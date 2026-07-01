@@ -1,0 +1,21 @@
+[project]
+name = "mqt-predictor-understanding"
+version = "0.1.0"
+description = "Reproducible experiments for understanding MQT Predictor"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "mqt.predictor==2.3.0",
+    # Compatibility pins from the official MQT Predictor v2.3.0 release lock.
+    "mqt.bench==2.0.0",
+    "qiskit==2.1.1",
+    "qiskit-aer==0.17.1",
+    "qiskit-ibm-runtime==0.40.1",
+    "qiskit-qasm3-import==0.6.0",
+    "pytket==2.9.1",
+    "pytket-qiskit==0.71.0",
+    "bqskit==1.2.0",
+    "scikit-learn==1.7.1",
+]
+
+[tool.uv]
+package = false
