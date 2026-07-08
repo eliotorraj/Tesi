@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from mqt.bench.targets import get_device
-from mqt.predictor.ml import setup_device_predictor
+from mqt.predictor.ml import Predictor
 from mqt.predictor.ml.helper import get_path_trained_model as get_ml_model_path
 from mqt.predictor.rl.helper import get_path_trained_model as get_rl_model_dir
 
@@ -22,6 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--uncompiled-circuits", type=Path, help="Directory QASM; usa il dataset incluso se omessa.")
     parser.add_argument("--compiled-circuits", type=Path, help="Directory di output per i circuiti compilati.")
     parser.add_argument("--timeout", type=int, default=600, help="Timeout per singola compilazione, in secondi.")
+    parser.add_argument("--num-workers", type=int, default=1, help="Worker paralleli per compilazione/dataset; 1 evita conflitti BQSKit.")
     return parser.parse_args()
 
 
@@ -30,6 +31,8 @@ def main() -> int:
     args = parse_args()
     if args.timeout <= 0:
         raise SystemExit("--timeout deve essere positivo.")
+    if args.num_workers <= 0:
+        raise SystemExit("--num-workers deve essere positivo.")
     if args.uncompiled_circuits and not args.uncompiled_circuits.is_dir():
         raise SystemExit(f"Directory QASM non trovata: {args.uncompiled_circuits}")
 
@@ -54,16 +57,23 @@ def main() -> int:
     print("Questa fase compila ogni circuito per ogni device e può richiedere molto tempo.")
     print(f"Device: {', '.join(device.description for device in devices)}")
     print(f"Metrica: {args.metric}")
-    # training vero e proprio del modello
-    success = setup_device_predictor(
+    print(f"Worker: {args.num_workers}")
+    predictor = Predictor(
         devices=devices,
         figure_of_merit=args.metric,
+    )
+    predictor.compile_training_circuits(
         path_uncompiled_circuits=args.uncompiled_circuits,
         path_compiled_circuits=compiled_dir,
         timeout=args.timeout,
+        num_workers=args.num_workers,
     )
-    if not success:
-        raise RuntimeError("Il setup del device selector è fallito; consulta il log precedente.")
+    predictor.generate_training_data(
+        path_uncompiled_circuits=args.uncompiled_circuits,
+        path_compiled_circuits=compiled_dir,
+        num_workers=args.num_workers,
+    )
+    predictor.train_random_forest_model()
 
     model_path = get_ml_model_path(args.metric)
     print(f"Device selector salvato: {model_path}")

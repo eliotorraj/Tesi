@@ -3,7 +3,7 @@
 ## Local knowledge base
 
 - Treat every file under `knowledge/` as the project's primary local knowledge base.
-- Read `knowledge/riassunto_kb_mqt_predictor_tuniq.md` first for the conversation context, then consult the papers when a claim needs confirmation.
+- Read `knowledge/riassunto_kb_mqt_predictor.md` first for the conversation context, then consult the papers when a claim needs confirmation.
 - Distinguish clearly between the 2023 compilation-option predictor and the 2025 MQT Predictor architecture.
 - Distinguish facts from the papers, facts from current software documentation, and our own engineering inferences.
 - For current APIs and installation details, prefer the official MQT repository, documentation, and PyPI metadata because the software may have changed since publication.
