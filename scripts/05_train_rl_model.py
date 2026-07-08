@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from typing import Any
 
 from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
@@ -14,6 +15,31 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def load_model_or_exit(checkpoint: Path, **kwargs: Any) -> MaskablePPO:
+    """Load a PPO checkpoint and explain common partial-save corruption."""
+    try:
+        return MaskablePPO.load(checkpoint, **kwargs)
+    except RuntimeError as error:
+        if "PytorchStreamReader failed locating file" in str(error):
+            raise SystemExit(
+                "Checkpoint non caricabile, probabilmente per salvataggio interrotto o incompleto:\n"
+                f"  {checkpoint}\n"
+                "Riprendi da un checkpoint periodico precedente, per esempio *_2048_steps.zip.\n"
+                f"Dettaglio PyTorch: {error}"
+            ) from error
+        raise
+
+
+def save_model_atomically(model: MaskablePPO, final_path: Path) -> Path:
+    """Avoid leaving a corrupt final checkpoint when saving is interrupted."""
+    final_zip = final_path.with_suffix(".zip") if final_path.suffix != ".zip" else final_path
+    temp_path = final_zip.with_name(f".{final_zip.stem}.tmp")
+    temp_path.unlink(missing_ok=True)
+    model.save(temp_path)
+    temp_path.replace(final_zip)
+    return final_zip
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,7 +71,7 @@ def main() -> int:
     model_name = f"model_{args.metric}_{device.description}"
     model_path = get_path_trained_model() / f"model_{args.metric}_{device.description}.zip"
     if model_path.exists() and not args.allow_overwrite:
-        raise SystemExit(f"Il modello esiste già: {model_path}\nUsa --allow-overwrite solo se vuoi davvero sostituirlo.")
+        raise SystemExit(f"Il modello esiste gia: {model_path}\nUsa --allow-overwrite solo se vuoi davvero sostituirlo.")
 
     checkpoint_dir = PROJECT_ROOT / "artifacts" / "checkpoints" / device.description
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -61,7 +87,7 @@ def main() -> int:
     )
 
     if args.resume_from:
-        model = MaskablePPO.load(
+        model = load_model_or_exit(
             args.resume_from,
             env=predictor.env,
             tensorboard_log=str(tensorboard_dir),
@@ -70,7 +96,7 @@ def main() -> int:
         remaining_timesteps = args.timesteps - completed_timesteps
         if remaining_timesteps <= 0:
             raise SystemExit(
-                f"Il checkpoint contiene già {completed_timesteps} step, almeno quanto il target {args.timesteps}."
+                f"Il checkpoint contiene gia {completed_timesteps} step, almeno quanto il target {args.timesteps}."
             )
         print(f"Ripresa da {args.resume_from}: completati={completed_timesteps}, restanti={remaining_timesteps}")
     else:
@@ -103,17 +129,18 @@ def main() -> int:
             progress_bar=True,
         )
     except KeyboardInterrupt:
-        interrupted_path = checkpoint_dir / f"{model_name}_interrupted_{model.num_timesteps}_steps"
-        model.save(interrupted_path)
-        print(f"\nTraining interrotto. Checkpoint di emergenza: {interrupted_path}.zip")
+        interrupted_path = checkpoint_dir / f"{model_name}_interrupted_{model.num_timesteps}_steps.zip"
+        saved_path = save_model_atomically(model, interrupted_path)
+        print(f"\nTraining interrotto. Checkpoint di emergenza: {saved_path}")
         return 130
 
     # qcompile expects this exact final filename inside the installed package.
-    model.save(model_path)
-    print(f"Modello salvato: {model_path}")
+    saved_path = save_model_atomically(model, model_path)
+    print(f"Modello salvato: {saved_path}")
     print("Esegui subito un backup: python scripts/model_store.py export")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
