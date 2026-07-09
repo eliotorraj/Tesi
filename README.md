@@ -101,9 +101,14 @@ Dopo aver addestrato tutti i device candidati, genera score, label e Random Fore
 ```bash
 python scripts/06_train_device_selector.py \
   --devices ibm_falcon_27 quantinuum_h2_56 \
-  --metric expected_fidelity
-  --num-workers 1 ##Si può tentare con più workers ma spesso ci sono conflitti e il training fallisce, quindi consiglio 1 solo worker(ovviamente a costo della velocità di training)
+  --metric expected_fidelity \
+  --num-workers 1 \
+  --uncompiled-circuits PATH_UNCOMPILED_CIRUITS \
+  --compiled-circuits PATH_COMPILED_CIRUITS
 ```
+
+Lo script imposta automaticamente `GITHUB_ACTIONS=true` per usare le impostazioni BQSKit più leggere e `MPLCONFIGDIR=/tmp/mqt-predictor-matplotlib` per evitare problemi di cache Matplotlib.
+Si può tentare con più worker, ma spesso ci sono conflitti; `--num-workers 1` è la scelta più stabile, ovviamente a costo della velocità di training.
 
 Questa seconda fase compila il dataset per ogni device e può richiedere molto tempo. Il paper riporta più di 500 circuiti; il lavoro del 2023 impiegò circa cinque giorni per una generazione dati più ampia.
 

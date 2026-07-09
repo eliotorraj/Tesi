@@ -1,0 +1,54 @@
+{
+  "benchmark": "ghz",
+  "figure_of_merit": "expected_fidelity",
+  "source": {
+    "qubits": 5,
+    "depth": 6,
+    "operations": {
+      "measure": 5,
+      "cx": 4,
+      "h": 1,
+      "barrier": 1
+    }
+  },
+  "compiled": {
+    "qubits": 56,
+    "depth": 15,
+    "operations": {
+      "rz": 13,
+      "ry": 10,
+      "measure": 5,
+      "rzz": 4,
+      "barrier": 1
+    }
+  },
+  "selected_device": {
+    "type": "qiskit.transpiler.target.Target",
+    "description": "quantinuum_h2_56",
+    "num_qubits": 56
+  },
+  "compilation_passes": [
+    "BasisTranslator",
+    "PeepholeOptimise2Q",
+    "BasisTranslator",
+    "OptimizeCliffords",
+    "CommutativeCancellation",
+    "Opt2qBlocks",
+    "RemoveRedundancies",
+    "InverseCancellation",
+    "BQSKitMapping",
+    "Opt2qBlocks",
+    "Opt2qBlocks",
+    "OptimizeCliffords",
+    "Opt2qBlocks",
+    "OptimizeCliffords",
+    "InverseCancellation",
+    "Opt2qBlocks",
+    "QiskitO3",
+    "InverseCancellation",
+    "CommutativeCancellation",
+    "CommutativeInverseCancellation",
+    "CommutativeInverseCancellation",
+    "terminate"
+  ]
+}

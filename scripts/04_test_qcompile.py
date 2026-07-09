@@ -4,10 +4,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
+# Keep BQSKit runs tractable and avoid Matplotlib cache warnings.
+os.environ.setdefault("GITHUB_ACTIONS", "true")
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/mqt-predictor-matplotlib")
+
 from mqt.bench import BenchmarkLevel, get_benchmark
-from mqt.predictor import qcompile
+from mqt.predictor.ml import predict_device_for_figure_of_merit
+from mqt.predictor.rl import rl_compile
+from mqt.predictor.utils import timeout_watcher
 from qiskit.qasm2 import dump
 
 
@@ -20,6 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--benchmark", default="ghz")
     parser.add_argument("--qubits", type=int, default=5)
     parser.add_argument("--metric", choices=("expected_fidelity", "critical_depth"), default="expected_fidelity")
+    parser.add_argument("--timeout", type=int, default=120, help="Timeout per la compilazione RL, in secondi.")
     return parser.parse_args()
 
 
@@ -27,18 +35,31 @@ def main() -> int:
     """Compile one target-independent benchmark and persist an inspection report."""
     args = parse_args()
     if args.qubits < 2:
-        raise SystemExit("--qubits deve essere almeno 2.")
+        raise SystemExit("--qubits deve essere almeno 2.")  
+    if args.timeout <= 0:
+        raise SystemExit("--timeout deve essere positivo.")
 
     source = get_benchmark(args.benchmark, BenchmarkLevel.ALG, args.qubits)
     print(f"Circuito sorgente: {args.benchmark}, qubit={source.num_qubits}, depth={source.depth()}")
 
     try:
-        compiled, compilation_passes, selected_device = qcompile(source, figure_of_merit=args.metric)
+        selected_device = predict_device_for_figure_of_merit(source, figure_of_merit=args.metric)
+        print(f"Device predetto:   {selected_device.description} ({selected_device.num_qubits} qubit)")
+        print(f"Timeout RL:        {args.timeout} s")
+        result = timeout_watcher(rl_compile, [source, selected_device, args.metric], args.timeout)
     except FileNotFoundError as error:
         print(f"\nModelli mancanti: {error}")
         print("Esegui prima lo smoke training oppure addestra/ripristina tutti i modelli abbinati al selettore.")
         print("Smoke training: python scripts/03_train_smoke_models.py")
         return 2
+
+    if not isinstance(result, tuple):
+        print("\nqcompile non ha prodotto un circuito entro il timeout.")
+        print("Causa probabile: il modello RL ha scelto una pass BQSKit costosa o bloccante.")
+        print("Prova con --timeout piu' alto, con meno qubit, oppure usa un benchmark/circuito piu' piccolo.")
+        return 3
+
+    compiled, compilation_passes = result
 
     if compiled.layout is None:
         raise RuntimeError("Il circuito compilato non contiene un layout fisico.")
