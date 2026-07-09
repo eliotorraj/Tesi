@@ -13,7 +13,6 @@ from sb3_contrib import MaskablePPO
 from sb3_contrib.common.maskable.policies import MaskableMultiInputActorCriticPolicy
 from stable_baselines3.common.callbacks import CheckpointCallback
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 

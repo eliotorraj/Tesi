@@ -3,6 +3,5 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
-artifacts/
 model_*/
 tmp/mqt_predictor-*

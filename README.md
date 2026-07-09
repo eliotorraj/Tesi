@@ -92,8 +92,8 @@ QASM e report JSON vengono salvati sotto `artifacts/results/`.
 Una policy RL deve essere addestrata per ogni coppia `device × figure_of_merit`:
 
 ```bash
-python scripts/05_train_rl_model.py --device ibm_falcon_27 --metric expected_fidelity --timesteps 100000
-python scripts/05_train_rl_model.py --device quantinuum_h2_56 --metric expected_fidelity --timesteps 100000
+python scripts/05_train_rl_model.py --device ibm_falcon_27 --metric expected_fidelity --timesteps 4096
+python scripts/05_train_rl_model.py --device quantinuum_h2_56 --metric expected_fidelity --timesteps 4096
 ```
 
 Dopo aver addestrato tutti i device candidati, genera score, label e Random Forest:
