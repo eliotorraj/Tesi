@@ -1,5 +1,5 @@
 {
-  "metric": "expected_fidelity",
+  "metric": "critical_depth",
   "sample_count": 8,
   "feature_count": 49,
   "feature_names": [
@@ -54,28 +54,28 @@
     "liveness"
   ],
   "label_distribution": {
-    "ibm_falcon_127": 2,
-    "quantinuum_h2_56": 6
+    "quantinuum_h2_56": 2,
+    "ibm_falcon_27": 6
   },
   "score_columns": [
-    "score_ibm_falcon_127",
+    "score_ibm_falcon_27",
     "score_quantinuum_h2_56"
   ],
   "notes": [
     "Each row is one source circuit.",
     "X is the feature vector extracted from the target-independent circuit.",
     "y is the best device label according to the selected figure of merit.",
-    "This export comes from the current local generated training_data_expected_fidelity.npy files.",
+    "This export comes from the current local generated training_data_critical_depth.npy files.",
     "Source and compiled QASM paths are resolved from the configured local candidate directories."
   ],
   "rows": [
     {
       "index": 0,
       "name": "mini_wide_pair_28",
-      "label_device": "ibm_falcon_127",
+      "label_device": "quantinuum_h2_56",
       "score_values": [
-        0.9997664201,
-        0.9982603852
+        -1.0,
+        0.0
       ],
       "feature_values": [
         0.0,
@@ -188,23 +188,21 @@
         "cx": 1,
         "rz": 1
       },
-      "compiled_qasm_count": 2,
+      "compiled_qasm_count": 1,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_wide_pair_28_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_wide_pair_28_expected_fidelity-quantinuum_h2_56.qasm"
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_wide_pair_28_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
       "index": 1,
       "name": "mini_ring_5",
-      "label_device": "quantinuum_h2_56",
+      "label_device": "ibm_falcon_27",
       "score_values": [
-        0.9794974601,
-        0.991748589
+        0.0,
+        0.0
       ],
       "feature_values": [
         0.0,
@@ -319,21 +317,21 @@
       },
       "compiled_qasm_count": 2,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
+        "ibm_falcon_27",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_ring_5_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_ring_5_expected_fidelity-quantinuum_h2_56.qasm"
+        "ibm_falcon_27": "mini-trainingset/compiled_circuit/mini_ring_5_critical_depth-ibm_falcon_27.qasm",
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_ring_5_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
       "index": 2,
       "name": "mini_parallel_4",
-      "label_device": "quantinuum_h2_56",
+      "label_device": "ibm_falcon_27",
       "score_values": [
-        0.9950525487,
-        0.9965835907
+        0.5,
+        0.5
       ],
       "feature_values": [
         0.0,
@@ -448,21 +446,21 @@
       },
       "compiled_qasm_count": 2,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
+        "ibm_falcon_27",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_parallel_4_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_parallel_4_expected_fidelity-quantinuum_h2_56.qasm"
+        "ibm_falcon_27": "mini-trainingset/compiled_circuit/mini_parallel_4_critical_depth-ibm_falcon_27.qasm",
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_parallel_4_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
       "index": 3,
       "name": "mini_ghz_3",
-      "label_device": "ibm_falcon_127",
+      "label_device": "ibm_falcon_27",
       "score_values": [
-        0.9970911216,
-        0.9966433884
+        0.0,
+        0.0
       ],
       "feature_values": [
         0.0,
@@ -576,21 +574,21 @@
       },
       "compiled_qasm_count": 2,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
+        "ibm_falcon_27",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_ghz_3_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_ghz_3_expected_fidelity-quantinuum_h2_56.qasm"
+        "ibm_falcon_27": "mini-trainingset/compiled_circuit/mini_ghz_3_critical_depth-ibm_falcon_27.qasm",
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_ghz_3_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
       "index": 4,
       "name": "mini_bell_2",
-      "label_device": "quantinuum_h2_56",
+      "label_device": "ibm_falcon_27",
       "score_values": [
-        0.997817637,
-        0.9982903339
+        0.0,
+        0.0
       ],
       "feature_values": [
         0.0,
@@ -704,21 +702,21 @@
       },
       "compiled_qasm_count": 2,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
+        "ibm_falcon_27",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_bell_2_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_bell_2_expected_fidelity-quantinuum_h2_56.qasm"
+        "ibm_falcon_27": "mini-trainingset/compiled_circuit/mini_bell_2_critical_depth-ibm_falcon_27.qasm",
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_bell_2_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
       "index": 5,
       "name": "mini_single_3",
-      "label_device": "quantinuum_h2_56",
+      "label_device": "ibm_falcon_27",
       "score_values": [
-        0.9998088771,
-        0.9998800054
+        1.0,
+        1.0
       ],
       "feature_values": [
         0.0,
@@ -834,21 +832,21 @@
       },
       "compiled_qasm_count": 2,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
+        "ibm_falcon_27",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_single_3_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_single_3_expected_fidelity-quantinuum_h2_56.qasm"
+        "ibm_falcon_27": "mini-trainingset/compiled_circuit/mini_single_3_critical_depth-ibm_falcon_27.qasm",
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_single_3_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
       "index": 6,
       "name": "mini_chain_4",
-      "label_device": "quantinuum_h2_56",
+      "label_device": "ibm_falcon_27",
       "score_values": [
-        0.9943350527,
-        0.9950290109
+        0.0,
+        0.0
       ],
       "feature_values": [
         0.0,
@@ -964,12 +962,12 @@
       },
       "compiled_qasm_count": 2,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
+        "ibm_falcon_27",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_chain_4_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_chain_4_expected_fidelity-quantinuum_h2_56.qasm"
+        "ibm_falcon_27": "mini-trainingset/compiled_circuit/mini_chain_4_critical_depth-ibm_falcon_27.qasm",
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_chain_4_critical_depth-quantinuum_h2_56.qasm"
       }
     },
     {
@@ -977,8 +975,8 @@
       "name": "mini_wide_single_28",
       "label_device": "quantinuum_h2_56",
       "score_values": [
-        0.9998147379,
-        0.9998800054
+        -1.0,
+        1.0
       ],
       "feature_values": [
         0.0,
@@ -1091,14 +1089,12 @@
         "x": 1,
         "rz": 1
       },
-      "compiled_qasm_count": 2,
+      "compiled_qasm_count": 1,
       "compiled_qasm_devices": [
-        "ibm_falcon_127",
         "quantinuum_h2_56"
       ],
       "compiled_qasm_paths": {
-        "ibm_falcon_127": "mini-trainingset/compiled_circuit/mini_wide_single_28_expected_fidelity-ibm_falcon_127.qasm",
-        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_wide_single_28_expected_fidelity-quantinuum_h2_56.qasm"
+        "quantinuum_h2_56": "mini-trainingset/compiled_circuit/mini_wide_single_28_critical_depth-quantinuum_h2_56.qasm"
       }
     }
   ]

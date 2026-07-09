@@ -148,6 +148,12 @@ def padded_scores(row: dict[str, Any], width: int) -> list[float | None]:
     return [*values, *([None] * max(0, width - len(values)))]
 
 
+def joined_values(values: Any) -> str:
+    if not values:
+        return ""
+    return ", ".join(str(value) for value in values)
+
+
 def ordered_dataset_features(payload: dict[str, Any]) -> list[str]:
     gate_feature_names = [feature for feature in payload["feature_names"] if feature.startswith("gate_count_")]
     ordered_core_feature_names = [feature for feature in CORE_FEATURE_NAMES if feature in payload["feature_names"]]
@@ -171,6 +177,8 @@ def build_workbook(input_path: Path, output_path: Path | None = None) -> Path:
     payload = json.loads(input_path.read_text(encoding="utf-8"))
     metric = str(payload["metric"])
     output = output_path or default_output_path(metric, DEFAULT_OUTPUT_DIR)
+    if not payload.get("rows"):
+        raise SystemExit(f"Input dataset has no rows: {input_path}")
 
     dataset_feature_names = ordered_dataset_features(payload)
     score_headers = score_columns(payload)
@@ -182,7 +190,18 @@ def build_workbook(input_path: Path, output_path: Path | None = None) -> Path:
     xmatrix = wb.create_sheet("X Matrix")
     legend = wb.create_sheet("Feature Legend")
 
-    id_headers = ["index", "name", "label_device", *score_headers]
+    id_headers = [
+        "index",
+        "name",
+        "label_device",
+        *score_headers,
+        "qasm_found",
+        "qasm_path",
+        "source_num_qubits",
+        "source_depth",
+        "compiled_qasm_count",
+        "compiled_qasm_devices",
+    ]
     dataset_headers = id_headers + dataset_feature_names
     dataset_rows = [
         [
@@ -190,6 +209,12 @@ def build_workbook(input_path: Path, output_path: Path | None = None) -> Path:
             row["name"],
             row["label_device"],
             *padded_scores(row, len(score_headers)),
+            row.get("qasm_found"),
+            row.get("qasm_path"),
+            row.get("source_num_qubits"),
+            row.get("source_depth"),
+            row.get("compiled_qasm_count"),
+            joined_values(row.get("compiled_qasm_devices")),
             *[row["features"].get(feature) for feature in dataset_feature_names],
         ]
         for row in payload["rows"]
@@ -207,7 +232,8 @@ def build_workbook(input_path: Path, output_path: Path | None = None) -> Path:
     score_start_col = 4
     score_end_col = score_start_col + len(score_headers) - 1
     apply_number_format(dataset, score_start_col, score_end_col, 2, dataset.max_row, "0.0000000000")
-    set_feature_formats(dataset, dataset_feature_names, score_end_col + 1)
+    metadata_width = 6
+    set_feature_formats(dataset, dataset_feature_names, score_end_col + metadata_width + 1)
 
     x_headers = ["name", *payload["feature_names"]]
     x_rows = [

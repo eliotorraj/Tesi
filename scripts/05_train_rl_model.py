@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 from typing import Any
+
+# Keep local RL training tractable on the small project dataset.
+os.environ.setdefault("GITHUB_ACTIONS", "true")
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/mqt-predictor-matplotlib")
 
 from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
