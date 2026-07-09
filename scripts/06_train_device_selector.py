@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--metric", choices=("expected_fidelity", "critical_depth"), default="expected_fidelity")
     parser.add_argument("--uncompiled-circuits", type=Path, help="Directory QASM; usa il dataset incluso se omessa.")
     parser.add_argument("--compiled-circuits", type=Path, help="Directory di output per i circuiti compilati.")
-    parser.add_argument("--timeout", type=int, default=600, help="Timeout per singola compilazione, in secondi.")
+    parser.add_argument("--timeout", type=int, default=7200, help="Timeout per singola compilazione, in secondi.")
     parser.add_argument("--num-workers", type=int, default=1, help="Worker paralleli per compilazione/dataset; 1 evita conflitti BQSKit.")
     return parser.parse_args()
 

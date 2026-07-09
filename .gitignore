@@ -5,3 +5,5 @@ __pycache__/
 .ruff_cache/
 model_*/
 tmp/mqt_predictor-*
+output/assets/
+output/*.pptx

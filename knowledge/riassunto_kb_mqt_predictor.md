@@ -3114,3 +3114,599 @@ python tmp/mqt_dataset_export/build_dataset_workbook.py
 23. Per uso pubblico/progetto condivisibile va preferito il builder `.py`, non il `.mjs`.
 
 ---
+
+# Continuazione KB — export Excel, TensorBoard, valutazione offline, compatibilità device e Git
+
+## Contesto della nuova continuazione
+
+Questa sezione aggiunge alla Knowledge Base i punti emersi nella conversazione successiva, legata soprattutto alla rifinitura degli artefatti sperimentali e alla gestione dei problemi pratici incontrati durante il training RL.
+
+I temi principali sono:
+
+- revisione dello script che genera l’Excel del dataset del device selector;
+- significato dell’opzione `--all-available`;
+- interpretazione dei log TensorBoard `PPO_1` e `PPO_2`;
+- limite pratico del training RL a 4096 step;
+- proposta di valutazione offline dei checkpoint;
+- fallimenti di training su `rigetti_ankaa_84` e `ionq_aria_25`;
+- distinzione tra device supportato come `Target` e device realmente robusto nella pipeline RL;
+- gestione Git del branch `working-branch` e push errato su `main`.
+
+Questa parte è importante perché chiarisce diversi limiti operativi del lavoro: non basta che un device sia disponibile in MQT Predictor; perché sia utilizzabile nel training RL standard devono essere compatibili anche i pass del catalogo, le librerie di compilazione sottostanti e le traduzioni verso la base nativa del backend.
+
+---
+
+## Revisione dello script di produzione dell’Excel
+
+L’utente ha notato che il file Excel prodotto dallo script aveva alcuni artefatti visivi:
+
+```text
+prima riga bloccata in alto;
+prime due colonne fisse durante lo scroll orizzontale;
+comportamento simile a freeze panes non desiderato.
+```
+
+L’obiettivo era rendere l’Excel più pulito, leggibile e generico.
+
+### Modifiche apportate
+
+Lo script Excel portabile è stato sistemato con queste modifiche:
+
+1. Rimozione dei `freeze_panes`.
+2. Nessun foglio blocca più righe o colonne.
+3. `export_device_selector_dataset.py` accetta ora:
+   - `--metric`;
+   - `--all-available`.
+4. `build_dataset_workbook.py` salva il file con nome dinamico:
+   ```text
+   MQT_device_selector_dataset_<metric>.xlsx
+   ```
+5. La formattazione numerica è stata resa più robusta:
+   - `score`: 10 decimali;
+   - `num_qubits`: senza decimali;
+   - `depth`: senza decimali;
+   - `gate_count_*`: senza decimali;
+   - feature strutturali: 6 decimali.
+6. I gate count restano spostati a destra nel foglio `Dataset`.
+7. Il file generato viene salvato nella cartella del progetto:
+   ```text
+   output/spreadsheets/
+   ```
+
+Al momento della verifica, nei `.npy` locali era disponibile solo la metrica:
+
+```text
+expected_fidelity
+```
+
+Quindi l’output effettivo generato era:
+
+```text
+output/spreadsheets/MQT_device_selector_dataset_expected_fidelity.xlsx
+```
+
+### Verifiche effettuate
+
+Le verifiche citate nella conversazione includono:
+
+```text
+sintassi Python corretta;
+generazione JSON/XLSX riuscita;
+controllo strutturale del workbook;
+freeze_panes=None su tutti i fogli;
+nessun errore formula trovato;
+render tecnico delle anteprime non vuoto.
+```
+
+Conclusione:
+
+```text
+lo script è ora più adatto a essere incluso nel progetto e condiviso, perché non dipende da comportamenti visivi strani e produce file coerenti con la figure of merit scelta.
+```
+
+---
+
+## Significato di `--all-available`
+
+L’opzione:
+
+```bash
+--all-available
+```
+
+serve a generare automaticamente gli artefatti per tutte le figure of merit per cui esistono già i tre file `.npy` necessari.
+
+Per ogni metrica, lo script cerca una terna completa:
+
+```text
+training_data_<metric>.npy
+names_list_<metric>.npy
+scores_list_<metric>.npy
+```
+
+Se la terna è presente, lo script può esportare i dati per quella metrica.
+
+Esempio: se in futuro esistessero sia `expected_fidelity` sia `critical_depth`, i comandi:
+
+```bash
+python tmp/mqt_dataset_export/export_device_selector_dataset.py --all-available
+python tmp/mqt_dataset_export/build_dataset_workbook.py --all-available
+```
+
+produrrebbero:
+
+```text
+device_selector_dataset_expected_fidelity.json
+device_selector_dataset_critical_depth.json
+
+MQT_device_selector_dataset_expected_fidelity.xlsx
+MQT_device_selector_dataset_critical_depth.xlsx
+```
+
+Senza `--all-available`, lo script lavora su una sola metrica:
+
+```bash
+python tmp/mqt_dataset_export/export_device_selector_dataset.py --metric expected_fidelity
+python tmp/mqt_dataset_export/build_dataset_workbook.py --metric expected_fidelity
+```
+
+Se non viene specificata alcuna metrica, il comportamento discusso era di usare come default:
+
+```text
+expected_fidelity
+```
+
+Sintesi:
+
+```text
+--metric = lavora su una figure of merit specifica;
+--all-available = lavora su tutte le metriche per cui trova i .npy completi.
+```
+
+---
+
+## TensorBoard: perché si vedeva solo `PPO_2`
+
+L’utente ha osservato che in TensorBoard si vedeva solo il run `PPO_2`, anche se nella cartella `training_logs` esisteva anche `PPO_1`.
+
+Il caso riguardava un training con checkpoint a:
+
+```text
+2048 step → PPO_1
+4096 step → PPO_2
+```
+
+Il controllo dei log ha mostrato:
+
+```text
+PPO_1 event file: circa 88 byte
+PPO_2 event file: circa 696 byte
+```
+
+Inoltre:
+
+```text
+PPO_1: nessuno scalar utile;
+PPO_2: time/fps, train/loss, train/value_loss, train/approx_kl, ...
+```
+
+Interpretazione:
+
+```text
+PPO_1 esiste come cartella, ma il suo event file è praticamente vuoto.
+```
+
+Questo può accadere perché il training si è fermato o ha salvato il checkpoint a 2048 step proprio al limite del primo rollout. In Stable-Baselines3/PPO, molte metriche `train/*` compaiono solo dopo un aggiornamento completo del modello. Quindi il checkpoint a 2048 può essere valido come artefatto, anche se TensorBoard non contiene ancora curve scalari interessanti.
+
+`PPO_2`, invece, rappresenta il run ripreso e contiene metriche agli step successivi. In particolare, può contenere:
+
+```text
+time/fps agli step 2048 e 4096;
+metriche train/* allo step 4096.
+```
+
+Conclusione:
+
+```text
+la mancanza di curve TensorBoard per PPO_1 non implica necessariamente che il checkpoint a 2048 sia inutilizzabile.
+```
+
+---
+
+## Limite pratico: training RL costoso e pochi checkpoint informativi
+
+L’utente ha impiegato circa:
+
+```text
+3 ore e mezza
+```
+
+per addestrare un modello RL per soli:
+
+```text
+4096 step
+```
+
+Questo rende insostenibile, almeno nell’immediato, aumentare molto il numero di step solo per ottenere curve TensorBoard più complete.
+
+Punto importante:
+
+```text
+salvare checkpoint a 2048 e 4096 non significa automaticamente avere due risultati scientificamente confrontabili.
+```
+
+Il checkpoint a 2048 è utile per:
+
+- riprendere il training;
+- conservare un artefatto intermedio;
+- documentare l’avanzamento.
+
+Ma non basta da solo a dimostrare miglioramento, se non viene valutato sugli stessi circuiti del checkpoint a 4096.
+
+---
+
+## Valutazione offline dei checkpoint
+
+Per mostrare un miglioramento senza dover proseguire il training per molte altre ore, è stata proposta una valutazione offline dei checkpoint.
+
+Invece di affidarsi solo a TensorBoard, si possono confrontare direttamente i file `.zip` dei checkpoint:
+
+```text
+checkpoint 2048
+checkpoint 4096
+```
+
+su uno stesso insieme piccolo e fisso di circuiti di validazione.
+
+Metriche consigliate per la mini-valutazione:
+
+- score secondo la figure of merit scelta;
+- depth finale;
+- gate count;
+- tempo di compilazione;
+- trace/pass scelti;
+- successo o fallimento della compilazione;
+- confronto con baseline Qiskit/TKET, se fattibile.
+
+Esempio di tabella:
+
+```text
+Checkpoint | Circuito | Score | Depth | Gate count | Tempo | Esito
+2048       | qft_4    | ...   | ...   | ...        | ...   | OK
+4096       | qft_4    | ...   | ...   | ...        | ...   | OK
+```
+
+Questa valutazione è più significativa delle sole curve TensorBoard perché misura direttamente la qualità del compilatore ottenuto, non solo metriche interne del training.
+
+Formulazione consigliata per il report:
+
+```text
+A causa del costo computazionale elevato, il training è stato limitato a 4096 step. I checkpoint a 2048 e 4096 sono stati conservati; tuttavia TensorBoard contiene metriche scalari complete solo per il secondo run. Per questo motivo il confronto tra checkpoint viene impostato tramite valutazione offline sugli stessi circuiti di validazione, invece che tramite sole curve TensorBoard.
+```
+
+---
+
+## Fallimento del training su `rigetti_ankaa_84`
+
+L’utente ha provato ad avviare:
+
+```bash
+python scripts/05_train_rl_model.py \
+  --device rigetti_ankaa_84 \
+  --metric expected_fidelity \
+  --timesteps 4096
+```
+
+Il training è fallito quasi subito, dopo pochi step.
+
+Errore principale:
+
+```text
+ValueError: The 'rxpi' gate of device 'rigetti_ankaa_84' is not supported in BQSKIT.
+```
+
+### Interpretazione
+
+L’errore non dipendeva dal comando né dal numero di step. Era una incompatibilità concreta tra:
+
+```text
+device Rigetti ankaa 84
+        +
+azioni BQSKit presenti nello spazio azioni RL
+        +
+parser/conversione MQT verso BQSKit
+```
+
+Durante il training, la policy ha scelto quasi subito un’azione BQSKit. MQT ha provato a costruire un `MachineModel` BQSKit usando i gate nativi del device Rigetti. Tra questi gate era presente:
+
+```text
+rxpi
+```
+
+ma il parser MQT/BQSKit non sapeva tradurlo in un gate BQSKit supportato.
+
+Il messaggio finale legato a `tqdm`/`rich` e allo shutdown di Python è stato interpretato come rumore secondario, non come causa del problema.
+
+### Conclusione operativa
+
+Nel setup MQT Predictor 2.3.0 discusso, `rigetti_ankaa_84` non è allenabile “out of the box” se nello spazio azioni restano abilitate le azioni BQSKit.
+
+Opzioni possibili:
+
+1. Non usare Rigetti per i checkpoint dimostrativi.
+2. Documentare il fallimento come limite tecnico.
+3. Patchare la pipeline per escludere azioni BQSKit su quel device.
+4. Non aspettarsi che cambiare metrica risolva il problema.
+
+Cambiare figure of merit, ad esempio da `expected_fidelity` a `critical_depth`, non elimina automaticamente le azioni incompatibili dallo spazio delle azioni. La metrica cambia la reward, non la compatibilità dei pass.
+
+Finding utile per la tesi:
+
+```text
+alcuni device disponibili come Target in MQT Predictor possono fallire nel training RL perché non tutti i gate nativi sono supportati da tutte le librerie di compilazione usate internamente.
+```
+
+---
+
+## Fallimento del training su `ionq_aria_25`
+
+L’utente ha poi provato:
+
+```bash
+python scripts/05_train_rl_model.py \
+  --device ionq_aria_25 \
+  --metric expected_fidelity \
+  --timesteps 4096
+```
+
+Anche questo training è fallito dopo pochissimi step.
+
+Errore principale:
+
+```text
+Unable to translate the operations in the circuit:
+["u3", "cx", "barrier", "measure"]
+
+to the backend target basis:
+{"gpi", "rz", "measure", "ms", "gpi2", "reset", "barrier", ...}
+```
+
+L’eccezione proviene da Qiskit `BasisTranslator`.
+
+### Interpretazione
+
+Il circuito di training contieneva gate Qiskit/OpenQASM generici, ad esempio:
+
+```text
+u3
+cx
+barrier
+measure
+```
+
+Il device IonQ, invece, esponeva una base nativa con gate del tipo:
+
+```text
+gpi
+gpi2
+ms
+rz
+measure
+reset
+```
+
+Durante il training, la policy ha scelto un’azione Qiskit che passa dal `BasisTranslator`. Qiskit non è riuscito a trovare una catena di equivalenze valida per tradurre automaticamente `u3` e `cx` nella base nativa IonQ presente nel `Target`.
+
+Quindi il problema non era:
+
+```text
+expected_fidelity;
+numero di step;
+comando usato.
+```
+
+Il problema era una incompatibilità tra circuito, pass scelto e base nativa del device.
+
+### Confronto con Rigetti
+
+I due fallimenti hanno cause diverse, ma mostrano lo stesso pattern:
+
+```text
+rigetti_ankaa_84:
+    fallisce perché BQSKit non supporta il gate nativo rxpi.
+
+ionq_aria_25:
+    fallisce perché Qiskit BasisTranslator non trova una traduzione da u3/cx alla base gpi/gpi2/ms.
+```
+
+Conclusione:
+
+```text
+MQT può esporre più device come Target, ma non tutti sono robusti per il training RL standard con l’intero catalogo di azioni.
+```
+
+---
+
+## Device supportato come `Target` non significa training RL robusto
+
+Un punto concettuale importante emerso dai tentativi falliti è la distinzione tra:
+
+```text
+device disponibile in MQT Predictor come Qiskit Target
+```
+
+e:
+
+```text
+device realmente utilizzabile senza modifiche nella pipeline RL standard
+```
+
+Un `Target` può descrivere correttamente:
+
+- gate nativi;
+- qubit;
+- connessioni;
+- durate;
+- errori;
+- proprietà hardware.
+
+Ma il training RL richiede anche che ogni azione scelta dalla policy sia applicabile o gestibile con quel device. Questo coinvolge:
+
+- Qiskit;
+- TKET;
+- BQSKit;
+- conversioni tra circuiti;
+- equivalence library;
+- supporto ai gate nativi;
+- basis translation;
+- action masking;
+- gestione degli errori dei pass.
+
+Se anche uno solo dei pass ammessi produce un errore non gestito, il training può interrompersi.
+
+Formula utile per il report:
+
+```text
+Il supporto di un backend come Qiskit Target non garantisce automaticamente la compatibilità con tutti i pass del catalogo RL. Alcuni backend falliscono perché la base nativa non è traducibile automaticamente dai pass Qiskit usati, oppure perché alcuni gate nativi non sono supportati da BQSKit.
+```
+
+Per ottenere checkpoint mostrabili, conviene usare un device meno problematico, anche se meno “interessante”.
+
+---
+
+## Cosa documentare sui tentativi falliti
+
+I tentativi su Rigetti e IonQ non vanno considerati tempo perso. Possono essere documentati come risultati negativi informativi.
+
+Esempio di tabella per il report o per la KB:
+
+```text
+Device           | Esito training | Errore principale                         | Interpretazione
+rigetti_ankaa_84 | fallito         | rxpi non supportato in BQSKIT             | incompatibilità gate nativo/BQSKit
+ionq_aria_25     | fallito         | BasisTranslator non traduce u3/cx         | equivalenze mancanti verso base IonQ
+quantinuum_h2_56 | riuscito/lento  | warning BQSKit non fatale                 | device utilizzabile ma costoso
+```
+
+Conclusione sperimentale:
+
+```text
+la scelta del device per gli esperimenti non dipende solo dal numero di qubit o dall’interesse hardware, ma anche dalla robustezza della pipeline di compilazione usata dal training RL.
+```
+
+---
+
+## Gestione Git: branch `working-branch` e push su `main`
+
+L’utente ha aggiunto forzatamente gli artefatti con:
+
+```bash
+git add -f artifacts/
+```
+
+Poi ha committato:
+
+```bash
+git commit -m "added artifacts"
+```
+
+Il commit è stato creato sul branch:
+
+```text
+working-branch
+```
+
+Il log di `git status` indicava:
+
+```text
+On branch working-branch
+Your branch is ahead of 'origin/working-branch' by 1 commit.
+```
+
+Tuttavia l’utente ha poi provato a fare:
+
+```bash
+git push origin main
+```
+
+ottenendo:
+
+```text
+! [rejected] main -> main (fetch first)
+```
+
+### Interpretazione
+
+Il problema principale è che l’utente era su:
+
+```text
+working-branch
+```
+
+ma ha tentato di pushare:
+
+```text
+main
+```
+
+Quindi Git ha provato ad aggiornare il branch remoto `main`, non il branch in cui era stato creato il commit degli artefatti.
+
+Il comando corretto per pubblicare il commit appena fatto era:
+
+```bash
+git push origin working-branch
+```
+
+Il messaggio `fetch first` su `main` non riguardava direttamente il commit appena creato, ma indicava che:
+
+```text
+il main locale era indietro rispetto a origin/main
+```
+
+### Nota sulle modifiche non staged
+
+Dopo il commit risultavano ancora modifiche non staged, in particolare cancellazioni di log TensorBoard per alcuni tentativi falliti:
+
+```text
+artifacts/training_logs/model_expected_fidelity_ionq_aria_25/...
+artifacts/training_logs/model_expected_fidelity_ionq_forte_36/...
+artifacts/training_logs/model_expected_fidelity_iqm_crystal_54/...
+artifacts/training_logs/model_expected_fidelity_rigetti_ankaa_84/...
+```
+
+Il commit effettuato includeva invece solo:
+
+```text
+artifacts/checkpoints/ibm_falcon_127/model_expected_fidelity_ibm_falcon_127_2048_steps.zip
+artifacts/training_logs/model_expected_fidelity_ibm_falcon_127/PPO_1/events...
+```
+
+Conclusione operativa:
+
+```text
+per pubblicare il commit già fatto: git push origin working-branch
+```
+
+Se invece l’obiettivo è aggiornare `main`, non bisogna farlo alla cieca: occorre prima decidere se unire `working-branch` in `main`, fare merge/rebase e integrare le modifiche remote.
+
+---
+
+## Sintesi aggiuntiva da ricordare
+
+1. Lo script Excel è stato reso più pulito rimuovendo i `freeze_panes`.
+2. L’Excel ora usa nomi dinamici basati sulla figure of merit.
+3. `--all-available` genera JSON/XLSX per tutte le metriche che hanno una terna `.npy` completa.
+4. Al momento era disponibile solo `expected_fidelity`.
+5. TensorBoard mostrava solo `PPO_2` perché `PPO_1` aveva un event file quasi vuoto.
+6. Un checkpoint può essere valido anche se TensorBoard non contiene scalar utili per quel run.
+7. Per dimostrare miglioramenti tra checkpoint è meglio una valutazione offline su circuiti fissi.
+8. Il training RL a 4096 step ha richiesto circa 3 ore e mezza, quindi aumentare gli step era poco sostenibile.
+9. `rigetti_ankaa_84` fallisce per incompatibilità del gate `rxpi` con BQSKit.
+10. `ionq_aria_25` fallisce perché Qiskit non traduce automaticamente `u3/cx` nella base IonQ `gpi/gpi2/ms`.
+11. La figure of merit non risolve incompatibilità di pass o gate nativi.
+12. Un device disponibile come `Target` non è necessariamente robusto nella pipeline RL standard.
+13. I fallimenti su device diversi sono risultati negativi utili da documentare.
+14. Per artefatti dimostrativi conviene usare device stabili, anche se meno interessanti.
+15. Il commit degli artefatti era su `working-branch`, quindi il push corretto era `git push origin working-branch`.
+16. Un push su `main` richiede prima di capire lo stato di `origin/main` e integrare eventuali modifiche remote.
+
+---
