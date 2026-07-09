@@ -3,7 +3,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
-model_*/
 tmp/mqt_predictor-*
 output/assets/
 output/*.pptx
