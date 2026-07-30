@@ -4,5 +4,3 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 tmp/mqt_predictor-*
-output/assets/
-output/*.pptx
