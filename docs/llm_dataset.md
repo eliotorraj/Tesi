@@ -36,7 +36,7 @@ Per generare un record per tutti i circuiti del mini-training set:
 
 ```bash
 python scripts/07_generate_llm_dataset.py \
-  --input-dir mini-trainingset/uncompiled_circuit \
+  --input-dir datasets/llm_train/uncompiled \
   --metric expected_fidelity \
   --no-deterministic \
   --repetitions 1 \
@@ -47,7 +47,7 @@ Un'esecuzione lunga viene salvata dopo ogni circuito. Se viene interrotta:
 
 ```bash
 python scripts/07_generate_llm_dataset.py \
-  --input-dir mini-trainingset/uncompiled_circuit \
+  --input-dir datasets/llm_train/uncompiled \
   --metric expected_fidelity \
   --no-deterministic \
   --output output/llm_dataset/mqt_pipeline_expected_fidelity.json \
