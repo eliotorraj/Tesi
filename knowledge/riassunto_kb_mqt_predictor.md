@@ -4718,5 +4718,313 @@ famiglia non devono apparire come esempi contenenti la risposta corretta.
     warning e provenienza.
 17. MQT Predictor può restare una modalità separata e una baseline.
 18. Il dataset LLM esistente è una base naturale, ma va usato senza leakage.
+# Continuazione KB — feedback dei relatori, protocollo sperimentale e dataset JSON per LLM
+
+Questa sezione riassume la fase successiva alla consegna del report. Il lavoro si è spostato dalla sola comprensione di MQT Predictor alla definizione del protocollo sperimentale, alla costruzione di un dataset JSON per LLM e alla preparazione di split riproducibili.
+
+Occorre distinguere sempre:
+
+- indicazioni dei relatori;
+- comportamento osservato localmente con MQT Predictor 2.3.0;
+- nostre scelte ingegneristiche, come schema JSON, script, split e metriche.
+
+---
+
+## Feedback dei relatori
+
+Il report è stato giudicato molto più chiaro del precedente. Restano refusi come “phyton” e numerazioni incoerenti, per esempio una sezione 5.1 seguita dalla 5.3. La stesura finale richiede quindi una revisione formale accurata.
+
+Espressioni qualitative come “modelli più grandi” e “può richiedere molto tempo” devono essere sostenute da numeri. Nella tesi vanno riportati, quando pertinenti, numero di parametri, dimensione su disco, quantità e dimensione dei circuiti, tempi medi/mediani/massimi, hardware, versioni, ripetizioni e dispersione.
+
+L’idea del dataset per LLM è stata approvata. Come baseline non va usato soltanto Qiskit optimization level 3: va incluso anche il level 2, indicato come default nella documentazione considerata in questa fase.
+
+Baseline minime:
+
+- MQT Predictor con policy PPO;
+- Qiskit optimization level 2;
+- Qiskit optimization level 3;
+- prototipo LLM.
+
+Una sequenza casuale di azioni valide può essere un controllo di sanità, non la baseline competitiva principale.
+
+I relatori hanno chiesto anche architettura del prototipo, criteri di qualità, confronto tra circuiti compilati, scelta di circuiti/backend/metriche e protocollo sperimentale. È stato suggerito GitHub, anche privato inizialmente, escludendo ambiente virtuale, modelli, checkpoint, log e dataset pesanti; devono rimanere codice, configurazioni, schemi, manifest, documentazione e istruzioni di riproduzione.
+
+---
+
+## Organizzazione del lavoro
+
+Sequenza consigliata:
+
+1. congelare l’ambiente riproducibile;
+2. definire precisamente il compito dell’LLM;
+3. generare e validare il dataset;
+4. preparare training, validation e test senza leakage;
+5. implementare prototipo e validatore;
+6. costruire un valutatore comune;
+7. eseguire un pilot;
+8. correggere e congelare il protocollo;
+9. eseguire gli esperimenti finali;
+10. analizzare qualità, fallimenti, tempi e costi.
+
+Conviene separare device selection e pass selection. Il primo problema riceve circuito target-independent, feature, figure of merit e catalogo hardware e restituisce il device. Il secondo riceve circuito, device fissato, metrica e stato della compilazione e restituisce pass, circuito finale e score. Così si distingue un errore del selector da uno della sequenza RL/LLM.
+
+---
+
+## Significato concreto di protocollo sperimentale
+
+È una specifica scritta prima dei risultati finali che stabilisce esattamente come eseguire e valutare l’esperimento. Evita condizioni diverse tra metodi, cambi di metriche a posteriori, rimozione silenziosa dei fallimenti, leakage e scarsa riproducibilità.
+
+Deve includere:
+
+1. domanda di ricerca e ipotesi;
+2. metodi confrontati;
+3. versioni software e hardware;
+4. circuiti e backend con criteri di selezione;
+5. figure of merit;
+6. variabili mantenute fisse;
+7. seed e ripetizioni;
+8. timeout e limite di azioni;
+9. procedura;
+10. metriche primarie e secondarie;
+11. trattamento di errori, output non validi e timeout;
+12. regola decisionale e analisi statistica;
+13. artefatti di riproduzione.
+
+Possibile domanda: a parità di circuito, backend, figure of merit e budget, la sequenza proposta dall’LLM produce uno score uguale o migliore rispetto a MQT Predictor e alle baseline Qiskit?
+
+Devono rimanere uguali circuito, backend, metrica, versioni, timeout, limite di azioni, ambiente e funzione di valutazione.
+
+Metriche primarie: figure of merit, delta dalla baseline, win/tie/loss. Metriche secondarie: target validity, depth, two-qubit depth, gate count, two-qubit gate count, tempo, pass, fallimenti, timeout, latenza/token/costo LLM.
+
+Un metodo che non termina, supera il timeout, genera un circuito non analizzabile o viola il target non va escluso: il caso contribuisce al tasso di fallimento.
+
+Il confronto è appaiato. Per ciascun circuito/backend si calcola il delta di score rispetto alla baseline e si riportano distribuzione, media o mediana, win/tie/loss, intervalli di confidenza e failure rate.
+
+Esempio di pilot discusso: 20 circuiti × 2 backend × 4 metodi × 3 seed = 480 tentativi.
+
+---
+
+## Obiettivo del dataset JSON
+
+Il dataset deve descrivere:
+
+circuito target-independent → feature vector → figure of merit → ranking hardware → device scelto → pass di compilazione → circuito compilato → score ed esito.
+
+JSON rende espliciti i campi, conserva strutture annidate e input/output intermedi ed è più interpretabile di array NumPy anonimi.
+
+I file NumPy supervisionati di MQT contengono feature, label e score del device selector, ma non tutta la traiettoria RL. La pipeline standard non conserva automaticamente azioni valide, azione scelta, osservazioni, reward, circuiti intermedi e sequenza completa. È stato quindi necessario un generatore strumentato.
+
+---
+
+## Generatore, schema e validazione
+
+È stato creato scripts/07_generate_llm_dataset.py, con schema JSON 1.0.0.
+
+Metadati globali: configurazione, ambiente Python, versioni, stato Git, feature schema, figure of merit, catalogo hardware deduplicato e record.
+
+Ogni record può contenere:
+
+- circuito, ripetizione e seed;
+- QASM 2 sorgente e SHA-256;
+- riepilogo di qubit, bit classici e metriche;
+- feature vector;
+- figure of merit;
+- probabilità/ranking del selector;
+- compatibilità e device scelto;
+- ground truth offline, se disponibile;
+- traiettoria PPO;
+- QASM finale;
+- score e target validity;
+- tempi, errore o timeout strutturato.
+
+Le 49 feature sono 42 conteggi di gate QASM, numero di qubit, depth e 5 feature SupermarQ. Nel JSON hanno nomi espliciti.
+
+La traccia PPO può salvare azioni valide, azione scelta, nome/indice/origine/tipo del pass, osservazioni e metriche prima/dopo, reward, tempo e QASM intermedio opzionale.
+
+Lo script supporta directory di input, expected_fidelity o critical_depth, ripetizioni, seed, --no-deterministic, timeout, limite di azioni, QASM intermedi, checkpoint atomici, --resume e --overwrite.
+
+Per riprodurre più fedelmente qcompile si usa --no-deterministic: seed diversi campionano azioni diverse senza riaddestramento.
+
+File creati:
+
+- schemas/mqt_llm_dataset.schema.json;
+- scripts/08_validate_llm_dataset.py;
+- scripts/09_validate_llm_dataset_qiskit.py;
+- docs/llm_dataset.md;
+- docs/llm_dataset_validation.md;
+- docs/llm_dataset_pilot_results.md.
+
+Il primo validatore usa QASM 2 stretto; il secondo le istruzioni legacy Qiskit. L’esportatore può emettere gate come rzz non sempre accettati da un parser limitato a qelib1.inc. Con LEGACY_CUSTOM_INSTRUCTIONS il dataset è leggibile dalla pipeline. In futuro si potranno considerare QPY, OpenQASM 3 o normalizzazione dei gate custom.
+
+---
+
+## Risultati del pilot
+
+Il primo test deterministico sul Bell circuit non terminava entro 100 azioni; il record negativo è stato conservato.
+
+In un test stocastico:
+
+- device quantinuum_h2_56;
+- probabilità circa 0.735 contro 0.265 per ibm_falcon_127;
+- 13 azioni;
+- score circa 0.9978112623;
+- circuito target-valid.
+
+Il primo dataset, 8 circuiti × 1 seed, aveva 7 successi, 1 errore, 0 timeout e una sequenza riuscita distinta. Il problema era mini_wide_pair_28, senza terminazione entro 100 azioni.
+
+Il file output/llm_dataset/mqt_pipeline_expected_fidelity_5seeds.json, circa 8.2 MB, contiene:
+
+- 40 record;
+- 8 circuiti × 5 ripetizioni;
+- 35 successi;
+- 5 errori;
+- 0 timeout;
+- 5 sequenze riuscite distinte.
+
+Trace riuscite: minimo 11, massimo 42, media circa 21.2. Tutti gli errori riguardano mini_wide_pair_28.
+
+Selector e label offline coincidevano in 40/40 casi. È coerenza interna sul piccolo workflow, non prova di generalizzazione.
+
+Il pilot è strutturalmente completo ma insufficiente per addestrare seriamente un LLM: solo 8 circuiti, 5 sequenze riuscite distinte e policy locali brevemente addestrate. Servono più circuiti, famiglie, dimensioni, device, seed e checkpoint robusti. I pilot temporanei sono stati rimossi, conservando il multi-seed finale.
+
+---
+
+## num_clbits, ripetizioni e seed
+
+num_clbits indica i bit classici del QuantumCircuit, distinto da num_qubits. Servono per misure e controlli classici. Nei circuiti target-independent senza misure il valore zero è normale. È descrittivo e non fa parte delle 49 feature.
+
+Ogni circuito multi-seed ha repetition_index 0–4. Il seed non riaddestra la policy né cambia QASM, feature o metrica: controlla il campionamento. Possono cambiare pass, circuiti intermedi/finale, passi, score, tempo ed esito.
+
+Le ripetizioni misurano diversità, robustezza, variabilità e fallimenti. Tutte le ripetizioni dello stesso circuito devono restare nello stesso split: distribuire seed tra train e test causerebbe leakage. Tracce diverse non sono label equivalenti; score ed esito distinguono traiettorie migliori e peggiori.
+
+---
+
+## Espansione del dataset
+
+Per nuovi record end-to-end bastano circuiti target-independent non compilati nella directory di input. Il generatore esegue parsing, feature extraction, device selection, policy RL, compilazione, valutazione e salva il circuito finale.
+
+Circuiti precompilati servono invece per una ground truth verificata del device migliore: ogni circuito va compilato su tutti i candidati, si confrontano gli score e l’argmax diventa label; poi si può riaddestrare il selector.
+
+Un nuovo circuito assente dagli aggregati NumPy può ricevere una previsione online, ma avrà ground truth offline non disponibile. Device previsto e device migliore verificato non vanno confusi.
+
+---
+
+## Corpus MQT e split
+
+Directory ispezionate:
+
+- .venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/training_circuits/;
+- .venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/training_circuits/.
+
+Risultati:
+
+- RL: 500 QASM, 2–30 qubit;
+- ML: 600 QASM;
+- 500 file condivisi con stesso nome e SHA-256;
+- 100 file solo ML, circa 30–90 qubit.
+
+Per il primo dataset è stato scelto il corpus RL; i 100 ML-only restano per una futura valutazione OOD. È una scelta ingegneristica, non un vincolo di MQT.
+
+È stato creato scripts/10_prepare_llm_circuit_splits.py con dry-run, overwrite controllato, hash e manifest.
+
+Selezionati 80 circuiti:
+
+- training 56;
+- validation 12;
+- test 12;
+- rapporto 70/15/15.
+
+I QASM sono nelle cartelle uncompiled. Le compiled restano vuote perché il QASM finale è incorporato nel JSON.
+
+Leakage group separati:
+
+- training: graphstate, ae, groundstate, portfolio, pricing, qaoa, qnn, random, routing, vqe;
+- validation: dj, qft/qftentangled;
+- test: wstate, qpeexact/qpeinexact, tsp.
+
+Distribuzione:
+
+- train: Qiskit 30/TKET 26; small 29/medium 21/large 6; 10 gruppi;
+- validation: Qiskit 7/TKET 5; small 3/medium 4/large 5; 2 gruppi;
+- test: Qiskit 6/TKET 6; small 4/medium 4/large 4; 3 gruppi;
+- totale: Qiskit 43/TKET 37; small 36/medium 29/large 15.
+
+Creati datasets/split_manifest.csv, datasets/split_manifest.json e datasets/README.md. Verificate parsabilità, hash e assenza di overlap di file, hash e leakage group.
+
+Il test è family-unseen per il futuro LLM, ma non totalmente unseen per le PPO MQT perché deriva dal corpus RL installato. Per una prova OOD forte servono circuiti ML-only o esterni completamente separati.
+
+---
+
+## Errore nel comando di generazione
+
+Il comando era stato lanciato da ~/Tesi/datasets usando scripts/07_generate_llm_dataset.py. Python cercava quindi /home/elioe/Tesi/datasets/scripts/07_generate_llm_dataset.py, inesistente.
+
+Dalla root:
+
+    cd ~/Tesi
+    python scripts/07_generate_llm_dataset.py \
+      --input-dir datasets/llm_train/uncompiled \
+      --metric expected_fidelity \
+      --no-deterministic \
+      --repetitions 5 \
+      --output output/llm_dataset/llm_train_expected_fidelity.json
+
+Da ~/Tesi/datasets:
+
+    python ../scripts/07_generate_llm_dataset.py \
+      --input-dir llm_train/uncompiled \
+      --metric expected_fidelity \
+      --no-deterministic \
+      --repetitions 5 \
+      --output ../output/llm_dataset/llm_train_expected_fidelity.json
+
+L’ambiente mqt-predictor-understanding era attivo: l’errore dipendeva solo dai percorsi relativi.
+
+---
+
+## Architettura concettuale e prossimi passi
+
+Flusso possibile:
+
+caricamento/normalizzazione → feature extraction → backend → contesto LLM → proposta pass → validazione → esecuzione → valutazione → correzione/ranking.
+
+L’LLM dovrebbe produrre azioni da un vocabolario chiuso e JSON conforme a schema, non testo libero eseguito direttamente. Il validatore deve rifiutare pass inesistenti, parametri errati, azioni incompatibili, sequenze troppo lunghe e output malformati.
+
+Per scegliere il risultato migliore bisogna verificare correttezza/equivalenza, target validity, figure of merit, metriche strutturali, tempo, costo e failure rate. La stessa funzione deve valutare LLM, MQT, Qiskit O2 e O3.
+
+Prossimi passi:
+
+1. generare JSON separati per train, validation e test;
+2. validarli con schema e parser legacy;
+3. produrre statistiche automatiche su esiti, device, trace e score;
+4. iniziare con backend fissato per isolare la pass selection;
+5. definire formato input/output e validatore;
+6. costruire il valutatore comune;
+7. eseguire pilot e congelare il protocollo;
+8. conservare configurazioni, seed, log e versioni;
+9. pubblicare codice e manifest senza artefatti pesanti.
+
+---
+
+## Sintesi finale della fase
+
+1. Il report è più chiaro, ma va revisionato formalmente.
+2. Le frasi qualitative devono essere quantificate.
+3. Le baseline includono Qiskit level 2 e 3.
+4. Il protocollo specifica preventivamente l’intero confronto.
+5. Il dataset descrive l’intera pipeline.
+6. Esistono generatore, schema, validatori e documentazione.
+7. I QASM legacy richiedono le custom instructions Qiskit.
+8. Il pilot multi-seed ha 40 record, 35 successi e 5 mancate terminazioni.
+9. num_clbits è descrittivo e indica i bit classici.
+10. I seed variano la traiettoria senza riaddestramento.
+11. Le ripetizioni dello stesso circuito restano nello stesso split.
+12. Per nuovi record bastano circuiti non compilati.
+13. La ground truth del device richiede compilazioni su tutti i candidati.
+14. RL e ML condividono 500 circuiti; ML ne ha 100 aggiuntivi più grandi.
+15. Lo split 56/12/12 evita overlap di file, hash e famiglie.
+16. Il test è family-unseen per l’LLM, non totalmente unseen per le PPO.
+17. L’errore “can’t open file” dipendeva dalla directory ~/Tesi/datasets.
+18. Il prototipo deve produrre output strutturati e validabili.
 
 ---
