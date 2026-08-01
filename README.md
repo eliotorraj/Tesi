@@ -1,165 +1,233 @@
-# MQT Predictor - ambiente e primi test
+# MQT Predictor — workspace sperimentale
 
-Questo progetto contiene una pipeline riproducibile per analizzare e testare MQT Predictor 2.3.0. Le dipendenze di compilazione principali sono allineate al lockfile ufficiale della release, evitando incompatibilità con versioni future di MQT Bench e Qiskit.
+Questo repository contiene una sola pipeline operativa per MQT Predictor 2.3.0:
 
-La pipeline è stata verificata su Ubuntu 24.04/WSL2 con Python 3.12: lo smoke training ha creato entrambi i modelli e `qcompile` ha compilato con successo un GHZ a 5 qubit per `ibm_falcon_127`, restituendo circuito, lista dei pass RL e nome del device.
+1. addestrare una policy RL per ogni coppia `device × metrica`;
+2. compilare i 600 circuiti del corpus device-selection;
+3. costruire il dataset supervisionato del device selector;
+4. addestrare il classificatore e produrre il JSON supervisionato;
+5. esportare gli esempi strict-RL nel dataset per l'LLM.
 
-## Contenuto della cartella
+Le istruzioni operative sono tutte in questo file. La cartella `knowledge/`
+contiene invece paper e note storiche: non descrive la struttura corrente del
+workspace.
 
-- `scripts/`: setup, controlli dell'installazione, smoke test, training RL e training del selettore ML;
-- `artifacts/results/`: circuito QASM e riepilogo JSON prodotti dal test di `qcompile`;
-- `artifacts/smoke/`: circuiti usati e prodotti dallo smoke test, con relativi log;
-- `artifacts/training_logs/`: eventi TensorBoard del training reale;
-- `artifacts/checkpoints/`: checkpoint da cui riprendere il training RL.
+## Struttura canonica
 
-## Scelta ambiente: Ubuntu su WSL2
+```text
+scripts/
+  01_check_install.py
+  02_list_devices.py
+  03_train_rl_model.py
+  04_train_device_selector.py
+  05_sync_models.py
+  06_export_llm_dataset.py
+  bootstrap_ubuntu.sh
+  bootstrap_windows.ps1
 
-MQT Predictor dichiara supporto ufficiale per Linux, macOS e Windows. Lo stack comprende PyTorch, Stable-Baselines3, Qiskit, TKET e BQSKit; shell, processi paralleli e futuri workflow di training/HPC risultano in genere più naturali su Linux. Windows nativo resta una buona alternativa per il solo smoke test.
+datasets/
+  device_selector_expected_fidelity.json
+  llm_mqt_full_pipeline_expected_fidelity.json
 
-Da PowerShell verifica anzitutto il nome con cui la distro è registrata:
-
-```powershell
-wsl --list --verbose
-wsl --set-default Ubuntu-24.04
-wsl -d Ubuntu-24.04
+artifacts/
+  models/
+    rl/
+    device_selector/
+  cache/
+    device_selector/expected_fidelity/
+      compiled/
+      manifest.jsonl
+  checkpoints/
+    rl/
+  logs/
+    rl/
+    device_selector/
 ```
 
-Usa in `--set-default` il nome esatto mostrato dalla prima istruzione: potrebbe essere `Ubuntu-24.04` oppure `Ubuntu` o altri nomi. Se l'app Ubuntu è stata appena scaricata ma la lista è vuota, avviala una volta dal menu Start per completare la registrazione e creare l'utente Linux. Solo se non è effettivamente installata usa `wsl --install -d Ubuntu-24.04` da PowerShell come amministratore.
+### `datasets/`
 
-## Setup Ubuntu
+Contiene il dataset supervisionato del device selector e l'export separato per
+l'LLM. Nel primo, ogni record rappresenta uno dei 600 circuiti sorgente e
+contiene:
 
-Dalla root del progetto:
+- le 49 feature del circuito target-independent;
+- lo score esplicito per ciascun device compatibile;
+- il device vincitore usato come label;
+- il percorso dei QASM compilati;
+- la provenienza della compilazione: RL, fallback Qiskit o legacy.
+
+Il file autorevole è:
+
+```text
+datasets/device_selector_expected_fidelity.json
+```
+
+I circuiti sorgente non sono duplicati nel repository: sono i 600 QASM inclusi
+in MQT Predictor e si trovano nell'ambiente `.venv`.
+
+### `artifacts/cache/`
+
+I QASM sotto `compiled/` non sono un secondo dataset. Sono risultati intermedi:
+per ogni circuito esiste un QASM per ogni device compatibile. Servono per
+ricalcolare score e label senza ripetere una compilazione durata molte ore.
+
+`manifest.jsonl` è il registro append-only di tentativi, timeout, successi RL e
+fallback. Non è il dataset supervisionato.
+
+Questa cache può essere eliminata soltanto se si accetta di ricompilare tutto.
+
+### `artifacts/models/`
+
+È l'unica copia autorevole dei modelli nel workspace:
+
+- `rl/`: policy PPO finali;
+- `device_selector/`: classificatore supervisionato finale.
+
+MQT Predictor richiede anche una copia runtime dentro `.venv`. Quella copia è
+parte dell'ambiente installato, non è un secondo store del progetto, e può
+essere ricreata con `05_sync_models.py`.
+
+### `artifacts/checkpoints/rl/`
+
+Contiene snapshot intermedi usati esclusivamente per riprendere un training RL
+interrotto. Non sono i modelli finali usati da `qcompile`.
+
+### `artifacts/logs/`
+
+Tutti i log sono riuniti qui:
+
+- `logs/rl/`: eventi TensorBoard;
+- `logs/device_selector/`: log del runner, dei worker e di BQSKit.
+
+## Setup
+
+Su Ubuntu/WSL2:
 
 ```bash
 bash scripts/bootstrap_ubuntu.sh
-```
-
-Il bootstrap installa `uv` se manca, prepara Python 3.12 e installa la release fissata in `pyproject.toml`. Alla fine stampa il comando di attivazione corretto.
-
-
-```bash
-cd ~/Nome_Cartella
 source .venv/bin/activate
 ```
 
-Per uscire dall'ambiente:
-
-```bash
-deactivate
-```
-
-## Setup Windows nativo (alternativa)
-
-Installa prima `uv` con il comando ufficiale indicato dalla documentazione MQT:
-
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-Riapri PowerShell, quindi:
-
-```powershell
-.\scripts\bootstrap_windows.ps1
-.\.venv\Scripts\Activate.ps1
-```
-
-## Percorso di test consigliato
-
-Con l'ambiente attivo:
+Controllo rapido:
 
 ```bash
 python scripts/01_check_install.py
 python scripts/02_list_devices.py
-python scripts/02_list_devices.py --details ibm_falcon_127
-python scripts/03_train_smoke_models.py
-python scripts/04_test_qcompile.py
 ```
 
-Il terzo script replica l'idea dell'integration test ufficiale: addestra rapidamente una policy RL deterministica e un selettore con un solo device. Verifica che training, persistenza dei modelli, selezione e compilazione funzionino insieme, ma **non produce un modello scientificamente significativo**.
+Il baseline riproducibile usa Python 3.12 e `mqt.predictor==2.3.0` con le
+versioni fissate in `pyproject.toml` e `uv.lock`.
 
-Nota di compatibilità: nella release 2.3.0 `qcompile` cerca rigidamente file chiamati `model_<metrica>_<device>.zip`. Gli script di questo repository lasciano quindi il parametro `model_name` al valore predefinito `model`; un nome personalizzato come quello mostrato in un esempio della documentazione stabile produrrebbe un file che `qcompile` non carica automaticamente.
+## Installare i modelli nell'ambiente
 
-`04_test_qcompile.py` controlla i tre risultati restituiti dall'API di MQT Predictor:
-
-1. circuito compilato;
-2. lista ordinata dei pass scelti dalla policy RL;
-3. `qiskit.transpiler.Target` del device selezionato.
-
-QASM e report JSON vengono salvati sotto `artifacts/results/`.
-
-## Training non-smoke
-
-Una policy RL deve essere addestrata per ogni coppia `device × figure_of_merit`:
+Dopo aver ricreato `.venv`:
 
 ```bash
-python scripts/05_train_rl_model.py --device ibm_falcon_27 --metric expected_fidelity --timesteps 4096
-python scripts/05_train_rl_model.py --device quantinuum_h2_56 --metric expected_fidelity --timesteps 4096
+python scripts/05_sync_models.py install
 ```
 
-Dopo aver addestrato tutti i device candidati, genera score, label e Random Forest:
+Per acquisire eccezionalmente modelli già presenti nella `.venv`:
 
 ```bash
-python scripts/06_train_device_selector.py \
-  --devices ibm_falcon_27 quantinuum_h2_56 \
+python scripts/05_sync_models.py capture --overwrite
+```
+
+I normali script di training aggiornano automaticamente sia il modello
+canonico sia la copia runtime; non serve un export manuale successivo.
+
+## Training RL
+
+Serve una policy per ogni coppia `device × metrica`:
+
+```bash
+python scripts/03_train_rl_model.py \
+  --device ibm_falcon_27 \
   --metric expected_fidelity \
-  --num-workers 1 \
-  --uncompiled-circuits PATH_UNCOMPILED_CIRUITS \
-  --compiled-circuits PATH_COMPILED_CIRUITS
+  --timesteps 4096
 ```
 
-Lo script imposta automaticamente `GITHUB_ACTIONS=true` per usare le impostazioni BQSKit più leggere e `MPLCONFIGDIR=/tmp/mqt-predictor-matplotlib` per evitare problemi di cache Matplotlib.
-Si può tentare con più worker, ma spesso ci sono conflitti; `--num-workers 1` è la scelta più stabile, ovviamente a costo della velocità di training.
+I checkpoint vengono scritti in `artifacts/checkpoints/rl/<device>/`; i log
+TensorBoard in `artifacts/logs/rl/`.
 
-Questa seconda fase compila il dataset per ogni device e può richiedere molto tempo. Il paper riporta più di 500 circuiti; il lavoro del 2023 impiegò circa cinque giorni per una generazione dati più ampia.
+## Device selector e dataset JSON
 
-## Stato corrente dell'esperimento
+La pipeline completa e riprendibile è gestita soltanto da:
 
-Il training reale è stato avviato per il device `quantinuum_h2_56`, con figure of merit `expected_fidelity` e target di 4096 step; e per il device `ibm_heron_133` con figure of merit `critical_depth` e target di 4096 step, . Sono stati salvati un checkpoint automatico a 2.048 step.
+```text
+scripts/04_train_device_selector.py
+```
 
-## Log e checkpoint
-
-I file `events.out.tfevents...` sotto `artifacts/training_logs/` sono log TensorBoard e non file di testo. Per consultarli, da un secondo terminale con l'ambiente attivo:
+Esempio:
 
 ```bash
-tensorboard --logdir artifacts/training_logs --port 6006
+python scripts/04_train_device_selector.py \
+  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
+  --metric expected_fidelity \
+  --num-workers 2
 ```
 
-Apri quindi `http://localhost:6006`. I grafici principali sono `rollout/ep_rew_mean`, per l'andamento medio della reward, e `rollout/ep_len_mean`, per la lunghezza degli episodi. Con `n_steps=2048`, le metriche `train/*` compaiono dopo il primo rollout completo.
+Lo script riusa automaticamente ogni QASM valido già presente nella cache.
+Al termine genera il JSON, seleziona gli iperparametri e rifà il fit finale su
+tutti i circuiti disponibili.
 
-I file `.zip` sotto `artifacts/checkpoints/<device>/` non sono log: contengono lo stato del modello e servono per riprendere il training con `--resume-from`.
-
-## Conservare i modelli
-
-MQT Predictor 2.3.0 salva modelli e training data dentro il pacchetto installato in `.venv`. Prima di ricreare l'ambiente esportali:
+Per rigenerare modello e JSON dalla cache senza compilare:
 
 ```bash
-python scripts/model_store.py export
+python scripts/04_train_device_selector.py \
+  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
+  --metric expected_fidelity \
+  --finalize-only
 ```
 
-Per ripristinarli in un nuovo ambiente:
+Per rigenerare soltanto il JSON, senza compilazione e senza training:
 
 ```bash
-python scripts/model_store.py import
+python scripts/04_train_device_selector.py \
+  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
+  --metric expected_fidelity \
+  --export-json-only
 ```
 
-Lo store predefinito è `artifacts/model_store/`. Può diventare molto grande e non è incluso in questa cartella di consegna.
+## Stato del dataset corrente
 
-## Generare il foglio Excel
-Per generare il foglio excel contenente le informazioni sul dataset usato dal classificatore ho sviluppato 2 script. Si trovano in tmp/mqt_dataset_export/ e sono export_device_selector_dataset.py e build_dataset_workbook.py.
+Il JSON corrente contiene 600 circuiti e 1.646 compilazioni compatibili:
 
-export_device_selector_dataset.py crea i file json che salvano i dati del dataset. 
-Permette anche di scegliere la figure of merit che ci interessa con `--metric`, oppure di generare i fogli per tutte le metriche disonibili con `--all-available`
+- 610 compilazioni prodotte dagli agenti RL;
+- 1.031 compilazioni prodotte dal fallback Qiskit;
+- 5 compilazioni legacy recuperate.
+
+La distribuzione delle label è sbilanciata:
+
+- `quantinuum_h2_56`: 522;
+- `ibm_falcon_127`: 67;
+- `ibm_falcon_27`: 11.
+
+Questi dati validano la pipeline, ma il forte uso di fallback sui device IBM va
+dichiarato in qualunque valutazione scientifica del selector.
+
+## Dataset per l'LLM
+
+Controllare prima la copertura strict-RL:
+
 ```bash
-python tmp/mqt_dataset_export/export_device_selector_dataset.py --metric expected_fidelity
-python tmp/mqt_dataset_export/export_device_selector_dataset.py --all-available
+python scripts/06_export_llm_dataset.py --audit-only
 ```
 
-build_dataset_workbook.py crea il foglio excel a partire dai json creati precedentemente.
+Creare poi il JSON senza fallback o record legacy:
+
 ```bash
-python tmp/mqt_dataset_export/build_dataset_workbook.py
+python scripts/06_export_llm_dataset.py --overwrite
 ```
 
+Ogni record separa `input`, `expected_output` e
+`deterministic_ground_truth`: score e QASM compilati restano disponibili per
+la validazione, ma non devono entrare nel prompt. Il bilanciamento predefinito
+limita a 3:1 il rapporto tra label hardware senza duplicare esempi; usare
+`--balance none` per conservare tutti i record idonei.
+## TensorBoard
 
-## Nota importante sulla versione 2.x
+```bash
+tensorboard --logdir artifacts/logs/rl --port 6006
+```
 
-Dalla versione 2.0 MQT Predictor non include più modelli preaddestrati. `pip install mqt.predictor` installa il framework, non una pipeline immediatamente pronta per `qcompile`. Occorre prima addestrare le policy RL e il device selector, oppure ripristinare artefatti già addestrati.
+I file `events.out.tfevents...` sono binari e vanno aperti con TensorBoard.

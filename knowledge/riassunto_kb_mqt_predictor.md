@@ -1,5 +1,13 @@
 # Riassunto KB — MQT Predictor, dataset, RL compiler e confronto con TuniQ
 
+> **Nota sul layout corrente (31 luglio 2026).** Questo documento conserva
+> anche riferimenti storici a esperimenti e script rimossi. I comandi operativi
+> aggiornati sono soltanto quelli nel `README.md` alla root. Il dataset corrente
+> è `datasets/device_selector_expected_fidelity.json`; i modelli finali sono in
+> `artifacts/models/`; i QASM compilati sono una cache intermedia in
+> `artifacts/cache/`; tutti i log sono in `artifacts/logs/`. Gli script correnti
+> sono numerati da `01` a `05`.
+
 ## Contesto della conversazione
 
 Questa chat riguarda lo studio di paper e codice relativi a **MQT Predictor** e al precedente lavoro del 2023 su predizione di buone opzioni di compilazione per circuiti quantistici. L’obiettivo dell’utente è costruire una **Knowledge Base** consultabile da un modello agentico, utile soprattutto per capire:
@@ -3708,5 +3716,1007 @@ Se invece l’obiettivo è aggiornare `main`, non bisogna farlo alla cieca: occo
 14. Per artefatti dimostrativi conviene usare device stabili, anche se meno interessanti.
 15. Il commit degli artefatti era su `working-branch`, quindi il push corretto era `git push origin working-branch`.
 16. Un push su `main` richiede prima di capire lo stato di `origin/main` e integrare eventuali modifiche remote.
+
+---
+# Continuazione KB — training robusto su 600 circuiti, pulizia del workspace e dataset LLM
+
+## Contesto di questa continuazione
+
+Questa sezione riassume la conversazione operativa più recente. Il lavoro è
+partito dalla necessità di capire se il classificatore per
+`expected_fidelity` installato nella `.venv` fosse ancora il vecchio modello
+addestrato sul mini dataset di 8 circuiti oppure il nuovo modello costruito sul
+corpus completo di 600 circuiti.
+
+La conversazione ha poi riguardato:
+
+- i fallimenti della generazione del dataset del device selector;
+- i messaggi di race condition, chiusura delle connessioni e crash BQSKit;
+- la necessità di parallelizzare un lavoro stimato inizialmente in circa 237 ore;
+- timeout esterni, worker isolati, ripartenza e checkpoint;
+- il completamento della cache per tre dispositivi;
+- il fitting finale della Random Forest su tutti i 600 circuiti;
+- la produzione di un unico JSON leggibile;
+- la semplificazione del workspace;
+- la distinzione tra dataset del device selector e futuro dataset per l'LLM.
+
+---
+
+## Dal mini dataset al corpus da 600 circuiti
+
+MQT Predictor 2.3.0 salva i modelli usati a runtime dentro il pacchetto
+installato nella `.venv`. Questo rende facile confondere:
+
+```text
+vecchio modello smoke / mini dataset
+nuovo modello completo
+copia canonica conservata nel progetto
+copia runtime installata nella .venv
+```
+
+Per eliminare l'ambiguità è stata adottata questa convenzione:
+
+```text
+artifacts/models/ = copia canonica e persistente
+.venv/.../mqt/predictor/ = mirror runtime richiesto da MQT Predictor
+```
+
+La `.venv` non è quindi l'archivio autorevole. Se viene ricreata, i modelli
+canonici devono essere reinstallati con lo script di sincronizzazione.
+
+Il controllo finale ha confermato che il classificatore
+`expected_fidelity` corrente è il nuovo modello addestrato sui 600 circuiti,
+non quello del mini dataset da 8.
+
+---
+
+## Perché la generazione si interrompeva
+
+L'utente aveva avviato durante la notte la costruzione del dataset su più
+dispositivi, ciascuno già dotato di policy RL. L'esecuzione era però fallita e
+nella CLI apparivano messaggi simili a:
+
+```text
+OS terminating due to race condition
+Closing connection to remote server
+```
+
+La parte costosa non era il fitting della Random Forest, ma:
+
+```text
+600 circuiti sorgente
+        ×
+dispositivi compatibili
+        ↓
+compilazione tramite policy RL
+        ↓
+pass Qiskit, TKET e BQSKit
+        ↓
+score expected_fidelity
+```
+
+Alcuni pass, soprattutto quelli di sintesi BQSKit, possono durare molto,
+creare processi o connessioni interne, terminare male durante lo shutdown,
+lasciare il chiamante in attesa o fallire su blocchi troppo grandi. Un solo
+caso patologico poteva quindi bloccare un'esecuzione lunga molte ore.
+
+---
+
+## Modifiche allo script del device selector
+
+Lo script originariamente chiamato `06_train_device_selector.py`, ora
+`scripts/04_train_device_selector.py`, è stato reso riprendibile e robusto.
+
+Modifiche principali:
+
+1. Cache persistente per ogni coppia circuito-device.
+2. Manifest append-only con esito, timeout, errore e provenienza.
+3. Worker separati per device.
+4. Timeout esterno per terminare un processo realmente bloccato.
+5. Riavvio del worker conservando tutti i risultati già validi.
+6. Scritture atomiche degli artefatti.
+7. Modalità separate:
+   - `--compile-only`;
+   - `--finalize-only`;
+   - `--export-json-only`.
+8. Fallback Qiskit sullo stesso device quando RL va in timeout o fallisce.
+
+Il checkpoint importante del device selector non è una Random Forest
+addestrata a metà. È la cache delle compilazioni già completate, dalla quale
+dataset e modello possono essere ricostruiti velocemente.
+
+---
+
+## Timeout e lavoro parallelo
+
+Un comando usato nella prima fase è stato:
+
+```bash
+python scripts/06_train_device_selector.py \
+  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
+  --metric expected_fidelity \
+  --num-workers 2 \
+  --compile-only \
+  --timeout 120 \
+  --max-attempts 1
+```
+
+L'esecuzione è stata interrotta dopo circa due ore, ma le compilazioni già
+valide sono rimaste riutilizzabili.
+
+Con timeout esterno di 30 secondi il log mostrava ripetutamente timeout e
+riavvii, con uno stato intermedio di:
+
+```text
+613/1646 checkpoint validi
+```
+
+Abbassare ancora il timeout non era consigliato: se quasi ogni job viene
+terminato prematuramente, il sistema passa il tempo a creare e distruggere
+processi senza avanzare. La soluzione adottata è stata isolare i processi,
+salvare ogni progresso e usare una fallback finita per i casi patologici.
+
+---
+
+## Fallback Qiskit
+
+La fallback Qiskit non cambia hardware. Cambia soltanto il compilatore usato
+per lo stesso circuito e lo stesso `Target`:
+
+```text
+circuito + device fissato
+        ↓
+tentativo con policy RL del device
+        ↓
+timeout / crash / errore
+        ↓
+qiskit.transpile(..., optimization_level=1) sullo stesso Target
+        ↓
+circuito compilato valido per lo stesso device
+```
+
+Serve a completare il dataset, ma una compilazione fallback non è un risultato
+della policy RL. Manifest e JSON distinguono quindi `RL`,
+`qiskit_fallback` e `legacy`.
+
+---
+
+## Problema BQSKit e valutazione dell'upgrade
+
+BQSKit è usato da alcune azioni RL per sintesi matematiche complesse. La ricerca
+di una decomposizione può diventare molto costosa oppure superare i limiti
+configurati. È stato osservato anche:
+
+```text
+ValueError: Unable to compile circuit with gate larger than max_synthesis_size.
+```
+
+Questo errore riguarda il blocco sottoposto a sintesi, non la Random Forest.
+
+È stata valutata l'idea di aggiornare a MQT Predictor 2.4.0. L'upgrade non è
+stato considerato una soluzione necessaria o garantita: eventuali correzioni
+non eliminano automaticamente la complessità di BQSKit, i timeout o tutte le
+incompatibilità dei pass. Inoltre avrebbe modificato la baseline riproducibile
+del progetto. Per questa fase si è mantenuto Python 3.12 con
+`mqt.predictor==2.3.0`, risolvendo il problema operativamente nello script.
+
+---
+
+## Stato finale della cache
+
+La compilazione si è conclusa con:
+
+```text
+600 circuiti sorgente
+3 dispositivi:
+  ibm_falcon_27
+  ibm_falcon_127
+  quantinuum_h2_56
+1646 coppie circuito-device compatibili completate
+```
+
+Provenienza:
+
+```text
+610  compilazioni RL
+1031 compilazioni Qiskit fallback
+5    output legacy validi senza voce originaria nel manifest
+```
+
+Ripartizione:
+
+```text
+ibm_falcon_127:   37 RL, 558 fallback, 5 legacy
+ibm_falcon_27:    35 RL, 447 fallback
+quantinuum_h2_56: 538 RL, 26 fallback
+```
+
+Conclusione scientifica importante: il dataset è **ibrido**. È utile per
+validare e usare la pipeline completa, ma non è un confronto puro tra tre
+policy RL. La maggioranza degli output IBM proviene da Qiskit; quelli
+Quantinuum provengono prevalentemente dalla policy RL.
+
+---
+
+## Dataset supervisionato e label
+
+Per ogni circuito sono stati calcolati gli score `expected_fidelity`; la label
+è il device compatibile con score massimo.
+
+```text
+quantinuum_h2_56: 522
+ibm_falcon_127:     67
+ibm_falcon_27:      11
+totale:            600
+```
+
+Il dataset è fortemente sbilanciato verso `quantinuum_h2_56`. Ogni record
+contiene circuito, 49 feature, score per device, label, riferimenti agli output
+compilati e provenienza. È stato verificato che tutte le label coincidano con
+l'argmax degli score registrati.
+
+---
+
+## Fitting finale della Random Forest
+
+La pipeline originaria usava uno split 70/30 e lasciava come modello finale
+quello addestrato sul solo 70%, circa 420 circuiti. Lo script è stato corretto:
+
+1. split stratificato 70/30 per selezionare gli iperparametri;
+2. `GridSearchCV` sul training split;
+3. scelta dei migliori parametri;
+4. nuovo fit finale su tutti i 600 campioni;
+5. salvataggio della stessa copia nell'area canonica e nel runtime MQT.
+
+Risultato verificato:
+
+```text
+modello: RandomForestClassifier
+campioni del fit finale: 600
+feature: 49
+classi: tutti e tre i device
+GridSearchCV: 5 fold, 216 candidati, 1080 fit
+migliore accuratezza CV: 0.9333
+```
+
+Parametri principali:
+
+```text
+n_estimators = 100
+max_depth = 14
+min_samples_leaf = 2
+min_samples_split = 2
+bootstrap = True
+```
+
+Le copie canonica e runtime coincidono:
+
+```text
+SHA-256:
+2481a764db5c4f0740788f3b852febea88595cbb37a27aeda95f467861fcaf16
+dimensione: 672369 byte
+```
+
+---
+
+## JSON canonico
+
+Il dataset supervisionato leggibile è:
+
+```text
+datasets/device_selector_expected_fidelity.json
+```
+
+Contiene 600 record, 49 feature per record e circa 2,35 MB. Include metadati,
+dispositivi, distribuzione delle label, provenienza, nomi delle feature, score e
+record individuali.
+
+Il JSON non sostituisce la cache QASM: la cache conserva gli output costosi,
+mentre il JSON descrive il dataset supervisionato derivato da tali output.
+
+Rigenerazione del solo JSON:
+
+```bash
+python scripts/04_train_device_selector.py \
+  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
+  --metric expected_fidelity \
+  --export-json-only
+```
+
+Rigenerazione di modello e JSON dalla cache:
+
+```bash
+python scripts/04_train_device_selector.py \
+  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
+  --metric expected_fidelity \
+  --finalize-only
+```
+
+La finalizzazione dalla cache ha richiesto circa 132 secondi, perché non ha
+ripetuto le compilazioni RL/BQSKit.
+
+---
+
+## Pulizia del workspace
+
+Il workspace era diventato confusionario: troppi script alternativi, mini
+dataset obsoleto, documentazione dispersa, modelli duplicati, log separati e
+artefatti smoke già validati.
+
+La struttura visibile è stata ridotta a:
+
+```text
+scripts/
+  01_check_install.py
+  02_list_devices.py
+  03_train_rl_model.py
+  04_train_device_selector.py
+  05_sync_models.py
+
+datasets/
+  device_selector_expected_fidelity.json
+
+artifacts/
+  models/rl/
+  models/device_selector/
+  cache/device_selector/expected_fidelity/
+  checkpoints/rl/
+  logs/rl/
+  logs/device_selector/expected_fidelity/
+
+knowledge/
+README.md
+```
+
+Ruoli:
+
+- `datasets/`: dataset finali leggibili;
+- `artifacts/models/`: copie canoniche dei modelli;
+- `artifacts/cache/`: intermedi costosi riutilizzabili;
+- `artifacts/checkpoints/`: stati intermedi dei training lunghi;
+- `artifacts/logs/`: log;
+- `.venv`: runtime, non archivio canonico.
+
+Il materiale obsoleto è stato tolto dalla vista principale ma conservato in
+modo recuperabile in:
+
+```text
+.workspace_archive/20260731_before_cleanup/
+```
+
+La cartella è ignorata da Git e non è stata cancellata definitivamente. La
+documentazione operativa aggiornata è ora nel `README.md` della root; questa
+KB conserva invece anche la storia degli esperimenti.
+
+Le copie canoniche correnti sono:
+
+```text
+artifacts/models/rl/*.zip
+artifacts/models/device_selector/trained_clf_expected_fidelity.joblib
+```
+
+Dopo avere ricreato la `.venv`:
+
+```bash
+python scripts/05_sync_models.py install
+```
+
+---
+
+## Chiarimento finale: non è ancora il dataset LLM
+
+Il JSON prodotto è il dataset del **device selector supervisionato**. Insegna
+alla Random Forest:
+
+```text
+feature del circuito target-independent
+        ↓
+device con expected_fidelity stimata più alta
+```
+
+Non è ancora il dataset definitivo da fornire a un LLM. È però la materia prima
+verificata:
+
+```text
+600 circuiti sorgente
+49 feature per circuito
+score per device
+label del device migliore
+1646 output compilati
+provenienza RL/fallback
+```
+
+Il formato finale dipende dal compito dell'LLM.
+
+### Compito 1 — scelta del device
+
+```text
+input  = QASM sorgente e/o feature
+output = device migliore
+```
+
+Si possono derivare circa 600 esempi.
+
+### Compito 2 — compilazione per un device
+
+```text
+input  = QASM sorgente + device + figure of merit
+output = QASM compilato e/o sequenza di pass
+```
+
+Si possono derivare fino a 1646 coppie, ma bisogna decidere se usare soltanto
+le 610 compilazioni RL o includere le fallback marcandone la provenienza. Un
+dataset LLM autosufficiente dovrà contenere direttamente il testo QASM, non
+soltanto percorsi locali.
+
+### Compito 3 — decisione sequenziale e spiegabile
+
+```text
+input  = circuito, device, feature e stato corrente
+output = pass successivo, motivazione, score previsto o trace
+```
+
+Per questo obiettivo il dataset corrente non basta: conserva output finali e
+provenienza, ma non necessariamente tutti gli stati intermedi delle trace RL.
+
+Conclusione:
+
+```text
+È stato completato il dataset supervisionato del device selector e la relativa
+infrastruttura robusta di compilazione/cache.
+
+Il prossimo passo è definire il task preciso dell'LLM e creare un unico
+esportatore JSON o JSONL autosufficiente per quel task.
+```
+
+---
+
+## Punti chiave da ricordare
+
+1. Il modello finale `expected_fidelity` usa tutti i 600 circuiti, non gli 8
+   del mini dataset.
+2. La parte lenta era la compilazione circuito-device, non la Random Forest.
+3. La cache contiene 1646 output e rende il lavoro riprendibile.
+4. Timeout troppo bassi possono impedire il progresso.
+5. BQSKit può bloccarsi o fallire; isolamento e fallback rendono la pipeline
+   terminabile.
+6. L'upgrade di MQT Predictor non è stato necessario né considerato una
+   soluzione garantita.
+7. La fallback Qiskit usa lo stesso device con un compilatore alternativo.
+8. Il dataset è ibrido: 610 RL, 1031 fallback e 5 legacy.
+9. Le label sono sbilanciate verso `quantinuum_h2_56`.
+10. Il JSON canonico contiene 600 record e 49 feature.
+11. I QASM compilati restano nella cache come intermedi costosi.
+12. `artifacts/models/` è canonico; la `.venv` contiene mirror runtime.
+13. Il workspace è stato ridotto a cinque script operativi.
+14. Il materiale obsoleto è archiviato in modo recuperabile.
+15. Il JSON corrente è una base per il dataset LLM, non il dataset LLM finale.
+16. Prima dell'export LLM va deciso se il modello deve scegliere il device,
+    compilare il circuito oppure scegliere e spiegare i pass.
+
+---
+# Continuazione KB — architettura del prototipo LLM e validazione
+
+## Contesto della conversazione
+
+Questa sezione riassume la discussione sull'architettura del prototipo
+interattivo basato su LLM e sulla validazione delle sue risposte. L'obiettivo
+non è dimostrare che l'LLM sia migliore o allo stesso livello di MQT
+Predictor, ma misurarne le capacità decisionali, esplicative e di rispetto
+del contratto.
+
+La proposta iniziale era:
+
+    richiesta utente + circuito nella UI
+            ↓
+    parser ed estrazione delle caratteristiche
+            ↓
+    invio delle informazioni all'LLM
+            ↓
+    scelta di hardware e opzioni di compilazione
+            ↓
+    spiegazione della scelta nella UI
+            ↓
+    conferma facoltativa dell'utente
+            ↓
+    compilazione Qiskit e restituzione del circuito
+
+Il flusso è valido come esperienza utente e come MVP. Non è però sufficiente
+come architettura interna se l'LLM rimane l'unica autorità su compatibilità,
+opzioni ammesse e correttezza. Queste responsabilità devono restare
+deterministiche, verificabili e riproducibili.
+
+---
+
+## Architettura ibrida consigliata
+
+Il flusso consigliato è:
+
+    richiesta + circuito + obiettivo + vincoli
+            ↓
+    UI
+            ↓
+    application service / orchestratore
+            ↓
+    parsing e validazione del circuito
+            ↓
+    CircuitProfile e feature
+            ↓
+    catalogo hardware versionato
+            ↓
+    filtro deterministico dei candidati compatibili
+            ↓
+    DecisionContext con sole alternative ammesse
+            ↓
+    LLM decision maker
+            ↓
+    risposta JSON strutturata
+            ↓
+    validazione deterministica della risposta
+            ↓
+    raccomandazione e spiegazione nella UI
+            ↓
+    conferma dell'utente
+            ↓
+    adapter Qiskit o MQT Predictor
+            ↓
+    validazione del circuito compilato
+            ↓
+    QASM, configurazione, metriche, warning e provenienza
+
+Responsabilità principali:
+
+- La UI raccoglie input, obiettivo e vincoli e mostra i risultati; non
+  contiene logica scientifica.
+- Il parser trasforma il QASM in una rappresentazione canonica, ad esempio un
+  QuantumCircuit, applica limiti e segnala input non valido.
+- Il feature extractor genera il profilo del circuito e, quando necessario,
+  le 49 feature compatibili con la pipeline MQT locale.
+- Il catalogo hardware è la sorgente autorevole per numero di qubit, gate,
+  connettività, proprietà del Target, compilatori e opzioni disponibili.
+- Il filtro di compatibilità elimina prima della chiamata LLM le alternative
+  impossibili.
+- Il context builder presenta all'LLM soltanto informazioni e alternative
+  rilevanti.
+- L'LLM sceglie nello spazio ammesso e restituisce motivazioni ed evidenze.
+- Il validator tratta l'output LLM come input non affidabile.
+- Il compiler adapter esegue con Qiskit o MQT la decisione già validata.
+- Il result validator controlla il circuito compilato e registra gli
+  artefatti.
+
+La separazione è logica: per il primo prototipo UI e backend possono stare
+nello stesso processo; non servono microservizi.
+
+---
+
+## Distinzione rispetto a MQT Predictor
+
+Se l'LLM sceglie sia hardware sia configurazione Qiskit, il task è
+concettualmente vicino al predictor del 2023:
+
+    circuito → device + compilatore + impostazioni
+
+MQT Predictor 2025 separa invece:
+
+    circuito → classificatore supervisionato sceglie il device
+             → policy RL specifica del device sceglie i pass
+             → circuito compilato
+
+Una pipeline in cui l'LLM sceglie la configurazione e Qiskit la esegue è
+quindi un sistema LLM + Qiskit distinto, non MQT Predictor 2025.
+
+Sono state suggerite due modalità:
+
+    llm_qiskit:
+        LLM sceglie device e opzioni;
+        Qiskit esegue la configurazione validata.
+
+    mqt_predictor:
+        il classificatore MQT sceglie il device;
+        la policy RL sceglie i pass;
+        l'LLM può presentare o spiegare il risultato.
+
+MQT Predictor può fungere da baseline senza diventare una soglia che l'LLM
+deve necessariamente eguagliare.
+
+---
+
+## Informazioni da fornire all'LLM
+
+Non conviene inviare soltanto il vettore numerico grezzo. Il DecisionContext
+dovrebbe contenere:
+
+- obiettivo di ottimizzazione;
+- vincoli espliciti dell'utente;
+- profilo sintetico e feature rilevanti del circuito;
+- soli device compatibili;
+- metadati hardware necessari alla decisione;
+- compilatori e opzioni consentite;
+- eventuali esempi recuperati dal dataset o dalla KB.
+
+Esempio concettuale:
+
+    {
+      "objective": "expected_fidelity",
+      "user_constraints": {
+        "preferred_vendor": null
+      },
+      "circuit": {
+        "num_qubits": 12,
+        "depth": 84,
+        "gate_count": 230,
+        "two_qubit_gate_count": 41,
+        "entanglement_ratio": 0.178
+      },
+      "compatible_devices": [
+        {
+          "id": "ibm_falcon_127",
+          "num_qubits": 127
+        }
+      ],
+      "allowed_options": {
+        "optimization_level": [0, 1, 2, 3],
+        "layout_method": ["trivial", "dense", "sabre"],
+        "routing_method": ["basic", "lookahead", "sabre"]
+      }
+    }
+
+Catalogo e allowlist devono provenire dal backend e non dalla memoria interna
+dell'LLM.
+
+---
+
+## Contratto strutturato della risposta
+
+L'LLM non dovrebbe restituire soltanto prosa, codice o pass arbitrari. Deve
+produrre JSON aderente a uno schema, per esempio:
+
+    {
+      "selected_device": "ibm_falcon_127",
+      "compiler": "qiskit",
+      "options": {
+        "optimization_level": 3,
+        "layout_method": "sabre",
+        "routing_method": "sabre",
+        "seed_transpiler": 42
+      },
+      "reasons": [
+        {
+          "choice": "selected_device",
+          "claim": "Il dispositivo ha capacità sufficiente.",
+          "evidence": [
+            "circuit.num_qubits",
+            "devices.ibm_falcon_127.num_qubits"
+          ]
+        }
+      ],
+      "alternatives": [],
+      "warnings": [
+        "Expected fidelity è una stima, non una misura hardware."
+      ]
+    }
+
+La spiegazione mostrata nella UI può essere ricavata da questi campi, così
+rimane collegata alla decisione effettivamente eseguita. Una confidence
+dichiarata dall'LLM non va trattata come probabilità calibrata.
+
+---
+
+## Conferma e riproducibilità
+
+La conferma dell'utente deve riferirsi a un identificatore immutabile della
+raccomandazione, costruito almeno da:
+
+- hash del circuito sorgente;
+- decisione validata;
+- versione del catalogo hardware;
+- versione del modello LLM;
+- versione del prompt;
+- versioni delle librerie;
+- seed di compilazione.
+
+In questo modo viene compilata esattamente la configurazione mostrata.
+
+Una API minima può usare:
+
+    POST /recommendations
+        richiesta + QASM + obiettivo + vincoli
+        → raccomandazione + recommendation_id
+
+    POST /compilations
+        recommendation_id
+        → job_id
+
+    GET /compilations/{job_id}
+        → stato + circuito + metriche + artefatti
+
+---
+
+## Perché ricontrollare i vincoli già mascherati
+
+Il masking prima della chiamata LLM riduce lo spazio di scelta, ma un prompt
+non garantisce l'output. Il modello può comunque inventare un device, un
+livello di ottimizzazione o una combinazione non prevista. Gli stessi vincoli
+devono quindi essere ricontrollati nella risposta.
+
+Non bisogna però duplicare le regole. La stessa policy deve generare la
+maschera e validare l'output:
+
+    allowed_options = policy.compute_allowed_options(context)
+
+    prompt = context_builder.build(
+        context=context,
+        allowed_options=allowed_options,
+    )
+
+    raw_response = llm.generate(prompt)
+    decision = decision_parser.parse(raw_response)
+
+    violations = policy.validate(
+        decision=decision,
+        allowed_options=allowed_options,
+    )
+
+Questo evita divergenze tra le alternative dichiarate nel prompt e quelle
+accettate dal backend.
+
+---
+
+## Tre livelli distinti di controllo
+
+### Validazione della risposta LLM
+
+Stabilisce se la decisione è utilizzabile, senza giudicare se sia la migliore:
+
+- JSON sintatticamente valido;
+- schema rispettato;
+- campi obbligatori presenti;
+- assenza di campi sconosciuti, se lo schema è chiuso;
+- device appartenente ai candidati;
+- compilatore e opzioni nelle allowlist;
+- tipi e intervalli corretti;
+- vincoli utente rispettati;
+- coerenza tra i campi;
+- motivazioni collegate a dati realmente presenti.
+
+### Validazione della compilazione
+
+Avviene dopo la conferma dell'utente:
+
+- Qiskit o l'adapter accetta la configurazione;
+- la compilazione termina senza errore;
+- il circuito usa operazioni supportate dal Target;
+- la connettività è rispettata;
+- il circuito risulta eseguibile sul device;
+- il comportamento è preservato, quando verificabile.
+
+Questo non è un controllo di performance. Un circuito può essere più profondo
+o meno ottimizzato e risultare comunque valido.
+
+Per circuiti piccoli la preservazione semantica può essere controllata tramite
+equivalenza di operatori o simulazione. Per circuiti grandi servono controlli
+più economici e compatibili con misure, reset e circuiti non unitari.
+
+### Valutazione delle capacità dell'LLM
+
+Serve all'esperimento e produce misure:
+
+- percentuale di JSON validi al primo tentativo;
+- rispetto dello schema e delle alternative ammesse;
+- grounding delle spiegazioni;
+- successo della compilazione;
+- stabilità su richieste ripetute;
+- sensibilità a obiettivi e vincoli diversi;
+- capacità di correggersi dopo feedback;
+- eventuale accordo con MQT Predictor o ground truth offline.
+
+Accordo con MQT e qualità della figure of merit possono essere metriche
+descrittive, ma non criteri binari di validità.
+
+---
+
+## Controlli ulteriori rispetto alle allowlist
+
+Valori singolarmente validi possono formare combinazioni non valide. Servono:
+
+- controllo strutturale di JSON, schema, campi e tipi;
+- controllo referenziale di device e profili;
+- controllo degli intervalli numerici;
+- controllo cross-field tra compilatore, device e opzioni;
+- controllo dei vincoli utente;
+- controllo di grounding delle affermazioni;
+- controllo di eseguibilità della configurazione;
+- controllo di basis e connettività sul risultato.
+
+È inoltre utile separare il parsing dell'intento dalla decisione. Se obiettivo
+e vincoli sono anche campi espliciti della UI, è più facile capire se un
+fallimento appartiene alla comprensione linguistica o alla scelta.
+
+---
+
+## Grounding delle spiegazioni
+
+La prosa libera è difficile da validare. Sono preferibili coppie
+claim/evidence:
+
+    {
+      "claim": "Il dispositivo ha capacità sufficiente.",
+      "evidence": [
+        {
+          "field": "circuit.num_qubits",
+          "value": 20
+        },
+        {
+          "field": "devices.ibm_falcon_127.num_qubits",
+          "value": 127
+        }
+      ]
+    }
+
+Il backend può verificare che:
+
+- i campi citati esistano;
+- i valori coincidano con il DecisionContext;
+- l'evidenza riguardi il device selezionato;
+- non vengano citate metriche assenti;
+- expected_fidelity non venga presentata come misura hardware;
+- la spiegazione riguardi le opzioni realmente selezionate.
+
+Questo non dimostra che tutta la spiegazione sia perfetta, ma rende
+misurabili molte allucinazioni.
+
+---
+
+## Non correggere silenziosamente
+
+Per misurare le capacità dell'LLM bisogna conservare:
+
+- prompt e DecisionContext;
+- risposta originale;
+- risultato del parsing;
+- violazioni trovate;
+- eventuale feedback di correzione;
+- risposta dopo il retry;
+- decisione effettivamente eseguita;
+- risultato della compilazione.
+
+Correggere silenziosamente, per esempio convertendo "three" in 3, farebbe
+apparire il modello più capace.
+
+È possibile usare un retry controllato:
+
+    primo tentativo non valido
+            ↓
+    registrazione del fallimento first-pass
+            ↓
+    feedback strutturato con gli errori
+            ↓
+    secondo tentativo dell'LLM
+
+Si misurano così:
+
+    first_pass_validity = rispetto immediato del contratto
+    repair_success      = capacità di correggersi dopo feedback
+
+Stati utili:
+
+    valid_first_pass
+    valid_after_repair
+    invalid_json
+    invalid_schema
+    invalid_reference
+    constraint_violation
+    unsupported_explanation
+    compiler_configuration_error
+    compilation_error
+    compiled_but_not_target_valid
+    success
+
+---
+
+## Performance e criterio di successo
+
+Il criterio principale può essere:
+
+    La risposta dell'LLM è sintatticamente valida, rispetta i vincoli,
+    è giustificata con informazioni disponibili e, se richiesto,
+    produce una compilazione corretta per il Target selezionato.
+
+Non è necessario imporre:
+
+    La configurazione scelta deve essere la migliore possibile.
+
+Depth, gate count, expected fidelity, accordo con la label offline, accordo
+con MQT Predictor e regret possono comunque essere salvati come misure
+descrittive del comportamento.
+
+---
+
+## Scheletro logico suggerito
+
+Per separare il prototipo dagli esperimenti MQT già presenti:
+
+    prototype/
+    ├── src/quantum_assistant/
+    │   ├── main.py
+    │   ├── config.py
+    │   ├── ui/
+    │   ├── api/
+    │   ├── domain/
+    │   ├── ingestion/
+    │   │   ├── qasm_parser.py
+    │   │   └── circuit_validator.py
+    │   ├── analysis/
+    │   │   ├── feature_extractor.py
+    │   │   └── intent_parser.py
+    │   ├── hardware/
+    │   │   ├── catalog.py
+    │   │   └── compatibility.py
+    │   ├── decision/
+    │   │   ├── context_builder.py
+    │   │   ├── llm_client.py
+    │   │   ├── response_validator.py
+    │   │   └── mqt_baseline.py
+    │   ├── compilation/
+    │   │   ├── qiskit_adapter.py
+    │   │   ├── mqt_adapter.py
+    │   │   └── result_validator.py
+    │   ├── evaluation/
+    │   └── storage/
+    ├── schemas/
+    │   ├── recommendation_request.schema.json
+    │   ├── decision_context.schema.json
+    │   ├── llm_decision.schema.json
+    │   └── compilation_result.schema.json
+    └── tests/
+        ├── unit/
+        ├── integration/
+        └── fixtures/circuits/
+
+---
+
+## Riutilizzo del dataset LLM esistente
+
+Il dataset end-to-end già prodotto contiene gran parte del DecisionContext:
+
+- QASM sorgente;
+- feature del circuito;
+- figure of merit;
+- catalogo hardware;
+- ranking del device selector;
+- ground truth offline quando disponibile;
+- trace della policy RL;
+- circuito compilato;
+- score e validazione finale.
+
+Conviene derivare i contratti del prototipo dallo schema esistente. Se i
+record vengono usati come esempi few-shot o tramite retrieval, bisogna evitare
+data leakage: il circuito valutato e circuiti quasi duplicati o della stessa
+famiglia non devono apparire come esempi contenenti la risposta corretta.
+
+---
+
+## Sintesi operativa finale
+
+1. La proposta iniziale è valida come esperienza utente.
+2. La UI non deve orchestrare direttamente parser, LLM e compilatore.
+3. Parsing, feature extraction e compatibilità restano deterministici.
+4. L'LLM sceglie soltanto tra alternative esplicitamente ammesse.
+5. La risposta deve essere JSON strutturato e validabile.
+6. I vincoli usati per mascherare l'input vanno ricontrollati nell'output.
+7. La stessa policy deve generare la maschera e validare la decisione.
+8. Servono anche controlli cross-field e di grounding.
+9. Validità della decisione, validità della compilazione e qualità della
+   scelta sono concetti distinti.
+10. Non è richiesto che l'LLM raggiunga MQT Predictor in performance.
+11. Performance e accordo con MQT possono essere misure descrittive.
+12. Risposta originale ed errori devono essere conservati.
+13. Le correzioni non devono alterare la misura first-pass.
+14. Un retry controllato misura anche la capacità di repair.
+15. Dopo la conferma va compilata la decisione mostrata e versionata.
+16. Il risultato include circuito, configurazione, validazione, metriche,
+    warning e provenienza.
+17. MQT Predictor può restare una modalità separata e una baseline.
+18. Il dataset LLM esistente è una base naturale, ma va usato senza leakage.
 
 ---
