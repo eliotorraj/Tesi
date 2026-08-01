@@ -2689,7 +2689,7 @@ python scripts/05_train_rl_model.py \
   --device quantinuum_h2_56 \
   --metric expected_fidelity \
   --timesteps 2720 \
-  --resume-from artifacts/checkpoints/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_interrupted_2717_steps.zip
+  --resume-from artifacts/checkpoints/rl/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_interrupted_2717_steps.zip
 ```
 
 Errore osservato:
@@ -2718,7 +2718,7 @@ python scripts/05_train_rl_model.py \
   --device quantinuum_h2_56 \
   --metric expected_fidelity \
   --timesteps 4096 \
-  --resume-from artifacts/checkpoints/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_2048_steps.zip
+  --resume-from artifacts/checkpoints/rl/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_2048_steps.zip
 ```
 
 Motivo per puntare a 4096 step:
@@ -3071,7 +3071,7 @@ tmp/mqt_dataset_export/device_selector_dataset_expected_fidelity.json
 Artefatti ML/RL rilevanti:
 
 ```text
-artifacts/checkpoints/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_2048_steps.zip
+artifacts/checkpoints/rl/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_2048_steps.zip
 .venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/trained_model/trained_clf_expected_fidelity.joblib
 .venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/training_data_aggregated/training_data_expected_fidelity.npy
 .venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/training_data_aggregated/names_list_expected_fidelity.npy
@@ -3684,7 +3684,7 @@ artifacts/training_logs/model_expected_fidelity_rigetti_ankaa_84/...
 Il commit effettuato includeva invece solo:
 
 ```text
-artifacts/checkpoints/ibm_falcon_127/model_expected_fidelity_ibm_falcon_127_2048_steps.zip
+artifacts/checkpoints/rl/ibm_falcon_127/model_expected_fidelity_ibm_falcon_127_2048_steps.zip
 artifacts/training_logs/model_expected_fidelity_ibm_falcon_127/PPO_1/events...
 ```
 
