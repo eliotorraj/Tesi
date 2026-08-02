@@ -1,83 +1,10 @@
 
---- start 2026-07-31T11:17:40.600894+00:00 ---
+--- start 2026-08-01T08:28:10.545927+00:00 ---
 
---- start 2026-07-31T11:22:03.241611+00:00 ---
-
---- start 2026-07-31T11:22:05.316402+00:00 ---
-Exception in thread Thread-1 (send_outgoing):
-Traceback (most recent call last):
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
-    self.run()
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/base.py", line 414, in send_outgoing
-    outgoing[0].send((outgoing[1], outgoing[2]))
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 206, in send
-    self._send_bytes(_ForkingPickler.dumps(obj))
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 420, in _send_bytes
-    self._send(header)
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 384, in _send
-    n = write(self._handle, buf)
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: 'NoneType' object cannot be interpreted as an integer
-
---- start 2026-07-31T13:35:48.223922+00:00 ---
-15:43:06.804 - ERROR    | base: Traceback (most recent call last):
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/base.py", line 465, in run
-    self.handle_message(msg, direction, conn, payload)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/detached.py", line 174, in handle_message
-    self.handle_error(payload)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/detached.py", line 396, in handle_error
-    raise RuntimeError(error_payload)
-RuntimeError: Traceback (most recent call last):
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 462, in _try_step_next_ready_task
-    future = task.step(self._get_desired_result(task))
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/task.py", line 115, in step
-    to_return = self.coro.send(send_val)
-                ^^^^^^^^^^^^^^^^^^^^^^^^
-StopIteration: Circuit(2)[U3Gate@(0,) ... U3Gate@(1,)]
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 255, in _loop
-    self._try_step_next_ready_task()
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 467, in _try_step_next_ready_task
-    self._process_task_completion(task, e.value)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 527, in _process_task_completion
-    self._tasks.pop(task.return_address)
-KeyError: RuntimeAddress(worker_id=0, mailbox_index=789, mailbox_slot=2)
-
-
-
---- start 2026-07-31T13:54:16.611318+00:00 ---
-15:57:16.674 - WARNING  | base: Connection reset while sending message.
-
---- start 2026-07-31T15:18:23.598444+00:00 ---
-17:19:47.689 - WARNING  | base: Connection reset while sending message.
-17:25:14.290 - WARNING  | base: Connection reset while sending message.
-17:25:14.292 - ERROR    | base: Traceback (most recent call last):
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/base.py", line 453, in run
-    msg, payload = conn.recv()
-                   ^^^^^^^^^^^
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 250, in recv
-    buf = self._recv_bytes()
-          ^^^^^^^^^^^^^^^^^^
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 430, in _recv_bytes
-    buf = self._recv(4)
-          ^^^^^^^^^^^^^
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 395, in _recv
-    chunk = read(handle, remaining)
-            ^^^^^^^^^^^^^^^^^^^^^^^
-OSError: [Errno 9] Bad file descriptor
-
-
---- start 2026-07-31T16:37:06.947317+00:00 ---
-18:37:29.899 - WARNING  | base: Connection reset while sending message.
-18:37:48.147 - WARNING  | base: Connection reset while sending message.
-18:37:53.206 - WARNING  | base: Connection reset while sending message.
-18:37:53.208 - ERROR    | base: Traceback (most recent call last):
+--- start 2026-08-01T08:29:08.117255+00:00 ---
+10:48:09.881 - WARNING  | base: Connection reset while sending message.
+10:50:35.708 - WARNING  | base: Connection reset while sending message.
+10:50:35.712 - ERROR    | base: Traceback (most recent call last):
   File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/base.py", line 453, in run
     msg, payload = conn.recv()
                    ^^^^^^^^^^^
@@ -87,3 +14,51 @@ OSError: [Errno 9] Bad file descriptor
     raise OSError("handle is closed")
 OSError: handle is closed
 
+
+--- start 2026-08-01T18:25:11.753067+00:00 ---
+
+--- start 2026-08-01T18:30:58.171345+00:00 ---
+
+--- start 2026-08-01T19:07:20.308911+00:00 ---
+
+--- start 2026-08-01T19:31:17.468014+00:00 ---
+
+--- start 2026-08-01T19:31:19.504218+00:00 ---
+Exception in thread Thread-1 (send_outgoing):
+Traceback (most recent call last):
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/base.py", line 414, in send_outgoing
+    outgoing[0].send((outgoing[1], outgoing[2]))
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 427, in _send_bytes
+    self._send(header + buf)
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 384, in _send
+    n = write(self._handle, buf)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 9] Bad file descriptor
+
+--- start 2026-08-02T13:16:04.108954+00:00 ---
+
+--- start 2026-08-02T13:18:03.505513+00:00 ---
+15:39:14.079 - WARNING  | base: Connection reset while sending message.
+16:22:37.628 - WARNING  | base: Connection reset while sending message.
+Exception in thread Thread-1 (send_outgoing):
+Traceback (most recent call last):
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/base.py", line 414, in send_outgoing
+    outgoing[0].send((outgoing[1], outgoing[2]))
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 427, in _send_bytes
+    self._send(header + buf)
+  File "/home/elioe/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/connection.py", line 384, in _send
+    n = write(self._handle, buf)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 9] Bad file descriptor
