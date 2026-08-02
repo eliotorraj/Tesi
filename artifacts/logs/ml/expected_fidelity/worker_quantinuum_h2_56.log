@@ -1,131 +1,39 @@
 
---- worker start 2026-07-31T11:18:43.920647+00:00 pid=22238 device=quantinuum_h2_56 ---
+--- robust worker start 2026-08-01T18:31:33.631281+00:00 pid=14354 device=quantinuum_h2_56 ---
 mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BasisTranslator
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=QiskitO3
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=RemoveDiagonalGatesBeforeMeasure
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=Opt2qBlocks
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=Opt2qBlocks
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=OptimizeCliffords
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=QiskitO3
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=RemoveDiagonalGatesBeforeMeasure
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=RemoveRedundancies
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=CliffordSimp
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=CliffordSimp
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BQSKitO2
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=FullPeepholeOptimiseCX
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BasisTranslator
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=RemoveRedundancies
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=CommutativeInverseCancellation
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=Optimize1qGatesDecomposition
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=FullPeepholeOptimiseCX
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=OptimizeCliffords
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BasisTranslator
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=Opt2qBlocks
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=CommutativeCancellation
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=InverseCancellation
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BQSKitSynthesis
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BQSKitMapping
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=terminate
 
---- worker start 2026-07-31T11:22:20.978012+00:00 pid=25409 device=quantinuum_h2_56 ---
+--- robust worker start 2026-08-02T13:17:22.935896+00:00 pid=100194 device=quantinuum_h2_56 ---
 mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T12:09:20.147318+00:00 pid=955499 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T12:13:22.096463+00:00 pid=1068869 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T12:23:02.906014+00:00 pid=1292518 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T12:25:26.339090+00:00 pid=1361269 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T12:30:05.704889+00:00 pid=1501391 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T12:32:32.311058+00:00 pid=1581208 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T12:36:37.800402+00:00 pid=1582144 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T12:40:43.085793+00:00 pid=1583062 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T12:44:47.964470+00:00 pid=1583993 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T12:48:52.806620+00:00 pid=1584915 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T12:52:57.779578+00:00 pid=1585834 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T12:57:03.006662+00:00 pid=1586755 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:01:08.274851+00:00 pid=1587676 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:05:13.276931+00:00 pid=1588610 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:09:18.171166+00:00 pid=1589511 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:13:23.337904+00:00 pid=1590432 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:17:28.643345+00:00 pid=1591357 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:21:33.833539+00:00 pid=1592412 device=quantinuum_h2_56 ---
-
---- worker start 2026-07-31T13:36:46.557601+00:00 pid=1603217 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T13:38:44.085425+00:00 pid=1624679 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T13:41:17.450677+00:00 pid=1655605 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T13:42:18.294413+00:00 pid=1665062 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T13:55:18.233934+00:00 pid=11952 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T13:56:19.179209+00:00 pid=17632 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-/home/elio/Tesi/.venv/lib/python3.12/site-packages/pytket/extensions/qiskit/qiskit_convert.py:1124: UserWarning: The pytket Circuit contains implicit qubit permutations which aren't handled by default. Consider using the replace_implicit_swaps flag in tk_to_qiskit or replacing them using Circuit.replace_implicit_swaps().
-  warnings.warn(  # noqa: B028
-
---- worker start 2026-07-31T13:58:08.335332+00:00 pid=47000 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T13:59:09.554939+00:00 pid=65771 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T14:00:42.996159+00:00 pid=77975 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T14:01:49.753521+00:00 pid=90397 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T14:03:25.485430+00:00 pid=104651 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T14:04:30.334550+00:00 pid=116738 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- worker start 2026-07-31T14:06:06.176776+00:00 pid=117214 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-
---- robust worker start 2026-07-31T16:44:57.003172+00:00 pid=223478 device=quantinuum_h2_56 ---
-mqt-predictor - INFO - Init env: expected_fidelity
-job=random_indep_qiskit_4|quantinuum_h2_56 fallback=QiskitO1
-job=pricingcall_indep_tket_5|quantinuum_h2_56 fallback=QiskitO1
-job=pricingcall_indep_qiskit_7|quantinuum_h2_56 fallback=QiskitO1
-job=pricingput_indep_qiskit_7|quantinuum_h2_56 fallback=QiskitO1
-job=pricingput_indep_tket_7|quantinuum_h2_56 fallback=QiskitO1
-job=random_indep_tket_7|quantinuum_h2_56 fallback=QiskitO1
-job=pricingput_indep_qiskit_9|quantinuum_h2_56 fallback=QiskitO1
-job=su2random_indep_qiskit_30|quantinuum_h2_56 fallback=QiskitO1
-job=twolocalrandom_indep_tket_30|quantinuum_h2_56 fallback=QiskitO1
-job=realamprandom_indep_tket_40|quantinuum_h2_56 fallback=QiskitO1
-job=su2random_indep_qiskit_40|quantinuum_h2_56 fallback=QiskitO1
-job=twolocalrandom_indep_qiskit_40|quantinuum_h2_56 fallback=QiskitO1
-job=twolocalrandom_indep_tket_40|quantinuum_h2_56 fallback=QiskitO1
-job=ae_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
-job=qftentangled_indep_qiskit_50|quantinuum_h2_56 fallback=QiskitO1
-job=qftentangled_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
-job=qpeexact_indep_qiskit_50|quantinuum_h2_56 fallback=QiskitO1
-job=qpeexact_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
-job=realamprandom_indep_qiskit_50|quantinuum_h2_56 fallback=QiskitO1
-job=realamprandom_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
-job=su2random_indep_qiskit_50|quantinuum_h2_56 fallback=QiskitO1
-job=su2random_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
-job=twolocalrandom_indep_qiskit_50|quantinuum_h2_56 fallback=QiskitO1
-job=twolocalrandom_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
-job=wstate_indep_qiskit_50|quantinuum_h2_56 fallback=QiskitO1
-job=wstate_indep_tket_50|quantinuum_h2_56 fallback=QiskitO1
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=OptimizeCliffords
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BasisTranslator
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=InverseCancellation
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=VF2Layout
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=Opt2qBlocks
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BasisTranslator
+job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=terminate

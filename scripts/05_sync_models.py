@@ -58,7 +58,7 @@ def main() -> int:
     package_rl = get_rl_model_dir()
     package_ml = get_ml_training_data() / "trained_model"
     store_rl = args.directory / "rl"
-    store_ml = args.directory / "device_selector"
+    store_ml = args.directory / "ml"
 
     if args.action == "capture":
         copied = copy_group(package_rl, store_rl, ("*.zip",), args.overwrite)

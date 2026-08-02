@@ -1,46 +1,18 @@
 
---- start 2026-07-31T11:17:40.600882+00:00 ---
+--- start 2026-08-01T08:28:10.545914+00:00 ---
 
---- start 2026-07-31T11:22:03.241600+00:00 ---
+--- start 2026-08-01T08:29:08.117244+00:00 ---
 
---- start 2026-07-31T11:22:05.316390+00:00 ---
+--- start 2026-08-01T18:25:11.753048+00:00 ---
 
---- start 2026-07-31T13:35:48.223909+00:00 ---
-15:43:05.773 - ERROR    | [wid=1]: Traceback (most recent call last):
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 462, in _try_step_next_ready_task
-    future = task.step(self._get_desired_result(task))
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/task.py", line 115, in step
-    to_return = self.coro.send(send_val)
-                ^^^^^^^^^^^^^^^^^^^^^^^^
-StopIteration: Circuit(2)[U3Gate@(0,) ... U3Gate@(1,)]
+--- start 2026-08-01T18:30:58.171335+00:00 ---
 
-During handling of the above exception, another exception occurred:
+--- start 2026-08-01T19:07:20.308896+00:00 ---
 
-Traceback (most recent call last):
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 255, in _loop
-    self._try_step_next_ready_task()
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 467, in _try_step_next_ready_task
-    self._process_task_completion(task, e.value)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 527, in _process_task_completion
-    self._tasks.pop(task.return_address)
-KeyError: RuntimeAddress(worker_id=0, mailbox_index=789, mailbox_slot=2)
+--- start 2026-08-01T19:31:17.468003+00:00 ---
 
+--- start 2026-08-01T19:31:19.504204+00:00 ---
 
---- start 2026-07-31T13:54:16.611305+00:00 ---
-Exception in thread Thread-2 (recv_incoming):
-Traceback (most recent call last):
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
-    self.run()
-  File "/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 311, in recv_incoming
-    self._handle_cancel(addr)
-  File "/home/elio/Tesi/.venv/lib/python3.12/site-packages/bqskit/runtime/worker.py", line 374, in _handle_cancel
-    for key, task in self._tasks.items():
-                     ^^^^^^^^^^^^^^^^^^^
-RuntimeError: dictionary changed size during iteration
+--- start 2026-08-02T13:16:04.108935+00:00 ---
 
---- start 2026-07-31T15:18:23.598431+00:00 ---
-
---- start 2026-07-31T16:37:06.947304+00:00 ---
+--- start 2026-08-02T13:18:03.505499+00:00 ---

@@ -14,3 +14,8 @@
 - Do not assume that `qcompile` works immediately after installation. MQT Predictor 2.x requires trained RL models and a trained supervised device selector.
 - A smoke-trained model only validates the pipeline; it is not evidence of compilation quality.
 - Preserve trained model artifacts before recreating `.venv`, because MQT Predictor 2.3.0 stores them inside the installed package directory.
+
+## Terminology
+
+- When i want to talk about the set for RAG/fine-tuning of the LLM i will talk about "Dataset"
+- Instead when i want to talk about the set of couples (circuit,device) for the ML model training, then i will say "Training set"

@@ -7,9 +7,9 @@ independent, durable checkpoint.
 
 Canonical outputs:
 - readable dataset: ``datasets/device_selector_<metric>.json``;
-- final model: ``artifacts/models/device_selector/``;
-- reusable compiled-QASM cache: ``artifacts/cache/device_selector/``;
-- runtime logs: ``artifacts/logs/device_selector/``.
+- final model: ``artifacts/models/ml/``;
+- reusable compiled-QASM cache: ``artifacts/cache/ml/``;
+- runtime logs: ``artifacts/logs/ml/``.
 """
 
 from __future__ import annotations
@@ -48,12 +48,14 @@ from joblib import dump as joblib_dump
 from joblib import load as joblib_load
 from mqt.bench.targets import get_device
 from mqt.predictor.ml import Predictor
+from mqt.predictor.ml.helper import create_feature_vector
 from mqt.predictor.ml.helper import get_openqasm_gates
 from mqt.predictor.ml.helper import get_path_trained_model as get_ml_model_path
 from mqt.predictor.ml.helper import get_path_training_circuits as get_ml_training_circuits
 from mqt.predictor.ml.helper import get_path_training_circuits_compiled as get_ml_compiled_circuits
 from mqt.predictor.ml.helper import get_path_training_data as get_ml_training_data
 from mqt.predictor.rl.helper import get_path_trained_model as get_rl_model_dir
+from mqt.predictor.reward import crit_depth, expected_fidelity
 from qiskit import QuantumCircuit
 from qiskit import transpile as qiskit_transpile
 from qiskit.qasm2 import dump as qasm_dump
@@ -63,13 +65,15 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_DATASETS_DIR = PROJECT_ROOT / "datasets"
-CANONICAL_MODELS_DIR = PROJECT_ROOT / "artifacts" / "models" / "device_selector"
-DEFAULT_CACHE_ROOT = PROJECT_ROOT / "artifacts" / "cache" / "device_selector"
-DEFAULT_LOG_ROOT = PROJECT_ROOT / "artifacts" / "logs" / "device_selector"
+CANONICAL_MODELS_DIR = PROJECT_ROOT / "artifacts" / "models" / "ml"
+DEFAULT_CACHE_ROOT = PROJECT_ROOT / "artifacts" / "cache" / "ml"
+DEFAULT_LOG_ROOT = PROJECT_ROOT / "artifacts" / "logs" / "ml"
 DEFAULT_WORKERS = 2
 ESTIMATED_RL_WORKER_GIB = 2.2
 WORKER_WATCHDOG_GRACE_SECONDS = 30
-SUCCESS_STATUSES = {"success", "success_fallback", "success_recovered_after_timeout"}
+WORST_SCORE = -1.0
+RL_SUCCESS_STATUSES = {"success", "success_recovered_after_timeout"}
+SUCCESS_STATUSES = RL_SUCCESS_STATUSES | {"success_fallback"}
 
 
 @dataclass(frozen=True)
@@ -100,6 +104,7 @@ class WorkerState:
     current_started_at: float | None = None
     current_attempt: int | None = None
     current_phase: str | None = None
+    current_output_version: tuple[int, int] | None = None
 
 
 def utc_now() -> str:
@@ -163,6 +168,20 @@ def is_valid_qasm(path: Path) -> bool:
     except Exception:
         return False
     return True
+
+
+def file_version(path: Path) -> tuple[int, int] | None:
+    """Return a cheap version marker used to reject stale cached outputs."""
+    try:
+        stat = path.stat()
+    except FileNotFoundError:
+        return None
+    return stat.st_mtime_ns, stat.st_size
+
+
+def output_changed(path: Path, previous_version: tuple[int, int] | None) -> bool:
+    """Return whether a worker produced or replaced an output in this attempt."""
+    return file_version(path) != previous_version and is_valid_qasm(path)
 
 
 def ensure_training_circuits(path: Path) -> None:
@@ -661,6 +680,7 @@ def _compile_fallback_process(
     finally:
         result_connection.close()
 
+
 def _run_isolated_job(
     job: CompilationJob,
     device: Any,
@@ -698,6 +718,7 @@ def _run_isolated_job(
             name=f"mqt-{mode}-{job.device_name}",
         )
     started = time.monotonic()
+    previous_output_version = file_version(job.output)
     process.start()
     send_connection.close()
     result: dict[str, Any] | None = None
@@ -715,7 +736,7 @@ def _run_isolated_job(
 
         if result is None and process.is_alive() and time.monotonic() >= deadline:
             _terminate_worker_process(process)
-            if is_valid_qasm(job.output):
+            if output_changed(job.output, previous_output_version):
                 result = {
                     "status": "success_recovered_after_timeout",
                     "mode": mode,
@@ -734,7 +755,7 @@ def _run_isolated_job(
                     result = receive_connection.recv()
                 except EOFError:
                     result = None
-            if result is None and is_valid_qasm(job.output):
+            if result is None and output_changed(job.output, previous_output_version):
                 result = {
                     "status": "success_recovered_after_timeout",
                     "mode": mode,
@@ -944,6 +965,33 @@ def group_pending_jobs(
     return grouped
 
 
+def is_strict_rl_success(record: dict[str, Any] | None) -> bool:
+    """Return whether a manifest record proves a usable RL compilation."""
+    if record is None:
+        return False
+    status = record.get("status")
+    mode = record.get("mode")
+    if status == "success":
+        return mode in (None, "rl") and "fallback_reason" not in record
+    if status == "success_recovered_after_timeout":
+        return mode == "rl" or record.get("phase") == "rl"
+    return False
+
+
+def strict_rl_success_keys(
+    jobs: list[CompilationJob],
+    manifest_path: Path,
+) -> set[str]:
+    """Return jobs backed by both RL provenance and a valid compiled QASM."""
+    latest = latest_manifest_records(manifest_path)
+    return {
+        job.key
+        for job in jobs
+        if is_strict_rl_success(latest.get(job.key)) and is_valid_qasm(job.output)
+    }
+
+
+
 def compile_resumably(
     jobs: list[CompilationJob],
     *,
@@ -960,15 +1008,12 @@ def compile_resumably(
     progress_every: int,
 ) -> None:
     """Compile with persistent device workers, retries, and a parent watchdog."""
-    attempts, _statuses = load_manifest(manifest_path)
-    valid_job_keys = {job.key for job in jobs if is_valid_qasm(job.output)}
-    initial_valid = len(valid_job_keys)
-    print(f"Checkpoint validi: {initial_valid}/{len(jobs)}")
     if fallback_enabled:
-        print(
-            f"Fallback Qiskit O{fallback_optimization_level} attivo "
-            f"(timeout {fallback_timeout}s); i successi saranno marcati nel manifest."
-        )
+        raise ValueError("Il fallback non e ammesso nella generazione del Training set.")
+    attempts, _statuses = load_manifest(manifest_path)
+    valid_job_keys = strict_rl_success_keys(jobs, manifest_path)
+    initial_valid = len(valid_job_keys)
+    print(f"Checkpoint RL validi: {initial_valid}/{len(jobs)}")
     warn_about_memory(num_workers)
 
     result_context = get_context("spawn")
@@ -976,10 +1021,29 @@ def compile_resumably(
     runtime = BQSKitRuntime(num_workers=num_workers, log_dir=log_dir)
     try:
         runtime.start()
-    except Exception:
+    except Exception as exc:
         runtime.stop()
         result_queue.close()
-        raise
+        error = f"{type(exc).__name__}: {exc}"
+        for job in jobs:
+            if job.key in valid_job_keys:
+                continue
+            attempt = max(max_attempts, attempts.get(job.key, 0) + 1)
+            append_manifest(
+                manifest_path,
+                {
+                    "timestamp": utc_now(),
+                    "key": job.key,
+                    "circuit": job.circuit_name,
+                    "device": job.device_name,
+                    "attempt": attempt,
+                    "status": "rl_runtime_unavailable",
+                    "mode": "rl",
+                    "error": error,
+                },
+            )
+        print(f"Runtime RL non disponibile: {error}. Assegno lo score minimo e continuo.")
+        return
     print(
         f"Runtime BQSKit condiviso avviato: {num_workers} worker; "
         f"porta client {runtime.server_port}."
@@ -1052,6 +1116,33 @@ def compile_resumably(
         append_manifest(manifest_path, record)
         processed_results += 1
 
+    def record_unavailable_device(device_name: str, status: str, error: str) -> None:
+        """Mark every pending job for an unloadable RL model as failed."""
+        nonlocal processed_results
+        for job in jobs:
+            if job.device_name != device_name or job.key in valid_job_keys:
+                continue
+            attempt = max(max_attempts, attempts.get(job.key, 0) + 1)
+            attempts[job.key] = attempt
+            append_manifest(
+                manifest_path,
+                {
+                    "timestamp": utc_now(),
+                    "key": job.key,
+                    "circuit": job.circuit_name,
+                    "device": job.device_name,
+                    "attempt": attempt,
+                    "status": status,
+                    "mode": "rl",
+                    "error": error,
+                },
+            )
+            processed_results += 1
+        print(
+            f"Modello RL {device_name} non disponibile: {error}. "
+            f"Tutte le sue coppie riceveranno lo score {WORST_SCORE}."
+        )
+
     try:
         refresh_device_queue()
         launch_available_workers()
@@ -1076,6 +1167,7 @@ def compile_resumably(
                         state.current_started_at = time.monotonic()
                         state.current_attempt = attempt
                         state.current_phase = "rl"
+                        state.current_output_version = file_version(job.output)
                         append_manifest(
                             manifest_path,
                             {
@@ -1116,11 +1208,9 @@ def compile_resumably(
                             ):
                                 if field in message:
                                     record[field] = message[field]
-                            if status in SUCCESS_STATUSES:
+                            if is_strict_rl_success(record):
                                 valid_job_keys.add(job.key)
                                 successful_results = len(valid_job_keys)
-                                if status == "success_fallback":
-                                    print(f"Checkpoint fallback valido: {job.key}")
                             else:
                                 record.setdefault("error", "errore sconosciuto")
                                 record.setdefault("traceback", "")
@@ -1143,6 +1233,7 @@ def compile_resumably(
                         state.current_started_at = None
                         state.current_attempt = None
                         state.current_phase = None
+                        state.current_output_version = None
 
             now = time.monotonic()
             finished_devices: list[str] = []
@@ -1160,7 +1251,10 @@ def compile_resumably(
                         f"{job_key}; riavvio worker."
                     )
                     _terminate_worker_process(state.process)
-                    if is_valid_qasm(state.current_job.output):
+                    if (
+                        state.current_phase == "rl"
+                        and output_changed(state.current_job.output, state.current_output_version)
+                    ):
                         valid_job_keys.add(state.current_job.key)
                         successful_results = len(valid_job_keys)
                         append_manifest(
@@ -1185,17 +1279,26 @@ def compile_resumably(
                     continue
 
                 if not state.ready and now - state.launched_at > startup_timeout:
-                    print(f"Timeout caricamento modello: {device_name}; riavvio worker.")
+                    print(f"Timeout caricamento modello: {device_name}.")
                     _terminate_worker_process(state.process)
                     if state.current_job is not None:
                         record_failure(state, "worker_startup_timeout", "worker non pronto")
+                    else:
+                        record_unavailable_device(
+                            device_name,
+                            "rl_model_startup_timeout",
+                            f"modello non caricato entro {startup_timeout}s",
+                        )
                     finished_devices.append(device_name)
                     continue
 
                 if not state.process.is_alive():
                     state.process.join(timeout=1)
                     if state.current_job is not None:
-                        if is_valid_qasm(state.current_job.output):
+                        if (
+                            state.current_phase == "rl"
+                            and output_changed(state.current_job.output, state.current_output_version)
+                        ):
                             valid_job_keys.add(state.current_job.key)
                             successful_results = len(valid_job_keys)
                             append_manifest(
@@ -1216,6 +1319,12 @@ def compile_resumably(
                                 "worker_crash",
                                 f"worker terminato con exit code {state.process.exitcode}",
                             )
+                    elif not state.ready:
+                        record_unavailable_device(
+                            device_name,
+                            "rl_model_load_failed",
+                            f"worker terminato con exit code {state.process.exitcode}",
+                        )
                     finished_devices.append(device_name)
 
             for device_name in finished_devices:
@@ -1231,7 +1340,8 @@ def compile_resumably(
                 print(
                     "ATTENZIONE: il runtime BQSKit condiviso si è arrestato; "
                     "continuo senza interrompere il run. Le compilazioni RL "
-                    "falliranno rapidamente e saranno completate dal fallback Qiskit. "
+                    "falliranno rapidamente, riceveranno lo score minimo e il run "
+                    "proseguira con le altre coppie. "
                     f"Dettagli: {log_dir / 'bqskit_server.log'}."
                 )
                 runtime_failure_reported = True
@@ -1251,9 +1361,10 @@ def compile_resumably(
 def coverage_report(
     jobs: list[CompilationJob],
     source_paths: dict[str, Path],
+    successful_job_keys: set[str],
 ) -> tuple[list[Path], list[CompilationJob]]:
-    """Return fully covered source circuits and missing jobs."""
-    missing = [job for job in jobs if not is_valid_qasm(job.output)]
+    """Return circuits with complete RL coverage and failed RL jobs."""
+    missing = [job for job in jobs if job.key not in successful_job_keys]
     missing_keys = {(job.circuit_name, job.device_name) for job in missing}
     devices_by_circuit: dict[str, set[str]] = {}
     for job in jobs:
@@ -1278,6 +1389,73 @@ def atomic_numpy_save(path: Path, data: np.ndarray) -> None:
     os.replace(temp, path)
 
 
+def score_compiled_circuit(
+    circuit: QuantumCircuit,
+    device: Any,
+    metric: str,
+) -> float:
+    """Evaluate one successfully compiled RL circuit."""
+    if metric == "critical_depth":
+        return float(crit_depth(circuit))
+    if metric == "expected_fidelity":
+        return float(expected_fidelity(circuit, device))
+    raise ValueError(f"Figure of merit non supportata: {metric}")
+
+
+def choose_best_device(
+    device_names: list[str],
+    scores: list[float],
+) -> str | None:
+    """Choose the highest-scoring device, ignoring failed candidates."""
+    if len(device_names) != len(scores):
+        raise ValueError("Dispositivi e score hanno lunghezze diverse.")
+    valid_indices = [
+        index
+        for index, score in enumerate(scores)
+        if np.isfinite(score) and score > WORST_SCORE
+    ]
+    if not valid_indices:
+        return None
+    winner_index = max(valid_indices, key=scores.__getitem__)
+    return device_names[winner_index]
+
+
+def generate_training_sample(
+    source: Path,
+    compiled_dir: Path,
+    metric: str,
+    device_names: list[str],
+    successful_rl_keys: set[str],
+) -> tuple[tuple[list[Any], str] | None, str, list[float]]:
+    """Score every RL candidate and choose the best successful device."""
+    source_circuit = QuantumCircuit.from_qasm_file(source)
+    scores: list[float] = []
+
+    for device_name in device_names:
+        device = get_device(device_name)
+        key = f"{source.stem}|{device_name}"
+        score = WORST_SCORE
+        if source_circuit.num_qubits <= device.num_qubits and key in successful_rl_keys:
+            compiled_path = compiled_dir / f"{source.stem}_{metric}-{device_name}.qasm"
+            try:
+                compiled_circuit = QuantumCircuit.from_qasm_file(compiled_path)
+                score = score_compiled_circuit(compiled_circuit, device, metric)
+                if not np.isfinite(score) or score <= WORST_SCORE:
+                    score = WORST_SCORE
+            except Exception as exc:
+                print(
+                    f"Score fallito per {key}: {type(exc).__name__}: {exc}; "
+                    f"assegno {WORST_SCORE}."
+                )
+        scores.append(score)
+
+    target_label = choose_best_device(device_names, scores)
+    if target_label is None:
+        return None, source.stem, scores
+    training_sample = (create_feature_vector(source_circuit), target_label)
+    return training_sample, source.stem, scores
+
+
 def generate_training_arrays(
     predictor: Predictor,
     sources: list[Path],
@@ -1285,28 +1463,45 @@ def generate_training_arrays(
     output_dir: Path,
     metric: str,
     num_workers: int,
+    successful_rl_keys: set[str],
 ) -> None:
-    """Generate the three selector arrays from fully covered circuits only."""
+    """Score all RL candidates, select each winner, and save selector arrays."""
     if not sources:
-        raise SystemExit("Nessun circuito con copertura completa; training annullato.")
-    source_dir = sources[0].parent
+        raise SystemExit("Nessun circuito sorgente; training annullato.")
+    device_names = [device.description for device in predictor.devices]
     results = Parallel(n_jobs=num_workers, verbose=10)(
-        delayed(predictor._generate_training_sample)(
-            source.name,
-            source_dir,
+        delayed(generate_training_sample)(
+            source,
             compiled_dir,
+            metric,
+            device_names,
+            successful_rl_keys,
         )
-        for source in sources
+        for source in sorted(sources)
     )
     training_data = []
     names_list = []
     scores_list = []
+    all_failed = 0
     for training_sample, circuit_name, scores in results:
-        if all(score == -1 for score in scores):
+        if training_sample is None:
+            all_failed += 1
+            print(
+                f"Nessun RL valido per {circuit_name}: tutti gli score sono "
+                f"{WORST_SCORE}; circuito escluso dal fit."
+            )
             continue
         training_data.append(training_sample)
         names_list.append(circuit_name)
         scores_list.append(scores)
+
+    if not training_data:
+        raise SystemExit("Tutte le compilazioni RL sono fallite; nessuna label addestrabile.")
+    failed_scores = sum(score == WORST_SCORE for row in scores_list for score in row)
+    print(
+        f"Score completati: {len(training_data)} circuiti addestrabili; "
+        f"{failed_scores} candidati con score minimo; {all_failed} circuiti senza vincitore."
+    )
 
     atomic_numpy_save(
         output_dir / f"training_data_{metric}.npy",
@@ -1318,7 +1513,7 @@ def generate_training_arrays(
     )
     atomic_numpy_save(
         output_dir / f"scores_list_{metric}.npy",
-        np.asarray(scores_list, dtype=object),
+        np.asarray(scores_list, dtype=np.float64),
     )
 
 
@@ -1336,7 +1531,7 @@ def load_generated_training_arrays(
 
 
 def latest_manifest_records(path: Path) -> dict[str, dict[str, Any]]:
-    """Return the latest checkpoint record for every circuit/device pair."""
+    """Return the latest terminal record for every circuit/device pair."""
     latest: dict[str, dict[str, Any]] = {}
     if not path.exists():
         return latest
@@ -1345,6 +1540,8 @@ def latest_manifest_records(path: Path) -> dict[str, dict[str, Any]]:
             try:
                 record = json.loads(line)
             except json.JSONDecodeError:
+                continue
+            if record.get("status") == "running":
                 continue
             key = record.get("key")
             if isinstance(key, str):
@@ -1403,42 +1600,49 @@ def export_dataset_json(
         features, label_value = sample
         label = str(label_value)
         label_counts[label] += 1
-        score_by_device: dict[str, float | None] = {}
+        feature_values = [float(value) for value in features]
+        source_num_qubits = int(feature_values[feature_names.index("num_qubits")])
+        score_by_device: dict[str, float] = {}
         compilations: dict[str, dict[str, Any]] = {}
 
         for device_name, raw_score in zip(device_names, score_values, strict=True):
             score = float(raw_score)
-            score_by_device[device_name] = None if score < 0 else score
+            score_by_device[device_name] = score
             compiled_path = compiled_dir / f"{name}_{metric}-{device_name}.qasm"
-            if not compiled_path.exists():
-                continue
             checkpoint = latest.get(f"{name}|{device_name}")
-            if checkpoint is None:
-                mode = "legacy"
-                status = "success_legacy"
-                passes: list[str] = []
-                fallback_reason = None
+            strict_rl = is_strict_rl_success(checkpoint) and is_valid_qasm(compiled_path)
+            if score > WORST_SCORE and not strict_rl:
+                raise SystemExit(
+                    f"Score non-RL rilevato per {name}|{device_name}. "
+                    "Rigenera gli array con --finalize-only prima di esportare il JSON."
+                )
+            device = get_device(device_name)
+            if source_num_qubits > device.num_qubits:
+                mode = "rl"
+                status = "incompatible_num_qubits"
+            elif checkpoint is None:
+                mode = "rl"
+                status = "missing"
             else:
                 status = str(checkpoint.get("status", "unknown"))
                 mode = str(checkpoint.get("mode") or ("rl" if status == "success" else "unknown"))
-                passes = [str(value) for value in checkpoint.get("passes", [])]
-                fallback_reason = checkpoint.get("fallback_reason")
+            passes = [str(value) for value in checkpoint.get("passes", [])] if checkpoint else []
+            error = checkpoint.get("error") if checkpoint else None
             provenance_counts[mode] += 1
             compilations[device_name] = {
                 "mode": mode,
                 "status": status,
-                "qasm": project_path(compiled_path),
+                "qasm": project_path(compiled_path) if strict_rl else None,
                 "passes": passes,
-                "fallback_reason": fallback_reason,
+                "error": error,
+                "used_for_score": strict_rl and score > WORST_SCORE,
             }
 
-        valid_scores = {device: value for device, value in score_by_device.items() if value is not None}
-        expected_label = max(valid_scores, key=valid_scores.get) if valid_scores else None
+        expected_label = choose_best_device(device_names, list(score_by_device.values()))
         if expected_label != label:
             raise SystemExit(
                 f"Label/score incoerenti per {name}: label={label}, argmax={expected_label}."
             )
-        feature_values = [float(value) for value in features]
         records.append(
             {
                 "index": index,
@@ -1452,7 +1656,8 @@ def export_dataset_json(
         )
 
     payload: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "worst_score": WORST_SCORE,
         "generated_at": utc_now(),
         "metric": metric,
         "source_corpus": "600 circuiti device-selection inclusi in mqt.predictor 2.3.0",
@@ -1599,19 +1804,19 @@ def parse_args() -> argparse.Namespace:
         "--fallback-timeout",
         type=int,
         default=60,
-        help="Timeout del fallback Qiskit usato quando RL fallisce o scade.",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--no-fallback",
         action="store_true",
-        help="Disabilita il fallback Qiskit e conserva solo compilazioni RL pure.",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--fallback-optimization-level",
         type=int,
         choices=(0, 1, 2, 3),
         default=2,
-        help="Livello Qiskit del fallback; 1 privilegia robustezza e velocità.",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--num-workers",
@@ -1638,7 +1843,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--allow-incomplete",
         action="store_true",
-        help="Allena solo sui circuiti con copertura completa, anche se sono meno di quelli sorgente.",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument("--dry-run", action="store_true", help="Mostra piano e copertura senza compilare o scrivere.")
     return parser.parse_args()
@@ -1688,16 +1893,12 @@ def main() -> int:
             missing_models.append(path)
     if missing_models:
         formatted = "\n".join(f"  - {path}" for path in missing_models)
-        raise SystemExit("Mancano i seguenti modelli RL:\n" + formatted)
+        print("Modelli RL mancanti; le relative coppie riceveranno lo score minimo:\n" + formatted)
 
     all_jobs, source_paths = build_jobs(source_dir, compiled_dir, device_names, args.metric)
     compile_jobs = select_compile_jobs(all_jobs, args.limit_circuits)
-    legacy_count = import_legacy_checkpoints(
-        compile_jobs,
-        get_ml_compiled_circuits(),
-        dry_run=args.dry_run,
-    )
-    valid_before = sum(is_valid_qasm(job.output) for job in compile_jobs)
+    strict_before = strict_rl_success_keys(compile_jobs, manifest_path)
+    valid_before = len(strict_before)
 
     per_device = Counter(job.device_name for job in all_jobs)
     print(f"Circuiti sorgente: {len(source_paths)}")
@@ -1705,15 +1906,15 @@ def main() -> int:
     print("Per device: " + ", ".join(f"{name}={per_device[name]}" for name in sorted(per_device)))
     if args.limit_circuits:
         print(f"Canary: {args.limit_circuits} circuiti, {len(compile_jobs)} compilazioni.")
-    print(f"Checkpoint già validi nella directory durevole: {valid_before}")
-    print(f"Checkpoint legacy recuperabili/recuperati dalla .venv: {legacy_count}")
+    print(f"Checkpoint RL già validi nella directory durevole: {valid_before}")
     print(f"Cache compilazioni: {cache_dir}")
     print(f"Log: {log_dir}")
     print(f"Dataset JSON: {dataset_json}")
 
     if args.dry_run:
-        _complete, missing = coverage_report(all_jobs, source_paths)
-        print(f"Copertura corrente: {len(all_jobs) - len(missing)}/{len(all_jobs)}")
+        strict_keys = strict_rl_success_keys(all_jobs, manifest_path)
+        _complete, missing = coverage_report(all_jobs, source_paths, strict_keys)
+        print(f"Copertura RL corrente: {len(all_jobs) - len(missing)}/{len(all_jobs)}")
         return 0
 
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -1753,23 +1954,21 @@ def main() -> int:
                 timeout=args.timeout,
                 startup_timeout=args.startup_timeout,
                 fallback_timeout=args.fallback_timeout,
-                fallback_enabled=not args.no_fallback,
+                fallback_enabled=False,
                 fallback_optimization_level=args.fallback_optimization_level,
                 max_attempts=args.max_attempts,
                 manifest_path=manifest_path,
                 log_dir=log_dir,
                 progress_every=1,
             )
-            failed_preflight = [
-                job for job in preflight_jobs if not is_valid_qasm(job.output)
-            ]
+            preflight_successes = strict_rl_success_keys(preflight_jobs, manifest_path)
+            failed_preflight = [job for job in preflight_jobs if job.key not in preflight_successes]
             if failed_preflight:
                 failed_names = ", ".join(job.device_name for job in failed_preflight)
                 print(
-                    "Run completo annullato: preflight fallito per "
-                    f"{failed_names}. Controlla manifest e log dei worker."
+                    "Preflight RL fallito per "
+                    f"{failed_names}: assegnero lo score minimo e continuero il run completo."
                 )
-                return 2
         compile_resumably(
             compile_jobs,
             metric=args.metric,
@@ -1777,7 +1976,7 @@ def main() -> int:
             timeout=args.timeout,
             startup_timeout=args.startup_timeout,
             fallback_timeout=args.fallback_timeout,
-            fallback_enabled=not args.no_fallback,
+            fallback_enabled=False,
             fallback_optimization_level=args.fallback_optimization_level,
             max_attempts=args.max_attempts,
             manifest_path=manifest_path,
@@ -1785,42 +1984,46 @@ def main() -> int:
             progress_every=args.progress_every,
         )
         if args.compile_only:
-            complete_sources, missing = coverage_report(all_jobs, source_paths)
-            selected_missing = [job for job in compile_jobs if not is_valid_qasm(job.output)]
+            successful_rl_keys = strict_rl_success_keys(all_jobs, manifest_path)
+            complete_sources, missing = coverage_report(
+                all_jobs,
+                source_paths,
+                successful_rl_keys,
+            )
             print(
                 f"Compile-only terminato: {len(all_jobs) - len(missing)}/{len(all_jobs)} "
-                f"compilazioni, {len(complete_sources)}/{len(source_paths)} circuiti completi."
+                f"compilazioni RL, {len(complete_sources)}/{len(source_paths)} circuiti completi. "
+                "Le coppie fallite riceveranno lo score minimo durante la finalizzazione."
             )
-            return 0 if not selected_missing else 2
+            return 0
 
-    complete_sources, missing = coverage_report(all_jobs, source_paths)
-    if missing and not args.allow_incomplete:
+    successful_rl_keys = strict_rl_success_keys(all_jobs, manifest_path)
+    complete_sources, missing = coverage_report(
+        all_jobs,
+        source_paths,
+        successful_rl_keys,
+    )
+    if missing:
         missing_counts = Counter(job.device_name for job in missing)
         print(
-            f"Training non avviato: mancano {len(missing)} compilazioni; "
-            f"circuiti completi {len(complete_sources)}/{len(source_paths)}."
+            f"Compilazioni RL fallite o mancanti: {len(missing)}; "
+            f"copertura completa per {len(complete_sources)}/{len(source_paths)} circuiti."
         )
-        print("Mancanti per device: " + ", ".join(f"{k}={v}" for k, v in sorted(missing_counts.items())))
         print(
-            "Rilancia aumentando --max-attempts; i checkpoint validi saranno saltati. "
-            "Usa --allow-incomplete solo se accetti di dichiarare un dataset più piccolo."
-        )
-        return 2
-
-    if missing:
-        print(
-            f"ATTENZIONE: training incompleto esplicito su {len(complete_sources)}/"
-            f"{len(source_paths)} circuiti con copertura completa."
+            "Score minimo per device: "
+            + ", ".join(f"{device}={count}" for device, count in sorted(missing_counts.items()))
+            + ". Il training prosegue."
         )
 
     predictor = Predictor(devices=devices, figure_of_merit=args.metric)
     generate_training_arrays(
         predictor,
-        complete_sources,
+        list(source_paths.values()),
         compiled_dir,
         staging_data_dir,
         args.metric,
         min(args.num_workers, 4),
+        successful_rl_keys,
     )
     train_selector_model(
         args.metric,

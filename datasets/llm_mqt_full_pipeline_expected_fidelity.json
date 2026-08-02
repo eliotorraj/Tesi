@@ -51,7 +51,7 @@
         "vqe_indep_qiskit_5"
       ]
     },
-    "source": "/home/elio/Tesi/datasets/device_selector_expected_fidelity.json",
+    "source": "/home/elioe/Tesi/datasets/device_selector_expected_fidelity.json",
     "source_sample_count": 600,
     "strict_eligible_count": 34
   },
@@ -115,7 +115,7 @@
     "interpretation": "Estimated product of instruction and readout fidelities from the Qiskit Target; it is not a measurement from quantum hardware.",
     "name": "expected_fidelity"
   },
-  "generated_at": "2026-08-01T09:36:45.668628+00:00",
+  "generated_at": "2026-08-02T09:03:58.106200+00:00",
   "hardware_catalog": {
     "ibm_falcon_127": {
       "allowed_compilation_actions": [
