@@ -9,11 +9,14 @@ from pathlib import Path
 from typing import Any
 
 # Keep the expensive BQSKit passes tractable. MQT also lowers
-# max_synthesis_size to 2 in this profile; configure_bqskit_runtime restores
-# that single limit because the bundled RL corpus contains 3-qubit gates.
+# max_synthesis_size to 2 in this profile. The runtime override below raises
+# it to 3 only for circuits that actually contain a three-qubit gate.
 os.environ.setdefault("GITHUB_ACTIONS", "true")
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mqt-predictor-matplotlib")
 
+from bqskit.ir.circuit import Circuit
+from bqskit.ir.gates.barrier import BarrierPlaceholder
+from bqskit.ir.gates.measure import MeasurementPlaceholder
 import mqt.predictor.rl.actions as predictor_actions
 from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
@@ -28,20 +31,32 @@ CANONICAL_MODEL_DIR = PROJECT_ROOT / "artifacts" / "models" / "rl"
 _ORIGINAL_BQSKIT_COMPILE = predictor_actions.bqskit_compile
 
 
-def configure_bqskit_runtime(max_synthesis_size: int) -> None:
-    """Override only MQT's BQSKit synthesis limit at runtime.
+def _contains_three_qubit_gate(circuit: Circuit) -> bool:
+    """Return whether ``circuit`` contains a synthesizable three-qubit gate."""
+    ignored_gate_types = (BarrierPlaceholder, MeasurementPlaceholder)
+    return any(
+        gate.num_qudits == 3 and not isinstance(gate, ignored_gate_types)
+        for gate in circuit.gate_set_no_blocks
+    )
+
+
+def configure_bqskit_runtime() -> None:
+    """Select MQT's BQSKit synthesis limit from each input circuit.
 
     MQT's lightweight profile is useful for local training, but it sets
     ``max_synthesis_size=2``. The bundled corpus contains ``ccx`` and
     ``cswap`` gates acting on three qubits, so a BQSKit action otherwise
-    aborts PPO. The action lambdas resolve ``bqskit_compile`` when executed;
-    replacing that module-level symbol keeps the 22 action IDs and the other
-    lightweight settings unchanged and does not modify ``.venv``.
+    aborts PPO on those circuits. Using 3 for every circuit is unnecessarily
+    expensive, so this override uses 3 only when a three-qubit gate is
+    present and 2 otherwise. The action lambdas resolve ``bqskit_compile``
+    when executed; replacing that module-level symbol keeps the 22 action IDs
+    and the other lightweight settings unchanged and does not modify
+    ``.venv``.
     """
 
-    def compile_with_project_limit(*args: Any, **kwargs: Any) -> Any:
-        kwargs["max_synthesis_size"] = max_synthesis_size
-        return _ORIGINAL_BQSKIT_COMPILE(*args, **kwargs)
+    def compile_with_project_limit(circuit: Circuit, *args: Any, **kwargs: Any) -> Any:
+        kwargs["max_synthesis_size"] = 3 if _contains_three_qubit_gate(circuit) else 2
+        return _ORIGINAL_BQSKIT_COMPILE(circuit, *args, **kwargs)
 
     predictor_actions.bqskit_compile = compile_with_project_limit
 
@@ -89,15 +104,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--training-circuits", type=Path, help="Directory QASM personalizzata; usa il dataset incluso se omessa.")
     parser.add_argument("--checkpoint-every", type=int, default=2_048, help="Salva un checkpoint ogni N step.")
     parser.add_argument("--resume-from", type=Path, help="Checkpoint .zip da cui riprendere il training.")
-    parser.add_argument(
-        "--bqskit-max-synthesis-size",
-        type=int,
-        default=3,
-        help=(
-            "Massima arita sintetizzata da BQSKit. Il default 3 gestisce i "
-            "gate ccx/cswap del Training set bundled senza modificare .venv."
-        ),
-    )
     parser.add_argument("--allow-overwrite", action="store_true", help="Consenti di sovrascrivere un modello esistente.")
     return parser.parse_args()
 
@@ -109,8 +115,6 @@ def main() -> int:
         raise SystemExit("--timesteps deve essere positivo.")
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every deve essere positivo.")
-    if not 2 <= args.bqskit_max_synthesis_size <= 8:
-        raise SystemExit("--bqskit-max-synthesis-size deve essere compreso tra 2 e 8.")
     if args.training_circuits and not args.training_circuits.is_dir():
         raise SystemExit(f"Directory QASM non trovata: {args.training_circuits}")
     if args.resume_from and not args.resume_from.is_file():
@@ -134,10 +138,10 @@ def main() -> int:
 
     print(f"Training RL: device={device.description}, metrica={args.metric}, target={args.timesteps} step")
     print(f"Checkpoint: {checkpoint_dir} (ogni {args.checkpoint_every} step)")
-    configure_bqskit_runtime(args.bqskit_max_synthesis_size)
+    configure_bqskit_runtime()
     print(
         "BQSKit: profilo locale leggero, "
-        f"max_synthesis_size={args.bqskit_max_synthesis_size} (override runtime)"
+        "max_synthesis_size=3 con gate a tre qubit, altrimenti 2 (override runtime)"
     )
     predictor = Predictor(
         device=device,
@@ -207,4 +211,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
