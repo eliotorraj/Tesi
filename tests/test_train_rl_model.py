@@ -4,6 +4,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import mqt.predictor.rl.actions as predictor_actions
@@ -27,38 +28,41 @@ class RLTrainingRuntimeTests(unittest.TestCase):
         predictor_actions.bqskit_compile = self.original_module_compile
         TRAIN_RL._ORIGINAL_BQSKIT_COMPILE = self.original_script_compile
 
-    def test_runtime_override_changes_only_max_synthesis_size(self) -> None:
-        captured: dict[str, Any] = {}
+    def test_runtime_override_selects_max_synthesis_size_from_gate_arity(self) -> None:
+        captured: list[dict[str, Any]] = []
 
         def fake_compile(*args: Any, **kwargs: Any) -> str:
-            captured["args"] = args
-            captured["kwargs"] = kwargs
+            captured.append({"args": args, "kwargs": kwargs})
             return "compiled"
 
         TRAIN_RL._ORIGINAL_BQSKIT_COMPILE = fake_compile
-        TRAIN_RL.configure_bqskit_runtime(3)
+        TRAIN_RL.configure_bqskit_runtime()
 
-        result = predictor_actions.bqskit_compile(
-            "circuit",
-            optimization_level=1,
-            synthesis_epsilon=0.1,
-            max_synthesis_size=2,
-            seed=10,
-            num_workers=1,
-        )
+        for gate_arities, expected_limit in (((1, 2), 2), ((1, 2, 3), 3)):
+            circuit = SimpleNamespace(
+                gate_set_no_blocks=[SimpleNamespace(num_qudits=arity) for arity in gate_arities]
+            )
+            result = predictor_actions.bqskit_compile(
+                circuit,
+                optimization_level=1,
+                synthesis_epsilon=0.1,
+                max_synthesis_size=8,
+                seed=10,
+                num_workers=1,
+            )
 
-        self.assertEqual(result, "compiled")
-        self.assertEqual(captured["args"], ("circuit",))
-        self.assertEqual(
-            captured["kwargs"],
-            {
-                "optimization_level": 1,
-                "synthesis_epsilon": 0.1,
-                "max_synthesis_size": 3,
-                "seed": 10,
-                "num_workers": 1,
-            },
-        )
+            self.assertEqual(result, "compiled")
+            self.assertEqual(captured[-1]["args"], (circuit,))
+            self.assertEqual(
+                captured[-1]["kwargs"],
+                {
+                    "optimization_level": 1,
+                    "synthesis_epsilon": 0.1,
+                    "max_synthesis_size": expected_limit,
+                    "seed": 10,
+                    "num_workers": 1,
+                },
+            )
 
     def test_runtime_override_does_not_change_action_ids(self) -> None:
         before = [
@@ -67,7 +71,7 @@ class RLTrainingRuntimeTests(unittest.TestCase):
             for action in actions
         ]
 
-        TRAIN_RL.configure_bqskit_runtime(3)
+        TRAIN_RL.configure_bqskit_runtime()
 
         after = [
             (action.name, action.origin, action.pass_type)

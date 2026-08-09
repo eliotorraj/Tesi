@@ -276,14 +276,15 @@ step aggiuntivi. Il parametro --training-circuits permette di usare una
 cartella QASM personalizzata. --allow-overwrite è necessario se esiste già un
 modello finale con lo stesso nome.
 
-Lo script mantiene il profilo BQSKit leggero usato negli esperimenti, ma porta
-soltanto `max_synthesis_size` da 2 a 3 tramite un override runtime. Il Training
-set RL bundled contiene infatti circuiti con gate `ccx` e `cswap` a tre qubit:
-con il limite 2 una di queste azioni interromperebbe PPO. Non viene modificato
-alcun file dentro `.venv`, gli ID delle 22 azioni restano invariati e i
-checkpoint precedenti rimangono caricabili. Il parametro
-`--bqskit-max-synthesis-size` permette di cambiare esplicitamente il limite;
-il valore predefinito 3 è quello corretto per il corpus bundled.
+Lo script mantiene il profilo BQSKit leggero usato negli esperimenti e sceglie
+`max_synthesis_size` dinamicamente: usa 3 soltanto quando il circuito contiene
+almeno un gate a tre qubit, altrimenti conserva il limite 2. Il Training set RL
+bundled contiene infatti circuiti con gate `ccx` e `cswap`: il limite 3 evita
+che una di queste azioni interrompa PPO, mentre il limite 2 riduce il costo
+della sintesi per gli altri circuiti. Misure e barriere non sono considerate
+gate sintetizzabili. Non viene modificato alcun file dentro `.venv`, gli ID
+delle 22 azioni restano invariati e i checkpoint precedenti rimangono
+caricabili.
 
 Per continuare il modello `quantinuum_h2_56` esistente fino a 100000 step:
 
