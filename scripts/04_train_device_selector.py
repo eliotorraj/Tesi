@@ -379,25 +379,25 @@ class BQSKitRuntime:
         # appends an out-of-scope ``task_id`` instead of the key currently
         # iterated. Patch only this subprocess; do not modify site-packages.
         server_bootstrap = """
-from bqskit.runtime.base import ServerBase
-from bqskit.runtime.detached import DetachedServer, start_server
+                            from bqskit.runtime.base import ServerBase
+                            from bqskit.runtime.detached import DetachedServer, start_server
 
-def fixed_handle_disconnect(self, conn):
-    ServerBase.handle_disconnect(self, conn)
-    tasks = self.clients.pop(conn, set())
-    for task_id in tasks:
-        self.handle_cancel_comp_task(task_id)
-    tasks_to_pop = []
-    for task_id, (tid, other_conn) in list(self.tasks.items()):
-        if other_conn == conn:
-            tasks_to_pop.append((task_id, tid))
-    for task_id, tid in tasks_to_pop:
-        self.tasks.pop(task_id, None)
-        self.mailbox_to_task_dict.pop(tid, None)
+                            def fixed_handle_disconnect(self, conn):
+                                ServerBase.handle_disconnect(self, conn)
+                                tasks = self.clients.pop(conn, set())
+                                for task_id in tasks:
+                                    self.handle_cancel_comp_task(task_id)
+                                tasks_to_pop = []
+                                for task_id, (tid, other_conn) in list(self.tasks.items()):
+                                    if other_conn == conn:
+                                        tasks_to_pop.append((task_id, tid))
+                                for task_id, tid in tasks_to_pop:
+                                    self.tasks.pop(task_id, None)
+                                    self.mailbox_to_task_dict.pop(tid, None)
 
-DetachedServer.handle_disconnect = fixed_handle_disconnect
-start_server()
-"""
+                            DetachedServer.handle_disconnect = fixed_handle_disconnect
+                            start_server()
+                            """
         self.server_process = subprocess.Popen(
             [
                 sys.executable,
@@ -459,92 +459,96 @@ def configure_shared_bqskit_runtime(server_port: int) -> Any:
     return shared_compiler
 
 
-def legacy_device_worker(
-    device_name: str,
-    metric: str,
-    jobs: list[CompilationJob],
-    server_port: int,
-    result_queue: Any,
-    log_path: Path,
-) -> None:
-    """Load one RL policy once, then compile all assigned circuits."""
-    _set_parent_death_signal()
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    with log_path.open("a", encoding="utf-8", buffering=1) as log_handle:
-        os.dup2(log_handle.fileno(), sys.stdout.fileno())
-        os.dup2(log_handle.fileno(), sys.stderr.fileno())
-        print(f"\n--- worker start {utc_now()} pid={os.getpid()} device={device_name} ---", flush=True)
+# def legacy_device_worker(
+#     device_name: str,
+#     metric: str,
+#     jobs: list[CompilationJob],
+#     server_port: int,
+#     result_queue: Any,
+#     log_path: Path,
+# ) -> None:
+#     """Load one RL policy once, then compile all assigned circuits."""
+#     _set_parent_death_signal()
+#     log_path.parent.mkdir(parents=True, exist_ok=True)
+#     with log_path.open("a", encoding="utf-8", buffering=1) as log_handle:
+#         os.dup2(log_handle.fileno(), sys.stdout.fileno())
+#         os.dup2(log_handle.fileno(), sys.stderr.fileno())
+#         print(f"\n--- worker start {utc_now()} pid={os.getpid()} device={device_name} ---", flush=True)
 
-        shared_compiler = None
-        try:
-            shared_compiler = configure_shared_bqskit_runtime(server_port)
-            import mqt.predictor.rl.predictor as rl_predictor_module
+#         shared_compiler = None
+#         try:
+#             shared_compiler = configure_shared_bqskit_runtime(server_port)
+#             import mqt.predictor.rl.predictor as rl_predictor_module
 
-            device = get_device(device_name)
-            predictor = rl_predictor_module.Predictor(figure_of_merit=metric, device=device)
-            model_name = f"model_{metric}_{device_name}"
-            cached_model = rl_predictor_module.load_model(model_name)
+#             device = get_device(device_name)
+#             predictor = rl_predictor_module.Predictor(figure_of_merit=metric, device=device)
+#             model_name = f"model_{metric}_{device_name}"
+#             cached_model = rl_predictor_module.load_model(model_name)
 
-            # MQT 2.3.0 loads the same multi-GB PPO archive on every call.
-            # Keep it resident for the lifetime of this device worker.
-            rl_predictor_module.load_model = lambda _name: cached_model
-            result_queue.put({"type": "ready", "device": device_name, "pid": os.getpid()})
+#             # MQT 2.3.0 loads the same multi-GB PPO archive on every call.
+#             # Keep it resident for the lifetime of this device worker.
+#             rl_predictor_module.load_model = lambda _name: cached_model
+#             result_queue.put({"type": "ready", "device": device_name, "pid": os.getpid()})
 
-            for job in jobs:
-                result_queue.put(
-                    {
-                        "type": "started",
-                        "device": device_name,
-                        "pid": os.getpid(),
-                        "key": job.key,
-                    }
-                )
-                started = time.monotonic()
-                temp_output = job.output.with_name(f".{job.output.name}.{os.getpid()}.tmp")
-                try:
-                    circuit = QuantumCircuit.from_qasm_file(job.source)
-                    compiled, passes = predictor.compile_as_predicted(circuit)
-                    temp_output.parent.mkdir(parents=True, exist_ok=True)
-                    with temp_output.open("w", encoding="utf-8") as handle:
-                        qasm_dump(compiled, handle)
-                        handle.flush()
-                        os.fsync(handle.fileno())
-                    QuantumCircuit.from_qasm_file(temp_output)
-                    os.replace(temp_output, job.output)
-                    result_queue.put(
-                        {
-                            "type": "result",
-                            "status": "success",
-                            "device": device_name,
-                            "pid": os.getpid(),
-                            "key": job.key,
-                            "duration_seconds": round(time.monotonic() - started, 3),
-                            "passes": passes,
-                        }
-                    )
-                except Exception as exc:
-                    if temp_output.exists():
-                        temp_output.unlink()
-                    result_queue.put(
-                        {
-                            "type": "result",
-                            "status": "failed",
-                            "device": device_name,
-                            "pid": os.getpid(),
-                            "key": job.key,
-                            "duration_seconds": round(time.monotonic() - started, 3),
-                            "error": f"{type(exc).__name__}: {exc}",
-                            "traceback": traceback.format_exc(limit=20)[-8000:],
-                        }
-                    )
+#             for job in jobs:
+#                 result_queue.put(
+#                     {
+#                         "type": "started",
+#                         "device": device_name,
+#                         "pid": os.getpid(),
+#                         "key": job.key,
+#                     }
+#                 )
+#                 started = time.monotonic()
+#                 temp_output = job.output.with_name(f".{job.output.name}.{os.getpid()}.tmp")
+#                 try:
+#                     circuit = QuantumCircuit.from_qasm_file(job.source)
+#                     compiled, passes = predictor.compile_as_predicted(circuit)
+#                     temp_output.parent.mkdir(parents=True, exist_ok=True)
+#                     #Writes on temporary file
+#                     with temp_output.open("w", encoding="utf-8") as handle:
+#                         qasm_dump(compiled, handle)
+#                         handle.flush()
+#                         os.fsync(handle.fileno()) #Forces writing on disk
+#                     #Integrity check
+#                     QuantumCircuit.from_qasm_file(temp_output)
+#                     #Atomic substitution
+#                     os.replace(temp_output, job.output)
 
-            result_queue.put({"type": "done", "device": device_name, "pid": os.getpid()})
-        except BaseException:
-            print(traceback.format_exc(), flush=True)
-            raise
-        finally:
-            if shared_compiler is not None:
-                shared_compiler.close()
+#                     result_queue.put(
+#                         {
+#                             "type": "result",
+#                             "status": "success",
+#                             "device": device_name,
+#                             "pid": os.getpid(),
+#                             "key": job.key,
+#                             "duration_seconds": round(time.monotonic() - started, 3),
+#                             "passes": passes,
+#                         }
+#                     )
+#                 except Exception as exc:
+#                     if temp_output.exists():
+#                         temp_output.unlink()
+#                     result_queue.put(
+#                         {
+#                             "type": "result",
+#                             "status": "failed",
+#                             "device": device_name,
+#                             "pid": os.getpid(),
+#                             "key": job.key,
+#                             "duration_seconds": round(time.monotonic() - started, 3),
+#                             "error": f"{type(exc).__name__}: {exc}",
+#                             "traceback": traceback.format_exc(limit=20)[-8000:],
+#                         }
+#                     )
+
+#             result_queue.put({"type": "done", "device": device_name, "pid": os.getpid()})
+#         except BaseException:
+#             print(traceback.format_exc(), flush=True)
+#             raise
+#         finally:
+#             if shared_compiler is not None:
+#                 shared_compiler.close()
 
 
 def _compile_job_process(
