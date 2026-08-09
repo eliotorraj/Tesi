@@ -8,19 +8,42 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-# Keep local RL training tractable on the small project dataset.
+# Keep the expensive BQSKit passes tractable. MQT also lowers
+# max_synthesis_size to 2 in this profile; configure_bqskit_runtime restores
+# that single limit because the bundled RL corpus contains 3-qubit gates.
 os.environ.setdefault("GITHUB_ACTIONS", "true")
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mqt-predictor-matplotlib")
 
+import mqt.predictor.rl.actions as predictor_actions
 from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
 from mqt.predictor.rl.helper import get_path_trained_model
 from sb3_contrib import MaskablePPO
 from sb3_contrib.common.maskable.policies import MaskableMultiInputActorCriticPolicy
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.monitor import Monitor
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_MODEL_DIR = PROJECT_ROOT / "artifacts" / "models" / "rl"
+_ORIGINAL_BQSKIT_COMPILE = predictor_actions.bqskit_compile
+
+
+def configure_bqskit_runtime(max_synthesis_size: int) -> None:
+    """Override only MQT's BQSKit synthesis limit at runtime.
+
+    MQT's lightweight profile is useful for local training, but it sets
+    ``max_synthesis_size=2``. The bundled corpus contains ``ccx`` and
+    ``cswap`` gates acting on three qubits, so a BQSKit action otherwise
+    aborts PPO. The action lambdas resolve ``bqskit_compile`` when executed;
+    replacing that module-level symbol keeps the 22 action IDs and the other
+    lightweight settings unchanged and does not modify ``.venv``.
+    """
+
+    def compile_with_project_limit(*args: Any, **kwargs: Any) -> Any:
+        kwargs["max_synthesis_size"] = max_synthesis_size
+        return _ORIGINAL_BQSKIT_COMPILE(*args, **kwargs)
+
+    predictor_actions.bqskit_compile = compile_with_project_limit
 
 
 def load_model_or_exit(checkpoint: Path, **kwargs: Any) -> MaskablePPO:
@@ -45,7 +68,7 @@ def save_model_atomically(model: MaskablePPO, final_path: Path) -> Path:
     temp_path = final_zip.with_name(f".{final_zip.stem}.{os.getpid()}.tmp.zip")
     temp_path.unlink(missing_ok=True)
     model.save(temp_path)
-    temp_path.replace(final_zip)
+    temp_path.replace(final_zip) #for every Path object, replace is an wrapped version of the raw os.replace function, they still do the same thing
     return final_zip
 
 
@@ -66,6 +89,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--training-circuits", type=Path, help="Directory QASM personalizzata; usa il dataset incluso se omessa.")
     parser.add_argument("--checkpoint-every", type=int, default=2_048, help="Salva un checkpoint ogni N step.")
     parser.add_argument("--resume-from", type=Path, help="Checkpoint .zip da cui riprendere il training.")
+    parser.add_argument(
+        "--bqskit-max-synthesis-size",
+        type=int,
+        default=3,
+        help=(
+            "Massima arita sintetizzata da BQSKit. Il default 3 gestisce i "
+            "gate ccx/cswap del Training set bundled senza modificare .venv."
+        ),
+    )
     parser.add_argument("--allow-overwrite", action="store_true", help="Consenti di sovrascrivere un modello esistente.")
     return parser.parse_args()
 
@@ -77,6 +109,8 @@ def main() -> int:
         raise SystemExit("--timesteps deve essere positivo.")
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every deve essere positivo.")
+    if not 2 <= args.bqskit_max_synthesis_size <= 8:
+        raise SystemExit("--bqskit-max-synthesis-size deve essere compreso tra 2 e 8.")
     if args.training_circuits and not args.training_circuits.is_dir():
         raise SystemExit(f"Directory QASM non trovata: {args.training_circuits}")
     if args.resume_from and not args.resume_from.is_file():
@@ -100,11 +134,19 @@ def main() -> int:
 
     print(f"Training RL: device={device.description}, metrica={args.metric}, target={args.timesteps} step")
     print(f"Checkpoint: {checkpoint_dir} (ogni {args.checkpoint_every} step)")
+    configure_bqskit_runtime(args.bqskit_max_synthesis_size)
+    print(
+        "BQSKit: profilo locale leggero, "
+        f"max_synthesis_size={args.bqskit_max_synthesis_size} (override runtime)"
+    )
     predictor = Predictor(
         device=device,
         figure_of_merit=args.metric,
         path_training_circuits=args.training_circuits,
     )
+
+    monitor_csv = tensorboard_dir / "monitor.csv"
+    predictor.env = Monitor(predictor.env, filename=str(monitor_csv))
 
     if args.resume_from:
         model = load_model_or_exit(

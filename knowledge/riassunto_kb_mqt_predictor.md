@@ -5028,3 +5028,189 @@ Prossimi passi:
 18. Il prototipo deve produrre output strutturati e validabili.
 
 ---
+
+# Aggiornamento dalle conversazioni recenti (30 luglio–1 agosto 2026)
+
+Questa sezione integra soltanto gli sviluppi successivi ai riepiloghi precedenti. Le informazioni operative derivano dalle verifiche sul repository e sull'ambiente locale; le scelte su LLM, RAG, fine-tuning e protocollo sperimentale sono proposte ingegneristiche della tesi, non risultati dei paper MQT.
+
+## Dal Training set del device selector al Dataset strict-RL per l'LLM
+
+Va mantenuta la distinzione terminologica seguente:
+
+- il **Training set** del device selector contiene le coppie circuito-device e serve al modello ML tradizionale di MQT Predictor;
+- il **Dataset** per l'LLM deve invece descrivere il contesto decisionale, le scelte di compilazione e le evidenze necessarie per addestrare o valutare l'LLM.
+
+Il JSON da 600 circuiti creato per il device selector non era quindi ancora il Dataset finale per l'LLM. Conteneva 49 feature, score di expected fidelity, device migliore, riferimenti alle compilazioni e provenienza RL/fallback. È una sorgente utile, ma includeva molte compilazioni Qiskit di fallback e non forniva da solo un target puro della policy RL.
+
+È stato creato `scripts/06_export_llm_dataset.py`, che esporta soltanto esempi passati realmente attraverso la pipeline RL. Ogni record separa:
+
+- `input`: QASM sorgente, 49 feature, obiettivo, backend compatibili, proprietà hardware e catalogo dei pass ammessi;
+- `expected_output`: device scelto, sequenza ordinata dei pass RL e spiegazione strutturata;
+- `deterministic_ground_truth`: ranking, score, QASM compilati e risultati delle validazioni, da usare per il controllo deterministico e non come parte del prompt.
+
+Il filtro strict-RL richiede, per ogni backend compatibile:
+
+- `mode == "rl"` e `status == "success"`;
+- trace non vuota e conclusa da `terminate`;
+- assenza di pass di fallback o record legacy;
+- QASM parsabile;
+- rispetto di basis gate e connettività del `Target`;
+- score riproducibile e hash coerenti.
+
+Audit sul materiale allora disponibile:
+
+- 600 circuiti analizzati;
+- 34 circuiti idonei secondo il criterio strict-RL;
+- device vincitori: 16 `ibm_falcon_127`, 5 `ibm_falcon_27`, 13 `quantinuum_h2_56`;
+- 33 record esportati applicando un rapporto massimo 3:1 tra classi, con la sola riduzione di Falcon 127 da 16 a 15;
+- file prodotto: `datasets/llm_mqt_full_pipeline_expected_fidelity.json`, circa 11,45 MB.
+
+Il Dataset risultava semanticamente valido, senza fallback o legacy, con trace terminate e QASM verificati, ma era ancora troppo piccolo per essere considerato definitivo. Il bilanciamento non deve inventare label: può sottocampionare deterministicamente, ma non dichiarare migliore un device che ha score peggiore.
+
+## Copertura hardware e training RL a 8192 step
+
+L'aumento dei timestep RL è stato considerato un mezzo per aumentare il numero di compilazioni RL riuscite. Non garantisce però una distribuzione uniforme dei device vincitori, che dipende anche dall'expected fidelity stimata per ogni circuito-device.
+
+Nel corso delle verifiche sono stati allineati a 8192 step cinque modelli RL `expected_fidelity`:
+
+- `ibm_falcon_127`;
+- `ibm_falcon_27`;
+- `ibm_heron_133`;
+- `ibm_heron_156`;
+- `quantinuum_h2_56`.
+
+In quella fase gli archivi canonici e le copie runtime nella `.venv` coincidevano per SHA-256; Falcon 27 e Heron 133 erano stati promossi dai rispettivi checkpoint più recenti. I modelli `critical_depth` non erano stati modificati.
+
+Questo stato è stato successivamente superato dalla pulizia dello spazio disco: le copie pesanti sono state rimosse dalla `.venv` e gli artefatti Git LFS nel working tree sono stati riportati a puntatori. Di conseguenza, la presenza storica dei cinque modelli verificati a 8192 step non implica che siano oggi materializzati localmente.
+
+Per rigenerare i dati con nuovi modelli serve una cache nuova. Riutilizzare la cache precedente conserverebbe gli esiti fallback già registrati e impedirebbe di misurare correttamente la nuova copertura RL.
+
+## Strategia per il piccolo LLM
+
+La proposta è separare inizialmente due sottoproblemi:
+
+1. **device selection**: scelta dell'hardware tra candidati compatibili;
+2. **pass selection**: scelta iterativa del prossimo `action_id` a device fissato.
+
+Solo dopo averli valutati separatamente conviene eseguire l'esperimento end-to-end. In questo modo un fallimento è attribuibile alla scelta del device oppure alla sequenza di pass, senza confondere le due cause.
+
+Per la pass selection, ogni step della trace può diventare un esempio supervisionato con:
+
+- figure of merit e device;
+- stato corrente del circuito;
+- action mask o lista degli ID validi;
+- eventuali azioni precedenti;
+- `action_id` scelto come output.
+
+Con 56 circuiti, 5 seed e circa 20 step per trace si ottengono indicativamente 5.000–6.000 esempi step-level. L'unità statistica rimane però il circuito: questi esempi non equivalgono a migliaia di circuiti indipendenti.
+
+I modelli piccoli proposti per uno screening iniziale sono Qwen3-4B, Qwen3.5-4B e SmolLM3-3B. La scelta non va fatta sul test: tutti devono essere valutati senza fine-tuning sulla validation, con stesso prompt, action mask, formato e budget. Il modello da adattare viene scelto soltanto dopo questo screening.
+
+Nell'ambiente WSL osservato erano disponibili circa 7,7 GiB di RAM e nessuna GPU NVIDIA esposta. L'inferenza quantizzata Q4 con contesto ridotto è plausibile, mentre un fine-tuning QLoRA richiede realisticamente Colab, una GPU cloud, una workstation o risorse universitarie.
+
+## RAG, QLoRA e ablation
+
+RAG e fine-tuning rispondono a scopi differenti:
+
+- il RAG recupera esempi pertinenti durante l'inferenza;
+- il fine-tuning modifica il comportamento del modello;
+- il RAG non insegna stabilmente una policy;
+- il fine-tuning non fornisce automaticamente esempi aggiornati o specifici del circuito corrente.
+
+Le quattro configurazioni sperimentali consigliate sono:
+
+1. modello base zero/few-shot;
+2. modello base con RAG;
+3. modello adattato con QLoRA/SFT;
+4. modello QLoRA con RAG.
+
+Per il RAG non è necessario iniziare con un vector database: un k-NN sulle feature numeriche normalizzate può bastare. L'indice deve contenere esclusivamente esempi di training e può usare feature, device, figure of merit, stato, action mask e pass recenti. I documenti recuperati devono essere riassunti compatti delle trace, non interi JSON di grandi dimensioni.
+
+Per il fine-tuning è preferibile QLoRA/SFT al full fine-tuning. L'early stopping deve dipendere anche dalla qualità closed-loop sulla validation, non soltanto dalla loss token-level. Sono raccomandati più seed di training e il congelamento di prompt e configurazione prima del test.
+
+## Controlli preliminari prima del fine-tuning
+
+Prima di spendere risorse sul modello linguistico vanno verificati:
+
+- **teacher quality**: MQT Predictor deve fornire abbastanza trace valide e risultati competitivi rispetto a Qiskit;
+- **action coverage**: frequenza dei pass, di `terminate`, degli errori e dei timeout;
+- **device coverage**: un Dataset dominato da un solo hardware non insegna una vera selezione del device;
+- **label entropy**: trace diverse possono essere equivalenti, quindi l'action accuracy non misura da sola la qualità;
+- **classical probe**: Random Forest, XGBoost, MLP o k-NN possono verificare se nelle feature esiste segnale predittivo;
+- **learning curve**: confronto closed-loop usando 25%, 50%, 75% e 100% del training.
+
+Poiché l'LLM imita un teacher, non ci si deve aspettare che lo superi sistematicamente. Per andare oltre l'imitazione servono, per esempio, selezione delle trace migliori tra più seed, penalizzazione dei fallimenti, generazione di più candidati o preference learning basato sul risultato finale.
+
+## Protocollo sperimentale aggiornato
+
+Le baseline consigliate sono:
+
+- Qiskit con `optimization_level=2`;
+- Qiskit con `optimization_level=3`;
+- MQT Predictor 2.3.0 come teacher e baseline principale;
+- random masked policy come sanity check;
+- k-NN o altro modello classico;
+- LLM base, RAG, QLoRA e QLoRA+RAG;
+- un modello remoto più forte soltanto come upper bound opzionale, eseguito nello stesso controller e senza strumenti aggiuntivi.
+
+Il confronto deve essere paired: stessi circuiti, device o insieme di candidati, `Target`, calibrazioni, figure of merit, versioni, timeout, limite di pass, seed e budget. Per i metodi stocastici vanno distinti single-shot e best-of-k usando lo stesso k.
+
+Metriche principali:
+
+- compilazioni valide, terminazioni, errori e timeout;
+- equivalenza semantica e target compliance;
+- expected fidelity, depth e gate count, inclusi i gate a due qubit;
+- numero di pass e tempo wall-clock;
+- token, RAM/VRAM e altri costi del modello.
+
+Per confrontare la compilazione si usa il delta paired rispetto a MQT. Per la scelta hardware è utile il regret rispetto al migliore device effettivamente valutato. La validità resta un requisito: un circuito non valido non può risultare vincitore soltanto perché ha depth minore.
+
+I 12 circuiti di test correnti, distribuiti su tre leakage group, sono sufficienti per un pilot ma deboli per conclusioni statistiche. Per l'esperimento finale sono preferibili almeno 30–50 circuiti e più famiglie indipendenti. Va inoltre distinta:
+
+- generalizzazione dello student LLM rispetto al teacher sul test corrente;
+- generalizzazione OOD su circuiti mai usati né dall'LLM né dalle policy MQT.
+
+## Sincronizzazione Git e gestione degli artefatti pesanti
+
+La repository locale è stata sincronizzata preservando sia gli artefatti già presenti su GitHub sia quelli prodotti localmente. Durante l'integrazione sono stati recuperati gli OID LFS remoti che la riorganizzazione dei percorsi avrebbe altrimenti lasciato senza riferimento. Non è stato usato un force-push.
+
+La successiva diagnosi dello spazio disco ha distinto tre copie separate dei dati pesanti:
+
+- cache Git LFS sotto `.git/lfs`;
+- file materializzati sotto `artifacts/`;
+- copie runtime dentro `.venv`.
+
+Prima della pulizia erano presenti circa 25 GB nella cache LFS, 7,7 GB sotto `artifacts/` e 14 GB nella `.venv`. Sono stati sincronizzati sul remoto 35 oggetti LFS per circa 34 GB, poi:
+
+- `main` è stato riallineato a `origin/main`;
+- i 35 file LFS nel working tree sono stati convertiti in puntatori;
+- le copie dei modelli dentro `.venv` sono state eliminate;
+- la cache `.git/lfs` è stata svuotata dopo verifica del remoto;
+- `skip-smudge` è stato attivato per evitare download automatici durante normali pull e checkout.
+
+Stato finale riportato dalla pulizia:
+
+- working tree pulito e `main` coincidente con `origin/main`;
+- `artifacts/` circa 34 MB, costituito principalmente da puntatori LFS;
+- `.venv` circa 5,3 GB;
+- cache LFS circa 336 KB e senza oggetti pesanti;
+- nessun archivio modello pesante materializzato localmente.
+
+La pulizia libera blocchi dentro il filesystem WSL, ma Windows può non ridurre automaticamente il file `ext4.vhdx`. Per restituire spazio a C: servono `fstrim`, arresto completo di WSL e compattazione del VHDX da PowerShell amministrativa.
+
+Con i modelli disidratati, `qcompile`, nuovi training e altri flussi che richiedono i pesi non funzionano finché gli oggetti necessari non vengono scaricati intenzionalmente. Per recuperare soltanto i modelli `expected_fidelity` è preferibile usare `git fetch` seguito da un ripristino selettivo dei path e da un `git lfs pull --include=...`, evitando un normale pull che materializzi tutti gli artefatti.
+
+## Stato operativo consolidato
+
+1. Il Training set del device selector e il Dataset per l'LLM sono artefatti diversi.
+2. Esiste un esportatore strict-RL e un Dataset provvisorio di 33 record validati.
+3. La quantità, non la correttezza strutturale, è il limite principale del Dataset strict-RL corrente.
+4. Più timestep RL possono aumentare la copertura, ma non garantiscono il bilanciamento dei device.
+5. Device selection e pass selection devono essere valutate prima separatamente e poi end-to-end.
+6. Il piano sperimentale confronta base, RAG, QLoRA e QLoRA+RAG con baseline comuni.
+7. Il test attuale non è completamente OOD rispetto alle policy MQT.
+8. I modelli a 8192 step sono stati verificati e pubblicati, ma non sono più materializzati localmente dopo la pulizia.
+9. Git LFS conserva gli artefatti pesanti sul remoto; il workspace locale mantiene puntatori e `skip-smudge`.
+10. Prima di nuovi training o di `qcompile` bisogna scaricare esplicitamente solo i modelli necessari.
+
+---
