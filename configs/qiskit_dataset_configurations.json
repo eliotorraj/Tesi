@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "qiskit_expected_fidelity_pilot_v1",
+  "device_id": "ibm_falcon_127",
+  "objective": {
+    "name": "expected_fidelity",
+    "direction": "maximize",
+    "implementation": "mqt.predictor.reward.expected_fidelity",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale."
+  },
+  "seeds": [0, 1, 2],
+  "fixed_transpile_options": {
+    "approximation_degree": 1.0,
+    "num_processes": 1
+  },
+  "configurations": [
+    {"config_id": "o2_default_default", "study": "baseline", "optimization_level": 2, "layout_method": null, "routing_method": null},
+    {"config_id": "o3_default_default", "study": "baseline", "optimization_level": 3, "layout_method": null, "routing_method": null},
+    {"config_id": "o2_sabre_sabre", "study": "layout", "optimization_level": 2, "layout_method": "sabre", "routing_method": "sabre"},
+    {"config_id": "o2_dense_sabre", "study": "layout", "optimization_level": 2, "layout_method": "dense", "routing_method": "sabre"},
+    {"config_id": "o2_trivial_sabre", "study": "layout", "optimization_level": 2, "layout_method": "trivial", "routing_method": "sabre"},
+    {"config_id": "o3_sabre_sabre", "study": "layout", "optimization_level": 3, "layout_method": "sabre", "routing_method": "sabre"},
+    {"config_id": "o3_dense_sabre", "study": "layout", "optimization_level": 3, "layout_method": "dense", "routing_method": "sabre"},
+    {"config_id": "o3_trivial_sabre", "study": "layout", "optimization_level": 3, "layout_method": "trivial", "routing_method": "sabre"},
+    {"config_id": "o2_sabre_lookahead", "study": "routing", "optimization_level": 2, "layout_method": "sabre", "routing_method": "lookahead"},
+    {"config_id": "o2_sabre_basic", "study": "routing", "optimization_level": 2, "layout_method": "sabre", "routing_method": "basic"},
+    {"config_id": "o3_sabre_lookahead", "study": "routing", "optimization_level": 3, "layout_method": "sabre", "routing_method": "lookahead"},
+    {"config_id": "o3_sabre_basic", "study": "routing", "optimization_level": 3, "layout_method": "sabre", "routing_method": "basic"}
+  ]
+}

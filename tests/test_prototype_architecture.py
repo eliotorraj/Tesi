@@ -41,7 +41,7 @@ def valid_llm_response(device_id: str) -> dict[str, object]:
         "figure_of_merit": "expected_fidelity",
         "compiler": "qiskit",
         "qiskit_plan": {
-            "optimization_level": 1,
+            "optimization_level": 2,
             "seed_transpiler": 7,
             "layout_method": None,
             "routing_method": None,

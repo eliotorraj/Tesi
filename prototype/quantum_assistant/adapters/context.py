@@ -8,12 +8,17 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Mapping
 
+from qiskit_dataset.catalog import load_catalog
+
 from ..models import (
     CompatibilityReport,
     ParsedRequest,
     PromptEnvelope,
     RetrievedExample,
 )
+
+
+QISKIT_CATALOG = load_catalog()
 
 
 def _feature_distance(
@@ -187,15 +192,19 @@ class StructuredPromptBuilder:
                 "figure_of_merit": request.figure_of_merit,
                 "compiler": "qiskit",
                 "qiskit_plan": {
-                    "optimization_level": "integer 0..3",
+                    "optimization_level": "integer 2|3",
                     "seed_transpiler": "non-negative integer",
                     "layout_method": "null or trivial|dense|sabre",
-                    "routing_method": "null or basic|lookahead|stochastic|sabre|none",
+                    "routing_method": "null or basic|lookahead|sabre",
                 },
                 "explanation": "non-empty user-facing text",
                 "evidence": "list of references to live input or retrieved record ids",
                 "warnings": "list of relevant limitations",
             },
+            "allowed_qiskit_configurations": [
+                configuration.to_dict()
+                for configuration in QISKIT_CATALOG.configurations
+            ],
             "previous_validation_errors": list(validation_errors),
             "rules": [
                 "Return structured JSON only.",

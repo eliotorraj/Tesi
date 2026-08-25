@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tesi.local/schemas/qiskit_run.schema.json",
+  "title": "Qiskit compilation attempt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "dataset_scope",
+    "split",
+    "objective",
+    "circuit",
+    "device",
+    "configuration",
+    "seed_transpiler",
+    "status",
+    "phase",
+    "score",
+    "target_validation",
+    "compiled_circuit",
+    "timings_seconds",
+    "failure",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "pattern": "^run_[0-9a-f]{64}$"},
+    "dataset_scope": {"enum": ["pilot", "full"]},
+    "split": {"enum": ["train", "validation", "test"]},
+    "objective": {
+      "type": "object",
+      "required": ["name", "direction", "implementation"],
+      "properties": {
+        "name": {"const": "expected_fidelity"},
+        "direction": {"const": "maximize"},
+        "implementation": {"type": "string"}
+      }
+    },
+    "circuit": {
+      "type": "object",
+      "required": [
+        "circuit_id",
+        "benchmark_family",
+        "generator",
+        "num_qubits",
+        "source_sha256",
+        "split",
+        "features"
+      ],
+      "properties": {
+        "circuit_id": {"type": "string"},
+        "benchmark_family": {"type": "string"},
+        "generator": {"enum": ["qiskit", "tket"]},
+        "num_qubits": {"type": "integer", "minimum": 1, "maximum": 127},
+        "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "split": {"enum": ["train", "validation", "test"]},
+        "features": {
+          "type": "object",
+          "required": ["extractor", "dimension", "values"],
+          "properties": {
+            "extractor": {"type": "string"},
+            "dimension": {"const": 49},
+            "values": {
+              "type": "object",
+              "minProperties": 49,
+              "maxProperties": 49,
+              "additionalProperties": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "device_id",
+        "num_qubits",
+        "target_sha256",
+        "provenance"
+      ],
+      "properties": {
+        "device_id": {"const": "ibm_falcon_127"},
+        "num_qubits": {"const": 127},
+        "target_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "provenance": {
+          "type": "object",
+          "required": ["provider", "calibration_kind", "live_hardware_data"],
+          "properties": {
+            "live_hardware_data": {"const": false}
+          }
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "required": [
+        "catalog_id",
+        "config_id",
+        "study",
+        "optimization_level",
+        "layout_method",
+        "routing_method"
+      ],
+      "properties": {
+        "catalog_id": {"type": "string"},
+        "config_id": {"type": "string"},
+        "study": {"enum": ["baseline", "layout", "routing"]},
+        "optimization_level": {"enum": [2, 3]},
+        "layout_method": {
+          "type": ["string", "null"],
+          "enum": [null, "sabre", "dense", "trivial"]
+        },
+        "routing_method": {
+          "type": ["string", "null"],
+          "enum": [null, "sabre", "lookahead", "basic"]
+        }
+      }
+    },
+    "seed_transpiler": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "status": {"enum": ["success", "failure", "timeout"]},
+    "phase": {
+      "enum": [
+        "planned",
+        "source_loading",
+        "target_loading",
+        "transpilation",
+        "target_validation",
+        "scoring",
+        "serialization",
+        "worker",
+        "completed"
+      ]
+    },
+    "score": {"type": ["number", "null"]},
+    "target_validation": {"type": ["object", "null"]},
+    "compiled_circuit": {"type": ["object", "null"]},
+    "timings_seconds": {"type": "object"},
+    "failure": {
+      "type": ["object", "null"],
+      "properties": {
+        "phase": {"type": "string"},
+        "category": {"type": "string"},
+        "exception_type": {"type": "string"},
+        "message": {"type": "string"},
+        "traceback": {"type": "string"},
+        "retryable": {"type": "boolean"},
+        "timeout_seconds": {"type": ["number", "null"]}
+      }
+    },
+    "provenance": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "success"}}},
+      "then": {
+        "properties": {
+          "phase": {"const": "completed"},
+          "score": {"type": "number"},
+          "failure": {"type": "null"},
+          "compiled_circuit": {"type": "object"},
+          "target_validation": {
+            "type": "object",
+            "properties": {
+              "is_executable_on_target": {"const": true}
+            },
+            "required": ["is_executable_on_target"]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "score": {"type": "null"},
+          "failure": {"type": "object"},
+          "compiled_circuit": {"type": "null"}
+        }
+      }
+    }
+  ]
+}
