@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tesi.local/schemas/qiskit_configuration_aggregate.schema.json",
+  "title": "Qiskit configuration aggregate across seeds",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "summary_id",
+    "dataset_scope",
+    "split",
+    "objective",
+    "circuit",
+    "device",
+    "configuration",
+    "seeds",
+    "attempts",
+    "score_statistics",
+    "timing_statistics_seconds",
+    "failure_breakdown",
+    "eligible_for_ranking",
+    "ranking_metric",
+    "ranking_score",
+    "rank",
+    "regret",
+    "run_ids"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "summary_id": {
+      "type": "string",
+      "pattern": "^summary_[0-9a-f]{64}$"
+    },
+    "dataset_scope": {"enum": ["pilot", "full"]},
+    "split": {"enum": ["train", "validation", "test"]},
+    "objective": {"type": "object"},
+    "circuit": {"type": "object"},
+    "device": {"type": "object"},
+    "configuration": {"type": "object"},
+    "seeds": {
+      "type": "object",
+      "required": [
+        "expected",
+        "observed",
+        "successful",
+        "failed",
+        "timed_out"
+      ]
+    },
+    "attempts": {
+      "type": "object",
+      "required": [
+        "expected_count",
+        "observed_count",
+        "success_count",
+        "failure_count",
+        "timeout_count",
+        "complete",
+        "success_rate"
+      ]
+    },
+    "score_statistics": {
+      "type": "object",
+      "required": [
+        "count",
+        "mean",
+        "median",
+        "std_population",
+        "min",
+        "max"
+      ]
+    },
+    "timing_statistics_seconds": {"type": "object"},
+    "failure_breakdown": {"type": "array"},
+    "eligible_for_ranking": {"type": "boolean"},
+    "ranking_metric": {
+      "const": "median_expected_fidelity_across_seeds"
+    },
+    "ranking_score": {"type": ["number", "null"]},
+    "rank": {"type": ["integer", "null"], "minimum": 1},
+    "regret": {"type": ["number", "null"], "minimum": 0},
+    "run_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^run_[0-9a-f]{64}$"
+      },
+      "uniqueItems": true
+    }
+  }
+}

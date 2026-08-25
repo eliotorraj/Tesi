@@ -1,0 +1,44 @@
+{
+  "available_attempts": 360,
+  "available_status": {
+    "success": 335,
+    "timeout": 25
+  },
+  "cache_hits": 3,
+  "cache_root": "artifacts/qiskit_dataset_cache/expected_fidelity",
+  "complete": true,
+  "dataset_scope": "pilot",
+  "executed_now": 357,
+  "executed_status": {
+    "success": 332,
+    "timeout": 25
+  },
+  "missing_attempts": 0,
+  "objective": "expected_fidelity",
+  "output": "qiskit_runs.jsonl",
+  "planned_attempts": 360,
+  "schema_version": "1.0.0",
+  "target": {
+    "coupling_edge_count": 284,
+    "description": "ibm_falcon_127",
+    "device_id": "ibm_falcon_127",
+    "num_qubits": 127,
+    "operation_names": [
+      "cx",
+      "delay",
+      "id",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "225e5f6fd85af0b37a1dd7c6306dd046a8c7ca585f135dda6e6418dd16f76b48",
+    "target_type": "qiskit.transpiler.target.Target"
+  }
+}

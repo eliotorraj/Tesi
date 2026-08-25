@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tesi.local/schemas/qiskit_rag_example.schema.json",
+  "title": "Train-only Qiskit RAG example",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "rag_id",
+    "split",
+    "objective",
+    "retrieval_input",
+    "ranking",
+    "top_configurations"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "rag_id": {"type": "string", "pattern": "^rag_[0-9a-f]{64}$"},
+    "split": {"const": "train"},
+    "objective": {
+      "type": "object",
+      "properties": {
+        "name": {"const": "expected_fidelity"},
+        "direction": {"const": "maximize"}
+      },
+      "required": ["name", "direction"]
+    },
+    "retrieval_input": {
+      "type": "object",
+      "required": ["circuit", "device", "retrieval_text"],
+      "properties": {
+        "circuit": {
+          "type": "object",
+          "required": [
+            "circuit_id",
+            "benchmark_family",
+            "generator",
+            "num_qubits",
+            "source_sha256",
+            "features"
+          ]
+        },
+        "device": {
+          "type": "object",
+          "properties": {
+            "device_id": {"const": "ibm_falcon_127"}
+          },
+          "required": ["device_id"]
+        },
+        "retrieval_text": {"type": "string", "minLength": 1}
+      }
+    },
+    "ranking": {
+      "type": "object",
+      "required": [
+        "metric",
+        "top_k_requested",
+        "evaluated_configuration_count",
+        "eligible_configuration_count",
+        "returned_configuration_count",
+        "complete_top_k"
+      ],
+      "properties": {
+        "metric": {
+          "const": "median_expected_fidelity_across_seeds"
+        },
+        "top_k_requested": {"type": "integer", "minimum": 1},
+        "evaluated_configuration_count": {"const": 12},
+        "eligible_configuration_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "returned_configuration_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "complete_top_k": {"type": "boolean"}
+      }
+    },
+    "top_configurations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "rank",
+          "summary_id",
+          "config_id",
+          "optimization_level",
+          "layout_method",
+          "routing_method",
+          "median_score",
+          "score_std_population",
+          "success_rate",
+          "regret"
+        ],
+        "properties": {
+          "rank": {"type": "integer", "minimum": 1},
+          "summary_id": {
+            "type": "string",
+            "pattern": "^summary_[0-9a-f]{64}$"
+          },
+          "config_id": {"type": "string"},
+          "optimization_level": {"enum": [2, 3]},
+          "layout_method": {
+            "type": ["string", "null"],
+            "enum": [null, "sabre", "dense", "trivial"]
+          },
+          "routing_method": {
+            "type": ["string", "null"],
+            "enum": [null, "sabre", "lookahead", "basic"]
+          },
+          "median_score": {"type": "number"},
+          "score_std_population": {"type": "number", "minimum": 0},
+          "success_rate": {"const": 1.0},
+          "regret": {"type": "number", "minimum": 0}
+        }
+      }
+    }
+  }
+}

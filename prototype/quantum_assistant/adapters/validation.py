@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
+from qiskit_dataset.catalog import load_catalog
+
 from ..models import (
     CompatibilityReport,
     ParsedRequest,
@@ -13,15 +15,7 @@ from ..models import (
 )
 
 
-ALLOWED_LAYOUT_METHODS = {None, "trivial", "dense", "sabre"}
-ALLOWED_ROUTING_METHODS = {
-    None,
-    "basic",
-    "lookahead",
-    "stochastic",
-    "sabre",
-    "none",
-}
+QISKIT_CATALOG = load_catalog()
 
 
 def _strict_int(value: Any) -> int | None:
@@ -79,8 +73,8 @@ class StructuredRecommendationValidator:
             raw_plan = {}
 
         optimization_level = _strict_int(raw_plan.get("optimization_level"))
-        if optimization_level not in {0, 1, 2, 3}:
-            errors.append("optimization_level deve essere un intero tra 0 e 3.")
+        if optimization_level is None:
+            errors.append("optimization_level deve essere un intero.")
 
         seed_transpiler = _strict_int(raw_plan.get("seed_transpiler"))
         if seed_transpiler is None or not 0 <= seed_transpiler <= 2**32 - 1:
@@ -89,16 +83,20 @@ class StructuredRecommendationValidator:
             )
 
         layout_method = raw_plan.get("layout_method")
-        if layout_method not in ALLOWED_LAYOUT_METHODS:
-            errors.append(
-                "layout_method deve essere null, trivial, dense oppure sabre."
-            )
-
         routing_method = raw_plan.get("routing_method")
-        if routing_method not in ALLOWED_ROUTING_METHODS:
+        allowed_configuration = (
+            None
+            if optimization_level is None
+            else QISKIT_CATALOG.find(
+                optimization_level,
+                layout_method,
+                routing_method,
+            )
+        )
+        if allowed_configuration is None:
             errors.append(
-                "routing_method deve essere null, basic, lookahead, "
-                "stochastic, sabre oppure none."
+                "La tupla (optimization_level, layout_method, routing_method) "
+                "non appartiene alle 12 configurazioni Qiskit ammesse."
             )
 
         max_level = request.constraints.get("max_optimization_level")
