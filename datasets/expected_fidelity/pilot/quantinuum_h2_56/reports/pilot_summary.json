@@ -4,9 +4,9 @@
     "missing": 0,
     "observed": 288,
     "planned": 288,
-    "success": 177,
-    "success_rate": 0.6145833333333334,
-    "timeout": 111
+    "success": 183,
+    "success_rate": 0.6354166666666666,
+    "timeout": 105
   },
   "catalog_id": "qiskit_expected_fidelity_pilot_v1",
   "circuit_coverage": {
@@ -99,21 +99,21 @@
       "circuit_id": "random_indep_qiskit_30",
       "depth": 312,
       "device_id": "quantinuum_h2_56",
-      "eligible_configurations": 6,
+      "eligible_configurations": 7,
       "failure_count": 0,
       "family": "random",
       "generator": "qiskit",
       "num_qubits": 30,
       "size": 2080,
       "split": "train",
-      "success_count": 18,
-      "success_rate": 0.5,
-      "timeout_count": 18,
-      "transpile_max_s": 0.6557116630001474,
-      "transpile_mean_s": 0.3049806677777269,
-      "transpile_median_s": 0.27471832449964495,
-      "transpile_p95_s": 0.40409175004983766,
-      "transpile_success_n": 18
+      "success_count": 21,
+      "success_rate": 0.5833333333333334,
+      "timeout_count": 15,
+      "transpile_max_s": 155.9585873369997,
+      "transpile_mean_s": 22.1191553161428,
+      "transpile_median_s": 0.28921493899997586,
+      "transpile_p95_s": 151.59008877700035,
+      "transpile_success_n": 21
     },
     {
       "attempts_expected": 36,
@@ -171,21 +171,21 @@
       "circuit_id": "qft_indep_tket_40",
       "depth": 81,
       "device_id": "quantinuum_h2_56",
-      "eligible_configurations": 6,
+      "eligible_configurations": 7,
       "failure_count": 0,
       "family": "qft",
       "generator": "tket",
       "num_qubits": 40,
       "size": 880,
       "split": "validation",
-      "success_count": 18,
-      "success_rate": 0.5,
-      "timeout_count": 18,
-      "transpile_max_s": 0.4303085049996298,
-      "transpile_mean_s": 0.3556417571666215,
-      "transpile_median_s": 0.3559758540004623,
-      "transpile_p95_s": 0.39361827964971774,
-      "transpile_success_n": 18
+      "success_count": 21,
+      "success_rate": 0.5833333333333334,
+      "timeout_count": 15,
+      "transpile_max_s": 146.24215591200118,
+      "transpile_mean_s": 21.044698304238107,
+      "transpile_median_s": 0.3601543249997121,
+      "transpile_p95_s": 145.34954179399938,
+      "transpile_success_n": 21
     },
     {
       "attempts_expected": 36,
@@ -244,7 +244,7 @@
       "attempts_expected": 24,
       "attempts_observed": 24,
       "circuits_complete": 8,
-      "circuits_eligible": 6,
+      "circuits_eligible": 8,
       "circuits_expected": 8,
       "co_winner_count": 6,
       "config_id": "o3_default_default",
@@ -255,16 +255,16 @@
       "rank1_count": 0,
       "routing_method": null,
       "study": "baseline",
-      "success_count": 18,
-      "success_rate": 0.75,
-      "timeout_count": 6,
+      "success_count": 24,
+      "success_rate": 1.0,
+      "timeout_count": 0,
       "top3_count": 6,
-      "transpile_max_s": 21.06590007199975,
-      "transpile_mean_s": 13.355097449888742,
-      "transpile_median_s": 14.706161726499886,
+      "transpile_max_s": 155.9585873369997,
+      "transpile_mean_s": 47.289228186541585,
+      "transpile_median_s": 17.477047122499698,
       "transpile_min_s": 0.09600904799935961,
-      "transpile_p95_s": 20.9204660792499,
-      "transpile_success_n": 18
+      "transpile_p95_s": 151.57116548620024,
+      "transpile_success_n": 24
     },
     {
       "attempts_expected": 24,
@@ -533,19 +533,19 @@
     "target_sha256": "8c5576ac2f280a98f797dceb53186f97500e901d9784cc328187e156cbbe9b8f"
   },
   "execution": {
-    "cache_hits": 0,
-    "executed_now": 288,
+    "cache_hits": 177,
+    "executed_now": 111,
     "observed_timeout_seconds": [
-      100.0
+      200.0
     ],
-    "timeout_seconds": 100.0,
-    "wall_clock_seconds_this_invocation": 1950.012893399,
+    "timeout_seconds": 200.0,
+    "wall_clock_seconds_this_invocation": 3713.819972599,
     "workers": 6
   },
   "failure_breakdown": [
     {
       "category": "timeout",
-      "count": 111,
+      "count": 105,
       "exception_type": "AttemptTimeoutError",
       "phase": "transpilation"
     }
@@ -560,8 +560,8 @@
     }
   },
   "ranking": {
-    "eligible_aggregates": 59,
-    "ineligible_aggregates": 37,
+    "eligible_aggregates": 61,
+    "ineligible_aggregates": 35,
     "rag_examples": 5
   },
   "report_type": "qiskit_pilot",
@@ -573,12 +573,12 @@
   ],
   "successful_transpilation_seconds": {
     "all": {
-      "count": 177,
-      "max": 21.06590007199975,
-      "mean": 1.4556939983671955,
-      "median": 0.04631523300031404,
+      "count": 183,
+      "max": 155.9585873369997,
+      "mean": 6.29621617535516,
+      "median": 0.0495873540003231,
       "min": 0.019630517000223335,
-      "p95": 13.21442645439978
+      "p95": 18.5561614628
     },
     "lookahead": {
       "count": 27,
@@ -589,54 +589,54 @@
       "p95": 0.3682554506001907
     },
     "non_lookahead": {
-      "count": 150,
-      "max": 21.06590007199975,
-      "mean": 1.6950184503799754,
-      "median": 0.050803388000076666,
+      "count": 156,
+      "max": 155.9585873369997,
+      "mean": 7.364118525230751,
+      "median": 0.05319995700028812,
       "min": 0.019630517000223335,
-      "p95": 17.284885521099746
+      "p95": 20.547486706749623
     }
   },
   "timeout_sensitivity": [
     {
-      "actual_timeouts_already_observed": 111,
+      "actual_timeouts_already_observed": 105,
       "lower_bound_timeouts_if_threshold_used": 111,
-      "successful_runs_above_threshold": 0,
+      "successful_runs_above_threshold": 6,
       "threshold_seconds": 30
     },
     {
-      "actual_timeouts_already_observed": 111,
+      "actual_timeouts_already_observed": 105,
       "lower_bound_timeouts_if_threshold_used": 111,
-      "successful_runs_above_threshold": 0,
+      "successful_runs_above_threshold": 6,
       "threshold_seconds": 60
     },
     {
-      "actual_timeouts_already_observed": 111,
+      "actual_timeouts_already_observed": 105,
       "lower_bound_timeouts_if_threshold_used": 111,
-      "successful_runs_above_threshold": 0,
+      "successful_runs_above_threshold": 6,
       "threshold_seconds": 100
     },
     {
-      "actual_timeouts_already_observed": 111,
+      "actual_timeouts_already_observed": 105,
       "lower_bound_timeouts_if_threshold_used": 111,
-      "successful_runs_above_threshold": 0,
+      "successful_runs_above_threshold": 6,
       "threshold_seconds": 120
     },
     {
-      "actual_timeouts_already_observed": 111,
-      "lower_bound_timeouts_if_threshold_used": 111,
+      "actual_timeouts_already_observed": 105,
+      "lower_bound_timeouts_if_threshold_used": 105,
       "successful_runs_above_threshold": 0,
       "threshold_seconds": 300
     },
     {
-      "actual_timeouts_already_observed": 111,
-      "lower_bound_timeouts_if_threshold_used": 111,
+      "actual_timeouts_already_observed": 105,
+      "lower_bound_timeouts_if_threshold_used": 105,
       "successful_runs_above_threshold": 0,
       "threshold_seconds": 600
     },
     {
-      "actual_timeouts_already_observed": 111,
-      "lower_bound_timeouts_if_threshold_used": 111,
+      "actual_timeouts_already_observed": 105,
+      "lower_bound_timeouts_if_threshold_used": 105,
       "successful_runs_above_threshold": 0,
       "threshold_seconds": 900
     }

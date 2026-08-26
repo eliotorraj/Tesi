@@ -1,7 +1,7 @@
 {
   "aggregate_status": {
-    "eligible": 59,
-    "ineligible": 37
+    "eligible": 61,
+    "ineligible": 35
   },
   "attempts_available": 288,
   "circuits": 10,
