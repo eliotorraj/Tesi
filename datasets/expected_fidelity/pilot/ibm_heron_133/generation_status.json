@@ -16,8 +16,8 @@
   },
   "execution_policy": {
     "timeout_seconds": 100.0,
-    "wall_clock_seconds_this_invocation": 825.0711814969998,
-    "workers": 6
+    "wall_clock_seconds_this_invocation": 2359.4323696360007,
+    "workers": 2
   },
   "missing_attempts": 0,
   "objective": "expected_fidelity",

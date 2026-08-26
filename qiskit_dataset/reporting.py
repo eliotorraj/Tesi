@@ -5,7 +5,6 @@ from __future__ import annotations
 import csv
 import json
 import math
-import re
 from collections import Counter, defaultdict
 from io import StringIO
 from pathlib import Path
@@ -14,6 +13,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from .catalog import ConfigurationCatalog
 from .core import SCHEMA_VERSION, atomic_json_write, atomic_text_write, read_jsonl
+from .generation import build_timeout_diagnostics
 
 
 CONFIG_FIELDS = """
@@ -31,9 +31,16 @@ transpile_p95_s transpile_max_s eligible_configurations best_config_id
 best_median_score
 """.split()
 FAILURE_FIELDS = """
-device_id run_id circuit_id family num_qubits config_id seed status phase category
-exception_type timeout_seconds observed_total_seconds message
-last_relevant_qiskit_frame
+device_id device_num_qubits target_sha256 run_id circuit_id family generator
+num_qubits depth size config_id optimization_level layout_method routing_method
+seed status phase category exception_type timeout_seconds observed_total_seconds
+message diagnostic_method observed_phase completed_pass_count
+last_completed_pass_name last_completed_pass_class last_completed_pass_index
+last_completed_pass_duration_seconds last_completed_pass_wall_elapsed_seconds
+interrupted_pass_file interrupted_pass_function interrupted_pass_line
+inferred_qiskit_stage inferred_configuration_component
+inferred_configuration_value inference_confidence
+causal_attribution_supported diagnostic_limitations last_relevant_qiskit_frame
 """.split()
 COMPARISON_FIELDS = """
 device_id device_num_qubits workers timeout_seconds compatible_circuits incompatible_circuits
@@ -141,7 +148,12 @@ def _table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
 
 def _csv(path: Path, rows: Sequence[Mapping[str, Any]], fields: Sequence[str]) -> None:
     stream = StringIO(newline="")
-    writer = csv.DictWriter(stream, fieldnames=list(fields), extrasaction="ignore")
+    writer = csv.DictWriter(
+        stream,
+        fieldnames=list(fields),
+        extrasaction="ignore",
+        lineterminator="\n",
+    )
     writer.writeheader()
     for row in rows:
         writer.writerow(
@@ -286,32 +298,68 @@ def _circuit_rows(
     return rows
 
 
-def _last_qiskit_frame(traceback_text: str) -> str | None:
-    candidates = [
-        line.strip()
-        for line in traceback_text.splitlines()
-        if re.search(r"File .*(qiskit|mqt)", line, re.IGNORECASE)
-    ]
-    return candidates[-1] if candidates else None
+def _timeout_diagnostics(
+    run: Mapping[str, Any],
+    failure: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    existing = failure.get("timeout_diagnostics")
+    if isinstance(existing, Mapping):
+        return existing
+    if run.get("status") != "timeout":
+        return {}
+    provenance = run.get("provenance") or {}
+    versions = provenance.get("versions") or {}
+    return build_timeout_diagnostics(
+        traceback_text=str(failure.get("traceback", "")),
+        phase=str(failure.get("phase", run.get("phase", "unknown"))),
+        timeout_seconds=failure.get("timeout_seconds"),
+        elapsed_seconds=(run.get("timings_seconds") or {}).get("total"),
+        configuration=run.get("configuration") or {},
+        qiskit_version=str(versions.get("qiskit", "")),
+    )
 
 
-def _failure_rows(
-    device_id: str, runs: Sequence[Mapping[str, Any]]
+def failure_detail_rows(
+    runs: Sequence[Mapping[str, Any]],
+    device_id: str | None = None,
 ) -> list[dict[str, Any]]:
+    """Return backward-compatible, evidence-qualified failure CSV rows."""
     rows: list[dict[str, Any]] = []
     for run in runs:
         if run.get("status") == "success":
             continue
         failure = run.get("failure") or {}
         circuit = run.get("circuit") or {}
+        device = run.get("device") or {}
+        configuration = run.get("configuration") or {}
+        diagnostics = _timeout_diagnostics(run, failure)
+        last_pass = diagnostics.get("last_completed_pass") or {}
+        interrupted = diagnostics.get("interrupted_stack_frame") or {}
+        inference = diagnostics.get("inference") or {}
+        component = inference.get("configuration_component") or {}
+        limitations = diagnostics.get("limitations") or []
+        interrupted_text = None
+        if interrupted:
+            interrupted_text = (
+                f"{interrupted.get('file')}:{interrupted.get('line')}:"
+                f"{interrupted.get('function')}"
+            )
         rows.append(
             {
-                "device_id": device_id,
+                "device_id": device_id or device.get("device_id"),
+                "device_num_qubits": device.get("num_qubits"),
+                "target_sha256": device.get("target_sha256"),
                 "run_id": run.get("run_id"),
                 "circuit_id": circuit.get("circuit_id"),
                 "family": circuit.get("benchmark_family"),
+                "generator": circuit.get("generator"),
                 "num_qubits": circuit.get("num_qubits"),
-                "config_id": run.get("configuration", {}).get("config_id"),
+                "depth": circuit.get("depth"),
+                "size": circuit.get("size"),
+                "config_id": configuration.get("config_id"),
+                "optimization_level": configuration.get("optimization_level"),
+                "layout_method": configuration.get("layout_method"),
+                "routing_method": configuration.get("routing_method"),
                 "seed": run.get("seed_transpiler"),
                 "status": run.get("status"),
                 "phase": failure.get("phase", run.get("phase")),
@@ -320,9 +368,30 @@ def _failure_rows(
                 "timeout_seconds": failure.get("timeout_seconds"),
                 "observed_total_seconds": run.get("timings_seconds", {}).get("total"),
                 "message": failure.get("message"),
-                "last_relevant_qiskit_frame": _last_qiskit_frame(
-                    str(failure.get("traceback", ""))
+                "diagnostic_method": diagnostics.get("observation_method"),
+                "observed_phase": diagnostics.get("observed_phase"),
+                "completed_pass_count": diagnostics.get("completed_pass_count"),
+                "last_completed_pass_name": last_pass.get("name"),
+                "last_completed_pass_class": last_pass.get("class"),
+                "last_completed_pass_index": last_pass.get("index"),
+                "last_completed_pass_duration_seconds": last_pass.get(
+                    "qiskit_reported_duration_seconds"
                 ),
+                "last_completed_pass_wall_elapsed_seconds": last_pass.get(
+                    "wall_elapsed_seconds"
+                ),
+                "interrupted_pass_file": interrupted.get("file"),
+                "interrupted_pass_function": interrupted.get("function"),
+                "interrupted_pass_line": interrupted.get("line"),
+                "inferred_qiskit_stage": inference.get("qiskit_stage"),
+                "inferred_configuration_component": component.get("name"),
+                "inferred_configuration_value": component.get("value"),
+                "inference_confidence": inference.get("confidence"),
+                "causal_attribution_supported": inference.get(
+                    "causal_attribution_supported"
+                ),
+                "diagnostic_limitations": " | ".join(map(str, limitations)),
+                "last_relevant_qiskit_frame": interrupted_text,
             }
         )
     return sorted(
@@ -334,6 +403,17 @@ def _failure_rows(
             int(row["seed"] or 0),
         ),
     )
+
+
+def write_failure_csv(
+    path: Path,
+    runs: Sequence[Mapping[str, Any]],
+    device_id: str | None = None,
+) -> int:
+    """Write the canonical failure view and return its number of rows."""
+    rows = failure_detail_rows(runs, device_id)
+    _csv(path, rows, FAILURE_FIELDS)
+    return len(rows)
 
 
 def _failure_breakdown(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -794,7 +874,7 @@ def build_pilot_report(
     circuit_rows = _circuit_rows(
         catalog, device_id, manifest, runs, summaries
     )
-    failure_rows = _failure_rows(device_id, runs)
+    failure_rows = failure_detail_rows(runs, device_id)
     eligible = sum(bool(item.get("eligible_for_ranking")) for item in summaries)
     policy = status.get("execution_policy") or {}
     observed = len(runs)
@@ -896,7 +976,7 @@ def build_pilot_report(
     atomic_text_write(paths["markdown"], _pilot_markdown(summary))
     _csv(paths["configuration_csv"], configuration_rows, CONFIG_FIELDS)
     _csv(paths["circuit_csv"], circuit_rows, CIRCUIT_FIELDS)
-    _csv(paths["failure_csv"], failure_rows, FAILURE_FIELDS)
+    write_failure_csv(paths["failure_csv"], runs, device_id)
     comparison = build_device_comparison(output_root.parent)
     return {
         "device_id": device_id,

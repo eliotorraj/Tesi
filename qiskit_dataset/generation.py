@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import multiprocessing
+import re
 import signal
 import sys
 import time
@@ -15,7 +16,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from io import StringIO
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, Iterator, Mapping, Sequence
 
 from .catalog import ConfigurationCatalog
 from .core import (
@@ -30,6 +31,7 @@ from .core import (
     finite_float,
     load_manifest,
     package_versions,
+    resolve_circuit_source,
     sha256_bytes,
 )
 
@@ -43,6 +45,204 @@ class AttemptTimeoutError(TimeoutError):
 
 class TargetValidationError(RuntimeError):
     """Raised when a compiled circuit does not satisfy target constraints."""
+
+
+_TIMEOUT_LIMITATIONS = (
+    "Il callback pubblico di Qiskit viene eseguito dopo ogni pass: "
+    "last_completed_pass non identifica necessariamente il pass interrotto.",
+    "Lo stack indica dove SIGALRM è stato osservato, non dimostra quale pass, "
+    "configurazione, circuito o hardware abbia causato il timeout.",
+    "Un'attribuzione causale richiede confronti controllati tra circuiti, "
+    "configurazioni e device.",
+)
+_TRACEBACK_FRAME_RE = re.compile(
+    r'^\s*File "(?P<file>[^"]+)", line (?P<line>\d+), in (?P<function>[^\n]+)$',
+    re.MULTILINE,
+)
+_STAGE_MARKERS_QISKIT_2_1_1 = (
+    ("qiskit/transpiler/passes/layout/vf2_post_layout.py", "optimization"),
+    ("qiskit/transpiler/passes/routing/lookahead_swap.py", "routing"),
+    ("qiskit/transpiler/passes/routing/sabre_swap.py", "routing"),
+    ("qiskit/transpiler/passes/routing/basic_swap.py", "routing"),
+    ("qiskit/transpiler/passes/routing/stochastic_swap.py", "routing"),
+    ("qiskit/transpiler/passes/layout/sabre_layout.py", "layout"),
+    ("qiskit/transpiler/passes/layout/dense_layout.py", "layout"),
+    ("qiskit/transpiler/passes/layout/trivial_layout.py", "layout"),
+    ("qiskit/transpiler/passes/layout/vf2_layout.py", "layout"),
+)
+
+
+def _pass_identity(pass_: Any) -> tuple[str, str]:
+    pass_class = f"{type(pass_).__module__}.{type(pass_).__qualname__}"
+    try:
+        candidate = pass_.name()
+    except Exception:
+        candidate = type(pass_).__name__
+    return str(candidate or type(pass_).__name__), pass_class
+
+
+def _capture_completed_pass(
+    progress: dict[str, Any],
+    transpilation_started: float,
+    callback_data: Mapping[str, Any],
+) -> None:
+    """Record only facts exposed by Qiskit's post-pass callback."""
+    pass_ = callback_data.get("pass_")
+    if pass_ is None:
+        return
+    pass_name, pass_class = _pass_identity(pass_)
+    raw_index = callback_data.get("count")
+    try:
+        pass_index = None if raw_index is None else int(raw_index)
+    except (TypeError, ValueError):
+        pass_index = None
+    try:
+        pass_duration = finite_float(callback_data.get("time"))
+    except (TypeError, ValueError, OverflowError):
+        pass_duration = None
+    progress["completed_pass_count"] = (
+        pass_index + 1
+        if pass_index is not None
+        else int(progress.get("completed_pass_count", 0)) + 1
+    )
+    progress["last_completed_pass"] = {
+        "name": pass_name,
+        "class": pass_class,
+        "index": pass_index,
+        "qiskit_reported_duration_seconds": pass_duration,
+        "wall_elapsed_seconds": time.perf_counter() - transpilation_started,
+    }
+
+
+def _portable_frame_file(filename: str) -> str:
+    normalized = str(filename).replace("\\", "/")
+    for marker in ("/site-packages/", "/dist-packages/"):
+        if marker in normalized:
+            return normalized.split(marker, 1)[1]
+    return normalized
+
+
+def _qiskit_stack_frames(traceback_text: str) -> list[dict[str, Any]]:
+    frames: list[dict[str, Any]] = []
+    for match in _TRACEBACK_FRAME_RE.finditer(traceback_text):
+        filename = _portable_frame_file(match.group("file"))
+        normalized = "/" + filename.replace("\\", "/").lower()
+        if "/qiskit/" not in normalized and "/mqt/" not in normalized:
+            continue
+        frames.append(
+            {
+                "file": filename,
+                "function": match.group("function").strip(),
+                "line": int(match.group("line")),
+            }
+        )
+    return frames
+
+
+def _timeout_inference(
+    interrupted_frame: Mapping[str, Any] | None,
+    configuration: Mapping[str, Any],
+    qiskit_version: str | None,
+) -> dict[str, Any]:
+    filename = (
+        ""
+        if interrupted_frame is None
+        else str(interrupted_frame.get("file", "")).replace("\\", "/").lower()
+    )
+    marker = stage = None
+    if qiskit_version == "2.1.1":
+        for candidate_marker, candidate_stage in _STAGE_MARKERS_QISKIT_2_1_1:
+            if candidate_marker in filename:
+                marker, stage = candidate_marker, candidate_stage
+                break
+    component = None
+    if stage == "routing" and configuration.get("routing_method") is not None:
+        component = {
+            "name": "routing_method",
+            "value": configuration["routing_method"],
+        }
+    elif stage == "layout" and configuration.get("layout_method") is not None:
+        component = {
+            "name": "layout_method",
+            "value": configuration["layout_method"],
+        }
+    elif stage == "optimization":
+        component = {
+            "name": "optimization_level",
+            "value": configuration.get("optimization_level"),
+        }
+    if marker is None:
+        basis = [
+            "Nessun mapping di stage verificato per il frame e la versione "
+            "Qiskit osservati."
+        ]
+        confidence = "none"
+    else:
+        basis = [
+            f"Lo stack interrotto contiene {marker!r}.",
+            "Lo stage è inferito dalla pipeline preset fissata a Qiskit 2.1.1; "
+            "non è un segnale runtime né una causa dimostrata.",
+        ]
+        if component is not None:
+            basis.append(
+                f"La configurazione usa {component['name']}="
+                f"{component['value']!r}."
+            )
+        confidence = "medium" if component is not None else "low"
+    return {
+        "qiskit_stage": stage,
+        "configuration_component": component,
+        "confidence": confidence,
+        "basis": basis,
+        "causal_attribution_supported": False,
+    }
+
+
+def build_timeout_diagnostics(
+    *,
+    traceback_text: str,
+    phase: str,
+    timeout_seconds: Any,
+    elapsed_seconds: Any,
+    configuration: Mapping[str, Any],
+    qiskit_version: str | None,
+    progress: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build factual timeout observations and explicitly qualified inference."""
+    progress = progress or {}
+    frames = _qiskit_stack_frames(traceback_text)
+    pass_frames = [
+        frame
+        for frame in frames
+        if "/qiskit/transpiler/passes/"
+        in ("/" + str(frame["file"]).replace("\\", "/").lower())
+    ]
+    interrupted_frame = (
+        pass_frames[-1] if pass_frames else (frames[-1] if frames else None)
+    )
+    has_callback_observation = bool(
+        progress.get("last_completed_pass")
+        or progress.get("completed_pass_count")
+    )
+    return {
+        "observation_method": (
+            "qiskit_post_pass_callback_and_sigalrm_traceback"
+            if has_callback_observation
+            else "sigalrm_traceback"
+        ),
+        "observed_phase": phase,
+        "timeout_seconds": finite_float(timeout_seconds),
+        "elapsed_seconds": finite_float(elapsed_seconds),
+        "completed_pass_count": int(progress.get("completed_pass_count", 0)),
+        "last_completed_pass": progress.get("last_completed_pass"),
+        "interrupted_stack_frame": interrupted_frame,
+        "inference": _timeout_inference(
+            interrupted_frame,
+            configuration,
+            qiskit_version,
+        ),
+        "limitations": list(_TIMEOUT_LIMITATIONS),
+    }
 
 
 def _target_payload(target: Any) -> dict[str, Any]:
@@ -254,15 +454,20 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
     record = _base_record(task)
     phase = "source_loading"
     total_started = time.perf_counter()
+    phase_started = total_started
+    transpiler_progress: dict[str, Any] = {
+        "completed_pass_count": 0,
+        "last_completed_pass": None,
+    }
     validation: dict[str, Any] | None = None
     try:
         with _hard_timeout(float(task["timeout_seconds"])):
-            started = time.perf_counter()
+            started = phase_started = time.perf_counter()
             circuit = QuantumCircuit.from_qasm_file(str(task["source_path"]))
             record["timings_seconds"][phase] = time.perf_counter() - started
 
             phase = "target_loading"
-            started = time.perf_counter()
+            started = phase_started = time.perf_counter()
             target = _worker_target(str(task["device_id"]))
             record["timings_seconds"][phase] = time.perf_counter() - started
             if int(circuit.num_qubits) > int(target.num_qubits):
@@ -272,7 +477,7 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
                 )
 
             phase = "transpilation"
-            started = time.perf_counter()
+            started = phase_started = time.perf_counter()
             configuration = task["configuration"]
             kwargs: dict[str, Any] = {
                 "target": target,
@@ -286,11 +491,16 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
                 kwargs["layout_method"] = configuration["layout_method"]
             if configuration.get("routing_method") is not None:
                 kwargs["routing_method"] = configuration["routing_method"]
+            kwargs["callback"] = lambda **callback_data: _capture_completed_pass(
+                transpiler_progress,
+                started,
+                callback_data,
+            )
             compiled = transpile(circuit, **kwargs)
             record["timings_seconds"][phase] = time.perf_counter() - started
 
             phase = "target_validation"
-            started = time.perf_counter()
+            started = phase_started = time.perf_counter()
             validation = validate_compiled_circuit(compiled, target)
             record["target_validation"] = validation
             record["timings_seconds"][phase] = time.perf_counter() - started
@@ -298,14 +508,14 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
                 raise TargetValidationError(canonical_json(validation))
 
             phase = "scoring"
-            started = time.perf_counter()
+            started = phase_started = time.perf_counter()
             score = float(expected_fidelity(compiled, target))
             record["timings_seconds"][phase] = time.perf_counter() - started
             if not math.isfinite(score):
                 raise ValueError(f"Score non finito: {score!r}.")
 
             phase = "serialization"
-            started = time.perf_counter()
+            started = phase_started = time.perf_counter()
             stream = StringIO()
             qasm_dump(compiled, stream)
             compiled_qasm = stream.getvalue()
@@ -335,20 +545,29 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
             record["score"] = score
             record["_compiled_qasm2"] = compiled_qasm
     except Exception as error:
+        elapsed_total = time.perf_counter() - total_started
+        if (
+            phase in record["timings_seconds"]
+            and record["timings_seconds"][phase] is None
+        ):
+            record["timings_seconds"][phase] = (
+                time.perf_counter() - phase_started
+            )
+        traceback_text = "".join(
+            traceback.format_exception(type(error), error, error.__traceback__)
+        )
         status = "timeout" if isinstance(error, AttemptTimeoutError) else "failure"
         record["status"] = status
         record["phase"] = phase
         record["score"] = None
         record["target_validation"] = validation
         record["compiled_circuit"] = None
-        record["failure"] = {
+        failure = {
             "phase": phase,
             "category": _failure_category(error, phase),
             "exception_type": type(error).__name__,
             "message": str(error)[:4000],
-            "traceback": "".join(
-                traceback.format_exception(type(error), error, error.__traceback__)
-            )[-8000:],
+            "traceback": traceback_text[-8000:],
             "retryable": isinstance(error, AttemptTimeoutError),
             "timeout_seconds": (
                 float(task["timeout_seconds"])
@@ -356,6 +575,17 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
                 else None
             ),
         }
+        if isinstance(error, AttemptTimeoutError):
+            failure["timeout_diagnostics"] = build_timeout_diagnostics(
+                traceback_text=traceback_text,
+                phase=phase,
+                timeout_seconds=task["timeout_seconds"],
+                elapsed_seconds=elapsed_total,
+                configuration=task["configuration"],
+                qiskit_version=str(task["versions"].get("qiskit", "")),
+                progress=transpiler_progress,
+            )
+        record["failure"] = failure
     record["timings_seconds"]["total"] = time.perf_counter() - total_started
     return record
 
@@ -494,7 +724,11 @@ def generate_dataset(
         attempt["target_record"] = target_record
         attempt["timeout_seconds"] = float(timeout_seconds)
         attempt["source_path"] = str(
-            output_root / str(attempt["circuit"]["source_ref"])
+            resolve_circuit_source(
+                objective_name,
+                scope,
+                str(attempt["circuit"]["source_ref"]),
+            )
         )
         cached = None if force else _load_cached_record(
             objective_name,

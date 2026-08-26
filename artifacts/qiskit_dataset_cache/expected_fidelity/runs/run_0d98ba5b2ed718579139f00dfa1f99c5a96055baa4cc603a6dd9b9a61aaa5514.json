@@ -86,23 +86,7 @@
     "source_sha256": "f6b92fbb8bf7b27699ae55317af480f99fb028a75337b36990de67ea25e7c244",
     "split": "train"
   },
-  "compiled_circuit": {
-    "artifact_ref": "artifacts/qiskit_dataset_cache/expected_fidelity/compiled_qasm/run_0d98ba5b2ed718579139f00dfa1f99c5a96055baa4cc603a6dd9b9a61aaa5514.qasm",
-    "depth": 1137,
-    "format": "OpenQASM 2",
-    "num_qubits": 156,
-    "operation_counts": {
-      "barrier": 1,
-      "cz": 931,
-      "measure": 90,
-      "rz": 607,
-      "sx": 1873,
-      "x": 1
-    },
-    "qasm_sha256": "ac79ac382b5cec07d650379a07236ccda3c4ec21485f3f085aed6d1eade2101c",
-    "size": 3502,
-    "two_qubit_gate_count": 931
-  },
+  "compiled_circuit": null,
   "configuration": {
     "catalog_id": "qiskit_expected_fidelity_pilot_v1",
     "config_id": "o3_trivial_sabre",
@@ -135,14 +119,60 @@
     "target_sha256": "a30f41e65c03fb900a4b8852261a8407c56c389560f4031ecb43099c1bec5089",
     "target_type": "qiskit.transpiler.target.Target"
   },
-  "failure": null,
+  "failure": {
+    "category": "timeout",
+    "exception_type": "AttemptTimeoutError",
+    "message": "Tentativo interrotto dopo 100.0 secondi.",
+    "phase": "transpilation",
+    "retryable": true,
+    "timeout_diagnostics": {
+      "completed_pass_count": 48,
+      "elapsed_seconds": 100.00010305900014,
+      "inference": {
+        "basis": [
+          "Lo stack interrotto contiene 'qiskit/transpiler/passes/layout/vf2_post_layout.py'.",
+          "Lo stage è inferito dalla pipeline preset fissata a Qiskit 2.1.1; non è un segnale runtime né una causa dimostrata.",
+          "La configurazione usa optimization_level=3."
+        ],
+        "causal_attribution_supported": false,
+        "confidence": "medium",
+        "configuration_component": {
+          "name": "optimization_level",
+          "value": 3
+        },
+        "qiskit_stage": "optimization"
+      },
+      "interrupted_stack_frame": {
+        "file": "qiskit/transpiler/passes/layout/vf2_post_layout.py",
+        "function": "_score_layout",
+        "line": 366
+      },
+      "last_completed_pass": {
+        "class": "qiskit.transpiler.passes.layout.vf2_post_layout.VF2PostLayout",
+        "index": 47,
+        "name": "VF2PostLayout",
+        "qiskit_reported_duration_seconds": 99.89144277572632,
+        "wall_elapsed_seconds": 99.99714171899996
+      },
+      "limitations": [
+        "Il callback pubblico di Qiskit viene eseguito dopo ogni pass: last_completed_pass non identifica necessariamente il pass interrotto.",
+        "Lo stack indica dove SIGALRM è stato osservato, non dimostra quale pass, configurazione, circuito o hardware abbia causato il timeout.",
+        "Un'attribuzione causale richiede confronti controllati tra circuiti, configurazioni e device."
+      ],
+      "observation_method": "qiskit_post_pass_callback_and_sigalrm_traceback",
+      "observed_phase": "transpilation",
+      "timeout_seconds": 100.0
+    },
+    "timeout_seconds": 100.0,
+    "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 499, in execute_attempt\n    compiled = transpile(circuit, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/compiler/transpiler.py\", line 291, in transpile\n    out_circuits = pm.run(circuits, callback=callback, num_processes=num_processes)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 451, in run\n    return super().run(circuits, output_name, callback, num_processes=num_processes)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 474, in wrapper\n    return meth(*meth_args, **meth_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 233, in run\n    return super().run(\n           ^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 238, in run\n    _run_workflow(\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 312, in _run_workflow\n    passmanager_ir, final_state = flow_controller.execute(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 98, in execute\n    ret = self.run(passmanager_ir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 284, in run\n    layout_score = self._score_layout(\n                   ^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 366, in _score_layout\n    fidelity *= (1 - props.error) ** count\n    ^^^^^^^^\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 333, in on_alarm\n    raise AttemptTimeoutError(\nqiskit_dataset.generation.AttemptTimeoutError: Tentativo interrotto dopo 100.0 secondi.\n"
+  },
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
-  "phase": "completed",
+  "phase": "transpilation",
   "provenance": {
     "compiler": "qiskit.transpile",
     "fixed_transpile_options": {
@@ -158,24 +188,18 @@
   },
   "run_id": "run_0d98ba5b2ed718579139f00dfa1f99c5a96055baa4cc603a6dd9b9a61aaa5514",
   "schema_version": "1.0.0",
-  "score": 0.0668762547,
+  "score": null,
   "seed_transpiler": 1,
   "split": "train",
-  "status": "success",
-  "target_validation": {
-    "basis_valid": true,
-    "connectivity_valid": true,
-    "is_executable_on_target": true,
-    "unsupported_operations": [],
-    "validation_errors": []
-  },
+  "status": "timeout",
+  "target_validation": null,
   "timings_seconds": {
-    "scoring": 0.0043730009997489105,
-    "serialization": 0.021891111000059027,
-    "source_loading": 0.0028400770002008358,
-    "target_loading": 2.9500001801352482e-06,
-    "target_validation": 0.0030989629999567114,
-    "total": 95.1401653769999,
-    "transpilation": 95.10789283399981
+    "scoring": null,
+    "serialization": null,
+    "source_loading": 0.0028981590003240854,
+    "target_loading": 2.4600003598607145e-06,
+    "target_validation": null,
+    "total": 100.00229389000015,
+    "transpilation": 99.99717259999943
   }
 }

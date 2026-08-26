@@ -1,19 +1,22 @@
 {
   "available_attempts": 360,
   "available_status": {
-    "success": 335,
-    "timeout": 25
+    "success": 321,
+    "timeout": 39
   },
-  "cache_hits": 360,
+  "cache_hits": 0,
   "cache_root": "artifacts/qiskit_dataset_cache/expected_fidelity",
   "complete": true,
   "dataset_scope": "pilot",
   "device_id": "ibm_falcon_127",
-  "executed_now": 0,
-  "executed_status": {},
+  "executed_now": 360,
+  "executed_status": {
+    "success": 321,
+    "timeout": 39
+  },
   "execution_policy": {
-    "timeout_seconds": 900.0,
-    "wall_clock_seconds_this_invocation": 0.45160336999833817,
+    "timeout_seconds": 100.0,
+    "wall_clock_seconds_this_invocation": 2227.972426058,
     "workers": 2
   },
   "missing_attempts": 0,

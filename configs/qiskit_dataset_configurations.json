@@ -13,7 +13,7 @@
     "name": "expected_fidelity",
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale."
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale."
   },
   "seeds": [0, 1, 2],
   "fixed_transpile_options": {

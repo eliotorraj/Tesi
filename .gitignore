@@ -6,3 +6,11 @@ __pycache__/
 tmp/mqt_predictor-*
 .workspace_archive/
 
+# Il branch qiskit_dataset conserva solo la pipeline del Dataset Qiskit diretto.
+artifacts/models/
+artifacts/cache/ml/
+artifacts/checkpoints/rl/
+artifacts/logs/ml/
+artifacts/logs/rl/
+datasets/device_selector_*.json
+datasets/llm_mqt_full_pipeline_*.json

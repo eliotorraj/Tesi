@@ -192,6 +192,102 @@ class PrototypeArchitectureTests(unittest.TestCase):
         self.assertNotIn("evaluation_only", serialized)
         self.assertNotIn("historical qasm intentionally omitted", serialized)
 
+    def test_jsonl_retriever_exposes_labeled_claim_and_evidence(self) -> None:
+        request = QasmRequestParser().parse(self.submission)
+        hardware = HardwareProfile(
+            device_id="ibm_falcon_27",
+            num_qubits=27,
+            operation_names=("x", "cx"),
+            coupling_edges=((0, 1),),
+        )
+        report = WidthCompatibilityFilter().filter(request, (hardware,))
+        record = {
+            "schema_version": "2.0.0",
+            "rag_id": "rag_" + "a" * 64,
+            "split": "train",
+            "view_scope": "global_multi_device",
+            "objective": {"name": "expected_fidelity"},
+            "retrieval_input": {
+                "circuit": {
+                    "circuit_id": "historical",
+                    "benchmark_family": "synthetic",
+                    "generator": "qiskit",
+                    "num_qubits": 2,
+                    "depth": 2,
+                    "size": 2,
+                    "source_sha256": "b" * 64,
+                    "features": {"values": dict(request.features)},
+                },
+                "compatible_devices": [
+                    {
+                        "device_id": "ibm_falcon_27",
+                        "num_qubits": 27,
+                        "target_sha256": "c" * 64,
+                    }
+                ],
+                "user_constraints": {
+                    "status": "not_applied_offline",
+                    "hard_constraints": [],
+                    "preferences": [],
+                },
+            },
+            "selected_device": {
+                "device_id": "ibm_falcon_27",
+                "median_score": 0.9,
+            },
+            "top_configurations": [
+                {
+                    "rank": 1,
+                    "device_id": "ibm_falcon_27",
+                    "config_id": "o2_default_default",
+                    "evidence_id": "evidence_" + "d" * 64,
+                }
+            ],
+            "claims": [
+                {
+                    "claim_id": "claim_" + "e" * 64,
+                    "text": "Scelta sostenuta dalla mediana osservata.",
+                    "evidence_ids": ["evidence_" + "d" * 64],
+                }
+            ],
+            "evidence": [
+                {
+                    "evidence_id": "evidence_" + "d" * 64,
+                    "aggregation": {"method": "median", "value": 0.9},
+                }
+            ],
+            "scientific_caveats": [
+                {
+                    "caveat_id": "estimate",
+                    "text": "Non e una misura hardware.",
+                }
+            ],
+        }
+        dataset_path = self.root / "rag_examples.jsonl"
+        dataset_path.write_text(
+            json.dumps(record) + "\n",
+            encoding="utf-8",
+        )
+        examples = JsonDatasetContextRetriever(dataset_path).retrieve(
+            request,
+            report,
+            limit=1,
+        )
+        self.assertEqual(len(examples), 1)
+        prompt_example = examples[0].prompt_input
+        self.assertEqual(
+            prompt_example["label"]["selected_device"]["device_id"],
+            "ibm_falcon_27",
+        )
+        self.assertEqual(
+            prompt_example["claims"][0]["evidence_ids"],
+            ["evidence_" + "d" * 64],
+        )
+        self.assertEqual(
+            prompt_example["evidence"][0]["aggregation"]["value"],
+            0.9,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

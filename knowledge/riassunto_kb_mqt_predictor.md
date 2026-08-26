@@ -5214,3 +5214,353 @@ Con i modelli disidratati, `qcompile`, nuovi training e altri flussi che richied
 10. Prima di nuovi training o di `qcompile` bisogna scaricare esplicitamente solo i modelli necessari.
 
 ---
+
+# Aggiornamento della chat del 25–26 agosto 2026 — Dataset Qiskit diretto
+
+Questa sezione registra cronologicamente richieste, decisioni, implementazioni e
+risultati della chat Codex `Definisci pipeline e dataset`. Le misure e lo stato
+del repository derivano da verifiche locali; le scelte su RAG, split, vincoli e
+timeout sono decisioni ingegneristiche della tesi, non risultati dei paper MQT.
+
+## Rilettura degli scambi con i relatori e scelta metodologica
+
+L'utente ha chiesto di ricostruire lo stato del progetto leggendo, in ordine:
+`Report_Tesi_Aggiornamento_Agosto_2026.pdf`, la risposta dei relatori al report,
+`Specifica_Tesi.pdf` e la successiva risposta dei relatori alla specifica.
+
+Il problema individuato è l'allineamento tra il dato raccolto e il task finale.
+Le trace RL descrivono una scelta sequenziale di pass appartenenti anche a
+framework diversi; l'LLM deve invece scegliere `optimization_level`,
+`layout_method` e `routing_method` di `qiskit.transpile`.
+
+Con un mese residuo è stato deciso di costruire un nuovo Dataset contenente
+direttamente configurazioni Qiskit e risultati empiricamente misurati. Non si
+usa come ground truth una traduzione euristica delle trace RL, perché:
+
+- una categoria RL non determina univocamente un parametro Qiskit;
+- le trace mescolano Qiskit, TKET, BQSKit e azioni MQT;
+- ordine e ripetizione dipendono dagli stati intermedi;
+- configurazioni diverse possono produrre pipeline simili;
+- la configurazione iniziale non è ricostruibile in generale dalla trace;
+- la compilazione reale produce ground truth allineata: configurazione,
+  validità, score e metriche.
+
+Le trace RL restano baseline e risultato precedente, ma non sono più la base
+del Dataset destinato al RAG.
+
+## Protocollo del nuovo Dataset
+
+Non si esplora l'intero prodotto cartesiano Qiskit. Si usa un catalogo congelato,
+si compila ogni configurazione e si confrontano i circuiti validi mediante
+`expected_fidelity`. Score maggiore significa risultato migliore; il confronto
+finale usa l'aggregazione dei tre seed.
+
+Protocollo:
+
+- obiettivo: `expected_fidelity`;
+- device iniziale: `ibm_falcon_127`;
+- seed: `0`, `1`, `2`;
+- 12 configurazioni:
+  - `o2_default_default`, `o3_default_default`;
+  - `o2_sabre_sabre`, `o3_sabre_sabre`;
+  - `o2_dense_sabre`, `o3_dense_sabre`;
+  - `o2_trivial_sabre`, `o3_trivial_sabre`;
+  - `o2_sabre_lookahead`, `o3_sabre_lookahead`;
+  - `o2_sabre_basic`, `o3_sabre_basic`.
+
+`default` lascia il metodo non specificato. Non sono ammesse combinazioni
+fuori catalogo. Il costo nominale è:
+
+```text
+N coppie circuito-device × 12 configurazioni × 3 seed
+```
+
+Il pilot da 10 circuiti e un device ha 360 tentativi nominali; il full usa i
+600 circuiti del corpus ML di MQT Predictor.
+
+## Branch e pipeline
+
+È stato scelto il branch `qiskit_dataset`, lavorando da `/home/elio/Tesi` e
+lasciando `main` intatto. Le modifiche non sono state committate
+automaticamente.
+
+```text
+07_prepare_qiskit_dataset.py
+  → circuiti, split, compatibilità, manifest e tentativi attesi
+08_generate_qiskit_dataset.py
+  → transpiling, validazione, scoring, timeout, errori e cache
+09_build_qiskit_dataset_views.py
+  → aggregati sui seed, ranking, RAG e report
+```
+
+L'unità di lavoro è `circuito × device × configurazione × seed`.
+
+File:
+
+- `qiskit_runs.jsonl`: una riga per tentativo con circuito, feature, device,
+  configurazione, seed, stato, fase, tempi, validazione, score e failure;
+- `qiskit_configuration_aggregates.jsonl`: aggregazione dei tre seed per
+  circuito-configurazione e fonte del ranking;
+- `rag_examples.jsonl`: circuito, feature e top-k per il retrieval.
+
+Directory:
+
+```text
+datasets/expected_fidelity/
+├── pilot/
+└── full/
+```
+
+L'estensione multi-device aggiunge una sottocartella per device, per esempio
+`datasets/expected_fidelity/pilot/ibm_falcon_127/`.
+
+## Validazione integrata
+
+La validazione non va eseguita separatamente. Dopo `qiskit.transpile` e prima
+dello scoring, lo script 08 controlla basis con `GatesInBasis`, coupling map
+con `CheckMap`, operazioni non supportate ed eseguibilità sul `Target`.
+
+```text
+transpile → target validation → expected_fidelity se valido → salvataggio
+```
+
+Un circuito non valido ha `score = null`, stato `failure` e fase
+`target_validation`; non entra nel ranking/RAG. È validazione strutturale, non
+esecuzione su hardware reale.
+
+## Timeout, cache e riesecuzione
+
+`timeout=8` significa otto tentativi individuali oltre soglia, non
+necessariamente otto circuiti. Sono salvati con `status = "timeout"` e
+`score = null`; la generazione prosegue. Una configurazione normalmente entra
+nel ranking soltanto con 3/3 seed riusciti.
+
+Lo script 08 usa una cache. Il flag già disponibile per conservare i successi e
+rieseguire failure/timeout è `--retry-failures`.
+
+```bash
+.venv/bin/python scripts/08_generate_qiskit_dataset.py \
+  --scope pilot --device ibm_falcon_127 \
+  --workers 2 --timeout-seconds 120 --retry-failures
+```
+
+Correzione dell'ultima risposta della chat: non serve aggiungere
+`--retry-timeouts`; `--retry-failures` era già implementato e comprende i
+timeout. Senza il flag, gli esiti registrati possono essere riutilizzati.
+
+Un successo ottenuto sopra una nuova soglia più bassa resta uno score valido,
+ma non rispetta retroattivamente la nuova timeout policy. Cache e policy devono
+quindi essere annotate e trattate coerentemente.
+
+## Risultati del pilot `ibm_falcon_127`
+
+- 360 tentativi; 335 successi (93,1%); 25 timeout (6,9%);
+- nessun altro fallimento;
+- 110 aggregati ammissibili su 120;
+- 10 aggregati incompleti, tutti `lookahead`;
+- 6 esempi RAG, uno per circuito train.
+
+| Configurazione | Successi | Timeout | Tasso timeout |
+|---|---:|---:|---:|
+| `o2_sabre_lookahead` | 19 | 11 | 36,7% |
+| `o3_sabre_lookahead` | 16 | 14 | 46,7% |
+| Altre 10 | 300 | 0 | 0% |
+
+Tutti i timeout sono avvenuti in `qiskit.transpile`, con layout `sabre`,
+routing `lookahead` e soglia 900 secondi. Gli stack trace indicavano
+`LookaheadSwap`, distanze nella coupling map e post-layout: costo patologico
+della ricerca, non QASM invalido.
+
+| Gruppo di successi | N | Min | Mediana | Media | P95 | Max |
+|---|---:|---:|---:|---:|---:|---:|
+| Tutti | 335 | 0,008 s | 0,139 s | 10,86 s | 12,49 s | 538,37 s |
+| Senza `lookahead` | 300 | 0,008 s | 0,108 s | 1,47 s | 4,73 s | 72,56 s |
+| Solo `lookahead` | 35 | 0,012 s | 7,54 s | 91,38 s | 499,20 s | 538,37 s |
+
+I timeout hanno consumato circa 6,25 worker-hours contro circa 1,01 per tutti i
+successi. Vincitori: baseline Qiskit 7 circuiti, layout 3, routing 0. Nessuna
+configurazione `lookahead` ha vinto.
+
+## Timeout per il full e worker
+
+Sensibilità controfattuale:
+
+| Timeout | Successi stimati | Timeout stimati | Successi non-lookahead persi |
+|---|---:|---:|---:|
+| 60 s | 321 | 39 | 3 |
+| 120 s | 329 | 31 | 0 |
+| 300 s | 331 | 29 | 0 |
+| 600/900 s | 335 | 25 | 0 |
+
+La raccomandazione principale è stata 120 secondi: conserva tutti i 300 successi
+non-`lookahead`, non perde i vincitori osservati e riduce il tempo sprecato.
+Centosecondi è possibile se si privilegia il costo, ma cambia il protocollo e
+deve essere applicato coerentemente a tutti i device.
+
+La proiezione lineare con due worker era circa 1,6 giorni ideali per il full a
+120 secondi contro circa nove giorni a 900 secondi. È soltanto una stima.
+
+Sul sistema osservato, circa 6 core fisici e 8 GB RAM, per statistiche
+confrontabili è stato consigliato un pilot alla volta con due worker. Per pura
+velocità si possono usare circa sei worker totali; quattro terminali × due
+worker creerebbero contesa e tempi meno confrontabili.
+
+## Estensione multi-device e report
+
+Gli script 07–09 accettano `--device`; ogni device usa una directory isolata.
+Device supportati:
+
+- `ibm_falcon_27`;
+- `ibm_heron_133`;
+- `ibm_falcon_127`;
+- `ibm_heron_156`;
+- `quantinuum_h2_56`.
+
+I circuiti troppo grandi restano annotati nel manifest ma non generano
+tentativi. Cardinalità pilot:
+
+| Device | Circuiti compatibili | Tentativi |
+|---|---:|---:|
+| `ibm_falcon_27` | 6/10 | 216 |
+| `ibm_heron_133` | 10/10 | 360 |
+| `ibm_falcon_127` | 10/10 | 360 |
+| `ibm_heron_156` | 10/10 | 360 |
+| `quantinuum_h2_56` | 8/10 | 288 |
+
+Per ogni pilot, lo script 09 produce:
+
+- `reports/pilot_report.md`;
+- `reports/pilot_summary.json`;
+- `reports/configuration_statistics.csv`;
+- `reports/circuit_statistics.csv`;
+- `reports/failure_details.csv`.
+
+Confronto cumulativo:
+
+- `datasets/expected_fidelity/pilot/device_comparison.md`;
+- `datasets/expected_fidelity/pilot/device_comparison.csv`.
+
+Il confronto annota worker e timeout. La vista Falcon 127 device-specifica è
+stata ricostruita dalla cache senza ricompilare; i vecchi file root sono rimasti
+byte-identici.
+
+Comando tipo:
+
+```bash
+cd ~/Tesi
+git switch qiskit_dataset
+DEVICE=ibm_falcon_27
+.venv/bin/python scripts/08_generate_qiskit_dataset.py \
+  --scope pilot --device "$DEVICE" --workers 2 --timeout-seconds 120
+.venv/bin/python scripts/09_build_qiskit_dataset_views.py \
+  --scope pilot --device "$DEVICE" --top-k 3
+```
+
+## Vincoli dell'utente finale
+
+Regola: l'utente può restringere il catalogo delle 12 configurazioni, ma non può
+modificare il protocollo, inventare combinazioni o disattivare i controlli.
+
+Non sono scelte dell'utente: feature; basis e coupling map; proprietà/errori del
+target; seed del Dataset; calcolo dello score; split; cache/worker; bypass della
+validazione; configurazioni fuori catalogo.
+
+Vincoli rigidi possibili: optimization level, layout/routing ammessi,
+configurazioni vietate, timeout finale, profondità massima, limite ai gate
+totali o a due qubit. Preferenze: fidelity, velocità, O2/O3, metodi preferiti,
+minore profondità o gate count.
+
+I vincoli si applicano alla richiesta, filtrando il catalogo, non durante la
+generazione. Il Dataset conserva tutte le configurazioni:
+
+```text
+12 configurazioni → filtro vincoli → ranking RAG → compilazione
+→ validazione → eventuale alternativa successiva
+```
+
+Se non resta alcuna configurazione, il sistema chiede di modificare i vincoli e
+non li rilassa silenziosamente.
+
+## Split train/validation/test nel sistema RAG
+
+Lo split non serve più ai vecchi modelli RL/ML, ma alla valutazione LLM+RAG:
+
+- train: corpus indicizzato e recuperabile;
+- validation: circuiti non indicizzati per scegliere prompt, `top_k`,
+  normalizzazione, retriever/reranker e retry;
+- test: circuiti non indicizzati, usati dopo aver congelato il sistema.
+
+Tutti i circuiti, inclusi validation/test, sono comunque compilati offline con
+le 12 configurazioni e tre seed per creare la ground truth dell'evaluatore.
+Questo non è leakage. Il sistema test vede circuito, feature, target, obiettivo
+e documenti train, non score o vincitore test.
+
+Nel pilot sono stati compilati tutti i 10 circuiti: 6 train, 2 validation e 2
+test. Il RAG contiene soltanto i sei train. Poiché noi umani abbiamo già
+analizzato i due test, il pilot è esplorativo, non una valutazione finale cieca.
+
+Test pilot già osservati:
+
+- `routing_indep_qiskit_12`;
+- `qpeexact_indep_tket_60`.
+
+Validation pilot:
+
+- `pricingcall_indep_qiskit_5`;
+- `qft_indep_tket_40`.
+
+Per il full: indicizzare solo train, regolare sulla validation, congelare il
+sistema, valutare il test una volta. Per massimo rigore si possono escludere
+dalla metrica finale i due test già studiati nel pilot, senza cancellarne i dati.
+
+## Dove leggere gli score
+
+1. `qiskit_runs.jsonl`: campo `score` del singolo tentativo/seed;
+2. `qiskit_configuration_aggregates.jsonl`: score aggregato sui tre seed, da
+   usare per scegliere la configurazione migliore;
+3. `rag_examples.jsonl`: top-k aggregata dei soli esempi destinati al RAG;
+4. `reports/pilot_report.md` e CSV: rappresentazione leggibile.
+
+Percorsi Falcon 127:
+
+```text
+datasets/expected_fidelity/pilot/ibm_falcon_127/qiskit_runs.jsonl
+datasets/expected_fidelity/pilot/ibm_falcon_127/qiskit_configuration_aggregates.jsonl
+datasets/expected_fidelity/pilot/ibm_falcon_127/rag_examples.jsonl
+datasets/expected_fidelity/pilot/ibm_falcon_127/reports/pilot_report.md
+datasets/expected_fidelity/pilot/ibm_falcon_127/reports/configuration_statistics.csv
+```
+
+Correzione dell'ultima risposta della chat: il nome raw verificato è
+`qiskit_runs.jsonl`, non `qiskit_compilation_runs.jsonl`.
+
+## Stato finale della sessione
+
+Modificati/aggiunti: configurazione del catalogo, `catalog.py`, `core.py`,
+`generation.py`, `views.py`, il nuovo `reporting.py`, script 07–09, schemi,
+test e documentazione.
+
+Verifiche riportate:
+
+- branch `qiskit_dataset`;
+- 21 test unitari superati;
+- `compileall` e `git diff --check` superati;
+- pilot storico Falcon 127 preservato byte per byte;
+- directory pilot preparate per cinque device;
+- nessun commit automatico.
+
+Decisioni consolidate:
+
+1. task LLM = scelta configurazione Qiskit, non ricostruzione trace RL;
+2. ground truth = compilazione reale + validazione + `expected_fidelity`;
+3. catalogo iniziale = 12 configurazioni × 3 seed;
+4. directory e report separati per device;
+5. `lookahead` è la causa dei tempi patologici osservati;
+6. timeout consigliato dal pilot = 120 secondi, uniforme e annotato;
+7. RAG indicizza soltanto train; validation/test restano ground truth esterna;
+8. compilare offline il test non è leakage; mostrarne label/score al sistema o
+   usarli per il tuning lo sarebbe;
+9. priorità del mese: completare Dataset, retrieval semplice, valutazione e
+   scrittura, evitando nuove metriche, fine-tuning e infrastruttura superflua.
+
+---

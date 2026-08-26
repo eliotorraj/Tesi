@@ -1,4 +1,4 @@
-"""Verify the Python environment and the MQT Predictor installation."""
+"""Verify the runtime needed by the direct-Qiskit Dataset pipeline."""
 
 from __future__ import annotations
 
@@ -11,16 +11,6 @@ PACKAGES = (
     "mqt.predictor",
     "mqt.bench",
     "qiskit",
-    "qiskit-aer",
-    "qiskit-ibm-runtime",
-    "qiskit-qasm3-import",
-    "pytket",
-    "pytket-qiskit",
-    "sb3-contrib",
-    "stable-baselines3",
-    "torch",
-    "scikit-learn",
-    "bqskit",
 )
 
 
@@ -45,13 +35,18 @@ def main() -> int:
         print("\nInstallazione incompleta: " + ", ".join(missing), file=sys.stderr)
         return 1
 
-    from mqt.predictor.ml.helper import get_path_trained_model as get_ml_model_path
-    from mqt.predictor.rl.helper import get_path_trained_model as get_rl_model_dir
+    try:
+        from mqt.bench.targets import get_device
+        from mqt.predictor.ml.helper import create_feature_vector, get_openqasm_gates
+        from mqt.predictor.reward import expected_fidelity
+        from qiskit import QuantumCircuit, transpile
+    except ImportError as error:
+        print(f"\nAPI runtime non disponibile: {error}", file=sys.stderr)
+        return 1
 
-    print("\n=== Artefatti del modello ===")
-    print(f"Directory modelli RL: {get_rl_model_dir()}")
-    print(f"Modello ML atteso:    {get_ml_model_path('expected_fidelity')}")
-    print("\nInstallazione MQT Predictor: OK")
+    del create_feature_vector, expected_fidelity, get_device, get_openqasm_gates
+    del QuantumCircuit, transpile
+    print("\nAPI Dataset Qiskit diretto: OK")
     return 0
 
 

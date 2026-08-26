@@ -118,16 +118,54 @@
   "failure": {
     "category": "timeout",
     "exception_type": "AttemptTimeoutError",
-    "message": "Tentativo interrotto dopo 200.0 secondi.",
+    "message": "Tentativo interrotto dopo 100.0 secondi.",
     "phase": "transpilation",
     "retryable": true,
-    "timeout_seconds": 200.0,
-    "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 289, in execute_attempt\n    compiled = transpile(circuit, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/compiler/transpiler.py\", line 291, in transpile\n    out_circuits = pm.run(circuits, callback=callback, num_processes=num_processes)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 451, in run\n    return super().run(circuits, output_name, callback, num_processes=num_processes)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 474, in wrapper\n    return meth(*meth_args, **meth_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 233, in run\n    return super().run(\n           ^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 238, in run\n    _run_workflow(\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 312, in _run_workflow\n    passmanager_ir, final_state = flow_controller.execute(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 98, in execute\n    ret = self.run(passmanager_ir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 284, in run\n    layout_score = self._score_layout(\n                   ^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 366, in _score_layout\n    fidelity *= (1 - props.error) ** count\n    ^^^^^^^^\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 133, in on_alarm\n    raise AttemptTimeoutError(\nqiskit_dataset.generation.AttemptTimeoutError: Tentativo interrotto dopo 200.0 secondi.\n"
+    "timeout_diagnostics": {
+      "completed_pass_count": 54,
+      "elapsed_seconds": 100.00035208999998,
+      "inference": {
+        "basis": [
+          "Lo stack interrotto contiene 'qiskit/transpiler/passes/layout/vf2_post_layout.py'.",
+          "Lo stage è inferito dalla pipeline preset fissata a Qiskit 2.1.1; non è un segnale runtime né una causa dimostrata.",
+          "La configurazione usa optimization_level=3."
+        ],
+        "causal_attribution_supported": false,
+        "confidence": "medium",
+        "configuration_component": {
+          "name": "optimization_level",
+          "value": 3
+        },
+        "qiskit_stage": "optimization"
+      },
+      "interrupted_stack_frame": {
+        "file": "qiskit/transpiler/passes/layout/vf2_post_layout.py",
+        "function": "_score_layout",
+        "line": 375
+      },
+      "last_completed_pass": {
+        "class": "qiskit.transpiler.passes.layout.vf2_post_layout.VF2PostLayout",
+        "index": 53,
+        "name": "VF2PostLayout",
+        "qiskit_reported_duration_seconds": 99.51735925674438,
+        "wall_elapsed_seconds": 99.98828866300028
+      },
+      "limitations": [
+        "Il callback pubblico di Qiskit viene eseguito dopo ogni pass: last_completed_pass non identifica necessariamente il pass interrotto.",
+        "Lo stack indica dove SIGALRM è stato osservato, non dimostra quale pass, configurazione, circuito o hardware abbia causato il timeout.",
+        "Un'attribuzione causale richiede confronti controllati tra circuiti, configurazioni e device."
+      ],
+      "observation_method": "qiskit_post_pass_callback_and_sigalrm_traceback",
+      "observed_phase": "transpilation",
+      "timeout_seconds": 100.0
+    },
+    "timeout_seconds": 100.0,
+    "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 499, in execute_attempt\n    compiled = transpile(circuit, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/compiler/transpiler.py\", line 291, in transpile\n    out_circuits = pm.run(circuits, callback=callback, num_processes=num_processes)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 451, in run\n    return super().run(circuits, output_name, callback, num_processes=num_processes)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 474, in wrapper\n    return meth(*meth_args, **meth_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 233, in run\n    return super().run(\n           ^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 238, in run\n    _run_workflow(\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 312, in _run_workflow\n    passmanager_ir, final_state = flow_controller.execute(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 98, in execute\n    ret = self.run(passmanager_ir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 284, in run\n    layout_score = self._score_layout(\n                   ^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 375, in _score_layout\n    fidelity *= (1 - props.error) ** count\n    ^^^^^^^^\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 333, in on_alarm\n    raise AttemptTimeoutError(\nqiskit_dataset.generation.AttemptTimeoutError: Tentativo interrotto dopo 100.0 secondi.\n"
   },
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
   "phase": "transpilation",
@@ -154,10 +192,10 @@
   "timings_seconds": {
     "scoring": null,
     "serialization": null,
-    "source_loading": 0.012929730999530875,
-    "target_loading": 2.529999619582668e-06,
+    "source_loading": 0.012011293999421468,
+    "target_loading": 2.1200003175181337e-06,
     "target_validation": null,
-    "total": 200.00280871500036,
-    "transpilation": null
+    "total": 100.00290951899933,
+    "transpilation": 99.9883123540003
   }
 }

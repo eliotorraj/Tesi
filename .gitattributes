@@ -1,3 +1,0 @@
-artifacts/checkpoints/rl/**/*.zip filter=lfs diff=lfs merge=lfs -text
-artifacts/models/rl/*.zip filter=lfs diff=lfs merge=lfs -text
-artifacts/models/device_selector/*.joblib filter=lfs diff=lfs merge=lfs -text

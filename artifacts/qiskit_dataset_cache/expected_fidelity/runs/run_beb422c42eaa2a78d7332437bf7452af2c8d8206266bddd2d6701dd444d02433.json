@@ -5,6 +5,11 @@
     "circuit_id": "qaoa_indep_tket_7",
     "declared_num_qubits": 7,
     "depth": 10,
+    "device_compatibility": {
+      "compatible": true,
+      "device_num_qubits": 127,
+      "reason": null
+    },
     "duplicate_group_size": 1,
     "features": {
       "dimension": 49,
@@ -132,7 +137,7 @@
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
   "phase": "completed",
@@ -163,12 +168,12 @@
     "validation_errors": []
   },
   "timings_seconds": {
-    "scoring": 0.0003379580011824146,
-    "serialization": 0.0022361890005413443,
-    "source_loading": 0.0004510610015131533,
-    "target_loading": 1.4399993233382702e-06,
-    "target_validation": 0.0009868639972410165,
-    "total": 12.581365530997573,
-    "transpilation": 12.577301058001467
+    "scoring": 0.0003189369999745395,
+    "serialization": 0.0017827520000537334,
+    "source_loading": 0.0006622450000577373,
+    "target_loading": 1.7600000319362152e-06,
+    "target_validation": 0.0010092440002154035,
+    "total": 17.046422705999703,
+    "transpilation": 17.042600805999882
   }
 }

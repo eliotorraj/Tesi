@@ -1,8 +1,8 @@
 {
   "available_attempts": 360,
   "available_status": {
-    "success": 318,
-    "timeout": 42
+    "success": 317,
+    "timeout": 43
   },
   "cache_hits": 0,
   "cache_root": "artifacts/qiskit_dataset_cache/expected_fidelity",
@@ -11,13 +11,13 @@
   "device_id": "ibm_heron_156",
   "executed_now": 360,
   "executed_status": {
-    "success": 318,
-    "timeout": 42
+    "success": 317,
+    "timeout": 43
   },
   "execution_policy": {
     "timeout_seconds": 100.0,
-    "wall_clock_seconds_this_invocation": 915.526454287,
-    "workers": 6
+    "wall_clock_seconds_this_invocation": 2693.291392404,
+    "workers": 2
   },
   "missing_attempts": 0,
   "objective": "expected_fidelity",

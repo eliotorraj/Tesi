@@ -1,0 +1,177 @@
+{
+  "aggregation_policy": {
+    "configuration_label": "top configurations restricted to the selected device",
+    "configuration_order": [
+      "o2_default_default",
+      "o3_default_default",
+      "o2_sabre_sabre",
+      "o2_dense_sabre",
+      "o2_trivial_sabre",
+      "o3_sabre_sabre",
+      "o3_dense_sabre",
+      "o3_trivial_sabre",
+      "o2_sabre_lookahead",
+      "o2_sabre_basic",
+      "o3_sabre_lookahead",
+      "o3_sabre_basic"
+    ],
+    "configuration_tie_break": "catalog order; claims explicitly deny superiority at equal score",
+    "device_label": "device whose best eligible configuration has the highest ranking score; catalog order breaks exact ties",
+    "device_order": [
+      "ibm_falcon_27",
+      "ibm_heron_133",
+      "ibm_falcon_127",
+      "ibm_heron_156",
+      "quantinuum_h2_56"
+    ],
+    "input_mode": "read_only_per_device_views",
+    "ranking_metric": "median_expected_fidelity_across_seeds",
+    "top_k": 3
+  },
+  "available_device_ids": [
+    "ibm_falcon_27",
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56"
+  ],
+  "counts": {
+    "configuration_aggregates": 528,
+    "eligible_configuration_aggregates": 446,
+    "failure_rows": 235,
+    "rag_examples": 6,
+    "runs": 1584,
+    "runs_by_status": {
+      "success": 1349,
+      "timeout": 235
+    },
+    "unique_circuits": 10
+  },
+  "dataset_scope": "pilot",
+  "mini_datasets_modified": false,
+  "missing_supported_device_ids": [],
+  "objective": "expected_fidelity",
+  "outputs": {
+    "configuration_aggregates": "global/qiskit_configuration_aggregates.jsonl",
+    "failure_details": "global/reports/failure_details.csv",
+    "rag": "global/rag_examples.jsonl",
+    "runs": "global/qiskit_runs.jsonl"
+  },
+  "record_schema_versions": {
+    "configuration_aggregate": "2.0.0",
+    "manifest": "2.0.0",
+    "rag_example": "2.0.0",
+    "run": "1.0.0"
+  },
+  "schema_version": "1.0.0",
+  "source_device_ids": [
+    "ibm_falcon_27",
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56"
+  ],
+  "sources": [
+    {
+      "configuration_aggregates": 72,
+      "device_id": "ibm_falcon_27",
+      "files": {
+        "configuration_aggregates": {
+          "path": "ibm_falcon_27/qiskit_configuration_aggregates.jsonl",
+          "sha256": "98232cf805782d3ba70fed8adffa4b745a9ad51699d7be0c77c208bef3961993"
+        },
+        "manifest": {
+          "path": "ibm_falcon_27/split_manifest.json",
+          "sha256": "9675f507e7438692fddf6027c23625892fd6d70daa2025223666b85ff34f4421"
+        },
+        "runs": {
+          "path": "ibm_falcon_27/qiskit_runs.jsonl",
+          "sha256": "ef072e63c9ec0d90729f7c242cee21f760721b94bff90c0246275c8c3e700cd2"
+        }
+      },
+      "manifest_id": "manifest_24649a5118d96073df12c3ecb84fb43fb49216608aae45f647044fcb7b3a1742",
+      "runs": 216
+    },
+    {
+      "configuration_aggregates": 120,
+      "device_id": "ibm_heron_133",
+      "files": {
+        "configuration_aggregates": {
+          "path": "ibm_heron_133/qiskit_configuration_aggregates.jsonl",
+          "sha256": "e5740787feb6abe75bc437b056ade7c9811c1327865ea46af6936beba82f522c"
+        },
+        "manifest": {
+          "path": "ibm_heron_133/split_manifest.json",
+          "sha256": "94e8d43fdf9e8ab97d37af531744a6e9bec7271c0a3a19777956d79bb8e04c7d"
+        },
+        "runs": {
+          "path": "ibm_heron_133/qiskit_runs.jsonl",
+          "sha256": "508b3ff5fdf1867531dc8179569910ee2b2fc565c33dca9547ad6522ff5b51ff"
+        }
+      },
+      "manifest_id": "manifest_bb3c56705c5d38ea025afd6af05aedfefb8f6ead1495319efcddce26050d3e2c",
+      "runs": 360
+    },
+    {
+      "configuration_aggregates": 120,
+      "device_id": "ibm_falcon_127",
+      "files": {
+        "configuration_aggregates": {
+          "path": "ibm_falcon_127/qiskit_configuration_aggregates.jsonl",
+          "sha256": "39ac43294f3377bf5cf723b6bae7552fbe1a2a9b331ff6b33ae5ccca69af690d"
+        },
+        "manifest": {
+          "path": "ibm_falcon_127/split_manifest.json",
+          "sha256": "15df6010f9bee8977cd1b0b4785ed9f8d585eed184430b482df008ed0b1faed5"
+        },
+        "runs": {
+          "path": "ibm_falcon_127/qiskit_runs.jsonl",
+          "sha256": "05781fe209fd553b15a59981c5524cb9d2b3341b082a5440d43952a9295018e4"
+        }
+      },
+      "manifest_id": "manifest_948fec36387d25eb673d65a82284dbd7003f48eabefca147d3417192434ef594",
+      "runs": 360
+    },
+    {
+      "configuration_aggregates": 120,
+      "device_id": "ibm_heron_156",
+      "files": {
+        "configuration_aggregates": {
+          "path": "ibm_heron_156/qiskit_configuration_aggregates.jsonl",
+          "sha256": "f2f50507c8733120226f862d540ab80f7872d8ed8ffa88232396864a836fe7aa"
+        },
+        "manifest": {
+          "path": "ibm_heron_156/split_manifest.json",
+          "sha256": "1a92a02fc79b13cdbaa351e7028f2211d8a08a8141ce1c07346798b76fe09f09"
+        },
+        "runs": {
+          "path": "ibm_heron_156/qiskit_runs.jsonl",
+          "sha256": "1fc07ce7cec36ac13a933d1d77b64b64b9643ef2dd06aac30a9db1866ac26fd8"
+        }
+      },
+      "manifest_id": "manifest_30dab48401c6e0450289370b6db5153a11cf56455ed4a3b44783474bca0664aa",
+      "runs": 360
+    },
+    {
+      "configuration_aggregates": 96,
+      "device_id": "quantinuum_h2_56",
+      "files": {
+        "configuration_aggregates": {
+          "path": "quantinuum_h2_56/qiskit_configuration_aggregates.jsonl",
+          "sha256": "7ccdbd52dd61f87ff8455bf514c824987b7e66d1ea639258855f179d0adc484a"
+        },
+        "manifest": {
+          "path": "quantinuum_h2_56/split_manifest.json",
+          "sha256": "05717d07f5218ed70787c4dd340ac76ae6445142f422e7ccc3b4f653c256dd2e"
+        },
+        "runs": {
+          "path": "quantinuum_h2_56/qiskit_runs.jsonl",
+          "sha256": "97cb27e019225a7a813b91c971ca85c5d2e72af55e97a546c6caff65cd5e25e8"
+        }
+      },
+      "manifest_id": "manifest_c0ef809c56b7a52e9607559425f39f809370778b7e458c1105073d98655e4bd9",
+      "runs": 288
+    }
+  ],
+  "view_type": "global_multi_device"
+}

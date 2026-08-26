@@ -1,115 +1,107 @@
 # Prototipo LLM per suggerimento e compilazione quantistica
 
-Questa directory contiene lo scheletro architetturale del prototipo.
+Questa directory contiene lo scheletro applicativo che usera il Dataset Qiskit
+diretto. Separa deliberatamente:
 
-L'obiettivo è tenere separati:
-
-- dialogo con l'utente;
-- lettura e analisi deterministica del circuito;
+- parsing OpenQASM e feature deterministiche;
 - compatibilità hardware;
-- ricerca nel Dataset dei casi più utili;
-- richiesta all'LLM;
-- controllo del suggerimento prodotto dall'LLM;
-- compilazione Qiskit autorizzata dall'utente.
+- retrieval di esempi etichettati;
+- generazione LLM;
+- validazione e retry;
+- conferma dell'utente;
+- compilazione Qiskit e validazione finale.
 
 ## Flusso
 
-~~~mermaid
-flowchart LR
-    UI["Interfaccia utente"] --> C["Gestore delle richieste"]
-    C --> P["Lettura QASM + caratteristiche del circuito"]
-    P --> F["Filtro di compatibilità"]
-    H["Catalogo hardware MQT"] --> F
-    F --> R["Ricerca di casi simili"]
-    D["Dataset"] --> R
-    R --> B["Preparazione della richiesta"]
-    B --> L["Collegamento con l'LLM"]
-    L --> V["Validatore deterministico"]
-    V -->|"non valida e tentativi disponibili"| B
-    V -->|"valida"| C
-    C --> UI
+```text
+richiesta + QASM + vincoli
+  -> parsing e feature
+  -> hardware compatibili
+  -> retrieval train-only dal Dataset globale
+  -> prompt con label, claim, evidence e caveat storici
+  -> risposta LLM strutturata
+  -> validazione deterministica
+       -> retry con errori espliciti, se non valida
+       -> proposta all'utente, se valida
+  -> conferma esplicita
+  -> qiskit.transpile
+  -> validazione sul Target
+```
 
-    UI -->|"conferma esplicita"| C2["Richiesta di compilazione"]
-    C2 --> S["Suggerimento già controllato"]
-    S --> Q["Compilazione deterministica con Qiskit"]
-    Q --> X["Controllo dei gate e delle connessioni"]
-    X --> UI
-~~~
-
-La compilazione non è uno strumento usato liberamente dal modello. L'LLM propone
-un piano Qiskit limitato a parametri ammessi; il programma lo controlla e
-Qiskit lo esegue soltanto dopo la conferma dell'utente.
+L'LLM suggerisce e spiega. Non modifica il catalogo, non disattiva i controlli
+e non esegue la compilazione senza conferma.
 
 ## Componenti
 
-I nomi nella seconda colonna sono quelli usati nel codice. La terza colonna
-spiega il loro significato.
-
-| Parte | Nome nel codice | Cosa fa |
+| Parte | Implementazione | Responsabilita |
 | --- | --- | --- |
-| Gestore della UI | PrototypeController | Riceve le richieste della UI e conserva temporaneamente i suggerimenti già controllati |
-| Lettore del circuito | QasmRequestParser | Legge OpenQASM 2 e calcola le 49 caratteristiche MQT |
-| Catalogo hardware | MqtHardwareCatalog | Carica le informazioni sugli hardware disponibili |
-| Filtro di compatibilità | WidthCompatibilityFilter | Esclude gli hardware troppo piccoli o vietati dall'utente |
-| Ricerca nel Dataset | ContextRetriever | Trova nel Dataset i casi più simili alla richiesta corrente |
-| Preparazione della richiesta | StructuredPromptBuilder | Prepara il testo e i dati da inviare all'LLM |
-| Collegamento con l'LLM | LlmGateway | Invia la richiesta all'LLM e ne riceve la risposta; deve ancora essere realizzato |
-| Controllo della risposta | StructuredRecommendationValidator | Verifica hardware, metrica e parametri Qiskit suggeriti |
-| Coordinatore | PrototypeService | Esegue i passaggi nell'ordine corretto e riprova quando la risposta non è valida |
-| Compilatore | QiskitDeterministicCompiler | Compila localmente con Qiskit e controlla il risultato |
+| Parsing | `QasmRequestParser` | QASM, metadati e 49 feature |
+| Compatibilita | `WidthCompatibilityFilter` | device ammessi per larghezza e richiesta |
+| Retrieval | `JsonDatasetContextRetriever` | JSONL RAG globale o JSON legacy |
+| Prompt | `StructuredPromptBuilder` | input live ed esempi etichettati |
+| LLM | `LlmGateway` | integrazione provider ancora da scegliere |
+| Validazione | `StructuredRecommendationValidator` | device e configurazione allowlisted |
+| Orchestrazione | `PrototypeService` | ordine, retry e conferma |
+| Compilazione | `QiskitDeterministicCompiler` | transpile e controllo Target |
 
-Il filtro iniziale non confronta i gate del circuito ancora indipendente
-dall'hardware con i gate nativi. Quel confronto eliminerebbe hardware validi
-prima che Qiskit abbia tradotto il circuito. All'inizio si controllano quindi la
-larghezza del circuito e i vincoli dell'utente. Dopo la compilazione si
-controllano i gate e le connessioni del circuito ottenuto.
+## Dataset usato dal retriever
 
-## Struttura dei file
+Il percorso previsto e:
 
-~~~text
-prototype/
-  README.md
-  quantum_assistant/
-    __init__.py
-    controller.py
-    factory.py
-    models.py
-    ports.py
-    services.py
-    adapters/
-      __init__.py
-      compilation.py
-      context.py
-      llm.py
-      parsing.py
-      validation.py
-~~~
+```text
+datasets/expected_fidelity/<scope>/global/rag_examples.jsonl
+```
 
-## Dati scambiati tra la UI e il programma
+Il retriever usa le feature per una distanza deterministica e considera
+soltanto esempi il cui device etichettato e disponibile nella richiesta live.
+Nel prompt inserisce:
 
-La UI invia una richiesta chiamata UiSubmission che contiene:
+- input storico compatto;
+- device e top-3 configurazioni etichettati;
+- claim naturali;
+- evidence con score e provenance;
+- caveat scientifici.
 
-- testo dell'utente;
-- circuito OpenQASM 2;
-- metrica da ottimizzare (figure of merit);
-- eventuale lista degli hardware ammessi;
-- vincoli aggiuntivi.
+Non inserisce il QASM storico completo. Il circuito live rimane invece
+disponibile al modello dopo il parsing e il mascheramento previsti
+dall'applicazione.
 
-Il gestore restituisce:
+Il supporto al vecchio JSON con `records[].input` resta disponibile per
+compatibilità, ma in quel formato le label di training e la ground truth di
+valutazione non vengono esposte.
 
-- risposta controllata;
-- spiegazione e avvisi;
-- hardware compatibili e non compatibili;
-- numero di tentativi fatti con l'LLM;
-- identificativi degli esempi recuperati dal Dataset;
-- indicazione che la compilazione richiede conferma.
+## Avvio del servizio
 
+```python
+from pathlib import Path
 
-## Formato obbligatorio della risposta dell'LLM
+from prototype.quantum_assistant.factory import build_default_service
 
-Il componente che comunica con l'LLM deve restituire dati organizzati in questo modo:
+llm_gateway = ...  # implementazione del provider scelta in seguito
 
-~~~json
+service = build_default_service(
+    device_names=(
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_falcon_127",
+        "ibm_heron_156",
+        "quantinuum_h2_56",
+    ),
+    dataset_path=Path(
+        "datasets/expected_fidelity/pilot/global/rag_examples.jsonl"
+    ),
+    llm_gateway=llm_gateway,
+    max_llm_attempts=3,
+    retrieval_limit=5,
+)
+```
+
+`llm_gateway` e un segnaposto: al momento il prototipo non effettua chiamate
+di rete.
+
+## Contratto della risposta LLM
+
+```json
 {
   "selected_device": "ibm_falcon_27",
   "figure_of_merit": "expected_fidelity",
@@ -120,104 +112,33 @@ Il componente che comunica con l'LLM deve restituire dati organizzati in questo 
     "layout_method": "sabre",
     "routing_method": "sabre"
   },
-  "explanation": "Spiegazione leggibile dall'utente.",
-  "evidence": [
-    "live_request.circuit.features",
-    "record_id:..."
-  ],
-  "warnings": [
-    "Expected fidelity è una stima, non una misura hardware."
-  ]
+  "explanation": "Motivazione leggibile.",
+  "evidence": ["evidence_<sha256>", "live_request.circuit.features"],
+  "warnings": ["Expected fidelity è una stima offline."]
 }
-~~~
+```
 
-Il programma rifiuta la risposta nei seguenti casi:
+Il validatore rifiuta device incompatibili, metriche o compiler diversi,
+configurazioni fuori catalogo, seed non validi, spiegazioni vuote e liste
+malformate.
 
-- hardware non presente tra quelli compatibili;
-- metrica diversa da quella richiesta;
-- compilatore diverso da Qiskit;
-- livello di ottimizzazione fuori dall'intervallo 0-3;
-- seed non intero o negativo;
-- metodo di posizionamento o instradamento non ammesso;
-- spiegazione o liste malformate.
+## Vincoli e retry: confini futuri
 
-Gli errori trovati vengono aggiunti alla richiesta successiva, in modo che l'LLM
-possa correggersi. Dopo il numero massimo di tentativi il programma si ferma e
-segnala che non è riuscito a ottenere una risposta valida.
+`UiSubmission.constraints` è già separato dal Dataset. La formalizzazione
+successiva dovrà introdurre:
 
-## Dataset, richiesta all'LLM e RAG
+- schema e versione dei vincoli;
+- distinzione tra vincoli rigidi e preferenze;
+- filtro deterministico del catalogo;
+- comportamento esplicito quando nessun candidato resta.
 
-Per il primo prototipo conviene cercare nel Dataset pochi casi simili e
-aggiungerli alla richiesta inviata all'LLM. Questo metodo viene chiamato RAG.
-È una buona prima scelta perché:
+Il retry esistente passa gli errori di validazione al tentativo successivo e si
+ferma dopo `max_llm_attempts`. Restano da congelare nel protocollo:
 
-- il Dataset e gli hardware cambieranno durante gli esperimenti;
-- è utile indicare gli esempi usati;
-- non serve riaddestrare il modello a ogni aggiornamento;
-- si può controllare quanta informazione viene inviata all'LLM.
+- errori retryable e terminali;
+- eventuale fallback deterministico;
+- contenuto accumulato tra tentativi;
+- metriche di validità, successo e costo.
 
-Il lettore del file JSON "llm_mqt_full_pipeline_[metric].json" usa soltanto il campo input di ogni esempio. Rispetta
-quindi la regola del Dataset attuale:
-
-- input: utilizzabile nella richiesta all'LLM;
-- expected_output: risultato atteso, utilizzabile per l'addestramento;
-- deterministic_ground_truth: informazione riservata alla valutazione.
-
-Il RAG consulta il Dataset completo, ma non lo invia interamente all’LLM. Per ogni richiesta cerca un numero limitato di casi simili, ad esempio cinque, e aggiunge soltanto quelli alla richiesta. Questi casi possono contenere caratteristiche del circuito, hardware scelto, punteggi, passi RL e circuito compilato. Per velocizzare la ricerca potrà essere creato un indice derivato dal Dataset.
-
-
-## Come si collegano e si avviano i componenti
-
-La funzione build_default_service prepara il servizio principale e collega il
-lettore del circuito, il filtro di compatibilità, la ricerca nel Dataset, il
-controllo della risposta e il compilatore Qiskit.
-
-Rimane da fornire il componente che effettua davvero la chiamata all'LLM. Nel
-codice seguente si chiama collegamento_llm:
-
-~~~python
-from pathlib import Path
-
-from prototype.quantum_assistant.factory import build_default_service
-
-# Segnaposto: sarà sostituito dopo aver scelto l'LLM.
-collegamento_llm = ...
-
-service = build_default_service(
-    device_names=("ibm_falcon_27", "ibm_falcon_127"),
-    dataset_path=Path("datasets/llm_mqt_full_pipeline_expected_fidelity.json"),
-    llm_gateway=collegamento_llm,
-    max_llm_attempts=3,
-    retrieval_limit=5,
-)
-~~~
-
-Questo esempio significa:
-
-- device_names: hardware che il prototipo deve prendere in considerazione;
-- dataset_path: posizione del file del Dataset;
-- llm_gateway: componente che invia la richiesta all'LLM e riceve la risposta;
-- max_llm_attempts=3: al massimo tre tentativi se la risposta non è valida;
-- retrieval_limit=5: inserisce nella richiesta al massimo cinque casi simili
-  trovati nel Dataset.
-
-collegamento_llm è quindi un segnaposto, non un oggetto già disponibile. Il
-frammento non è ancora eseguibile così com'è. Prima bisognerà scegliere quale
-LLM usare e scrivere il piccolo componente che sa comunicare con quel servizio
-o con un modello locale.
-
-Questa parte viene fornita dall'esterno per poter cambiare LLM senza modificare
-il lettore del circuito, il filtro, il validatore o il compilatore. Al momento
-non è stato scelto alcun servizio LLM e il prototipo non effettua chiamate di
-rete.
-
-## Limiti intenzionali dello scheletro
-
-- nessuna interfaccia utente concreta;
-- nessun collegamento concreto a un LLM;
-- nessun motore di ricerca vettoriale per il RAG;
-- Dataset per LLM ancora incompleto (non sta ancora sfruttando punteggi, passi RL e circuiti compilati. Quando il formato
-  definitivo del Dataset sarà pronto, dovremo aggiornare la ricerca RAG affinché utilizzi anche queste informazioni)
-
-Questi confini permettono di completare prima il modello supervisionato e il
-Dataset, mantenendo già stabile l'architettura applicativa.
+Queste policy non vengono dedotte dagli esempi del Dataset e non ne modificano
+le etichette.

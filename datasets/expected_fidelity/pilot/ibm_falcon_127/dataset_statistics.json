@@ -1,7 +1,7 @@
 {
   "aggregate_status": {
-    "eligible": 110,
-    "ineligible": 10
+    "eligible": 106,
+    "ineligible": 14
   },
   "attempts_available": 360,
   "circuits": 10,
@@ -14,14 +14,10 @@
       "graphstate_indep_qiskit_14",
       "pricingcall_indep_qiskit_5",
       "qaoa_indep_tket_7",
-      "qft_indep_tket_40",
-      "qpeexact_indep_tket_60",
-      "random_indep_qiskit_30",
       "routing_indep_qiskit_12",
-      "vqe_indep_tket_16",
-      "wstate_indep_tket_90"
+      "vqe_indep_tket_16"
     ],
-    "devices": 1,
+    "devices": 5,
     "outputs": {
       "csv": "/home/elio/Tesi/datasets/expected_fidelity/pilot/device_comparison.csv",
       "markdown": "/home/elio/Tesi/datasets/expected_fidelity/pilot/device_comparison.md"
@@ -44,5 +40,11 @@
   "rag_examples": 6,
   "rag_split": "train_only",
   "rag_top_k": 3,
+  "record_schema_versions": {
+    "configuration_aggregate": "2.0.0",
+    "manifest": "2.0.0",
+    "rag_example": "2.0.0",
+    "run": "1.0.0"
+  },
   "schema_version": "1.0.0"
 }
