@@ -18,9 +18,9 @@ Scheda generata automaticamente dagli artefatti del pilot. I tempi descrivono so
 | Configurazioni | 12 |
 | Seed | 0, 1, 2 |
 | Worker | 6 |
-| Timeout richiesto | 100.000 s |
-| Cache hit | 0 |
-| Durata invocazione | 1950.013 s |
+| Timeout richiesto | 200.000 s |
+| Cache hit | 177 |
+| Durata invocazione | 3713.820 s |
 
 La durata invocazione riguarda il comando corrente. Se Cache hit è maggiore di zero, i record conservano i tempi delle esecuzioni originali e non sono stati ricompilati.
 
@@ -31,16 +31,16 @@ La durata invocazione riguarda il comando corrente. Se Cache hit è maggiore di 
 | Pianificati | 288 | - |
 | Osservati | 288 | 100.0% |
 | Mancanti | 0 | - |
-| Successi | 177 | 61.5% |
+| Successi | 183 | 63.5% |
 | Failure | 0 | 0.0% |
-| Timeout | 111 | 38.5% |
+| Timeout | 105 | 36.5% |
 
 ## Tempi di transpilation dei successi
 
 | Gruppo | N | Min s | Mediana s | Media s | P95 s | Max s |
 | --- | --- | --- | --- | --- | --- | --- |
-| Tutti | 177 | 0.020 | 0.046 | 1.456 | 13.214 | 21.066 |
-| Non-lookahead | 150 | 0.020 | 0.051 | 1.695 | 17.285 | 21.066 |
+| Tutti | 183 | 0.020 | 0.050 | 6.296 | 18.556 | 155.959 |
+| Non-lookahead | 156 | 0.020 | 0.053 | 7.364 | 20.547 | 155.959 |
 | Lookahead | 27 | 0.024 | 0.041 | 0.126 | 0.368 | 0.656 |
 
 I timeout non hanno un tempo di transpilation concluso e non entrano nella tabella: il timeout rate va sempre letto insieme ai tempi.
@@ -50,7 +50,7 @@ I timeout non hanno un tempo di transpilation concluso e non entrano nella tabel
 | Config | Studio | O | Layout | Routing | Ok/Obs | Timeout | Mediana s | P95 s | Max s | Eleggibili | Vittorie | Co-vittorie | Top 3 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | o2_default_default | baseline | 2 | default | default | 24/24 | 0 | 0.043 | 0.367 | 0.430 | 8 | 6 | 6 | 6 |
-| o3_default_default | baseline | 3 | default | default | 18/24 | 6 | 14.706 | 20.920 | 21.066 | 6 | 0 | 6 | 6 |
+| o3_default_default | baseline | 3 | default | default | 24/24 | 0 | 17.477 | 151.571 | 155.959 | 8 | 0 | 6 | 6 |
 | o2_sabre_sabre | layout | 2 | sabre | sabre | 24/24 | 0 | 0.044 | 0.355 | 0.367 | 8 | 0 | 6 | 8 |
 | o2_dense_sabre | layout | 2 | dense | sabre | 24/24 | 0 | 0.043 | 0.335 | 0.387 | 8 | 2 | 8 | 2 |
 | o2_trivial_sabre | layout | 2 | trivial | sabre | 24/24 | 0 | 0.032 | 0.339 | 0.348 | 8 | 0 | 5 | 0 |
@@ -71,29 +71,29 @@ Le vittorie applicano il tie-break del catalogo; le co-vittorie considerano scor
 | ae_indep_qiskit_2 | train | 2 | 36/36 | 0 | 0.064 | 0.109 | 0.125 | 12 | o2_default_default |
 | graphstate_indep_qiskit_14 | train | 14 | 21/36 | 15 | 0.028 | 20.895 | 21.066 | 7 | o2_default_default |
 | qaoa_indep_tket_7 | train | 7 | 21/36 | 15 | 0.039 | 11.957 | 11.973 | 7 | o2_default_default |
-| random_indep_qiskit_30 | train | 30 | 18/36 | 18 | 0.275 | 0.404 | 0.656 | 6 | o2_dense_sabre |
+| random_indep_qiskit_30 | train | 30 | 21/36 | 15 | 0.289 | 151.590 | 155.959 | 7 | o2_dense_sabre |
 | vqe_indep_tket_16 | train | 16 | 21/36 | 15 | 0.033 | 17.460 | 18.669 | 7 | o2_default_default |
 | pricingcall_indep_qiskit_5 | validation | 5 | 21/36 | 15 | 0.053 | 12.170 | 12.220 | 7 | o2_default_default |
-| qft_indep_tket_40 | validation | 40 | 18/36 | 18 | 0.356 | 0.394 | 0.430 | 6 | o2_dense_sabre |
+| qft_indep_tket_40 | validation | 40 | 21/36 | 15 | 0.360 | 145.350 | 146.242 | 7 | o2_dense_sabre |
 | routing_indep_qiskit_12 | test | 12 | 21/36 | 15 | 0.038 | 17.494 | 17.542 | 7 | o2_default_default |
 
 ## Failure e timeout
 
 | Fase | Categoria | Eccezione | N |
 | --- | --- | --- | --- |
-| transpilation | timeout | AttemptTimeoutError | 111 |
+| transpilation | timeout | AttemptTimeoutError | 105 |
 
 ## Sensibilità a soglie alternative
 
 | Soglia s | Successi sopra soglia | Timeout già osservati | Lower bound timeout |
 | --- | --- | --- | --- |
-| 30 | 0 | 111 | 111 |
-| 60 | 0 | 111 | 111 |
-| 100 | 0 | 111 | 111 |
-| 120 | 0 | 111 | 111 |
-| 300 | 0 | 111 | 111 |
-| 600 | 0 | 111 | 111 |
-| 900 | 0 | 111 | 111 |
+| 30 | 6 | 105 | 111 |
+| 60 | 6 | 105 | 111 |
+| 100 | 6 | 105 | 111 |
+| 120 | 6 | 105 | 111 |
+| 300 | 0 | 105 | 105 |
+| 600 | 0 | 105 | 105 |
+| 900 | 0 | 105 | 105 |
 
 La stima è conservativa: un run già interrotto è censurato e non rivela se sarebbe terminato con una soglia più alta.
 
@@ -101,8 +101,8 @@ La stima è conservativa: un run già interrotto è censurato e non rivela se sa
 
 | Aggregati | N |
 | --- | --- |
-| Eleggibili | 59 |
-| Non eleggibili | 37 |
+| Eleggibili | 61 |
+| Non eleggibili | 35 |
 | Esempi RAG | 5 |
 
 La expected_fidelity è una stima deterministica sul Target sintetico di MQT Bench, non una misura raccolta su hardware quantistico reale.
