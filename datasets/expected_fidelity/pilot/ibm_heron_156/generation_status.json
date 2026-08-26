@@ -1,0 +1,50 @@
+{
+  "available_attempts": 360,
+  "available_status": {
+    "success": 318,
+    "timeout": 42
+  },
+  "cache_hits": 0,
+  "cache_root": "artifacts/qiskit_dataset_cache/expected_fidelity",
+  "complete": true,
+  "dataset_scope": "pilot",
+  "device_id": "ibm_heron_156",
+  "executed_now": 360,
+  "executed_status": {
+    "success": 318,
+    "timeout": 42
+  },
+  "execution_policy": {
+    "timeout_seconds": 100.0,
+    "wall_clock_seconds_this_invocation": 915.526454287,
+    "workers": 6
+  },
+  "missing_attempts": 0,
+  "objective": "expected_fidelity",
+  "output": "qiskit_runs.jsonl",
+  "planned_attempts": 360,
+  "schema_version": "1.0.0",
+  "target": {
+    "coupling_edge_count": 352,
+    "description": "ibm_heron_156",
+    "device_id": "ibm_heron_156",
+    "num_qubits": 156,
+    "operation_names": [
+      "cz",
+      "delay",
+      "id",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "a30f41e65c03fb900a4b8852261a8407c56c389560f4031ecb43099c1bec5089",
+    "target_type": "qiskit.transpiler.target.Target"
+  }
+}

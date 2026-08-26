@@ -51,7 +51,7 @@
         "circuit_id": {"type": "string"},
         "benchmark_family": {"type": "string"},
         "generator": {"enum": ["qiskit", "tket"]},
-        "num_qubits": {"type": "integer", "minimum": 1, "maximum": 127},
+        "num_qubits": {"type": "integer", "minimum": 1, "maximum": 156},
         "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "split": {"enum": ["train", "validation", "test"]},
         "features": {
@@ -79,8 +79,16 @@
         "provenance"
       ],
       "properties": {
-        "device_id": {"const": "ibm_falcon_127"},
-        "num_qubits": {"const": 127},
+        "device_id": {
+          "enum": [
+            "ibm_falcon_27",
+            "ibm_heron_133",
+            "ibm_falcon_127",
+            "ibm_heron_156",
+            "quantinuum_h2_56"
+          ]
+        },
+        "num_qubits": {"enum": [27, 56, 127, 133, 156]},
         "target_sha256": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"

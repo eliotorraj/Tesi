@@ -25,6 +25,10 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=DEFAULT_CATALOG_PATH,
     )
+    parser.add_argument(
+        "--device",
+        help="Device MQT Bench; se omesso usa il default del catalogo.",
+    )
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
     parser.add_argument(
@@ -60,20 +64,26 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     catalog = load_catalog(args.catalog)
+    device_id = catalog.require_device(args.device)
     if args.dry_run:
-        manifest = load_manifest(args.scope, str(catalog.objective["name"]))
+        manifest = load_manifest(
+            args.scope,
+            str(catalog.objective["name"]),
+            device_id,
+        )
         print(
             json.dumps(
                 {
                     "scope": args.scope,
+                    "device_id": device_id,
                     "circuits": len(manifest["circuits"]),
+                    "compatible_circuits": manifest["counts"].get(
+                        "compatible_circuits",
+                        len(manifest["circuits"]),
+                    ),
                     "configurations": len(catalog.configurations),
                     "seeds": list(catalog.seeds),
-                    "attempts_planned": (
-                        len(manifest["circuits"])
-                        * len(catalog.configurations)
-                        * len(catalog.seeds)
-                    ),
+                    "attempts_planned": manifest["counts"]["attempts_planned"],
                 },
                 indent=2,
                 sort_keys=True,
@@ -88,6 +98,7 @@ def main() -> None:
         limit_runs=args.limit_runs,
         retry_failures=args.retry_failures,
         force=args.force,
+        device_id=device_id,
     )
     print(json.dumps(status, indent=2, sort_keys=True))
 

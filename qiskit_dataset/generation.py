@@ -19,13 +19,13 @@ from typing import Any, Iterator, Mapping
 
 from .catalog import ConfigurationCatalog
 from .core import (
-    DATASETS_ROOT,
     PROJECT_ROOT,
     SCHEMA_VERSION,
     atomic_json_write,
     atomic_jsonl_write,
     atomic_text_write,
     canonical_json,
+    dataset_scope_root,
     expand_attempts,
     finite_float,
     load_manifest,
@@ -458,6 +458,7 @@ def generate_dataset(
     limit_runs: int | None = None,
     retry_failures: bool = False,
     force: bool = False,
+    device_id: str | None = None,
 ) -> dict[str, Any]:
     """Run missing attempts, cache each result, and rebuild ordered JSONL."""
     if workers <= 0:
@@ -467,16 +468,24 @@ def generate_dataset(
     if limit_runs is not None and limit_runs <= 0:
         raise ValueError("limit_runs deve essere positivo.")
 
-    manifest = load_manifest(scope, str(catalog.objective["name"]))
-    target_record = build_target_record(catalog.device_id)
+    generation_started = time.perf_counter()
+    objective_name = str(catalog.objective["name"])
+    selected_device_id = catalog.require_device(device_id)
+    output_root = dataset_scope_root(
+        objective_name,
+        scope,
+        selected_device_id,
+    )
+    manifest = load_manifest(scope, objective_name, selected_device_id)
+    target_record = build_target_record(selected_device_id)
     versions = package_versions()
     attempts = expand_attempts(
         manifest,
         catalog,
         target_sha256=str(target_record["target_sha256"]),
         versions=versions,
+        device_id=selected_device_id,
     )
-    objective_name = str(catalog.objective["name"])
     pending: list[dict[str, Any]] = []
     records_by_id: dict[str, dict[str, Any]] = {}
     cache_hits = 0
@@ -485,10 +494,7 @@ def generate_dataset(
         attempt["target_record"] = target_record
         attempt["timeout_seconds"] = float(timeout_seconds)
         attempt["source_path"] = str(
-            DATASETS_ROOT
-            / objective_name
-            / scope
-            / str(attempt["circuit"]["source_ref"])
+            output_root / str(attempt["circuit"]["source_ref"])
         )
         cached = None if force else _load_cached_record(
             objective_name,
@@ -515,7 +521,7 @@ def generate_dataset(
     execution_total = len(pending)
     if execution_total:
         print(
-            f"[{scope}] cache_hit={cache_hits}; "
+            f"[{scope}/{selected_device_id}] cache_hit={cache_hits}; "
             f"da_eseguire={execution_total}; workers={workers}",
             file=sys.stderr,
             flush=True,
@@ -534,7 +540,7 @@ def generate_dataset(
             completed_now += 1
             status_now[str(record["status"])] += 1
             _report_progress(
-                scope,
+                f"{scope}/{selected_device_id}",
                 completed_now,
                 execution_total,
                 status_now,
@@ -571,7 +577,7 @@ def generate_dataset(
                     completed_now += 1
                     status_now[str(record["status"])] += 1
                     _report_progress(
-                        scope,
+                        f"{scope}/{selected_device_id}",
                         completed_now,
                         execution_total,
                         status_now,
@@ -589,13 +595,13 @@ def generate_dataset(
         for attempt in attempts
         if str(attempt["run_id"]) in records_by_id
     ]
-    output_root = DATASETS_ROOT / objective_name / scope
     atomic_jsonl_write(output_root / "qiskit_runs.jsonl", ordered_records)
     observed_status = Counter(str(record["status"]) for record in ordered_records)
     status = {
         "schema_version": SCHEMA_VERSION,
         "dataset_scope": scope,
         "objective": objective_name,
+        "device_id": selected_device_id,
         "planned_attempts": len(attempts),
         "available_attempts": len(ordered_records),
         "missing_attempts": len(attempts) - len(ordered_records),
@@ -604,6 +610,13 @@ def generate_dataset(
         "executed_status": dict(sorted(status_now.items())),
         "available_status": dict(sorted(observed_status.items())),
         "complete": len(ordered_records) == len(attempts),
+        "execution_policy": {
+            "workers": workers,
+            "timeout_seconds": float(timeout_seconds),
+            "wall_clock_seconds_this_invocation": (
+                time.perf_counter() - generation_started
+            ),
+        },
         "output": "qiskit_runs.jsonl",
         "cache_root": str(
             (CACHE_ROOT / objective_name).relative_to(PROJECT_ROOT).as_posix()

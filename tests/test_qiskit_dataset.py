@@ -17,7 +17,12 @@ from prototype.quantum_assistant.adapters.validation import (
 )
 from prototype.quantum_assistant.models import HardwareProfile, UiSubmission
 from qiskit_dataset.catalog import load_catalog
-from qiskit_dataset.core import expand_attempts, load_manifest, stable_id
+from qiskit_dataset.core import (
+    dataset_scope_root,
+    expand_attempts,
+    load_manifest,
+    stable_id,
+)
 from qiskit_dataset.generation import execute_attempt
 from qiskit_dataset.views import aggregate_runs, build_rag_examples
 
@@ -36,6 +41,13 @@ EXPECTED_KEYS = {
     (3, "sabre", "lookahead"),
     (3, "sabre", "basic"),
 }
+EXPECTED_DEVICES = (
+    "ibm_falcon_27",
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56",
+)
 
 
 def _qasm2() -> str:
@@ -136,6 +148,22 @@ class QiskitCatalogTests(unittest.TestCase):
             baseline.transpile_kwargs(),
             {"optimization_level": 2},
         )
+        self.assertEqual(catalog.default_device_id, "ibm_falcon_127")
+        self.assertEqual(catalog.supported_device_ids, EXPECTED_DEVICES)
+        for device_id in EXPECTED_DEVICES:
+            self.assertEqual(catalog.require_device(device_id), device_id)
+
+    def test_device_paths_are_isolated_and_reject_path_traversal(self) -> None:
+        legacy = dataset_scope_root("expected_fidelity", "pilot")
+        falcon = dataset_scope_root(
+            "expected_fidelity", "pilot", "ibm_falcon_127"
+        )
+        self.assertEqual(falcon.parent, legacy)
+        self.assertEqual(falcon.name, "ibm_falcon_127")
+        with self.assertRaises(ValueError):
+            dataset_scope_root("expected_fidelity", "pilot", "../escape")
+        with self.assertRaises(ValueError):
+            load_catalog().require_device("unknown_device")
 
     def test_catalog_rejects_cross_product_and_excluded_values(self) -> None:
         catalog = load_catalog()
@@ -238,6 +266,47 @@ class QiskitSplitAndPlanTests(unittest.TestCase):
         self.assertLessEqual(
             {item["run_id"] for item in pilot_plan},
             {item["run_id"] for item in full_plan},
+        )
+
+    def test_attempt_plan_skips_width_incompatible_circuits(self) -> None:
+        catalog = load_catalog()
+        compatible = _synthetic_circuit("compatible", "train")
+        compatible["device_compatibility"] = {
+            "compatible": True,
+            "device_num_qubits": 27,
+            "reason": None,
+        }
+        incompatible = _synthetic_circuit("incompatible", "train")
+        incompatible["num_qubits"] = 90
+        incompatible["device_compatibility"] = {
+            "compatible": False,
+            "device_num_qubits": 27,
+            "reason": "circuit_width_90_exceeds_device_width_27",
+        }
+        manifest = {
+            "dataset_scope": "pilot",
+            "device_id": "ibm_falcon_27",
+            "circuits": [compatible, incompatible],
+        }
+        attempts = expand_attempts(
+            manifest,
+            catalog,
+            target_sha256="a" * 64,
+            versions={
+                "mqt.predictor": "2.3.0",
+                "mqt.bench": "2.0.0",
+                "qiskit": "2.1.1",
+            },
+            device_id="ibm_falcon_27",
+        )
+        self.assertEqual(len(attempts), 36)
+        self.assertEqual(
+            {item["circuit"]["circuit_id"] for item in attempts},
+            {"compatible"},
+        )
+        self.assertEqual(
+            {item["device_id"] for item in attempts},
+            {"ibm_falcon_27"},
         )
 
 

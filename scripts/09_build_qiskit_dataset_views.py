@@ -24,6 +24,10 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=DEFAULT_CATALOG_PATH,
     )
+    parser.add_argument(
+        "--device",
+        help="Device MQT Bench; se omesso usa il default del catalogo.",
+    )
     parser.add_argument("--top-k", type=int, default=3)
     args = parser.parse_args()
     if args.top_k <= 0:
@@ -33,10 +37,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    catalog = load_catalog(args.catalog)
+    device_id = catalog.require_device(args.device)
     statistics = build_dataset_views(
         args.scope,
-        load_catalog(args.catalog),
+        catalog,
         top_k=args.top_k,
+        device_id=device_id,
     )
     print(json.dumps(statistics, indent=2, sort_keys=True))
 

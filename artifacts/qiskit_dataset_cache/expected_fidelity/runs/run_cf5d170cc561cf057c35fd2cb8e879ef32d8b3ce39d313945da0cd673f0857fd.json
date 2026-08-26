@@ -1,0 +1,166 @@
+{
+  "circuit": {
+    "benchmark_family": "qaoa",
+    "canonical_circuit_id": "qaoa_indep_tket_7",
+    "circuit_id": "qaoa_indep_tket_7",
+    "declared_num_qubits": 7,
+    "depth": 10,
+    "device_compatibility": {
+      "compatible": true,
+      "device_num_qubits": 156,
+      "reason": null
+    },
+    "duplicate_group_size": 1,
+    "features": {
+      "dimension": 49,
+      "extractor": "mqt.predictor.ml.helper.create_feature_vector",
+      "values": {
+        "critical_depth": 0.42857142857142855,
+        "depth": 10.0,
+        "entanglement_ratio": 0.4,
+        "gate_count_c3sqrtx": 0.0,
+        "gate_count_c3x": 0.0,
+        "gate_count_c4x": 0.0,
+        "gate_count_ccx": 0.0,
+        "gate_count_ch": 0.0,
+        "gate_count_cp": 0.0,
+        "gate_count_crx": 0.0,
+        "gate_count_cry": 0.0,
+        "gate_count_crz": 0.0,
+        "gate_count_cswap": 0.0,
+        "gate_count_csx": 0.0,
+        "gate_count_cu": 0.0,
+        "gate_count_cu1": 0.0,
+        "gate_count_cu3": 0.0,
+        "gate_count_cx": 0.0,
+        "gate_count_cy": 0.0,
+        "gate_count_cz": 0.0,
+        "gate_count_h": 7.0,
+        "gate_count_id": 0.0,
+        "gate_count_p": 0.0,
+        "gate_count_rc3x": 0.0,
+        "gate_count_rccx": 0.0,
+        "gate_count_rx": 14.0,
+        "gate_count_rxx": 0.0,
+        "gate_count_ry": 0.0,
+        "gate_count_rz": 0.0,
+        "gate_count_rzz": 14.0,
+        "gate_count_s": 0.0,
+        "gate_count_sdg": 0.0,
+        "gate_count_swap": 0.0,
+        "gate_count_sx": 0.0,
+        "gate_count_sxdg": 0.0,
+        "gate_count_t": 0.0,
+        "gate_count_tdg": 0.0,
+        "gate_count_u": 0.0,
+        "gate_count_u0": 0.0,
+        "gate_count_u1": 0.0,
+        "gate_count_u2": 0.0,
+        "gate_count_u3": 0.0,
+        "gate_count_x": 0.0,
+        "gate_count_y": 0.0,
+        "gate_count_z": 0.0,
+        "liveness": 0.8,
+        "num_qubits": 7.0,
+        "parallelism": 0.4166666666666667,
+        "program_communication": 0.3333333333333333
+      }
+    },
+    "file_name": "qaoa_indep_tket_7.qasm",
+    "generator": "tket",
+    "is_duplicate_alias": false,
+    "is_exact_duplicate": false,
+    "leakage_group": "qaoa",
+    "num_clbits": 7,
+    "num_qubits": 7,
+    "operation_counts": {
+      "barrier": 1,
+      "h": 7,
+      "measure": 7,
+      "rx": 14,
+      "rzz": 14
+    },
+    "size": 42,
+    "source_ref": "circuits/train/qaoa_indep_tket_7.qasm",
+    "source_sha256": "0abccc7fd2df2d5ffece53c41b5e4a24693ffdae545bd63798bd78506027b69c",
+    "split": "train"
+  },
+  "compiled_circuit": null,
+  "configuration": {
+    "catalog_id": "qiskit_expected_fidelity_pilot_v1",
+    "config_id": "o3_sabre_lookahead",
+    "layout_method": "sabre",
+    "optimization_level": 3,
+    "routing_method": "lookahead",
+    "study": "routing"
+  },
+  "dataset_scope": "pilot",
+  "device": {
+    "coupling_edge_count": 352,
+    "description": "ibm_heron_156",
+    "device_id": "ibm_heron_156",
+    "num_qubits": 156,
+    "operation_names": [
+      "cz",
+      "delay",
+      "id",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "a30f41e65c03fb900a4b8852261a8407c56c389560f4031ecb43099c1bec5089",
+    "target_type": "qiskit.transpiler.target.Target"
+  },
+  "failure": {
+    "category": "timeout",
+    "exception_type": "AttemptTimeoutError",
+    "message": "Tentativo interrotto dopo 100.0 secondi.",
+    "phase": "transpilation",
+    "retryable": true,
+    "timeout_seconds": 100.0,
+    "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 289, in execute_attempt\n    compiled = transpile(circuit, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/compiler/transpiler.py\", line 291, in transpile\n    out_circuits = pm.run(circuits, callback=callback, num_processes=num_processes)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 451, in run\n    return super().run(circuits, output_name, callback, num_processes=num_processes)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 474, in wrapper\n    return meth(*meth_args, **meth_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 233, in run\n    return super().run(\n           ^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 238, in run\n    _run_workflow(\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 312, in _run_workflow\n    passmanager_ir, final_state = flow_controller.execute(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 98, in execute\n    ret = self.run(passmanager_ir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/layout/vf2_post_layout.py\", line 281, in run\n    layout = Layout(\n             ^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/layout.py\", line 44, in __init__\n    self.from_dict(input_dict)\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/layout.py\", line 84, in from_dict\n    virtual, physical = Layout.order_based_on_type(key, value)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/layout.py\", line 96, in order_based_on_type\n    elif isinstanceint(value2) and isinstance(value1, (Qubit, type(None))):\n         ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/converters/__init__.py\", line 55, in isinstanceint\n    def isinstanceint(obj):\n    \n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 133, in on_alarm\n    raise AttemptTimeoutError(\nqiskit_dataset.generation.AttemptTimeoutError: Tentativo interrotto dopo 100.0 secondi.\n"
+  },
+  "objective": {
+    "direction": "maximize",
+    "implementation": "mqt.predictor.reward.expected_fidelity",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "name": "expected_fidelity"
+  },
+  "phase": "transpilation",
+  "provenance": {
+    "compiler": "qiskit.transpile",
+    "fixed_transpile_options": {
+      "approximation_degree": 1.0,
+      "num_processes": 1
+    },
+    "generator": "qiskit_dataset.generation",
+    "versions": {
+      "mqt.bench": "2.0.0",
+      "mqt.predictor": "2.3.0",
+      "qiskit": "2.1.1"
+    }
+  },
+  "run_id": "run_cf5d170cc561cf057c35fd2cb8e879ef32d8b3ce39d313945da0cd673f0857fd",
+  "schema_version": "1.0.0",
+  "score": null,
+  "seed_transpiler": 0,
+  "split": "train",
+  "status": "timeout",
+  "target_validation": null,
+  "timings_seconds": {
+    "scoring": null,
+    "serialization": null,
+    "source_loading": 0.0006905270001880126,
+    "target_loading": 2.1199998627707828e-06,
+    "target_validation": null,
+    "total": 100.00435796200009,
+    "transpilation": null
+  }
+}

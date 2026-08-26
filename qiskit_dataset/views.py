@@ -11,11 +11,11 @@ from typing import Any, Iterable, Mapping
 
 from .catalog import ConfigurationCatalog, QiskitConfiguration
 from .core import (
-    DATASETS_ROOT,
     SCHEMA_VERSION,
     atomic_json_write,
     atomic_jsonl_write,
     canonical_json,
+    dataset_scope_root,
     load_manifest,
     read_jsonl,
     stable_id,
@@ -46,6 +46,7 @@ def _number_statistics(values: Iterable[float]) -> dict[str, float | int | None]
 def _validate_run(
     run: Mapping[str, Any],
     catalog: ConfigurationCatalog,
+    expected_device_id: str,
 ) -> None:
     status = run.get("status")
     if status not in {"success", "failure", "timeout"}:
@@ -59,7 +60,7 @@ def _validate_run(
     device = run.get("device")
     if (
         not isinstance(device, Mapping)
-        or device.get("device_id") != catalog.device_id
+        or device.get("device_id") != expected_device_id
     ):
         raise ValueError("Hardware del tentativo fuori catalogo.")
     configuration = run.get("configuration")
@@ -161,7 +162,7 @@ def _summary_record(
         {
             "circuit_id": circuit["circuit_id"],
             "source_sha256": circuit["source_sha256"],
-            "device_id": catalog.device_id,
+            "device_id": target_record["device_id"],
             "configuration": configuration.to_dict(),
             "objective": catalog.objective["name"],
             "catalog_id": catalog.catalog_id,
@@ -225,12 +226,17 @@ def aggregate_runs(
     identifiers = [str(run.get("run_id")) for run in runs]
     if len(identifiers) != len(set(identifiers)):
         raise ValueError("run_id duplicati nel JSONL dei tentativi.")
+    expected_device_id = str(target_record["device_id"])
+    if manifest.get("device_id") not in {None, expected_device_id}:
+        raise ValueError(
+            "Device del target incoerente con quello dichiarato nel manifest."
+        )
     circuits_by_id = {
         str(circuit["circuit_id"]): circuit
         for circuit in manifest["circuits"]
     }
     for run in runs:
-        _validate_run(run, catalog)
+        _validate_run(run, catalog, expected_device_id)
         circuit_id = str(run["circuit"]["circuit_id"])
         expected_circuit = circuits_by_id.get(circuit_id)
         if expected_circuit is None:
@@ -258,6 +264,8 @@ def aggregate_runs(
 
     summaries: list[dict[str, Any]] = []
     for circuit in manifest["circuits"]:
+        if circuit.get("device_compatibility", {}).get("compatible") is False:
+            continue
         for configuration in catalog.configurations:
             summaries.append(
                 _summary_record(
@@ -437,7 +445,8 @@ def build_rag_examples(
 def _load_target_record(
     output_root: Path,
     runs: list[Mapping[str, Any]],
-    catalog: ConfigurationCatalog,
+    device_id: str,
+    manifest: Mapping[str, Any],
 ) -> dict[str, Any]:
     if runs:
         device = runs[0].get("device")
@@ -451,9 +460,9 @@ def _load_target_record(
         if isinstance(target, Mapping):
             return dict(target)
     return {
-        "device_id": catalog.device_id,
-        "description": catalog.device_id,
-        "num_qubits": 127,
+        "device_id": device_id,
+        "description": device_id,
+        "num_qubits": manifest.get("device_num_qubits"),
         "target_sha256": None,
         "provenance": {
             "provider": "mqt.bench.targets.get_device",
@@ -468,13 +477,24 @@ def build_dataset_views(
     catalog: ConfigurationCatalog,
     *,
     top_k: int = 3,
+    device_id: str | None = None,
 ) -> dict[str, Any]:
     objective_name = str(catalog.objective["name"])
-    output_root = DATASETS_ROOT / objective_name / scope
-    manifest = load_manifest(scope, objective_name)
+    selected_device_id = catalog.require_device(device_id)
+    output_root = dataset_scope_root(
+        objective_name,
+        scope,
+        selected_device_id,
+    )
+    manifest = load_manifest(scope, objective_name, selected_device_id)
     runs_path = output_root / "qiskit_runs.jsonl"
     runs = read_jsonl(runs_path)
-    target_record = _load_target_record(output_root, runs, catalog)
+    target_record = _load_target_record(
+        output_root,
+        runs,
+        selected_device_id,
+        manifest,
+    )
     summaries = aggregate_runs(manifest, runs, catalog, target_record)
     rag_examples = build_rag_examples(summaries, top_k=top_k)
 
@@ -495,7 +515,16 @@ def build_dataset_views(
         "schema_version": SCHEMA_VERSION,
         "dataset_scope": scope,
         "objective": objective_name,
+        "device_id": selected_device_id,
         "circuits": len(manifest["circuits"]),
+        "compatible_circuits": manifest["counts"].get(
+            "compatible_circuits",
+            len(manifest["circuits"]),
+        ),
+        "incompatible_circuits": manifest["counts"].get(
+            "incompatible_circuits",
+            0,
+        ),
         "attempts_available": len(runs),
         "configuration_aggregates": len(summaries),
         "aggregate_status": dict(sorted(summary_status.items())),
@@ -514,5 +543,19 @@ def build_dataset_views(
             "rag": rag_path.name,
         },
     }
+    if scope == "pilot":
+        from .reporting import build_pilot_report
+
+        report = build_pilot_report(output_root, catalog)
+        statistics["outputs"].update(
+            {
+                "pilot_report": "reports/pilot_report.md",
+                "pilot_summary": "reports/pilot_summary.json",
+                "configuration_statistics": "reports/configuration_statistics.csv",
+                "circuit_statistics": "reports/circuit_statistics.csv",
+                "failure_details": "reports/failure_details.csv",
+            }
+        )
+        statistics["device_comparison"] = report["comparison"]
     atomic_json_write(output_root / "dataset_statistics.json", statistics)
     return statistics
