@@ -4,8 +4,13 @@ Questa pipeline sostituisce le trace RL con una ground truth ottenuta compilando
 direttamente in Qiskit. L'unita sperimentale e la tupla:
 
 ```text
-(circuito, ibm_falcon_127, configurazione Qiskit, seed)
+(circuito, device, configurazione Qiskit, seed)
 ```
+
+I device ammessi sono `ibm_falcon_27`, `ibm_heron_133`,
+`ibm_falcon_127`, `ibm_heron_156` e `quantinuum_h2_56`. Il device di
+default resta `ibm_falcon_127`, ma ogni esecuzione deve usare l'opzione
+`--device` per rendere esplicita la scelta.
 
 Lo score e `mqt.predictor.reward.expected_fidelity` calcolato sul circuito
 compilato. Piu alto e migliore. E una stima ottenuta dal Qiskit Target sintetico
@@ -24,8 +29,14 @@ configurazioni e tre seed, `0, 1, 2`.
 Nel JSON e in Python, `null`/`None` significa lasciare a Qiskit la scelta
 default. Non viene passata la stringa `"default"`.
 
-Ogni circuito produce 36 tentativi: 12 configurazioni per 3 seed. Il pilota
-contiene 360 tentativi; il completo 21.600.
+Ogni coppia circuito-device compatibile produce 36 tentativi: 12 configurazioni
+per 3 seed. I 10 circuiti del pilot restano identici per tutti i device, ma
+quelli troppo larghi vengono annotati nel manifest e non espansi in 36 failure
+ridondanti. Le cardinalita del pilot sono:
+
+- 216 tentativi su 6 circuiti per `ibm_falcon_27`;
+- 288 tentativi su 8 circuiti per `quantinuum_h2_56`;
+- 360 tentativi su 10 circuiti per i tre device da almeno 127 qubit.
 
 ## Split dei circuiti
 
@@ -51,17 +62,30 @@ duplicati sono esclusi soltanto dall'export RAG.
 datasets/
   expected_fidelity/
     pilot/
-      split_manifest.json
-      circuits/{train,validation,test}/
-      qiskit_runs.jsonl
-      qiskit_configuration_aggregates.jsonl
-      rag_examples.jsonl
+      <device_id>/
+        split_manifest.json
+        circuits/{train,validation,test}/
+        qiskit_runs.jsonl
+        qiskit_configuration_aggregates.jsonl
+        rag_examples.jsonl
+        generation_status.json
+        dataset_statistics.json
+        reports/
+          pilot_report.md
+          pilot_summary.json
+          configuration_statistics.csv
+          circuit_statistics.csv
+          failure_details.csv
+      device_comparison.{md,csv}
     full/
-      ...
+      <device_id>/
+        ...
 ```
 
-I circuiti copiati, i JSONL e la cache sono artefatti rigenerabili e ignorati da
-Git. I manifest di split restano versionati.
+La vecchia root `pilot/` con il primo esperimento Falcon-127 resta intatta
+come snapshot storico. Tutte le nuove esecuzioni usano una sottocartella
+`<device_id>`, quindi non possono sovrascriversi a vicenda. I report sono
+piccoli artefatti derivati pensati per essere letti e confrontati.
 
 I tre record hanno contratti formali in `schemas/`:
 
@@ -81,36 +105,45 @@ cd ~/Tesi
 git switch qiskit_dataset
 ```
 
-Preparare o rigenerare manifest e copie dei circuiti:
+Preparare il pilot del device desiderato, per esempio Falcon-27:
 
 ```bash
-.venv/bin/python scripts/07_prepare_qiskit_dataset.py --scope both
+.venv/bin/python scripts/07_prepare_qiskit_dataset.py \
+  --scope pilot --device ibm_falcon_27
 ```
 
 Controllare il piano senza compilare:
 
 ```bash
-.venv/bin/python scripts/08_generate_qiskit_dataset.py --scope pilot --dry-run
-.venv/bin/python scripts/08_generate_qiskit_dataset.py --scope full --dry-run
+.venv/bin/python scripts/08_generate_qiskit_dataset.py \
+  --scope pilot --device ibm_falcon_27 --dry-run
 ```
 
-Eseguire prima il pilota:
+Eseguire il pilot e costruire aggregati, RAG e report:
 
 ```bash
 .venv/bin/python scripts/08_generate_qiskit_dataset.py \
-  --scope pilot --workers 2 --timeout-seconds 900
+  --scope pilot --device ibm_falcon_27 \
+  --workers 2 --timeout-seconds 100
 .venv/bin/python scripts/09_build_qiskit_dataset_views.py \
-  --scope pilot --top-k 3
+  --scope pilot --device ibm_falcon_27 --top-k 3
 ```
 
-Dopo avere controllato tasso di successo, tempi e distribuzione degli score,
-avviare il completo:
+Ripetere i tre comandi cambiando soltanto `--device`. Per statistiche di tempo
+confrontabili, eseguire i pilot uno alla volta con 2 worker e la stessa soglia.
+Il report per-device viene scritto in `reports/pilot_report.md`; il confronto
+aggiornato è in `pilot/device_comparison.md`.
+
+Dopo avere controllato i cinque pilot, preparare e avviare il completo:
 
 ```bash
+.venv/bin/python scripts/07_prepare_qiskit_dataset.py \
+  --scope full --device ibm_falcon_27
 .venv/bin/python scripts/08_generate_qiskit_dataset.py \
-  --scope full --workers 2 --timeout-seconds 900
+  --scope full --device ibm_falcon_27 \
+  --workers 6 --timeout-seconds 100
 .venv/bin/python scripts/09_build_qiskit_dataset_views.py \
-  --scope full --top-k 3
+  --scope full --device ibm_falcon_27 --top-k 3
 ```
 
 La generazione salva atomicamente un record cache per tentativo. Ripetere lo

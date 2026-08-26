@@ -42,7 +42,15 @@
         "device": {
           "type": "object",
           "properties": {
-            "device_id": {"const": "ibm_falcon_127"}
+            "device_id": {
+              "enum": [
+                "ibm_falcon_27",
+                "ibm_heron_133",
+                "ibm_falcon_127",
+                "ibm_heron_156",
+                "quantinuum_h2_56"
+              ]
+            }
           },
           "required": ["device_id"]
         },

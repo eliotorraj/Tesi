@@ -81,6 +81,20 @@ PILOT_FILENAMES = (
 )
 
 
+def dataset_scope_root(
+    objective: str,
+    scope: str,
+    device_id: str | None = None,
+) -> Path:
+    """Return the legacy scope root or an isolated per-device root."""
+    root = DATASETS_ROOT / objective / scope
+    if device_id is None:
+        return root
+    if Path(device_id).name != device_id or device_id in {".", ".."}:
+        raise ValueError(f"device_id non valido per un path: {device_id!r}.")
+    return root / device_id
+
+
 def canonical_json(payload: Any) -> str:
     return json.dumps(
         payload,
@@ -303,8 +317,6 @@ def _validate_split(records: list[dict[str, Any]], scope: str) -> None:
     split_by_hash: dict[str, set[str]] = defaultdict(set)
     for record in records:
         split_by_hash[str(record["source_sha256"])].add(str(record["split"]))
-        if int(record["num_qubits"]) > 127:
-            raise ValueError(f"{record['circuit_id']} non entra in ibm_falcon_127.")
     leaked = {
         digest: sorted(splits)
         for digest, splits in split_by_hash.items()
@@ -319,10 +331,15 @@ def prepare_dataset(
     catalog: ConfigurationCatalog,
     *,
     source: Path | None = None,
+    device_id: str | None = None,
 ) -> dict[str, Any]:
     """Create circuit copies and a deterministic split manifest."""
     if scope not in {"pilot", "full"}:
         raise ValueError("scope deve essere pilot oppure full.")
+    from mqt.bench.targets import get_device
+
+    selected_device_id = catalog.require_device(device_id)
+    device_num_qubits = int(get_device(selected_device_id).num_qubits)
     source_path = ensure_training_circuits(source)
     all_records = _base_inventory(source_path)
     if scope == "pilot":
@@ -342,12 +359,25 @@ def prepare_dataset(
     )
     _validate_split(records, scope)
 
-    output_root = (
-        DATASETS_ROOT
-        / str(catalog.objective["name"])
-        / scope
+    output_root = dataset_scope_root(
+        str(catalog.objective["name"]),
+        scope,
+        selected_device_id,
     )
     for record in records:
+        compatible = int(record["num_qubits"]) <= device_num_qubits
+        record["device_compatibility"] = {
+            "compatible": compatible,
+            "device_num_qubits": device_num_qubits,
+            "reason": (
+                None
+                if compatible
+                else (
+                    f"circuit_width_{record['num_qubits']}_exceeds_"
+                    f"device_width_{device_num_qubits}"
+                )
+            ),
+        }
         relative_path = (
             Path("circuits")
             / str(record["split"])
@@ -364,6 +394,9 @@ def prepare_dataset(
     split_counts = Counter(str(record["split"]) for record in records)
     family_counts = Counter(str(record["benchmark_family"]) for record in records)
     generator_counts = Counter(str(record["generator"]) for record in records)
+    compatible_count = sum(
+        bool(record["device_compatibility"]["compatible"]) for record in records
+    )
     duplicate_hashes = {
         str(record["source_sha256"])
         for record in records
@@ -373,7 +406,8 @@ def prepare_dataset(
         "schema_version": SCHEMA_VERSION,
         "dataset_scope": scope,
         "objective": dict(catalog.objective),
-        "device_id": catalog.device_id,
+        "device_id": selected_device_id,
+        "device_num_qubits": device_num_qubits,
         "catalog_id": catalog.catalog_id,
         "seeds": list(catalog.seeds),
         "split_policy": {
@@ -387,8 +421,10 @@ def prepare_dataset(
         },
         "counts": {
             "circuits": len(records),
+            "compatible_circuits": compatible_count,
+            "incompatible_circuits": len(records) - compatible_count,
             "attempts_planned": (
-                len(records)
+                compatible_count
                 * len(catalog.configurations)
                 * len(catalog.seeds)
             ),
@@ -418,8 +454,12 @@ def prepare_dataset(
     return manifest
 
 
-def load_manifest(scope: str, objective: str = "expected_fidelity") -> dict[str, Any]:
-    path = DATASETS_ROOT / objective / scope / "split_manifest.json"
+def load_manifest(
+    scope: str,
+    objective: str = "expected_fidelity",
+    device_id: str | None = None,
+) -> dict[str, Any]:
+    path = dataset_scope_root(objective, scope, device_id) / "split_manifest.json"
     if not path.is_file():
         raise FileNotFoundError(
             f"Manifest assente: {path}. Eseguire prima 07_prepare_qiskit_dataset.py."
@@ -428,6 +468,10 @@ def load_manifest(scope: str, objective: str = "expected_fidelity") -> dict[str,
         manifest = json.load(handle)
     if manifest.get("dataset_scope") != scope:
         raise ValueError(f"Scope incoerente nel manifest {path}.")
+    if device_id is not None and manifest.get("device_id") != device_id:
+        raise ValueError(
+            f"Device incoerente nel manifest {path}: {manifest.get('device_id')!r}."
+        )
     return manifest
 
 
@@ -468,7 +512,13 @@ def expand_attempts(
     *,
     target_sha256: str,
     versions: Mapping[str, str] | None = None,
+    device_id: str | None = None,
 ) -> list[dict[str, Any]]:
+    selected_device_id = catalog.require_device(
+        device_id or str(manifest.get("device_id", catalog.default_device_id))
+    )
+    if manifest.get("device_id") not in {None, selected_device_id}:
+        raise ValueError("Device del manifest incoerente con il piano.")
     version_map = package_versions() if versions is None else dict(versions)
     attempts: list[dict[str, Any]] = []
     configuration_order = {
@@ -476,6 +526,8 @@ def expand_attempts(
         for index, configuration in enumerate(catalog.configurations)
     }
     for circuit in manifest["circuits"]:
+        if circuit.get("device_compatibility", {}).get("compatible") is False:
+            continue
         for configuration in catalog.configurations:
             configuration_record = configuration.to_dict()
             for seed in catalog.seeds:
@@ -485,7 +537,7 @@ def expand_attempts(
                             circuit,
                             configuration_record,
                             seed,
-                            device_id=catalog.device_id,
+                            device_id=selected_device_id,
                             target_sha256=target_sha256,
                             objective=catalog.objective,
                             versions=version_map,
@@ -498,7 +550,7 @@ def expand_attempts(
                             configuration.config_id
                         ],
                         "seed_transpiler": seed,
-                        "device_id": catalog.device_id,
+                        "device_id": selected_device_id,
                         "target_sha256": target_sha256,
                         "objective": dict(catalog.objective),
                         "versions": version_map,

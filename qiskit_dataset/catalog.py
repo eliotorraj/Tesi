@@ -49,7 +49,8 @@ class QiskitConfiguration:
 class ConfigurationCatalog:
     schema_version: str
     catalog_id: str
-    device_id: str
+    default_device_id: str
+    supported_device_ids: tuple[str, ...]
     objective: Mapping[str, Any]
     seeds: tuple[int, ...]
     fixed_transpile_options: Mapping[str, Any]
@@ -65,6 +66,20 @@ class ConfigurationCatalog:
             configuration.config_id: configuration
             for configuration in self.configurations
         }
+
+    @property
+    def device_id(self) -> str:
+        """Backward-compatible alias for the default device."""
+        return self.default_device_id
+
+    def require_device(self, device_id: str | None = None) -> str:
+        selected = self.default_device_id if device_id is None else str(device_id)
+        if selected not in self.supported_device_ids:
+            allowed = ", ".join(self.supported_device_ids)
+            raise ValueError(
+                f"Device fuori catalogo: {selected!r}. Ammessi: {allowed}."
+            )
+        return selected
 
     def find(
         self,
@@ -137,7 +152,16 @@ def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
     catalog = ConfigurationCatalog(
         schema_version=str(raw["schema_version"]),
         catalog_id=str(raw["catalog_id"]),
-        device_id=str(raw["device_id"]),
+        default_device_id=str(
+            raw.get("default_device_id", raw.get("device_id"))
+        ),
+        supported_device_ids=tuple(
+            str(value)
+            for value in raw.get(
+                "supported_device_ids",
+                (raw.get("default_device_id", raw.get("device_id")),),
+            )
+        ),
         objective=dict(raw["objective"]),
         seeds=seeds,
         fixed_transpile_options=dict(raw.get("fixed_transpile_options", {})),
@@ -165,7 +189,11 @@ def _validate_catalog(catalog: ConfigurationCatalog) -> None:
         raise ValueError("Il catalogo deve definire esattamente tre seed distinti.")
     if any(seed < 0 or seed > 2**32 - 1 for seed in catalog.seeds):
         raise ValueError("I seed devono essere compresi tra 0 e 2^32-1.")
-    if catalog.device_id != "ibm_falcon_127":
-        raise ValueError("Questa versione ammette soltanto ibm_falcon_127.")
+    if not catalog.supported_device_ids:
+        raise ValueError("Il catalogo deve definire almeno un device.")
+    if len(catalog.supported_device_ids) != len(set(catalog.supported_device_ids)):
+        raise ValueError("Device duplicato nel catalogo.")
+    if catalog.default_device_id not in catalog.supported_device_ids:
+        raise ValueError("Il device di default deve essere tra quelli supportati.")
     if catalog.objective.get("name") != "expected_fidelity":
         raise ValueError("Questa versione ammette soltanto expected_fidelity.")

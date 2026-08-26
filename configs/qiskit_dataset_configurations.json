@@ -1,7 +1,14 @@
 {
   "schema_version": "1.0.0",
   "catalog_id": "qiskit_expected_fidelity_pilot_v1",
-  "device_id": "ibm_falcon_127",
+  "default_device_id": "ibm_falcon_127",
+  "supported_device_ids": [
+    "ibm_falcon_27",
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56"
+  ],
   "objective": {
     "name": "expected_fidelity",
     "direction": "maximize",

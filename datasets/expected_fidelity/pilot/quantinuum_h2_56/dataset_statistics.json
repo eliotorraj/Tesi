@@ -1,0 +1,44 @@
+{
+  "aggregate_status": {
+    "eligible": 59,
+    "ineligible": 37
+  },
+  "attempts_available": 288,
+  "circuits": 10,
+  "compatible_circuits": 8,
+  "configuration_aggregates": 96,
+  "dataset_scope": "pilot",
+  "device_comparison": {
+    "common_circuit_ids": [
+      "ae_indep_qiskit_2",
+      "graphstate_indep_qiskit_14",
+      "pricingcall_indep_qiskit_5",
+      "qaoa_indep_tket_7",
+      "routing_indep_qiskit_12",
+      "vqe_indep_tket_16"
+    ],
+    "devices": 5,
+    "outputs": {
+      "csv": "/home/elio/Tesi/datasets/expected_fidelity/pilot/device_comparison.csv",
+      "markdown": "/home/elio/Tesi/datasets/expected_fidelity/pilot/device_comparison.md"
+    }
+  },
+  "device_id": "quantinuum_h2_56",
+  "duplicate_aliases_excluded_from_rag": 0,
+  "incompatible_circuits": 2,
+  "objective": "expected_fidelity",
+  "outputs": {
+    "attempts": "qiskit_runs.jsonl",
+    "circuit_statistics": "reports/circuit_statistics.csv",
+    "configuration_aggregates": "qiskit_configuration_aggregates.jsonl",
+    "configuration_statistics": "reports/configuration_statistics.csv",
+    "failure_details": "reports/failure_details.csv",
+    "pilot_report": "reports/pilot_report.md",
+    "pilot_summary": "reports/pilot_summary.json",
+    "rag": "rag_examples.jsonl"
+  },
+  "rag_examples": 5,
+  "rag_split": "train_only",
+  "rag_top_k": 3,
+  "schema_version": "1.0.0"
+}

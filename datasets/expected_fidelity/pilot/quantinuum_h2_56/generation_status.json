@@ -1,0 +1,47 @@
+{
+  "available_attempts": 288,
+  "available_status": {
+    "success": 183,
+    "timeout": 105
+  },
+  "cache_hits": 177,
+  "cache_root": "artifacts/qiskit_dataset_cache/expected_fidelity",
+  "complete": true,
+  "dataset_scope": "pilot",
+  "device_id": "quantinuum_h2_56",
+  "executed_now": 111,
+  "executed_status": {
+    "success": 6,
+    "timeout": 105
+  },
+  "execution_policy": {
+    "timeout_seconds": 200.0,
+    "wall_clock_seconds_this_invocation": 3713.819972599,
+    "workers": 6
+  },
+  "missing_attempts": 0,
+  "objective": "expected_fidelity",
+  "output": "qiskit_runs.jsonl",
+  "planned_attempts": 288,
+  "schema_version": "1.0.0",
+  "target": {
+    "coupling_edge_count": 3080,
+    "description": "quantinuum_h2_56",
+    "device_id": "quantinuum_h2_56",
+    "num_qubits": 56,
+    "operation_names": [
+      "measure",
+      "rx",
+      "ry",
+      "rz",
+      "rzz"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "8c5576ac2f280a98f797dceb53186f97500e901d9784cc328187e156cbbe9b8f",
+    "target_type": "qiskit.transpiler.target.Target"
+  }
+}

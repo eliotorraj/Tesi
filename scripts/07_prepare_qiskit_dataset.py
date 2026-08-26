@@ -30,6 +30,10 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_CATALOG_PATH,
     )
     parser.add_argument(
+        "--device",
+        help="Device MQT Bench; se omesso usa il default del catalogo.",
+    )
+    parser.add_argument(
         "--source-circuits",
         type=Path,
         help="Override opzionale della cartella con i 600 QASM MQT.",
@@ -40,6 +44,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     catalog = load_catalog(args.catalog)
+    device_id = catalog.require_device(args.device)
     scopes = ("pilot", "full") if args.scope == "both" else (args.scope,)
     result = {}
     for scope in scopes:
@@ -47,6 +52,7 @@ def main() -> None:
             scope,
             catalog,
             source=args.source_circuits,
+            device_id=device_id,
         )
         result[scope] = {
             "manifest_id": manifest["manifest_id"],
