@@ -1,7 +1,7 @@
 [project]
-name = "mqt-predictor-understanding"
+name = "qiskit-llm-dataset"
 version = "0.1.0"
-description = "Reproducible experiments for understanding MQT Predictor"
+description = "Reproducible direct-Qiskit datasets for evidence-backed LLM recommendations"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "mqt.predictor==2.3.0",

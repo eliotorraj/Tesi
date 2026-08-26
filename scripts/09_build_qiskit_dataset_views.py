@@ -30,8 +30,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--top-k", type=int, default=3)
     args = parser.parse_args()
-    if args.top_k <= 0:
-        parser.error("--top-k deve essere positivo.")
+    if not 1 <= args.top_k <= 3:
+        parser.error("--top-k deve essere compreso tra 1 e 3.")
     return args
 
 

@@ -18,12 +18,16 @@ from prototype.quantum_assistant.adapters.validation import (
 from prototype.quantum_assistant.models import HardwareProfile, UiSubmission
 from qiskit_dataset.catalog import load_catalog
 from qiskit_dataset.core import (
+    dataset_circuits_root,
     dataset_scope_root,
     expand_attempts,
     load_manifest,
+    resolve_circuit_source,
+    sha256_file,
     stable_id,
 )
-from qiskit_dataset.generation import execute_attempt
+from qiskit_dataset.generation import build_timeout_diagnostics, execute_attempt
+from qiskit_dataset.reporting import failure_detail_rows
 from qiskit_dataset.views import aggregate_runs, build_rag_examples
 
 
@@ -92,6 +96,8 @@ def _success_run(
     configuration: object,
     seed: int,
     score: float,
+    *,
+    device_id: str = "ibm_falcon_127",
 ) -> dict[str, object]:
     configuration_dict = configuration.to_dict()
     return {
@@ -102,6 +108,7 @@ def _success_run(
                 "circuit": circuit["circuit_id"],
                 "config": configuration_dict["config_id"],
                 "seed": seed,
+                "device": device_id,
             },
         ),
         "dataset_scope": "pilot",
@@ -113,9 +120,9 @@ def _success_run(
         },
         "circuit": circuit,
         "device": {
-            "device_id": "ibm_falcon_127",
+            "device_id": device_id,
             "num_qubits": 127,
-            "target_sha256": "a" * 64,
+            "target_sha256": stable_id("target", device_id).split("_", 1)[1],
         },
         "configuration": {
             **configuration_dict,
@@ -223,7 +230,10 @@ class QiskitCatalogTests(unittest.TestCase):
 class QiskitSplitAndPlanTests(unittest.TestCase):
     def test_committed_manifests_have_expected_counts_and_no_leakage(self) -> None:
         catalog = load_catalog()
-        pilot = load_manifest("pilot")
+        pilot = load_manifest(
+            "pilot",
+            device_id=catalog.default_device_id,
+        )
         full = load_manifest("full")
         self.assertEqual(pilot["counts"]["by_split"], {
             "test": 2,
@@ -267,6 +277,33 @@ class QiskitSplitAndPlanTests(unittest.TestCase):
             {item["run_id"] for item in pilot_plan},
             {item["run_id"] for item in full_plan},
         )
+
+    def test_pilot_uses_one_shared_integrity_checked_circuit_store(self) -> None:
+        catalog = load_catalog()
+        shared_root = dataset_circuits_root("expected_fidelity", "pilot")
+        self.assertEqual(len(list(shared_root.glob("*/*.qasm"))), 10)
+        for device_id in catalog.supported_device_ids:
+            device_root = dataset_scope_root(
+                "expected_fidelity", "pilot", device_id
+            )
+            self.assertFalse((device_root / "circuits").exists())
+            manifest = load_manifest("pilot", device_id=device_id)
+            self.assertEqual(manifest["schema_version"], "2.0.0")
+            self.assertEqual(
+                manifest["circuit_storage"]["layout"],
+                "shared_scope_root",
+            )
+            for circuit in manifest["circuits"]:
+                source = resolve_circuit_source(
+                    "expected_fidelity",
+                    "pilot",
+                    str(circuit["source_ref"]),
+                )
+                self.assertTrue(source.is_file())
+                self.assertEqual(
+                    sha256_file(source),
+                    circuit["source_sha256"],
+                )
 
     def test_attempt_plan_skips_width_incompatible_circuits(self) -> None:
         catalog = load_catalog()
@@ -319,16 +356,27 @@ class QiskitAggregationTests(unittest.TestCase):
             "validation",
         )
         self.manifest = {
+            "schema_version": "1.0.0",
             "dataset_scope": "pilot",
+            "catalog_id": self.catalog.catalog_id,
+            "objective": dict(self.catalog.objective),
+            "seeds": list(self.catalog.seeds),
             "circuits": [self.train_circuit, self.validation_circuit],
         }
         self.target = {
             "device_id": "ibm_falcon_127",
             "num_qubits": 127,
-            "target_sha256": "a" * 64,
+            "target_sha256": stable_id(
+                "target", "ibm_falcon_127"
+            ).split("_", 1)[1],
         }
 
-    def _complete_runs(self) -> list[dict[str, object]]:
+    def _complete_runs(
+        self,
+        *,
+        device_id: str = "ibm_falcon_127",
+        score_shift: float = 0.0,
+    ) -> list[dict[str, object]]:
         runs: list[dict[str, object]] = []
         for circuit in (self.train_circuit, self.validation_circuit):
             for index, configuration in enumerate(
@@ -353,7 +401,8 @@ class QiskitAggregationTests(unittest.TestCase):
                             circuit,
                             configuration,
                             seed,
-                            score,
+                            score + score_shift,
+                            device_id=device_id,
                         )
                     )
         return runs
@@ -384,6 +433,23 @@ class QiskitAggregationTests(unittest.TestCase):
         self.assertEqual(rag[0]["split"], "train")
         self.assertEqual(len(rag[0]["top_configurations"]), 3)
         self.assertNotIn("seed", json.dumps(rag[0]["top_configurations"]))
+        self.assertEqual(rag[0]["schema_version"], "2.0.0")
+        self.assertEqual(rag[0]["view_scope"], "device_specific")
+        self.assertEqual(
+            rag[0]["selected_device"]["device_id"],
+            "ibm_falcon_127",
+        )
+        evidence_ids = {
+            item["evidence_id"] for item in rag[0]["evidence"]
+        }
+        for claim in rag[0]["claims"]:
+            self.assertLessEqual(set(claim["evidence_ids"]), evidence_ids)
+        self.assertTrue(
+            all(
+                item["stability"]["observations"]
+                for item in rag[0]["evidence"]
+            )
+        )
 
     def test_incomplete_seed_set_is_not_eligible(self) -> None:
         runs = self._complete_runs()
@@ -411,6 +477,94 @@ class QiskitAggregationTests(unittest.TestCase):
         self.assertFalse(summary["attempts"]["complete"])
         self.assertFalse(summary["eligible_for_ranking"])
         self.assertIsNone(summary["rank"])
+
+    def test_global_rag_selects_device_then_top_three_configurations(self) -> None:
+        first = aggregate_runs(
+            self.manifest,
+            self._complete_runs(device_id="ibm_falcon_127"),
+            self.catalog,
+            self.target,
+        )
+        second = aggregate_runs(
+            self.manifest,
+            self._complete_runs(
+                device_id="ibm_heron_133",
+                score_shift=0.05,
+            ),
+            self.catalog,
+            {
+                **self.target,
+                "device_id": "ibm_heron_133",
+                "target_sha256": stable_id(
+                    "target", "ibm_heron_133"
+                ).split("_", 1)[1],
+            },
+        )
+        example = build_rag_examples(
+            first + second,
+            top_k=3,
+            device_order=self.catalog.supported_device_ids,
+        )[0]
+        self.assertEqual(example["view_scope"], "global_multi_device")
+        self.assertEqual(
+            example["selected_device"]["device_id"],
+            "ibm_heron_133",
+        )
+        self.assertEqual(
+            {item["device_id"] for item in example["top_configurations"]},
+            {"ibm_heron_133"},
+        )
+        self.assertEqual(
+            len(example["retrieval_input"]["compatible_devices"]),
+            2,
+        )
+        self.assertNotIn("selected_device", example["retrieval_input"])
+
+    def test_global_rag_tie_break_is_explicitly_non_causal(self) -> None:
+        first = aggregate_runs(
+            self.manifest,
+            self._complete_runs(device_id="ibm_falcon_27"),
+            self.catalog,
+            {
+                **self.target,
+                "device_id": "ibm_falcon_27",
+                "target_sha256": stable_id(
+                    "target", "ibm_falcon_27"
+                ).split("_", 1)[1],
+            },
+        )
+        second = aggregate_runs(
+            self.manifest,
+            self._complete_runs(device_id="ibm_falcon_127"),
+            self.catalog,
+            self.target,
+        )
+        example = build_rag_examples(
+            first + second,
+            top_k=3,
+            device_order=self.catalog.supported_device_ids,
+        )[0]
+        self.assertEqual(
+            example["selected_device"]["device_id"],
+            "ibm_falcon_27",
+        )
+        device_claim = next(
+            claim
+            for claim in example["claims"]
+            if claim["claim_type"] == "selected_device"
+        )
+        self.assertIn("parità", device_claim["text"])
+        self.assertIn("non dimostrano superiorità", device_claim["text"])
+
+    def test_rag_rejects_more_than_three_labeled_configurations(self) -> None:
+        summaries = aggregate_runs(
+            self.manifest,
+            self._complete_runs(),
+            self.catalog,
+            self.target,
+        )
+        with self.assertRaises(ValueError):
+            build_rag_examples(summaries, top_k=4)
 
 
 class QiskitFailureRecordTests(unittest.TestCase):
@@ -460,6 +614,82 @@ class QiskitFailureRecordTests(unittest.TestCase):
         self.assertEqual(record["failure"]["category"], "source_error")
         self.assertTrue(record["failure"]["exception_type"])
         self.assertTrue(record["failure"]["message"])
+
+    def test_timeout_diagnostics_separate_observation_from_inference(self) -> None:
+        traceback_text = """Traceback (most recent call last):
+  File "/tmp/qiskit/transpiler/passes/layout/vf2_post_layout.py", line 363, in _score_layout
+    value = target[gate]
+  File "/workspace/qiskit_dataset/generation.py", line 1, in on_alarm
+    raise AttemptTimeoutError()
+"""
+        diagnostics = build_timeout_diagnostics(
+            traceback_text=traceback_text,
+            phase="transpilation",
+            timeout_seconds=120.0,
+            elapsed_seconds=120.01,
+            configuration={
+                "optimization_level": 3,
+                "layout_method": "sabre",
+                "routing_method": "lookahead",
+            },
+            qiskit_version="2.1.1",
+        )
+        self.assertEqual(
+            diagnostics["interrupted_stack_frame"]["function"],
+            "_score_layout",
+        )
+        self.assertEqual(
+            diagnostics["inference"]["qiskit_stage"],
+            "optimization",
+        )
+        self.assertEqual(
+            diagnostics["inference"]["configuration_component"],
+            {"name": "optimization_level", "value": 3},
+        )
+        self.assertFalse(
+            diagnostics["inference"]["causal_attribution_supported"]
+        )
+        self.assertIsNone(diagnostics["last_completed_pass"])
+
+        run = {
+            "run_id": "run_" + "a" * 64,
+            "status": "timeout",
+            "phase": "transpilation",
+            "seed_transpiler": 0,
+            "circuit": {
+                "circuit_id": "c",
+                "benchmark_family": "synthetic",
+                "generator": "qiskit",
+                "num_qubits": 2,
+                "depth": 2,
+                "size": 2,
+            },
+            "device": {
+                "device_id": "ibm_falcon_127",
+                "num_qubits": 127,
+                "target_sha256": "b" * 64,
+            },
+            "configuration": {
+                "config_id": "o3_sabre_lookahead",
+                "optimization_level": 3,
+                "layout_method": "sabre",
+                "routing_method": "lookahead",
+            },
+            "timings_seconds": {"total": 120.01},
+            "failure": {
+                "phase": "transpilation",
+                "category": "timeout",
+                "exception_type": "AttemptTimeoutError",
+                "message": "timeout",
+                "traceback": traceback_text,
+                "timeout_seconds": 120.0,
+            },
+            "provenance": {"versions": {"qiskit": "2.1.1"}},
+        }
+        row = failure_detail_rows([run])[0]
+        self.assertEqual(row["interrupted_pass_function"], "_score_layout")
+        self.assertEqual(row["inferred_qiskit_stage"], "optimization")
+        self.assertEqual(row["causal_attribution_supported"], False)
 
 
 class JsonSchemaFilesTests(unittest.TestCase):

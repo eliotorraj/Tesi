@@ -137,7 +137,7 @@
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
   "phase": "completed",
@@ -168,12 +168,12 @@
     "validation_errors": []
   },
   "timings_seconds": {
-    "scoring": 0.0007244559999435296,
-    "serialization": 0.003893541000024925,
-    "source_loading": 0.0008000380000794394,
-    "target_loading": 2.429999995001708e-06,
-    "target_validation": 0.0009113710000292485,
-    "total": 5.225506820999954,
-    "transpilation": 5.219075449999991
+    "scoring": 0.0006172549997245369,
+    "serialization": 0.0038850420000926533,
+    "source_loading": 0.000522911999723874,
+    "target_loading": 1.5800001165189315e-06,
+    "target_validation": 0.0009321920001639228,
+    "total": 3.978439223999885,
+    "transpilation": 3.9724402329998156
   }
 }

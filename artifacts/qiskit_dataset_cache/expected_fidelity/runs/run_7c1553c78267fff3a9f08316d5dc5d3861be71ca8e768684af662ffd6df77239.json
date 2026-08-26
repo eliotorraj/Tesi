@@ -5,6 +5,11 @@
     "circuit_id": "random_indep_qiskit_30",
     "declared_num_qubits": 30,
     "depth": 312,
+    "device_compatibility": {
+      "compatible": true,
+      "device_num_qubits": 127,
+      "reason": null
+    },
     "duplicate_group_size": 1,
     "features": {
       "dimension": 49,
@@ -146,16 +151,54 @@
   "failure": {
     "category": "timeout",
     "exception_type": "AttemptTimeoutError",
-    "message": "Tentativo interrotto dopo 900.0 secondi.",
+    "message": "Tentativo interrotto dopo 100.0 secondi.",
     "phase": "transpilation",
     "retryable": true,
-    "timeout_seconds": 900.0,
-    "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 289, in execute_attempt\n    compiled = transpile(circuit, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/compiler/transpiler.py\", line 291, in transpile\n    out_circuits = pm.run(circuits, callback=callback, num_processes=num_processes)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 451, in run\n    return super().run(circuits, output_name, callback, num_processes=num_processes)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 474, in wrapper\n    return meth(*meth_args, **meth_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 233, in run\n    return super().run(\n           ^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 238, in run\n    _run_workflow(\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 312, in _run_workflow\n    passmanager_ir, final_state = flow_controller.execute(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/basepasses.py\", line 167, in execute\n    new_dag, state = super().execute(\n                     ^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 98, in execute\n    ret = self.run(passmanager_ir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 148, in run\n    best_step = _search_forward_n_swaps(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 227, in _search_forward_n_swaps\n    next_step = _search_forward_n_swaps(new_state, gates_remaining, depth - 1, width)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 227, in _search_forward_n_swaps\n    next_step = _search_forward_n_swaps(new_state, gates_remaining, depth - 1, width)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 227, in _search_forward_n_swaps\n    next_step = _search_forward_n_swaps(new_state, gates_remaining, depth - 1, width)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  [Previous line repeated 1 more time]\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 215, in _search_forward_n_swaps\n    ranked_swaps = sorted(\n                   ^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 216, in <genexpr>\n    (_score_state_with_swap(swap, state, gates) for swap in state.swaps),\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 357, in _score_state_with_swap\n    return _calc_layout_distance(gates, new_state), swap, new_state\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 341, in _calc_layout_distance\n    if len(qubits) == 2:\n       ^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 133, in on_alarm\n    raise AttemptTimeoutError(\nqiskit_dataset.generation.AttemptTimeoutError: Tentativo interrotto dopo 900.0 secondi.\n"
+    "timeout_diagnostics": {
+      "completed_pass_count": 21,
+      "elapsed_seconds": 100.00028108999959,
+      "inference": {
+        "basis": [
+          "Lo stack interrotto contiene 'qiskit/transpiler/passes/routing/lookahead_swap.py'.",
+          "Lo stage è inferito dalla pipeline preset fissata a Qiskit 2.1.1; non è un segnale runtime né una causa dimostrata.",
+          "La configurazione usa routing_method='lookahead'."
+        ],
+        "causal_attribution_supported": false,
+        "confidence": "medium",
+        "configuration_component": {
+          "name": "routing_method",
+          "value": "lookahead"
+        },
+        "qiskit_stage": "routing"
+      },
+      "interrupted_stack_frame": {
+        "file": "qiskit/transpiler/passes/routing/lookahead_swap.py",
+        "function": "_calc_layout_distance",
+        "line": 342
+      },
+      "last_completed_pass": {
+        "class": "qiskit.transpiler.passes.routing.lookahead_swap.LookaheadSwap",
+        "index": 20,
+        "name": "LookaheadSwap",
+        "qiskit_reported_duration_seconds": 99.1530442237854,
+        "wall_elapsed_seconds": 99.9855801850008
+      },
+      "limitations": [
+        "Il callback pubblico di Qiskit viene eseguito dopo ogni pass: last_completed_pass non identifica necessariamente il pass interrotto.",
+        "Lo stack indica dove SIGALRM è stato osservato, non dimostra quale pass, configurazione, circuito o hardware abbia causato il timeout.",
+        "Un'attribuzione causale richiede confronti controllati tra circuiti, configurazioni e device."
+      ],
+      "observation_method": "qiskit_post_pass_callback_and_sigalrm_traceback",
+      "observed_phase": "transpilation",
+      "timeout_seconds": 100.0
+    },
+    "timeout_seconds": 100.0,
+    "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 499, in execute_attempt\n    compiled = transpile(circuit, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/compiler/transpiler.py\", line 291, in transpile\n    out_circuits = pm.run(circuits, callback=callback, num_processes=num_processes)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 451, in run\n    return super().run(circuits, output_name, callback, num_processes=num_processes)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 474, in wrapper\n    return meth(*meth_args, **meth_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passmanager.py\", line 233, in run\n    return super().run(\n           ^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 238, in run\n    _run_workflow(\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/passmanager.py\", line 312, in _run_workflow\n    passmanager_ir, final_state = flow_controller.execute(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 218, in execute\n    passmanager_ir, state = next_task.execute(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/basepasses.py\", line 167, in execute\n    new_dag, state = super().execute(\n                     ^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/passmanager/base_tasks.py\", line 98, in execute\n    ret = self.run(passmanager_ir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 148, in run\n    best_step = _search_forward_n_swaps(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 227, in _search_forward_n_swaps\n    next_step = _search_forward_n_swaps(new_state, gates_remaining, depth - 1, width)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 227, in _search_forward_n_swaps\n    next_step = _search_forward_n_swaps(new_state, gates_remaining, depth - 1, width)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 227, in _search_forward_n_swaps\n    next_step = _search_forward_n_swaps(new_state, gates_remaining, depth - 1, width)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  [Previous line repeated 1 more time]\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 215, in _search_forward_n_swaps\n    ranked_swaps = sorted(\n                   ^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 216, in <genexpr>\n    (_score_state_with_swap(swap, state, gates) for swap in state.swaps),\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 357, in _score_state_with_swap\n    return _calc_layout_distance(gates, new_state), swap, new_state\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/Tesi/.venv/lib/python3.12/site-packages/qiskit/transpiler/passes/routing/lookahead_swap.py\", line 342, in _calc_layout_distance\n    out += state.coupling_map.distance(layout_map[qubits[0]], layout_map[qubits[1]])\n    ^^^\n  File \"/home/elio/Tesi/qiskit_dataset/generation.py\", line 333, in on_alarm\n    raise AttemptTimeoutError(\nqiskit_dataset.generation.AttemptTimeoutError: Tentativo interrotto dopo 100.0 secondi.\n"
   },
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
   "phase": "transpilation",
@@ -182,10 +225,10 @@
   "timings_seconds": {
     "scoring": null,
     "serialization": null,
-    "source_loading": 0.010551447001489578,
-    "target_loading": 2.1900013962294906e-06,
+    "source_loading": 0.014637162999861175,
+    "target_loading": 2.660000063769985e-06,
     "target_validation": null,
-    "total": 900.0947465519966,
-    "transpilation": null
+    "total": 100.07116613899962,
+    "transpilation": 99.98561621600038
   }
 }

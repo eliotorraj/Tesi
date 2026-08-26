@@ -1,5 +1,11 @@
 {
   "catalog_id": "qiskit_expected_fidelity_pilot_v1",
+  "circuit_storage": {
+    "integrity_field": "source_sha256",
+    "layout": "shared_scope_root",
+    "root_ref": "circuits",
+    "source_ref_base": "scope_root"
+  },
   "circuits": [
     {
       "benchmark_family": "ae",
@@ -985,11 +991,11 @@
     ],
     "source_circuit_only": true
   },
-  "manifest_id": "manifest_f962f9d955e2e3581f3f817c7c45d0ccc92f694c9f023c41932540b8b7c9946c",
+  "manifest_id": "manifest_30dab48401c6e0450289370b6db5153a11cf56455ed4a3b44783474bca0664aa",
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
   "provenance": {
@@ -1001,7 +1007,7 @@
       "qiskit": "2.1.1"
     }
   },
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "seeds": [
     0,
     1,

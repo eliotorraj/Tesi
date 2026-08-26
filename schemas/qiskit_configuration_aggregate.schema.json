@@ -15,6 +15,7 @@
     "seeds",
     "attempts",
     "score_statistics",
+    "score_observations",
     "timing_statistics_seconds",
     "failure_breakdown",
     "eligible_for_ranking",
@@ -25,7 +26,7 @@
     "run_ids"
   ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "summary_id": {
       "type": "string",
       "pattern": "^summary_[0-9a-f]{64}$"
@@ -68,6 +69,25 @@
         "min",
         "max"
       ]
+    },
+    "score_observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["run_id", "seed_transpiler", "score"],
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^run_[0-9a-f]{64}$"
+          },
+          "seed_transpiler": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "score": {"type": "number"}
+        }
+      }
     },
     "timing_statistics_seconds": {"type": "object"},
     "failure_breakdown": {"type": "array"},

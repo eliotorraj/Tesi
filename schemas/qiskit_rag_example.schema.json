@@ -1,32 +1,66 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://tesi.local/schemas/qiskit_rag_example.schema.json",
-  "title": "Train-only Qiskit RAG example",
+  "title": "Evidence-backed train-only Qiskit RAG example",
   "type": "object",
   "required": [
     "schema_version",
     "rag_id",
     "split",
+    "view_scope",
+    "task",
     "objective",
     "retrieval_input",
     "ranking",
-    "top_configurations"
+    "selected_device",
+    "top_configurations",
+    "claims",
+    "evidence",
+    "scientific_caveats",
+    "retrieval_document"
   ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "rag_id": {"type": "string", "pattern": "^rag_[0-9a-f]{64}$"},
     "split": {"const": "train"},
+    "view_scope": {
+      "enum": ["device_specific", "global_multi_device"]
+    },
+    "task": {
+      "type": "object",
+      "required": ["name", "input_fields", "label_fields", "label_semantics"],
+      "properties": {
+        "name": {"const": "select_device_and_qiskit_configurations"},
+        "input_fields": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "label_fields": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "label_semantics": {"type": "string", "minLength": 1}
+      }
+    },
     "objective": {
       "type": "object",
+      "required": ["name", "direction"],
       "properties": {
         "name": {"const": "expected_fidelity"},
         "direction": {"const": "maximize"}
-      },
-      "required": ["name", "direction"]
+      }
     },
     "retrieval_input": {
       "type": "object",
-      "required": ["circuit", "device", "retrieval_text"],
+      "required": [
+        "circuit",
+        "compatible_devices",
+        "selection_scope",
+        "user_constraints",
+        "retrieval_text"
+      ],
       "properties": {
         "circuit": {
           "type": "object",
@@ -35,24 +69,76 @@
             "benchmark_family",
             "generator",
             "num_qubits",
+            "source_ref",
             "source_sha256",
             "features"
+          ],
+          "properties": {
+            "circuit_id": {"type": "string"},
+            "benchmark_family": {"type": "string"},
+            "generator": {"enum": ["qiskit", "tket"]},
+            "num_qubits": {"type": "integer", "minimum": 1},
+            "source_ref": {"type": "string", "minLength": 1},
+            "source_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "features": {
+              "type": "object",
+              "required": ["extractor", "dimension", "values"],
+              "properties": {
+                "dimension": {"const": 49},
+                "values": {
+                  "type": "object",
+                  "minProperties": 49,
+                  "maxProperties": 49,
+                  "additionalProperties": {"type": "number"}
+                }
+              }
+            }
+          }
+        },
+        "compatible_devices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["device_id", "num_qubits", "target_sha256"],
+            "properties": {
+              "device_id": {"$ref": "#/$defs/deviceId"},
+              "num_qubits": {"type": "integer", "minimum": 1},
+              "target_sha256": {
+                "type": ["string", "null"],
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "selection_scope": {
+          "type": "object",
+          "required": [
+            "catalog_id",
+            "evaluated_device_ids",
+            "evaluated_configuration_count",
+            "eligible_configuration_count"
           ]
         },
-        "device": {
+        "user_constraints": {
           "type": "object",
+          "required": [
+            "schema_version",
+            "constraint_set_id",
+            "status",
+            "hard_constraints",
+            "preferences"
+          ],
           "properties": {
-            "device_id": {
-              "enum": [
-                "ibm_falcon_27",
-                "ibm_heron_133",
-                "ibm_falcon_127",
-                "ibm_heron_156",
-                "quantinuum_h2_56"
-              ]
-            }
-          },
-          "required": ["device_id"]
+            "schema_version": {"type": "string"},
+            "constraint_set_id": {"type": ["string", "null"]},
+            "status": {"const": "not_applied_offline"},
+            "hard_constraints": {"type": "array"},
+            "preferences": {"type": "array"}
+          }
         },
         "retrieval_text": {"type": "string", "minLength": 1}
       }
@@ -62,27 +148,75 @@
       "required": [
         "metric",
         "top_k_requested",
+        "evaluated_device_count",
+        "eligible_device_count",
         "evaluated_configuration_count",
         "eligible_configuration_count",
         "returned_configuration_count",
         "complete_top_k"
       ],
       "properties": {
-        "metric": {
-          "const": "median_expected_fidelity_across_seeds"
-        },
+        "metric": {"const": "median_expected_fidelity_across_seeds"},
         "top_k_requested": {"type": "integer", "minimum": 1},
-        "evaluated_configuration_count": {"const": 12},
-        "eligible_configuration_count": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 12
-        },
-        "returned_configuration_count": {
-          "type": "integer",
-          "minimum": 1
-        },
+        "evaluated_device_count": {"type": "integer", "minimum": 1},
+        "eligible_device_count": {"type": "integer", "minimum": 1},
+        "evaluated_configuration_count": {"type": "integer", "minimum": 1},
+        "eligible_configuration_count": {"type": "integer", "minimum": 1},
+        "returned_configuration_count": {"type": "integer", "minimum": 1},
         "complete_top_k": {"type": "boolean"}
+      }
+    },
+    "selected_device": {
+      "type": "object",
+      "required": [
+        "device_id",
+        "best_summary_id",
+        "best_config_id",
+        "median_score",
+        "tied_best_device_ids",
+        "tied_best_config_ids",
+        "eligible_device_ids",
+        "ineligible_device_ids",
+        "selection_reason",
+        "comparison_margin"
+      ],
+      "properties": {
+        "device_id": {"$ref": "#/$defs/deviceId"},
+        "best_summary_id": {"$ref": "#/$defs/summaryId"},
+        "best_config_id": {"type": "string"},
+        "median_score": {"type": "number"},
+        "tied_best_device_ids": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/deviceId"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "tied_best_config_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "eligible_device_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/deviceId"},
+          "uniqueItems": true
+        },
+        "ineligible_device_ids": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/deviceId"},
+          "uniqueItems": true
+        },
+        "selection_reason": {
+          "enum": [
+            "device_specific_configuration_ranking",
+            "only_eligible_device",
+            "tie_break_catalog_order",
+            "best_observed_median"
+          ]
+        },
+        "comparison_margin": {"type": ["number", "null"], "minimum": 0}
       }
     },
     "top_configurations": {
@@ -93,6 +227,7 @@
         "type": "object",
         "required": [
           "rank",
+          "device_id",
           "summary_id",
           "config_id",
           "optimization_level",
@@ -101,14 +236,15 @@
           "median_score",
           "score_std_population",
           "success_rate",
-          "regret"
+          "regret",
+          "tied_score_config_ids",
+          "claim_id",
+          "evidence_id"
         ],
         "properties": {
-          "rank": {"type": "integer", "minimum": 1},
-          "summary_id": {
-            "type": "string",
-            "pattern": "^summary_[0-9a-f]{64}$"
-          },
+          "rank": {"type": "integer", "minimum": 1, "maximum": 3},
+          "device_id": {"$ref": "#/$defs/deviceId"},
+          "summary_id": {"$ref": "#/$defs/summaryId"},
           "config_id": {"type": "string"},
           "optimization_level": {"enum": [2, 3]},
           "layout_method": {
@@ -122,9 +258,129 @@
           "median_score": {"type": "number"},
           "score_std_population": {"type": "number", "minimum": 0},
           "success_rate": {"const": 1.0},
-          "regret": {"type": "number", "minimum": 0}
+          "regret": {"type": "number", "minimum": 0},
+          "tied_score_config_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"},
+            "uniqueItems": true
+          },
+          "claim_id": {"$ref": "#/$defs/claimId"},
+          "evidence_id": {"$ref": "#/$defs/evidenceId"}
         }
       }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_id",
+          "claim_type",
+          "text",
+          "evidence_ids",
+          "caveat_ids"
+        ],
+        "properties": {
+          "claim_id": {"$ref": "#/$defs/claimId"},
+          "claim_type": {
+            "enum": ["selected_device", "ranked_configuration"]
+          },
+          "text": {"type": "string", "minLength": 1},
+          "evidence_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"$ref": "#/$defs/evidenceId"}
+          },
+          "caveat_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"}
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "evidence_id",
+          "evidence_type",
+          "summary_id",
+          "run_ids",
+          "device_id",
+          "config_id",
+          "metric",
+          "aggregation",
+          "comparison_with_selected_best",
+          "stability",
+          "provenance"
+        ],
+        "properties": {
+          "evidence_id": {"$ref": "#/$defs/evidenceId"},
+          "evidence_type": {"const": "offline_seed_aggregate"},
+          "summary_id": {"$ref": "#/$defs/summaryId"},
+          "run_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "pattern": "^run_[0-9a-f]{64}$"}
+          },
+          "device_id": {"$ref": "#/$defs/deviceId"},
+          "config_id": {"type": "string"},
+          "metric": {"const": "median_expected_fidelity_across_seeds"},
+          "aggregation": {
+            "type": "object",
+            "required": ["method", "value", "sample_count"],
+            "properties": {
+              "method": {"const": "median"},
+              "value": {"type": "number"},
+              "sample_count": {"type": "integer", "minimum": 1}
+            }
+          },
+          "comparison_with_selected_best": {"type": "object"},
+          "stability": {"type": "object"},
+          "provenance": {"type": "object"}
+        }
+      }
+    },
+    "scientific_caveats": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["caveat_id", "text"],
+        "properties": {
+          "caveat_id": {"type": "string"},
+          "text": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "retrieval_document": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "deviceId": {
+      "enum": [
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_falcon_127",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ]
+    },
+    "summaryId": {
+      "type": "string",
+      "pattern": "^summary_[0-9a-f]{64}$"
+    },
+    "claimId": {
+      "type": "string",
+      "pattern": "^claim_[0-9a-f]{64}$"
+    },
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^evidence_[0-9a-f]{64}$"
     }
   }
 }

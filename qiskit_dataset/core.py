@@ -20,6 +20,7 @@ from .catalog import ConfigurationCatalog
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASETS_ROOT = PROJECT_ROOT / "datasets"
 SCHEMA_VERSION = "1.0.0"
+MANIFEST_SCHEMA_VERSION = "2.0.0"
 FILENAME_PATTERN = re.compile(
     r"^(?P<family>.+)_indep_(?P<generator>qiskit|tket)_(?P<qubits>\d+)\.qasm$"
 )
@@ -93,6 +94,28 @@ def dataset_scope_root(
     if Path(device_id).name != device_id or device_id in {".", ".."}:
         raise ValueError(f"device_id non valido per un path: {device_id!r}.")
     return root / device_id
+
+
+def dataset_circuits_root(objective: str, scope: str) -> Path:
+    """Return the single shared circuit store for one objective and scope."""
+    return dataset_scope_root(objective, scope) / "circuits"
+
+
+def resolve_circuit_source(
+    objective: str,
+    scope: str,
+    source_ref: str,
+) -> Path:
+    """Resolve a manifest circuit reference inside its shared scope root."""
+    scope_root = dataset_scope_root(objective, scope).resolve()
+    candidate = (scope_root / source_ref).resolve()
+    try:
+        candidate.relative_to(scope_root)
+    except ValueError as error:
+        raise ValueError(
+            f"source_ref fuori dallo scope Dataset: {source_ref!r}."
+        ) from error
+    return candidate
 
 
 def canonical_json(payload: Any) -> str:
@@ -326,6 +349,30 @@ def _validate_split(records: list[dict[str, Any]], scope: str) -> None:
         raise ValueError(f"Hash QASM presenti in split diversi: {leaked}.")
 
 
+def _ensure_circuit_copy(
+    source: Path,
+    destination: Path,
+    expected_sha256: str,
+) -> None:
+    """Create one integrity-checked shared QASM copy without overwriting it."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        if not destination.is_file() or sha256_file(destination) != expected_sha256:
+            raise RuntimeError(
+                f"QASM condiviso esistente ma incoerente: {destination}."
+            )
+        return
+
+    temporary = destination.with_name(f".{destination.name}.{os.getpid()}.tmp")
+    try:
+        shutil.copy2(source, temporary)
+        if sha256_file(temporary) != expected_sha256:
+            raise RuntimeError(f"Copia QASM corrotta: {destination}.")
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def prepare_dataset(
     scope: str,
     catalog: ConfigurationCatalog,
@@ -359,11 +406,13 @@ def prepare_dataset(
     )
     _validate_split(records, scope)
 
+    objective_name = str(catalog.objective["name"])
     output_root = dataset_scope_root(
-        str(catalog.objective["name"]),
+        objective_name,
         scope,
         selected_device_id,
     )
+    circuits_root = dataset_circuits_root(objective_name, scope)
     for record in records:
         compatible = int(record["num_qubits"]) <= device_num_qubits
         record["device_compatibility"] = {
@@ -383,11 +432,12 @@ def prepare_dataset(
             / str(record["split"])
             / str(record["file_name"])
         )
-        destination = output_root / relative_path
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(Path(record["_source_path"]), destination)
-        if sha256_file(destination) != record["source_sha256"]:
-            raise RuntimeError(f"Copia QASM corrotta: {destination}.")
+        destination = circuits_root / Path(*relative_path.parts[1:])
+        _ensure_circuit_copy(
+            Path(record["_source_path"]),
+            destination,
+            str(record["source_sha256"]),
+        )
         record["source_ref"] = relative_path.as_posix()
         record.pop("_source_path", None)
 
@@ -403,13 +453,19 @@ def prepare_dataset(
         if bool(record["is_exact_duplicate"])
     }
     manifest: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": MANIFEST_SCHEMA_VERSION,
         "dataset_scope": scope,
         "objective": dict(catalog.objective),
         "device_id": selected_device_id,
         "device_num_qubits": device_num_qubits,
         "catalog_id": catalog.catalog_id,
         "seeds": list(catalog.seeds),
+        "circuit_storage": {
+            "layout": "shared_scope_root",
+            "root_ref": "circuits",
+            "source_ref_base": "scope_root",
+            "integrity_field": "source_sha256",
+        },
         "split_policy": {
             "type": "family_group_holdout",
             "group_to_split": dict(sorted(GROUP_TO_SPLIT.items())),

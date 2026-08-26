@@ -123,13 +123,13 @@
     "operation_counts": {
       "barrier": 1,
       "measure": 30,
-      "rx": 729,
-      "ry": 1347,
+      "rx": 727,
+      "ry": 1346,
       "rz": 2085,
       "rzz": 1215
     },
-    "qasm_sha256": "e734ebf4279fe2f2e0ce50597a0f04ecac695de09c98fd2ab135414feb995177",
-    "size": 5406,
+    "qasm_sha256": "d7c85565a570ed3e87fa895449c5aed26e2b89eeaa974bf37a6da9930d8f6bad",
+    "size": 5403,
     "two_qubit_gate_count": 1215
   },
   "configuration": {
@@ -165,7 +165,7 @@
   "objective": {
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non e una misura su hardware reale.",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
     "name": "expected_fidelity"
   },
   "phase": "completed",
@@ -184,7 +184,7 @@
   },
   "run_id": "run_eaab0ad34ae67aeada6a3c85811ca672c1b89b29c1fe4488e61063483f971320",
   "schema_version": "1.0.0",
-  "score": 0.1361859702,
+  "score": 0.1361982276,
   "seed_transpiler": 1,
   "split": "train",
   "status": "success",
@@ -196,12 +196,12 @@
     "validation_errors": []
   },
   "timings_seconds": {
-    "scoring": 0.010584096999991743,
-    "serialization": 0.0956073910001578,
-    "source_loading": 0.05146057300044049,
-    "target_loading": 2.599999788799323e-06,
-    "target_validation": 0.005964487999335688,
-    "total": 0.48131549800018547,
-    "transpilation": 0.31763820800006215
+    "scoring": 0.013481653999406262,
+    "serialization": 0.09268902300027548,
+    "source_loading": 0.014220832999853883,
+    "target_loading": 2.3900001906440593e-06,
+    "target_validation": 0.006143614000393427,
+    "total": 0.3749076320000313,
+    "transpilation": 0.2483154060000743
   }
 }

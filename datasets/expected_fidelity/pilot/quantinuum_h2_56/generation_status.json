@@ -1,23 +1,23 @@
 {
   "available_attempts": 288,
   "available_status": {
-    "success": 183,
-    "timeout": 105
+    "success": 177,
+    "timeout": 111
   },
-  "cache_hits": 177,
+  "cache_hits": 0,
   "cache_root": "artifacts/qiskit_dataset_cache/expected_fidelity",
   "complete": true,
   "dataset_scope": "pilot",
   "device_id": "quantinuum_h2_56",
-  "executed_now": 111,
+  "executed_now": 288,
   "executed_status": {
-    "success": 6,
-    "timeout": 105
+    "success": 177,
+    "timeout": 111
   },
   "execution_policy": {
-    "timeout_seconds": 200.0,
-    "wall_clock_seconds_this_invocation": 3713.819972599,
-    "workers": 6
+    "timeout_seconds": 100.0,
+    "wall_clock_seconds_this_invocation": 5707.834524853,
+    "workers": 2
   },
   "missing_attempts": 0,
   "objective": "expected_fidelity",

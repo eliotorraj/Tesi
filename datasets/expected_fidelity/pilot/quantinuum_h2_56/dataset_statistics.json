@@ -1,7 +1,7 @@
 {
   "aggregate_status": {
-    "eligible": 61,
-    "ineligible": 35
+    "eligible": 59,
+    "ineligible": 37
   },
   "attempts_available": 288,
   "circuits": 10,
@@ -40,5 +40,11 @@
   "rag_examples": 5,
   "rag_split": "train_only",
   "rag_top_k": 3,
+  "record_schema_versions": {
+    "configuration_aggregate": "2.0.0",
+    "manifest": "2.0.0",
+    "rag_example": "2.0.0",
+    "run": "1.0.0"
+  },
   "schema_version": "1.0.0"
 }
