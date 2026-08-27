@@ -91,18 +91,6 @@ Il Dataset etichettato generale si trova in:
 datasets/expected_fidelity/pilot/global/rag_examples.jsonl
 ```
 
-## Proprietà di affidabilità
-
-- una sola copia dei circuiti per scope;
-- manifest distinti per device e riferimenti verificati con SHA-256;
-- catalogo e seed versionati;
-- cache atomica per singolo tentativo;
-- resume e retry espliciti;
-- validazione basis/coupling/Target prima dello scoring;
-- aggregazione generale read-only rispetto ai mini-Dataset;
-- diagnostica timeout separata in osservazioni e inferenze;
-- nessuna attribuzione causale automatica del timeout;
-- RAG limitato allo split train; validation e test restano ground truth esterna.
 
 ## Verifica
 
@@ -116,11 +104,8 @@ git diff --check
 
 La struttura è predisposta per:
 
-1. popolare il Dataset completo dopo la conferma dei relatori;
+1. popolare il Dataset completo;
 2. formalizzare uno schema versionato dei vincoli utente;
-3. congelare un protocollo sperimentale e una procedura di valutazione;
-4. formalizzare la politica di retry dell'LLM in caso di risposta non valida.
+3. formalizzare la politica di retry dell'LLM in caso di risposta non valida.
+4. congelare un protocollo sperimentale e una procedura di valutazione;
 
-Questi aspetti non sono anticipati con regole arbitrarie: il Dataset conserva
-campi e provenance necessari, mentre policy e vincoli verranno versionati
-quando saranno definiti.
