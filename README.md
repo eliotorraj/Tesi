@@ -12,7 +12,7 @@ Lo scheletro applicativo è descritto in
 
 ## Terminologia
 
-- **Dataset**: esempi destinati al RAG o a un eventuale fine-tuning dell'LLM.
+- **Dataset**: esempi destinati al RAG
 - **Training set**: coppie circuito-device usate dai modelli ML storici di MQT
   Predictor; non vengono generate in questo branch.
 
