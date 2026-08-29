@@ -7,8 +7,8 @@ from typing import Any, Mapping
 from qiskit_dataset.catalog import load_catalog
 
 from ..models import (
-    CompatibilityReport,
-    ParsedRequest,
+    CompatibilityView,
+    NormalizedRequest,
     QiskitCompilationPlan,
     Recommendation,
     ValidationResult,
@@ -39,8 +39,8 @@ class StructuredRecommendationValidator:
     def validate(
         self,
         raw_response: Mapping[str, Any],
-        request: ParsedRequest,
-        compatibility: CompatibilityReport,
+        request: NormalizedRequest,
+        compatibility: CompatibilityView,
     ) -> ValidationResult:
         errors: list[str] = []
         if not isinstance(raw_response, Mapping):
@@ -97,16 +97,6 @@ class StructuredRecommendationValidator:
             errors.append(
                 "La tupla (optimization_level, layout_method, routing_method) "
                 "non appartiene alle 12 configurazioni Qiskit ammesse."
-            )
-
-        max_level = request.constraints.get("max_optimization_level")
-        if (
-            isinstance(max_level, int)
-            and optimization_level is not None
-            and optimization_level > max_level
-        ):
-            errors.append(
-                f"optimization_level supera il vincolo utente {max_level}."
             )
 
         explanation = raw_response.get("explanation")

@@ -532,7 +532,7 @@ Questa sezione continua la Knowledge Base precedente con le informazioni emerse 
 - creazione di script per testare `qcompile` e addestrare modelli;
 - chiarimento su quale dataset viene usato per il training RL;
 - gestione di checkpoint per RL e classificatore ML;
-- preparazione di una cartella separata da mostrare ai relatori;
+- preparazione di una cartella separata per condividere il lavoro;
 - aggiunta di riferimenti al codice nel report;
 - origine dei pass di compilazione presenti in `compilation_information`;
 - spiegazione semplice del protocollo sperimentale proposto.
@@ -992,7 +992,7 @@ nella versione discussa non c’è ancora uno script separato che genera soltant
 
 ---
 
-## Cartella separata per i relatori
+## Cartella separata per la condivisione
 
 L’utente ha creato una cartella diversa dalla cartella WSL, sul Desktop Windows:
 
@@ -1003,7 +1003,7 @@ C:\Users\elioe\Desktop\Tesi
 Scopo della cartella:
 
 ```text
-contenere solo ciò che può essere mostrato ai relatori
+contenere solo ciò che può essere condiviso
 ```
 
 L’utente vuole escludere da questa cartella:
@@ -1035,8 +1035,8 @@ Sono però emersi alcuni punti da sistemare o dichiarare:
    ```
 4. Il checkpoint da 2248 step contiene anche lo stato dell’optimizer ed è quindi più utile per riprendere il training.
 5. Il modello ML e il dataset del classificatore non erano ancora presenti perché lo script 06 non era ancora stato completato.
-6. Se i relatori devono solo esaminare il lavoro, la cartella è sufficiente.
-7. Se i relatori devono eseguire subito `qcompile` senza rifare smoke training, serve esportare i modelli con:
+6. Se serve solo esaminare il lavoro, la cartella è sufficiente.
+7. Se serve eseguire subito `qcompile` senza rifare lo smoke training, bisogna esportare i modelli con:
    ```bash
    python scripts/model_store.py export
    ```
@@ -1358,7 +1358,7 @@ Punti chiave emersi nella continuazione:
 10. Per la Random Forest del device selector non servono checkpoint intermedi del modello.
 11. La parte costosa del device selector è generare dataset, score e label, non addestrare la Random Forest.
 12. Lo script `06_train_device_selector.py` genera dataset e addestra il classificatore nella stessa pipeline.
-13. Nella cartella per i relatori non devono comparire KB, `AGENTS.md`, `.codex` o riferimenti espliciti a ChatGPT/Codex.
+13. Nella cartella condivisibile non devono comparire KB, `AGENTS.md`, `.codex` o riferimenti espliciti a ChatGPT/Codex.
 14. Il report è stato aggiornato con riferimenti mirati al codice MQT 2.3.0.
 15. I pass in `compilation_information` non sono la pipeline default di Qiskit: sono azioni scelte dalla policy PPO da un catalogo MQT.
 16. Il catalogo MQT combina pass Qiskit, TKET, BQSKit, azioni composte e azioni di controllo.
@@ -1369,17 +1369,17 @@ Punti chiave emersi nella continuazione:
 
 ---
 
-# Continuazione KB — feedback dei relatori, revisione del report, figure of merit e reward sparse
+# Continuazione KB — feedback ricevuto, revisione del report, figure of merit e reward sparse
 
 ## Contesto della nuova continuazione
 
-Questa sezione estende la Knowledge Base con gli argomenti emersi dopo l’invio ai relatori del report e del lavoro svolto su MQT Predictor.
+Questa sezione estende la Knowledge Base con gli argomenti emersi dopo l’invio del report e del lavoro svolto su MQT Predictor.
 
 Materiale di partenza della conversazione:
 
 - markdown locale in `Ubuntu/home/elioe/Tesi/knowledge`;
-- report inviato ai relatori in `Desktop/Report_MQT_Predictor.pdf`;
-- feedback ricevuto via mail dai relatori;
+- report inviato in `Desktop/Report_MQT_Predictor.pdf`;
+- feedback ricevuto via mail;
 - successiva riscrittura proposta del report;
 - chiarimenti concettuali su:
   - figure of merit;
@@ -1390,13 +1390,13 @@ Materiale di partenza della conversazione:
   - credit assignment;
   - collegamento con TuniQ.
 
-Il punto centrale della conversazione è che il lavoro tecnico non è stato giudicato “sbagliato”, ma il report risultava poco leggibile per un lettore esterno. I relatori hanno chiesto una struttura più chiara, meno densa e più esplicita nel filo logico.
+Il punto centrale della conversazione è che il lavoro tecnico non è stato giudicato “sbagliato”, ma il report risultava poco leggibile per un lettore esterno. È stata chiesta una struttura più chiara, meno densa e più esplicita nel filo logico.
 
 ---
 
-## Feedback ricevuto dai relatori
+## Feedback ricevuto
 
-I relatori hanno letto report e codice, ma hanno segnalato difficoltà nel seguire con precisione:
+La lettura del report e del codice ha segnalato difficoltà nel seguire con precisione:
 
 ```text
 cosa è stato fatto
@@ -1674,7 +1674,7 @@ quale script implementa o automatizza quel controllo
 
 ### 6. Aggiungere una tabella “test / input / output / conclusione”
 
-Per rispondere direttamente al feedback dei relatori, è utile una tabella sintetica del tipo:
+Per rispondere direttamente al feedback ricevuto, è utile una tabella sintetica del tipo:
 
 | Test | Input | Output osservato | Conclusione |
 |---|---|---|---|
@@ -1730,7 +1730,7 @@ La struttura proposta per la nuova versione del report era:
 7. Conclusioni e prossimi passi
 ```
 
-Questa struttura risponde direttamente alla richiesta dei relatori:
+Questa struttura risponde direttamente alla richiesta ricevuta:
 
 ```text
 da quale stato iniziale sei partito
@@ -1743,9 +1743,9 @@ quali conclusioni trai
 
 ---
 
-## Risposta suggerita ai relatori
+## Risposta suggerita al feedback
 
-Era stata proposta una risposta breve ai relatori, con tono collaborativo:
+Era stata proposta una risposta breve, con tono collaborativo:
 
 ```text
 Grazie per il feedback, mi è molto utile. Rileggendo il report mi rendo conto che ho compresso troppo il passaggio tra contesto, lavoro svolto e motivazione sperimentale, dando per scontati concetti come figure of merit, score, training RL e dataset del device selector.
@@ -2285,8 +2285,8 @@ spiegabili e confrontabili con PPO e baseline classiche.
 
 ## Cosa deve ricordare un agente LLM da questa continuazione
 
-1. Il feedback dei relatori riguarda soprattutto chiarezza, struttura e filo logico del report.
-2. I relatori vogliono capire stato iniziale, scelte, motivazioni, test, risultati e conclusioni.
+1. Il feedback ricevuto riguarda soprattutto chiarezza, struttura e filo logico del report.
+2. La richiesta è rendere chiari stato iniziale, scelte, motivazioni, test, risultati e conclusioni.
 3. La figure of merit va definita subito come funzione di scoring su un circuito compilato.
 4. La figure of merit determina cosa significa “buon circuito compilato”.
 5. In MQT Predictor la figure of merit è usata sia per la reward RL sia per costruire score e label del device selector.
@@ -2303,7 +2303,7 @@ spiegabili e confrontabili con PPO e baseline classiche.
 16. Le trace sono importanti perché permettono di passare da una singola label finale a esempi sequenziali utili per un LLM.
 17. Il report rivisto deve essere più breve, lineare e spiegato, non necessariamente più dettagliato.
 18. Gli script vanno presentati come strumenti di verifica, non come centro narrativo.
-19. Una tabella test/input/output/conclusione può rispondere direttamente alle richieste dei relatori.
+19. Una tabella test/input/output/conclusione può rispondere direttamente alle richieste ricevute.
 20. La tesi può valorizzare il limite della reward sparsa come motivazione per trace, spiegabilità e possibili approcci LLM/ibridi.
 
 ---
@@ -2326,7 +2326,7 @@ Il focus è diventato più operativo e riguarda soprattutto:
 - addestramento riuscito del device selector con un solo device;
 - creazione di una procedura portabile per generare l’Excel senza dipendenze da Codex.
 
-L’obiettivo pratico è rendere il progetto più leggibile e riproducibile, soprattutto per generare artefatti come tabelle Excel comprensibili ai relatori e per chiarire che cosa viene prodotto da ciascuna fase della pipeline.
+L’obiettivo pratico è rendere il progetto più leggibile e riproducibile, soprattutto per generare artefatti come tabelle Excel comprensibili anche all’esterno e per chiarire che cosa viene prodotto da ciascuna fase della pipeline.
 
 ---
 
@@ -3043,7 +3043,7 @@ Output:
 output/spreadsheets/MQT_device_selector_dataset_expected_fidelity.xlsx
 ```
 
-Questa è la procedura da preferire per il progetto condivisibile con i relatori.
+Questa è la procedura da preferire per il progetto condivisibile.
 
 Sintesi:
 
@@ -4718,19 +4718,19 @@ famiglia non devono apparire come esempi contenenti la risposta corretta.
     warning e provenienza.
 17. MQT Predictor può restare una modalità separata e una baseline.
 18. Il dataset LLM esistente è una base naturale, ma va usato senza leakage.
-# Continuazione KB — feedback dei relatori, protocollo sperimentale e dataset JSON per LLM
+# Continuazione KB — feedback ricevuto, protocollo sperimentale e dataset JSON per LLM
 
 Questa sezione riassume la fase successiva alla consegna del report. Il lavoro si è spostato dalla sola comprensione di MQT Predictor alla definizione del protocollo sperimentale, alla costruzione di un dataset JSON per LLM e alla preparazione di split riproducibili.
 
 Occorre distinguere sempre:
 
-- indicazioni dei relatori;
+- indicazioni ricevute;
 - comportamento osservato localmente con MQT Predictor 2.3.0;
 - nostre scelte ingegneristiche, come schema JSON, script, split e metriche.
 
 ---
 
-## Feedback dei relatori
+## Feedback ricevuto
 
 Il report è stato giudicato molto più chiaro del precedente. Restano refusi come “phyton” e numerazioni incoerenti, per esempio una sezione 5.1 seguita dalla 5.3. La stesura finale richiede quindi una revisione formale accurata.
 
@@ -4747,7 +4747,7 @@ Baseline minime:
 
 Una sequenza casuale di azioni valide può essere un controllo di sanità, non la baseline competitiva principale.
 
-I relatori hanno chiesto anche architettura del prototipo, criteri di qualità, confronto tra circuiti compilati, scelta di circuiti/backend/metriche e protocollo sperimentale. È stato suggerito GitHub, anche privato inizialmente, escludendo ambiente virtuale, modelli, checkpoint, log e dataset pesanti; devono rimanere codice, configurazioni, schemi, manifest, documentazione e istruzioni di riproduzione.
+Sono stati chiesti anche l’architettura del prototipo, i criteri di qualità, il confronto tra circuiti compilati, la scelta di circuiti, backend e metriche, e il protocollo sperimentale. È stato suggerito GitHub, anche privato inizialmente, escludendo ambiente virtuale, modelli, checkpoint, log e dataset pesanti; devono rimanere codice, configurazioni, schemi, manifest, documentazione e istruzioni di riproduzione.
 
 ---
 
@@ -5222,11 +5222,11 @@ risultati della chat Codex `Definisci pipeline e dataset`. Le misure e lo stato
 del repository derivano da verifiche locali; le scelte su RAG, split, vincoli e
 timeout sono decisioni ingegneristiche della tesi, non risultati dei paper MQT.
 
-## Rilettura degli scambi con i relatori e scelta metodologica
+## Rilettura degli scambi e scelta metodologica
 
 L'utente ha chiesto di ricostruire lo stato del progetto leggendo, in ordine:
-`Report_Tesi_Aggiornamento_Agosto_2026.pdf`, la risposta dei relatori al report,
-`Specifica_Tesi.pdf` e la successiva risposta dei relatori alla specifica.
+`Report_Tesi_Aggiornamento_Agosto_2026.pdf`, la risposta ricevuta sul report,
+`Specifica_Tesi.pdf` e la successiva risposta ricevuta sulla specifica.
 
 Il problema individuato è l'allineamento tra il dato raccolto e il task finale.
 Le trace RL descrivono una scelta sequenziale di pass appartenenti anche a
@@ -5562,5 +5562,546 @@ Decisioni consolidate:
    usarli per il tuning lo sarebbe;
 9. priorità del mese: completare Dataset, retrieval semplice, valutazione e
    scrittura, evitando nuove metriche, fine-tuning e infrastruttura superflua.
+
+---
+
+
+# Aggiornamento della chat del 27–29 agosto 2026 — progettazione RAG, vincoli hard e implementazione della fase 2
+
+## Contesto e obiettivo della conversazione
+
+Questa continuazione ha chiarito l’architettura del prototipo che, dato un
+circuito nuovo mai compilato nel sistema:
+
+1. riceve circuito, figure of merit e vincoli hardware strutturati;
+2. determina quali device sono ammissibili;
+3. recupera dal Dataset esempi storici di circuiti simili;
+4. chiede all’LLM di proporre un device e una configurazione Qiskit;
+5. presenta una motivazione strutturata come claim ed evidence;
+6. compila soltanto dopo una conferma esplicita dell’utente.
+
+L’obiettivo non è compilare preventivamente ogni nuovo circuito su tutti i
+device e con tutte le configurazioni. La raccomandazione live è una previsione
+fondata su casi storici; la compilazione effettiva avviene successivamente, se
+richiesta.
+
+Queste sono decisioni ingegneristiche della tesi e del prototipo, non risultati
+dichiarati dai paper MQT.
+
+## Contenuto da fornire all’LLM tramite RAG
+
+È stato deciso che l’LLM riceverà un singolo oggetto JSON, non JSONL, composto
+da:
+
+- richiesta live dell’utente;
+- rappresentazione e feature del circuito nuovo;
+- figure of merit;
+- vincoli hardware normalizzati;
+- catalogo o vista dei soli device ammissibili;
+- esempi etichettati recuperati dal Dataset.
+
+Ogni esempio storico destinato al prompt dovrà contenere almeno:
+
+- circuito o sua rappresentazione retrieval-safe;
+- figure of merit;
+- device ottimale osservato;
+- configurazioni Qiskit ottimali osservate;
+- claim;
+- evidence strutturata;
+- provenance e caveat scientifici.
+
+Non va aggiunto al prompt soltanto `retrieval_input`: gli esempi sono utili
+proprio perché contengono anche la label storica, cioè device, configurazione,
+claim ed evidence. Bisogna però impedire che label o score di validation/test
+entrino nell’indice o nel prompt.
+
+## Differenza fra evidence storica e motivazione live
+
+Per i record di training è possibile produrre claim forti perché il circuito è
+stato compilato offline sulle combinazioni previste dal protocollo e sono
+disponibili i risultati comparativi.
+
+Per un circuito nuovo non sono disponibili gli score delle sue compilazioni.
+Il modello non deve quindi affermare:
+
+> questo device è migliore per il circuito corrente perché ha ottenuto lo score
+> più alto;
+
+prima che tale compilazione sia stata eseguita.
+
+La motivazione live deve essere predittiva e dichiarare esplicitamente il suo
+grado di incertezza. Il modello di risposta desiderato è del tipo:
+
+> Raccomando `quantinuum_h2_56`. Fra i casi storici più simili, questo device ha
+> ottenuto il miglior risultato nella maggioranza pesata dei casi e presenta il
+> ranking medio migliore. Il circuito corrente condivide con tali casi numero
+> di qubit, quota di operazioni a due qubit e struttura del grafo
+> d’interazione. Sul device raccomandato, la configurazione proposta è stata la
+> più efficace nella maggioranza pesata degli esempi recuperati. Il circuito
+> corrente non è ancora stato compilato: la raccomandazione è una previsione
+> basata su casi analoghi.
+
+Le statistiche citate dall’LLM non devono essere inventate: il backend dovrà
+ricalcolarle deterministicamente sui record recuperati.
+
+## Separazione della giustificazione
+
+Claim ed evidence futuri dovranno distinguere almeno due decisioni:
+
+1. **device rationale**: perché il device è stato scelto rispetto agli altri
+   device ammissibili;
+2. **configuration rationale**: perché quella configurazione Qiskit è stata
+   scelta per il device raccomandato.
+
+Il claim non deve limitarsi ai margini numerici fra configurazioni dello stesso
+device. Deve spiegare anche il trasferimento dagli esempi simili alla scelta
+hardware, con riferimenti a record recuperati, ranking storico, frequenze
+pesate e caratteristiche condivise.
+
+Deve inoltre contenere una limitazione esplicita: i risultati storici sono
+evidence osservata sui circuiti del Dataset, mentre la raccomandazione del
+circuito live è un’inferenza.
+
+## Similarità fra circuiti
+
+Il retrieval richiede una definizione riproducibile di “circuito simile”. Sono
+state discusse cinque famiglie:
+
+1. quasi-isomorfismo mediante Weisfeiler–Lehman;
+2. analisi tensoriale e conteggi Clifford+T;
+3. matrice di connettività virtuale;
+4. spettro algoritmico e benchmark come Quantum Volume, HOG o XEB;
+5. embedding e machine learning, ad esempio Query2Vec o Circuit2Vec.
+
+Per contenere la complessità, la direzione preferita è iniziare con due
+componenti strutturali:
+
+- firma Weisfeiler–Lehman del grafo d’interazione;
+- descrittori derivati dalla matrice di connettività virtuale.
+
+Questa scelta non è ancora implementata né validata. Prima di integrare Qdrant
+serve un benchmark riproducibile che misuri se la vicinanza strutturale
+trasferisce davvero il ranking hardware e la configurazione migliore.
+
+Le metriche di valutazione proposte per la similarità sono:
+
+- coerenza del ranking dei device;
+- accuratezza del device dei vicini;
+- accuratezza della configurazione trasferita;
+- regret rispetto all’oracle offline;
+- stabilità rispetto a seed, dimensione del circuito e famiglia benchmark.
+
+Gli split devono essere privi di duplicati e quasi-duplicati strutturali fra
+train, validation e test. `source_sha256` identifica il testo QASM, non
+l’identità semantica del circuito e non basta da solo per prevenire leakage.
+
+## Qdrant e unità di retrieval
+
+Il feedback ricevuto è stato recepito così:
+
+- Qdrant può essere appropriato, ma non va introdotto prima di avere definito
+  unità di retrieval, vettori, payload, metadati e filtri;
+- l’unità candidata è un esempio storico etichettato relativo a un circuito e
+  alla figure of merit, collegato ai risultati multi-device e alle migliori
+  configurazioni;
+- il payload dovrà contenere identificatori, split, famiglia del circuito,
+  feature strutturali, device compatibili, target fingerprint, label,
+  claim/evidence e provenance;
+- soltanto train sarà indicizzato;
+- validation e test resteranno ground truth esterna;
+- Qdrant dovrà essere isolato dietro un adapter per non legare il prototipo al
+  formato corrente del Dataset.
+
+La conversazione ha escluso, per il protocollo finale, una proliferazione di
+varianti “RAG testuale contro numerico contro grafo contro ibrido”. Si vuole una
+sola soluzione LLM+RAG motivata dal benchmark di similarità, mantenendo
+l’esperimento leggibile. Eventuali baseline tecniche della similarità possono
+essere usate durante la progettazione, senza trasformarle tutte in sistemi
+finali da confrontare.
+
+## Decisione aggiornata sui vincoli utente
+
+Per il prototipo corrente sono supportati soltanto vincoli **hard hardware**
+selezionati dalla UI:
+
+- provider ammessi;
+- device ammessi;
+- numero minimo di qubit fisici del device;
+- numero massimo di qubit fisici del device;
+- gate nativi obbligatori.
+
+`allowed_device_ids` è l’unica lista di device prevista. Non esiste una lista
+complementare di device vietati.
+
+La figure of merit è una selezione separata e, nella versione corrente, vale
+soltanto `expected_fidelity`.
+
+L’utente non scrive vincoli in linguaggio naturale. Menu, multiselect e range
+sono popolati dal catalogo hardware restituito dal backend. La richiesta nasce
+quindi già strutturata.
+
+Questa decisione **sostituisce, per il prototipo corrente**, le note precedenti
+che proponevano vincoli utente su optimization level, layout, routing, timeout,
+profondità o numero di gate. Tali proprietà potranno essere rivalutate in una
+versione futura, ma non appartengono allo schema 1.0.0 implementato.
+
+## Ordine delle operazioni
+
+Il flusso approvato della fase 2 è:
+
+```text
+richiesta JSON
+  -> validazione sintattica
+  -> parsing OpenQASM 2 e feature deterministiche
+  -> snapshot del catalogo hardware
+  -> validazione semantica
+  -> normalizzazione
+  -> maschera hardware
+       -> nessun device: esito terminale
+       -> almeno un device: il flusso può proseguire al retrieval
+```
+
+La maschera viene quindi costruita prima del RAG. Nel prototipo corrente il
+retriever legacy riceve già i device ammissibili. La politica scientifica
+completa dei filtri del futuro retriever sarà comunque definita nella fase RAG:
+questa fase non ha ridisegnato la metrica di similarità.
+
+## Contratto JSON della richiesta implementato
+
+Sono stati aggiunti tre JSON Schema Draft 2020-12:
+
+- `schemas/assistant_request.schema.json`;
+- `schemas/hardware_catalog.schema.json`;
+- `schemas/hardware_mask_result.schema.json`.
+
+La richiesta versione `1.0.0` contiene:
+
+- `schema_version`;
+- `request_id`, UUID canonico;
+- `catalog_snapshot_id`;
+- `circuit.format = openqasm2`;
+- `circuit.name`;
+- `circuit.source`;
+- `figure_of_merit_id = expected_fidelity`;
+- `hardware_constraints`.
+
+Gli oggetti sono chiusi con `additionalProperties: false`.
+
+Per gli array di filtri vale:
+
+```text
+campo assente = nessuna restrizione
+campo presente = almeno un elemento
+```
+
+Gli array vuoti sono rifiutati, così non esistono due rappresentazioni
+equivalenti dello stesso vincolo.
+
+## Validazione sintattica implementata
+
+Il decoder e il parser controllano:
+
+- JSON oggetto singolo;
+- UTF-8;
+- limite in byte;
+- chiavi duplicate;
+- valori non finiti;
+- campi obbligatori e tipi;
+- UUID canonico;
+- lunghezze e pattern;
+- cardinalità e unicità degli array;
+- versione dello schema;
+- formato e parsing OpenQASM 2;
+- presenza di almeno un qubit;
+- forma e finitezza del vettore di feature.
+
+Per sicurezza, il QASM può includere soltanto `qelib1.inc`, risolto dalla copia
+inclusa nel pacchetto Qiskit. Include dal working directory o altri file sono
+rifiutati prima del parsing.
+
+Il validatore JSON Schema locale è fail-closed: una keyword non supportata, un
+riferimento esterno o sibling di `$ref` fanno fallire il caricamento dello
+schema, invece di essere ignorati silenziosamente.
+
+## Validazione semantica implementata
+
+Il validatore usa lo snapshot corrente e controlla:
+
+- corrispondenza esatta di `catalog_snapshot_id`;
+- esistenza della figure of merit;
+- esistenza dei provider;
+- esistenza dei device ammessi;
+- esistenza e normalizzazione dei gate;
+- collisioni dopo alias, ad esempio `cnot -> cx`;
+- assenza di duplicati;
+- `min_qubits <= max_qubits`;
+- numero di qubit del circuito non superiore al massimo richiesto;
+- appartenenza dei device ammessi ai provider ammessi.
+
+Gli errori sono tipizzati tramite `ValidationIssue`, `ValidationReport` e
+`RequestValidationError`. Avvengono prima del RAG e non sono riparabili con un
+retry dell’LLM.
+
+## Catalogo hardware implementato
+
+`MqtHardwareCatalog` normalizza i Target MQT e il catalogo delle configurazioni
+Qiskit. I device correnti sono:
+
+- `ibm_falcon_27`;
+- `ibm_falcon_127`;
+- `ibm_heron_133`;
+- `ibm_heron_156`;
+- `quantinuum_h2_56`.
+
+Provider e gate nativi sono dichiarati esplicitamente e verificati contro
+`mqt.bench.targets.get_gateset`:
+
+- Falcon: `cx, id, rz, sx, x`;
+- Heron: `cz, id, rz, sx, x`;
+- Quantinuum H2: `rx, ry, rz, rzz`.
+
+Il catalogo conserva:
+
+- provider;
+- numero di qubit;
+- operazioni del Target;
+- gate nativi selezionabili;
+- coupling diretto;
+- disponibilità del Target;
+- figure of merit supportate;
+- ID delle configurazioni Qiskit;
+- provenance e versioni software.
+
+Per H2-56 il coupling è esplicito e completo, con `56 * 55 = 3080` archi
+diretti.
+
+## Fingerprint del Target
+
+Il `target_hash` del catalogo include:
+
+- tipo del Target;
+- device ID;
+- numero di qubit;
+- operation names;
+- coupling;
+- qargs;
+- errori delle istruzioni;
+- durate delle istruzioni.
+
+La serializzazione `qiskit-dataset-target/1` replica quella usata dal Dataset:
+per lo stesso Target, `target_hash` coincide con il `target_sha256` storico.
+Questo permette in futuro di verificare che evidence e catalogo live si
+riferiscano allo stesso Target senza migrare retroattivamente il Dataset.
+
+Lo snapshot completo usa l’algoritmo
+`assistant-hardware-catalog/2` e include anche digest del catalogo Qiskit e
+versioni dei pacchetti.
+
+I Target MQT correnti sono sintetici e deterministici, non calibrazioni
+hardware live.
+
+Un errore operativo di caricamento produce:
+
+- `target_available = false`;
+- `unavailability_code = TARGET_LOAD_FAILED`;
+- solo il tipo dell’eccezione.
+
+Il messaggio grezzo, eventuali path locali e dettagli instabili non vengono
+esposti né inseriti nel fingerprint. Una discordanza fra definizione statica e
+Target caricato è invece un errore d’integrità fail-fast.
+
+## Maschera hardware implementata
+
+I device sono ordinati deterministicamente per ID. Per ogni posizione:
+
+```text
+mask[i] = true  se il device soddisfa tutti i vincoli hard
+mask[i] = false altrimenti
+```
+
+La maschera accumula tutte le ragioni applicabili, senza fermarsi alla prima:
+
+- `PROVIDER_NOT_ALLOWED`;
+- `DEVICE_NOT_ALLOWED`;
+- `INSUFFICIENT_QUBITS_FOR_CIRCUIT`;
+- `BELOW_USER_MIN_QUBITS`;
+- `ABOVE_USER_MAX_QUBITS`;
+- `MISSING_REQUIRED_NATIVE_GATE`;
+- `FIGURE_OF_MERIT_NOT_SUPPORTED`;
+- `TARGET_NOT_AVAILABLE`.
+
+Il minimo effettivo è:
+
+```text
+max(qubit del circuito, minimo fisico richiesto dall’utente)
+```
+
+La porta produttiva `HardwareMaskBuilder` accetta soltanto:
+
+- `NormalizedRequest`;
+- lo stesso `HardwareCatalogSnapshot` usato dalla validazione.
+
+Non accetta più liste ad hoc che potrebbero saltare il controllo semantico.
+`WidthCompatibilityFilter` resta come adapter legacy separato.
+
+Se nessun device è ammissibile, `prepare_request()` restituisce stato
+`no_eligible_device` e un `terminal_error` con:
+
+- codice `NO_ELIGIBLE_DEVICE`;
+- `retryable = false`;
+- diagnostica completa della maschera.
+
+`recommend()` si arresta prima di leggere il Dataset o chiamare l’LLM.
+
+## Immutabilità e serializzazione
+
+Snapshot, feature e dettagli diagnostici sono congelati ricorsivamente per
+evitare modifiche successive al calcolo degli hash.
+
+Le funzioni `to_dict()` producono però copie JSON mutabili. Il prompt builder
+converte esplicitamente mapping immutabili e tuple nelle corrispondenti
+strutture JSON-safe; un test esegue realmente `json.dumps` sul prompt.
+
+## Compatibilità con il prototipo precedente
+
+Sono stati conservati:
+
+- `UiSubmission`;
+- `QasmRequestParser`;
+- `WidthCompatibilityFilter`;
+- `CompatibilityReport`;
+- il vecchio ordine posizionale del costruttore `PrototypeService`;
+- i campi controller legacy per hardware disponibile/non disponibile.
+
+Il testo libero legacy `user_text` viene ignorato. Il vecchio dizionario
+generico `constraints` è rifiutato. Un chiamante non può ottenere il percorso
+trusted legacy impostando direttamente il flag nel modello pubblico.
+
+L’output canonico resta `hardware_mask` con `excluded_devices` tipizzati; le
+stringhe diagnostiche storiche sono mantenute soltanto per compatibilità.
+
+## Politica di validazione e retry prevista, non ancora implementata
+
+La risposta LLM futura dovrà contenere:
+
+- device;
+- configurazione Qiskit;
+- claim;
+- evidence;
+- caveat o incertezza.
+
+La validazione prevista comprende:
+
+1. schema e tipi;
+2. esistenza del device;
+3. rispetto della maschera;
+4. appartenenza della configurazione all’allowlist;
+5. coerenza claim/evidence con i record effettivamente recuperati;
+6. ricalcolo deterministico delle statistiche citate;
+7. divieto di presentare prediction live come risultato già misurato.
+
+Gli errori dovranno essere tipizzati e reinseriti nel prompt del tentativo
+successivo. Il limite discusso è configurabile, con cinque tentativi come
+esempio, ma la politica definitiva appartiene alla fase 5. Errori non
+riparabili, come richiesta invalida o nessun device ammissibile, non devono
+attivare retry.
+
+La logica di retry esistente non è stata ridisegnata durante la fase 2.
+
+## Protocollo sperimentale discusso
+
+I circuiti finali di test dovranno essere nuovi e non indicizzati. Per ciascuno:
+
+1. il sistema LLM+RAG propone device e configurazione;
+2. la configurazione proposta viene compilata con Qiskit;
+3. il risultato viene valutato con la stessa figure of merit;
+4. il confronto usa ground truth e baseline definite prima del test;
+5. modello, prompt, catalogo, split e seed vengono congelati.
+
+La preferenza aggiornata è valutare una sola pipeline finale LLM+RAG, non molte
+varianti RAG testuale/numerica/grafo/ibrida. Restano da congelare precisamente:
+
+- Dataset e split;
+- corpus di test;
+- hardware;
+- spazio delle configurazioni;
+- baseline necessarie, come Qiskit standard, MQT Predictor o oracle offline;
+- numero di ripetizioni;
+- metriche e analisi statistica;
+- budget di calcolo;
+- criteri di superiorità.
+
+L’oracle esaustivo può essere calcolato offline soltanto sui circuiti di
+valutazione per misurare regret; non deve entrare nel prompt.
+
+## Sequenza dei sei prompt di lavoro concordata
+
+Il lavoro è stato suddiviso in sei richieste separate:
+
+1. analisi e specifica completa, senza implementazione;
+2. vincoli, catalogo, validazione e mascheramento;
+3. benchmark della similarità fra circuiti;
+4. migrazione Dataset e implementazione RAG;
+5. output strutturato, validazione e retry;
+6. protocollo sperimentale.
+
+La separazione serve a evitare che decisioni scientifiche non ancora validate
+vengano incorporate prematuramente nel codice.
+
+La fase 2 è stata implementata. Le fasi 3–6 restano da eseguire.
+
+## File principali della fase 2
+
+- `prototype/quantum_assistant/adapters/request.py`;
+- `prototype/quantum_assistant/adapters/hardware.py`;
+- `prototype/quantum_assistant/schema_validation.py`;
+- `prototype/quantum_assistant/errors.py`;
+- `prototype/quantum_assistant/models.py`;
+- `prototype/quantum_assistant/services.py`;
+- `prototype/quantum_assistant/controller.py`;
+- `prototype/quantum_assistant/factory.py`;
+- `schemas/assistant_request.schema.json`;
+- `schemas/hardware_catalog.schema.json`;
+- `schemas/hardware_mask_result.schema.json`;
+- `tests/test_request_constraints.py`;
+- `prototype/README.md`.
+
+`prototype/quantum_assistant/adapters/parsing.py` conserva re-export
+compatibili verso i nuovi adapter separati.
+
+## Verifiche finali della fase 2
+
+Risultato verificato al termine della chat:
+
+- 44 test su 44 superati;
+- `compileall` superato;
+- `git diff --check` superato;
+- prompt serializzabile in JSON;
+- snapshot stabile fra istanze indipendenti;
+- fingerprint confrontato con il Dataset per tutti i device correnti;
+- nessuna modifica ai file sotto `datasets/`;
+- nessuna modifica alla pipeline `qiskit_dataset`;
+- nessuna migrazione di claim/evidence;
+- nessuna modifica sostanziale alla logica RAG o retry;
+- modifica preesistente a `AGENTS.md` preservata;
+- nessun commit automatico.
+
+## Stato operativo e prossimo passo
+
+La fase 2 fornisce ora un confine affidabile pre-RAG:
+
+```text
+input utente strutturato
+  -> richiesta validata
+  -> catalogo versionato
+  -> richiesta normalizzata
+  -> hardware mask
+  -> ready oppure terminal error
+```
+
+Il prossimo passo logico è la fase 3: implementare un benchmark di similarità
+basato inizialmente su Weisfeiler–Lehman e matrice di connettività virtuale,
+misurando il trasferimento del ranking hardware prima di scegliere
+definitivamente indice e retrieval.
 
 ---

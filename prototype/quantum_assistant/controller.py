@@ -5,7 +5,8 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
-from .models import ApprovedCompilation, RecommendationResult, UiSubmission
+from .models import ApprovedCompilation, RecommendationResult
+from .ports import RequestInput
 from .services import PrototypeService
 
 
@@ -21,13 +22,22 @@ class PrototypeController:
         self._service = service
         self._recommendations: dict[str, RecommendationResult] = {}
 
-    def request_recommendation(self, submission: UiSubmission) -> dict[str, Any]:
+    def get_hardware_catalog(self) -> dict[str, Any]:
+        """Return the canonical options used by both UI and backend."""
+        return self._service.hardware_catalog.snapshot().to_dict()
+
+    def prepare_request(self, submission: RequestInput) -> dict[str, Any]:
+        """Expose the terminal pre-RAG boundary to a future UI/API."""
+        return self._service.prepare_request(submission).to_dict()
+
+    def request_recommendation(self, submission: RequestInput) -> dict[str, Any]:
         result = self._service.recommend(submission)
         self._recommendations[result.request.request_id] = result
         return {
             "request_id": result.request.request_id,
             "recommendation": asdict(result.recommendation),
             "attempts": result.attempts,
+            "hardware_mask": result.compatibility.to_dict(),
             "compatible_hardware": list(
                 result.compatibility.available_device_ids
             ),

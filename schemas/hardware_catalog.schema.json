@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hardware_catalog.schema.json",
+  "title": "Normalized hardware catalog snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_snapshot_id",
+    "source_kind",
+    "configuration_catalog_id",
+    "providers",
+    "devices",
+    "supported_figure_of_merit_ids",
+    "qiskit_configuration_ids",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "catalog_snapshot_id": {
+      "type": "string",
+      "pattern": "^hardware_catalog_[0-9a-f]{64}$"
+    },
+    "source_kind": {"const": "synthetic_mqt_target"},
+    "configuration_catalog_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "providers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider_id", "display_name"],
+        "properties": {
+          "provider_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+          "display_name": {"type": "string", "minLength": 1, "maxLength": 128}
+        }
+      }
+    },
+    "devices": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/device"}
+    },
+    "supported_figure_of_merit_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"const": "expected_fidelity"}
+    },
+    "qiskit_configuration_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fingerprint_algorithm",
+        "configuration_catalog_digest",
+        "package_versions"
+      ],
+      "properties": {
+        "fingerprint_algorithm": {"const": "assistant-hardware-catalog/2"},
+        "configuration_catalog_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "package_versions": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"type": "string"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "device_id",
+        "provider_id",
+        "num_qubits",
+        "operation_names",
+        "native_gate_ids",
+        "coupling",
+        "supported_figure_of_merit_ids",
+        "allowed_qiskit_configuration_ids",
+        "target_available",
+        "metadata"
+      ],
+      "properties": {
+        "device_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "provider_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "num_qubits": {"type": "integer", "minimum": 1},
+        "operation_names": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "native_gate_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+        },
+        "coupling": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "edge_count", "edges"],
+          "properties": {
+            "type": {
+              "enum": [
+                "global_unconstrained",
+                "explicit_complete",
+                "sparse_directed",
+                "unavailable"
+              ]
+            },
+            "edge_count": {"type": "integer", "minimum": 0},
+            "edges": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {"type": "integer", "minimum": 0}
+              }
+            }
+          }
+        },
+        "target_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "supported_figure_of_merit_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"const": "expected_fidelity"}
+        },
+        "allowed_qiskit_configuration_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+        },
+        "target_available": {"type": "boolean"},
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target_source",
+            "native_gateset_id",
+            "target_fingerprint_algorithm",
+            "calibration_kind",
+            "live_hardware_data"
+          ],
+          "properties": {
+            "target_source": {"type": "string", "minLength": 1},
+            "target_type": {"type": "string", "minLength": 1},
+            "native_gateset_id": {"type": "string", "minLength": 1},
+            "target_fingerprint_algorithm": {
+              "const": "qiskit-dataset-target/1"
+            },
+            "calibration_kind": {
+              "const": "synthetic_deterministic_target"
+            },
+            "live_hardware_data": {"const": false},
+            "coupling_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "instruction_properties_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "unavailability_code": {"const": "TARGET_LOAD_FAILED"},
+            "load_error_type": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

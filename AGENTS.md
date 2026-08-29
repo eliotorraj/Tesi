@@ -19,3 +19,21 @@
 
 - When i want to talk about the set for RAG/fine-tuning of the LLM i will talk about "Dataset"
 - Instead when i want to talk about the set of couples (circuit,device) for the ML model training, then i will say "Training set"
+
+## LeanCTX
+
+- Prefer LeanCTX MCP tools for repository exploration.
+- Use `ctx_search` instead of broad recursive searches when possible.
+- Use `ctx_read` with map or signatures mode before requesting full files.
+- Use `ctx_tree` instead of recursively listing the repository.
+- Use `ctx_shell` for commands whose output may be large.
+- Expand compressed or partial results when exact source text is required.
+- Do not use lossy summaries as evidence for exact code, test failures, numerical results, or paper claims.
+
+## Reports
+
+When writing the documentation of an implemented task you have done, follow this principles:
+- Use a simple and natural language, easy to understand
+- Avoid English loanwords unless necessary
+- No long or complex sentences. The goal is to explain what we actually did—the details don't matter!
+- The goal is to understand what this part of the project excatly does, in general terms

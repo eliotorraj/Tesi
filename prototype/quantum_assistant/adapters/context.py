@@ -11,7 +11,7 @@ from typing import Any, Mapping
 from qiskit_dataset.catalog import load_catalog
 
 from ..models import (
-    CompatibilityReport,
+    CompatibilityView,
     ParsedRequest,
     PromptEnvelope,
     RetrievedExample,
@@ -170,7 +170,7 @@ class JsonDatasetContextRetriever:
     def retrieve(
         self,
         request: ParsedRequest,
-        compatibility: CompatibilityReport,
+        compatibility: CompatibilityView,
         *,
         limit: int,
     ) -> tuple[RetrievedExample, ...]:
@@ -249,7 +249,7 @@ class StructuredPromptBuilder:
     def build(
         self,
         request: ParsedRequest,
-        compatibility: CompatibilityReport,
+        compatibility: CompatibilityView,
         examples: Sequence[RetrievedExample],
         *,
         validation_errors: Sequence[str] = (),
@@ -260,7 +260,7 @@ class StructuredPromptBuilder:
                 "num_qubits": profile.num_qubits,
                 "operation_names": profile.operation_names,
                 "coupling_edges": profile.coupling_edges,
-                "metadata": profile.metadata,
+                "metadata": profile.to_dict()["metadata"],
             }
             for profile in compatibility.available
         ]
@@ -281,10 +281,13 @@ class StructuredPromptBuilder:
                     "num_qubits": request.num_qubits,
                     "depth": request.depth,
                     "operation_names": request.operation_names,
-                    "features": request.features,
+                    "features": dict(request.features),
                 },
                 "compatible_hardware": available,
-                "unavailable_hardware": compatibility.unavailable,
+                "unavailable_hardware": {
+                    device_id: list(reasons)
+                    for device_id, reasons in compatibility.unavailable.items()
+                },
             },
             "retrieved_labeled_examples": [
                 {
