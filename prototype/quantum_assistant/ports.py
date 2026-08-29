@@ -5,42 +5,61 @@ from __future__ import annotations
 from typing import Any, Mapping, Protocol, Sequence
 
 from .models import (
-    CompatibilityReport,
+    CompatibilityView,
     CompilationArtifact,
+    HardwareCatalogSnapshot,
+    HardwareMaskResult,
     HardwareProfile,
+    NormalizedRequest,
     ParsedRequest,
     PromptEnvelope,
     Recommendation,
     RetrievedExample,
     UiSubmission,
+    UserRequest,
     ValidationResult,
 )
 
 
+RequestInput = UserRequest | UiSubmission | Mapping[str, Any] | str | bytes
+
+
 class RequestParser(Protocol):
-    def parse(self, submission: UiSubmission) -> ParsedRequest:
-        """Validate the circuit and normalize the UI request."""
+    def parse(self, submission: RequestInput) -> ParsedRequest:
+        """Validate JSON/QASM syntax and derive deterministic circuit data."""
 
 
 class HardwareCatalog(Protocol):
+    def snapshot(self) -> HardwareCatalogSnapshot:
+        """Return the immutable catalog shared by every phase."""
+
     def list_hardware(self) -> Sequence[HardwareProfile]:
-        """Return the hardware currently exposed by the prototype."""
+        """Backward-compatible device view of the same snapshot."""
+
+
+class SemanticRequestValidator(Protocol):
+    def normalize(
+        self,
+        request: ParsedRequest,
+        catalog: HardwareCatalogSnapshot,
+    ) -> NormalizedRequest:
+        """Validate catalog-dependent rules and normalize the request."""
 
 
 class CompatibilityFilter(Protocol):
     def filter(
         self,
-        request: ParsedRequest,
-        hardware: Sequence[HardwareProfile],
-    ) -> CompatibilityReport:
-        """Partition hardware into available and unavailable candidates."""
+        request: NormalizedRequest,
+        hardware: HardwareCatalogSnapshot,
+    ) -> HardwareMaskResult:
+        """Apply all hard constraints to the validated snapshot."""
 
 
 class ContextRetriever(Protocol):
     def retrieve(
         self,
-        request: ParsedRequest,
-        compatibility: CompatibilityReport,
+        request: NormalizedRequest,
+        compatibility: CompatibilityView,
         *,
         limit: int,
     ) -> Sequence[RetrievedExample]:
@@ -50,8 +69,8 @@ class ContextRetriever(Protocol):
 class PromptBuilder(Protocol):
     def build(
         self,
-        request: ParsedRequest,
-        compatibility: CompatibilityReport,
+        request: NormalizedRequest,
+        compatibility: CompatibilityView,
         examples: Sequence[RetrievedExample],
         *,
         validation_errors: Sequence[str] = (),
@@ -68,8 +87,8 @@ class RecommendationValidator(Protocol):
     def validate(
         self,
         raw_response: Mapping[str, Any],
-        request: ParsedRequest,
-        compatibility: CompatibilityReport,
+        request: NormalizedRequest,
+        compatibility: CompatibilityView,
     ) -> ValidationResult:
         """Validate schema, compatibility, and executable parameters."""
 
@@ -77,7 +96,7 @@ class RecommendationValidator(Protocol):
 class DeterministicCompiler(Protocol):
     def compile(
         self,
-        request: ParsedRequest,
+        request: NormalizedRequest,
         recommendation: Recommendation,
     ) -> CompilationArtifact:
         """Compile with deterministic local tools, never with LLM-generated code."""

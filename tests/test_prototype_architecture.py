@@ -23,7 +23,10 @@ from prototype.quantum_assistant.models import (
     HardwareProfile,
     UiSubmission,
 )
-from prototype.quantum_assistant.services import ConfirmationRequiredError
+from prototype.quantum_assistant.services import (
+    ConfirmationRequiredError,
+    PrototypeService,
+)
 
 
 def qasm_for_two_qubit_circuit() -> str:
@@ -76,6 +79,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         ]
 
         def callback(prompt):
+            json.dumps(prompt.payload)
             prompts.append(prompt)
             return responses[len(prompts) - 1]
 
@@ -114,6 +118,31 @@ class PrototypeArchitectureTests(unittest.TestCase):
         self.assertEqual(artifact.device_id, "ibm_falcon_27")
         self.assertTrue(artifact.validation["is_executable_on_target"])
         self.assertIn("OPENQASM 2.0", artifact.qasm2)
+
+    def test_legacy_positional_service_constructor_remains_compatible(
+        self,
+    ) -> None:
+        wired = build_default_service(
+            device_names=("ibm_falcon_27",),
+            dataset_path=self.root / "missing.jsonl",
+            llm_gateway=CallableLlmGateway(
+                lambda prompt: valid_llm_response("ibm_falcon_27")
+            ),
+        )
+        legacy = PrototypeService(
+            wired.parser,
+            wired.hardware_catalog,
+            wired.compatibility_filter,
+            wired.context_retriever,
+            wired.prompt_builder,
+            wired.llm_gateway,
+            wired.validator,
+            wired.compiler,
+            1,
+            0,
+        )
+        result = legacy.recommend(self.submission)
+        self.assertEqual(result.recommendation.selected_device, "ibm_falcon_27")
 
     def test_width_filter_marks_small_hardware_unavailable(self) -> None:
         request = QasmRequestParser().parse(self.submission)

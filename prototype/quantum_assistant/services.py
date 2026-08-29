@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .models import (
     ApprovedCompilation,
     CompilationArtifact,
+    HardwareMaskResult,
+    NO_ELIGIBLE_DEVICE_CODE,
+    NO_ELIGIBLE_DEVICE_MESSAGE,
+    PreparedRequestContext,
     RecommendationResult,
-    UiSubmission,
 )
 from .ports import (
     CompatibilityFilter,
@@ -18,12 +21,33 @@ from .ports import (
     LlmGateway,
     PromptBuilder,
     RecommendationValidator,
+    RequestInput,
     RequestParser,
+    SemanticRequestValidator,
 )
 
 
 class NoCompatibleHardwareError(RuntimeError):
-    """Raised when every configured device is unavailable."""
+    """Legacy base retained for callers of the previous prototype."""
+
+
+class NoEligibleDeviceError(NoCompatibleHardwareError):
+    """Terminal pre-LLM outcome for a valid but unsatisfiable request."""
+
+    code = NO_ELIGIBLE_DEVICE_CODE
+    retryable = False
+
+    def __init__(self, mask_result: HardwareMaskResult) -> None:
+        self.mask_result = mask_result
+        super().__init__(NO_ELIGIBLE_DEVICE_MESSAGE)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "code": self.code,
+            "retryable": self.retryable,
+            "message": str(self),
+            "mask_result": self.mask_result.to_dict(),
+        }
 
 
 class LlmValidationExhaustedError(RuntimeError):
@@ -42,6 +66,13 @@ class ConfirmationRequiredError(RuntimeError):
     """Raised when compilation is requested without explicit user approval."""
 
 
+def _default_semantic_validator() -> SemanticRequestValidator:
+    # Local import preserves the ports/adapters dependency direction.
+    from .adapters.request import RequestSemanticValidator
+
+    return RequestSemanticValidator()
+
+
 @dataclass
 class PrototypeService:
     """Facade called by any concrete UI controller."""
@@ -56,25 +87,39 @@ class PrototypeService:
     compiler: DeterministicCompiler
     max_llm_attempts: int = 3
     retrieval_limit: int = 5
+    semantic_validator: SemanticRequestValidator = field(
+        default_factory=_default_semantic_validator
+    )
 
     def __post_init__(self) -> None:
         if self.max_llm_attempts <= 0:
             raise ValueError("max_llm_attempts deve essere positivo.")
         if self.retrieval_limit < 0:
-            raise ValueError("retrieval_limit non puo essere negativo.")
+            raise ValueError("retrieval_limit non può essere negativo.")
 
-    def recommend(self, submission: UiSubmission) -> RecommendationResult:
-        """Run parse, compatibility, retrieval, LLM, validation, and retry."""
-        request = self.parser.parse(submission)
-        hardware = self.hardware_catalog.list_hardware()
-        compatibility = self.compatibility_filter.filter(request, hardware)
-        if not compatibility.available:
-            details = ", ".join(
-                f"{device}: {', '.join(reasons)}"
-                for device, reasons in sorted(compatibility.unavailable.items())
-            )
-            raise NoCompatibleHardwareError(details or "Nessun device configurato.")
+    def prepare_request(
+        self,
+        submission: RequestInput,
+    ) -> PreparedRequestContext:
+        """Stop after syntax, semantics, catalog snapshot, and hardware mask."""
+        parsed = self.parser.parse(submission)
+        catalog = self.hardware_catalog.snapshot()
+        request = self.semantic_validator.normalize(parsed, catalog)
+        mask_result = self.compatibility_filter.filter(request, catalog)
+        return PreparedRequestContext(
+            request=request,
+            hardware_catalog=catalog,
+            mask_result=mask_result,
+        )
 
+    def recommend(self, submission: RequestInput) -> RecommendationResult:
+        """Prepare once, then run the unchanged retrieval/LLM/retry boundary."""
+        prepared = self.prepare_request(submission)
+        if not prepared.can_recommend:
+            raise NoEligibleDeviceError(prepared.mask_result)
+
+        request = prepared.request
+        compatibility = prepared.mask_result
         examples = tuple(
             self.context_retriever.retrieve(
                 request,

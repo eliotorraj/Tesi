@@ -1,71 +1,45 @@
 # Dataset Qiskit diretto — protocollo e struttura
 
-Questa cartella contiene il Dataset sperimentale ottenuto compilando
-direttamente con Qiskit. L'unità elementare è:
+## 1. Spiegazione generale
+
+Questa cartella contiene il Dataset sperimentale ottenuto compilando circuiti
+direttamente con Qiskit. L'unità elementare dell'esperimento è:
 
 ```text
-(circuito, device, configurazione Qiskit, seed)
+(circuito, dispositivo, configurazione Qiskit, seed)
 ```
 
-Lo score è `mqt.predictor.reward.expected_fidelity`, da massimizzare. È una
-stima offline basata sul `Qiskit Target` sintetico e deterministico di MQT
-Bench, non una misura ottenuta eseguendo il circuito su hardware reale.
+La misura da massimizzare è
+`mqt.predictor.reward.expected_fidelity`. Il valore è una stima offline basata
+sul Target sintetico e deterministico di MQT Bench. Non deriva dall'esecuzione
+del circuito su hardware quantistico reale.
 
-## Catalogo sperimentale
+Il Dataset ha due dimensioni:
 
-`configs/qiskit_dataset_configurations.json` congela:
+- `pilot` usa dieci circuiti e serve a verificare il protocollo, i tempi e i
+  casi di errore;
+- `full` usa seicento circuiti e rappresenta l'esperimento completo da
+  popolare dopo aver fissato il protocollo.
 
-- cinque device;
-- dodici configurazioni Qiskit;
-- seed `0`, `1`, `2`;
-- objective, direzione e opzioni fisse di transpile.
+Il campione pilota contiene risultati separati per cinque dispositivi e una
+vista generale che li confronta. Ogni vista per dispositivo può essere
+controllata da sola. La vista generale viene costruita in seguito e non
+modifica i dati di partenza.
 
-Le configurazioni coprono:
+Solo i circuiti della parte `train` diventano esempi per il RAG. I circuiti di
+`validation` e `test` vengono compilati per creare il riferimento esterno usato
+nella valutazione, ma non entrano nell'indice.
 
-- baseline O2/O3 con layout e routing di default;
-- layout `sabre`, `dense`, `trivial` con routing `sabre`;
-- routing `lookahead` e `basic` con layout `sabre`.
-
-`null` significa lasciare a Qiskit la scelta di default. Combinazioni fuori
-catalogo non sono ground truth di questo protocollo.
-
-## Split dei circuiti
-
-Lo split avviene per gruppi di famiglie prima di espandere device,
-configurazioni e seed:
-
-- train, 422 circuiti: ae, dj, graphstate, portfolio, qaoa, qnn,
-  random/ansatz, vqe e wstate;
-- validation, 88 circuiti: qft/qftentangled e pricing;
-- test, 90 circuiti: qpeexact/qpeinexact, tsp, routing e groundstate.
-
-Non ci sono hash QASM condivisi tra split. Il claim sperimentale sostenibile e
-quindi la generalizzazione a famiglie non viste. Limite noto: validation e test
-arrivano a 70 qubit, mentre gli esempi da 80/90 qubit sono nel train.
-
-Il pilot usa un sottoinsieme fisso di dieci circuiti, split 6/2/2 e bilanciato
-tra generatori Qiskit e TKET. Validation e test vengono compilati offline per
-creare la ground truth dell'evaluatore, ma non entrano nell'indice RAG.
-
-## Una sola copia dei circuiti
-
-Ogni scope conserva un solo corpus:
-
-```text
-pilot/circuits/{train,validation,test}/
-full/circuits/{train,validation,test}/
-```
-
-I manifest rimangono nelle cartelle dei device ma `source_ref` e relativo
-alla root dello scope. La preparazione verifica SHA-256 e non sovrascrive un
-QASM condiviso già presente con contenuto diverso.
-
-## Layout
+## 2. Struttura della directory e compito dei file
 
 ```text
 datasets/expected_fidelity/
+  README.md
   pilot/
     circuits/
+      train/
+      validation/
+      test/
     <device_id>/
       split_manifest.json
       qiskit_runs.jsonl
@@ -84,88 +58,227 @@ datasets/expected_fidelity/
       qiskit_configuration_aggregates.jsonl
       rag_examples.jsonl
       dataset_statistics.json
-      reports/failure_details.csv
-    device_comparison.{md,csv}
+      reports/
+        failure_details.csv
+    device_comparison.md
+    device_comparison.csv
   full/
     circuits/
+      train/
+      validation/
+      test/
+    split_manifest.json
     <device_id>/
     global/
 ```
 
-Le cartelle per-device sono mini-Dataset indipendenti. Lo script 10 le legge e
-scrive soltanto in `global/`: non modifica i loro raw run, aggregati o report.
+Le cartelle `circuits/` conservano una sola copia dei file OpenQASM per ciascun
+insieme. I manifest dei dispositivi puntano a questi file condivisi.
 
-Le versioni dei record sono separate per evitare ambiguità nelle migrazioni:
+Ogni cartella `<device_id>/` è un mini-Dataset indipendente:
 
-- manifest `2.0.0`: `source_ref` è relativo alla root dello scope condiviso;
-- raw run `1.0.0`: la diagnostica timeout è un'aggiunta retrocompatibile;
-- aggregato di configurazione `2.0.0`: include le osservazioni
-  `run_id + seed + score` richieste dalle evidence;
-- esempio RAG `2.0.0`: include label device/configurazioni, claim, evidence e
-  caveat.
+- `split_manifest.json` elenca i circuiti, la loro suddivisione e l'impronta
+  SHA-256;
+- `qiskit_runs.jsonl` conserva un record per ogni tentativo;
+- `qiskit_configuration_aggregates.jsonl` riunisce i tre seed della stessa
+  configurazione;
+- `rag_examples.jsonl` contiene gli esempi etichettati della parte `train`;
+- `generation_status.json` registra l'avanzamento della generazione;
+- `dataset_statistics.json` riassume dimensioni, esiti e versioni dei record;
+- `reports/` contiene il resoconto del campione, le statistiche e il dettaglio
+  degli errori.
 
-`dataset_statistics.json` riporta queste versioni in
-`record_schema_versions`.
+La cartella `global/` unisce i mini-Dataset e permette il confronto tra
+dispositivi. `device_comparison.md` e `device_comparison.csv` riassumono invece
+i risultati del campione pilota per una lettura immediata.
 
-## Significato dei file
+### Codice collegato al Dataset
 
-### `qiskit_runs.jsonl`
+```text
+configs/
+  qiskit_dataset_configurations.json
+qiskit_dataset/
+  __init__.py
+  aggregation.py
+  catalog.py
+  core.py
+  generation.py
+  reporting.py
+  views.py
+scripts/
+  07_prepare_qiskit_dataset.py
+  08_generate_qiskit_dataset.py
+  09_build_qiskit_dataset_views.py
+  10_aggregate_qiskit_dataset.py
+schemas/
+  qiskit_run.schema.json
+  qiskit_configuration_aggregate.schema.json
+  qiskit_rag_example.schema.json
+```
 
-Una riga per tentativo. Contiene input, feature, device, configurazione, seed,
-fase, tempi, validazione, score o failure e provenance delle versioni.
+- `configs/qiskit_dataset_configurations.json` fissa il catalogo
+  sperimentale.
+- `qiskit_dataset/catalog.py` legge il catalogo e ne controlla la coerenza.
+- `qiskit_dataset/core.py` prepara corpus, suddivisioni, manifest e tentativi.
+- `qiskit_dataset/generation.py` esegue le compilazioni e salva risultati o
+  errori.
+- `qiskit_dataset/views.py` aggrega i seed e costruisce gli esempi RAG.
+- `qiskit_dataset/aggregation.py` unisce le viste dei dispositivi.
+- `qiskit_dataset/reporting.py` produce statistiche, tabelle e resoconti.
+- Gli script `07`, `08`, `09` e `10` espongono in ordine le quattro fasi della
+  procedura.
+- I tre schemi JSON descrivono rispettivamente il singolo tentativo,
+  l'aggregato di una configurazione e l'esempio destinato al RAG.
 
-### `qiskit_configuration_aggregates.jsonl`
+## 3. Implementazione
 
-Una riga per circuito-device-configurazione. I tre seed sono repliche
-sperimentali. Una configurazione è eleggibile soltanto con tutti i seed
-riusciti; il ranking usa la mediana di expected fidelity. Le osservazioni
-`run_id + seed + score` sono conservate per rendere verificabile ogni
-evidence successiva.
+### 3.1 Catalogo sperimentale
 
-### `rag_examples.jsonl`
+`configs/qiskit_dataset_configurations.json` fissa:
 
-Una riga per circuito train non duplicato. Nella vista globale:
+- cinque dispositivi;
+- dodici configurazioni Qiskit;
+- i seed `0`, `1` e `2`;
+- la misura, la direzione del confronto e le opzioni comuni di compilazione.
 
-- input: circuito, 49 feature, objective, device compatibili e campo
-  versionato per futuri vincoli utente;
-- label: device selezionato e top-3 configurazioni su quel device;
-- claim: spiegazioni naturali della scelta;
-- evidence: mediana, dispersione, seed, run, summary, target, margine e
-  provenance;
-- caveat: limiti scientifici espliciti.
+Le configurazioni comprendono:
 
-Il device scelto è quello la cui migliore configurazione eleggibile ha lo score
-più alto. In caso di parità esatta si usa l'ordine del catalogo e il claim
-dichiara che i dati non dimostrano superiorità. Le top-3 sono poi ristrette al
-device selezionato.
+- livello di ottimizzazione 2 e 3 con scelte Qiskit predefinite;
+- metodi di disposizione `sabre`, `dense` e `trivial` con instradamento
+  `sabre`;
+- instradamento `lookahead` e `basic` con disposizione `sabre`.
 
-Anche le parità tra configurazioni sono etichettate: ogni top configuration
-elenca `tied_score_config_ids` e il claim chiarisce quando la posizione deriva
-soltanto dall'ordine deterministico del catalogo.
+Il valore `null` lascia a Qiskit la scelta predefinita. Le combinazioni fuori
+catalogo non appartengono al riferimento sperimentale.
 
-Claim ed evidence descrivono il risultato osservato. Non inferiscono che
-complessita del circuito, configurazione o hardware siano la causa del
-risultato senza un confronto sperimentale controllato.
+### 3.2 Suddivisione e copia dei circuiti
 
-## Timeout e failure
+La suddivisione viene fatta per famiglie prima di espandere dispositivi,
+configurazioni e seed:
 
-Il timeout copre un singolo tentativo. Per i nuovi run, il callback pubblico di
-Qiskit registra l'ultimo pass completato; il traceback SIGALRM registra il frame
-in cui l'interruzione e stata osservata. Il CSV distingue:
+- `train`, 422 circuiti: ae, dj, graphstate, portfolio, qaoa, qnn,
+  random/ansatz, vqe e wstate;
+- `validation`, 88 circuiti: qft/qftentangled e pricing;
+- `test`, 90 circuiti: qpeexact/qpeinexact, tsp, routing e groundstate.
+
+Non ci sono impronte QASM condivise tra le tre parti. Un limite noto è che
+`validation` e `test` arrivano a 70 qubit, mentre i circuiti da 80 e 90 qubit
+sono in `train`.
+
+Il campione pilota usa dieci circuiti con suddivisione 6/2/2 ed è bilanciato tra
+generatori Qiskit e TKET.
+
+Ogni insieme conserva un unico corpus:
+
+```text
+pilot/circuits/{train,validation,test}/
+full/circuits/{train,validation,test}/
+```
+
+Il campo `source_ref` dei manifest è relativo alla radice dell'insieme. Durante
+la preparazione viene verificata l'impronta SHA-256. Un file condiviso già
+presente non viene sovrascritto se il contenuto è diverso.
+
+### 3.3 Preparazione e generazione
+
+Lo script `07_prepare_qiskit_dataset.py` crea il corpus e il manifest del
+dispositivo scelto. Da quel manifest vengono ricavati tutti i tentativi
+previsti dal protocollo.
+
+Lo script `08_generate_qiskit_dataset.py` esegue ogni combinazione. Per ciascun
+tentativo:
+
+1. legge il circuito;
+2. carica il Target del dispositivo;
+3. applica la configurazione e il seed;
+4. compila con `qiskit.transpile`;
+5. controlla gate e connettività;
+6. calcola `expected_fidelity` oppure registra l'errore;
+7. salva il record e le versioni usate.
+
+Ogni record viene salvato in modo atomico. Una nuova esecuzione riparte dai
+record mancanti. Le opzioni principali sono:
+
+- `--retry-failures` ripete errori e superamenti del limite temporale;
+- `--force` ignora e sovrascrive i risultati già presenti nella memoria locale;
+- `--limit-runs N` limita il numero di tentativi per una prova rapida.
+
+Per confrontare i tempi tra dispositivi bisogna usare lo stesso numero di
+processi e lo stesso limite temporale. Cambiare questa regola significa cambiare
+il protocollo e deve essere annotato.
+
+### 3.4 Aggregati ed esempi RAG
+
+Lo script `09_build_qiskit_dataset_views.py` riunisce i tre seed di ogni
+configurazione. Una configurazione entra nella graduatoria solo se tutti e tre i
+tentativi sono riusciti. Il valore usato per il confronto è la mediana di
+`expected_fidelity`.
+
+`qiskit_configuration_aggregates.jsonl` conserva anche le osservazioni
+`run_id + seed + score`. In questo modo ogni prova citata successivamente può
+essere ricondotta ai tentativi originali.
+
+`rag_examples.jsonl` contiene una riga per ogni circuito `train` non duplicato.
+Nella vista generale ogni riga comprende:
+
+- circuito e 49 caratteristiche;
+- misura e dispositivi compatibili;
+- dispositivo scelto;
+- tre migliori configurazioni per quel dispositivo;
+- affermazioni in linguaggio naturale;
+- prove con punteggi, seed, tentativi, Target e margini;
+- limiti scientifici espliciti.
+
+Il dispositivo scelto è quello la cui migliore configurazione valida ha il
+punteggio più alto. In caso di parità esatta viene usato l'ordine stabile del
+catalogo e l'affermazione chiarisce che i dati non mostrano una superiorità.
+La stessa regola rende esplicite le parità tra configurazioni.
+
+Affermazioni e prove descrivono ciò che è stato osservato. Non attribuiscono il
+risultato alla complessità del circuito, alla configurazione o all'hardware
+senza un confronto sperimentale controllato.
+
+I vincoli della richiesta dell'utente sono ora descritti separatamente da
+`schemas/assistant_request.schema.json`. Gli esempi offline non applicano
+vincoli retroattivi: il relativo campo resta vuoto e usa lo stato
+`not_applied_offline`.
+
+### 3.5 Errori e limiti temporali
+
+Il limite temporale vale per un singolo tentativo. Quando viene superato, il
+sistema distingue:
 
 - fase osservata;
 - ultimo pass completato;
-- frame/pass interrotto osservato;
-- stage Qiskit inferito solo per mapping verificati su Qiskit 2.1.1;
-- componente della configurazione associata;
-- confidenza, base dell'inferenza e `causal_attribution_supported=false`.
+- punto dello stack in cui è stata osservata l'interruzione;
+- fase Qiskit dedotta solo per corrispondenze verificate con Qiskit 2.1.1;
+- parte della configurazione associata;
+- livello di confidenza e base della deduzione.
 
-Il callback è post-pass: l'ultimo pass completato non è necessariamente quello
-interrotto. Lo stack indica il punto di interruzione, non prova la causa. I
-report storici vengono arricchiti dal traceback esistente senza riscrivere i
-raw run.
+L'ultimo pass completato non coincide necessariamente con quello interrotto. Lo
+stack mostra il punto dell'interruzione, ma non ne dimostra la causa. Per questo
+`causal_attribution_supported` rimane `false`.
 
-## Procedura per-device
+I resoconti storici possono essere arricchiti usando le tracce già salvate,
+senza riscrivere `qiskit_runs.jsonl`.
+
+### 3.6 Aggregazione generale
+
+Lo script `10_aggregate_qiskit_dataset.py` legge i mini-Dataset, ne controlla
+manifest, versioni e collegamenti, poi scrive solo nella cartella `global/`.
+Non modifica tentativi, aggregati o resoconti dei singoli dispositivi.
+
+L'opzione `--check-only` esegue i controlli e calcola le statistiche senza
+scrivere. `--devices` permette di costruire una vista dichiaratamente parziale.
+Le statistiche elencano sempre i dispositivi mancanti, così un Dataset
+incompleto non può essere presentato come completo.
+
+
+
+
+### 3.7 Comandi principali
+
+Procedura per un dispositivo:
 
 ```bash
 .venv/bin/python scripts/07_prepare_qiskit_dataset.py \
@@ -177,36 +290,22 @@ raw run.
   --scope pilot --device ibm_falcon_127 --top-k 3
 ```
 
-La generazione salva atomicamente ogni record. Rieseguire riprende dai record
-mancanti. `--retry-failures` riesegue failure e timeout; `--force` ignora
-la cache; `--limit-runs N` serve agli smoke test.
-
-Per tempi confrontabili tra device usare lo stesso numero di worker e la stessa
-soglia. Una modifica della timeout policy cambia il protocollo e va annotata.
-
-## Aggregazione generale
+Aggregazione dei dispositivi:
 
 ```bash
 .venv/bin/python scripts/10_aggregate_qiskit_dataset.py \
   --scope pilot --top-k 3 --require-all-supported
 ```
 
-`--check-only` valida e calcola le statistiche senza scrivere. `--devices`
-permette una vista esplicitamente parziale; le statistiche elencano sempre i
-device mancanti, evitando che un Dataset incompleto sembri completo.
+### 3.8 Sviluppi successivi
 
-## Popolazione e sviluppi futuri
+Prima di popolare l'insieme `full` vanno fissati:
 
-Prima della popolazione full vanno congelati con i relatori:
+1. catalogo e dispositivi;
+2. limite temporale, numero di processi e ripetizione dei tentativi;
+3. suddivisione e criteri di esclusione dei circuiti;
+4. misura e regola della graduatoria;
+5. valutazione della ricerca e del sistema con modello linguistico.
 
-1. catalogo e device;
-2. timeout, worker e retry dei tentativi;
-3. split e criteri di esclusione;
-4. metrica e regola di ranking;
-5. valutazione del retriever e del sistema LLM.
-
-I vincoli utente saranno formalizzati in uno schema separato e versionato. Gli
-esempi offline conservano per ora liste vuote con stato
-`not_applied_offline`: non inventano vincoli retroattivi. Analogamente, la
-politica di retry dell'LLM resta nel livello applicativo e verrà congelata come
-parte del protocollo, senza alterare la ground truth.
+La politica per ripetere una risposta non valida del modello resta nel livello
+applicativo. Non modifica il riferimento sperimentale del Dataset.

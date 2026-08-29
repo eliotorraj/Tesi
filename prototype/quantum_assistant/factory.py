@@ -8,9 +8,10 @@ from pathlib import Path
 from .adapters.compilation import QiskitDeterministicCompiler
 from .adapters.context import JsonDatasetContextRetriever, StructuredPromptBuilder
 from .adapters.parsing import (
+    HardwareMaskBuilder,
     MqtHardwareCatalog,
     QasmRequestParser,
-    WidthCompatibilityFilter,
+    RequestSemanticValidator,
 )
 from .adapters.validation import StructuredRecommendationValidator
 from .ports import LlmGateway
@@ -27,10 +28,12 @@ def build_default_service(
     dataset_required: bool = False,
 ) -> PrototypeService:
     """Wire default adapters while keeping the concrete LLM provider injectable."""
+    hardware_catalog = MqtHardwareCatalog(device_names)
     return PrototypeService(
         parser=QasmRequestParser(),
-        hardware_catalog=MqtHardwareCatalog(device_names),
-        compatibility_filter=WidthCompatibilityFilter(),
+        hardware_catalog=hardware_catalog,
+        semantic_validator=RequestSemanticValidator(),
+        compatibility_filter=HardwareMaskBuilder(),
         context_retriever=JsonDatasetContextRetriever(
             dataset_path,
             required=dataset_required,
