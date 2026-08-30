@@ -1,4 +1,5 @@
 # Prototipo dell'assistente quantistico
+<img width="1444" height="736" alt="Gemini_Generated_Image_uxvjltuxvjltuxvj" src="https://github.com/user-attachments/assets/74cb16d9-e73e-4484-ab68-6f6494885862" />
 
 ## 1. Spiegazione generale
 
