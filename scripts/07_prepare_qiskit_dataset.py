@@ -1,4 +1,4 @@
-"""Prepare deterministic pilot/full circuit splits for the Qiskit Dataset."""
+"""Prepara le suddivisioni riproducibili dei circuiti del Dataset Qiskit."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from qiskit_dataset.core import prepare_dataset
 
 
 def parse_args() -> argparse.Namespace:
+    """Legge le opzioni per preparare il campione o il Dataset completo."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--scope",
@@ -42,6 +43,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Prepara gli insiemi richiesti e ne mostra le informazioni principali."""
     args = parse_args()
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)

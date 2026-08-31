@@ -1,4 +1,4 @@
-"""Thin UI-facing controller with server-side recommendation state."""
+"""Controllore per la UI con raccomandazioni conservate lato servizio."""
 
 from __future__ import annotations
 
@@ -11,26 +11,28 @@ from .services import PrototypeService
 
 
 class PrototypeController:
-    """Adapter usable by a future REST, desktop, or command-line UI.
+    """Espone il prototipo a una futura UI REST, desktop o da terminale.
 
-    Validated recommendations are retained server-side so the compilation
-    endpoint does not trust an edited recommendation sent back by the client.
-    Replace this in-memory store with persistent session storage for deployment.
+    Le raccomandazioni validate restano sul lato servizio. In questo modo la
+    compilazione non accetta dati modificati dal client. In produzione questa
+    memoria temporanea potrà essere sostituita da una memoria persistente.
     """
 
     def __init__(self, service: PrototypeService) -> None:
+        """Collega il controllore al servizio applicativo."""
         self._service = service
         self._recommendations: dict[str, RecommendationResult] = {}
 
     def get_hardware_catalog(self) -> dict[str, Any]:
-        """Return the canonical options used by both UI and backend."""
+        """Restituisce il catalogo usato sia dalla UI sia dal servizio."""
         return self._service.hardware_catalog.snapshot().to_dict()
 
     def prepare_request(self, submission: RequestInput) -> dict[str, Any]:
-        """Expose the terminal pre-RAG boundary to a future UI/API."""
+        """Prepara la richiesta senza interrogare Dataset o LLM."""
         return self._service.prepare_request(submission).to_dict()
 
     def request_recommendation(self, submission: RequestInput) -> dict[str, Any]:
+        """Genera e conserva una raccomandazione già validata."""
         result = self._service.recommend(submission)
         self._recommendations[result.request.request_id] = result
         return {
@@ -57,6 +59,7 @@ class PrototypeController:
         *,
         user_confirmed: bool,
     ) -> dict[str, Any]:
+        """Compila una raccomandazione conservata dopo la conferma."""
         try:
             result = self._recommendations[request_id]
         except KeyError as exc:

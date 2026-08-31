@@ -22,6 +22,13 @@ una maschera dei dispositivi utilizzabili. I vincoli scelti dall'utente possono
 limitare fornitori, dispositivi ammessi, numero di qubit e gate nativi. Non
 esiste un secondo elenco di dispositivi vietati.
 
+Anche la risposta del modello viene controllata. Deve essere un singolo oggetto
+JSON conforme allo schema, riferito alla richiesta e al catalogo correnti. Le
+affermazioni e i riferimenti alle evidenze sono campi strutturati. Il modello non
+fornisce una spiegazione libera: il testo mostrato all'utente viene costruito dal
+prototipo dopo tutti i controlli. Se la risposta è errata, il sistema può
+effettuare un numero limitato di nuovi tentativi.
+
 I modelli RL e ML di MQT Predictor, i loro artefatti e la procedura storica
 rimangono nel ramo `main`. Non fanno parte di questo ramo.
 
@@ -112,6 +119,9 @@ uv.lock
   catalogo hardware.
 - `schemas/hardware_mask_result.schema.json` descrive la maschera dei
   dispositivi e le motivazioni di esclusione.
+- `schemas/llm_recommendation.schema.json` descrive la raccomandazione
+  strutturata, le affermazioni e i riferimenti che il modello linguistico deve
+  restituire.
 
 ## 3. Implementazione
 
@@ -169,6 +179,42 @@ zero conserva una motivazione. Se non rimane alcun dispositivo, il flusso si
 ferma prima del RAG. La ricerca e la risposta del modello non possono quindi
 aggirare i vincoli.
 
+### Validazione della risposta del modello
+
+Il collegamento al modello può restituire testo JSON oppure un oggetto già
+letto dall'adattatore. Nel primo caso il testo deve contenere un solo oggetto,
+senza prosa, blocchi Markdown, chiavi duplicate o valori non validi.
+
+Lo schema chiuso controlla campi, tipi e intervalli. I controlli successivi
+verificano l'identificativo della richiesta, l'istantanea del catalogo, il
+dispositivo scelto, la maschera e la configurazione Qiskit. La stessa istanza
+del catalogo delle configurazioni viene usata per costruire il catalogo
+hardware, preparare la richiesta al modello e controllare la risposta.
+
+Dopo la ricerca viene costruito un registro immutabile con i primi esempi
+storici recuperati. Il registro conserva risultati, configurazioni,
+affermazioni sorgente e limiti scientifici. Ogni riferimento prodotto dal
+modello deve indicare un record presente in questo registro. Il validatore
+controlla anche che le evidenze siano tutte e sole quelle collegate
+all'affermazione storica e che dispositivo e configurazione coincidano con la
+raccomandazione corrente.
+
+La spiegazione finale non proviene dal testo del modello. Un componente
+deterministico la costruisce usando soltanto affermazioni e riferimenti già
+validati. I risultati storici vengono presentati come precedenti di circuiti
+simili, mai come misure del circuito corrente. Se gli esempi nel formato
+precedente non contengono evidenze, il sistema richiede una dichiarazione
+strutturata di questa assenza e usa soltanto la compatibilità verificata dal
+prototipo.
+
+Gli errori contengono codice, percorso e messaggio. Anche gli errori nei
+collegamenti tra affermazioni ed evidenze seguono questa politica. Il registro
+viene costruito una sola volta e resta identico in tutti i tentativi. Gli errori
+vengono inseriti nella richiesta successiva fino al limite configurato, pari a
+tre tentativi nella configurazione predefinita. Errori del Dataset, del
+catalogo, del collegamento al modello o del programma non vengono trasformati
+in nuovi tentativi.
+
 ### Affidabilità e riproducibilità
 
 Le principali garanzie sono:
@@ -180,9 +226,10 @@ Le principali garanzie sono:
 - controllo delle operazioni e della connettività del circuito compilato;
 - separazione tra dati osservati e interpretazioni dei limiti temporali;
 - aggregazione generale che legge le viste per dispositivo senza modificarle;
-- validazione della richiesta e della risposta del modello prima della
-  compilazione;
-- compilazione consentita solo dopo la conferma esplicita dell'utente.
+- validazione della richiesta, della risposta e dei collegamenti tra
+  affermazioni ed evidenze prima della compilazione;
+- compilazione consentita solo dopo la conferma esplicita dell'utente e con un
+  risultato validato emesso dal servizio.
 
 ### Esecuzione del campione pilota
 
@@ -225,10 +272,8 @@ I prossimi passi sono:
 
 1. definire e verificare la misura di similarità tra circuiti;
 2. integrare il RAG con la misura scelta;
-3. completare il formato delle spiegazioni e il controllo della risposta del
-   modello linguistico;
-4. congelare il protocollo sperimentale;
-5. popolare il Dataset completo.
+3. congelare il protocollo sperimentale;
+4. popolare il Dataset completo.
 
 Queste parti non cambiano il contratto già definito per richiesta, catalogo e
 maschera hardware.

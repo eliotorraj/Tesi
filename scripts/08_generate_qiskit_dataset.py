@@ -1,4 +1,4 @@
-"""Compile Qiskit attempts with per-run cache, timeout, and resume."""
+"""Esegue i tentativi Qiskit con salvataggio, limite di tempo e ripresa."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from qiskit_dataset.generation import generate_dataset
 
 
 def parse_args() -> argparse.Namespace:
+    """Legge e controlla le opzioni della generazione."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="pilot")
     parser.add_argument(
@@ -62,6 +63,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Mostra il piano oppure genera i tentativi ancora necessari."""
     args = parse_args()
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)

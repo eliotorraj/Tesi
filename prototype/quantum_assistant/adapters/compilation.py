@@ -1,4 +1,4 @@
-"""Deterministic Qiskit compilation after explicit user approval."""
+"""Compila con Qiskit dopo la conferma esplicita dell'utente."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ def _validate_compiled_circuit(
     circuit: QuantumCircuit,
     target: Any,
 ) -> dict[str, Any]:
+    """Controlla che il circuito compilato sia eseguibile sul dispositivo."""
     errors: list[str] = []
     unsupported = sorted(
         set(map(str, circuit.count_ops()))
@@ -59,13 +60,14 @@ def _validate_compiled_circuit(
 
 
 class QiskitDeterministicCompiler:
-    """Execute only allowlisted parameters from a validated recommendation."""
+    """Compila usando solo i parametri già controllati della raccomandazione."""
 
     def compile(
         self,
         request: ParsedRequest,
         recommendation: Recommendation,
     ) -> CompilationArtifact:
+        """Compila il circuito secondo la raccomandazione validata."""
         if recommendation.figure_of_merit != request.figure_of_merit:
             raise ValueError("La recommendation usa una figure of merit diversa.")
         target = get_device(recommendation.selected_device)

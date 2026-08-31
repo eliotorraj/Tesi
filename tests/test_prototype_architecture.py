@@ -38,8 +38,12 @@ def qasm_for_two_qubit_circuit() -> str:
     return stream.getvalue()
 
 
-def valid_llm_response(device_id: str) -> dict[str, object]:
+def valid_llm_response(device_id: str, prompt) -> dict[str, object]:
+    live_request = prompt.payload["live_request"]
     return {
+        "schema_version": "2.0.0",
+        "request_id": live_request["request_id"],
+        "catalog_snapshot_id": live_request["catalog_snapshot_id"],
         "selected_device": device_id,
         "figure_of_merit": "expected_fidelity",
         "compiler": "qiskit",
@@ -49,9 +53,21 @@ def valid_llm_response(device_id: str) -> dict[str, object]:
             "layout_method": None,
             "routing_method": None,
         },
-        "explanation": "Il device supporta la larghezza del circuito.",
-        "evidence": ["live_request.circuit.num_qubits"],
-        "warnings": [],
+        "evidence_refs": [],
+        "claims": [
+            {
+                "claim_id": "live-compatibility",
+                "claim_type": "live_compatibility",
+                "parameters": {"device_id": device_id},
+                "evidence_ref_ids": [],
+            },
+            {
+                "claim_id": "historical-evidence-unavailable",
+                "claim_type": "historical_evidence_unavailable",
+                "parameters": {},
+                "evidence_ref_ids": [],
+            },
+        ],
     }
 
 
@@ -73,15 +89,16 @@ class PrototypeArchitectureTests(unittest.TestCase):
         self,
     ) -> None:
         prompts = []
-        responses = [
-            valid_llm_response("device_not_available"),
-            valid_llm_response("ibm_falcon_27"),
+        selected_devices = [
+            "device_not_available",
+            "ibm_falcon_27",
         ]
 
         def callback(prompt):
             json.dumps(prompt.payload)
+            device_id = selected_devices[len(prompts)]
             prompts.append(prompt)
-            return responses[len(prompts) - 1]
+            return valid_llm_response(device_id, prompt)
 
         service = build_default_service(
             device_names=("ibm_falcon_27",),
@@ -96,6 +113,23 @@ class PrototypeArchitectureTests(unittest.TestCase):
         self.assertEqual(
             result.recommendation.selected_device,
             "ibm_falcon_27",
+        )
+        self.assertEqual(
+            result.recommendation.explanation,
+            (
+                "Il dispositivo ibm_falcon_27 rispetta i vincoli verificati "
+                "per la richiesta corrente. Tra i circuiti più simili "
+                "recuperati non sono disponibili risultati storici "
+                "utilizzabili per sostenere la raccomandazione."
+            ),
+        )
+        self.assertEqual(result.recommendation.evidence, ())
+        self.assertEqual(
+            result.recommendation.warnings,
+            (
+                "La raccomandazione non dispone di evidenze storiche "
+                "utilizzabili.",
+            ),
         )
         self.assertTrue(
             prompts[1].payload["previous_validation_errors"],
@@ -126,7 +160,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
             device_names=("ibm_falcon_27",),
             dataset_path=self.root / "missing.jsonl",
             llm_gateway=CallableLlmGateway(
-                lambda prompt: valid_llm_response("ibm_falcon_27")
+                lambda prompt: valid_llm_response("ibm_falcon_27", prompt)
             ),
         )
         legacy = PrototypeService(
@@ -143,6 +177,10 @@ class PrototypeArchitectureTests(unittest.TestCase):
         )
         result = legacy.recommend(self.submission)
         self.assertEqual(result.recommendation.selected_device, "ibm_falcon_27")
+        self.assertIn(
+            "non sono disponibili risultati storici utilizzabili",
+            result.recommendation.explanation,
+        )
 
     def test_width_filter_marks_small_hardware_unavailable(self) -> None:
         request = QasmRequestParser().parse(self.submission)
@@ -216,7 +254,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         )
 
         self.assertEqual(len(examples), 1)
-        serialized = json.dumps(examples[0].prompt_input)
+        serialized = repr(examples[0].prompt_input)
         self.assertNotIn("secret_training_target", serialized)
         self.assertNotIn("evaluation_only", serialized)
         self.assertNotIn("historical qasm intentionally omitted", serialized)
@@ -310,7 +348,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         )
         self.assertEqual(
             prompt_example["claims"][0]["evidence_ids"],
-            ["evidence_" + "d" * 64],
+            ("evidence_" + "d" * 64,),
         )
         self.assertEqual(
             prompt_example["evidence"][0]["aggregation"]["value"],

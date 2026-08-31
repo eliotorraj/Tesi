@@ -1,4 +1,4 @@
-"""Structured request decoding, QASM parsing, and semantic validation."""
+"""Legge la richiesta, analizza il QASM e ne controlla il significato."""
 
 from __future__ import annotations
 
@@ -26,6 +26,7 @@ from ..models import (
     ValidationIssue,
     ValidationReport,
 )
+from ..ports import RequestInput
 from ..schema_validation import (
     MAX_REQUEST_BYTES,
     decode_json_object,
@@ -62,22 +63,23 @@ FEATURE_NAMES = tuple(
         "liveness",
     ]
 )
-RequestInput = UserRequest | UiSubmission | Mapping[str, Any] | str | bytes
 
 
 def normalize_gate_id(value: str) -> str:
+    """Uniforma il nome di un gate e applica gli alias riconosciuti."""
     normalized = value.strip().lower()
     return GATE_ALIASES.get(normalized, normalized)
 
 
 def _raise_issue(code: str, path: str, message: str) -> Never:
+    """Solleva un errore di richiesta con un solo problema strutturato."""
     raise RequestValidationError(
         ValidationReport((ValidationIssue(code, path, message),))
     )
 
 
 def _validate_qasm_includes(source: str) -> None:
-    """Allow only Qiskit's packaged qelib1; never resolve from the CWD."""
+    """Ammette soltanto qelib1 fornita da Qiskit, senza cercare altri file."""
     without_comments = _BLOCK_COMMENT_PATTERN.sub("", source)
     without_comments = _LINE_COMMENT_PATTERN.sub("", without_comments)
     remainder = _ALLOWED_INCLUDE_PATTERN.sub("", without_comments)
@@ -90,6 +92,7 @@ def _validate_qasm_includes(source: str) -> None:
 
 
 def _extract_feature_values(circuit: QuantumCircuit) -> tuple[float, ...]:
+    """Estrae dal circuito un vettore di caratteristiche valido e finito."""
     if circuit.num_qubits < 1:
         _raise_issue(
             "CIRCUIT_HAS_NO_QUBITS",
@@ -127,6 +130,7 @@ def _extract_feature_values(circuit: QuantumCircuit) -> tuple[float, ...]:
 
 
 def _constraints_from_mapping(raw: Mapping[str, Any]) -> HardwareConstraints:
+    """Converte i vincoli JSON nel modello interno dei vincoli hardware."""
     qubit_range_raw = raw.get("device_qubits")
     qubit_range = None
     if isinstance(qubit_range_raw, Mapping):
@@ -145,6 +149,7 @@ def _constraints_from_mapping(raw: Mapping[str, Any]) -> HardwareConstraints:
 
 
 def _user_request_from_mapping(raw: Mapping[str, Any]) -> UserRequest:
+    """Valida l'oggetto JSON e costruisce la richiesta dell'utente."""
     issues = validate_instance(
         REQUEST_SCHEMA,
         raw,
@@ -170,6 +175,7 @@ def _user_request_from_mapping(raw: Mapping[str, Any]) -> UserRequest:
 
 
 def _legacy_request(submission: UiSubmission) -> UserRequest:
+    """Adatta il vecchio formato della schermata alla richiesta corrente."""
     if submission.constraints:
         _raise_issue(
             "LEGACY_CONSTRAINT_NOT_SUPPORTED",
@@ -233,14 +239,15 @@ def _legacy_request(submission: UiSubmission) -> UserRequest:
 
 
 class QasmRequestParser:
-    """Decode strict request JSON and attach deterministic QASM properties."""
+    """Legge una richiesta rigorosa e calcola le proprietà del circuito."""
 
     def parse(self, submission: RequestInput) -> ParsedRequest:
+        """Converte l'ingresso supportato in una richiesta con QASM analizzato."""
         if isinstance(submission, UiSubmission):
             request = _legacy_request(submission)
         elif isinstance(submission, UserRequest):
-            # A caller cannot opt into the trusted legacy path by setting the
-            # internal marker on a public dataclass instance.
+            # Un chiamante non può attivare il percorso storico impostando
+            # direttamente il marcatore interno del modello pubblico.
             request = _user_request_from_mapping(submission.to_dict())
         else:
             try:
@@ -312,13 +319,14 @@ class QasmRequestParser:
 
 
 class RequestSemanticValidator:
-    """Validate catalog-dependent rules and normalize gate aliases."""
+    """Controlla le regole legate al catalogo e uniforma i nomi dei gate."""
 
     def normalize(
         self,
         request: ParsedRequest,
         catalog: HardwareCatalogSnapshot,
     ) -> NormalizedRequest:
+        """Controlla la richiesta rispetto al catalogo e la rende canonica."""
         issues: list[ValidationIssue] = []
         constraints = request.hardware_constraints
         provider_ids = set(catalog.provider_ids)

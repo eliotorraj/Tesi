@@ -1,4 +1,4 @@
-"""Circuit inventory, deterministic splits, and common Dataset I/O."""
+"""Prepara i circuiti, le suddivisioni e i file comuni del Dataset."""
 
 from __future__ import annotations
 
@@ -87,7 +87,7 @@ def dataset_scope_root(
     scope: str,
     device_id: str | None = None,
 ) -> Path:
-    """Return the legacy scope root or an isolated per-device root."""
+    """Individua la cartella generale o quella riservata a un dispositivo."""
     root = DATASETS_ROOT / objective / scope
     if device_id is None:
         return root
@@ -97,7 +97,7 @@ def dataset_scope_root(
 
 
 def dataset_circuits_root(objective: str, scope: str) -> Path:
-    """Return the single shared circuit store for one objective and scope."""
+    """Individua la cartella condivisa che contiene i circuiti di uno scope."""
     return dataset_scope_root(objective, scope) / "circuits"
 
 
@@ -106,7 +106,7 @@ def resolve_circuit_source(
     scope: str,
     source_ref: str,
 ) -> Path:
-    """Resolve a manifest circuit reference inside its shared scope root."""
+    """Risolve il percorso di un circuito e impedisce di uscire dallo scope."""
     scope_root = dataset_scope_root(objective, scope).resolve()
     candidate = (scope_root / source_ref).resolve()
     try:
@@ -119,6 +119,7 @@ def resolve_circuit_source(
 
 
 def canonical_json(payload: Any) -> str:
+    """Produce una rappresentazione JSON stabile dello stesso contenuto."""
     return json.dumps(
         payload,
         sort_keys=True,
@@ -129,19 +130,23 @@ def canonical_json(payload: Any) -> str:
 
 
 def stable_id(prefix: str, payload: Any) -> str:
+    """Calcola un identificatore stabile a partire dal contenuto ricevuto."""
     digest = hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
     return f"{prefix}_{digest}"
 
 
 def sha256_bytes(value: bytes) -> str:
+    """Calcola l'impronta SHA-256 di una sequenza di byte."""
     return hashlib.sha256(value).hexdigest()
 
 
 def sha256_file(path: Path) -> str:
+    """Calcola l'impronta SHA-256 del contenuto di un file."""
     return sha256_bytes(path.read_bytes())
 
 
 def finite_float(value: Any) -> float | None:
+    """Converte un valore in numero finito, oppure restituisce None."""
     if value is None:
         return None
     result = float(value)
@@ -149,6 +154,7 @@ def finite_float(value: Any) -> float | None:
 
 
 def atomic_json_write(path: Path, payload: Any) -> None:
+    """Scrive un JSON completo senza lasciare file parziali."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -167,6 +173,7 @@ def atomic_json_write(path: Path, payload: Any) -> None:
 
 
 def atomic_text_write(path: Path, text: str) -> None:
+    """Scrive un testo completo senza lasciare file parziali."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -177,6 +184,7 @@ def atomic_text_write(path: Path, text: str) -> None:
 
 
 def atomic_jsonl_write(path: Path, records: Iterable[Mapping[str, Any]]) -> int:
+    """Scrive record JSONL in modo sicuro e restituisce quanti sono."""
     lines: list[str] = []
     for record in records:
         lines.append(canonical_json(record))
@@ -185,6 +193,7 @@ def atomic_jsonl_write(path: Path, records: Iterable[Mapping[str, Any]]) -> int:
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    """Legge i record JSONL, ignorando le righe vuote."""
     records: list[dict[str, Any]] = []
     if not path.is_file():
         return records
@@ -200,6 +209,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def package_versions() -> dict[str, str]:
+    """Raccoglie le versioni dei pacchetti usati dall'esperimento."""
     result: dict[str, str] = {}
     for name in ("mqt.predictor", "mqt.bench", "qiskit"):
         try:
@@ -210,6 +220,7 @@ def package_versions() -> dict[str, str]:
 
 
 def feature_names() -> tuple[str, ...]:
+    """Restituisce i nomi delle caratteristiche estratte da ogni circuito."""
     from mqt.predictor.ml.helper import get_openqasm_gates
 
     return tuple(
@@ -227,6 +238,7 @@ def feature_names() -> tuple[str, ...]:
 
 
 def ensure_training_circuits(source: Path | None = None) -> Path:
+    """Trova i circuiti MQT e, se serve, estrae l'archivio locale."""
     from mqt.predictor.ml.helper import get_path_training_circuits
 
     path = Path(get_path_training_circuits()) if source is None else source
@@ -243,6 +255,7 @@ def ensure_training_circuits(source: Path | None = None) -> Path:
 
 
 def _extract_features(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
+    """Estrae le caratteristiche e i dati principali di un circuito QASM."""
     from mqt.predictor.ml.helper import create_feature_vector
     from qiskit import QuantumCircuit
 
@@ -272,6 +285,7 @@ def _extract_features(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
 
 
 def _base_inventory(source: Path) -> list[dict[str, Any]]:
+    """Costruisce l'inventario dei 600 circuiti e riconosce i duplicati."""
     paths = sorted(source.glob("*.qasm"), key=lambda item: item.name)
     if len(paths) != 600:
         raise ValueError(f"Corpus MQT inatteso: trovati {len(paths)} QASM, attesi 600.")
@@ -329,6 +343,7 @@ def _base_inventory(source: Path) -> list[dict[str, Any]]:
 
 
 def _validate_split(records: list[dict[str, Any]], scope: str) -> None:
+    """Controlla quantità e separazione dei circuiti tra gli insiemi."""
     expected = {
         "pilot": {"train": 6, "validation": 2, "test": 2},
         "full": {"train": 422, "validation": 88, "test": 90},
@@ -354,7 +369,7 @@ def _ensure_circuit_copy(
     destination: Path,
     expected_sha256: str,
 ) -> None:
-    """Create one integrity-checked shared QASM copy without overwriting it."""
+    """Copia un QASM condiviso e ne controlla l'integrità senza sovrascriverlo."""
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists():
         if not destination.is_file() or sha256_file(destination) != expected_sha256:
@@ -380,7 +395,7 @@ def prepare_dataset(
     source: Path | None = None,
     device_id: str | None = None,
 ) -> dict[str, Any]:
-    """Create circuit copies and a deterministic split manifest."""
+    """Prepara i circuiti e crea un manifest con suddivisione deterministica."""
     if scope not in {"pilot", "full"}:
         raise ValueError("scope deve essere pilot oppure full.")
     from mqt.bench.targets import get_device
@@ -452,6 +467,7 @@ def prepare_dataset(
         for record in records
         if bool(record["is_exact_duplicate"])
     }
+    feature_name_list = feature_names()
     manifest: dict[str, Any] = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "dataset_scope": scope,
@@ -494,8 +510,8 @@ def prepare_dataset(
         },
         "feature_contract": {
             "extractor": "mqt.predictor.ml.helper.create_feature_vector",
-            "names": list(feature_names()),
-            "dimension": len(feature_names()),
+            "names": list(feature_name_list),
+            "dimension": len(feature_name_list),
             "source_circuit_only": True,
         },
         "provenance": {
@@ -515,6 +531,7 @@ def load_manifest(
     objective: str = "expected_fidelity",
     device_id: str | None = None,
 ) -> dict[str, Any]:
+    """Legge il manifest preparato per uno scope e un dispositivo."""
     path = dataset_scope_root(objective, scope, device_id) / "split_manifest.json"
     if not path.is_file():
         raise FileNotFoundError(
@@ -541,6 +558,7 @@ def make_run_id(
     objective: Mapping[str, Any],
     versions: Mapping[str, str],
 ) -> str:
+    """Calcola l'identificatore stabile di un tentativo di compilazione."""
     identity = {
         "circuit_id": circuit["circuit_id"],
         "source_sha256": circuit["source_sha256"],
@@ -570,6 +588,7 @@ def expand_attempts(
     versions: Mapping[str, str] | None = None,
     device_id: str | None = None,
 ) -> list[dict[str, Any]]:
+    """Espande il manifest in tutti i tentativi previsti dal catalogo."""
     selected_device_id = catalog.require_device(
         device_id or str(manifest.get("device_id", catalog.default_device_id))
     )

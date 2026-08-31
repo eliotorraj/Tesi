@@ -1,4 +1,4 @@
-"""Read-only aggregation of per-device Dataset views."""
+"""Riunisce le viste dei singoli dispositivi senza modificarle."""
 
 from __future__ import annotations
 
@@ -36,6 +36,7 @@ REQUIRED_DEVICE_FILES = (
 
 
 def _load_json(path: Path) -> dict[str, Any]:
+    """Legge un file JSON richiesto e controlla che contenga un oggetto."""
     import json
 
     with path.open(encoding="utf-8") as handle:
@@ -45,10 +46,22 @@ def _load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _shared_circuit_identity(circuit: Mapping[str, Any]) -> str:
+    """Rappresenta un circuito senza la compatibilità specifica del device."""
+    return canonical_json(
+        {
+            key: value
+            for key, value in circuit.items()
+            if key != "device_compatibility"
+        }
+    )
+
+
 def _available_devices(
     scope_root: Path,
     catalog: ConfigurationCatalog,
 ) -> list[str]:
+    """Elenca i dispositivi per cui sono presenti tutti i file necessari."""
     return [
         device_id
         for device_id in catalog.supported_device_ids
@@ -66,7 +79,7 @@ def _validate_manifest(
     scope: str,
     catalog: ConfigurationCatalog,
 ) -> dict[str, str]:
-    """Validate one mini-Dataset manifest and its shared circuit references."""
+    """Controlla un manifest e i circuiti condivisi a cui fa riferimento."""
     if manifest.get("schema_version") != MANIFEST_SCHEMA_VERSION:
         raise ValueError(f"Versione schema inattesa nel manifest di {device_id}.")
     if manifest.get("device_id") != device_id:
@@ -115,13 +128,7 @@ def _validate_manifest(
             raise ValueError(
                 f"Compatibilità incoerente per {device_id}/{circuit_id}."
             )
-        identities[circuit_id] = canonical_json(
-            {
-                key: value
-                for key, value in circuit.items()
-                if key != "device_compatibility"
-            }
-        )
+        identities[circuit_id] = _shared_circuit_identity(circuit)
     if not identities:
         raise ValueError(f"Manifest senza circuiti per {device_id}.")
     return identities
@@ -137,6 +144,7 @@ def _validate_device_records(
     catalog: ConfigurationCatalog,
     expected_schema_version: str,
 ) -> None:
+    """Controlla i campi comuni dei tentativi o degli aggregati di un device."""
     for index, record in enumerate(records, start=1):
         location = f"{device_id}/{record_kind}:{index}"
         if record.get("schema_version") != expected_schema_version:
@@ -185,7 +193,7 @@ def _validate_records_against_manifest(
     *,
     device_id: str,
 ) -> None:
-    """Ensure raw and derived records still describe the committed manifest."""
+    """Verifica che i record descrivano ancora i circuiti del manifest."""
     circuits = {
         str(circuit["circuit_id"]): circuit
         for circuit in manifest.get("circuits", [])
@@ -199,20 +207,8 @@ def _validate_records_against_manifest(
             raise ValueError(
                 f"{device_id}:{index}: circuito fuori manifest: {circuit_id!r}."
             )
-        expected_identity = canonical_json(
-            {
-                key: value
-                for key, value in expected.items()
-                if key != "device_compatibility"
-            }
-        )
-        observed_identity = canonical_json(
-            {
-                key: value
-                for key, value in circuit.items()
-                if key != "device_compatibility"
-            }
-        )
+        expected_identity = _shared_circuit_identity(expected)
+        observed_identity = _shared_circuit_identity(circuit)
         if observed_identity != expected_identity:
             raise ValueError(
                 f"{device_id}:{index}: metadati incoerenti per {circuit_id}."
@@ -236,6 +232,7 @@ def _ensure_unique(
     records: Sequence[Mapping[str, Any]],
     identifier: str,
 ) -> None:
+    """Controlla che ogni record abbia un identificatore unico e non vuoto."""
     raw_values = [record.get(identifier) for record in records]
     if any(not isinstance(value, str) or not value for value in raw_values):
         raise ValueError(f"{identifier} mancante nella vista globale.")
@@ -252,6 +249,7 @@ def _ensure_unique(
 def _validate_circuit_identity(
     summaries: Sequence[Mapping[str, Any]],
 ) -> None:
+    """Verifica che ogni circuito conservi gli stessi dati tra i device."""
     by_circuit: dict[str, str] = {}
     for summary in summaries:
         circuit = summary.get("circuit") or {}
@@ -274,6 +272,7 @@ def _validate_circuit_identity(
 
 
 def _record_key(record: Mapping[str, Any]) -> tuple[str, str, str]:
+    """Costruisce la chiave formata da circuito, dispositivo e configurazione."""
     circuit = record.get("circuit") or {}
     device = record.get("device") or {}
     configuration = record.get("configuration") or {}
@@ -288,7 +287,7 @@ def _validate_summary_run_links(
     runs: Sequence[Mapping[str, Any]],
     summaries: Sequence[Mapping[str, Any]],
 ) -> None:
-    """Reject stale aggregate views that no longer describe their raw runs."""
+    """Controlla che ogni aggregato rappresenti esattamente i suoi tentativi."""
     runs_by_key: dict[tuple[str, str, str], list[Mapping[str, Any]]] = defaultdict(list)
     run_by_id: dict[str, Mapping[str, Any]] = {}
     for run in runs:
@@ -362,7 +361,7 @@ def aggregate_device_datasets(
     require_all_supported: bool = False,
     write: bool = True,
 ) -> dict[str, Any]:
-    """Combine every selected mini-Dataset without modifying its files."""
+    """Riunisce i mini-Dataset selezionati senza modificarne i file."""
     if scope not in {"pilot", "full"}:
         raise ValueError("scope deve essere pilot oppure full.")
     if top_k <= 0:

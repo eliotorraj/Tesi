@@ -1,4 +1,4 @@
-"""Resumable execution of direct Qiskit compilation attempts."""
+"""Esegue e riprende i tentativi di compilazione diretta con Qiskit."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from io import StringIO
 from pathlib import Path
-from typing import Any, Iterator, Mapping, Sequence
+from typing import Any, Iterator, Mapping
 
 from .catalog import ConfigurationCatalog
 from .core import (
@@ -40,11 +40,11 @@ CACHE_ROOT = PROJECT_ROOT / "artifacts" / "qiskit_dataset_cache"
 
 
 class AttemptTimeoutError(TimeoutError):
-    """Raised when one Qiskit attempt exceeds its hard time budget."""
+    """Segnala che un tentativo Qiskit ha superato il tempo massimo."""
 
 
 class TargetValidationError(RuntimeError):
-    """Raised when a compiled circuit does not satisfy target constraints."""
+    """Segnala che il circuito compilato non rispetta il dispositivo."""
 
 
 _TIMEOUT_LIMITATIONS = (
@@ -73,6 +73,7 @@ _STAGE_MARKERS_QISKIT_2_1_1 = (
 
 
 def _pass_identity(pass_: Any) -> tuple[str, str]:
+    """Ricava nome e classe di un passaggio interno di Qiskit."""
     pass_class = f"{type(pass_).__module__}.{type(pass_).__qualname__}"
     try:
         candidate = pass_.name()
@@ -86,7 +87,7 @@ def _capture_completed_pass(
     transpilation_started: float,
     callback_data: Mapping[str, Any],
 ) -> None:
-    """Record only facts exposed by Qiskit's post-pass callback."""
+    """Registra soltanto i dati forniti da Qiskit dopo ogni passaggio."""
     pass_ = callback_data.get("pass_")
     if pass_ is None:
         return
@@ -115,6 +116,7 @@ def _capture_completed_pass(
 
 
 def _portable_frame_file(filename: str) -> str:
+    """Rende portabile il percorso di un file presente nello stack."""
     normalized = str(filename).replace("\\", "/")
     for marker in ("/site-packages/", "/dist-packages/"):
         if marker in normalized:
@@ -123,6 +125,7 @@ def _portable_frame_file(filename: str) -> str:
 
 
 def _qiskit_stack_frames(traceback_text: str) -> list[dict[str, Any]]:
+    """Estrae dallo stack soltanto i passaggi interni a Qiskit o MQT."""
     frames: list[dict[str, Any]] = []
     for match in _TRACEBACK_FRAME_RE.finditer(traceback_text):
         filename = _portable_frame_file(match.group("file"))
@@ -144,6 +147,7 @@ def _timeout_inference(
     configuration: Mapping[str, Any],
     qiskit_version: str | None,
 ) -> dict[str, Any]:
+    """Formula una diagnosi prudente sul punto in cui è avvenuto il timeout."""
     filename = (
         ""
         if interrupted_frame is None
@@ -208,7 +212,7 @@ def build_timeout_diagnostics(
     qiskit_version: str | None,
     progress: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Build factual timeout observations and explicitly qualified inference."""
+    """Raccoglie i fatti osservati sul timeout e separa le ipotesi."""
     progress = progress or {}
     frames = _qiskit_stack_frames(traceback_text)
     pass_frames = [
@@ -246,6 +250,7 @@ def build_timeout_diagnostics(
 
 
 def _target_payload(target: Any) -> dict[str, Any]:
+    """Converte il dispositivo Qiskit nei dati usati per la sua impronta."""
     instructions: list[dict[str, Any]] = []
     for operation, qargs in target.instructions:
         properties = None
@@ -294,6 +299,7 @@ def _target_payload(target: Any) -> dict[str, Any]:
 
 
 def build_target_record(device_id: str) -> dict[str, Any]:
+    """Crea il record stabile che descrive il dispositivo selezionato."""
     from mqt.bench.targets import get_device
 
     target = get_device(device_id)
@@ -317,6 +323,7 @@ def build_target_record(device_id: str) -> dict[str, Any]:
 
 @lru_cache(maxsize=2)
 def _worker_target(device_id: str) -> Any:
+    """Carica una sola volta il dispositivo usato da ciascun processo."""
     from mqt.bench.targets import get_device
 
     return get_device(device_id)
@@ -324,11 +331,13 @@ def _worker_target(device_id: str) -> Any:
 
 @contextmanager
 def _hard_timeout(seconds: float) -> Iterator[None]:
+    """Interrompe il blocco quando supera il tempo massimo disponibile."""
     if seconds <= 0 or not hasattr(signal, "SIGALRM"):
         yield
         return
 
     def on_alarm(signum: int, frame: Any) -> None:
+        """Trasforma il segnale del sistema nell'errore previsto dal flusso."""
         del signum, frame
         raise AttemptTimeoutError(
             f"Tentativo interrotto dopo {seconds:.1f} secondi."
@@ -344,6 +353,7 @@ def _hard_timeout(seconds: float) -> Iterator[None]:
 
 
 def validate_compiled_circuit(circuit: Any, target: Any) -> dict[str, Any]:
+    """Controlla porte e collegamenti del circuito compilato sul dispositivo."""
     from qiskit.transpiler.passes import CheckMap, GatesInBasis
 
     errors: list[str] = []
@@ -385,6 +395,7 @@ def validate_compiled_circuit(circuit: Any, target: Any) -> dict[str, Any]:
 
 
 def _clean_circuit_record(circuit: Mapping[str, Any]) -> dict[str, Any]:
+    """Rimuove dal record del circuito i campi usati soltanto internamente."""
     return {
         key: value
         for key, value in circuit.items()
@@ -393,6 +404,7 @@ def _clean_circuit_record(circuit: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _base_record(task: Mapping[str, Any]) -> dict[str, Any]:
+    """Prepara il record comune a tutti gli esiti di un tentativo."""
     return {
         "schema_version": SCHEMA_VERSION,
         "run_id": task["run_id"],
@@ -431,6 +443,7 @@ def _base_record(task: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _failure_category(error: BaseException, phase: str) -> str:
+    """Classifica un errore in base al tipo e alla fase raggiunta."""
     if isinstance(error, AttemptTimeoutError):
         return "timeout"
     if isinstance(error, TargetValidationError):
@@ -446,7 +459,7 @@ def _failure_category(error: BaseException, phase: str) -> str:
 
 
 def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
-    """Execute one attempt and always return a self-contained record."""
+    """Esegue un tentativo e restituisce sempre un record completo."""
     from mqt.predictor.reward import expected_fidelity
     from qiskit import QuantumCircuit, transpile
     from qiskit.qasm2 import dump as qasm_dump
@@ -591,6 +604,7 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _cache_paths(objective: str, run_id: str) -> tuple[Path, Path]:
+    """Individua i file di cache di un tentativo e del circuito compilato."""
     root = CACHE_ROOT / objective
     return (
         root / "runs" / f"{run_id}.json",
@@ -602,6 +616,7 @@ def _load_cached_record(
     objective: str,
     run_id: str,
 ) -> dict[str, Any] | None:
+    """Recupera dalla cache un record completo e riconoscibile."""
     record_path, _ = _cache_paths(objective, run_id)
     if not record_path.is_file():
         return None
@@ -618,6 +633,7 @@ def _load_cached_record(
 
 
 def _persist_record(record: dict[str, Any], objective: str) -> None:
+    """Salva in cache il record e l'eventuale circuito compilato."""
     run_id = str(record["run_id"])
     record_path, qasm_path = _cache_paths(objective, run_id)
     compiled_qasm = record.pop("_compiled_qasm2", None)
@@ -633,6 +649,7 @@ def _worker_crash_record(
     task: Mapping[str, Any],
     error: BaseException,
 ) -> dict[str, Any]:
+    """Crea un record di errore quando un processo termina in modo inatteso."""
     record = _base_record(task)
     record["status"] = "failure"
     record["phase"] = "worker"
@@ -654,6 +671,7 @@ def _normalize_for_scope(
     record: Mapping[str, Any],
     task: Mapping[str, Any],
 ) -> dict[str, Any]:
+    """Allinea un record recuperato allo scope e al circuito correnti."""
     normalized = json.loads(canonical_json(record))
     normalized["dataset_scope"] = task["dataset_scope"]
     normalized["split"] = task["split"]
@@ -667,6 +685,7 @@ def _report_progress(
     total: int,
     statuses: Mapping[str, int],
 ) -> None:
+    """Mostra periodicamente quanti tentativi sono stati completati."""
     if completed == 1 or completed == total or completed % 25 == 0:
         status_text = ", ".join(
             f"{name}={count}" for name, count in sorted(statuses.items())
@@ -690,7 +709,7 @@ def generate_dataset(
     force: bool = False,
     device_id: str | None = None,
 ) -> dict[str, Any]:
-    """Run missing attempts, cache each result, and rebuild ordered JSONL."""
+    """Esegue i tentativi mancanti e ricostruisce il JSONL ordinato."""
     if workers <= 0:
         raise ValueError("workers deve essere positivo.")
     if timeout_seconds <= 0:

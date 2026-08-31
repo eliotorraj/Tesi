@@ -1,4 +1,4 @@
-"""Readable, reproducible statistics for per-device Qiskit pilots."""
+"""Crea statistiche leggibili per i pilot Qiskit dei singoli dispositivi."""
 
 from __future__ import annotations
 
@@ -54,6 +54,7 @@ common_transpile_mean_s common_transpile_p95_s common_transpile_max_s
 
 
 def _json(path: Path) -> dict[str, Any]:
+    """Legge un oggetto JSON, oppure restituisce un oggetto vuoto se manca."""
     if not path.is_file():
         return {}
     with path.open(encoding="utf-8") as handle:
@@ -64,6 +65,7 @@ def _json(path: Path) -> dict[str, Any]:
 
 
 def _finite(values: Iterable[Any]) -> list[float]:
+    """Mantiene soltanto i valori numerici finiti."""
     result: list[float] = []
     for value in values:
         if value is None or isinstance(value, bool):
@@ -75,6 +77,7 @@ def _finite(values: Iterable[Any]) -> list[float]:
 
 
 def _percentile(values: Sequence[float], fraction: float) -> float | None:
+    """Calcola un percentile con interpolazione tra i valori vicini."""
     if not values:
         return None
     ordered = sorted(values)
@@ -87,6 +90,7 @@ def _percentile(values: Sequence[float], fraction: float) -> float | None:
 
 
 def _stats(values: Iterable[Any]) -> dict[str, Any]:
+    """Calcola le statistiche usate nei riepiloghi numerici."""
     finite = _finite(values)
     if not finite:
         return dict.fromkeys(("min", "median", "mean", "p95", "max"), None) | {
@@ -103,6 +107,7 @@ def _stats(values: Iterable[Any]) -> dict[str, Any]:
 
 
 def _success_times(runs: Iterable[Mapping[str, Any]]) -> list[float]:
+    """Estrae i tempi di compilazione dei soli tentativi riusciti."""
     return _finite(
         run.get("timings_seconds", {}).get("transpilation")
         for run in runs
@@ -111,14 +116,17 @@ def _success_times(runs: Iterable[Mapping[str, Any]]) -> list[float]:
 
 
 def _statuses(runs: Iterable[Mapping[str, Any]]) -> Counter[str]:
+    """Conta i tentativi per stato finale."""
     return Counter(str(run.get("status", "unknown")) for run in runs)
 
 
 def _rate(numerator: int, denominator: int) -> float | None:
+    """Calcola un rapporto senza dividere per zero."""
     return numerator / denominator if denominator else None
 
 
 def _num(value: Any, digits: int = 3) -> str:
+    """Formatta un numero per una tabella leggibile."""
     if value is None:
         return "-"
     if isinstance(value, int):
@@ -128,11 +136,15 @@ def _num(value: Any, digits: int = 3) -> str:
 
 
 def _pct(value: Any) -> str:
+    """Formatta un rapporto come percentuale."""
     return "-" if value is None else f"{100 * float(value):.1f}%"
 
 
 def _table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
+    """Costruisce una tabella Markdown a partire da intestazioni e righe."""
+
     def clean(value: Any) -> str:
+        """Evita che un valore rompa la struttura della tabella."""
         return str(value).replace("|", "\\|").replace("\n", " ")
 
     lines = [
@@ -147,6 +159,7 @@ def _table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
 
 
 def _csv(path: Path, rows: Sequence[Mapping[str, Any]], fields: Sequence[str]) -> None:
+    """Scrive una vista CSV usando soltanto le colonne richieste."""
     stream = StringIO(newline="")
     writer = csv.DictWriter(
         stream,
@@ -169,6 +182,7 @@ def _configuration_rows(
     runs: Sequence[Mapping[str, Any]],
     summaries: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
+    """Prepara una riga di riepilogo per ogni configurazione."""
     by_config: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     summary_by_config: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     eligible_by_circuit: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
@@ -243,6 +257,7 @@ def _circuit_rows(
     runs: Sequence[Mapping[str, Any]],
     summaries: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
+    """Prepara una riga di riepilogo per ogni circuito compatibile."""
     by_circuit: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     summary_by_circuit: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for run in runs:
@@ -302,6 +317,7 @@ def _timeout_diagnostics(
     run: Mapping[str, Any],
     failure: Mapping[str, Any],
 ) -> Mapping[str, Any]:
+    """Recupera la diagnosi del timeout o la ricostruisce dai dati disponibili."""
     existing = failure.get("timeout_diagnostics")
     if isinstance(existing, Mapping):
         return existing
@@ -323,7 +339,7 @@ def failure_detail_rows(
     runs: Sequence[Mapping[str, Any]],
     device_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Return backward-compatible, evidence-qualified failure CSV rows."""
+    """Prepara righe di errore dettagliate mantenendo il formato esistente."""
     rows: list[dict[str, Any]] = []
     for run in runs:
         if run.get("status") == "success":
@@ -410,13 +426,14 @@ def write_failure_csv(
     runs: Sequence[Mapping[str, Any]],
     device_id: str | None = None,
 ) -> int:
-    """Write the canonical failure view and return its number of rows."""
+    """Scrive la vista degli errori e restituisce il numero di righe."""
     rows = failure_detail_rows(runs, device_id)
     _csv(path, rows, FAILURE_FIELDS)
     return len(rows)
 
 
 def _failure_breakdown(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Raggruppa gli errori per fase, categoria e tipo di eccezione."""
     counts = Counter(
         (
             str(row.get("phase") or "unknown"),
@@ -437,6 +454,7 @@ def _failure_breakdown(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]
 
 
 def _timeout_sensitivity(runs: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Stima quanti tentativi supererebbero diverse soglie di tempo."""
     totals = _finite(
         run.get("timings_seconds", {}).get("total")
         for run in runs
@@ -456,6 +474,7 @@ def _timeout_sensitivity(runs: Sequence[Mapping[str, Any]]) -> list[dict[str, An
 
 
 def _pilot_markdown(summary: Mapping[str, Any]) -> str:
+    """Trasforma il riepilogo del pilot in un documento Markdown."""
     coverage = summary["circuit_coverage"]
     execution = summary["execution"]
     attempts = summary["attempts"]
@@ -696,6 +715,7 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
 
 
 def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
+    """Confronta i risultati pilot disponibili sugli stessi circuiti."""
     paths = sorted(pilot_root.glob("*/reports/pilot_summary.json"))
     pairs = [(path, _json(path)) for path in paths if path.is_file()]
     pairs = [(path, summary) for path, summary in pairs if summary]
@@ -851,6 +871,7 @@ def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
 def build_pilot_report(
     output_root: Path, catalog: ConfigurationCatalog
 ) -> dict[str, Any]:
+    """Genera il riepilogo e i file di consultazione di un pilot."""
     manifest = _json(output_root / "split_manifest.json")
     if not manifest:
         raise FileNotFoundError(output_root / "split_manifest.json")

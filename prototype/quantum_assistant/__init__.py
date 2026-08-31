@@ -1,5 +1,6 @@
-"""LLM-assisted quantum compilation prototype."""
+"""Prototipo di compilazione quantistica assistita da un LLM."""
 
+from .adapters.context import EvidenceRegistryDataError
 from .controller import PrototypeController
 from .factory import build_default_service
 from .errors import RequestValidationError
@@ -12,6 +13,14 @@ from .models import (
     DeviceExclusionDiagnostic,
     DeviceExclusionReason,
     DeviceQubitRange,
+    EvidenceRecord,
+    EvidenceReference,
+    EvidenceRegistry,
+    EvidenceSourceType,
+    HistoricalClaim,
+    HistoricalClaimType,
+    HistoricalConfiguration,
+    HistoricalEvidence,
     HardwareCatalogSnapshot,
     HardwareConstraints,
     HardwareMaskResult,
@@ -19,6 +28,11 @@ from .models import (
     PreparedRequestContext,
     Recommendation,
     RecommendationResult,
+    RenderedExplanation,
+    ScientificCaveat,
+    SupportedClaim,
+    SupportedClaimType,
+    ClaimParameters,
     UiSubmission,
     UserRequest,
     ValidationIssue,
@@ -30,6 +44,7 @@ from .services import (
     NoCompatibleHardwareError,
     NoEligibleDeviceError,
     PrototypeService,
+    UnvalidatedRecommendationError,
 )
 
 __all__ = [
@@ -42,6 +57,15 @@ __all__ = [
     "DeviceExclusionDiagnostic",
     "DeviceExclusionReason",
     "DeviceQubitRange",
+    "EvidenceRecord",
+    "EvidenceReference",
+    "EvidenceRegistryDataError",
+    "EvidenceRegistry",
+    "EvidenceSourceType",
+    "HistoricalClaim",
+    "HistoricalClaimType",
+    "HistoricalConfiguration",
+    "HistoricalEvidence",
     "HardwareCatalogSnapshot",
     "HardwareConstraints",
     "HardwareMaskResult",
@@ -54,8 +78,14 @@ __all__ = [
     "PrototypeService",
     "Recommendation",
     "RecommendationResult",
+    "RenderedExplanation",
+    "ScientificCaveat",
+    "SupportedClaim",
+    "SupportedClaimType",
+    "ClaimParameters",
     "RequestValidationError",
     "UiSubmission",
+    "UnvalidatedRecommendationError",
     "UserRequest",
     "ValidationIssue",
     "ValidationReport",
