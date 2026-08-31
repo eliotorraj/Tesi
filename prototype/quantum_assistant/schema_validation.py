@@ -1,8 +1,8 @@
-"""Small dependency-free validator for the JSON Schema subset used here.
+"""Validazione locale del sottoinsieme JSON Schema usato dal progetto.
 
-The repository does not currently depend on jsonschema. This module validates
-instances against the checked-in Draft 2020-12 contracts and deliberately
-supports only the keywords used by those contracts.
+Il progetto non dipende da ``jsonschema``. Questo modulo controlla i dati
+rispetto agli schemi Draft 2020-12 presenti nel repository e accetta soltanto
+le parole chiave necessarie a tali schemi.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ MAX_REQUEST_BYTES = 2_100_000
 
 
 class _DuplicateKeyError(ValueError):
-    pass
+    """Segnala una chiave ripetuta nello stesso oggetto JSON."""
 
 
 _SUPPORTED_SCHEMA_KEYWORDS = frozenset(
@@ -59,9 +59,10 @@ _SUPPORTED_TYPES = frozenset(
 
 
 def ensure_supported_schema(schema: Mapping[str, Any]) -> None:
-    """Fail closed if a schema uses semantics this local validator lacks."""
+    """Rifiuta uno schema che usa regole non gestite dal validatore locale."""
 
     def visit(node: Mapping[str, Any], path: str) -> None:
+        """Controlla ricorsivamente un nodo dello schema."""
         unknown = sorted(set(node) - _SUPPORTED_SCHEMA_KEYWORDS)
         if unknown:
             raise ValueError(
@@ -122,6 +123,7 @@ def ensure_supported_schema(schema: Mapping[str, Any]) -> None:
 
 
 def load_schema(file_name: str) -> dict[str, Any]:
+    """Carica uno schema del progetto e verifica che sia supportato."""
     path = SCHEMA_ROOT / file_name
     with path.open(encoding="utf-8") as handle:
         schema = json.load(handle)
@@ -136,7 +138,7 @@ def decode_json_object(
     *,
     max_bytes: int = MAX_REQUEST_BYTES,
 ) -> dict[str, Any]:
-    """Decode strict JSON, rejecting duplicate keys and non-finite constants."""
+    """Decodifica un oggetto JSON rifiutando duplicati e numeri non finiti."""
     if isinstance(document, bytes):
         raw_bytes = document
         try:
@@ -152,6 +154,7 @@ def decode_json_object(
         )
 
     def object_pairs_hook(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        """Costruisce un oggetto JSON e rileva le chiavi duplicate."""
         result: dict[str, Any] = {}
         for key, value in pairs:
             if key in result:
@@ -160,6 +163,7 @@ def decode_json_object(
         return result
 
     def parse_constant(value: str) -> Any:
+        """Rifiuta le costanti numeriche che JSON non ammette."""
         raise ValueError(f"Costante JSON non finita non ammessa: {value}.")
 
     try:
@@ -176,6 +180,7 @@ def decode_json_object(
 
 
 def _resolve_ref(root: Mapping[str, Any], reference: str) -> Mapping[str, Any]:
+    """Risolve un riferimento locale all'interno dello schema."""
     if not reference.startswith("#/"):
         raise ValueError(f"$ref esterno non supportato: {reference}.")
     value: Any = root
@@ -190,6 +195,7 @@ def _resolve_ref(root: Mapping[str, Any], reference: str) -> Mapping[str, Any]:
 
 
 def _is_type(instance: Any, expected: str) -> bool:
+    """Verifica un valore rispetto a un tipo JSON Schema supportato."""
     if expected == "object":
         return isinstance(instance, Mapping)
     if expected == "array":
@@ -212,6 +218,7 @@ def _is_type(instance: Any, expected: str) -> bool:
 
 
 def _unique(items: Sequence[Any]) -> bool:
+    """Controlla l'unicità di valori JSON anche se non sono hashabili."""
     encoded = [
         json.dumps(item, sort_keys=True, separators=(",", ":"), allow_nan=False)
         for item in items
@@ -225,10 +232,11 @@ def validate_instance(
     *,
     error_code: str = "SCHEMA_INVALID",
 ) -> tuple[ValidationIssue, ...]:
-    """Validate an instance and return stable project-level issues."""
+    """Controlla un valore e restituisce errori stabili del progetto."""
     issues: list[ValidationIssue] = []
 
     def add(path: str, message: str) -> None:
+        """Aggiunge un errore usando il codice richiesto dal chiamante."""
         issues.append(
             ValidationIssue(code=error_code, path=path, message=message)
         )
@@ -238,6 +246,7 @@ def validate_instance(
         value: Any,
         path: str,
     ) -> None:
+        """Applica ricorsivamente le regole dello schema al valore."""
         reference = current_schema.get("$ref")
         if isinstance(reference, str):
             visit(_resolve_ref(schema, reference), value, path)

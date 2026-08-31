@@ -5980,33 +5980,36 @@ trusted legacy impostando direttamente il flag nel modello pubblico.
 L’output canonico resta `hardware_mask` con `excluded_devices` tipizzati; le
 stringhe diagnostiche storiche sono mantenute soltanto per compatibilità.
 
-## Politica di validazione e retry prevista, non ancora implementata
+## Politica di validazione e nuovi tentativi definita nella fase 2
 
-La risposta LLM futura dovrà contenere:
+Nella fase 2 era stata prevista una risposta del modello con:
 
-- device;
+- dispositivo;
 - configurazione Qiskit;
-- claim;
-- evidence;
-- caveat o incertezza.
+- affermazioni;
+- evidenze;
+- limiti o incertezze.
 
-La validazione prevista comprende:
+La validazione prevista in quel momento comprendeva:
 
 1. schema e tipi;
-2. esistenza del device;
+2. esistenza del dispositivo;
 3. rispetto della maschera;
-4. appartenenza della configurazione all’allowlist;
-5. coerenza claim/evidence con i record effettivamente recuperati;
+4. appartenenza della configurazione alle alternative consentite;
+5. coerenza tra affermazioni ed evidenze con i record recuperati;
 6. ricalcolo deterministico delle statistiche citate;
-7. divieto di presentare prediction live come risultato già misurato.
+7. divieto di presentare una previsione corrente come risultato già misurato.
 
-Gli errori dovranno essere tipizzati e reinseriti nel prompt del tentativo
-successivo. Il limite discusso è configurabile, con cinque tentativi come
-esempio, ma la politica definitiva appartiene alla fase 5. Errori non
-riparabili, come richiesta invalida o nessun device ammissibile, non devono
-attivare retry.
+Gli errori dovevano essere tipizzati e inseriti nella richiesta del tentativo
+successivo. Il limite discusso era configurabile, con cinque tentativi come
+esempio. Errori non correggibili, come una richiesta non valida o l'assenza di
+dispositivi ammissibili, non dovevano attivare nuovi tentativi.
 
-La logica di retry esistente non è stata ridisegnata durante la fase 2.
+Questa parte non era stata realizzata nella fase 2. È stata completata in
+seguito, con un limite predefinito di tre tentativi totali. Il contratto finale
+non accetta spiegazioni libere: usa affermazioni e riferimenti strutturati, poi
+costruisce la spiegazione dopo la validazione. L'appendice in fondo al documento
+descrive lo stato corrente senza modificare la ricostruzione di questa fase.
 
 ## Protocollo sperimentale discusso
 
@@ -6048,7 +6051,8 @@ Il lavoro è stato suddiviso in sei richieste separate:
 La separazione serve a evitare che decisioni scientifiche non ancora validate
 vengano incorporate prematuramente nel codice.
 
-La fase 2 è stata implementata. Le fasi 3–6 restano da eseguire.
+Le fasi 2 e 5 sono state implementate. Le fasi 3, 4 e 6 restano da
+completare sul piano sperimentale.
 
 ## File principali della fase 2
 
@@ -6105,3 +6109,121 @@ misurando il trasferimento del ranking hardware prima di scegliere
 definitivamente indice e retrieval.
 
 ---
+
+
+# Appendice — validazione delle affermazioni e delle evidenze (30 agosto 2026)
+
+## 1. Spiegazione generale
+
+Il prototipo collega ora ogni affermazione storica alle evidenze dei circuiti
+più simili recuperati per la richiesta corrente. Dopo la ricerca costruisce un
+registro immutabile con i primi `k` risultati, cioè il gruppo `top-k`. Lo stesso
+registro viene usato nella richiesta al modello, nella validazione e in tutti
+gli eventuali nuovi tentativi.
+
+Il modello restituisce soltanto il piano Qiskit, affermazioni tipizzate e
+riferimenti strutturati. Non può scrivere la spiegazione mostrata all'utente.
+Il prototipo controlla i collegamenti con il registro e produce poi la
+spiegazione in modo deterministico. Una risposta non valida non raggiunge la
+conferma dell'utente o la compilazione.
+
+Gli esempi nel formato precedente possono ancora aiutare la ricerca, ma non
+contengono dati sufficienti per essere citati come evidenze storiche. Se il
+registro non contiene record completi, il modello deve dichiarare in forma
+strutturata che le evidenze storiche non sono disponibili. La compatibilità
+corrente del piano resta comunque verificata dal prototipo.
+
+## 2. Struttura della directory e compito dei file
+
+I file interessati si trovano soprattutto in `prototype/quantum_assistant/`:
+
+- `models.py` definisce il registro immutabile, i record storici, le
+  affermazioni e i riferimenti;
+- `ports.py` definisce il contratto fra ricerca, modello, validatore e
+  costruttore della spiegazione;
+- `adapters/context.py` legge i risultati recuperati e costruisce il registro;
+- `adapters/validation.py` controlla lo schema, i valori e tutti i collegamenti
+  con le evidenze;
+- `adapters/explanations.py` costruisce spiegazione, prove e avvertenze dai
+  dati già validati;
+- `services.py` coordina il registro, i tentativi e il passaggio alla conferma;
+- `schemas/llm_recommendation.schema.json` descrive la risposta chiusa del
+  modello;
+- `tests/test_llm_output_validation.py` verifica i casi validi, i rifiuti e
+  il numero dei tentativi;
+- `tests/test_claim_evidence_validation.py` verifica i legami tra affermazioni,
+  evidenze e circuiti storici più simili;
+- `tests/test_prototype_architecture.py` verifica il passaggio completo fino
+  alla conferma e alla compilazione.
+
+## 3. Implementazione più dettagliata
+
+Il percorso della raccomandazione è il seguente:
+
+```text
+richiesta e maschera hardware
+  -> ricerca dei circuiti più simili
+  -> registro immutabile dei primi k risultati
+  -> risposta strutturata del modello
+  -> controllo dello schema e dei collegamenti
+       -> errore correggibile: nuovo tentativo con lo stesso registro
+       -> risposta valida: spiegazione deterministica
+  -> conferma dell'utente
+  -> compilazione
+```
+
+### 3.1 Registro delle evidenze
+
+Il registro viene costruito una sola volta per ogni raccomandazione. Conserva
+record storici completi, configurazioni migliori, affermazioni sorgente,
+evidenze e limiti scientifici. Ogni elemento mantiene l'identificativo della
+propria fonte. In questo modo il validatore può controllare che un'evidenza
+appartenga davvero all'affermazione indicata nello stesso record.
+
+Il registro non cambia durante i nuovi tentativi ed entra anche nel risultato
+della raccomandazione. Un record storico incompleto non viene trasformato in
+un'evidenza. Se invece un record nel formato strutturato è incoerente, il flusso
+si ferma prima della chiamata al modello.
+
+### 3.2 Affermazioni e riferimenti
+
+Le affermazioni possono sostenere la scelta storica del dispositivo, la scelta
+storica della configurazione, la compatibilità corrente, un limite scientifico
+oppure l'assenza di evidenze storiche. Ogni riferimento storico indica il
+record, la fonte, l'evidenza e l'affermazione sorgente.
+
+Il validatore controlla che dispositivo e configurazione coincidano con la
+raccomandazione. Per ogni affermazione sorgente, devono essere citate tutte e
+sole le evidenze collegate nel Dataset. Controlla anche che ogni riferimento
+esista, sia usato una sola volta e sostenga il tipo di affermazione corretto. La
+compatibilità corrente non usa riferimenti storici: viene verificata
+direttamente con catalogo e maschera.
+
+Quando il registro contiene record completi, devono essere sostenute sia la
+scelta del dispositivo sia quella della configurazione. Quando il registro è
+vuoto, sono ammesse soltanto la compatibilità corrente e la dichiarazione di
+assenza delle evidenze storiche.
+
+### 3.3 Spiegazione deterministica
+
+La spiegazione viene costruita solo dopo la validazione. Il costruttore usa le
+affermazioni, i riferimenti e il registro già controllati. Non usa prosa
+generata dal modello.
+
+Le avvertenze ricordano che i dati citati provengono da circuiti storici simili.
+Non vengono presentati come misure ottenute sul circuito corrente. Eventuali
+limiti scientifici presenti nelle fonti vengono riportati insieme alla
+spiegazione.
+
+### 3.4 Integrazione con i nuovi tentativi
+
+Gli errori correggibili nelle affermazioni o nei riferimenti attivano la stessa
+politica già usata per le altre risposte non valide. Il tentativo successivo
+riceve soltanto codice, percorso e messaggio dell'errore. Conserva richiesta,
+vincoli, maschera, risultati recuperati e registro originali.
+
+Il limite predefinito resta di tre tentativi totali ed è configurabile. Errori
+di configurazione, catalogo o Dataset, indisponibilità del modello ed eccezioni
+inattese non vengono trasformati in errori correggibili del modello. La
+compilazione accetta soltanto il risultato validato emesso dalla stessa istanza
+del servizio.

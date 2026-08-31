@@ -1,4 +1,4 @@
-"""Build a global multi-device Dataset from read-only per-device views."""
+"""Unisce le viste dei dispositivi in un Dataset generale senza modificarle."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from qiskit_dataset.catalog import DEFAULT_CATALOG_PATH, load_catalog
 
 
 def parse_args() -> argparse.Namespace:
+    """Legge e controlla le opzioni dell'aggregazione generale."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="pilot")
     parser.add_argument(
@@ -50,6 +51,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Controlla o costruisce la vista generale e mostra le statistiche."""
     args = parse_args()
     catalog = load_catalog(args.catalog)
     statistics = aggregate_device_datasets(

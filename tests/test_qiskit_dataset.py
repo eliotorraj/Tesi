@@ -15,7 +15,11 @@ from prototype.quantum_assistant.adapters.parsing import (
 from prototype.quantum_assistant.adapters.validation import (
     StructuredRecommendationValidator,
 )
-from prototype.quantum_assistant.models import HardwareProfile, UiSubmission
+from prototype.quantum_assistant.models import (
+    EvidenceRegistry,
+    HardwareProfile,
+    UiSubmission,
+)
 from qiskit_dataset.catalog import load_catalog
 from qiskit_dataset.core import (
     dataset_circuits_root,
@@ -203,6 +207,9 @@ class QiskitCatalogTests(unittest.TestCase):
             (hardware,),
         )
         raw = {
+            "schema_version": "2.0.0",
+            "request_id": request.request_id,
+            "catalog_snapshot_id": request.catalog_snapshot_id,
             "selected_device": "ibm_falcon_127",
             "figure_of_merit": "expected_fidelity",
             "compiler": "qiskit",
@@ -212,14 +219,27 @@ class QiskitCatalogTests(unittest.TestCase):
                 "layout_method": "dense",
                 "routing_method": "basic",
             },
-            "explanation": "test",
-            "evidence": ["test"],
-            "warnings": [],
+            "evidence_refs": [],
+            "claims": [
+                {
+                    "claim_id": "live-compatibility",
+                    "claim_type": "live_compatibility",
+                    "parameters": {"device_id": "ibm_falcon_127"},
+                    "evidence_ref_ids": [],
+                },
+                {
+                    "claim_id": "historical-evidence-unavailable",
+                    "claim_type": "historical_evidence_unavailable",
+                    "parameters": {},
+                    "evidence_ref_ids": [],
+                },
+            ],
         }
         result = StructuredRecommendationValidator().validate(
             raw,
             request,
             compatibility,
+            evidence_registry=EvidenceRegistry(),
         )
         self.assertFalse(result.is_valid)
         self.assertTrue(

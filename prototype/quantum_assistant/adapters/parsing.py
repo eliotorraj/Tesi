@@ -1,4 +1,4 @@
-"""Backward-compatible imports for request parsing and hardware masking."""
+"""Mantiene gli import storici per richieste e maschera hardware."""
 
 from .hardware import (
     DEVICE_DEFINITIONS,

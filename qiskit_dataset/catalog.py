@@ -1,4 +1,4 @@
-"""Versioned allowlist for the Qiskit Dataset experiment."""
+"""Definisce e valida le configurazioni ammesse per il Dataset Qiskit."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ DEFAULT_CATALOG_PATH = PROJECT_ROOT / "configs" / "qiskit_dataset_configurations
 
 @dataclass(frozen=True)
 class QiskitConfiguration:
-    """One complete allowlisted Qiskit configuration."""
+    """Rappresenta una configurazione Qiskit ammessa dal catalogo."""
 
     config_id: str
     study: str
@@ -24,9 +24,11 @@ class QiskitConfiguration:
 
     @property
     def key(self) -> tuple[int, str | None, str | None]:
+        """Restituisce i tre valori che identificano la configurazione."""
         return (self.optimization_level, self.layout_method, self.routing_method)
 
     def to_dict(self) -> dict[str, Any]:
+        """Converte la configurazione in un oggetto pronto per il JSON."""
         return {
             "config_id": self.config_id,
             "study": self.study,
@@ -36,7 +38,7 @@ class QiskitConfiguration:
         }
 
     def transpile_kwargs(self) -> dict[str, Any]:
-        """Return user-controlled kwargs; None means Qiskit's default."""
+        """Prepara le opzioni da passare a Qiskit, omettendo quelle di default."""
         kwargs: dict[str, Any] = {"optimization_level": self.optimization_level}
         if self.layout_method is not None:
             kwargs["layout_method"] = self.layout_method
@@ -47,6 +49,8 @@ class QiskitConfiguration:
 
 @dataclass(frozen=True)
 class ConfigurationCatalog:
+    """Raccoglie dispositivi, configurazioni e parametri dell'esperimento."""
+
     schema_version: str
     catalog_id: str
     default_device_id: str
@@ -58,10 +62,12 @@ class ConfigurationCatalog:
 
     @property
     def allowed_keys(self) -> frozenset[tuple[int, str | None, str | None]]:
+        """Restituisce le combinazioni di opzioni ammesse dal catalogo."""
         return frozenset(configuration.key for configuration in self.configurations)
 
     @property
     def by_id(self) -> dict[str, QiskitConfiguration]:
+        """Indicizza le configurazioni tramite il loro identificatore."""
         return {
             configuration.config_id: configuration
             for configuration in self.configurations
@@ -69,10 +75,11 @@ class ConfigurationCatalog:
 
     @property
     def device_id(self) -> str:
-        """Backward-compatible alias for the default device."""
+        """Mantiene il vecchio nome usato per il dispositivo predefinito."""
         return self.default_device_id
 
     def require_device(self, device_id: str | None = None) -> str:
+        """Restituisce il dispositivo richiesto solo se è presente nel catalogo."""
         selected = self.default_device_id if device_id is None else str(device_id)
         if selected not in self.supported_device_ids:
             allowed = ", ".join(self.supported_device_ids)
@@ -87,6 +94,7 @@ class ConfigurationCatalog:
         layout_method: str | None,
         routing_method: str | None,
     ) -> QiskitConfiguration | None:
+        """Cerca la configurazione che corrisponde alle opzioni ricevute."""
         key = (optimization_level, layout_method, routing_method)
         return next(
             (
@@ -103,6 +111,7 @@ class ConfigurationCatalog:
         layout_method: str | None,
         routing_method: str | None,
     ) -> QiskitConfiguration:
+        """Restituisce una configurazione ammessa oppure segnala l'errore."""
         configuration = self.find(
             optimization_level,
             layout_method,
@@ -118,13 +127,14 @@ class ConfigurationCatalog:
 
 
 def _strict_int(value: Any, field: str) -> int:
+    """Accetta soltanto un intero vero, escludendo anche i valori booleani."""
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{field} deve essere un intero.")
     return value
 
 
 def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
-    """Load and fail-fast validate the experiment catalog."""
+    """Legge il catalogo e interrompe subito il flusso se non è valido."""
     with path.open(encoding="utf-8") as handle:
         raw = json.load(handle)
 
@@ -149,17 +159,16 @@ def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
         )
 
     seeds = tuple(_strict_int(value, "seed") for value in raw.get("seeds", ()))
+    default_device_id = raw.get("default_device_id", raw.get("device_id"))
     catalog = ConfigurationCatalog(
         schema_version=str(raw["schema_version"]),
         catalog_id=str(raw["catalog_id"]),
-        default_device_id=str(
-            raw.get("default_device_id", raw.get("device_id"))
-        ),
+        default_device_id=str(default_device_id),
         supported_device_ids=tuple(
             str(value)
             for value in raw.get(
                 "supported_device_ids",
-                (raw.get("default_device_id", raw.get("device_id")),),
+                (default_device_id,),
             )
         ),
         objective=dict(raw["objective"]),
@@ -172,6 +181,7 @@ def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
 
 
 def _validate_catalog(catalog: ConfigurationCatalog) -> None:
+    """Controlla che il catalogo rispetti il protocollo sperimentale."""
     if len(catalog.configurations) != 12:
         raise ValueError(
             "Il catalogo deve contenere esattamente 12 configurazioni, "

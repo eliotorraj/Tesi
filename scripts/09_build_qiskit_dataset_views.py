@@ -1,4 +1,4 @@
-"""Build configuration aggregates and train-only RAG JSONL."""
+"""Costruisce gli aggregati e gli esempi RAG destinati all'addestramento."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from qiskit_dataset.views import build_dataset_views
 
 
 def parse_args() -> argparse.Namespace:
+    """Legge le opzioni usate per costruire le viste del Dataset."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="pilot")
     parser.add_argument(
@@ -36,6 +37,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Costruisce le viste del dispositivo e ne mostra le statistiche."""
     args = parse_args()
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)

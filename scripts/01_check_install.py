@@ -1,4 +1,4 @@
-"""Verify the runtime needed by the direct-Qiskit Dataset pipeline."""
+"""Controlla l'ambiente richiesto dalla procedura Qiskit diretta."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ PACKAGES = (
 
 
 def main() -> int:
-    """Print environment information and return a process status code."""
+    """Mostra l'ambiente e restituisce il codice di esito del controllo."""
     print("=== Ambiente Python ===")
     print(f"Python:      {platform.python_version()}")
     print(f"Eseguibile:  {sys.executable}")

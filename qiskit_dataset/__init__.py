@@ -1,4 +1,4 @@
-"""Utilities for building the direct-Qiskit thesis Dataset."""
+"""Espone gli elementi principali per costruire il Dataset Qiskit."""
 
 from .catalog import (
     DEFAULT_CATALOG_PATH,

@@ -1,4 +1,4 @@
-"""List the quantum-device targets available through MQT Bench."""
+"""Elenca i dispositivi quantistici disponibili tramite MQT Bench."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ from mqt.bench.targets import get_available_device_names, get_device
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse command-line arguments."""
+    """Legge gli argomenti passati dalla riga di comando."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--details", metavar="DEVICE", help="Mostra gate e connettività di un singolo device.")
     return parser.parse_args()
 
 
 def main() -> int:
-    """Print all targets, or details for one selected target."""
+    """Mostra tutti i dispositivi oppure i dettagli di quello richiesto."""
     args = parse_args()
     available = list(get_available_device_names())
 

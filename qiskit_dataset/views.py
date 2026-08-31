@@ -1,4 +1,4 @@
-"""Aggregate seed replicates and export train-only RAG examples."""
+"""Riunisce i seed e crea gli esempi RAG riservati all'addestramento."""
 
 from __future__ import annotations
 
@@ -15,7 +15,6 @@ from .core import (
     SCHEMA_VERSION,
     atomic_json_write,
     atomic_jsonl_write,
-    canonical_json,
     dataset_scope_root,
     load_manifest,
     read_jsonl,
@@ -60,6 +59,7 @@ SCIENTIFIC_CAVEATS = (
 
 
 def _number_statistics(values: Iterable[float]) -> dict[str, float | int | None]:
+    """Calcola le statistiche descrittive di una serie di numeri."""
     finite = [float(value) for value in values if math.isfinite(float(value))]
     if not finite:
         return {
@@ -85,6 +85,7 @@ def _validate_run(
     catalog: ConfigurationCatalog,
     expected_device_id: str,
 ) -> None:
+    """Controlla che un tentativo rispetti catalogo e dispositivo."""
     status = run.get("status")
     if status not in {"success", "failure", "timeout"}:
         raise ValueError(f"Stato tentativo non valido: {status!r}.")
@@ -138,6 +139,7 @@ def _validate_run(
 
 
 def _failure_breakdown(runs: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Raggruppa gli errori per fase, categoria e tipo di eccezione."""
     counts: Counter[tuple[str, str, str]] = Counter()
     for run in runs:
         if run.get("status") == "success":
@@ -169,6 +171,7 @@ def _summary_record(
     target_record: Mapping[str, Any],
     scope: str,
 ) -> dict[str, Any]:
+    """Riunisce i seed di una coppia circuito-configurazione."""
     runs = sorted(runs, key=lambda run: int(run["seed_transpiler"]))
     observed_seeds = [int(run["seed_transpiler"]) for run in runs]
     if len(observed_seeds) != len(set(observed_seeds)):
@@ -268,6 +271,7 @@ def aggregate_runs(
     catalog: ConfigurationCatalog,
     target_record: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
+    """Costruisce gli aggregati di tutte le coppie circuito-configurazione."""
     identifiers = [str(run.get("run_id")) for run in runs]
     if len(identifiers) != len(set(identifiers)):
         raise ValueError("run_id duplicati nel JSONL dei tentativi.")
@@ -383,6 +387,7 @@ def _retrieval_text(
     device_ids: Sequence[str],
     objective_name: str,
 ) -> str:
+    """Crea il testo stabile usato per cercare circuiti simili."""
     features = circuit["features"]["values"]
     feature_text = "; ".join(
         f"{name}={features[name]:.12g}" for name in sorted(features)
@@ -397,6 +402,7 @@ def _retrieval_text(
 
 
 def _device_order_map(device_order: Sequence[str] | None) -> dict[str, int]:
+    """Associa a ogni dispositivo la sua posizione nel catalogo."""
     return {
         str(device_id): index
         for index, device_id in enumerate(device_order or ())
@@ -407,6 +413,7 @@ def _global_summary_key(
     summary: Mapping[str, Any],
     order: Mapping[str, int],
 ) -> tuple[Any, ...]:
+    """Costruisce la chiave che ordina i risultati di tutti i dispositivi."""
     device_id = str(summary["device"]["device_id"])
     rank = summary.get("rank")
     return (
@@ -423,6 +430,7 @@ def _evidence_record(
     selected_best: Mapping[str, Any],
     rank_within_selected_device: int | None,
 ) -> dict[str, Any]:
+    """Trasforma un aggregato nella prova strutturata usata dai claim."""
     summary_id = str(summary["summary_id"])
     score = float(summary["ranking_score"])
     selected_score = float(selected_best["ranking_score"])
@@ -492,7 +500,7 @@ def build_rag_label(
     top_k: int = 3,
     device_order: Sequence[str] | None = None,
 ) -> dict[str, Any]:
-    """Build one evidence-backed label across every evaluated device."""
+    """Crea un'etichetta motivata dai risultati di tutti i dispositivi."""
     if not 1 <= top_k <= MAX_RAG_CONFIGURATIONS:
         raise ValueError(
             f"top_k deve essere compreso tra 1 e {MAX_RAG_CONFIGURATIONS}."
@@ -777,6 +785,7 @@ def build_rag_examples(
     top_k: int = 3,
     device_order: Sequence[str] | None = None,
 ) -> list[dict[str, Any]]:
+    """Crea gli esempi RAG dai soli circuiti di addestramento validi."""
     if not 1 <= top_k <= MAX_RAG_CONFIGURATIONS:
         raise ValueError(
             f"top_k deve essere compreso tra 1 e {MAX_RAG_CONFIGURATIONS}."
@@ -929,6 +938,7 @@ def _load_target_record(
     device_id: str,
     manifest: Mapping[str, Any],
 ) -> dict[str, Any]:
+    """Recupera il dispositivo dai tentativi, dallo stato o dal manifest."""
     if runs:
         device = runs[0].get("device")
         if isinstance(device, Mapping):
@@ -960,6 +970,7 @@ def build_dataset_views(
     top_k: int = 3,
     device_id: str | None = None,
 ) -> dict[str, Any]:
+    """Genera aggregati, esempi RAG, statistiche e report dello scope."""
     objective_name = str(catalog.objective["name"])
     selected_device_id = catalog.require_device(device_id)
     output_root = dataset_scope_root(
