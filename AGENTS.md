@@ -37,3 +37,4 @@ When writing the documentation of an implemented task you have done, follow this
 - Avoid English loanwords unless necessary
 - No long or complex sentences. The goal is to explain what we actually did—the details don't matter!
 - The goal is to understand what this part of the project excatly does, in general terms
+- If necessary for clarity, create a separated readme to describe the actual task, and place it in the most specific folder of the task implemented

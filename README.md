@@ -44,6 +44,9 @@ La guida specifica del Dataset è in
 La guida del prototipo è in
 [`prototype/README.md`](prototype/README.md).
 
+Il protocollo sperimentale ufficiale, approvato e congelato, è in
+[`docs/protocollo_sperimentale_definitivo.md`](docs/protocollo_sperimentale_definitivo.md).
+
 ## 2. Struttura del progetto e compito dei file
 
 ```text
