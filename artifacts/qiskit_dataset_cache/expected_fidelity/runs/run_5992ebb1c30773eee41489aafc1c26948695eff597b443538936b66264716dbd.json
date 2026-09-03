@@ -1,0 +1,178 @@
+{
+  "circuit": {
+    "benchmark_family": "portfoliovqe",
+    "canonical_circuit_id": "portfoliovqe_indep_qiskit_6",
+    "circuit_id": "portfoliovqe_indep_qiskit_6",
+    "declared_num_qubits": 6,
+    "depth": 26,
+    "device_compatibility": {
+      "compatible": true,
+      "device_num_qubits": 27,
+      "reason": null
+    },
+    "duplicate_group_size": 1,
+    "features": {
+      "dimension": 49,
+      "extractor": "mqt.predictor.ml.helper.create_feature_vector",
+      "values": {
+        "critical_depth": 0.4666666666666667,
+        "depth": 26.0,
+        "entanglement_ratio": 0.6521739130434783,
+        "gate_count_c3sqrtx": 0.0,
+        "gate_count_c3x": 0.0,
+        "gate_count_c4x": 0.0,
+        "gate_count_ccx": 0.0,
+        "gate_count_ch": 0.0,
+        "gate_count_cp": 0.0,
+        "gate_count_crx": 0.0,
+        "gate_count_cry": 0.0,
+        "gate_count_crz": 0.0,
+        "gate_count_cswap": 0.0,
+        "gate_count_csx": 0.0,
+        "gate_count_cu": 0.0,
+        "gate_count_cu1": 0.0,
+        "gate_count_cu3": 0.0,
+        "gate_count_cx": 0.0,
+        "gate_count_cy": 0.0,
+        "gate_count_cz": 45.0,
+        "gate_count_h": 0.0,
+        "gate_count_id": 0.0,
+        "gate_count_p": 0.0,
+        "gate_count_rc3x": 0.0,
+        "gate_count_rccx": 0.0,
+        "gate_count_rx": 0.0,
+        "gate_count_rxx": 0.0,
+        "gate_count_ry": 24.0,
+        "gate_count_rz": 0.0,
+        "gate_count_rzz": 0.0,
+        "gate_count_s": 0.0,
+        "gate_count_sdg": 0.0,
+        "gate_count_swap": 0.0,
+        "gate_count_sx": 0.0,
+        "gate_count_sxdg": 0.0,
+        "gate_count_t": 0.0,
+        "gate_count_tdg": 0.0,
+        "gate_count_u": 0.0,
+        "gate_count_u0": 0.0,
+        "gate_count_u1": 0.0,
+        "gate_count_u2": 0.0,
+        "gate_count_u3": 0.0,
+        "gate_count_x": 0.0,
+        "gate_count_y": 0.0,
+        "gate_count_z": 0.0,
+        "liveness": 0.7692307692307693,
+        "num_qubits": 6.0,
+        "parallelism": 0.33076923076923076,
+        "program_communication": 1.0
+      }
+    },
+    "file_name": "portfoliovqe_indep_qiskit_6.qasm",
+    "generator": "qiskit",
+    "is_duplicate_alias": false,
+    "is_exact_duplicate": false,
+    "leakage_group": "portfolio",
+    "num_clbits": 6,
+    "num_qubits": 6,
+    "operation_counts": {
+      "barrier": 1,
+      "cz": 45,
+      "measure": 6,
+      "ry": 24
+    },
+    "size": 75,
+    "source_ref": "circuits/train/portfoliovqe_indep_qiskit_6.qasm",
+    "source_sha256": "7dafebd46e73b9b279f1ef96da32f7d563de3721b856b4570375ab81951e06fc",
+    "split": "train"
+  },
+  "compiled_circuit": {
+    "artifact_ref": "artifacts/qiskit_dataset_cache/expected_fidelity/compiled_qasm/run_5992ebb1c30773eee41489aafc1c26948695eff597b443538936b66264716dbd.qasm",
+    "depth": 222,
+    "format": "OpenQASM 2",
+    "num_qubits": 27,
+    "operation_counts": {
+      "barrier": 1,
+      "cx": 145,
+      "measure": 6,
+      "rz": 130,
+      "sx": 96
+    },
+    "qasm_sha256": "5b8e56800e15cc20d40a8bd9bbe2eba57cccd8351ef004af54854d77445ccad7",
+    "size": 377,
+    "two_qubit_gate_count": 145
+  },
+  "configuration": {
+    "catalog_id": "qiskit_expected_fidelity_pilot_v1",
+    "config_id": "o3_default_default",
+    "layout_method": null,
+    "optimization_level": 3,
+    "routing_method": null,
+    "study": "baseline"
+  },
+  "dataset_scope": "full",
+  "device": {
+    "coupling_edge_count": 56,
+    "description": "ibm_falcon_27",
+    "device_id": "ibm_falcon_27",
+    "num_qubits": 27,
+    "operation_names": [
+      "cx",
+      "delay",
+      "id",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "f30536987677ef5017fe3a89b8b4ee0a3e7252a1a226cc3db95fd9b2e822d991",
+    "target_type": "qiskit.transpiler.target.Target"
+  },
+  "failure": null,
+  "objective": {
+    "direction": "maximize",
+    "implementation": "mqt.predictor.reward.expected_fidelity",
+    "interpretation": "Stima deterministica basata sul Qiskit Target sintetico di MQT Bench; non è una misura su hardware reale.",
+    "name": "expected_fidelity"
+  },
+  "phase": "completed",
+  "provenance": {
+    "compiler": "qiskit.transpile",
+    "fixed_transpile_options": {
+      "approximation_degree": 1.0,
+      "num_processes": 1
+    },
+    "generator": "qiskit_dataset.generation",
+    "versions": {
+      "mqt.bench": "2.0.0",
+      "mqt.predictor": "2.3.0",
+      "qiskit": "2.1.1"
+    }
+  },
+  "run_id": "run_5992ebb1c30773eee41489aafc1c26948695eff597b443538936b66264716dbd",
+  "schema_version": "1.0.0",
+  "score": 0.7407608096,
+  "seed_transpiler": 0,
+  "split": "train",
+  "status": "success",
+  "target_validation": {
+    "basis_valid": true,
+    "connectivity_valid": true,
+    "is_executable_on_target": true,
+    "unsupported_operations": [],
+    "validation_errors": []
+  },
+  "timings_seconds": {
+    "scoring": 0.0050916240002152335,
+    "serialization": 0.009495224000147573,
+    "source_loading": 0.0008627390002402535,
+    "target_loading": 2.401000074314652e-06,
+    "target_validation": 0.0008597699998063035,
+    "total": 0.1420561249997263,
+    "transpilation": 0.12567277599964655
+  }
+}

@@ -112,7 +112,7 @@
     "routing_method": null,
     "study": "baseline"
   },
-  "dataset_scope": "pilot",
+  "dataset_scope": "full",
   "device": {
     "coupling_edge_count": 284,
     "description": "ibm_falcon_127",
@@ -171,12 +171,12 @@
     "validation_errors": []
   },
   "timings_seconds": {
-    "scoring": 0.00011070200025642407,
-    "serialization": 0.00045734099967376096,
-    "source_loading": 0.0005409030000009807,
-    "target_loading": 0.021071009000024787,
-    "target_validation": 0.00085262100037653,
-    "total": 0.046786385999894264,
-    "transpilation": 0.023658447000343585
+    "scoring": 0.00014249299999846698,
+    "serialization": 0.0006409650000023248,
+    "source_loading": 0.00042885000004844187,
+    "target_loading": 1.5800000028320937e-06,
+    "target_validation": 0.0011918059999516117,
+    "total": 0.024517913000067892,
+    "transpilation": 0.02206249900007151
   }
 }

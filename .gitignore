@@ -15,3 +15,4 @@ artifacts/logs/rl/
 datasets/device_selector_*.json
 datasets/llm_mqt_full_pipeline_*.json
 .backups/
+artifacts/qiskit_dataset_cache/expected_fidelity/*
