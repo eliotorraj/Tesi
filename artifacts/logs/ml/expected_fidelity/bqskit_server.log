@@ -62,3 +62,67 @@ Traceback (most recent call last):
     n = write(self._handle, buf)
         ^^^^^^^^^^^^^^^^^^^^^^^^
 OSError: [Errno 9] Bad file descriptor
+
+--- start 2026-09-02T11:39:33.642814+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:39:35.749007+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:40:24.791330+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:40:26.908452+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:41:00.810988+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:41:02.953270+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:48:14.695628+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:48:16.848825+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:48:37.202543+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:48:39.325161+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:49:04.011338+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T11:49:06.189920+00:00 ---
+  File "<string>", line 2
+    from bqskit.runtime.base import ServerBase
+IndentationError: unexpected indent
+
+--- start 2026-09-02T12:22:22.667320+00:00 ---
+
+--- start 2026-09-02T13:34:23.841071+00:00 ---

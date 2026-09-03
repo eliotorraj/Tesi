@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -49,6 +50,30 @@ class DeviceSelectorTrainingTests(unittest.TestCase):
         with path.open("w", encoding="utf-8") as handle:
             qasm_dump(circuit, handle)
 
+    @staticmethod
+    def _strict_record(**overrides: object) -> dict[str, object]:
+        record: dict[str, object] = {
+            "status": "success",
+            "mode": "rl",
+            "validation_version": TRAIN_SELECTOR.VALIDATION_VERSION,
+            "terminated": True,
+            "truncated": False,
+            "termination_reason": "terminate",
+            "native": True,
+            "laid_out": True,
+            "routed": True,
+            "passes": ["Optimize1qGatesDecomposition", "terminate"],
+            "qasm_sha256": "qasm-hash",
+            "target_validation": {"is_executable_on_target": True},
+            "mqt_predictor_version": TRAIN_SELECTOR.package_version("mqt.predictor"),
+            "rl_max_steps": 64,
+            "seed": 7,
+            "model_sha256": "model-hash",
+            "target_sha256": "target-hash",
+        }
+        record.update(overrides)
+        return record
+
     def test_choose_best_device_ignores_failed_candidates(self) -> None:
         winner = TRAIN_SELECTOR.choose_best_device(
             ["device_a", "device_b", "device_c"],
@@ -63,26 +88,243 @@ class DeviceSelectorTrainingTests(unittest.TestCase):
         )
         self.assertIsNone(winner)
 
-    def test_fallback_manifest_record_is_not_an_rl_success(self) -> None:
+
+    def test_scoring_device_reuses_one_target_instance(self) -> None:
+        cached_device = SimpleNamespace(description="device_a")
+        TRAIN_SELECTOR.scoring_device.cache_clear()
+        try:
+            with patch.object(
+                TRAIN_SELECTOR,
+                "get_device",
+                return_value=cached_device,
+            ) as get_device:
+                first = TRAIN_SELECTOR.scoring_device("device_a")
+                second = TRAIN_SELECTOR.scoring_device("device_a")
+            self.assertIs(first, cached_device)
+            self.assertIs(second, cached_device)
+            get_device.assert_called_once_with("device_a")
+        finally:
+            TRAIN_SELECTOR.scoring_device.cache_clear()
+
+    def test_single_worker_scoring_bypasses_joblib(self) -> None:
+        predictor = SimpleNamespace(
+            devices=[SimpleNamespace(description="device_a")]
+        )
+        generated = (([0.0], "device_a"), "example", [0.5])
+        with (
+            patch.object(
+                TRAIN_SELECTOR,
+                "generate_training_sample",
+                return_value=generated,
+            ) as generate,
+            patch.object(
+                TRAIN_SELECTOR,
+                "Parallel",
+                side_effect=AssertionError("joblib non deve essere usato"),
+            ),
+        ):
+            TRAIN_SELECTOR.generate_training_arrays(
+                predictor,
+                [self.source],
+                self.compiled_dir,
+                self.output_dir,
+                "expected_fidelity",
+                1,
+                {"example|device_a"},
+            )
+        generate.assert_called_once()
+
+    def test_only_complete_rl_manifest_record_is_strict_success(self) -> None:
         self.assertTrue(
             TRAIN_SELECTOR.is_strict_rl_success(
-                {"status": "success", "mode": "rl"},
+                self._strict_record(),
             )
         )
-        self.assertFalse(
-            TRAIN_SELECTOR.is_strict_rl_success(
-                {
-                    "status": "success_fallback",
-                    "mode": "fallback",
-                    "fallback_reason": "RL timeout",
-                },
-            )
+
+    def test_fallback_and_timeout_recovery_are_not_strict_rl_successes(self) -> None:
+        records = {
+            "fallback": self._strict_record(
+                status="success_fallback",
+                mode="fallback",
+                fallback_reason="RL timeout",
+            ),
+            "timeout_recovery": self._strict_record(
+                status="success_recovered_after_timeout",
+                phase="rl",
+            ),
+        }
+        for case, record in records.items():
+            with self.subTest(case=case):
+                self.assertFalse(TRAIN_SELECTOR.is_strict_rl_success(record))
+
+    def test_strict_rl_success_rejects_invalid_termination_trace(self) -> None:
+        invalid_records = {
+            "not_terminated": self._strict_record(terminated=False),
+            "missing_terminate": self._strict_record(
+                passes=["Optimize1qGatesDecomposition"],
+            ),
+            "truncated": self._strict_record(truncated=True),
+            "not_target_valid": self._strict_record(
+                target_validation={"is_executable_on_target": False},
+            ),
+        }
+        for case, record in invalid_records.items():
+            with self.subTest(case=case):
+                self.assertFalse(TRAIN_SELECTOR.is_strict_rl_success(record))
+
+    def test_strict_rl_success_requires_matching_run_provenance(self) -> None:
+        record = self._strict_record()
+        expected = {
+            "rl_max_steps": 64,
+            "seed": 7,
+            "model_sha256": "model-hash",
+            "target_sha256": "target-hash",
+        }
+        self.assertTrue(TRAIN_SELECTOR.is_strict_rl_success(record, **expected))
+
+        mismatches = {
+            "rl_max_steps": 65,
+            "seed": 8,
+            "model_sha256": "different-model-hash",
+            "target_sha256": "different-target-hash",
+        }
+        for field, value in mismatches.items():
+            with self.subTest(field=field, condition="mismatch"):
+                actual = dict(expected)
+                actual[field] = value
+                self.assertFalse(
+                    TRAIN_SELECTOR.is_strict_rl_success(record, **actual),
+                )
+
+            with self.subTest(field=field, condition="missing"):
+                incomplete_record = dict(record)
+                incomplete_record.pop(field)
+                self.assertFalse(
+                    TRAIN_SELECTOR.is_strict_rl_success(
+                        incomplete_record,
+                        **expected,
+                    ),
+                )
+
+    def test_strict_success_keys_require_matching_qasm_and_provenance_hashes(self) -> None:
+        job = TRAIN_SELECTOR.CompilationJob(
+            source=self.source,
+            output=self.compiled_dir / "example_expected_fidelity-device_a.qasm",
+            circuit_name="example",
+            device_name="device_a",
+            num_qubits=2,
         )
-        self.assertTrue(
-            TRAIN_SELECTOR.is_strict_rl_success(
-                {"status": "success_recovered_after_timeout", "phase": "rl"},
-            )
+        self._write_qasm(job.output, self.circuit)
+        manifest = self.root / "manifest.jsonl"
+        record = self._strict_record(
+            key=job.key,
+            qasm_sha256=TRAIN_SELECTOR.file_sha256(job.output),
         )
+        manifest.write_text(json.dumps(record) + "\n", encoding="utf-8")
+        run_configuration = {
+            "rl_max_steps": 64,
+            "seed": 7,
+            "model_sha256_by_device": {"device_a": "model-hash"},
+            "target_sha256_by_device": {"device_a": "target-hash"},
+        }
+
+        self.assertEqual(
+            TRAIN_SELECTOR.strict_rl_success_keys(
+                [job],
+                manifest,
+                **run_configuration,
+            ),
+            {job.key},
+        )
+
+        changed_circuit = self.circuit.copy()
+        changed_circuit.x(0)
+        self._write_qasm(job.output, changed_circuit)
+        self.assertEqual(
+            TRAIN_SELECTOR.strict_rl_success_keys(
+                [job],
+                manifest,
+                **run_configuration,
+            ),
+            set(),
+        )
+
+    def test_infrastructure_failures_do_not_consume_retry_budget(self) -> None:
+        manifest = self.root / "manifest.jsonl"
+        records = [
+            {"key": "first|device", "attempt": 1, "status": "failed"},
+            {
+                "key": "first|device",
+                "attempt": 9,
+                "status": "rl_runtime_unavailable",
+            },
+            {
+                "key": "second|device",
+                "attempt": 4,
+                "status": "rl_runtime_unavailable",
+            },
+            {"key": "third|device", "attempt": 7, "status": "rl_model_load_failed"},
+            {"key": "fourth|device", "attempt": 8, "status": "rl_model_startup_timeout"},
+        ]
+        manifest.write_text(
+            "".join(json.dumps(record) + "\n" for record in records),
+            encoding="utf-8",
+        )
+
+        attempts, statuses = TRAIN_SELECTOR.load_manifest(manifest)
+
+        self.assertEqual(attempts, {"first|device": 1})
+        self.assertEqual(statuses["first|device"], "rl_runtime_unavailable")
+        self.assertEqual(statuses["second|device"], "rl_runtime_unavailable")
+
+    def test_coverage_report_accepts_only_fully_covered_circuits(self) -> None:
+        complete_source = self.source_dir / "complete.qasm"
+        incomplete_source = self.source_dir / "incomplete.qasm"
+        jobs = [
+            TRAIN_SELECTOR.CompilationJob(
+                source=complete_source,
+                output=self.compiled_dir / "complete-device_a.qasm",
+                circuit_name="complete",
+                device_name="device_a",
+                num_qubits=2,
+            ),
+            TRAIN_SELECTOR.CompilationJob(
+                source=incomplete_source,
+                output=self.compiled_dir / "incomplete-device_a.qasm",
+                circuit_name="incomplete",
+                device_name="device_a",
+                num_qubits=2,
+            ),
+            TRAIN_SELECTOR.CompilationJob(
+                source=incomplete_source,
+                output=self.compiled_dir / "incomplete-device_b.qasm",
+                circuit_name="incomplete",
+                device_name="device_b",
+                num_qubits=2,
+            ),
+        ]
+        source_paths = {
+            "complete": complete_source,
+            "incomplete": incomplete_source,
+        }
+        successes = {"complete|device_a", "incomplete|device_a"}
+
+        complete, missing = TRAIN_SELECTOR.coverage_report(
+            jobs,
+            source_paths,
+            successes,
+        )
+
+        self.assertEqual(complete, [complete_source])
+        self.assertEqual([job.key for job in missing], ["incomplete|device_b"])
+
+        complete, missing = TRAIN_SELECTOR.coverage_report(
+            jobs,
+            source_paths,
+            {job.key for job in jobs},
+        )
+        self.assertEqual(complete, [complete_source, incomplete_source])
+        self.assertEqual(missing, [])
 
     def test_latest_manifest_record_ignores_interrupted_running_record(self) -> None:
         manifest = self.root / "manifest.jsonl"

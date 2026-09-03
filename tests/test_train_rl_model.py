@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-import mqt.predictor.rl.actions as predictor_actions
+from mqt.predictor.rl import actions as predictor_actions
+from mqt.predictor.rl.actions import bqskit_actions as predictor_bqskit_actions
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -21,11 +23,11 @@ SPEC.loader.exec_module(TRAIN_RL)
 
 class RLTrainingRuntimeTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.original_module_compile = predictor_actions.bqskit_compile
+        self.original_module_compile = predictor_bqskit_actions.bqskit_compile
         self.original_script_compile = TRAIN_RL._ORIGINAL_BQSKIT_COMPILE
 
     def tearDown(self) -> None:
-        predictor_actions.bqskit_compile = self.original_module_compile
+        predictor_bqskit_actions.bqskit_compile = self.original_module_compile
         TRAIN_RL._ORIGINAL_BQSKIT_COMPILE = self.original_script_compile
 
     def test_runtime_override_selects_max_synthesis_size_from_gate_arity(self) -> None:
@@ -36,13 +38,13 @@ class RLTrainingRuntimeTests(unittest.TestCase):
             return "compiled"
 
         TRAIN_RL._ORIGINAL_BQSKIT_COMPILE = fake_compile
-        TRAIN_RL.configure_bqskit_runtime()
+        TRAIN_RL.configure_bqskit_runtime(seed=7)
 
         for gate_arities, expected_limit in (((1, 2), 2), ((1, 2, 3), 3)):
             circuit = SimpleNamespace(
                 gate_set_no_blocks=[SimpleNamespace(num_qudits=arity) for arity in gate_arities]
             )
-            result = predictor_actions.bqskit_compile(
+            result = predictor_bqskit_actions.bqskit_compile(
                 circuit,
                 optimization_level=1,
                 synthesis_epsilon=0.1,
@@ -59,7 +61,7 @@ class RLTrainingRuntimeTests(unittest.TestCase):
                     "optimization_level": 1,
                     "synthesis_epsilon": 0.1,
                     "max_synthesis_size": expected_limit,
-                    "seed": 10,
+                    "seed": 7,
                     "num_workers": 1,
                 },
             )
@@ -79,6 +81,11 @@ class RLTrainingRuntimeTests(unittest.TestCase):
             for action in actions
         ]
         self.assertEqual(after, before)
+
+    def test_bqskit_action_timeout_interrupts_a_stalled_action(self) -> None:
+        with self.assertRaises(TRAIN_RL.BQSKitActionTimeoutError):
+            with TRAIN_RL.bqskit_action_timeout(0.01):
+                time.sleep(0.1)
 
 
 if __name__ == "__main__":

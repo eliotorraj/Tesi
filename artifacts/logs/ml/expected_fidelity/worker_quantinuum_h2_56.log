@@ -37,3 +37,13 @@ job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=VF2Layout
 job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=Opt2qBlocks
 job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=BasisTranslator
 job=ae_indep_qiskit_2|quantinuum_h2_56 azione_RL=terminate
+
+--- robust worker start 2026-09-02T13:34:28.706698+00:00 pid=38751 device=quantinuum_h2_56 ---
+mqt-predictor - INFO - Init env: expected_fidelity
+job=ae_indep_tket_2|quantinuum_h2_56 azione_RL=BQSKitSynthesis
+job=ae_indep_tket_2|quantinuum_h2_56 azione_RL=DenseLayout
+
+--- robust worker start 2026-09-02T13:39:40.831102+00:00 pid=40007 device=quantinuum_h2_56 ---
+mqt-predictor - INFO - Init env: expected_fidelity
+job=ae_indep_tket_2|quantinuum_h2_56 azione_RL=BQSKitSynthesis
+job=ae_indep_tket_2|quantinuum_h2_56 azione_RL=DenseLayout
