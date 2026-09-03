@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
         help="Device MQT Bench; se omesso usa il default del catalogo.",
     )
     parser.add_argument("--workers", type=int, default=2)
-    parser.add_argument("--timeout-seconds", type=float, default=900.0)
+    parser.add_argument("--timeout-seconds", type=float, default=100.0)
     parser.add_argument(
         "--limit-runs",
         type=int,
