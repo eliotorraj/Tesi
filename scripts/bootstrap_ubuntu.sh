@@ -33,7 +33,7 @@ fi
 echo "Preparo Python 3.12 e l'ambiente virtuale $VENV_PATH..."
 uv python install 3.12
 export UV_PROJECT_ENVIRONMENT="$VENV_PATH"
-uv sync --python 3.12
+uv sync --frozen --python 3.12
 
 echo
 "$VENV_PATH/bin/python" scripts/01_check_install.py

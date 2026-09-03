@@ -70,7 +70,7 @@ La configurazione riproducibile del progetto è:
 
 - Ubuntu oppure Ubuntu su WSL2;
 - Python 3.12;
-- mqt.predictor 2.3.0;
+- mqt.predictor 2.4.0;
 - dipendenze fissate in pyproject.toml e uv.lock.
 
 Lo script principale per il Training set richiede funzioni disponibili su
@@ -80,6 +80,31 @@ bisogna usare WSL2. macOS non fa parte dell'ambiente verificato.
 Non servono credenziali per un hardware quantistico reale. Serve una connessione
 Internet durante la prima installazione delle dipendenze.
 
+Il protocollo sperimentale usa soltanto `expected_fidelity` e congela questo
+ordine dei candidati, condiviso con il branch `qiskit_dataset`:
+
+1. `ibm_falcon_27`;
+2. `ibm_heron_133`;
+3. `ibm_falcon_127`;
+4. `ibm_heron_156`;
+5. `quantinuum_h2_56`.
+
+MQT Predictor 2.4.0 usa MQT Bench 2.2.3, mentre i risultati Qiskit già
+congelati erano stati prodotti con MQT Bench 2.0.0. Un hash grezzo non è
+direttamente confrontabile, perché Qiskit 2.5 aggiunge al `Target` operazioni
+di control-flow e questo branch usa uno schema di fingerprint versionato. Il
+controllo normalizza prima queste sole differenze di rappresentazione.
+
+Dopo la normalizzazione, i dati nativi dei quattro Target IBM risultano
+realmente cambiati; `quantinuum_h2_56` coincide invece con il Target legacy.
+Vanno comunque rigenerati per tutti e cinque i device Qiskit default, Qiskit
+random e oracle nell'ambiente 2.4.0/Qiskit 2.5.0: soltanto così gli score
+`expected_fidelity` e le pipeline dei competitor restano omogenei.
+
+La [guida ufficiale al training](https://mqt.readthedocs.io/projects/predictor/en/stable/setup.html)
+descrive le due fasi originali; gli script locali aggiungono checkpoint,
+timeout, validazione e copie canoniche riproducibili.
+
 ### 3.2 Risorse hardware consigliate
 
 Questi valori sono indicazioni pratiche, non requisiti imposti da MQT:
@@ -87,12 +112,12 @@ Questi valori sono indicazioni pratiche, non requisiti imposti da MQT:
 | Risorsa | Indicazione |
 | --- | --- |
 | CPU | processore moderno con più core |
-| RAM | almeno 8 GiB usando 2 worker; 16 GiB sono consigliati |
+| RAM | con 8 GiB usare 1 worker; con almeno 16 GiB si possono provare 2 worker |
 | Disco | almeno 20 GiB per ambiente e codice; 50 GiB o più per modelli, checkpoint e training completi |
 | GPU | non obbligatoria per la pipeline corrente |
 
 Ogni worker RL può usare diversi GiB di memoria. Se la macchina ha circa 8 GiB
-di RAM, mantenere --num-workers 2.
+di RAM, mantenere `--num-workers 1`.
 
 ### 3.3 Preparare WSL2 su Windows
 
@@ -181,11 +206,21 @@ non sono stati addestrati oppure installati nell'ambiente. Se i modelli sono
 già presenti in artifacts/models:
 
 ~~~bash
-python scripts/05_sync_models.py install
+python scripts/05_sync_models.py install --component rl
+python scripts/05_sync_models.py verify --component rl
 ~~~
 
 Gli script di training aggiornano automaticamente sia la copia conservata nella
-repository sia quella usata dall'ambiente Python.
+repository sia quella usata dall'ambiente Python. Dopo avere creato anche il
+selettore ML, il gate completo per `qcompile` è:
+
+~~~bash
+python scripts/05_sync_models.py verify
+python scripts/01_check_install.py --require-models
+~~~
+
+Prima del benchmark finale aggiungere `--require-frozen-targets`: questo gate
+verifica i nuovi fingerprint del protocollo 2.4-v2, non quelli legacy.
 
 ### 3.6 Regole pratiche
 
@@ -257,7 +292,12 @@ python scripts/03_train_rl_model.py \
   --device ibm_falcon_27 \
   --metric expected_fidelity \
   --timesteps 100000 \
-  --checkpoint-every 2048
+  --checkpoint-every 2048 \
+  --max-steps 64 \
+  --bqskit-action-timeout 60 \
+  --seed 0 \
+  --run-name restart-240-seed0 \
+  --allow-overwrite
 ~~~
 
 Per riprendere da un checkpoint:
@@ -267,14 +307,17 @@ python scripts/03_train_rl_model.py \
   --device ibm_falcon_27 \
   --metric expected_fidelity \
   --timesteps 100000 \
-  --resume-from artifacts/checkpoints/rl/ibm_falcon_27/NOME_CHECKPOINT.zip \
+  --run-name restart-240-seed0 \
+  --resume-from artifacts/checkpoints/rl/ibm_falcon_27/restart-240-seed0/NOME_CHECKPOINT.zip \
   --allow-overwrite
 ~~~
 
-Nel secondo comando, --timesteps indica il numero totale desiderato, non gli
-step aggiuntivi. Il parametro --training-circuits permette di usare una
-cartella QASM personalizzata. --allow-overwrite è necessario se esiste già un
-modello finale con lo stesso nome.
+Con `--resume-from`, `--timesteps` indica il totale desiderato, non gli step
+aggiuntivi. `--training-circuits` permette di usare una cartella QASM
+personalizzata. `--allow-overwrite` autorizza soltanto la sostituzione del
+modello canonico al termine del training. Checkpoint e log sono isolati sotto
+il nome della run; una nuova esecuzione quindi non sovrascrive i checkpoint
+storici.
 
 Lo script mantiene il profilo BQSKit leggero usato negli esperimenti e sceglie
 `max_synthesis_size` dinamicamente: usa 3 soltanto quando il circuito contiene
@@ -282,21 +325,63 @@ almeno un gate a tre qubit, altrimenti conserva il limite 2. Il Training set RL
 bundled contiene infatti circuiti con gate `ccx` e `cswap`: il limite 3 evita
 che una di queste azioni interrompa PPO, mentre il limite 2 riduce il costo
 della sintesi per gli altri circuiti. Misure e barriere non sono considerate
-gate sintetizzabili. Non viene modificato alcun file dentro `.venv`, gli ID
-delle 22 azioni restano invariati e i checkpoint precedenti rimangono
-caricabili.
+gate sintetizzabili. Non viene applicata alcuna patch al codice della dipendenza
+dentro `.venv`; gli ID delle 22 azioni restano invariati e i checkpoint
+precedenti rimangono caricabili. La sola scrittura prevista nell'ambiente è la
+copia runtime del modello finale, necessaria a `qcompile`.
 
-Per continuare il modello `quantinuum_h2_56` esistente fino a 100000 step:
+Prima di decidere se riprendere i checkpoint esistenti, eseguire l'audit:
 
 ~~~bash
-python scripts/03_train_rl_model.py \
-  --device quantinuum_h2_56 \
-  --metric expected_fidelity \
-  --timesteps 100000 \
-  --checkpoint-every 10000 \
-  --resume-from artifacts/checkpoints/rl/quantinuum_h2_56/model_expected_fidelity_quantinuum_h2_56_8192_steps.zip \
-  --allow-overwrite
+python scripts/08_audit_rl_models.py --deep-load
 ~~~
+
+L'audit restituisce codice 1 quando raccomanda un riavvio. I cinque archivi
+correnti sono integri, caricabili con SB3 2.9.0 e conservano le 22 azioni e lo
+stesso spazio delle osservazioni. Non sono però modelli sufficientemente
+affidabili per l'esperimento:
+
+| Device | Step salvati | Evidenza operativa disponibile |
+| --- | ---: | --- |
+| `ibm_falcon_27` | 100720 | 40 successi grezzi su 482 compilazioni |
+| `ibm_falcon_127` | 100240 | 50 successi grezzi su 600 compilazioni |
+| `ibm_heron_133` | 100480 | 0 successi su 600 compilazioni |
+| `ibm_heron_156` | 100352 | 0 successi su 600 compilazioni |
+| `quantinuum_h2_56` | 60000 | 1 successo su 564; il canary 2.4.0 va in timeout |
+
+I checkpoint precedenti non sono inoltre accompagnati da compilazioni che
+documentino la nuova prova di terminazione, validità sul Target e provenienza
+2.4.0. La decisione per questo branch è quindi **riavviare da zero tutti e
+cinque i training**, mantenendo i vecchi file come baseline storica e non come
+punto di ripresa.
+
+Esecuzione sequenziale consigliata:
+
+~~~bash
+devices=(
+  ibm_falcon_27
+  ibm_heron_133
+  ibm_falcon_127
+  ibm_heron_156
+  quantinuum_h2_56
+)
+for device in "${devices[@]}"; do
+  python scripts/03_train_rl_model.py \
+    --device "$device" \
+    --metric expected_fidelity \
+    --timesteps 100000 \
+    --checkpoint-every 10000 \
+    --max-steps 64 \
+    --bqskit-action-timeout 60 \
+    --seed 0 \
+    --run-name restart-240-seed0 \
+    --allow-overwrite || break
+done
+~~~
+
+Il loop si ferma al primo errore. Ogni modello canonico viene sostituito solo
+dopo il completamento della rispettiva run; i checkpoint storici nella cartella
+del device non vengono sovrascritti.
 
 #### 04_train_device_selector.py
 
@@ -305,99 +390,107 @@ compatibili, assegna uno score a ogni risultato e costruisce il Training set.
 Il modello supervisionato usa come risposta corretta l'hardware con lo score
 più alto.
 
-Se una compilazione fallisce, lo script assegna a quella coppia lo score minimo
--1.0 e continua. Se tutti i modelli falliscono per lo stesso circuito, quel
-circuito non viene usato per addestrare il classificatore.
+Per un risultato pubblicabile ogni coppia compatibile deve provenire dalla
+policy RL, terminare esplicitamente con l'azione `terminate` e produrre un QASM
+il cui hash corrisponda al campo `compiled_sha256` del manifest. Il circuito
+deve inoltre essere eseguibile sul Target. Timeout, fallback e risultati
+troncati restano nel manifest ma non diventano label.
+La finalizzazione si blocca finché la copertura non è completa. Solo
+`--allow-incomplete` crea un artefatto esplorativo nella staging area, senza
+aggiornare il modello o il Training set canonico.
 
-Esecuzione completa:
+I cinque device e `expected_fidelity` sono già i default. Controllare prima
+piano, Target, modelli e copertura senza scrivere:
 
 ~~~bash
-python scripts/04_train_device_selector.py \
-  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
-  --metric expected_fidelity \
-  --num-workers 2 \
-  --timeout 300
+python scripts/04_train_device_selector.py --dry-run
 ~~~
 
-Lo script è riprendibile: rieseguendo lo stesso comando, i risultati RL validi
-già presenti nella cache non vengono compilati di nuovo.
-
-Controllare il piano senza scrivere file:
+Eseguire quindi un canary piccolo. Non usare `--skip-preflight` nel run
+completo finché ogni policy non ha superato almeno una compilazione:
 
 ~~~bash
 python scripts/04_train_device_selector.py \
-  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
-  --metric expected_fidelity \
-  --dry-run
-~~~
-
-Provare pochi circuiti senza addestrare il modello finale:
-
-~~~bash
-python scripts/04_train_device_selector.py \
-  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
-  --metric expected_fidelity \
-  --limit-circuits 5 \
+  --num-workers 1 \
+  --timeout 300 \
+  --rl-max-steps 64 \
+  --seed 0 \
+  --max-attempts 1 \
+  --limit-circuits 2 \
   --compile-only
 ~~~
 
-Generare Training set e modello usando la cache esistente:
+Se il canary riesce per tutti i device, completare la cache riprendibile:
 
 ~~~bash
 python scripts/04_train_device_selector.py \
-  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
-  --metric expected_fidelity \
-  --finalize-only
+  --num-workers 1 \
+  --timeout 300 \
+  --rl-max-steps 64 \
+  --seed 0 \
+  --max-attempts 3 \
+  --compile-only
 ~~~
 
-Rigenerare soltanto il file JSON dagli array già installati:
+Rieseguire lo stesso comando riprende soltanto QASM con provenienza, hash,
+versione Predictor, modello RL, Target, seed e limite passi identici. I vecchi
+91 risultati non hanno queste prove e vengono quindi ignorati intenzionalmente.
+
+Quando la copertura rigorosa è completa, generare Training set e modello ML:
 
 ~~~bash
 python scripts/04_train_device_selector.py \
-  --devices ibm_falcon_27 ibm_falcon_127 quantinuum_h2_56 \
-  --metric expected_fidelity \
-  --export-json-only
+  --num-workers 1 \
+  --rl-max-steps 64 \
+  --seed 0 \
+  --finalize-only
 ~~~
 
 Parametri principali:
 
 | Parametro | Significato |
 | --- | --- |
-| --devices | hardware da confrontare; richiede una policy RL per ciascuno |
-| --metric | expected_fidelity oppure critical_depth |
-| --num-workers | compilazioni RL eseguite in parallelo |
-| --timeout | tempo massimo per una compilazione circuito-hardware |
-| --startup-timeout | tempo massimo per caricare un worker RL |
-| --max-attempts | tentativi totali per ogni coppia circuito-hardware |
-| --rf-workers | processi usati nell'addestramento finale del classificatore |
-| --limit-circuits | limita l'esecuzione ai primi N circuiti |
-| --compile-only | esegue la compilazione senza creare il modello finale |
-| --finalize-only | usa soltanto i risultati già presenti nella cache |
-| --export-json-only | rigenera soltanto il JSON |
-| --dry-run | mostra piano e copertura senza scrivere |
+| `--devices` | default: i cinque hardware congelati, nell'ordine del protocollo |
+| `--metric` | default e metrica pubblicabile: `expected_fidelity` |
+| `--num-workers` | modelli RL residenti e compilazioni parallele |
+| `--timeout` | limite totale per una coppia circuito-hardware |
+| `--rl-max-steps` | limite di azioni della policy per episodio |
+| `--seed` | seed condiviso da policy, BQSKit e Random Forest |
+| `--startup-timeout` | tempo massimo per caricare un worker RL |
+| `--max-attempts` | tentativi totali per ogni coppia circuito-hardware |
+| `--rf-workers` | processi usati nell'addestramento finale del classificatore |
+| `--limit-circuits` | limita l'esecuzione ai primi N circuiti |
+| `--compile-only` | aggiorna la cache senza creare il modello finale |
+| `--finalize-only` | usa soltanto i risultati già presenti nella cache |
+| `--allow-incomplete` | crea solo artefatti esplorativi, mai canonici |
+| `--allow-target-drift` | bypassa il gate; il run resta fuori protocollo finché hash e ID non vengono aggiornati |
+| `--export-json-only` | rigenera il JSON solo con copertura corrente completa |
+| `--dry-run` | mostra piano e copertura senza scrivere |
 
 I parametri --uncompiled-circuits, --compiled-circuits, --cache-dir, --log-dir
 e --dataset-json permettono di sostituire i percorsi predefiniti.
 
 #### 05_sync_models.py
 
-Sincronizza i modelli finali tra artifacts/models e la copia interna in .venv usata da
-MQT Predictor.
-
-Installare nell'ambiente .venv i modelli conservati nella repository: (artifacts/models ---> .venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/training_model/)
+Sincronizza esclusivamente le cinque policy RL e il selettore ML del protocollo
+tra `artifacts/models` e la copia runtime nella virtualenv. Prima di copiare
+verifica puntatori Git LFS, integrità ZIP, 22 azioni, spazio delle osservazioni,
+classi ML, numero di feature e hash.
 
 ~~~bash
+python scripts/05_sync_models.py verify
 python scripts/05_sync_models.py install
 ~~~
 
-Acquisire eccezionalmente modelli già presenti nell'ambiente: (.venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/training_model/  ---> artifacts/models)
+Se una destinazione contiene bytes diversi, la copia viene rifiutata. Usare
+`--overwrite` solo dopo aver verificato quale artefatto debba essere
+autorevole. L'acquisizione inversa dalla virtualenv è eccezionale:
 
 ~~~bash
 python scripts/05_sync_models.py capture --overwrite
 ~~~
 
-L'azione capture non è necessaria dopo il normale training, perché gli script
-aggiornano già entrambe le copie.
+Il normale training aggiorna già copia canonica e runtime.
 
 #### 06_export_llm_dataset.py
 
@@ -424,6 +517,32 @@ python scripts/06_export_llm_dataset.py \
   --output datasets/llm_mqt_full_pipeline_expected_fidelity.json \
   --overwrite
 ~~~
+
+#### 07_validate_qcompile.py
+
+Dopo il training, esegue cinque canary RL deterministici e un canary
+end-to-end con l'API ufficiale `qcompile`. Ogni processo ha un timeout rigido
+e il report richiede `terminate`, score finito e circuito eseguibile sul
+Target:
+
+~~~bash
+python scripts/07_validate_qcompile.py --timeout 300 --max-steps 64
+~~~
+
+Finché il selettore ML non copre tutte le cinque classi, il controllo si blocca
+prima dei canary senza modificare i modelli.
+
+#### 08_audit_rl_models.py
+
+Analizza struttura, metadati, log TensorBoard e manifest storico delle cinque
+policy; con `--deep-load` verifica anche il caricamento completo dei tensori:
+
+~~~bash
+python scripts/08_audit_rl_models.py --deep-load
+~~~
+
+Un codice di uscita 1 significa che almeno una policy va riaddestrata; il report
+JSON spiega separatamente integrità tecnica e qualità operativa.
 
 Per vedere tutti i parametri disponibili per uno script:
 
@@ -479,33 +598,39 @@ devono continuare a essere modificati tramite Git LFS.
 
 Completato:
 
-- ambiente riproducibile basato su Python 3.12 e MQT Predictor 2.3.0;
-- script per training, checkpoint e ripresa dei modelli RL;
-- pipeline resistente agli errori per costruire il Training set e addestrare il
-  selettore hardware;
-- assegnazione dello score minimo alle compilazioni RL fallite, senza
-  interrompere l'intera elaborazione;
-- esportazione controllata dei dati per i successivi esperimenti LLM;
-- scheletro del prototipo con analisi del circuito, filtro di compatibilità,
-  validazione e compilazione Qiskit dopo conferma;
-- test automatici per le parti principali introdotte nella repository.
+- ambiente riproducibile Python 3.12 con MQT Predictor 2.4.0 e lock di progetto;
+- protocollo `expected_fidelity` sui cinque device, con fingerprint Target
+  deterministici e distinzione dagli hash legacy di `qiskit_dataset`;
+- audit dei modelli di `main`: archivi tecnicamente compatibili ma qualità
+  operativa insufficiente, decisione `restart_all`;
+- training RL con seed, limite azioni, timeout BQSKit, resume e directory per run;
+- pipeline del Training set che accetta solo compilazioni RL terminate,
+  validate, integre e con provenienza coerente;
+- sincronizzazione atomica dei sei artefatti richiesti da `qcompile`;
+- canary isolati per cinque policy e per il flusso `qcompile`;
+- esportazione controllata del Dataset LLM e test automatici.
 
 In corso:
 
-- rigenerazione del Training set e del modello supervisionato con la nuova
-  pipeline basata soltanto sui risultati RL validi;
-- verifica sperimentale dei modelli e degli artefatti prodotti.
+- nuovo training da zero delle cinque policy con Predictor 2.4.0;
+- completamento delle 2846 compilazioni compatibili e training del selettore ML;
+- rigenerazione dei risultati Qiskit e oracle sui Target MQT Bench 2.2.3.
 
 Passi successivi:
 
-1. valutare il modello supervisionato ottenuto;
-2. completare e verificare il Dataset per l'LLM;
-3. collegare al prototipo una ricerca RAG sul Dataset;
-4. scegliere il servizio LLM e implementare il relativo collegamento;
-5. realizzare la UI e valutare il sistema completo.
+1. completare e validare le cinque policy RL;
+2. generare il Training set completo e il selettore ML a cinque classi;
+3. superare il canary end-to-end di `qcompile`;
+4. rigenerare Qiskit default, Qiskit random e oracle nello stesso protocollo;
+5. confrontare MQT Predictor con LLM+RAG, LLM senza RAG, LLM di frontiera e gli
+   altri competitor congelati;
+6. completare Dataset, prototipo RAG, UI e valutazione finale.
 
 ## Riferimenti principali
 
 - [MQT Predictor - documentazione stabile](https://mqt.readthedocs.io/projects/predictor/en/stable/)
+- [MQT Predictor - setup e training](https://mqt.readthedocs.io/projects/predictor/en/stable/setup.html)
+- [MQT Predictor 2.4.0 - release](https://github.com/munich-quantum-toolkit/predictor/releases/tag/v2.4.0)
+- [MQT Predictor 2.4.0 - guida di upgrade](https://github.com/munich-quantum-toolkit/predictor/blob/v2.4.0/UPGRADING.md)
 - [Installare WSL](https://learn.microsoft.com/windows/wsl/install)
 - [Git Large File Storage](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)

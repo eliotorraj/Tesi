@@ -3,21 +3,39 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import re
+import signal
 import shutil
+import sys
+from contextlib import contextmanager
+from datetime import UTC, datetime
+from importlib.metadata import version as package_version
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
-# Keep the expensive BQSKit passes tractable. MQT also lowers
-# max_synthesis_size to 2 in this profile. The runtime override below raises
-# it to 3 only for circuits that actually contain a three-qubit gate.
+# Keep the expensive BQSKit passes tractable. The project override below uses
+# max_synthesis_size 2 for ordinary circuits and raises it to 3 only when a
+# circuit actually contains a synthesizable three-qubit gate.
 os.environ.setdefault("GITHUB_ACTIONS", "true")
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mqt-predictor-matplotlib")
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from mqt_predictor_protocol import FROZEN_DEVICES
+from mqt_predictor_protocol import FROZEN_TARGET_SHA256
+from mqt_predictor_protocol import FIGURE_OF_MERIT as FROZEN_FIGURE_OF_MERIT
+from mqt_predictor_protocol import PROTOCOL_ID
+from mqt_predictor_protocol import file_sha256
+from mqt_predictor_protocol import target_record
 
 from bqskit.ir.circuit import Circuit
 from bqskit.ir.gates.barrier import BarrierPlaceholder
 from bqskit.ir.gates.measure import MeasurementPlaceholder
-import mqt.predictor.rl.actions as predictor_actions
+from mqt.predictor.rl.actions import bqskit_actions as predictor_bqskit_actions
 from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
 from mqt.predictor.rl.helper import get_path_trained_model
@@ -25,10 +43,11 @@ from sb3_contrib import MaskablePPO
 from sb3_contrib.common.maskable.policies import MaskableMultiInputActorCriticPolicy
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.utils import set_random_seed
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_MODEL_DIR = PROJECT_ROOT / "artifacts" / "models" / "rl"
-_ORIGINAL_BQSKIT_COMPILE = predictor_actions.bqskit_compile
+_ORIGINAL_BQSKIT_COMPILE = predictor_bqskit_actions.bqskit_compile
 
 
 def _contains_three_qubit_gate(circuit: Circuit) -> bool:
@@ -40,7 +59,33 @@ def _contains_three_qubit_gate(circuit: Circuit) -> bool:
     )
 
 
-def configure_bqskit_runtime() -> None:
+class BQSKitActionTimeoutError(TimeoutError):
+    """Raised when one BQSKit action exceeds the bounded training budget."""
+
+
+@contextmanager
+def bqskit_action_timeout(seconds: float) -> Iterator[None]:
+    """Bound one BQSKit action so a PPO rollout cannot hang indefinitely."""
+    if seconds <= 0 or not hasattr(signal, "setitimer"):
+        yield
+        return
+
+    def on_alarm(signum: int, frame: Any) -> None:
+        del signum, frame
+        raise BQSKitActionTimeoutError(
+            f"Azione BQSKit interrotta dopo {seconds:.1f}s."
+        )
+
+    previous_handler = signal.signal(signal.SIGALRM, on_alarm)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *previous_timer)
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
+def configure_bqskit_runtime(seed: int = 0, action_timeout: float = 60.0) -> None:
     """Select MQT's BQSKit synthesis limit from each input circuit.
 
     MQT's lightweight profile is useful for local training, but it sets
@@ -56,9 +101,11 @@ def configure_bqskit_runtime() -> None:
 
     def compile_with_project_limit(circuit: Circuit, *args: Any, **kwargs: Any) -> Any:
         kwargs["max_synthesis_size"] = 3 if _contains_three_qubit_gate(circuit) else 2
-        return _ORIGINAL_BQSKIT_COMPILE(circuit, *args, **kwargs)
+        kwargs["seed"] = seed
+        with bqskit_action_timeout(action_timeout):
+            return _ORIGINAL_BQSKIT_COMPILE(circuit, *args, **kwargs)
 
-    predictor_actions.bqskit_compile = compile_with_project_limit
+    predictor_bqskit_actions.bqskit_compile = compile_with_project_limit
 
 
 def load_model_or_exit(checkpoint: Path, **kwargs: Any) -> MaskablePPO:
@@ -95,6 +142,18 @@ def install_model_atomically(source: Path, destination: Path) -> None:
     os.replace(temp, destination)
 
 
+def write_training_metadata(path: Path, metadata: dict[str, Any]) -> None:
+    """Write reproducibility metadata next to the canonical model."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temp.open("w", encoding="utf-8") as handle:
+        json.dump(metadata, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temp, path)
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -103,6 +162,36 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timesteps", type=int, default=100_000)
     parser.add_argument("--training-circuits", type=Path, help="Directory QASM personalizzata; usa il dataset incluso se omessa.")
     parser.add_argument("--checkpoint-every", type=int, default=2_048, help="Salva un checkpoint ogni N step.")
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=64,
+        help="Numero massimo di azioni per episodio RL; evita policy che non terminano.",
+    )
+    parser.add_argument(
+        "--bqskit-action-timeout",
+        type=float,
+        default=60.0,
+        help="Timeout in secondi per una singola azione BQSKit durante il training.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Seed condiviso da PPO, ambiente e BQSKit per run riproducibili.",
+    )
+    parser.add_argument(
+        "--run-name",
+        help=(
+            "Identificatore della run usato per isolare checkpoint e log; "
+            "se omesso viene generato da timestamp UTC e seed."
+        ),
+    )
+    parser.add_argument(
+        "--allow-target-drift",
+        action="store_true",
+        help="Consenti un Target diverso dal fingerprint congelato del protocollo 2.4-v2.",
+    )
     parser.add_argument("--resume-from", type=Path, help="Checkpoint .zip da cui riprendere il training.")
     parser.add_argument("--allow-overwrite", action="store_true", help="Consenti di sovrascrivere un modello esistente.")
     return parser.parse_args()
@@ -115,14 +204,51 @@ def main() -> int:
         raise SystemExit("--timesteps deve essere positivo.")
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every deve essere positivo.")
+    if args.max_steps <= 0:
+        raise SystemExit("--max-steps deve essere positivo.")
+    if args.bqskit_action_timeout <= 0:
+        raise SystemExit("--bqskit-action-timeout deve essere positivo.")
+    if args.run_name and re.fullmatch(r"[A-Za-z0-9_.-]+", args.run_name) is None:
+        raise SystemExit(
+            "--run-name può contenere soltanto lettere, numeri, punto, trattino e underscore."
+        )
     if args.training_circuits and not args.training_circuits.is_dir():
         raise SystemExit(f"Directory QASM non trovata: {args.training_circuits}")
     if args.resume_from and not args.resume_from.is_file():
         raise SystemExit(f"Checkpoint non trovato: {args.resume_from}")
 
     device = get_device(args.device)
+    current_target = target_record(device)
+    uses_frozen_protocol = bool(
+        device.description in FROZEN_DEVICES
+        and args.metric == FROZEN_FIGURE_OF_MERIT
+    )
+    target_matches_frozen_protocol = False
+    if uses_frozen_protocol:
+        expected_target_hash = FROZEN_TARGET_SHA256[device.description]
+        observed_target_hash = str(current_target["target_sha256"])
+        target_matches_frozen_protocol = observed_target_hash == expected_target_hash
+        if not target_matches_frozen_protocol and not args.allow_target_drift:
+            raise SystemExit(
+                "Target diverso dal protocollo migrato 2.4-v2: "
+                f"atteso={expected_target_hash}, osservato={observed_target_hash}. "
+                "Usa --allow-target-drift soltanto come bypass temporaneo del gate."
+            )
+    if uses_frozen_protocol and not target_matches_frozen_protocol:
+        print("ATTENZIONE: il modello risultante sarà marcato come fuori protocollo.")
+    started_at = datetime.now(UTC)
+    run_name = args.run_name or started_at.strftime("%Y%m%dT%H%M%SZ") + f"-seed{args.seed}"
     model_name = f"model_{args.metric}_{device.description}"
     filename = f"model_{args.metric}_{device.description}.zip"
+    if args.resume_from:
+        resume_name = args.resume_from.name
+        compatible_name = (
+            resume_name == filename or resume_name.startswith(f"{model_name}_")
+        )
+        if not compatible_name:
+            raise SystemExit(
+                f"Checkpoint incompatibile con device/metrica richiesti: {resume_name}"
+            )
     canonical_model = CANONICAL_MODEL_DIR / filename
     runtime_model = get_path_trained_model() / filename
     if canonical_model.exists() and not args.allow_overwrite:
@@ -131,22 +257,42 @@ def main() -> int:
             "Usa --allow-overwrite solo se vuoi davvero sostituirlo."
         )
 
-    checkpoint_dir = PROJECT_ROOT / "artifacts" / "checkpoints" / "rl" / device.description
+    checkpoint_dir = (
+        PROJECT_ROOT
+        / "artifacts"
+        / "checkpoints"
+        / "rl"
+        / device.description
+        / run_name
+    )
+    if args.run_name and checkpoint_dir.exists() and any(checkpoint_dir.iterdir()) and not args.resume_from:
+        raise SystemExit(
+            f"La directory della run contiene già file: {checkpoint_dir}\n"
+            "Scegli un altro --run-name oppure usa --resume-from."
+        )
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    tensorboard_dir = PROJECT_ROOT / "artifacts" / "logs" / "rl" / model_name
+    tensorboard_dir = PROJECT_ROOT / "artifacts" / "logs" / "rl" / model_name / run_name
     tensorboard_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Training RL: device={device.description}, metrica={args.metric}, target={args.timesteps} step")
+    print(
+        f"Training RL: device={device.description}, metrica={args.metric}, "
+        f"target={args.timesteps} step, max_steps={args.max_steps}, seed={args.seed}, "
+        f"bqskit_action_timeout={args.bqskit_action_timeout}s"
+    )
+    print(f"Run: {run_name}")
     print(f"Checkpoint: {checkpoint_dir} (ogni {args.checkpoint_every} step)")
-    configure_bqskit_runtime()
+    set_random_seed(args.seed)
+    configure_bqskit_runtime(args.seed, args.bqskit_action_timeout)
     print(
         "BQSKit: profilo locale leggero, "
-        "max_synthesis_size=3 con gate a tre qubit, altrimenti 2 (override runtime)"
+        "max_synthesis_size=3 con gate a tre qubit, altrimenti 2 "
+        f"(override runtime, seed={args.seed}, timeout={args.bqskit_action_timeout}s)"
     )
     predictor = Predictor(
         device=device,
         figure_of_merit=args.metric,
         path_training_circuits=args.training_circuits,
+        max_steps=args.max_steps,
     )
 
     monitor_csv = tensorboard_dir / "monitor.csv"
@@ -158,6 +304,7 @@ def main() -> int:
             env=predictor.env,
             tensorboard_log=str(tensorboard_dir),
         )
+        model.set_random_seed(args.seed)
         completed_timesteps = model.num_timesteps
         remaining_timesteps = args.timesteps - completed_timesteps
         if remaining_timesteps <= 0:
@@ -175,6 +322,7 @@ def main() -> int:
             n_steps=2048,
             batch_size=64,
             n_epochs=10,
+            seed=args.seed,
         )
         remaining_timesteps = args.timesteps
 
@@ -204,8 +352,47 @@ def main() -> int:
     # mirror with this exact filename inside the installed package.
     saved_path = save_model_atomically(model, canonical_model)
     install_model_atomically(saved_path, runtime_model)
+    metadata_path = saved_path.with_suffix(".metadata.json")
+    write_training_metadata(
+        metadata_path,
+        {
+            "bqskit_action_timeout_seconds": args.bqskit_action_timeout,
+            "bqskit_profile": (
+                "ci-lightweight-dynamic-synthesis"
+                if os.getenv("GITHUB_ACTIONS") == "true"
+                else "mqt-default-dynamic-synthesis"
+            ),
+            "device": device.description,
+            "figure_of_merit": args.metric,
+            "max_steps": args.max_steps,
+            "model_sha256": file_sha256(saved_path),
+            "mqt_predictor_version": package_version("mqt.predictor"),
+            "num_timesteps": model.num_timesteps,
+            "protocol": PROTOCOL_ID if target_matches_frozen_protocol else None,
+            "target_matches_frozen_protocol": target_matches_frozen_protocol,
+            "resume_from": str(args.resume_from.resolve()) if args.resume_from else None,
+            "run_name": run_name,
+            "seed": args.seed,
+            "started_at": started_at.isoformat(),
+            "software": {
+                distribution: package_version(distribution)
+                for distribution in (
+                    "mqt.predictor",
+                    "mqt.bench",
+                    "bqskit",
+                    "qiskit",
+                    "sb3-contrib",
+                    "stable-baselines3",
+                )
+            },
+            "target": current_target,
+            "target_timesteps": args.timesteps,
+            "training_circuits": str(args.training_circuits.resolve()) if args.training_circuits else None,
+        },
+    )
     print(f"Modello canonico: {saved_path}")
     print(f"Copia runtime installata: {runtime_model}")
+    print(f"Metadati training: {metadata_path}")
     return 0
 
 

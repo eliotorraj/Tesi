@@ -29,6 +29,8 @@ import zipfile
 from collections import Counter, deque
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from functools import lru_cache
+from importlib.metadata import version as package_version
 from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
@@ -41,6 +43,19 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from mqt_model_artifacts import validate_rl_training_metadata
+from mqt_predictor_protocol import FROZEN_DEVICES
+from mqt_predictor_protocol import FIGURE_OF_MERIT as FROZEN_FIGURE_OF_MERIT
+from mqt_predictor_protocol import PROTOCOL_ID
+from mqt_predictor_protocol import file_sha256
+from mqt_predictor_protocol import frozen_target_mismatches
+from mqt_predictor_protocol import target_record
+from mqt_predictor_protocol import validate_compiled_circuit
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -59,6 +74,7 @@ from mqt.predictor.reward import crit_depth, expected_fidelity
 from qiskit import QuantumCircuit
 from qiskit import transpile as qiskit_transpile
 from qiskit.qasm2 import dump as qasm_dump
+from sb3_contrib.common.maskable.utils import get_action_masks
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, train_test_split
 
@@ -67,13 +83,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_DATASETS_DIR = PROJECT_ROOT / "datasets"
 CANONICAL_MODELS_DIR = PROJECT_ROOT / "artifacts" / "models" / "ml"
 DEFAULT_CACHE_ROOT = PROJECT_ROOT / "artifacts" / "cache" / "ml"
+CANONICAL_RL_MODELS_DIR = PROJECT_ROOT / "artifacts" / "models" / "rl"
 DEFAULT_LOG_ROOT = PROJECT_ROOT / "artifacts" / "logs" / "ml"
-DEFAULT_WORKERS = 2
+DEFAULT_WORKERS = 1
 ESTIMATED_RL_WORKER_GIB = 2.2
 WORKER_WATCHDOG_GRACE_SECONDS = 30
 WORST_SCORE = -1.0
-RL_SUCCESS_STATUSES = {"success", "success_recovered_after_timeout"}
+RL_SUCCESS_STATUSES = {"success"}
 SUCCESS_STATUSES = RL_SUCCESS_STATUSES | {"success_fallback"}
+VALIDATION_VERSION = 1
+NON_ATTEMPT_STATUSES = {
+    "rl_model_load_failed",
+    "rl_model_startup_timeout",
+    "rl_runtime_unavailable",
+}
 
 
 @dataclass(frozen=True)
@@ -134,7 +157,12 @@ def append_manifest(path: Path, record: dict[str, Any]) -> None:
 
 
 def load_manifest(path: Path) -> tuple[dict[str, int], dict[str, str]]:
-    """Load attempts and last status, tolerating an interrupted last line."""
+    """Load attempts and last status, tolerating an interrupted last line.
+
+    A failure to start the shared runtime is infrastructure-wide and does not
+    represent a compilation attempt for every queued circuit/device pair.
+    Ignore those records when reconstructing the per-job retry budget.
+    """
     attempts: dict[str, int] = {}
     statuses: dict[str, str] = {}
     if not path.exists():
@@ -150,10 +178,10 @@ def load_manifest(path: Path) -> tuple[dict[str, int], dict[str, str]]:
             key = record.get("key")
             if not isinstance(key, str):
                 continue
-            attempt = record.get("attempt")
-            if isinstance(attempt, int):
-                attempts[key] = max(attempts.get(key, 0), attempt)
             status = record.get("status")
+            attempt = record.get("attempt")
+            if isinstance(attempt, int) and status not in NON_ATTEMPT_STATUSES:
+                attempts[key] = max(attempts.get(key, 0), attempt)
             if isinstance(status, str):
                 statuses[key] = status
     return attempts, statuses
@@ -375,34 +403,9 @@ class BQSKitRuntime:
         if self.manager_process.poll() is not None:
             raise RuntimeError("Il manager BQSKit non è partito; controlla bqskit_manager.log.")
 
-        # BQSKit 1.2.0 has a bug in DetachedServer.handle_disconnect: it
-        # appends an out-of-scope ``task_id`` instead of the key currently
-        # iterated. Patch only this subprocess; do not modify site-packages.
-        server_bootstrap = """
-                            from bqskit.runtime.base import ServerBase
-                            from bqskit.runtime.detached import DetachedServer, start_server
-
-                            def fixed_handle_disconnect(self, conn):
-                                ServerBase.handle_disconnect(self, conn)
-                                tasks = self.clients.pop(conn, set())
-                                for task_id in tasks:
-                                    self.handle_cancel_comp_task(task_id)
-                                tasks_to_pop = []
-                                for task_id, (tid, other_conn) in list(self.tasks.items()):
-                                    if other_conn == conn:
-                                        tasks_to_pop.append((task_id, tid))
-                                for task_id, tid in tasks_to_pop:
-                                    self.tasks.pop(task_id, None)
-                                    self.mailbox_to_task_dict.pop(tid, None)
-
-                            DetachedServer.handle_disconnect = fixed_handle_disconnect
-                            start_server()
-                            """
         self.server_process = subprocess.Popen(
             [
-                sys.executable,
-                "-c",
-                server_bootstrap,
+                str(server_command),
                 "--port",
                 str(self.server_port),
                 f"localhost:{self.manager_port}",
@@ -440,10 +443,10 @@ class BQSKitRuntime:
             self.manager_log.close()
 
 
-def configure_shared_bqskit_runtime(server_port: int) -> Any:
+def configure_shared_bqskit_runtime(server_port: int, seed: int) -> Any:
     """Route MQT BQSKit actions to the shared detached runtime."""
-    import mqt.predictor.rl.actions as actions_module
     from bqskit.compiler import Compiler
+    from mqt.predictor.rl.actions import bqskit_actions as actions_module
 
     original_compile = actions_module.bqskit_compile
     shared_compiler = Compiler(ip="localhost", port=server_port)
@@ -453,6 +456,7 @@ def configure_shared_bqskit_runtime(server_port: int) -> Any:
         kwargs.pop("ip", None)
         kwargs.pop("port", None)
         kwargs["compiler"] = shared_compiler
+        kwargs["seed"] = seed
         return original_compile(*args, **kwargs)
 
     actions_module.bqskit_compile = shared_compile
@@ -551,6 +555,100 @@ def configure_shared_bqskit_runtime(server_port: int) -> Any:
 #                 shared_compiler.close()
 
 
+def run_rl_policy(
+    predictor: Any,
+    cached_model: Any,
+    circuit: QuantumCircuit,
+    seed: int,
+) -> tuple[QuantumCircuit, list[str], bool, bool, dict[str, Any]]:
+    """Run one deterministic policy episode while preserving truncation state."""
+    environment = predictor.env
+    observation, _ = environment.reset(circuit, seed=seed)
+    passes: list[str] = []
+    terminated = False
+    truncated = False
+    info: dict[str, Any] = {}
+
+    while not (terminated or truncated):
+        action_masks = get_action_masks(environment)
+        action, _ = cached_model.predict(
+            observation,
+            action_masks=action_masks,
+            deterministic=True,
+        )
+        action_index = int(np.asarray(action).item())
+        action_name = environment.action_set[action_index].name
+        print(f"azione_RL={action_name}", flush=True)
+        passes.append(action_name)
+        observation, _reward, terminated, truncated, info = environment.step(action_index)
+
+    return environment.state, passes, terminated, truncated, info
+
+
+def validate_rl_compilation(
+    predictor: Any,
+    compiled: QuantumCircuit,
+    passes: list[str],
+    terminated: bool,
+    truncated: bool,
+    info: dict[str, Any],
+    device: Any,
+) -> dict[str, Any]:
+    """Prove that a policy terminated with a circuit executable on its Target."""
+    environment = predictor.env
+    native = bool(environment.is_circuit_synthesized(compiled))
+    laid_out = bool(
+        environment.layout is not None
+        and environment.is_circuit_laid_out(compiled, environment.layout)
+    )
+    coupling_map = device.build_coupling_map()
+    routed = bool(
+        laid_out
+        and (
+            coupling_map is None
+            or environment.is_circuit_routed(compiled, coupling_map)
+        )
+    )
+    target_validation = validate_compiled_circuit(compiled, device)
+    terminated_by_policy = bool(
+        terminated
+        and not truncated
+        and passes
+        and passes[-1] == "terminate"
+        and not environment.error_occurred
+    )
+    valid = bool(
+        terminated_by_policy
+        and native
+        and laid_out
+        and routed
+        and target_validation["is_executable_on_target"]
+    )
+    if terminated_by_policy:
+        termination_reason = "terminate"
+    elif truncated:
+        termination_reason = str(
+            info.get("truncation_reason")
+            or info.get("Truncated because of error")
+            or "truncated"
+        )
+    else:
+        termination_reason = "invalid_termination"
+
+    return {
+        "laid_out": laid_out,
+        "native": native,
+        "num_steps": int(environment.num_steps),
+        "routed": routed,
+        "target_validation": target_validation,
+        "terminated": bool(terminated),
+        "termination_reason": termination_reason,
+        "truncated": bool(truncated),
+        "valid": valid,
+        "validation_version": VALIDATION_VERSION,
+    }
+
+
 def _compile_job_process(
     job: CompilationJob,
     device: Any,
@@ -559,6 +657,9 @@ def _compile_job_process(
     server_port: int,
     mode: str,
     fallback_optimization_level: int,
+    seed: int,
+    model_sha256: str,
+    target_sha256: str,
     result_connection: Any,
 ) -> None:
     """Compile one job in a disposable process forked after PPO loading."""
@@ -567,22 +668,26 @@ def _compile_job_process(
     shared_compiler = None
     temp_output = job.output.with_name(f".{job.output.name}.{os.getpid()}.tmp")
     result: dict[str, Any]
+    validation: dict[str, Any] = {}
     try:
         circuit = QuantumCircuit.from_qasm_file(job.source)
         if mode == "rl":
-            shared_compiler = configure_shared_bqskit_runtime(server_port)
-            import mqt.predictor.rl.predictor as rl_predictor_module
-
-            rl_predictor_module.load_model = lambda _name: cached_model
-            original_step = predictor.env.step
-
-            def logged_step(action: int) -> Any:
-                action_name = predictor.env.action_set[int(action)].name
-                print(f"job={job.key} azione_RL={action_name}", flush=True)
-                return original_step(action)
-
-            predictor.env.step = logged_step
-            compiled, passes = predictor.compile_as_predicted(circuit)
+            shared_compiler = configure_shared_bqskit_runtime(server_port, seed)
+            compiled, passes, terminated, truncated, info = run_rl_policy(
+                predictor,
+                cached_model,
+                circuit,
+                seed,
+            )
+            validation = validate_rl_compilation(
+                predictor,
+                compiled,
+                passes,
+                terminated,
+                truncated,
+                info,
+                device,
+            )
         elif mode == "fallback":
             print(
                 f"job={job.key} fallback=QiskitO{fallback_optimization_level}",
@@ -592,25 +697,51 @@ def _compile_job_process(
                 circuit,
                 target=device,
                 optimization_level=fallback_optimization_level,
-                seed_transpiler=0,
+                seed_transpiler=seed,
             )
             passes = [f"fallback:qiskit_transpile_o{fallback_optimization_level}"]
         else:
             raise ValueError(f"Modalità di compilazione sconosciuta: {mode}")
 
-        temp_output.parent.mkdir(parents=True, exist_ok=True)
-        with temp_output.open("w", encoding="utf-8") as handle:
-            qasm_dump(compiled, handle)
-            handle.flush()
-            os.fsync(handle.fileno())
-        QuantumCircuit.from_qasm_file(temp_output)
-        os.replace(temp_output, job.output)
-        result = {
-            "status": "success",
-            "mode": mode,
-            "duration_seconds": round(time.monotonic() - started, 3),
-            "passes": passes,
+        provenance = {
+            "model_sha256": model_sha256,
+            "mqt_predictor_version": package_version("mqt.predictor"),
+            "rl_max_steps": predictor.env.max_steps,
+            "seed": seed,
+            "target_sha256": target_sha256,
         }
+        if mode == "rl" and not validation["valid"]:
+            temp_output.unlink(missing_ok=True)
+            result = {
+                "status": "truncated" if validation["truncated"] else "invalid_compilation",
+                "mode": mode,
+                "duration_seconds": round(time.monotonic() - started, 3),
+                "error": (
+                    "episodio RL troncato o circuito non eseguibile: "
+                    f"{validation['termination_reason']}"
+                ),
+                "passes": passes,
+                **provenance,
+                **validation,
+            }
+        else:
+            temp_output.parent.mkdir(parents=True, exist_ok=True)
+            with temp_output.open("w", encoding="utf-8") as handle:
+                qasm_dump(compiled, handle)
+                handle.flush()
+                os.fsync(handle.fileno())
+            QuantumCircuit.from_qasm_file(temp_output)
+            qasm_sha256 = file_sha256(temp_output)
+            os.replace(temp_output, job.output)
+            result = {
+                "status": "success",
+                "mode": mode,
+                "duration_seconds": round(time.monotonic() - started, 3),
+                "passes": passes,
+                "qasm_sha256": qasm_sha256,
+                **provenance,
+                **validation,
+            }
     except BaseException as exc:
         temp_output.unlink(missing_ok=True)
         result = {
@@ -619,6 +750,12 @@ def _compile_job_process(
             "duration_seconds": round(time.monotonic() - started, 3),
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(limit=20)[-8000:],
+            "model_sha256": model_sha256,
+            "mqt_predictor_version": package_version("mqt.predictor"),
+            "rl_max_steps": predictor.env.max_steps,
+            "seed": seed,
+            "target_sha256": target_sha256,
+            **validation,
         }
 
     try:
@@ -694,6 +831,9 @@ def _run_isolated_job(
     mode: str,
     timeout: int,
     fallback_optimization_level: int,
+    seed: int,
+    model_sha256: str,
+    target_sha256: str,
 ) -> dict[str, Any]:
     """Run one compilation with a hard timeout without killing the PPO owner."""
     if mode == "fallback":
@@ -717,6 +857,9 @@ def _run_isolated_job(
                 server_port,
                 mode,
                 fallback_optimization_level,
+                seed,
+                model_sha256,
+                target_sha256,
                 send_connection,
             ),
             name=f"mqt-{mode}-{job.device_name}",
@@ -740,18 +883,17 @@ def _run_isolated_job(
 
         if result is None and process.is_alive() and time.monotonic() >= deadline:
             _terminate_worker_process(process)
-            if output_changed(job.output, previous_output_version):
-                result = {
-                    "status": "success_recovered_after_timeout",
-                    "mode": mode,
-                    "passes": [],
-                }
-            else:
-                result = {
-                    "status": "timeout",
-                    "mode": mode,
-                    "error": f"superato limite {mode} di {timeout}s",
-                }
+            unverified_output = output_changed(job.output, previous_output_version)
+            if unverified_output:
+                job.output.unlink(missing_ok=True)
+            result = {
+                "status": "timeout",
+                "mode": mode,
+                "error": (
+                    f"superato limite {mode} di {timeout}s"
+                    + ("; output non verificato rimosso" if unverified_output else "")
+                ),
+            }
         elif result is None:
             process.join(timeout=1)
             if receive_connection.poll():
@@ -759,17 +901,17 @@ def _run_isolated_job(
                     result = receive_connection.recv()
                 except EOFError:
                     result = None
-            if result is None and output_changed(job.output, previous_output_version):
-                result = {
-                    "status": "success_recovered_after_timeout",
-                    "mode": mode,
-                    "passes": [],
-                }
-            elif result is None:
+            if result is None:
+                unverified_output = output_changed(job.output, previous_output_version)
+                if unverified_output:
+                    job.output.unlink(missing_ok=True)
                 result = {
                     "status": "failed",
                     "mode": mode,
-                    "error": f"processo {mode} terminato con exit code {process.exitcode}",
+                    "error": (
+                        f"processo {mode} terminato con exit code {process.exitcode}"
+                        + ("; output non verificato rimosso" if unverified_output else "")
+                    ),
                 }
     finally:
         receive_connection.close()
@@ -838,6 +980,10 @@ def device_worker(
     fallback_timeout: int,
     fallback_enabled: bool,
     fallback_optimization_level: int,
+    rl_max_steps: int,
+    seed: int,
+    model_sha256: str,
+    target_sha256: str,
 ) -> None:
     """Keep one PPO resident and isolate each compilation in a forked child."""
     _set_parent_death_signal()
@@ -850,7 +996,11 @@ def device_worker(
             import mqt.predictor.rl.predictor as rl_predictor_module
 
             device = get_device(device_name)
-            predictor = rl_predictor_module.Predictor(figure_of_merit=metric, device=device)
+            predictor = rl_predictor_module.Predictor(
+                figure_of_merit=metric,
+                device=device,
+                max_steps=rl_max_steps,
+            )
             model_name = f"model_{metric}_{device_name}"
             cached_model = rl_predictor_module.load_model(model_name)
             result_queue.put({"type": "ready", "device": device_name, "pid": os.getpid()})
@@ -870,6 +1020,9 @@ def device_worker(
                     "rl",
                     timeout,
                     fallback_optimization_level,
+                    seed,
+                    model_sha256,
+                    target_sha256,
                 )
                 final_result = rl_result
 
@@ -969,37 +1122,117 @@ def group_pending_jobs(
     return grouped
 
 
-def is_strict_rl_success(record: dict[str, Any] | None) -> bool:
-    """Return whether a manifest record proves a usable RL compilation."""
+def record_matches_run_configuration(
+    record: dict[str, Any] | None,
+    *,
+    rl_max_steps: int,
+    seed: int,
+    model_sha256: str,
+    target_sha256: str,
+) -> bool:
+    """Return whether a record belongs to the current reproducible RL run."""
     if record is None:
         return False
-    status = record.get("status")
-    mode = record.get("mode")
-    if status == "success":
-        return mode in (None, "rl") and "fallback_reason" not in record
-    if status == "success_recovered_after_timeout":
-        return mode == "rl" or record.get("phase") == "rl"
-    return False
+    return bool(
+        record.get("mqt_predictor_version") == package_version("mqt.predictor")
+        and record.get("rl_max_steps") == rl_max_steps
+        and record.get("seed") == seed
+        and record.get("model_sha256") == model_sha256
+        and record.get("target_sha256") == target_sha256
+    )
+
+
+def is_strict_rl_success(
+    record: dict[str, Any] | None,
+    *,
+    rl_max_steps: int | None = None,
+    seed: int | None = None,
+    model_sha256: str | None = None,
+    target_sha256: str | None = None,
+) -> bool:
+    """Return whether a manifest record proves a complete RL compilation."""
+    if record is None:
+        return False
+    target_validation = record.get("target_validation")
+    strict = bool(
+        record.get("status") == "success"
+        and record.get("mode") == "rl"
+        and "fallback_reason" not in record
+        and record.get("validation_version") == VALIDATION_VERSION
+        and record.get("terminated") is True
+        and record.get("truncated") is False
+        and record.get("termination_reason") == "terminate"
+        and record.get("native") is True
+        and record.get("laid_out") is True
+        and record.get("routed") is True
+        and isinstance(record.get("passes"), list)
+        and bool(record["passes"])
+        and record["passes"][-1] == "terminate"
+        and isinstance(record.get("qasm_sha256"), str)
+        and isinstance(target_validation, dict)
+        and target_validation.get("is_executable_on_target") is True
+    )
+    if not strict:
+        return False
+    if None not in (rl_max_steps, seed, model_sha256, target_sha256):
+        return record_matches_run_configuration(
+            record,
+            rl_max_steps=int(rl_max_steps),
+            seed=int(seed),
+            model_sha256=str(model_sha256),
+            target_sha256=str(target_sha256),
+        )
+    return True
 
 
 def strict_rl_success_keys(
     jobs: list[CompilationJob],
     manifest_path: Path,
+    *,
+    rl_max_steps: int | None = None,
+    seed: int | None = None,
+    model_sha256_by_device: dict[str, str] | None = None,
+    target_sha256_by_device: dict[str, str] | None = None,
 ) -> set[str]:
-    """Return jobs backed by both RL provenance and a valid compiled QASM."""
+    """Return jobs backed by provenance, validation, and an unchanged QASM."""
     latest = latest_manifest_records(manifest_path)
-    return {
-        job.key
-        for job in jobs
-        if is_strict_rl_success(latest.get(job.key)) and is_valid_qasm(job.output)
-    }
-
+    valid: set[str] = set()
+    for job in jobs:
+        record = latest.get(job.key)
+        model_sha256 = (
+            model_sha256_by_device.get(job.device_name)
+            if model_sha256_by_device is not None
+            else None
+        )
+        target_sha256 = (
+            target_sha256_by_device.get(job.device_name)
+            if target_sha256_by_device is not None
+            else None
+        )
+        if not is_strict_rl_success(
+            record,
+            rl_max_steps=rl_max_steps,
+            seed=seed,
+            model_sha256=model_sha256,
+            target_sha256=target_sha256,
+        ):
+            continue
+        if not is_valid_qasm(job.output):
+            continue
+        if file_sha256(job.output) != record["qasm_sha256"]:
+            continue
+        valid.add(job.key)
+    return valid
 
 
 def compile_resumably(
     jobs: list[CompilationJob],
     *,
     metric: str,
+    rl_max_steps: int,
+    seed: int,
+    model_sha256_by_device: dict[str, str],
+    target_sha256_by_device: dict[str, str],
     num_workers: int,
     timeout: int,
     startup_timeout: int,
@@ -1015,7 +1248,24 @@ def compile_resumably(
     if fallback_enabled:
         raise ValueError("Il fallback non e ammesso nella generazione del Training set.")
     attempts, _statuses = load_manifest(manifest_path)
-    valid_job_keys = strict_rl_success_keys(jobs, manifest_path)
+    latest = latest_manifest_records(manifest_path)
+    for job in jobs:
+        if not record_matches_run_configuration(
+            latest.get(job.key),
+            rl_max_steps=rl_max_steps,
+            seed=seed,
+            model_sha256=model_sha256_by_device[job.device_name],
+            target_sha256=target_sha256_by_device[job.device_name],
+        ):
+            attempts[job.key] = 0
+    valid_job_keys = strict_rl_success_keys(
+        jobs,
+        manifest_path,
+        rl_max_steps=rl_max_steps,
+        seed=seed,
+        model_sha256_by_device=model_sha256_by_device,
+        target_sha256_by_device=target_sha256_by_device,
+    )
     initial_valid = len(valid_job_keys)
     print(f"Checkpoint RL validi: {initial_valid}/{len(jobs)}")
     warn_about_memory(num_workers)
@@ -1032,7 +1282,6 @@ def compile_resumably(
         for job in jobs:
             if job.key in valid_job_keys:
                 continue
-            attempt = max(max_attempts, attempts.get(job.key, 0) + 1)
             append_manifest(
                 manifest_path,
                 {
@@ -1040,14 +1289,18 @@ def compile_resumably(
                     "key": job.key,
                     "circuit": job.circuit_name,
                     "device": job.device_name,
-                    "attempt": attempt,
+                    "attempt": attempts.get(job.key, 0),
                     "status": "rl_runtime_unavailable",
                     "mode": "rl",
+                    "model_sha256": model_sha256_by_device[job.device_name],
+                    "mqt_predictor_version": package_version("mqt.predictor"),
+                    "rl_max_steps": rl_max_steps,
+                    "seed": seed,
+                    "target_sha256": target_sha256_by_device[job.device_name],
                     "error": error,
                 },
             )
-        print(f"Runtime RL non disponibile: {error}. Assegno lo score minimo e continuo.")
-        return
+        raise RuntimeError(f"Runtime RL non disponibile: {error}") from exc
     print(
         f"Runtime BQSKit condiviso avviato: {num_workers} worker; "
         f"porta client {runtime.server_port}."
@@ -1060,7 +1313,6 @@ def compile_resumably(
     successful_results = initial_valid
     durations: list[float] = []
     job_lookup = {job.key: job for job in jobs}
-    runtime_failure_reported = False
 
     def refresh_device_queue() -> None:
         grouped = group_pending_jobs(jobs, attempts, max_attempts, valid_job_keys)
@@ -1092,6 +1344,10 @@ def compile_resumably(
                     fallback_timeout,
                     fallback_enabled,
                     fallback_optimization_level,
+                    rl_max_steps,
+                    seed,
+                    model_sha256_by_device[device_name],
+                    target_sha256_by_device[device_name],
                 ),
                 name=f"mqt-selector-{device_name}",
             )
@@ -1115,6 +1371,12 @@ def compile_resumably(
             "device": job.device_name,
             "attempt": state.current_attempt,
             "status": status,
+            "mode": "rl",
+            "model_sha256": model_sha256_by_device[job.device_name],
+            "mqt_predictor_version": package_version("mqt.predictor"),
+            "rl_max_steps": rl_max_steps,
+            "seed": seed,
+            "target_sha256": target_sha256_by_device[job.device_name],
             "error": error,
         }
         append_manifest(manifest_path, record)
@@ -1138,14 +1400,16 @@ def compile_resumably(
                     "attempt": attempt,
                     "status": status,
                     "mode": "rl",
+                    "model_sha256": model_sha256_by_device[job.device_name],
+                    "mqt_predictor_version": package_version("mqt.predictor"),
+                    "rl_max_steps": rl_max_steps,
+                    "seed": seed,
+                    "target_sha256": target_sha256_by_device[job.device_name],
                     "error": error,
                 },
             )
             processed_results += 1
-        print(
-            f"Modello RL {device_name} non disponibile: {error}. "
-            f"Tutte le sue coppie riceveranno lo score {WORST_SCORE}."
-        )
+        print(f"Modello RL {device_name} non disponibile: {error}.")
 
     try:
         refresh_device_queue()
@@ -1181,6 +1445,12 @@ def compile_resumably(
                                 "device": job.device_name,
                                 "attempt": attempt,
                                 "status": "running",
+                                "mode": "rl",
+                                "model_sha256": model_sha256_by_device[job.device_name],
+                                "mqt_predictor_version": package_version("mqt.predictor"),
+                                "rl_max_steps": rl_max_steps,
+                                "seed": seed,
+                                "target_sha256": target_sha256_by_device[job.device_name],
                                 "pid": state.process.pid,
                             },
                         )
@@ -1203,16 +1473,37 @@ def compile_resumably(
                                 "duration_seconds": message.get("duration_seconds"),
                             }
                             for field in (
-                                "passes",
-                                "mode",
-                                "fallback_reason",
-                                "rl_status",
                                 "error",
+                                "fallback_reason",
+                                "laid_out",
+                                "mode",
+                                "model_sha256",
+                                "mqt_predictor_version",
+                                "native",
+                                "num_steps",
+                                "passes",
+                                "qasm_sha256",
+                                "rl_max_steps",
+                                "rl_status",
+                                "routed",
+                                "seed",
+                                "target_sha256",
+                                "target_validation",
+                                "terminated",
+                                "termination_reason",
                                 "traceback",
+                                "truncated",
+                                "validation_version",
                             ):
                                 if field in message:
                                     record[field] = message[field]
-                            if is_strict_rl_success(record):
+                            if is_strict_rl_success(
+                                record,
+                                rl_max_steps=rl_max_steps,
+                                seed=seed,
+                                model_sha256=model_sha256_by_device[job.device_name],
+                                target_sha256=target_sha256_by_device[job.device_name],
+                            ):
                                 valid_job_keys.add(job.key)
                                 successful_results = len(valid_job_keys)
                             else:
@@ -1255,30 +1546,18 @@ def compile_resumably(
                         f"{job_key}; riavvio worker."
                     )
                     _terminate_worker_process(state.process)
-                    if (
-                        state.current_phase == "rl"
-                        and output_changed(state.current_job.output, state.current_output_version)
-                    ):
-                        valid_job_keys.add(state.current_job.key)
-                        successful_results = len(valid_job_keys)
-                        append_manifest(
-                            manifest_path,
-                            {
-                                "timestamp": utc_now(),
-                                "key": state.current_job.key,
-                                "circuit": state.current_job.circuit_name,
-                                "device": state.current_job.device_name,
-                                "attempt": state.current_attempt,
-                                "status": "success_recovered_after_timeout",
-                                "phase": state.current_phase,
-                            },
-                        )
-                    else:
-                        record_failure(
-                            state,
-                            "worker_watchdog_timeout",
-                            f"worker senza risposta in fase {state.current_phase}",
-                        )
+                    unverified_output = output_changed(
+                        state.current_job.output,
+                        state.current_output_version,
+                    )
+                    if unverified_output:
+                        state.current_job.output.unlink(missing_ok=True)
+                    record_failure(
+                        state,
+                        "worker_watchdog_timeout",
+                        f"worker senza risposta in fase {state.current_phase}"
+                        + ("; output non verificato rimosso" if unverified_output else ""),
+                    )
                     finished_devices.append(device_name)
                     continue
 
@@ -1299,30 +1578,18 @@ def compile_resumably(
                 if not state.process.is_alive():
                     state.process.join(timeout=1)
                     if state.current_job is not None:
-                        if (
-                            state.current_phase == "rl"
-                            and output_changed(state.current_job.output, state.current_output_version)
-                        ):
-                            valid_job_keys.add(state.current_job.key)
-                            successful_results = len(valid_job_keys)
-                            append_manifest(
-                                manifest_path,
-                                {
-                                    "timestamp": utc_now(),
-                                    "key": state.current_job.key,
-                                    "circuit": state.current_job.circuit_name,
-                                    "device": state.current_job.device_name,
-                                    "attempt": state.current_attempt,
-                                    "status": "success_recovered_after_timeout",
-                                    "phase": state.current_phase,
-                                },
-                            )
-                        else:
-                            record_failure(
-                                state,
-                                "worker_crash",
-                                f"worker terminato con exit code {state.process.exitcode}",
-                            )
+                        unverified_output = output_changed(
+                            state.current_job.output,
+                            state.current_output_version,
+                        )
+                        if unverified_output:
+                            state.current_job.output.unlink(missing_ok=True)
+                        record_failure(
+                            state,
+                            "worker_crash",
+                            f"worker terminato con exit code {state.process.exitcode}"
+                            + ("; output non verificato rimosso" if unverified_output else ""),
+                        )
                     elif not state.ready:
                         record_unavailable_device(
                             device_name,
@@ -1340,15 +1607,12 @@ def compile_resumably(
                 else:
                     completed_devices.add(device_name)
 
-            if not runtime.is_alive() and not runtime_failure_reported:
-                print(
-                    "ATTENZIONE: il runtime BQSKit condiviso si è arrestato; "
-                    "continuo senza interrompere il run. Le compilazioni RL "
-                    "falliranno rapidamente, riceveranno lo score minimo e il run "
-                    "proseguira con le altre coppie. "
-                    f"Dettagli: {log_dir / 'bqskit_server.log'}."
+            if not runtime.is_alive():
+                raise RuntimeError(
+                    "Il runtime BQSKit condiviso si è arrestato; il run è stato "
+                    "interrotto senza convertire compilazioni mancanti in score minimo. "
+                    f"Controlla {log_dir / 'bqskit_server.log'}."
                 )
-                runtime_failure_reported = True
 
             refresh_device_queue()
             launch_available_workers()
@@ -1424,6 +1688,12 @@ def choose_best_device(
     return device_names[winner_index]
 
 
+@lru_cache(maxsize=None)
+def scoring_device(device_name: str) -> Any:
+    """Reuse immutable Target descriptions while scoring many circuits."""
+    return get_device(device_name)
+
+
 def generate_training_sample(
     source: Path,
     compiled_dir: Path,
@@ -1436,7 +1706,7 @@ def generate_training_sample(
     scores: list[float] = []
 
     for device_name in device_names:
-        device = get_device(device_name)
+        device = scoring_device(device_name)
         key = f"{source.stem}|{device_name}"
         score = WORST_SCORE
         if source_circuit.num_qubits <= device.num_qubits and key in successful_rl_keys:
@@ -1473,16 +1743,32 @@ def generate_training_arrays(
     if not sources:
         raise SystemExit("Nessun circuito sorgente; training annullato.")
     device_names = [device.description for device in predictor.devices]
-    results = Parallel(n_jobs=num_workers, verbose=10)(
-        delayed(generate_training_sample)(
-            source,
-            compiled_dir,
-            metric,
-            device_names,
-            successful_rl_keys,
+    ordered_sources = sorted(sources)
+    if num_workers == 1:
+        results = []
+        for index, source in enumerate(ordered_sources, start=1):
+            results.append(
+                generate_training_sample(
+                    source,
+                    compiled_dir,
+                    metric,
+                    device_names,
+                    successful_rl_keys,
+                )
+            )
+            if index % 10 == 0 or index == len(ordered_sources):
+                print(f"Scoring ML: {index}/{len(ordered_sources)} circuiti.")
+    else:
+        results = Parallel(n_jobs=num_workers, verbose=10)(
+            delayed(generate_training_sample)(
+                source,
+                compiled_dir,
+                metric,
+                device_names,
+                successful_rl_keys,
+            )
+            for source in ordered_sources
         )
-        for source in sorted(sources)
-    )
     training_data = []
     names_list = []
     scores_list = []
@@ -1568,6 +1854,8 @@ def export_dataset_json(
     manifest_path: Path,
     device_names: list[str],
     output_path: Path,
+    strict_rl_keys: set[str],
+    run_metadata: dict[str, Any],
 ) -> None:
     """Write the single, human-readable device-selector dataset."""
     training_data = np.load(
@@ -1614,7 +1902,11 @@ def export_dataset_json(
             score_by_device[device_name] = score
             compiled_path = compiled_dir / f"{name}_{metric}-{device_name}.qasm"
             checkpoint = latest.get(f"{name}|{device_name}")
-            strict_rl = is_strict_rl_success(checkpoint) and is_valid_qasm(compiled_path)
+            strict_rl = (
+                f"{name}|{device_name}" in strict_rl_keys
+                and is_strict_rl_success(checkpoint)
+                and is_valid_qasm(compiled_path)
+            )
             if score > WORST_SCORE and not strict_rl:
                 raise SystemExit(
                     f"Score non-RL rilevato per {name}|{device_name}. "
@@ -1664,13 +1956,17 @@ def export_dataset_json(
         "worst_score": WORST_SCORE,
         "generated_at": utc_now(),
         "metric": metric,
-        "source_corpus": "600 circuiti device-selection inclusi in mqt.predictor 2.3.0",
+        "source_corpus": (
+            "circuiti device-selection inclusi in "
+            f"mqt.predictor {package_version('mqt.predictor')}"
+        ),
         "sample_count": len(records),
         "feature_count": len(feature_names),
         "devices": device_names,
         "label_distribution": dict(label_counts),
         "compilation_provenance": dict(provenance_counts),
         "feature_names": feature_names,
+        "run": run_metadata,
         "records": records,
     }
     atomic_json_write(output_path, payload)
@@ -1682,6 +1978,8 @@ def train_selector_model(
     training_data_dir: Path,
     model_path: Path,
     rf_workers: int,
+    seed: int,
+    expected_devices: list[str] | None,
 ) -> None:
     """Select hyperparameters on a holdout, then refit on every sample."""
     x, y = load_generated_training_arrays(metric, training_data_dir)
@@ -1691,7 +1989,7 @@ def train_selector_model(
     if len(y) < 20 or smallest_class < 2:
         classifier: Any = RandomForestClassifier(
             n_estimators=200,
-            random_state=0,
+            random_state=seed,
             class_weight="balanced",
         )
         classifier.fit(x, y)
@@ -1701,7 +1999,7 @@ def train_selector_model(
             x,
             y,
             test_size=0.3,
-            random_state=5,
+            random_state=seed,
             stratify=y,
         )
         train_counts = Counter(y_train)
@@ -1709,7 +2007,7 @@ def train_selector_model(
         if num_cv < 2:
             classifier = RandomForestClassifier(
                 n_estimators=500,
-                random_state=0,
+                random_state=seed,
                 class_weight="balanced",
             )
             classifier.fit(x_train, y_train)
@@ -1724,7 +2022,7 @@ def train_selector_model(
                 }
             ]
             classifier = GridSearchCV(
-                RandomForestClassifier(random_state=0, class_weight="balanced"),
+                RandomForestClassifier(random_state=seed, class_weight="balanced"),
                 tree_param,
                 cv=num_cv,
                 n_jobs=rf_workers,
@@ -1737,7 +2035,7 @@ def train_selector_model(
                 f"accuracy CV={classifier.best_score_:.4f}."
             )
             classifier = RandomForestClassifier(
-                random_state=0,
+                random_state=seed,
                 class_weight="balanced",
                 **classifier.best_params_,
             )
@@ -1749,7 +2047,18 @@ def train_selector_model(
     joblib_dump(classifier, temp)
     loaded = joblib_load(temp)
     loaded.predict_proba(x[:1])
+    learned_devices = set(map(str, loaded.classes_))
+    if expected_devices is not None and learned_devices != set(expected_devices):
+        temp.unlink(missing_ok=True)
+        missing = sorted(set(expected_devices) - learned_devices)
+        unexpected = sorted(learned_devices - set(expected_devices))
+        raise SystemExit(
+            "Il classificatore non copre esattamente i cinque device congelati. "
+            f"Mancanti={missing}; inattesi={unexpected}. "
+            "Il modello canonico non è stato aggiornato."
+        )
     os.replace(temp, model_path)
+    print("Classi apprese: " + ", ".join(sorted(learned_devices)))
     print("Distribuzione label: " + ", ".join(f"{label}={count}" for label, count in label_counts.items()))
 
 
@@ -1791,7 +2100,12 @@ def deploy_selector_artifacts(
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--devices", nargs="+", required=True, help="Device con un modello RL già addestrato.")
+    parser.add_argument(
+        "--devices",
+        nargs="+",
+        default=list(FROZEN_DEVICES),
+        help="Device con un modello RL già addestrato; default: i cinque del protocollo.",
+    )
     parser.add_argument(
         "--metric",
         choices=("expected_fidelity", "critical_depth"),
@@ -1803,6 +2117,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--log-dir", type=Path, help="Directory dei log del device selector.")
     parser.add_argument("--dataset-json", type=Path, help="Percorso del dataset JSON finale.")
     parser.add_argument("--timeout", type=int, default=300, help="Timeout della compilazione RL per coppia circuito/device.")
+    parser.add_argument(
+        "--rl-max-steps",
+        type=int,
+        default=64,
+        help="Numero massimo di azioni per episodio RL; distinto dal timeout in secondi.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Seed condiviso da policy RL, BQSKit e training del classificatore.",
+    )
     parser.add_argument("--startup-timeout", type=int, default=240, help="Timeout per caricare un modello RL.")
     parser.add_argument(
         "--fallback-timeout",
@@ -1826,7 +2152,7 @@ def parse_args() -> argparse.Namespace:
         "--num-workers",
         type=int,
         default=DEFAULT_WORKERS,
-        help="Modelli RL residenti e compilazioni parallele; 2 è sicuro con circa 8 GiB di RAM.",
+        help="Modelli RL residenti e compilazioni parallele; con circa 8 GiB usa 1 worker.",
     )
     parser.add_argument("--max-attempts", type=int, default=3, help="Tentativi totali per coppia circuito/device.")
     parser.add_argument("--rf-workers", type=int, default=4, help="Worker usati dal GridSearchCV finale.")
@@ -1836,6 +2162,11 @@ def parse_args() -> argparse.Namespace:
         "--skip-preflight",
         action="store_true",
         help="Salta il canary automatico di un circuito per device.",
+    )
+    parser.add_argument(
+        "--allow-target-drift",
+        action="store_true",
+        help="Consenti Target diversi dai fingerprint congelati; richiede rigenerare i competitor.",
     )
     parser.add_argument("--compile-only", action="store_true", help="Crea checkpoint QASM senza generare dataset/modello.")
     parser.add_argument("--finalize-only", action="store_true", help="Genera dataset/modello dai checkpoint esistenti.")
@@ -1847,7 +2178,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--allow-incomplete",
         action="store_true",
-        help=argparse.SUPPRESS,
+        help="Modalità esplorativa: usa solo circuiti con copertura completa e non pubblica il modello.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Mostra piano e copertura senza compilare o scrivere.")
     return parser.parse_args()
@@ -1861,13 +2192,23 @@ def main() -> int:
         raise SystemExit(
             "--compile-only, --finalize-only e --export-json-only sono mutuamente esclusivi."
         )
-    for name in ("timeout", "startup_timeout", "fallback_timeout", "num_workers", "max_attempts", "rf_workers", "progress_every"):
+    for name in (
+        "timeout",
+        "startup_timeout",
+        "fallback_timeout",
+        "rl_max_steps",
+        "num_workers",
+        "max_attempts",
+        "rf_workers",
+        "progress_every",
+    ):
         if getattr(args, name) <= 0:
             raise SystemExit(f"--{name.replace('_', '-')} deve essere positivo.")
     if args.limit_circuits is not None and args.limit_circuits <= 0:
         raise SystemExit("--limit-circuits deve essere positivo.")
     if os.name != "posix":
         raise SystemExit("Il runner robusto richiede Linux/WSL per process group e parent-death signal.")
+    np.random.seed(args.seed)
 
     source_dir = args.uncompiled_circuits or get_ml_training_circuits()
     if not source_dir.is_dir():
@@ -1889,19 +2230,125 @@ def main() -> int:
     device_names = [device.description for device in devices]
     if len(set(device_names)) != len(device_names):
         raise SystemExit("La lista --devices contiene duplicati.")
+    if not args.compile_only and not args.dry_run:
+        if tuple(device_names) != FROZEN_DEVICES or args.metric != FROZEN_FIGURE_OF_MERIT:
+            raise SystemExit(
+                "La finalizzazione pubblicabile richiede esattamente i cinque device "
+                "nell'ordine congelato e la metrica expected_fidelity."
+            )
 
-    missing_models = []
+    target_records = {
+        device.description: target_record(device)
+        for device in devices
+    }
+    target_sha256_by_device = {
+        name: str(record["target_sha256"])
+        for name, record in target_records.items()
+    }
+    target_mismatches = frozen_target_mismatches(devices)
+    if target_mismatches:
+        details = "\n".join(
+            f"  - {name}: atteso={values['expected']}, osservato={values['observed']}"
+            for name, values in sorted(target_mismatches.items())
+        )
+        message = (
+            "I Target MQT correnti differiscono dai fingerprint congelati "
+            "del protocollo migrato 2.4-v2:\n"
+            + details
+            + "\nPer confronti omogenei rigenera i competitor nello stesso ambiente. "
+            "Usa --allow-target-drift soltanto come bypass temporaneo del gate."
+        )
+        if not args.allow_target_drift:
+            raise SystemExit(message)
+        print("ATTENZIONE: " + message)
+    matches_frozen_protocol = bool(
+        tuple(device_names) == FROZEN_DEVICES
+        and args.metric == FROZEN_FIGURE_OF_MERIT
+        and not target_mismatches
+    )
+
+    runtime_model_paths: dict[str, Path] = {}
+    missing_models: list[Path] = []
     for device in devices:
         path = get_rl_model_dir() / f"model_{args.metric}_{device.description}.zip"
-        if not path.exists():
+        runtime_model_paths[device.description] = path
+        if not path.is_file():
             missing_models.append(path)
     if missing_models:
         formatted = "\n".join(f"  - {path}" for path in missing_models)
-        print("Modelli RL mancanti; le relative coppie riceveranno lo score minimo:\n" + formatted)
+        raise SystemExit("Modelli RL mancanti:\n" + formatted)
+    model_sha256_by_device = {
+        name: file_sha256(path)
+        for name, path in runtime_model_paths.items()
+    }
+    if matches_frozen_protocol:
+        metadata_problems: list[str] = []
+        for device_name in device_names:
+            metadata_path = (
+                CANONICAL_RL_MODELS_DIR
+                / runtime_model_paths[device_name].name
+            ).with_suffix(".metadata.json")
+            _metadata, errors = validate_rl_training_metadata(
+                metadata_path,
+                device_name=device_name,
+                model_sha256=model_sha256_by_device[device_name],
+                expected_max_steps=args.rl_max_steps,
+            )
+            metadata_problems.extend(
+                f"{device_name}: {error}" for error in errors
+            )
+        if metadata_problems:
+            formatted = "\n".join(f"  - {error}" for error in metadata_problems)
+            raise SystemExit(
+                "Le policy RL non attestano un training conforme a MQT Predictor "
+                "2.4.0 e al protocollo congelato:\n"
+                + formatted
+                + "\nCompleta prima scripts/03_train_rl_model.py per tutti i device."
+            )
+
 
     all_jobs, source_paths = build_jobs(source_dir, compiled_dir, device_names, args.metric)
     compile_jobs = select_compile_jobs(all_jobs, args.limit_circuits)
-    strict_before = strict_rl_success_keys(compile_jobs, manifest_path)
+    run_metadata: dict[str, Any] = {
+        "protocol": PROTOCOL_ID if matches_frozen_protocol else None,
+        "matches_frozen_protocol": matches_frozen_protocol,
+        "devices": device_names,
+        "figure_of_merit": args.metric,
+        "seed": args.seed,
+        "timeout_seconds": args.timeout,
+        "rl_max_steps": args.rl_max_steps,
+        "max_attempts": args.max_attempts,
+        "allow_target_drift": args.allow_target_drift,
+        "software": {
+            distribution: package_version(distribution)
+            for distribution in (
+                "mqt.predictor",
+                "mqt.bench",
+                "bqskit",
+                "qiskit",
+                "sb3-contrib",
+                "stable-baselines3",
+            )
+        },
+        "targets": target_records,
+        "rl_models": {
+            name: {
+                "path": project_path(runtime_model_paths[name]),
+                "sha256": model_sha256_by_device[name],
+            }
+            for name in device_names
+        },
+        "source_circuit_count": len(source_paths),
+        "compatible_compilation_count": len(all_jobs),
+    }
+    strict_before = strict_rl_success_keys(
+        compile_jobs,
+        manifest_path,
+        rl_max_steps=args.rl_max_steps,
+        seed=args.seed,
+        model_sha256_by_device=model_sha256_by_device,
+        target_sha256_by_device=target_sha256_by_device,
+    )
     valid_before = len(strict_before)
 
     per_device = Counter(job.device_name for job in all_jobs)
@@ -1916,7 +2363,14 @@ def main() -> int:
     print(f"Dataset JSON: {dataset_json}")
 
     if args.dry_run:
-        strict_keys = strict_rl_success_keys(all_jobs, manifest_path)
+        strict_keys = strict_rl_success_keys(
+            all_jobs,
+            manifest_path,
+            rl_max_steps=args.rl_max_steps,
+            seed=args.seed,
+            model_sha256_by_device=model_sha256_by_device,
+            target_sha256_by_device=target_sha256_by_device,
+        )
         _complete, missing = coverage_report(all_jobs, source_paths, strict_keys)
         print(f"Copertura RL corrente: {len(all_jobs) - len(missing)}/{len(all_jobs)}")
         return 0
@@ -1927,6 +2381,20 @@ def main() -> int:
 
     if args.export_json_only:
         runtime_data = get_ml_training_data() / "training_data_aggregated"
+        strict_keys = strict_rl_success_keys(
+            all_jobs,
+            manifest_path,
+            rl_max_steps=args.rl_max_steps,
+            seed=args.seed,
+            model_sha256_by_device=model_sha256_by_device,
+            target_sha256_by_device=target_sha256_by_device,
+        )
+        _complete, missing = coverage_report(all_jobs, source_paths, strict_keys)
+        if missing:
+            raise SystemExit(
+                "--export-json-only richiede copertura RL completa per la "
+                f"configurazione corrente; mancano {len(missing)} compilazioni."
+            )
         predictor = Predictor(devices=devices, figure_of_merit=args.metric)
         export_dataset_json(
             args.metric,
@@ -1935,6 +2403,8 @@ def main() -> int:
             manifest_path,
             [device.description for device in predictor.devices],
             dataset_json,
+            strict_keys,
+            run_metadata,
         )
         return 0
 
@@ -1954,6 +2424,10 @@ def main() -> int:
             compile_resumably(
                 preflight_jobs,
                 metric=args.metric,
+                rl_max_steps=args.rl_max_steps,
+                seed=args.seed,
+                model_sha256_by_device=model_sha256_by_device,
+                target_sha256_by_device=target_sha256_by_device,
                 num_workers=args.num_workers,
                 timeout=args.timeout,
                 startup_timeout=args.startup_timeout,
@@ -1965,17 +2439,28 @@ def main() -> int:
                 log_dir=log_dir,
                 progress_every=1,
             )
-            preflight_successes = strict_rl_success_keys(preflight_jobs, manifest_path)
+            preflight_successes = strict_rl_success_keys(
+                preflight_jobs,
+                manifest_path,
+                rl_max_steps=args.rl_max_steps,
+                seed=args.seed,
+                model_sha256_by_device=model_sha256_by_device,
+                target_sha256_by_device=target_sha256_by_device,
+            )
             failed_preflight = [job for job in preflight_jobs if job.key not in preflight_successes]
             if failed_preflight:
                 failed_names = ", ".join(job.device_name for job in failed_preflight)
-                print(
-                    "Preflight RL fallito per "
-                    f"{failed_names}: assegnero lo score minimo e continuero il run completo."
+                raise SystemExit(
+                    f"Preflight RL fallito per {failed_names}. "
+                    "Il run completo non è stato avviato; i checkpoint validi restano salvati."
                 )
         compile_resumably(
             compile_jobs,
             metric=args.metric,
+            rl_max_steps=args.rl_max_steps,
+            seed=args.seed,
+            model_sha256_by_device=model_sha256_by_device,
+            target_sha256_by_device=target_sha256_by_device,
             num_workers=args.num_workers,
             timeout=args.timeout,
             startup_timeout=args.startup_timeout,
@@ -1988,7 +2473,14 @@ def main() -> int:
             progress_every=args.progress_every,
         )
         if args.compile_only:
-            successful_rl_keys = strict_rl_success_keys(all_jobs, manifest_path)
+            successful_rl_keys = strict_rl_success_keys(
+                all_jobs,
+                manifest_path,
+                rl_max_steps=args.rl_max_steps,
+                seed=args.seed,
+                model_sha256_by_device=model_sha256_by_device,
+                target_sha256_by_device=target_sha256_by_device,
+            )
             complete_sources, missing = coverage_report(
                 all_jobs,
                 source_paths,
@@ -1997,32 +2489,69 @@ def main() -> int:
             print(
                 f"Compile-only terminato: {len(all_jobs) - len(missing)}/{len(all_jobs)} "
                 f"compilazioni RL, {len(complete_sources)}/{len(source_paths)} circuiti completi. "
-                "Le coppie fallite riceveranno lo score minimo durante la finalizzazione."
+                "La finalizzazione pubblicabile resterà bloccata finché la copertura "
+                "non sarà completa."
             )
             return 0
 
-    successful_rl_keys = strict_rl_success_keys(all_jobs, manifest_path)
+    successful_rl_keys = strict_rl_success_keys(
+        all_jobs,
+        manifest_path,
+        rl_max_steps=args.rl_max_steps,
+        seed=args.seed,
+        model_sha256_by_device=model_sha256_by_device,
+        target_sha256_by_device=target_sha256_by_device,
+    )
     complete_sources, missing = coverage_report(
         all_jobs,
         source_paths,
         successful_rl_keys,
     )
+    production_ready = not missing
+    missing_counts = Counter(job.device_name for job in missing)
+    run_metadata["coverage"] = {
+        "strict_successes": len(successful_rl_keys),
+        "required_compilations": len(all_jobs),
+        "complete_source_circuits": len(complete_sources),
+        "source_circuit_count": len(source_paths),
+        "missing_by_device": dict(sorted(missing_counts.items())),
+    }
+    run_metadata["publication_status"] = (
+        "production" if production_ready else "exploratory-incomplete"
+    )
+
     if missing:
-        missing_counts = Counter(job.device_name for job in missing)
-        print(
+        summary = (
             f"Compilazioni RL fallite o mancanti: {len(missing)}; "
-            f"copertura completa per {len(complete_sources)}/{len(source_paths)} circuiti."
+            f"copertura completa per {len(complete_sources)}/{len(source_paths)} circuiti. "
+            "Mancanti per device: "
+            + ", ".join(
+                f"{device}={count}"
+                for device, count in sorted(missing_counts.items())
+            )
+            + "."
         )
+        if not args.allow_incomplete:
+            raise SystemExit(
+                summary
+                + " Finalizzazione annullata: completa i checkpoint RL oppure usa "
+                "--allow-incomplete soltanto per un artefatto esplorativo non pubblicato."
+            )
+        if not complete_sources:
+            raise SystemExit(summary + " Nessun circuito completo da usare in modalità esplorativa.")
         print(
-            "Score minimo per device: "
-            + ", ".join(f"{device}={count}" for device, count in sorted(missing_counts.items()))
-            + ". Il training prosegue."
+            "MODALITÀ ESPLORATIVA: "
+            + summary
+            + " Uso soltanto i circuiti a copertura completa e non aggiorno gli artefatti canonici."
         )
+        selected_sources = complete_sources
+    else:
+        selected_sources = list(source_paths.values())
 
     predictor = Predictor(devices=devices, figure_of_merit=args.metric)
     generate_training_arrays(
         predictor,
-        list(source_paths.values()),
+        selected_sources,
         compiled_dir,
         staging_data_dir,
         args.metric,
@@ -2034,20 +2563,36 @@ def main() -> int:
         staging_data_dir,
         staged_model,
         args.rf_workers,
+        args.seed,
+        device_names if production_ready else None,
     )
+    staged_dataset = staging_dir / dataset_json.name
     export_dataset_json(
         args.metric,
         staging_data_dir,
         compiled_dir,
         manifest_path,
         [device.description for device in predictor.devices],
-        dataset_json,
+        staged_dataset,
+        successful_rl_keys,
+        run_metadata,
     )
+
+    if not production_ready:
+        print(f"Artefatto esplorativo: {staged_model}")
+        print(f"Dataset esplorativo: {staged_dataset}")
+        print("Gli artefatti canonici e runtime non sono stati modificati.")
+        return 0
+
     deploy_selector_artifacts(
         args.metric,
         staging_data_dir,
         staged_model,
     )
+    dataset_json.parent.mkdir(parents=True, exist_ok=True)
+    dataset_temp = dataset_json.with_name(f".{dataset_json.name}.{os.getpid()}.tmp")
+    shutil.copy2(staged_dataset, dataset_temp)
+    os.replace(dataset_temp, dataset_json)
     shutil.rmtree(staging_dir, ignore_errors=True)
     print("Pipeline conclusa: JSON e modello canonico sono aggiornati.")
     return 0

@@ -16,6 +16,7 @@ import os
 import zipfile
 from collections import Counter
 from datetime import UTC, datetime
+from importlib.metadata import version as package_version
 from pathlib import Path
 from statistics import fmean
 from typing import Any, Iterable
@@ -375,7 +376,10 @@ def build_record(source_record: dict[str, Any], source_dir: Path, hardware_catal
                 "name": circuit_name, "format": "OpenQASM 2", "sha256": sha256_text(source_qasm),
                 "qasm2": source_qasm, "summary": circuit_summary(source_circuit),
                 "features": {
-                    "extractor": "MQT Predictor 2.3.0 device-selector feature vector",
+                    "extractor": (
+                        f"MQT Predictor {package_version('mqt.predictor')} "
+                        "device-selector feature vector"
+                    ),
                     "feature_count": len(feature_names), "ordered_names": feature_names,
                     "ordered_values": feature_values, "by_name": {name: features[name] for name in feature_names},
                 },
