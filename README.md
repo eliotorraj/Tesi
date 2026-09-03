@@ -355,6 +355,12 @@ documentino la nuova prova di terminazione, validità sul Target e provenienza
 cinque i training**, mantenendo i vecchi file come baseline storica e non come
 punto di ripresa.
 
+Lo stesso gate è applicato dagli script di training ML e validazione `qcompile`:
+accettano soltanto modelli RL corredati da metadata 2.4.0 coerenti con device,
+metrica, hash del modello, Target congelato e profilo BQSKit. I cinque modelli
+storici restano quindi conservati, ma non possono entrare accidentalmente nel
+nuovo esperimento.
+
 Esecuzione sequenziale consigliata:
 
 ~~~bash
@@ -435,6 +441,11 @@ python scripts/04_train_device_selector.py \
 Rieseguire lo stesso comando riprende soltanto QASM con provenienza, hash,
 versione Predictor, modello RL, Target, seed e limite passi identici. I vecchi
 91 risultati non hanno queste prove e vengono quindi ignorati intenzionalmente.
+
+Con `--num-workers 1` estrazione delle feature e scoring sono eseguiti in un
+ciclo sequenziale diretto, riutilizzando in cache gli oggetti device. Questo
+evita sia il costo di migliaia di `deepcopy` sia l'errore secondario interno a
+Joblib che in precedenza compariva dopo `Ctrl-C`.
 
 Quando la copertura rigorosa è completa, generare Training set e modello ML:
 

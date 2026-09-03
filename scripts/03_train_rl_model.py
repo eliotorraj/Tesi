@@ -130,7 +130,7 @@ def save_model_atomically(model: MaskablePPO, final_path: Path) -> Path:
     temp_path = final_zip.with_name(f".{final_zip.stem}.{os.getpid()}.tmp.zip")
     temp_path.unlink(missing_ok=True)
     model.save(temp_path)
-    temp_path.replace(final_zip) #for every Path object, replace is an wrapped version of the raw os.replace function, they still do the same thing
+    temp_path.replace(final_zip)
     return final_zip
 
 
