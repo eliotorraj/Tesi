@@ -34,6 +34,9 @@ from mqt_predictor_protocol import EXPERIMENT_ROOT
 from mqt_predictor_protocol import PROTOCOL_ID
 from mqt_predictor_protocol import PROTOCOL_VERSION
 from mqt_predictor_protocol import SOURCE_MANIFEST_V2
+from mqt_predictor_protocol import RL_CHECKPOINT_EVERY
+from mqt_predictor_protocol import RL_ROLLOUT_STEPS
+from mqt_predictor_protocol import RL_TRAINING_TIMESTEPS
 from mqt_predictor_protocol import TRAINING_CIRCUITS_V2
 from mqt_predictor_protocol import file_sha256
 from mqt_predictor_protocol import package_version_mismatches
@@ -75,19 +78,37 @@ class AtomicCheckpointCallback(BaseCallback):
         self.name_prefix = name_prefix
         self.metadata_factory = metadata_factory
 
-    def _on_step(self) -> bool:
-        if self.n_calls % self.save_freq != 0:
-            return True
-        checkpoint = (
-            self.save_dir
-            / f"{self.name_prefix}_{self.model.num_timesteps}_steps.zip"
-        )
-        saved = save_model_atomically(self.model, checkpoint)
+    def _save(self, path: Path, num_timesteps: int) -> Path:
+        saved = save_model_atomically(self.model, path)
         write_training_metadata(
             saved.with_suffix(".metadata.json"),
-            self.metadata_factory(saved, int(self.model.num_timesteps)),
+            self.metadata_factory(saved, num_timesteps),
         )
-        print(f"Checkpoint atomico: {saved}", flush=True)
+        return saved
+
+    def _on_rollout_start(self) -> None:
+        # This hook runs after the previous PPO update. Saving from _on_step
+        # would capture a partially collected rollout that SB3 does not
+        # serialize, making an apparently aligned resume scientifically wrong.
+        num_timesteps = int(self.model.num_timesteps)
+        if num_timesteps <= 0:
+            return
+        rolling = self.save_dir / f"{self.name_prefix}_latest_rollout.zip"
+        saved_rolling = self._save(rolling, num_timesteps)
+        print(
+            f"Snapshot di ripresa aggiornato ({num_timesteps} step): "
+            f"{saved_rolling}",
+            flush=True,
+        )
+        if num_timesteps % self.save_freq == 0:
+            checkpoint = (
+                self.save_dir
+                / f"{self.name_prefix}_{num_timesteps}_steps.zip"
+            )
+            saved_checkpoint = self._save(checkpoint, num_timesteps)
+            print(f"Checkpoint periodico: {saved_checkpoint}", flush=True)
+
+    def _on_step(self) -> bool:
         return True
 
 
@@ -158,7 +179,7 @@ def load_model_or_exit(checkpoint: Path, **kwargs: Any) -> MaskablePPO:
             raise SystemExit(
                 "Checkpoint non caricabile, probabilmente per salvataggio interrotto o incompleto:\n"
                 f"  {checkpoint}\n"
-                "Riprendi da un checkpoint periodico precedente, per esempio *_2048_steps.zip.\n"
+                "Riprendi da un checkpoint periodico precedente *_steps.zip.\n"
                 f"Dettaglio PyTorch: {error}"
             ) from error
         raise
@@ -200,7 +221,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", required=True, help="Per esempio ibm_falcon_27.")
     parser.add_argument("--metric", choices=("expected_fidelity", "critical_depth"), default="expected_fidelity")
-    parser.add_argument("--timesteps", type=int, default=100_000)
+    parser.add_argument("--timesteps", type=int, default=RL_TRAINING_TIMESTEPS)
     parser.add_argument(
         "--training-circuits",
         type=Path,
@@ -213,7 +234,12 @@ def parse_args() -> argparse.Namespace:
         default=SOURCE_MANIFEST_V2,
         help="Manifest v2 usato per provare split e hash dei circuiti.",
     )
-    parser.add_argument("--checkpoint-every", type=int, default=2_048, help="Salva un checkpoint ogni N step.")
+    parser.add_argument(
+        "--checkpoint-every",
+        type=int,
+        default=RL_CHECKPOINT_EVERY,
+        help="Salva un checkpoint ogni N step.",
+    )
     parser.add_argument(
         "--max-steps",
         type=int,
@@ -256,10 +282,20 @@ def main() -> int:
         raise SystemExit("--timesteps deve essere positivo.")
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every deve essere positivo.")
+    if args.checkpoint_every % RL_ROLLOUT_STEPS:
+        raise SystemExit(
+            "--checkpoint-every deve essere un multiplo del rollout PPO "
+            f"({RL_ROLLOUT_STEPS})."
+        )
     if args.max_steps <= 0:
         raise SystemExit("--max-steps deve essere positivo.")
     if args.bqskit_action_timeout <= 0:
         raise SystemExit("--bqskit-action-timeout deve essere positivo.")
+    expected_final_timesteps = (
+        (args.timesteps + RL_ROLLOUT_STEPS - 1)
+        // RL_ROLLOUT_STEPS
+        * RL_ROLLOUT_STEPS
+    )
     if args.run_name and re.fullmatch(r"[A-Za-z0-9_.-]+", args.run_name) is None:
         raise SystemExit(
             "--run-name può contenere soltanto lettere, numeri, punto, trattino e underscore."
@@ -316,22 +352,26 @@ def main() -> int:
         metadata_path = args.resume_from.with_suffix(".metadata.json")
         from mqt_model_artifacts import validate_rl_training_metadata
 
-        _metadata, metadata_errors = validate_rl_training_metadata(
+        resume_metadata, metadata_errors = validate_rl_training_metadata(
             metadata_path,
             device_name=str(device.description),
             model_sha256=file_sha256(args.resume_from),
             expected_max_steps=args.max_steps,
         )
         try:
-            resume_metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            resume_metadata = {}
+            resume_timesteps = int(resume_metadata.get("num_timesteps"))
+        except (TypeError, ValueError):
+            resume_timesteps = -1
         if resume_metadata.get("training_manifest_sha256") != training_partition["manifest_sha256"]:
             metadata_errors.append("manifest dei circuiti di training diverso")
         if resume_metadata.get("training_split") != "train":
             metadata_errors.append("checkpoint non legato esclusivamente allo split train")
         if resume_metadata.get("seed") != args.seed:
             metadata_errors.append("seed del checkpoint diverso dalla run richiesta")
+        if "interrupted" in args.resume_from.stem:
+            metadata_errors.append("snapshot di emergenza non riprendibile")
+        if resume_timesteps % RL_ROLLOUT_STEPS:
+            metadata_errors.append("checkpoint non allineato a un rollout PPO completo")
         if metadata_errors:
             raise SystemExit(
                 "Checkpoint di ripresa privo di provenienza v2 compatibile:\n  - "
@@ -352,11 +392,20 @@ def main() -> int:
         / device.description
         / run_name
     )
-    if args.run_name and checkpoint_dir.exists() and any(checkpoint_dir.iterdir()) and not args.resume_from:
-        raise SystemExit(
-            f"La directory della run contiene già file: {checkpoint_dir}\n"
-            "Scegli un altro --run-name oppure usa --resume-from."
-        )
+    if args.run_name and checkpoint_dir.exists() and not args.resume_from:
+        existing_names = {path.name for path in checkpoint_dir.iterdir()}
+        restart_safe_names = {
+            f"{model_name}_interrupted.zip",
+            f"{model_name}_interrupted.metadata.json",
+        }
+        unexpected_names = sorted(existing_names - restart_safe_names)
+        if unexpected_names:
+            raise SystemExit(
+                f"La directory della run contiene già file: {checkpoint_dir}\n"
+                "Scegli un altro --run-name oppure usa --resume-from."
+            )
+        if existing_names:
+            print("Nessun rollout completo disponibile: la run riparte da zero.")
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     tensorboard_dir = EXPERIMENT_ROOT / "logs" / "rl" / model_name / run_name
     tensorboard_dir.mkdir(parents=True, exist_ok=True)
@@ -364,7 +413,8 @@ def main() -> int:
     print(
         f"Training RL: device={device.description}, metrica={args.metric}, "
         f"target={args.timesteps} step, max_steps={args.max_steps}, seed={args.seed}, "
-        f"bqskit_action_timeout={args.bqskit_action_timeout}s"
+        f"bqskit_action_timeout={args.bqskit_action_timeout}s, "
+        f"contatore finale atteso={expected_final_timesteps}"
     )
     print(f"Run: {run_name}")
     print(f"Checkpoint: {checkpoint_dir} (ogni {args.checkpoint_every} step)")
@@ -406,7 +456,7 @@ def main() -> int:
             verbose=2,
             tensorboard_log=str(tensorboard_dir),
             gamma=0.98,
-            n_steps=2048,
+            n_steps=RL_ROLLOUT_STEPS,
             batch_size=64,
             n_epochs=10,
             seed=args.seed,
@@ -415,6 +465,7 @@ def main() -> int:
 
     def metadata_for(saved_path: Path, num_timesteps: int) -> dict[str, Any]:
         return {
+            "checkpoint_every": args.checkpoint_every,
             "bqskit_action_timeout_seconds": args.bqskit_action_timeout,
             "bqskit_profile": "ci-lightweight-dynamic-synthesis",
             "device": str(device.description),
@@ -430,6 +481,7 @@ def main() -> int:
             "resume_from": str(args.resume_from.resolve()) if args.resume_from else None,
             "run_name": run_name,
             "seed": args.seed,
+            "rollout_steps": RL_ROLLOUT_STEPS,
             "started_at": started_at.isoformat(),
             "software": {
                 distribution: package_version(distribution)
@@ -465,13 +517,16 @@ def main() -> int:
             progress_bar=True,
         )
     except KeyboardInterrupt:
-        interrupted_path = checkpoint_dir / f"{model_name}_interrupted_{model.num_timesteps}_steps.zip"
+        interrupted_path = checkpoint_dir / f"{model_name}_interrupted.zip"
         saved_path = save_model_atomically(model, interrupted_path)
         write_training_metadata(
             saved_path.with_suffix(".metadata.json"),
             metadata_for(saved_path, int(model.num_timesteps)),
         )
-        print(f"\nTraining interrotto. Checkpoint di emergenza: {saved_path}")
+        print(
+            "\nTraining interrotto. Snapshot diagnostico di emergenza "
+            f"(non usato per la ripresa): {saved_path}"
+        )
         return 130
 
     # The workspace copy is authoritative. qcompile also requires a runtime

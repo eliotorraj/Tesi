@@ -32,6 +32,9 @@ from mqt_predictor_protocol import (  # noqa: E402
     FIGURE_OF_MERIT,
     FROZEN_DEVICES,
     QISKIT_WORKERS,
+    RL_CHECKPOINT_EVERY,
+    RL_FINAL_TIMESTEPS,
+    RL_ROLLOUT_STEPS,
     RL_TRAINING_TIMESTEPS,
     SOURCE_MANIFEST_V2,
     TRAINING_CIRCUITS_V2,
@@ -40,24 +43,16 @@ from mqt_predictor_protocol import (  # noqa: E402
 
 
 CATALOG_V2 = PROJECT_ROOT / "configs" / "qiskit_dataset_configurations_v2.json"
-RL_CHECKPOINT_EVERY = 2_048
 RL_MAX_STEPS = 64
 RL_BQSKIT_ACTION_TIMEOUT = 60
 RL_SEED = 0
 QISKIT_TIMEOUT_SECONDS = 300
+ML_CANARY_CIRCUITS = 10
 
 # Questi nomi descrivono soltanto la ripartizione operativa tra due computer.
 # Non sono dati scientifici e non cambiano il protocollo dei modelli.
 RL_GROUPS: dict[str, tuple[str, ...]] = {
-    "pc1": (
-        "ibm_falcon_127",
-        "ibm_heron_156",
-        "quantinuum_h2_56",
-    ),
-    "pc2": (
-        "ibm_falcon_27",
-        "ibm_heron_133",
-    ),
+    "models": FROZEN_DEVICES,
 }
 
 
@@ -98,7 +93,7 @@ def canonical_rl_problems(device_name: str) -> tuple[Path, list[str]]:
         device_name=device_name,
         model_sha256=file_sha256(model),
         expected_max_steps=RL_MAX_STEPS,
-        expected_num_timesteps=RL_TRAINING_TIMESTEPS,
+        expected_num_timesteps=RL_FINAL_TIMESTEPS,
     )
     errors.extend(metadata_errors)
     return model, errors
@@ -130,6 +125,10 @@ def checkpoint_problems(path: Path, device_name: str) -> tuple[int, list[str]]:
         steps = int(metadata.get("num_timesteps"))
     except (TypeError, ValueError):
         steps = -1
+    if "interrupted" in path.stem:
+        errors.append("snapshot di emergenza non riprendibile")
+    if steps % RL_ROLLOUT_STEPS:
+        errors.append("checkpoint non allineato a un rollout PPO completo")
     if steps >= RL_TRAINING_TIMESTEPS:
         errors.append(
             "checkpoint già al target finale: controlla perché manca "
@@ -160,6 +159,12 @@ def latest_valid_checkpoint(device_name: str) -> Path | None:
         else:
             valid.append((steps, path))
     if not valid:
+        if rejected and all(
+            "snapshot di emergenza non riprendibile" in item
+            for item in rejected
+        ):
+            print("Nessun rollout PPO completo salvato: ripartenza da zero.")
+            return None
         details = "\n  - ".join(rejected)
         raise SystemExit(
             f"La directory {directory} contiene checkpoint, ma nessuno è "
@@ -272,6 +277,38 @@ def run_prepare(_args: argparse.Namespace) -> None:
         numbered_script("06_prepare_experiment_v2.py"),
         numbered_script("11_freeze_method_plan_v2.py", "--split", "validation"),
         numbered_script("11_freeze_method_plan_v2.py", "--split", "test"),
+    )
+    for command in commands:
+        run_checked(command)
+
+
+def run_ml_canary(args: argparse.Namespace) -> None:
+    """Compila un lotto train riutilizzabile per calibrare il timeout ML."""
+    commands = (
+        numbered_script(
+            "05_sync_models.py", "install", "--component", "rl", "--overwrite"
+        ),
+        numbered_script("05_sync_models.py", "verify", "--component", "rl"),
+        numbered_script(
+            "04_train_device_selector.py",
+            "--timeout",
+            args.timeout,
+            "--startup-timeout",
+            args.startup_timeout,
+            "--rl-max-steps",
+            RL_MAX_STEPS,
+            "--seed",
+            RL_SEED,
+            "--num-workers",
+            args.num_workers,
+            "--max-attempts",
+            args.max_attempts,
+            "--rf-workers",
+            1,
+            "--limit-circuits",
+            args.limit_circuits,
+            "--compile-only",
+        ),
     )
     for command in commands:
         run_checked(command)
@@ -432,6 +469,14 @@ def print_plan(_args: argparse.Namespace) -> None:
     payload = {
         "rl_groups": {name: list(devices) for name, devices in RL_GROUPS.items()},
         "canonical_rl_models": str(CANONICAL_RL_MODEL_DIR_V2),
+        "parallel_roles": {
+            "dataset_pc": ["qiskit-canary", "qiskit-full"],
+            "models_pc": ["rl --group models", "ml-canary", "ml"],
+        },
+        "rl_checkpoint_every": RL_CHECKPOINT_EVERY,
+        "rl_rollout_steps": RL_ROLLOUT_STEPS,
+        "rl_requested_timesteps": RL_TRAINING_TIMESTEPS,
+        "rl_expected_final_timesteps": RL_FINAL_TIMESTEPS,
         "training_circuits": str(TRAINING_CIRCUITS_V2),
         "source_manifest": str(SOURCE_MANIFEST_V2),
         "qiskit_catalog": str(CATALOG_V2),
@@ -491,6 +536,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Non cercare automaticamente il checkpoint più avanzato.",
     )
     rl.set_defaults(handler=run_rl)
+
+    ml_canary = subparsers.add_parser(
+        "ml-canary",
+        help="Crea checkpoint train riutilizzabili per calibrare il timeout ML.",
+    )
+    ml_canary.add_argument("--timeout", type=positive_int, default=300)
+    ml_canary.add_argument("--startup-timeout", type=positive_int, default=240)
+    ml_canary.add_argument("--num-workers", type=positive_int, default=1)
+    ml_canary.add_argument("--max-attempts", type=positive_int, default=1)
+    ml_canary.add_argument(
+        "--limit-circuits",
+        type=positive_int,
+        default=ML_CANARY_CIRCUITS,
+    )
+    ml_canary.set_defaults(handler=run_ml_canary)
 
     ml = subparsers.add_parser(
         "ml",
