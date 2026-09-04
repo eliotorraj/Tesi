@@ -13,6 +13,10 @@ La guida completa, con dipendenze, protezioni contro il leakage, comandi di
 training, popolamento, ripresa e apertura del test, è in
 [docs/protocollo_sperimentale_v2.md](docs/protocollo_sperimentale_v2.md).
 
+La sequenza operativa semplificata per due computer, senza array o cicli Bash,
+è in
+[docs/procedura_operativa_pipeline_v2.md](docs/procedura_operativa_pipeline_v2.md).
+
 Stato attuale:
 
 - è sicuro avviare il popolamento Qiskit full di train e validation;
