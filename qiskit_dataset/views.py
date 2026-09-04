@@ -210,6 +210,8 @@ def _summary_record(
     )
     return {
         "schema_version": AGGREGATE_SCHEMA_VERSION,
+        "experiment_id": catalog.experiment_id,
+        "protocol_version": catalog.protocol_version,
         "summary_id": summary_id,
         "dataset_scope": scope,
         "split": circuit["split"],
@@ -848,6 +850,8 @@ def build_rag_examples(
         examples.append(
             {
                 "schema_version": RAG_SCHEMA_VERSION,
+                "experiment_id": first.get("experiment_id"),
+                "protocol_version": first.get("protocol_version"),
                 "rag_id": rag_id,
                 "split": "train",
                 "view_scope": label["view_scope"],
@@ -977,8 +981,14 @@ def build_dataset_views(
         objective_name,
         scope,
         selected_device_id,
+        catalog.experiment_id,
     )
-    manifest = load_manifest(scope, objective_name, selected_device_id)
+    manifest = load_manifest(
+        scope,
+        objective_name,
+        selected_device_id,
+        catalog.experiment_id,
+    )
     runs_path = output_root / "qiskit_runs.jsonl"
     runs = read_jsonl(runs_path)
     target_record = _load_target_record(
@@ -993,6 +1003,14 @@ def build_dataset_views(
         top_k=top_k,
         device_order=catalog.supported_device_ids,
     )
+    if catalog.experiment_id is not None:
+        from scripts.mqt_predictor_protocol import assert_records_belong_to_split
+
+        assert_records_belong_to_split(
+            rag_examples,
+            allowed_split="train",
+            manifest=manifest,
+        )
 
     aggregate_path = output_root / "qiskit_configuration_aggregates.jsonl"
     rag_path = output_root / "rag_examples.jsonl"
@@ -1009,6 +1027,8 @@ def build_dataset_views(
     )
     statistics = {
         "schema_version": SCHEMA_VERSION,
+        "experiment_id": catalog.experiment_id,
+        "protocol_version": catalog.protocol_version,
         "record_schema_versions": {
             "manifest": MANIFEST_SCHEMA_VERSION,
             "run": SCHEMA_VERSION,

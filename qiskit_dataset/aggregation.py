@@ -88,6 +88,8 @@ def _validate_manifest(
         raise ValueError(f"Scope incoerente nel manifest di {device_id}.")
     if manifest.get("catalog_id") != catalog.catalog_id:
         raise ValueError(f"Catalogo incoerente nel manifest di {device_id}.")
+    if manifest.get("experiment_id") != catalog.experiment_id:
+        raise ValueError(f"Esperimento incoerente nel manifest di {device_id}.")
     if manifest.get("objective") != catalog.objective:
         raise ValueError(f"Objective incoerente nel manifest di {device_id}.")
     if list(manifest.get("seeds", [])) != list(catalog.seeds):
@@ -114,6 +116,7 @@ def _validate_manifest(
             str(catalog.objective["name"]),
             scope,
             source_ref,
+            catalog.experiment_id,
         )
         if not source_path.is_file():
             raise FileNotFoundError(f"Circuito condiviso mancante: {source_path}.")
@@ -368,7 +371,11 @@ def aggregate_device_datasets(
         raise ValueError("top_k deve essere positivo.")
 
     objective_name = str(catalog.objective["name"])
-    scope_root = dataset_scope_root(objective_name, scope)
+    scope_root = dataset_scope_root(
+        objective_name,
+        scope,
+        experiment_id=catalog.experiment_id,
+    )
     available = _available_devices(scope_root, catalog)
     if device_ids is None:
         selected_devices = available
@@ -513,6 +520,17 @@ def aggregate_device_datasets(
         top_k=top_k,
         device_order=catalog.supported_device_ids,
     )
+    if catalog.experiment_id is not None:
+        from scripts.mqt_predictor_protocol import assert_records_belong_to_split
+
+        manifest_for_partition = _load_json(
+            scope_root / selected_devices[0] / "split_manifest.json"
+        )
+        assert_records_belong_to_split(
+            rag_examples,
+            allowed_split="train",
+            manifest=manifest_for_partition,
+        )
 
     output_root = scope_root / GLOBAL_VIEW_DIRECTORY
     runs_output = output_root / "qiskit_runs.jsonl"
@@ -522,6 +540,8 @@ def aggregate_device_datasets(
     status_counts = Counter(str(run["status"]) for run in all_runs)
     statistics: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
+        "experiment_id": catalog.experiment_id,
+        "protocol_version": catalog.protocol_version,
         "dataset_scope": scope,
         "objective": objective_name,
         "view_type": "global_multi_device",
