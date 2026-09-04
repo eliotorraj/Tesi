@@ -1,0 +1,2907 @@
+{
+  "circuit_count": 90,
+  "configuration_order": [
+    "o2_default_default",
+    "o3_default_default",
+    "o2_sabre_sabre",
+    "o2_dense_sabre",
+    "o2_trivial_sabre",
+    "o3_sabre_sabre",
+    "o3_dense_sabre",
+    "o3_trivial_sabre",
+    "o2_sabre_lookahead",
+    "o2_sabre_basic",
+    "o3_sabre_lookahead",
+    "o3_sabre_basic"
+  ],
+  "device_order": [
+    "ibm_falcon_27",
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56"
+  ],
+  "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "plan_sha256": "13e7da619c6ed1d5c72c8d5ebe551df03fc8f5b6cb0dbb3a0ebe0e7a5541d132",
+  "protocol_version": "2.0.0",
+  "qcompile_repetition_indices": [
+    0,
+    1,
+    2
+  ],
+  "qiskit_seeds": [
+    0,
+    1,
+    2
+  ],
+  "random_selection": {
+    "algorithm": "python_random_v3_mt19937_randrange",
+    "rows": [
+      {
+        "circuit_id": "groundstate_medium_indep_qiskit_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "d41da9752a9c3c4137339eef2a29e8b7608714a6a7c16e6d95c0e7afa2b781a4",
+        "split": "test"
+      },
+      {
+        "circuit_id": "groundstate_medium_indep_tket_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "00db2572b64928c7e7ac8822614a9095e2339826b1bc9744d8521d00156c2390",
+        "split": "test"
+      },
+      {
+        "circuit_id": "groundstate_small_indep_qiskit_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "234c2112a60e1cc64f3703ac3fd6899e70e866fee654f4291a8402d7c982a636",
+        "split": "test"
+      },
+      {
+        "circuit_id": "groundstate_small_indep_tket_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "f07e587ed9d242696204f66084b35567f297f5ad53a5c9c5ded598ffa1c62023",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_10",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "624202a633f5257d888bc1f452bb286d74cedb1d44403d8d9a0b722d72845e65",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_11",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "8e59e0b57607900cb98ee56449d14e5a34ca97842ffc0840e2e33bc9f2186a2c",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "f59dab5cbc8992e702520b5b775dbe3dd5d094d428e8286d95497b824429987d",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_13",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "b1c6c407b1526bc180c19c8422bb3c9759e3ca57c6b91f77242f577d0cb98f99",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_14",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "fae418daaaa9c478ac21fcb2f153af6d081d7fd59654013eaff1eacc20829216",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_15",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "3221e2e68074513006958fc54669ed44dd9444b45f3f2af3a6bf79fab181fd31",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_16",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "726089173ddacb31d16889a24b973cc51b062508c36b62ba6aed535b12a96be3",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_2",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "0a43a3dbe4a4294a007fa7ec167a24ea300d3762489b98245c2f80ad29727075",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_3",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "56289d5fdefe63c89244b0849f2e22753ce30832776d74b79de4603006db32f4",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_30",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "6c20987350005658cbd2be04df95d8995bf7f91e58ee79b94760491799ca218b",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "af7e7c49ba06f5c554580173d3dcd73bc9d5a9dd9c6e3d3cd8c94d494fa4b969",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_40",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "e88d4a8d9e67caffc9b4fbdc21ebcf6de15f76b915c5100c1a77eff1ebe3b5ed",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_5",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "7478da09664f4489c33c18a6ea1974cc9dea86d1adda1f912c3eaeff27c2d5fa",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_50",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "11c59d30940f7ce693131d20e9782d3e23f0c90045893e42151e3d2d058ee821",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_6",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "abe368f160ce73db792b3af14a6e120eda4838b15f01376daa204a680d07c5bc",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_60",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "86885f65a419cec7cfb3c3948854667ed1df9c96e9edeb57db94efb20490b65f",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_7",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "d06936015124a75ae15e1f94eeb54cc51ab24596726b8110765a69ba66d0e80a",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_70",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "d5e315324810e4787e37f220cdf3423ecc951baba03c72e12a786beaf60be9fa",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_8",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "5d3cc38ff0e2b9054c927b6309c6a8dfaba491733eab08b06cc06f2d333da23d",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_qiskit_9",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "31f7b2533d8a3c05d59b44a9b2d93f44bc48da630d1884cf9df0012199e10a74",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_10",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "c782e7ffea4614fb29a56e57c7e44493fa2e936e97c85d8ca47f8794163bcc4c",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_11",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "7d8a490986f56db4cd07d17de268c0ba6901009f908cfd1746babd5a5c38c792",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "002eebefb7369f0880eb7002aebc195b70b126f8b8ca39ebd40400facaa29d1b",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_13",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "de9333e4c22d8ee0baddad5def1cd801be1533c730a9dd9e77c229bfe0bd044d",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_14",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "a0bb0449fbcfa89d617c1cec32e4ef6ca530699579a7539a06b464e47e2fb5cf",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_15",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "d1d0b930e970df0f27b5f121c45691006fafc32a9e2c109b9c7c9c54824abe36",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_2",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "7317c983c99f43fd590b2a523fc1ea3a807194f62acc17b1abfbdab92d498632",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_3",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "61036a93a932d5c9ccc7b261beda13a347422c5dd865b7ac49193b59bde3d482",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_30",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "b706803de92397849ff5502324d36b0fba7d3528dc8b246218b28efb12b55f1e",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "efc87260f8234c59f6305385d8c29a3ee5f1a8c67352387a3e1d3c7245e93e10",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_40",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "4663345ddcae1d8efc408dd53dcbad408bc0e28a9e535f6862bf782f43173136",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_5",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "0e6da5877693c065a7d4d953442f3fd5bdd6ae1586ab8843f39edac0fc2da268",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_50",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "18525ffd2ca5513db714f94f465162d6f97984d3d22321399eb72114913166c7",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_6",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "549d48e49ee93f93ae9e901265c750ef20dcca267b637e25c833f1f252260d74",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_60",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "f6adacf29372e8ed53d9fff55dec0a44e8c9a8602bd01cf88e36a5d0db7e87f7",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_7",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "14b02572a5aab88aae9d7752dcb6c928d77965ee5fb1c7311a05d8134f0b5354",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_8",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "374eee68068690fc9f58d225f742d4a4ef065b778a7da5b81699a867ab9d1663",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeexact_indep_tket_9",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "64c3c7ee852a0efd85c1ef3bb9c562b0e1e2828d4a52db804a7bae7184a4adff",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_10",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "5f9b5fd6cdab5be5699c0700197dcdad1f4c09772ac436ccfccae3e45e9f240e",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_11",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "80f399491431096f0d725350345e1c8884831f4184fe1ef47a71152d055b1d5f",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "cff0cf26ba643311baf5d3573e561389b3b1c39841089dfe6d214581bfeddcb1",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_13",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "90095afd2a4a6123fcbeb51259a134f327e22a5d5fb33831e63667ed4e841c93",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_14",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "416a28600797867f5ab6bd17d490e648873cc33c862aeec8cc7f3523c64151c4",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_15",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "cd20a58a011f9fa716409ad584f8d410c7ddccbb017e9d720af1406e44b3ffaf",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_16",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "ba1364f1b9afd1a40ac3fe883c34d1fc305559633bfd8b8401aeae8298c16c36",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_2",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "acacd76111e7f23e4224342ca0ab5340b1bdaad3b6eba8893e4036ba14896362",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_3",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "afa0cd93480bae81feca2afdcb909ab13c2934f76b139c27872b18658e5c1f28",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_30",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "72b8e881d45d72390170e160e815fe937c1244ed4871971d34fb72c1eb2d4812",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "1d76cd981622e5ca02125654d00534f3aec623bbb2b95b7ea894049f76916577",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_40",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "cefea1a1b3be20458dc0267315f838cf95186812c12de9d0f8219b0785fe208b",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_5",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "f37f599f25c5024b4069e866a31563a6daf0b1495d17d25343f7b3cfac1169ee",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_50",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "9cd9a46b20de7ba204affebbb65112e859c30de65e190b139579c09ee3f659e5",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_6",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "c658b0f6c564cc6b7d6d48105e5567caf0660181ca2dbad8b9bdbdd353962fd6",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_60",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "6c7dc85d19452ff455db8b49796166900d9544043bc3f10075f5b6b1dcb425f5",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_7",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "093af0605e834bf0a4f2aef0b46600d12c6b1c913e791fb13e2513048a6b1c70",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_70",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "e47fe93dfc9645269d7182ac8bee6642f5db719c6496d30579e2371249f0cd21",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_8",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "82da8e687716ed31c95e72560edb07e7f6073a5be0f5ebffb17d22aff22c81fd",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_qiskit_9",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "81a66b1daaf97d148a8a075515daf8702349d257883a1dd88e26993c1622351f",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_10",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "9b784050139fadaa392eda390a2e9304904938af6b0b5cd2635c9da9883b6a1c",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_11",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "bf3a18375a4dca133f2536f5670e57c73356229caf2fad5fa70e35f6f5f268ae",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "9644237b24830cef7be7c59414eeff64915691cef309bb957759deb0c42140af",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_13",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "bde6764c0230a513ffb450f31950c5225d8f0faf8bd4eab25eec8b4ccc14583d",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_14",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "ae0a425cc4bca45a9fb2c182a67f36b9af118488a4e3d090b6239098b3856159",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_15",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "a84132872af3b962dd4bd1e4f837f31d5633439d26630972be398c8c6c92985b",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_2",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "5075635ae3b9128db5c5562113f2dec45242375ae9baee56bcfc14bded502be8",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_3",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "15f27762f4e2ef4b9d4d29b27688f192373ec6357dc31a293daed45141c335a3",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_30",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "53e58f163882e7fb731f1a90eb8633b7685175ad5ebfb47a78bf1f8370293492",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "dfdb1f708adae1f118856a16748a20116d9dbec2d428ce638e13fa7dc035dce7",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_40",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "d70d788c2c43f910a40328247172de049f59d7755f2b0dcebff986c9213e5cfb",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_5",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "a74e19b5f72f934bceef74e99145ea1ccd85e61c0b2e354e310a977781d062ea",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_50",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "7ab37a8533c08bb664610d1e40445bb98bfa0e2b5cc2bdbda0cb6577a4c6c2dd",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_6",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "a81efae04a86d2cdc8f7741ca788482e164bd145dc0de6ba6b1604b3772d8da3",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_60",
+        "compatible_device_ids": [
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "a9601926e464d4e249ede7a3f8b56d7ee3510ed6333e7e5bcd2f2b308d158e28",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_7",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "18c3bcee1582c8dc2bd2d9a4fb5cd97b2aff7336dbc1556954d4574f8bffada1",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_8",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "2dd041ccbd7449869ba817f8ce0b42faa650241fa6a75a46a4b24fb780f6b428",
+        "split": "test"
+      },
+      {
+        "circuit_id": "qpeinexact_indep_tket_9",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_133"
+          }
+        ],
+        "source_sha256": "0a533674a3ba50f797287efa4fa0109d6b03c9dc46cbb572af1b31571e84f0e7",
+        "split": "test"
+      },
+      {
+        "circuit_id": "routing_indep_qiskit_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "15d3114b54a812987003fe40c055a06de94cf009083c618d516fd8792f55e9eb",
+        "split": "test"
+      },
+      {
+        "circuit_id": "routing_indep_qiskit_2",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "a2a13906aaf51409fa0e9a22929243187248a837552c6acdf7b95873b706d54e",
+        "split": "test"
+      },
+      {
+        "circuit_id": "routing_indep_qiskit_6",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "35c6db49d3eb018424a4191d84236d75607a11a404d7599f34db90c5ce9c62dd",
+        "split": "test"
+      },
+      {
+        "circuit_id": "routing_indep_tket_12",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_trivial_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          }
+        ],
+        "source_sha256": "e1c7c893ff8ae0e4a17d0f413d8c5afc585374d05faf42fc8fcaceb7925ca88c",
+        "split": "test"
+      },
+      {
+        "circuit_id": "routing_indep_tket_2",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "8a38d1ea7a0aa6766f1f29d23c2d64bfc53cfda99366920f887d6d71c6a754ce",
+        "split": "test"
+      },
+      {
+        "circuit_id": "routing_indep_tket_6",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_heron_133"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_sabre",
+            "selected_device_id": "ibm_heron_156"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_default_default",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "3e9df8096e0aa32d9a02f30d529f03b9a6f2b3da3588f0db6540c426b57fc1d7",
+        "split": "test"
+      },
+      {
+        "circuit_id": "tsp_indep_qiskit_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_default_default",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "c622bf36b764ff1b8e3697f6d0121c4c18d26667c73e5ab4ea7863303aaceb67",
+        "split": "test"
+      },
+      {
+        "circuit_id": "tsp_indep_qiskit_9",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "quantinuum_h2_56"
+          }
+        ],
+        "source_sha256": "e075926ef9653a2b53961309d031fc31a38e5f843e3e7f146c0c6bb79b611b3c",
+        "split": "test"
+      },
+      {
+        "circuit_id": "tsp_indep_tket_4",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o3_sabre_basic",
+            "selected_device_id": "quantinuum_h2_56"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o3_trivial_sabre",
+            "selected_device_id": "ibm_heron_156"
+          }
+        ],
+        "source_sha256": "9e7a4949fd25fc4dd0b670e2eacb1e9dcc4b4a9f48961713531f5297c0b5688d",
+        "split": "test"
+      },
+      {
+        "circuit_id": "tsp_indep_tket_9",
+        "compatible_device_ids": [
+          "ibm_falcon_27",
+          "ibm_heron_133",
+          "ibm_falcon_127",
+          "ibm_heron_156",
+          "quantinuum_h2_56"
+        ],
+        "repetitions": [
+          {
+            "qiskit_seed": 0,
+            "repetition_index": 0,
+            "selected_config_id": "o2_sabre_basic",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 1,
+            "repetition_index": 1,
+            "selected_config_id": "o2_sabre_lookahead",
+            "selected_device_id": "ibm_falcon_27"
+          },
+          {
+            "qiskit_seed": 2,
+            "repetition_index": 2,
+            "selected_config_id": "o2_dense_sabre",
+            "selected_device_id": "ibm_falcon_127"
+          }
+        ],
+        "source_sha256": "5934a91ceddc4681102bad91c595c0dee96edf7ddb96ce47492dfdc58c621175",
+        "split": "test"
+      }
+    ],
+    "seed": 20260901
+  },
+  "required_llm_methods": [
+    "llm_rag",
+    "llm_no_rag",
+    "frontier_llm"
+  ],
+  "schema_version": "1.0.0",
+  "source_manifest_content_sha256": "d1e87dae335f8bef1c6b67f4e91360b0f76c8cf9022a605c95569d62e25e106a",
+  "split": "test"
+}

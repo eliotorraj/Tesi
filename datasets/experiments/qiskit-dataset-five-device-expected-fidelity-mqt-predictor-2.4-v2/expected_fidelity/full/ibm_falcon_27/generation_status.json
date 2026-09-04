@@ -1,0 +1,61 @@
+{
+  "available_attempts": 2,
+  "available_status": {
+    "success": 2
+  },
+  "cache_hits": 1,
+  "cache_root": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/qiskit_dataset_cache/expected_fidelity",
+  "complete": false,
+  "dataset_scope": "full",
+  "device_id": "ibm_falcon_27",
+  "executed_now": 1,
+  "executed_status": {
+    "success": 1
+  },
+  "execution_policy": {
+    "timeout_seconds": 300.0,
+    "wall_clock_seconds_this_invocation": 8.468759825999769,
+    "workers": 2
+  },
+  "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "missing_attempts": 14758,
+  "objective": "expected_fidelity",
+  "output": "qiskit_runs.jsonl",
+  "planned_attempts": 14760,
+  "protocol_version": "2.0.0",
+  "schema_version": "1.0.0",
+  "selected_attempts": 12204,
+  "selected_complete": false,
+  "split_filter": "train",
+  "target": {
+    "coupling_edge_count": 56,
+    "description": "ibm_falcon_27",
+    "device_id": "ibm_falcon_27",
+    "fingerprint_schema_version": 2,
+    "num_qubits": 27,
+    "operation_names": [
+      "box",
+      "break",
+      "continue",
+      "cx",
+      "delay",
+      "for_loop",
+      "id",
+      "if_else",
+      "measure",
+      "reset",
+      "rz",
+      "switch_case",
+      "sx",
+      "while_loop",
+      "x"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104",
+    "target_type": "qiskit.transpiler.target.Target"
+  }
+}

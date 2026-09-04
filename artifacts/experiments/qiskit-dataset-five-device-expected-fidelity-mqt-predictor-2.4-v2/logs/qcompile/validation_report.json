@@ -1,0 +1,250 @@
+{
+  "artifact_problems": [
+    "model_expected_fidelity_ibm_falcon_27.zip:canonical:file mancante",
+    "model_expected_fidelity_ibm_heron_133.zip:canonical:file mancante",
+    "model_expected_fidelity_ibm_falcon_127.zip:canonical:file mancante",
+    "model_expected_fidelity_ibm_heron_156.zip:canonical:file mancante",
+    "model_expected_fidelity_quantinuum_h2_56.zip:canonical:file mancante",
+    "trained_clf_expected_fidelity.joblib:canonical:file mancante",
+    "trained_clf_expected_fidelity.joblib:runtime:classi non conformi al protocollo: attese=['ibm_falcon_27', 'ibm_heron_133', 'ibm_falcon_127', 'ibm_heron_156', 'quantinuum_h2_56'], osservate=['ibm_falcon_127']"
+  ],
+  "artifacts": {
+    "model_expected_fidelity_ibm_falcon_127.zip": {
+      "canonical": {
+        "errors": [
+          "file mancante"
+        ],
+        "kind": "rl",
+        "path": "/home/elioe/Tesi/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/rl/model_expected_fidelity_ibm_falcon_127.zip"
+      },
+      "runtime": {
+        "action_count": 22,
+        "archive_members": 6,
+        "errors": [],
+        "kind": "rl",
+        "num_timesteps": 100240,
+        "observation_keys": [
+          "critical_depth",
+          "depth",
+          "entanglement_ratio",
+          "liveness",
+          "num_qubits",
+          "parallelism",
+          "program_communication"
+        ],
+        "path": "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/trained_model/model_expected_fidelity_ibm_falcon_127.zip",
+        "sb3_version": "2.4.1",
+        "size_bytes": 1536354472
+      }
+    },
+    "model_expected_fidelity_ibm_falcon_27.zip": {
+      "canonical": {
+        "errors": [
+          "file mancante"
+        ],
+        "kind": "rl",
+        "path": "/home/elioe/Tesi/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/rl/model_expected_fidelity_ibm_falcon_27.zip"
+      },
+      "runtime": {
+        "action_count": 22,
+        "archive_members": 6,
+        "errors": [],
+        "kind": "rl",
+        "num_timesteps": 100720,
+        "observation_keys": [
+          "critical_depth",
+          "depth",
+          "entanglement_ratio",
+          "liveness",
+          "num_qubits",
+          "parallelism",
+          "program_communication"
+        ],
+        "path": "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/trained_model/model_expected_fidelity_ibm_falcon_27.zip",
+        "sb3_version": "2.4.1",
+        "size_bytes": 1536353794
+      }
+    },
+    "model_expected_fidelity_ibm_heron_133.zip": {
+      "canonical": {
+        "errors": [
+          "file mancante"
+        ],
+        "kind": "rl",
+        "path": "/home/elioe/Tesi/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/rl/model_expected_fidelity_ibm_heron_133.zip"
+      },
+      "runtime": {
+        "action_count": 22,
+        "archive_members": 6,
+        "errors": [],
+        "kind": "rl",
+        "num_timesteps": 100480,
+        "observation_keys": [
+          "critical_depth",
+          "depth",
+          "entanglement_ratio",
+          "liveness",
+          "num_qubits",
+          "parallelism",
+          "program_communication"
+        ],
+        "path": "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/trained_model/model_expected_fidelity_ibm_heron_133.zip",
+        "sb3_version": "2.4.1",
+        "size_bytes": 1536354475
+      }
+    },
+    "model_expected_fidelity_ibm_heron_156.zip": {
+      "canonical": {
+        "errors": [
+          "file mancante"
+        ],
+        "kind": "rl",
+        "path": "/home/elioe/Tesi/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/rl/model_expected_fidelity_ibm_heron_156.zip"
+      },
+      "runtime": {
+        "action_count": 22,
+        "archive_members": 6,
+        "errors": [],
+        "kind": "rl",
+        "num_timesteps": 100352,
+        "observation_keys": [
+          "critical_depth",
+          "depth",
+          "entanglement_ratio",
+          "liveness",
+          "num_qubits",
+          "parallelism",
+          "program_communication"
+        ],
+        "path": "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/trained_model/model_expected_fidelity_ibm_heron_156.zip",
+        "sb3_version": "2.4.1",
+        "size_bytes": 1536355144
+      }
+    },
+    "model_expected_fidelity_quantinuum_h2_56.zip": {
+      "canonical": {
+        "errors": [
+          "file mancante"
+        ],
+        "kind": "rl",
+        "path": "/home/elioe/Tesi/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/rl/model_expected_fidelity_quantinuum_h2_56.zip"
+      },
+      "runtime": {
+        "action_count": 22,
+        "archive_members": 6,
+        "errors": [],
+        "kind": "rl",
+        "num_timesteps": 60000,
+        "observation_keys": [
+          "critical_depth",
+          "depth",
+          "entanglement_ratio",
+          "liveness",
+          "num_qubits",
+          "parallelism",
+          "program_communication"
+        ],
+        "path": "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/rl/training_data/trained_model/model_expected_fidelity_quantinuum_h2_56.zip",
+        "sb3_version": "2.4.1",
+        "size_bytes": 1536357797
+      }
+    },
+    "trained_clf_expected_fidelity.joblib": {
+      "canonical": {
+        "errors": [
+          "file mancante"
+        ],
+        "kind": "ml",
+        "path": "/home/elioe/Tesi/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/ml/trained_clf_expected_fidelity.joblib"
+      },
+      "runtime": {
+        "classes": [
+          "ibm_falcon_127"
+        ],
+        "classifier_type": "sklearn.ensemble._forest.RandomForestClassifier",
+        "errors": [
+          "classi non conformi al protocollo: attese=['ibm_falcon_27', 'ibm_heron_133', 'ibm_falcon_127', 'ibm_heron_156', 'quantinuum_h2_56'], osservate=['ibm_falcon_127']"
+        ],
+        "feature_count": 49,
+        "kind": "ml",
+        "path": "/home/elioe/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/trained_model/trained_clf_expected_fidelity.joblib",
+        "size_bytes": 47921
+      }
+    }
+  },
+  "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "figure_of_merit": "expected_fidelity",
+  "frozen_devices": [
+    "ibm_falcon_27",
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56"
+  ],
+  "generated_at": "2026-09-04T10:04:38.081111+00:00",
+  "limits": {
+    "max_steps": 64,
+    "timeout_seconds": 300
+  },
+  "packages": {
+    "mqt.bench": "2.2.3",
+    "mqt.predictor": "2.4.0",
+    "qiskit": "2.5.0",
+    "sb3-contrib": "2.9.0",
+    "stable-baselines3": "2.9.0",
+    "torch": "2.13.0"
+  },
+  "protocol": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "protocol_version": "2.0.0",
+  "results": [],
+  "schema_version": "1.0.0",
+  "source_circuit": {
+    "name": "ae_indep_qiskit_10.qasm",
+    "sha256": "78ad3c5b3703b2eab8229c1bb5133f438fc458f489ff650fdca1fff38fe922f2"
+  },
+  "status": "blocked_before_canary",
+  "target_drift": [],
+  "target_fingerprint_schema_version": 2,
+  "target_fingerprints": {
+    "ibm_falcon_127": {
+      "differs_from_legacy_native_data": true,
+      "expected": "5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd",
+      "legacy_comparable_observed": "d857b68374bb2b9fdf1096ed31efd38c409107cbaf6474baac70a34b741907a1",
+      "legacy_qiskit_dataset": "225e5f6fd85af0b37a1dd7c6306dd046a8c7ca585f135dda6e6418dd16f76b48",
+      "matches_frozen": true,
+      "observed": "5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd"
+    },
+    "ibm_falcon_27": {
+      "differs_from_legacy_native_data": true,
+      "expected": "b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104",
+      "legacy_comparable_observed": "26635440926845b45d938185c4d45022c84d3bc48fe7e82fd35f1b0b9ae31218",
+      "legacy_qiskit_dataset": "f30536987677ef5017fe3a89b8b4ee0a3e7252a1a226cc3db95fd9b2e822d991",
+      "matches_frozen": true,
+      "observed": "b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104"
+    },
+    "ibm_heron_133": {
+      "differs_from_legacy_native_data": true,
+      "expected": "2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3",
+      "legacy_comparable_observed": "4694e431568f7db80a416f72268a7e9b6088b13609e88e59ce429705a8749ffe",
+      "legacy_qiskit_dataset": "804f28754ad200e42a328ba910639c9d6fd3233dff35035e7f3cb85a2fc5168a",
+      "matches_frozen": true,
+      "observed": "2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3"
+    },
+    "ibm_heron_156": {
+      "differs_from_legacy_native_data": true,
+      "expected": "207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003",
+      "legacy_comparable_observed": "9bc83e5a4e185e9b4f0c0b144e9ca868a6b6c3217b1da53538e771fe3675f3b2",
+      "legacy_qiskit_dataset": "a30f41e65c03fb900a4b8852261a8407c56c389560f4031ecb43099c1bec5089",
+      "matches_frozen": true,
+      "observed": "207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003"
+    },
+    "quantinuum_h2_56": {
+      "differs_from_legacy_native_data": false,
+      "expected": "ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee",
+      "legacy_comparable_observed": "8c5576ac2f280a98f797dceb53186f97500e901d9784cc328187e156cbbe9b8f",
+      "legacy_qiskit_dataset": "8c5576ac2f280a98f797dceb53186f97500e901d9784cc328187e156cbbe9b8f",
+      "matches_frozen": true,
+      "observed": "ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee"
+    }
+  }
+}
