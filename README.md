@@ -1,6 +1,27 @@
-# Dataset Qiskit diretto e prototipo dell'assistente quantistico
+# Esperimento MQT Predictor e assistente quantistico
 
-## 1. Spiegazione generale
+## Protocollo corrente: versione 2.0
+
+La nuova pipeline usa MQT Predictor 2.4.0, MQT Bench 2.2.3, Qiskit 2.5.0 e
+Python 3.12. Confronta LLM con e senza RAG, un LLM di frontiera, qcompile,
+Qiskit predefinito, una scelta casuale e l'oracle esaustivo.
+
+Il protocollo 1.0 e i risultati basati sulla pila 2.3.0 restano intatti. Tutti
+gli output 2.0 hanno un nuovo identificativo e directory separate.
+
+La guida completa, con dipendenze, protezioni contro il leakage, comandi di
+training, popolamento, ripresa e apertura del test, è in
+[docs/protocollo_sperimentale_v2.md](docs/protocollo_sperimentale_v2.md).
+
+Stato attuale:
+
+- è sicuro avviare il popolamento Qiskit full di train e validation;
+- è sicuro avviare i cinque training RL;
+- il test resta sigillato;
+- qcompile non è ancora pronto, perché mancano i modelli addestrati;
+- i tre modelli LLM devono ancora essere scelti e congelati.
+
+## 1. Protocollo 1.0 conservato
 
 Questo ramo, `qiskit_dataset`, raccoglie due parti collegate del progetto:
 
@@ -128,7 +149,7 @@ uv.lock
 
 ## 3. Implementazione
 
-### Ambiente riproducibile
+### Ambiente riproducibile del protocollo 1.0
 
 L'ambiente di riferimento usa Ubuntu, oppure Ubuntu su WSL2, e Python 3.12. Le
 versioni principali sono:
@@ -269,7 +290,7 @@ datasets/expected_fidelity/pilot/global/rag_examples.jsonl
 git diff --check
 ```
 
-### Sviluppi successivi
+### Sviluppi successivi del protocollo 1.0
 
 I prossimi passi sono:
 

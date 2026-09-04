@@ -16,3 +16,6 @@ datasets/device_selector_*.json
 datasets/llm_mqt_full_pipeline_*.json
 .backups/
 artifacts/qiskit_dataset_cache/expected_fidelity/*
+# Artefatti pesanti e risultati del protocollo 2.0: si rigenerano dai manifest.
+artifacts/experiments/
+datasets/experiments/
