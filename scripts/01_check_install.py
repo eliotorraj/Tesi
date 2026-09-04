@@ -24,7 +24,7 @@ from mqt_predictor_protocol import (
     FROZEN_TARGET_SHA256,
     LEGACY_QISKIT_DATASET_TARGET_SHA256,
     PROTOCOL_ID,
-    RL_TRAINING_TIMESTEPS,
+    RL_FINAL_TIMESTEPS,
     TARGET_FINGERPRINT_SCHEMA_VERSION,
     file_sha256,
     target_sha256,
@@ -82,7 +82,7 @@ def validate_model_pair(
                 device_name=device_name,
                 model_sha256=canonical_digest,
                 expected_max_steps=64,
-                expected_num_timesteps=RL_TRAINING_TIMESTEPS,
+                expected_num_timesteps=RL_FINAL_TIMESTEPS,
             )
             problems.extend(
                 f"metadati: {message}" for message in metadata_errors

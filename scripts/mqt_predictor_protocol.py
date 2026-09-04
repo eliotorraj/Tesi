@@ -21,6 +21,15 @@ FIGURE_OF_MERIT = "expected_fidelity"
 COMPILATION_TIMEOUT_SECONDS = 300
 QISKIT_WORKERS = 2
 RL_TRAINING_TIMESTEPS = 100_000
+RL_ROLLOUT_STEPS = 2_048
+RL_CHECKPOINT_EVERY = 5 * RL_ROLLOUT_STEPS
+# Stable-Baselines3 completa sempre il rollout corrente. Il target richiesto
+# resta 100000, mentre il contatore finale attestato è quindi 49 * 2048.
+RL_FINAL_TIMESTEPS = (
+    (RL_TRAINING_TIMESTEPS + RL_ROLLOUT_STEPS - 1)
+    // RL_ROLLOUT_STEPS
+    * RL_ROLLOUT_STEPS
+)
 PROTOCOL_ID = "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2"
 TARGET_FINGERPRINT_SCHEMA_VERSION = 2
 LEGACY_IGNORED_CONTROL_FLOW_OPERATIONS = frozenset(

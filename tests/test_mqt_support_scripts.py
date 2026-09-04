@@ -32,6 +32,10 @@ from mqt_predictor_protocol import FROZEN_TARGET_SHA256  # noqa: E402
 from mqt_predictor_protocol import EXPERIMENT_ID  # noqa: E402
 from mqt_predictor_protocol import PROTOCOL_ID  # noqa: E402
 from mqt_predictor_protocol import PROTOCOL_VERSION  # noqa: E402
+from mqt_predictor_protocol import RL_CHECKPOINT_EVERY  # noqa: E402
+from mqt_predictor_protocol import RL_FINAL_TIMESTEPS  # noqa: E402
+from mqt_predictor_protocol import RL_ROLLOUT_STEPS  # noqa: E402
+from mqt_predictor_protocol import RL_TRAINING_TIMESTEPS  # noqa: E402
 
 
 def load_script(name: str, filename: str):
@@ -81,7 +85,7 @@ class ModelArtifactTests(unittest.TestCase):
                     )
                     payload = json.dumps(
                         {
-                            "num_timesteps": 100_000,
+                            "num_timesteps": RL_FINAL_TIMESTEPS,
                             "action_space": {"n": str(EXPECTED_ACTION_COUNT)},
                             "observation_space": {"spaces": "{" + spaces + "}"},
                         }
@@ -108,6 +112,7 @@ class ModelArtifactTests(unittest.TestCase):
         device_name = FROZEN_DEVICES[0]
         path = self.root / "model.metadata.json"
         payload = {
+            "checkpoint_every": RL_CHECKPOINT_EVERY,
             "bqskit_profile": EXPECTED_RL_BQSKIT_PROFILE,
             "device": device_name,
             "experiment_id": EXPERIMENT_ID,
@@ -115,13 +120,15 @@ class ModelArtifactTests(unittest.TestCase):
             "max_steps": 64,
             "model_sha256": "model-digest",
             "mqt_predictor_version": "2.4.0",
-            "num_timesteps": 100_000,
+            "num_timesteps": RL_FINAL_TIMESTEPS,
             "protocol": PROTOCOL_ID,
             "protocol_version": PROTOCOL_VERSION,
+            "rollout_steps": RL_ROLLOUT_STEPS,
             "target": {
                 "target_sha256": FROZEN_TARGET_SHA256[device_name],
             },
             "target_matches_frozen_protocol": True,
+            "target_timesteps": RL_TRAINING_TIMESTEPS,
             "training_circuit_count": 422,
             "training_split": "train",
         }

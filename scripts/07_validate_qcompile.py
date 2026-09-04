@@ -36,7 +36,7 @@ from mqt_predictor_protocol import (
     LEGACY_QISKIT_DATASET_TARGET_SHA256,
     PROTOCOL_ID,
     PROTOCOL_VERSION,
-    RL_TRAINING_TIMESTEPS,
+    RL_FINAL_TIMESTEPS,
     SOURCE_MANIFEST_V2,
     TARGET_FINGERPRINT_SCHEMA_VERSION,
     file_sha256,
@@ -378,7 +378,7 @@ def artifact_readiness(expected_max_steps: int) -> tuple[dict[str, Any], list[st
                     device_name=device_name,
                     model_sha256=item["canonical_sha256"],
                     expected_max_steps=expected_max_steps,
-                    expected_num_timesteps=RL_TRAINING_TIMESTEPS,
+                    expected_num_timesteps=RL_FINAL_TIMESTEPS,
                 )
                 item["training_metadata"] = {**metadata, "errors": errors}
                 problems.extend(

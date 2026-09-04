@@ -6,7 +6,8 @@ La pipeline 2.0 è pronta per avviare il popolamento Qiskit di train e
 validation e i cinque addestramenti RL.
 
 Non è ancora possibile dichiarare pronto qcompile. Mancano i cinque modelli RL
-da 100000 step e il classificatore ML con cinque classi. Manca anche la scelta
+con target richiesto 100000 e contatore finale atteso 100352, e il
+classificatore ML con cinque classi. Manca anche la scelta
 definitiva dei tre metodi LLM. Per questo il test resta sigillato.
 
 Il popolamento completo non è stato avviato in questa preparazione. Sono stati
@@ -198,8 +199,13 @@ proseguire senza ricominciare.
 
 ## Popolamento Qiskit di train e validation
 
-Questo è il comando completo da avviare sull'altro computer. Non comprende il
-test:
+Questa fase si avvia sul PC Dataset e può procedere in parallelo ai training RL
+sul PC Modelli. Non dipende dai modelli RL/ML e non comprende il test. Il
+comando operativo è:
+
+    .venv/bin/python scripts/16_run_pipeline_v2.py qiskit-full
+
+La sequenza esplicita equivalente richiamata dall'orchestratore è:
 
     for device in ibm_falcon_27 ibm_heron_133 ibm_falcon_127 ibm_heron_156 quantinuum_h2_56
     do
@@ -240,45 +246,57 @@ resta nel Dataset e nel denominatore.
 
 ## Cinque training RL sequenziali
 
-I modelli pubblicabili devono raggiungere esattamente 100000 step, usare seed
-0, max_steps 64 e il profilo BQSKit registrato nei metadati. I comandi sono:
+I modelli pubblicabili ricevono un target di 100000 step, usano seed 0,
+max_steps 64 e il profilo BQSKit registrato nei metadati. PPO lavora con
+rollout da 2048 step e completa l'ultimo rollout: il contatore finale atteso è
+100352. I checkpoint sono allineati ogni 10240 step, cioè ogni cinque rollout.
+Un singolo latest_rollout viene inoltre sovrascritto dopo ogni aggiornamento
+PPO completo: limita lo spazio occupato ma permette una ripresa precisa. Gli
+snapshot interrupted sono diagnostici e non sono candidati di ripresa.
+
+Sul PC Modelli il comando operativo sequenziale è:
+
+    .venv/bin/python scripts/16_run_pipeline_v2.py rl --group models
+
+I comandi espliciti equivalenti richiamati dall'orchestratore sono:
 
     .venv/bin/python scripts/03_train_rl_model.py \
       --device ibm_falcon_27 \
-      --timesteps 100000 --checkpoint-every 2048 \
+      --timesteps 100000 --checkpoint-every 10240 \
       --max-steps 64 --bqskit-action-timeout 60 \
       --seed 0 --run-name v2-ibm-falcon-27-seed0
 
     .venv/bin/python scripts/03_train_rl_model.py \
       --device ibm_heron_133 \
-      --timesteps 100000 --checkpoint-every 2048 \
+      --timesteps 100000 --checkpoint-every 10240 \
       --max-steps 64 --bqskit-action-timeout 60 \
       --seed 0 --run-name v2-ibm-heron-133-seed0
 
     .venv/bin/python scripts/03_train_rl_model.py \
       --device ibm_falcon_127 \
-      --timesteps 100000 --checkpoint-every 2048 \
+      --timesteps 100000 --checkpoint-every 10240 \
       --max-steps 64 --bqskit-action-timeout 60 \
       --seed 0 --run-name v2-ibm-falcon-127-seed0
 
     .venv/bin/python scripts/03_train_rl_model.py \
       --device ibm_heron_156 \
-      --timesteps 100000 --checkpoint-every 2048 \
+      --timesteps 100000 --checkpoint-every 10240 \
       --max-steps 64 --bqskit-action-timeout 60 \
       --seed 0 --run-name v2-ibm-heron-156-seed0
 
     .venv/bin/python scripts/03_train_rl_model.py \
       --device quantinuum_h2_56 \
-      --timesteps 100000 --checkpoint-every 2048 \
+      --timesteps 100000 --checkpoint-every 10240 \
       --max-steps 64 --bqskit-action-timeout 60 \
       --seed 0 --run-name v2-quantinuum-h2-56-seed0
 
 Ogni checkpoint ha un file metadata accanto. Una ripresa usa lo stesso target
-finale di 100000 step:
+richiesto di 100000 step; il modello conforme termina comunque con contatore
+100352:
 
     .venv/bin/python scripts/03_train_rl_model.py \
       --device ibm_falcon_27 \
-      --timesteps 100000 --checkpoint-every 2048 \
+      --timesteps 100000 --checkpoint-every 10240 \
       --max-steps 64 --bqskit-action-timeout 60 \
       --seed 0 --run-name v2-ibm-falcon-27-seed0 \
       --resume-from PERCORSO_DEL_CHECKPOINT.zip
@@ -288,16 +306,25 @@ rifiutato. Non usare --allow-target-drift per risultati confermativi.
 
 ## Training set e classificatore ML
 
-Dopo i cinque training RL:
+Dopo i cinque training RL si esegue prima un lotto compile-only riutilizzabile:
 
-    .venv/bin/python scripts/04_train_device_selector.py \
-      --timeout 300 \
-      --startup-timeout 240 \
-      --rl-max-steps 64 \
-      --seed 0 \
-      --num-workers 1 \
-      --max-attempts 3 \
-      --rf-workers 1
+    .venv/bin/python scripts/16_run_pipeline_v2.py ml-canary
+
+Non esistono ancora misure ML pregresse pertinenti; i tempi Qiskit non sono
+trasferibili alla compilazione tramite policy RL. Il canary usa i primi 10
+circuiti train, un worker, un tentativo e un tetto provvisorio di 300 secondi.
+Registra stato e duration_seconds nel manifest durevole:
+
+    artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/cache/ml/expected_fidelity/manifest.jsonl
+
+Il timeout completo si decide dopo questo campione. Un valore inferiore è
+ammesso soltanto se resta superiore, con margine, a tutte le durate dei
+successi riutilizzati e il campione fornisce evidenza sufficiente; altrimenti
+resta 300. Il valore scelto viene registrato nei metadati della run.
+
+Il run completo è:
+
+    .venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout SECONDI_SCELTI
 
 Il comando usa soltanto i 422 circuiti train. Ogni coppia
 circuito-dispositivo ha un checkpoint durevole. Sono accettate solo
@@ -408,7 +435,7 @@ Il test può essere aperto solo se sono veri tutti questi gate:
 5. piani validation e test identici a quelli ricalcolati;
 6. matrice Qiskit validation completa;
 7. indice RAG composto soltanto da train;
-8. cinque modelli RL da 100000 step e classificatore ML a cinque classi;
+8. cinque modelli RL con target 100000, contatore 100352 e classificatore ML a cinque classi;
 9. cinque canary RL e un canary qcompile riusciti;
 10. valutazione validation completa.
 

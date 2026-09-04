@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
+from unittest.mock import patch
 
 from mqt.predictor.rl import actions as predictor_actions
 from mqt.predictor.rl.actions import bqskit_actions as predictor_bqskit_actions
@@ -82,6 +83,50 @@ class RLTrainingRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(after, before)
 
+
+    def test_checkpoint_callback_saves_after_completed_rollouts(self) -> None:
+        checkpoint_dir = Path("/tmp/checkpoints")
+        callback = TRAIN_RL.AtomicCheckpointCallback(
+            save_freq=10_240,
+            save_dir=checkpoint_dir,
+            name_prefix="model",
+            metadata_factory=lambda path, steps: {
+                "path": str(path),
+                "num_timesteps": steps,
+            },
+        )
+        callback.model = SimpleNamespace(num_timesteps=0)
+
+        def fake_save(_model: Any, path: Path) -> Path:
+            return path
+
+        with (
+            patch.object(
+                TRAIN_RL,
+                "save_model_atomically",
+                side_effect=fake_save,
+            ) as save,
+            patch.object(TRAIN_RL, "write_training_metadata") as metadata,
+        ):
+            callback._on_rollout_start()
+            self.assertEqual(save.call_count, 0)
+
+            callback.model.num_timesteps = 2_048
+            callback._on_rollout_start()
+            self.assertEqual(
+                save.call_args_list[-1].args[1].name,
+                "model_latest_rollout.zip",
+            )
+
+            callback.model.num_timesteps = 10_240
+            callback._on_rollout_start()
+
+        saved_names = [call.args[1].name for call in save.call_args_list]
+        self.assertEqual(
+            saved_names,
+            ["model_latest_rollout.zip", "model_latest_rollout.zip", "model_10240_steps.zip"],
+        )
+        self.assertEqual(metadata.call_count, 3)
     def test_bqskit_action_timeout_interrupts_a_stalled_action(self) -> None:
         with self.assertRaises(TRAIN_RL.BQSKitActionTimeoutError):
             with TRAIN_RL.bqskit_action_timeout(0.01):

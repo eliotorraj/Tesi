@@ -23,7 +23,7 @@ from mqt_model_artifacts import (
 from mqt_predictor_protocol import (
     CANONICAL_MODEL_ROOT_V2,
     FROZEN_DEVICES,
-    RL_TRAINING_TIMESTEPS,
+    RL_FINAL_TIMESTEPS,
     file_sha256,
 )
 
@@ -159,7 +159,7 @@ def verify_pair(pair: ArtifactPair) -> list[str]:
                 device_name=device_name,
                 model_sha256=canonical_digest,
                 expected_max_steps=64,
-                expected_num_timesteps=RL_TRAINING_TIMESTEPS,
+                expected_num_timesteps=RL_FINAL_TIMESTEPS,
             )
             errors.extend(f"metadati: {message}" for message in provenance_errors)
         else:
@@ -188,7 +188,7 @@ def canonical_provenance_errors(pair: ArtifactPair) -> list[str]:
             device_name=device_name,
             model_sha256=digest,
             expected_max_steps=64,
-            expected_num_timesteps=RL_TRAINING_TIMESTEPS,
+            expected_num_timesteps=RL_FINAL_TIMESTEPS,
         )
     else:
         _metadata, errors = validate_ml_training_metadata(

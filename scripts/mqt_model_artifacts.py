@@ -18,6 +18,9 @@ from mqt_predictor_protocol import (
     FROZEN_DEVICES,
     FROZEN_TARGET_SHA256,
     PROTOCOL_ID,
+    RL_CHECKPOINT_EVERY,
+    RL_FINAL_TIMESTEPS,
+    RL_ROLLOUT_STEPS,
     PROTOCOL_VERSION,
     RL_TRAINING_TIMESTEPS,
 )
@@ -178,6 +181,7 @@ def validate_rl_training_metadata(
 
     expected = {
         "bqskit_profile": EXPECTED_RL_BQSKIT_PROFILE,
+        "checkpoint_every": RL_CHECKPOINT_EVERY,
         "device": device_name,
         "experiment_id": EXPERIMENT_ID,
         "figure_of_merit": FIGURE_OF_MERIT,
@@ -187,7 +191,9 @@ def validate_rl_training_metadata(
         "protocol_version": PROTOCOL_VERSION,
         "target_matches_frozen_protocol": True,
         "training_circuit_count": EXPECTED_SPLIT_COUNTS["train"],
+        "rollout_steps": RL_ROLLOUT_STEPS,
         "training_split": "train",
+        "target_timesteps": RL_TRAINING_TIMESTEPS,
     }
     for field, expected_value in expected.items():
         if loaded.get(field) != expected_value:
@@ -333,7 +339,7 @@ def validate_ml_training_metadata(
 def validate_model_set(
     *,
     expected_max_steps: int = 64,
-    expected_num_timesteps: int = RL_TRAINING_TIMESTEPS,
+    expected_num_timesteps: int = RL_FINAL_TIMESTEPS,
 ) -> tuple[dict[str, Any], list[str]]:
     """Controlla le copie canoniche/runtime e tutta la provenienza qcompile."""
     from mqt.predictor.ml.helper import get_path_training_data

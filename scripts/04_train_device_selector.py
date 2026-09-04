@@ -56,7 +56,7 @@ from mqt_predictor_protocol import FIGURE_OF_MERIT as FROZEN_FIGURE_OF_MERIT
 from mqt_predictor_protocol import MQT_TRAINING_SET_V2
 from mqt_predictor_protocol import PROTOCOL_ID
 from mqt_predictor_protocol import PROTOCOL_VERSION
-from mqt_predictor_protocol import RL_TRAINING_TIMESTEPS
+from mqt_predictor_protocol import RL_FINAL_TIMESTEPS
 from mqt_predictor_protocol import SOURCE_MANIFEST_V2
 from mqt_predictor_protocol import TRAINING_CIRCUITS_V2
 from mqt_predictor_protocol import file_sha256
@@ -2240,7 +2240,7 @@ def main() -> int:
                 device_name=device_name,
                 model_sha256=model_sha256_by_device[device_name],
                 expected_max_steps=args.rl_max_steps,
-                expected_num_timesteps=RL_TRAINING_TIMESTEPS,
+                expected_num_timesteps=RL_FINAL_TIMESTEPS,
             )
             metadata_problems.extend(
                 f"{device_name}: {error}" for error in errors
