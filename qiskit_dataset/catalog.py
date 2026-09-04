@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -59,6 +60,12 @@ class ConfigurationCatalog:
     seeds: tuple[int, ...]
     fixed_transpile_options: Mapping[str, Any]
     configurations: tuple[QiskitConfiguration, ...]
+    experiment_id: str | None = None
+    protocol_version: str | None = None
+    required_versions: Mapping[str, str] = field(default_factory=dict)
+    target_sha256: Mapping[str, str] = field(default_factory=dict)
+    target_fingerprint_schema_version: int | None = None
+    execution_policy: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def allowed_keys(self) -> frozenset[tuple[int, str | None, str | None]]:
@@ -175,6 +182,33 @@ def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
         seeds=seeds,
         fixed_transpile_options=dict(raw.get("fixed_transpile_options", {})),
         configurations=tuple(configurations),
+        experiment_id=(
+            str(raw["experiment_id"])
+            if raw.get("experiment_id") is not None
+            else None
+        ),
+        protocol_version=(
+            str(raw["protocol_version"])
+            if raw.get("protocol_version") is not None
+            else None
+        ),
+        required_versions={
+            str(name): str(value)
+            for name, value in raw.get("required_versions", {}).items()
+        },
+        target_sha256={
+            str(name): str(value)
+            for name, value in raw.get("target_sha256", {}).items()
+        },
+        target_fingerprint_schema_version=(
+            _strict_int(
+                raw["target_fingerprint_schema_version"],
+                "target_fingerprint_schema_version",
+            )
+            if raw.get("target_fingerprint_schema_version") is not None
+            else None
+        ),
+        execution_policy=dict(raw.get("execution_policy", {})),
     )
     _validate_catalog(catalog)
     return catalog
@@ -207,3 +241,45 @@ def _validate_catalog(catalog: ConfigurationCatalog) -> None:
         raise ValueError("Il device di default deve essere tra quelli supportati.")
     if catalog.objective.get("name") != "expected_fidelity":
         raise ValueError("Questa versione ammette soltanto expected_fidelity.")
+    if catalog.experiment_id is not None:
+        if re.fullmatch(r"[A-Za-z0-9_.-]+", catalog.experiment_id) is None:
+            raise ValueError("experiment_id contiene caratteri non ammessi.")
+        if catalog.protocol_version is None:
+            raise ValueError("Il catalogo v2 deve dichiarare protocol_version.")
+        missing_versions = sorted(
+            {
+                "mqt.predictor",
+                "mqt.bench",
+                "qiskit",
+            }
+            - set(catalog.required_versions)
+        )
+        if missing_versions:
+            raise ValueError(
+                "Versioni richieste mancanti nel catalogo v2: "
+                + ", ".join(missing_versions)
+            )
+        if set(catalog.target_sha256) != set(catalog.supported_device_ids):
+            raise ValueError(
+                "Il catalogo v2 deve congelare un Target per ogni device."
+            )
+        if catalog.target_fingerprint_schema_version != 2:
+            raise ValueError(
+                "Il catalogo v2 richiede target_fingerprint_schema_version=2."
+            )
+        if set(catalog.execution_policy) != {"workers", "timeout_seconds"}:
+            raise ValueError(
+                "Il catalogo v2 deve fissare workers e timeout_seconds."
+            )
+        workers = catalog.execution_policy["workers"]
+        timeout = catalog.execution_policy["timeout_seconds"]
+        if isinstance(workers, bool) or not isinstance(workers, int) or workers <= 0:
+            raise ValueError("execution_policy.workers deve essere positivo.")
+        if (
+            isinstance(timeout, bool)
+            or not isinstance(timeout, (int, float))
+            or timeout <= 0
+        ):
+            raise ValueError(
+                "execution_policy.timeout_seconds deve essere positivo."
+            )

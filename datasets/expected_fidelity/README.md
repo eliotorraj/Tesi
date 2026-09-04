@@ -1,5 +1,21 @@
 # Dataset Qiskit diretto — protocollo e struttura
 
+## Nota sul protocollo 2.0
+
+Questa cartella conserva il protocollo 1.0 e i risultati legacy. Il protocollo
+2.0 non scrive qui. Usa invece:
+
+    datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/
+
+Le cache, i modelli, i checkpoint e i piani 2.0 sono sotto:
+
+    artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/
+
+Prima dell'apertura del test, i manifest 2.0 contengono soltanto train e
+validation. Gli esempi RAG contengono sempre e soltanto train. La procedura
+completa è descritta in
+[docs/protocollo_sperimentale_v2.md](../../docs/protocollo_sperimentale_v2.md).
+
 ## 1. Spiegazione generale
 
 Questa cartella contiene il Dataset sperimentale ottenuto compilando circuiti

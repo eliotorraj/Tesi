@@ -39,6 +39,11 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Override opzionale della cartella con i 600 QASM MQT.",
     )
+    parser.add_argument(
+        "--include-test",
+        action="store_true",
+        help="Aggiunge il test solo dopo un record di apertura v2 valido.",
+    )
     return parser.parse_args()
 
 
@@ -55,6 +60,7 @@ def main() -> None:
             catalog,
             source=args.source_circuits,
             device_id=device_id,
+            include_test=args.include_test,
         )
         result[scope] = {
             "manifest_id": manifest["manifest_id"],

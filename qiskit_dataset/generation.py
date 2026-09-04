@@ -298,11 +298,26 @@ def _target_payload(target: Any) -> dict[str, Any]:
     }
 
 
-def build_target_record(device_id: str) -> dict[str, Any]:
+def build_target_record(
+    device_id: str,
+    fingerprint_schema_version: int | None = None,
+) -> dict[str, Any]:
     """Crea il record stabile che descrive il dispositivo selezionato."""
     from mqt.bench.targets import get_device
 
     target = get_device(device_id)
+    if fingerprint_schema_version == 2:
+        from scripts.mqt_predictor_protocol import target_record
+
+        return {
+            **target_record(target),
+            "description": str(target.description),
+            "provenance": {
+                "provider": "mqt.bench.targets.get_device",
+                "calibration_kind": "synthetic_deterministic_target",
+                "live_hardware_data": False,
+            },
+        }
     payload = _target_payload(target)
     target_sha256 = sha256_bytes(canonical_json(payload).encode("utf-8"))
     return {
@@ -407,6 +422,8 @@ def _base_record(task: Mapping[str, Any]) -> dict[str, Any]:
     """Prepara il record comune a tutti gli esiti di un tentativo."""
     return {
         "schema_version": SCHEMA_VERSION,
+        "experiment_id": task.get("experiment_id"),
+        "protocol_version": task.get("protocol_version"),
         "run_id": task["run_id"],
         "dataset_scope": task["dataset_scope"],
         "split": task["split"],
@@ -437,7 +454,9 @@ def _base_record(task: Mapping[str, Any]) -> dict[str, Any]:
             "versions": dict(task["versions"]),
             "compiler": "qiskit.transpile",
             "fixed_transpile_options": dict(task["fixed_transpile_options"]),
+            "execution_policy": dict(task.get("execution_policy", {})),
             "generator": "qiskit_dataset.generation",
+            "resume_contract_sha256": task.get("resume_contract_sha256"),
         },
     }
 
@@ -603,9 +622,24 @@ def execute_attempt(task: Mapping[str, Any]) -> dict[str, Any]:
     return record
 
 
-def _cache_paths(objective: str, run_id: str) -> tuple[Path, Path]:
+def _cache_paths(
+    objective: str,
+    run_id: str,
+    experiment_id: str | None = None,
+) -> tuple[Path, Path]:
     """Individua i file di cache di un tentativo e del circuito compilato."""
-    root = CACHE_ROOT / objective
+    root = (
+        CACHE_ROOT / objective
+        if experiment_id is None
+        else (
+            PROJECT_ROOT
+            / "artifacts"
+            / "experiments"
+            / experiment_id
+            / "qiskit_dataset_cache"
+            / objective
+        )
+    )
     return (
         root / "runs" / f"{run_id}.json",
         root / "compiled_qasm" / f"{run_id}.qasm",
@@ -615,9 +649,11 @@ def _cache_paths(objective: str, run_id: str) -> tuple[Path, Path]:
 def _load_cached_record(
     objective: str,
     run_id: str,
+    experiment_id: str | None = None,
+    expected_resume_contract_sha256: str | None = None,
 ) -> dict[str, Any] | None:
     """Recupera dalla cache un record completo e riconoscibile."""
-    record_path, _ = _cache_paths(objective, run_id)
+    record_path, _ = _cache_paths(objective, run_id, experiment_id)
     if not record_path.is_file():
         return None
     try:
@@ -629,13 +665,25 @@ def _load_cached_record(
         return None
     if record.get("status") not in {"success", "failure", "timeout"}:
         return None
+    if record.get("experiment_id") != experiment_id:
+        return None
+    if (
+        expected_resume_contract_sha256 is not None
+        and record.get("provenance", {}).get("resume_contract_sha256")
+        != expected_resume_contract_sha256
+    ):
+        return None
     return record
 
 
-def _persist_record(record: dict[str, Any], objective: str) -> None:
+def _persist_record(
+    record: dict[str, Any],
+    objective: str,
+    experiment_id: str | None = None,
+) -> None:
     """Salva in cache il record e l'eventuale circuito compilato."""
     run_id = str(record["run_id"])
-    record_path, qasm_path = _cache_paths(objective, run_id)
+    record_path, qasm_path = _cache_paths(objective, run_id, experiment_id)
     compiled_qasm = record.pop("_compiled_qasm2", None)
     if compiled_qasm is not None:
         atomic_text_write(qasm_path, str(compiled_qasm))
@@ -708,6 +756,7 @@ def generate_dataset(
     retry_failures: bool = False,
     force: bool = False,
     device_id: str | None = None,
+    split: str | None = None,
 ) -> dict[str, Any]:
     """Esegue i tentativi mancanti e ricostruisce il JSONL ordinato."""
     if workers <= 0:
@@ -716,6 +765,29 @@ def generate_dataset(
         raise ValueError("timeout_seconds deve essere positivo.")
     if limit_runs is not None and limit_runs <= 0:
         raise ValueError("limit_runs deve essere positivo.")
+    if split not in {None, "train", "validation", "test"}:
+        raise ValueError("split deve essere train, validation oppure test.")
+    if catalog.experiment_id is not None and split is None:
+        split = "train"
+    if catalog.experiment_id is not None and split == "test":
+        from scripts.mqt_predictor_protocol import validate_test_release_record
+
+        try:
+            validate_test_release_record()
+        except (FileNotFoundError, ValueError) as error:
+            raise RuntimeError(
+                "Lo split test è sigillato. Eseguire la procedura di apertura "
+                f"soltanto dopo il congelamento definitivo. Dettaglio: {error}"
+            ) from error
+    if catalog.experiment_id is not None:
+        expected_workers = int(catalog.execution_policy["workers"])
+        expected_timeout = float(catalog.execution_policy["timeout_seconds"])
+        if workers != expected_workers or timeout_seconds != expected_timeout:
+            raise ValueError(
+                "Politica di esecuzione diversa dal protocollo v2: "
+                f"richiesti workers={expected_workers}, "
+                f"timeout_seconds={expected_timeout:g}."
+            )
 
     generation_started = time.perf_counter()
     objective_name = str(catalog.objective["name"])
@@ -724,22 +796,63 @@ def generate_dataset(
         objective_name,
         scope,
         selected_device_id,
+        catalog.experiment_id,
     )
-    manifest = load_manifest(scope, objective_name, selected_device_id)
-    target_record = build_target_record(selected_device_id)
-    versions = package_versions()
-    attempts = expand_attempts(
+    manifest = load_manifest(
+        scope,
+        objective_name,
+        selected_device_id,
+        catalog.experiment_id,
+    )
+    target_record = build_target_record(
+        selected_device_id,
+        catalog.target_fingerprint_schema_version,
+    )
+    expected_target_sha256 = catalog.target_sha256.get(selected_device_id)
+    if (
+        expected_target_sha256 is not None
+        and target_record["target_sha256"] != expected_target_sha256
+    ):
+        raise RuntimeError(
+            f"Target drift per {selected_device_id}: "
+            f"atteso={expected_target_sha256}, "
+            f"osservato={target_record['target_sha256']}."
+        )
+    versions = package_versions(
+        catalog.required_versions or ("mqt.predictor", "mqt.bench", "qiskit")
+    )
+    version_mismatches = {
+        name: {"expected": expected, "observed": versions.get(name)}
+        for name, expected in catalog.required_versions.items()
+        if versions.get(name) != expected
+    }
+    if version_mismatches:
+        raise RuntimeError(
+            f"Versioni non conformi al catalogo: {version_mismatches}."
+        )
+    all_attempts = expand_attempts(
         manifest,
         catalog,
         target_sha256=str(target_record["target_sha256"]),
         versions=versions,
         device_id=selected_device_id,
     )
+    selected_attempts = all_attempts
+    if split is not None:
+        selected_attempts = [
+            attempt
+            for attempt in all_attempts
+            if attempt["split"] == split
+        ]
+    selected_run_ids = {
+        str(attempt["run_id"])
+        for attempt in selected_attempts
+    }
     pending: list[dict[str, Any]] = []
     records_by_id: dict[str, dict[str, Any]] = {}
     cache_hits = 0
 
-    for attempt in attempts:
+    for attempt in all_attempts:
         attempt["target_record"] = target_record
         attempt["timeout_seconds"] = float(timeout_seconds)
         attempt["source_path"] = str(
@@ -747,16 +860,21 @@ def generate_dataset(
                 objective_name,
                 scope,
                 str(attempt["circuit"]["source_ref"]),
+                catalog.experiment_id,
             )
         )
-        cached = None if force else _load_cached_record(
+        is_selected = str(attempt["run_id"]) in selected_run_ids
+        cached = None if (force and is_selected) else _load_cached_record(
             objective_name,
             str(attempt["run_id"]),
+            catalog.experiment_id,
+            str(attempt["resume_contract_sha256"]),
         )
         if (
             cached is not None
             and not (
-                retry_failures
+                is_selected
+                and retry_failures
                 and cached.get("status") in {"failure", "timeout"}
             )
         ):
@@ -765,7 +883,7 @@ def generate_dataset(
                 attempt,
             )
             cache_hits += 1
-        else:
+        elif is_selected:
             pending.append(attempt)
 
     if limit_runs is not None:
@@ -785,7 +903,7 @@ def generate_dataset(
     if workers == 1:
         for task in pending:
             record = execute_attempt(task)
-            _persist_record(record, objective_name)
+            _persist_record(record, objective_name, catalog.experiment_id)
             records_by_id[str(task["run_id"])] = _normalize_for_scope(
                 record,
                 task,
@@ -822,7 +940,7 @@ def generate_dataset(
                         record = future.result()
                     except Exception as error:
                         record = _worker_crash_record(task, error)
-                    _persist_record(record, objective_name)
+                    _persist_record(record, objective_name, catalog.experiment_id)
                     records_by_id[str(task["run_id"])] = _normalize_for_scope(
                         record,
                         task,
@@ -845,24 +963,32 @@ def generate_dataset(
 
     ordered_records = [
         records_by_id[str(attempt["run_id"])]
-        for attempt in attempts
+        for attempt in all_attempts
         if str(attempt["run_id"]) in records_by_id
     ]
     atomic_jsonl_write(output_root / "qiskit_runs.jsonl", ordered_records)
     observed_status = Counter(str(record["status"]) for record in ordered_records)
     status = {
         "schema_version": SCHEMA_VERSION,
+        "experiment_id": catalog.experiment_id,
+        "protocol_version": catalog.protocol_version,
         "dataset_scope": scope,
+        "split_filter": split,
         "objective": objective_name,
         "device_id": selected_device_id,
-        "planned_attempts": len(attempts),
+        "planned_attempts": len(all_attempts),
+        "selected_attempts": len(selected_attempts),
         "available_attempts": len(ordered_records),
-        "missing_attempts": len(attempts) - len(ordered_records),
+        "missing_attempts": len(all_attempts) - len(ordered_records),
         "cache_hits": cache_hits,
         "executed_now": completed_now,
         "executed_status": dict(sorted(status_now.items())),
         "available_status": dict(sorted(observed_status.items())),
-        "complete": len(ordered_records) == len(attempts),
+        "complete": len(ordered_records) == len(all_attempts),
+        "selected_complete": all(
+            str(attempt["run_id"]) in records_by_id
+            for attempt in selected_attempts
+        ),
         "execution_policy": {
             "workers": workers,
             "timeout_seconds": float(timeout_seconds),
@@ -872,7 +998,18 @@ def generate_dataset(
         },
         "output": "qiskit_runs.jsonl",
         "cache_root": str(
-            (CACHE_ROOT / objective_name).relative_to(PROJECT_ROOT).as_posix()
+            (
+                CACHE_ROOT / objective_name
+                if catalog.experiment_id is None
+                else (
+                    PROJECT_ROOT
+                    / "artifacts"
+                    / "experiments"
+                    / catalog.experiment_id
+                    / "qiskit_dataset_cache"
+                    / objective_name
+                )
+            ).relative_to(PROJECT_ROOT).as_posix()
         ),
         "target": target_record,
     }

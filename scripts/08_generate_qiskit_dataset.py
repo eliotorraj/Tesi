@@ -22,6 +22,14 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="pilot")
     parser.add_argument(
+        "--split",
+        choices=("train", "validation", "test"),
+        help=(
+            "Limita l'esecuzione a uno split. Con il catalogo v2 il default "
+            "sicuro è train; test richiede il gate di apertura."
+        ),
+    )
+    parser.add_argument(
         "--catalog",
         type=Path,
         default=DEFAULT_CATALOG_PATH,
@@ -68,24 +76,48 @@ def main() -> None:
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)
     if args.dry_run:
+        selected_split = args.split
+        if catalog.experiment_id is not None and selected_split is None:
+            selected_split = "train"
+        if catalog.experiment_id is not None and selected_split == "test":
+            from scripts.mqt_predictor_protocol import validate_test_release_record
+
+            try:
+                validate_test_release_record()
+            except (FileNotFoundError, ValueError) as error:
+                raise SystemExit(str(error)) from error
         manifest = load_manifest(
             args.scope,
             str(catalog.objective["name"]),
             device_id,
+            catalog.experiment_id,
         )
+        selected_circuits = [
+            circuit
+            for circuit in manifest["circuits"]
+            if selected_split is None or circuit["split"] == selected_split
+        ]
+        compatible_circuits = [
+            circuit
+            for circuit in selected_circuits
+            if circuit.get("device_compatibility", {}).get("compatible", True)
+        ]
         print(
             json.dumps(
                 {
                     "scope": args.scope,
+                    "experiment_id": catalog.experiment_id,
+                    "split": selected_split,
                     "device_id": device_id,
-                    "circuits": len(manifest["circuits"]),
-                    "compatible_circuits": manifest["counts"].get(
-                        "compatible_circuits",
-                        len(manifest["circuits"]),
-                    ),
+                    "circuits": len(selected_circuits),
+                    "compatible_circuits": len(compatible_circuits),
                     "configurations": len(catalog.configurations),
                     "seeds": list(catalog.seeds),
-                    "attempts_planned": manifest["counts"]["attempts_planned"],
+                    "attempts_planned": (
+                        len(compatible_circuits)
+                        * len(catalog.configurations)
+                        * len(catalog.seeds)
+                    ),
                 },
                 indent=2,
                 sort_keys=True,
@@ -101,6 +133,7 @@ def main() -> None:
         retry_failures=args.retry_failures,
         force=args.force,
         device_id=device_id,
+        split=args.split,
     )
     print(json.dumps(status, indent=2, sort_keys=True))
 
