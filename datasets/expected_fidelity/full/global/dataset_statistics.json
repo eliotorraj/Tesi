@@ -1,0 +1,94 @@
+{
+  "aggregation_policy": {
+    "configuration_label": "top configurations restricted to the selected device",
+    "configuration_order": [
+      "o2_default_default",
+      "o3_default_default",
+      "o2_sabre_sabre",
+      "o2_dense_sabre",
+      "o2_trivial_sabre",
+      "o3_sabre_sabre",
+      "o3_dense_sabre",
+      "o3_trivial_sabre",
+      "o2_sabre_lookahead",
+      "o2_sabre_basic",
+      "o3_sabre_lookahead",
+      "o3_sabre_basic"
+    ],
+    "configuration_tie_break": "catalog order; claims explicitly deny superiority at equal score",
+    "device_label": "device whose best eligible configuration has the highest ranking score; catalog order breaks exact ties",
+    "device_order": [
+      "ibm_falcon_27",
+      "ibm_heron_133",
+      "ibm_falcon_127",
+      "ibm_heron_156",
+      "quantinuum_h2_56"
+    ],
+    "input_mode": "read_only_per_device_views",
+    "ranking_metric": "median_expected_fidelity_across_seeds",
+    "top_k": 3
+  },
+  "available_device_ids": [
+    "ibm_falcon_27"
+  ],
+  "counts": {
+    "configuration_aggregates": 5784,
+    "eligible_configuration_aggregates": 5526,
+    "failure_rows": 637,
+    "rag_examples": 319,
+    "runs": 17352,
+    "runs_by_status": {
+      "success": 16715,
+      "timeout": 637
+    },
+    "unique_circuits": 482
+  },
+  "dataset_scope": "full",
+  "mini_datasets_modified": false,
+  "missing_supported_device_ids": [
+    "ibm_heron_133",
+    "ibm_falcon_127",
+    "ibm_heron_156",
+    "quantinuum_h2_56"
+  ],
+  "objective": "expected_fidelity",
+  "outputs": {
+    "configuration_aggregates": "global/qiskit_configuration_aggregates.jsonl",
+    "failure_details": "global/reports/failure_details.csv",
+    "rag": "global/rag_examples.jsonl",
+    "runs": "global/qiskit_runs.jsonl"
+  },
+  "record_schema_versions": {
+    "configuration_aggregate": "2.0.0",
+    "manifest": "2.0.0",
+    "rag_example": "2.0.0",
+    "run": "1.0.0"
+  },
+  "schema_version": "1.0.0",
+  "source_device_ids": [
+    "ibm_falcon_27"
+  ],
+  "sources": [
+    {
+      "configuration_aggregates": 5784,
+      "device_id": "ibm_falcon_27",
+      "files": {
+        "configuration_aggregates": {
+          "path": "ibm_falcon_27/qiskit_configuration_aggregates.jsonl",
+          "sha256": "7b13e1cd78741ebeb0e39590a06080c230e44df6d9e7ea7ef3bbcdad9fda0c3a"
+        },
+        "manifest": {
+          "path": "ibm_falcon_27/split_manifest.json",
+          "sha256": "8ae0ef074a4b5e91b485f7d0e0565893a3ccc85a82239d5f657bbfd9e7ea4505"
+        },
+        "runs": {
+          "path": "ibm_falcon_27/qiskit_runs.jsonl",
+          "sha256": "a7b4b523ada8f069b82d9995f94dc04ae1e6d5be7267f2992aa84cb415095083"
+        }
+      },
+      "manifest_id": "manifest_f1d5db43ed6e4700ee9ca7b6e6cccd3b0dd9275093218ca90e12490b2c89a8c9",
+      "runs": 17352
+    }
+  ],
+  "view_type": "global_multi_device"
+}

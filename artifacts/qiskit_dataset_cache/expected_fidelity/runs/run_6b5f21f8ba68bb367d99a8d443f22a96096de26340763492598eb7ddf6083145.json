@@ -110,7 +110,7 @@
     "routing_method": "basic",
     "study": "routing"
   },
-  "dataset_scope": "pilot",
+  "dataset_scope": "full",
   "device": {
     "coupling_edge_count": 300,
     "description": "ibm_heron_133",
@@ -169,12 +169,12 @@
     "validation_errors": []
   },
   "timings_seconds": {
-    "scoring": 0.0008072380001067359,
-    "serialization": 0.00481531300010829,
-    "source_loading": 0.0006018539997967309,
-    "target_loading": 1.9300000531075057e-06,
-    "target_validation": 0.0015507059997617034,
-    "total": 0.03817931999992652,
-    "transpilation": 0.03035342600014701
+    "scoring": 0.0004876409984717611,
+    "serialization": 0.0027914930033148266,
+    "source_loading": 0.00046710099923075177,
+    "target_loading": 1.1800002539530396e-06,
+    "target_validation": 0.001082315000530798,
+    "total": 0.030131340001389617,
+    "transpilation": 0.025264479001634754
   }
 }

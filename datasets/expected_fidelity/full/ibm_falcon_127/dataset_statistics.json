@@ -1,0 +1,29 @@
+{
+  "aggregate_status": {
+    "ineligible": 7200
+  },
+  "attempts_available": 0,
+  "circuits": 600,
+  "compatible_circuits": 600,
+  "configuration_aggregates": 7200,
+  "dataset_scope": "full",
+  "device_id": "ibm_falcon_127",
+  "duplicate_aliases_excluded_from_rag": 26,
+  "incompatible_circuits": 0,
+  "objective": "expected_fidelity",
+  "outputs": {
+    "attempts": "qiskit_runs.jsonl",
+    "configuration_aggregates": "qiskit_configuration_aggregates.jsonl",
+    "rag": "rag_examples.jsonl"
+  },
+  "rag_examples": 0,
+  "rag_split": "train_only",
+  "rag_top_k": 3,
+  "record_schema_versions": {
+    "configuration_aggregate": "2.0.0",
+    "manifest": "2.0.0",
+    "rag_example": "2.0.0",
+    "run": "1.0.0"
+  },
+  "schema_version": "1.0.0"
+}
