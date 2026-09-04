@@ -1,0 +1,52 @@
+{
+  "available_attempts": 1,
+  "available_status": {
+    "success": 1
+  },
+  "cache_hits": 0,
+  "cache_root": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/qiskit_dataset_cache/expected_fidelity",
+  "complete": false,
+  "dataset_scope": "full",
+  "device_id": "quantinuum_h2_56",
+  "executed_now": 1,
+  "executed_status": {
+    "success": 1
+  },
+  "execution_policy": {
+    "timeout_seconds": 300.0,
+    "wall_clock_seconds_this_invocation": 8.075409156000205,
+    "workers": 2
+  },
+  "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "missing_attempts": 17279,
+  "objective": "expected_fidelity",
+  "output": "qiskit_runs.jsonl",
+  "planned_attempts": 17280,
+  "protocol_version": "2.0.0",
+  "schema_version": "1.0.0",
+  "selected_attempts": 14292,
+  "selected_complete": false,
+  "split_filter": "train",
+  "target": {
+    "coupling_edge_count": 3080,
+    "description": "quantinuum_h2_56",
+    "device_id": "quantinuum_h2_56",
+    "fingerprint_schema_version": 2,
+    "num_qubits": 56,
+    "operation_names": [
+      "if_else",
+      "measure",
+      "rx",
+      "ry",
+      "rz",
+      "rzz"
+    ],
+    "provenance": {
+      "calibration_kind": "synthetic_deterministic_target",
+      "live_hardware_data": false,
+      "provider": "mqt.bench.targets.get_device"
+    },
+    "target_sha256": "ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee",
+    "target_type": "qiskit.transpiler.target.Target"
+  }
+}
