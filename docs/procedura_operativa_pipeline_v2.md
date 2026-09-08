@@ -110,6 +110,20 @@ Ordine eseguito:
 4. ibm_heron_156;
 5. quantinuum_h2_56.
 
+### Limite dei qubit su Heron
+
+MQT Predictor 2.4.0 dichiara uno spazio per il numero di qubit che arriva a
+127. La mappatura può invece allargare un circuito ai 133 o 156 qubit fisici
+di Heron. Questo provocava l'errore
+`Class values must be smaller than num_classes` durante il training.
+
+Lo script 03 adatta ora questo limite al dispositivo prima di creare o
+ricaricare PPO. Conserva il numero reale di qubit e registra il limite nei
+metadati del modello. La policy salvata conserva anche lo spazio corretto,
+che viene usato nelle predizioni successive. Per Falcon e Quantinuum lo spazio
+resta identico: Falcon 27 già completato non richiede un nuovo training.
+Dopo questa correzione basta rilanciare lo stesso comando del gruppo.
+
 ### Interruzione e ripresa RL
 
 Per interrompere, premere Ctrl+C una sola volta e attendere il messaggio sullo
