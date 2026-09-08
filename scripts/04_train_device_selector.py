@@ -49,6 +49,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from mqt_model_artifacts import validate_rl_training_metadata
 from mqt_predictor_protocol import CANONICAL_ML_MODEL_DIR_V2
 from mqt_predictor_protocol import CANONICAL_RL_MODEL_DIR_V2
+from mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS
 from mqt_predictor_protocol import EXPERIMENT_ID
 from mqt_predictor_protocol import EXPERIMENT_ROOT
 from mqt_predictor_protocol import FROZEN_DEVICES
@@ -2054,7 +2055,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cache-dir", type=Path, help="Directory di cache per manifest e QASM intermedi.")
     parser.add_argument("--log-dir", type=Path, help="Directory dei log del device selector.")
     parser.add_argument("--dataset-json", type=Path, help="Percorso del dataset JSON finale.")
-    parser.add_argument("--timeout", type=int, default=300, help="Timeout della compilazione RL per coppia circuito/device.")
+    parser.add_argument("--timeout", type=int, default=COMPILATION_TIMEOUT_SECONDS, help="Timeout della compilazione RL per coppia circuito/device.")
     parser.add_argument(
         "--rl-max-steps",
         type=int,

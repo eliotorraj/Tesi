@@ -28,6 +28,7 @@ from mqt_model_artifacts import (  # noqa: E402
 )
 from mqt_predictor_protocol import (  # noqa: E402
     CANONICAL_RL_MODEL_DIR_V2,
+    COMPILATION_TIMEOUT_SECONDS,
     EXPERIMENT_ROOT,
     FIGURE_OF_MERIT,
     FROZEN_DEVICES,
@@ -46,7 +47,7 @@ CATALOG_V2 = PROJECT_ROOT / "configs" / "qiskit_dataset_configurations_v2.json"
 RL_MAX_STEPS = 64
 RL_BQSKIT_ACTION_TIMEOUT = 60
 RL_SEED = 0
-QISKIT_TIMEOUT_SECONDS = 300
+QISKIT_TIMEOUT_SECONDS = COMPILATION_TIMEOUT_SECONDS
 ML_CANARY_CIRCUITS = 10
 
 # Questi nomi descrivono soltanto la ripartizione operativa tra due computer.
@@ -541,7 +542,7 @@ def build_parser() -> argparse.ArgumentParser:
         "ml-canary",
         help="Crea checkpoint train riutilizzabili per calibrare il timeout ML.",
     )
-    ml_canary.add_argument("--timeout", type=positive_int, default=300)
+    ml_canary.add_argument("--timeout", type=positive_int, default=COMPILATION_TIMEOUT_SECONDS)
     ml_canary.add_argument("--startup-timeout", type=positive_int, default=240)
     ml_canary.add_argument("--num-workers", type=positive_int, default=1)
     ml_canary.add_argument("--max-attempts", type=positive_int, default=1)
@@ -556,7 +557,7 @@ def build_parser() -> argparse.ArgumentParser:
         "ml",
         help="Crea il Training set, allena ML e valida qcompile.",
     )
-    ml.add_argument("--timeout", type=positive_int, default=300)
+    ml.add_argument("--timeout", type=positive_int, default=COMPILATION_TIMEOUT_SECONDS)
     ml.add_argument("--startup-timeout", type=positive_int, default=240)
     ml.add_argument("--num-workers", type=positive_int, default=1)
     ml.add_argument("--max-attempts", type=positive_int, default=3)

@@ -23,7 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=DEFAULT_CATALOG_PATH,
+        help="Catalogo: per full usa la versione v2, per pilot la versione storica.",
     )
     parser.add_argument(
         "--device",
@@ -31,6 +31,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--top-k", type=int, default=3)
     args = parser.parse_args()
+    if args.catalog is None:
+        args.catalog = (
+            PROJECT_ROOT / "configs" / "qiskit_dataset_configurations_v2.json"
+            if args.scope == "full" else DEFAULT_CATALOG_PATH
+        )
     if not 1 <= args.top_k <= 3:
         parser.error("--top-k deve essere compreso tra 1 e 3.")
     return args

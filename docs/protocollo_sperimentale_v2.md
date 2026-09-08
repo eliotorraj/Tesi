@@ -92,8 +92,8 @@ Ordine dei dispositivi e impronte dei Target:
 | ibm_heron_156 | 207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003 |
 | quantinuum_h2_56 | ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee |
 
-La matrice Qiskit usa dodici configurazioni, seed 0, 1 e 2, due processi e un
-timeout di 300 secondi per tentativo. Le opzioni fisse sono
+La matrice Qiskit usa dodici configurazioni, seed 0, 1 e 2, sei processi e un
+timeout di 100 secondi per tentativo. Le opzioni fisse sono
 approximation_degree uguale a 1 e num_processes uguale a 1.
 
 Il piano casuale usa Python Random con MT19937 e seed 20260901. Le estrazioni
@@ -188,8 +188,8 @@ I canary usano soltanto train e la stessa politica della prova completa:
         --split train \
         --catalog configs/qiskit_dataset_configurations_v2.json \
         --device $device \
-        --workers 2 \
-        --timeout-seconds 300 \
+        --workers 6 \
+        --timeout-seconds 100 \
         --limit-runs 1
     done
 
@@ -218,15 +218,15 @@ La sequenza esplicita equivalente richiamata dall'orchestratore è:
         --split train \
         --catalog configs/qiskit_dataset_configurations_v2.json \
         --device $device \
-        --workers 2 \
-        --timeout-seconds 300
+        --workers 6 \
+        --timeout-seconds 100
       .venv/bin/python scripts/08_generate_qiskit_dataset.py \
         --scope full \
         --split validation \
         --catalog configs/qiskit_dataset_configurations_v2.json \
         --device $device \
-        --workers 2 \
-        --timeout-seconds 300
+        --workers 6 \
+        --timeout-seconds 100
       .venv/bin/python scripts/09_build_qiskit_dataset_views.py \
         --scope full \
         --catalog configs/qiskit_dataset_configurations_v2.json \
@@ -312,19 +312,17 @@ Dopo i cinque training RL si esegue prima un lotto compile-only riutilizzabile:
 
 Non esistono ancora misure ML pregresse pertinenti; i tempi Qiskit non sono
 trasferibili alla compilazione tramite policy RL. Il canary usa i primi 10
-circuiti train, un worker, un tentativo e un tetto provvisorio di 300 secondi.
+circuiti train, un worker, un tentativo e un limite di 100 secondi.
 Registra stato e duration_seconds nel manifest durevole:
 
     artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/cache/ml/expected_fidelity/manifest.jsonl
 
-Il timeout completo si decide dopo questo campione. Un valore inferiore è
-ammesso soltanto se resta superiore, con margine, a tutte le durate dei
-successi riutilizzati e il campione fornisce evidenza sufficiente; altrimenti
-resta 300. Il valore scelto viene registrato nei metadati della run.
+Il limite concordato è 100 secondi anche per la generazione completa.
+Il valore viene registrato nei metadati della run.
 
 Il run completo è:
 
-    .venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout SECONDI_SCELTI
+    .venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout 100
 
 Il comando usa soltanto i 422 circuiti train. Ogni coppia
 circuito-dispositivo ha un checkpoint durevole. Sono accettate solo
@@ -342,7 +340,7 @@ non produce il modello confermativo.
     .venv/bin/python scripts/01_check_install.py \
       --require-frozen-targets --require-models
     .venv/bin/python scripts/07_validate_qcompile.py \
-      --timeout 300 --max-steps 64
+      --timeout 100 --max-steps 64
 
 Il canary usa un circuito train. Esegue una compilazione RL diretta per ognuno
 dei cinque device e una prova end-to-end di qcompile. Tutte e sei devono
@@ -351,7 +349,7 @@ riuscire. Una trace vuota, troncata o non conclusa da terminate fallisce.
 Poi qcompile viene eseguito tre volte per ogni circuito validation:
 
     .venv/bin/python scripts/12_run_qcompile_v2.py \
-      --split validation --timeout 300
+      --split validation --timeout 100
 
 Il runner usa un processo nuovo per ogni ripetizione. Salva subito successi,
 timeout e fallimenti. --limit-circuits N esegue un piccolo lotto riprendibile.
@@ -477,7 +475,7 @@ devono ancora esistere score Qiskit test visibili agli esecutori:
 Si esegue qcompile:
 
     .venv/bin/python scripts/12_run_qcompile_v2.py \
-      --split test --timeout 300
+      --split test --timeout 100
 
 Solo dopo si popola la matrice Qiskit test:
 
@@ -488,8 +486,8 @@ Solo dopo si popola la matrice Qiskit test:
         --split test \
         --catalog configs/qiskit_dataset_configurations_v2.json \
         --device $device \
-        --workers 2 \
-        --timeout-seconds 300
+        --workers 6 \
+        --timeout-seconds 100
       .venv/bin/python scripts/09_build_qiskit_dataset_views.py \
         --scope full \
         --catalog configs/qiskit_dataset_configurations_v2.json \
@@ -532,7 +530,7 @@ RAG. Il file RAG congelato deve restare identico.
 Il comando seguente deve fallire fino al training completo:
 
     .venv/bin/python scripts/07_validate_qcompile.py \
-      --timeout 300 --max-steps 64
+      --timeout 100 --max-steps 64
 
 Anche qualsiasi accesso test deve fallire prima del record di apertura,
 compresa la modalità dry-run.

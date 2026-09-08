@@ -1065,19 +1065,18 @@ def build_dataset_views(
             "rag": rag_path.name,
         },
     }
-    if scope == "pilot":
-        from .reporting import build_pilot_report
+    from .reporting import build_dataset_report
 
-        report = build_pilot_report(output_root, catalog)
-        statistics["outputs"].update(
-            {
-                "pilot_report": "reports/pilot_report.md",
-                "pilot_summary": "reports/pilot_summary.json",
-                "configuration_statistics": "reports/configuration_statistics.csv",
-                "circuit_statistics": "reports/circuit_statistics.csv",
-                "failure_details": "reports/failure_details.csv",
-            }
-        )
-        statistics["device_comparison"] = report["comparison"]
+    report = build_dataset_report(output_root, catalog)
+    statistics["outputs"].update(
+        {
+            f"{scope}_report": f"reports/{scope}_report.md",
+            f"{scope}_summary": f"reports/{scope}_summary.json",
+            "configuration_statistics": "reports/configuration_statistics.csv",
+            "circuit_statistics": "reports/circuit_statistics.csv",
+            "failure_details": "reports/failure_details.csv",
+        }
+    )
+    statistics["device_comparison"] = report["comparison"]
     atomic_json_write(output_root / "dataset_statistics.json", statistics)
     return statistics

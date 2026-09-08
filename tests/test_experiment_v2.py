@@ -201,15 +201,15 @@ class ExperimentV2Tests(unittest.TestCase):
                 "full",
                 catalog,
                 workers=1,
-                timeout_seconds=300,
+                timeout_seconds=100,
                 split="train",
             )
         with self.assertRaisesRegex(ValueError, "Politica di esecuzione"):
             generate_dataset(
                 "full",
                 catalog,
-                workers=2,
-                timeout_seconds=120,
+                workers=6,
+                timeout_seconds=300,
                 split="train",
             )
 
@@ -249,7 +249,7 @@ class ExperimentV2Tests(unittest.TestCase):
         self.assertEqual(dict(catalog.target_sha256), FROZEN_TARGET_SHA256)
         self.assertEqual(
             dict(catalog.execution_policy),
-            {"workers": 2, "timeout_seconds": 300},
+            {"workers": 6, "timeout_seconds": 100},
         )
 
     def test_qcompile_timeout_is_a_terminal_observation(self) -> None:
@@ -328,7 +328,7 @@ class ExperimentV2Tests(unittest.TestCase):
                             "repetition_semantics": (
                                 "fresh_process_without_exposed_seed"
                             ),
-                            "timeout_seconds": 300,
+                            "timeout_seconds": 100,
                         },
                     }
                 )

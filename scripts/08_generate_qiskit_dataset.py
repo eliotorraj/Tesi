@@ -15,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from qiskit_dataset.catalog import DEFAULT_CATALOG_PATH, load_catalog
 from qiskit_dataset.core import load_manifest
 from qiskit_dataset.generation import generate_dataset
+from scripts.mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS, QISKIT_WORKERS
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,8 +39,8 @@ def parse_args() -> argparse.Namespace:
         "--device",
         help="Device MQT Bench; se omesso usa il default del catalogo.",
     )
-    parser.add_argument("--workers", type=int, default=2)
-    parser.add_argument("--timeout-seconds", type=float, default=100.0)
+    parser.add_argument("--workers", type=int, default=QISKIT_WORKERS)
+    parser.add_argument("--timeout-seconds", type=float, default=COMPILATION_TIMEOUT_SECONDS)
     parser.add_argument(
         "--limit-runs",
         type=int,

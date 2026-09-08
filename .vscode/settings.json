@@ -1,0 +1,6 @@
+{
+  "workbench.editorAssociations": {
+    "**/full/global/qiskit_configuration_aggregates.jsonl": "default",
+    "**/full/global/qiskit_runs.jsonl": "default"
+  }
+}

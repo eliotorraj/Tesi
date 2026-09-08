@@ -130,13 +130,15 @@ class PipelineRunnerTests(unittest.TestCase):
     def test_qiskit_orchestration_cannot_request_test(self) -> None:
         with patch.object(RUNNER, "run_checked") as mocked:
             RUNNER.run_qiskit_full(
-                SimpleNamespace(workers=2, timeout_seconds=300)
+                RUNNER.build_parser().parse_args(["qiskit-full"])
             )
         commands = [call.args[0] for call in mocked.call_args_list]
         self.assertEqual(len(commands), len(RUNNER.FROZEN_DEVICES) * 4 + 1)
         for command in commands:
             self.assertNotIn("--include-test", command)
             if "--split" in command:
+                self.assertEqual(command[command.index("--workers") + 1], "6")
+                self.assertEqual(command[command.index("--timeout-seconds") + 1], "100")
                 self.assertIn(
                     command[command.index("--split") + 1],
                     ("train", "validation"),
@@ -145,7 +147,7 @@ class PipelineRunnerTests(unittest.TestCase):
     def test_canary_runs_one_missing_train_attempt_per_device(self) -> None:
         with patch.object(RUNNER, "run_checked") as mocked:
             RUNNER.run_qiskit_canary(
-                SimpleNamespace(workers=2, timeout_seconds=300)
+                RUNNER.build_parser().parse_args(["qiskit-canary"])
             )
         commands = [call.args[0] for call in mocked.call_args_list]
         generation = [
@@ -153,6 +155,8 @@ class PipelineRunnerTests(unittest.TestCase):
         ]
         self.assertEqual(len(generation), len(RUNNER.FROZEN_DEVICES))
         for command in generation:
+            self.assertEqual(command[command.index("--workers") + 1], "6")
+            self.assertEqual(command[command.index("--timeout-seconds") + 1], "100")
             self.assertEqual(command[command.index("--split") + 1], "train")
             self.assertEqual(command[command.index("--limit-runs") + 1], "1")
 

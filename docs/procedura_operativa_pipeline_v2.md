@@ -183,13 +183,12 @@ artifacts/.
 Questa fase si esegue sul PC Modelli, dopo il completamento di tutti i modelli
 RL. Non dipende dal popolamento Qiskit in corso sull'altro computer.
 
-### Canary e scelta del timeout
+### Canary con timeout di 100 secondi
 
 Al momento non esiste un manifest di compilazioni ML dal quale ricavare tempi
 affidabili. I tempi e i timeout del Dataset Qiskit non sono trasferibili:
 Qiskit e le policy RL del device selector percorrono compilatori diversi.
-Perciò 300 secondi resta il tetto provvisorio, non una soglia già dimostrata
-necessaria.
+Il limite concordato per ogni compilazione è 100 secondi.
 
 Appena terminano i cinque RL, eseguire:
 
@@ -198,7 +197,7 @@ Appena terminano i cinque RL, eseguire:
 ~~~
 
 Il canary usa un solo worker, un solo tentativo e i primi 10 circuiti train
-compatibili, con timeout 300 e modalità compile-only. Le compilazioni valide
+compatibili, con timeout 100 e modalità compile-only. Le compilazioni valide
 restano riutilizzabili nel run completo; un fallimento conserva invece altri
 tentativi disponibili. Tempi e stati sono nel file:
 
@@ -206,16 +205,13 @@ tentativi disponibili. Tempi e stati sono nel file:
 artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/cache/ml/expected_fidelity/manifest.jsonl
 ~~~
 
-Dopo il canary si sceglie il timeout guardando distribuzione dei tempi dei
-successi e fallimenti saturati, non soltanto la media. Se il campione mostra
-ampio margine, si usa un valore inferiore; se non dà evidenza sufficiente, si
-mantengono 300 secondi. Per evitare una decisione arbitraria, fermarsi qui e
-valutare il manifest prima del run completo.
+Il canary verifica la compilazione con lo stesso limite di 100 secondi
+usato nella generazione completa.
 
 ### Run completo
 
 ~~~bash
-.venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout SECONDI_SCELTI
+.venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout 100
 ~~~
 
 Il comando richiama in ordine gli script 05, 04, 05, 01 e 07 per:
@@ -229,7 +225,7 @@ Il comando richiama in ordine gli script 05, 04, 05, 01 e 07 per:
 
 Impostazioni conservative predefinite: un worker RL, tre tentativi massimi per
 coppia, startup timeout 240 secondi e un worker per la Random Forest. Se
---timeout viene omesso, il valore resta 300 secondi.
+--timeout viene omesso, il valore è 100 secondi.
 
 La parte costosa è la costruzione del Training set, non il fit finale della
 Random Forest. Ogni compilazione valida viene salvata subito. Dopo
@@ -270,6 +266,16 @@ riesce per tutti i device, passare al popolamento completo.
 
 ## 7. Popolamento del Dataset Qiskit full
 
+Tutti e cinque i dispositivi usano 100 secondi per tentativo e 6 worker.
+Questi valori sono predefiniti nello script principale e nel generatore,
+e sono fissati anche nel catalogo v2.
+
+La correzione del 5 settembre 2026 sostituisce i precedenti 300 secondi e
+2 worker. I risultati già salvati restano nella cache con i loro parametri
+originali. Poiché questi parametri fanno parte dell'identità del tentativo,
+il prossimo avvio li ricalcola con 100 secondi e 6 worker. La ripresa senza
+ricalcolo vale quando i parametri restano uguali.
+
 ~~~bash
 .venv/bin/python scripts/16_run_pipeline_v2.py qiskit-full
 ~~~
@@ -280,6 +286,26 @@ Per ciascuno dei cinque device il comando esegue:
 2. 08_generate_qiskit_dataset.py sullo split train;
 3. 08_generate_qiskit_dataset.py sullo split validation;
 4. 09_build_qiskit_dataset_views.py con top-k 3.
+
+Lo script 09 genera anche per full il resoconto Markdown e i CSV di
+confronto tra configurazioni, circuiti e fallimenti:
+
+~~~bash
+.venv/bin/python scripts/09_build_qiskit_dataset_views.py --scope full --device ibm_falcon_27
+~~~
+
+Con scope full, gli script 09 e 10 usano il catalogo v2 quando --catalog è
+omesso. I file del dispositivo sono nella sua cartella reports/:
+full_report.md, configuration_statistics.csv, circuit_statistics.csv e
+failure_details.csv. Il confronto tra dispositivi è scritto anche in
+device_comparison.md e device_comparison.csv; lo script 10 lo salva nella
+cartella global/reports/.
+
+La copia dei risultati di Falcon 27 a 300 secondi e 2 worker è in
+artifacts/snapshots/ibm_falcon_27_full_300s_2workers_20260905/.
+Questa copia resta consultabile durante il nuovo popolamento a 100 secondi
+e 6 worker. La stima di circa tre ore riguarda soltanto Falcon 27 ed è
+indicativa; gli altri dispositivi richiedono altro tempo.
 
 Alla fine richiama 10_aggregate_qiskit_dataset.py richiedendo tutti i device.
 Lo split test non è una scelta disponibile in questo orchestratore. Prima
@@ -323,7 +349,7 @@ Verifica manuale finale sul PC Modelli:
 .venv/bin/python scripts/01_check_install.py \
   --require-frozen-targets --require-models
 .venv/bin/python scripts/07_validate_qcompile.py \
-  --timeout SECONDI_SCELTI --max-steps 64
+  --timeout 100 --max-steps 64
 ~~~
 
 Verifica manuale finale sul PC Dataset:
@@ -370,5 +396,5 @@ Solo quando tutti i modelli RL sono pronti:
 Valutato il manifest dei tempi:
 
 ~~~bash
-.venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout SECONDI_SCELTI
+.venv/bin/python scripts/16_run_pipeline_v2.py ml --timeout 100
 ~~~

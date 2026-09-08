@@ -1,4 +1,4 @@
-"""Crea statistiche leggibili per i pilot Qiskit dei singoli dispositivi."""
+"""Crea statistiche leggibili per i Dataset Qiskit pilot e full."""
 
 from __future__ import annotations
 
@@ -43,7 +43,8 @@ inferred_configuration_value inference_confidence
 causal_attribution_supported diagnostic_limitations last_relevant_qiskit_frame
 """.split()
 COMPARISON_FIELDS = """
-device_id device_num_qubits workers timeout_seconds compatible_circuits incompatible_circuits
+device_id device_num_qubits workers timeout_seconds observed_workers observed_timeout_seconds
+execution_policy_source mixed_execution_policies compatible_circuits incompatible_circuits
 attempts_planned attempts_observed success_count failure_count timeout_count
 success_rate transpile_median_s transpile_mean_s transpile_p95_s transpile_max_s
 eligible_aggregates ineligible_aggregates common_circuits
@@ -453,28 +454,74 @@ def _failure_breakdown(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]
     ]
 
 
+def _run_policy(run: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Legge i parametri originali conservati nel singolo tentativo."""
+    return (run.get("provenance") or {}).get("execution_policy") or {}
+
+
+def _execution_policies(
+    runs: Sequence[Mapping[str, Any]], status_policy: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Distingue i parametri osservati da quelli dell'ultima invocazione."""
+    counts = Counter(
+        (_run_policy(run).get("workers"), _run_policy(run).get("timeout_seconds"))
+        for run in runs
+    )
+    known = [pair for pair in counts if pair != (None, None)]
+    # I vecchi tentativi pilot non registravano i parametri nel singolo record.
+    from_records = bool(known)
+    policies = [
+        {"workers": workers, "timeout_seconds": timeout, "attempts": count}
+        for (workers, timeout), count in sorted(counts.items(), key=lambda item: str(item[0]))
+    ] if from_records else []
+    workers = sorted({pair[0] for pair in known if pair[0] is not None})
+    timeouts = sorted({pair[1] for pair in known if pair[1] is not None})
+    if not from_records:
+        workers = [status_policy["workers"]] if status_policy.get("workers") is not None else []
+        timeouts = [status_policy["timeout_seconds"]] if status_policy.get("timeout_seconds") is not None else []
+    incomplete_workers = from_records and any(pair[0] is None for pair in counts)
+    incomplete_timeouts = from_records and any(pair[1] is None for pair in counts)
+    return {
+        "workers": workers[0] if len(workers) == 1 and not incomplete_workers else None,
+        "timeout_seconds": timeouts[0] if len(timeouts) == 1 and not incomplete_timeouts else None,
+        "observed_workers": workers,
+        "observed_timeout_seconds": timeouts,
+        "policy_source": "run_provenance" if from_records else "generation_status_fallback",
+        "policies": policies,
+        "mixed_execution_policies": len(counts) > 1 if from_records else False,
+        "unknown_policy_attempts": counts[(None, None)] if from_records else len(runs),
+        "last_invocation_policy": dict(status_policy),
+    }
+
+
 def _timeout_sensitivity(runs: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Stima quanti tentativi supererebbero diverse soglie di tempo."""
+    """Distingue i timeout certi dai casi censurati a una soglia inferiore."""
     totals = _finite(
         run.get("timings_seconds", {}).get("total")
         for run in runs
         if run.get("status") == "success"
     )
-    observed_timeouts = sum(run.get("status") == "timeout" for run in runs)
-    return [
-        {
-            "threshold_seconds": threshold,
-            "successful_runs_above_threshold": sum(total > threshold for total in totals),
-            "actual_timeouts_already_observed": observed_timeouts,
-            "lower_bound_timeouts_if_threshold_used": observed_timeouts
-            + sum(total > threshold for total in totals),
-        }
-        for threshold in (30, 60, 100, 120, 300, 600, 900)
+    timeout_limits = [
+        (run.get("failure") or {}).get("timeout_seconds", _run_policy(run).get("timeout_seconds"))
+        for run in runs if run.get("status") == "timeout"
     ]
+    rows = []
+    for threshold in (30, 60, 100, 120, 300, 600, 900):
+        certain = sum(limit is not None and float(limit) >= threshold for limit in timeout_limits)
+        above = sum(total > threshold for total in totals)
+        rows.append({
+            "threshold_seconds": threshold,
+            "successful_runs_above_threshold": above,
+            "actual_timeouts_already_observed": len(timeout_limits),
+            "timeouts_at_or_above_threshold": certain,
+            "timeouts_with_unknown_outcome_at_threshold": len(timeout_limits) - certain,
+            "lower_bound_timeouts_if_threshold_used": certain + above,
+        })
+    return rows
 
 
-def _pilot_markdown(summary: Mapping[str, Any]) -> str:
-    """Trasforma il riepilogo del pilot in un documento Markdown."""
+def _dataset_markdown(summary: Mapping[str, Any]) -> str:
+    """Trasforma il riepilogo del Dataset in un documento Markdown."""
     coverage = summary["circuit_coverage"]
     execution = summary["execution"]
     attempts = summary["attempts"]
@@ -482,10 +529,10 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
     ranking = summary["ranking"]
     versions = summary["provenance"]["versions"]
     lines = [
-        f"# Pilot Qiskit — {summary['device']['device_id']}",
+        f"# Dataset Qiskit {summary['dataset_scope']} — {summary['device']['device_id']}",
         "",
         (
-            "Scheda generata automaticamente dagli artefatti del pilot. I tempi "
+            "Scheda generata automaticamente dagli artefatti del Dataset. I tempi "
             "descrivono soltanto i tentativi riusciti e sono censurati dai timeout."
         ),
         "",
@@ -505,8 +552,9 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
                 ("Circuiti incompatibili", coverage["incompatible"]),
                 ("Configurazioni", summary["configuration_count"]),
                 ("Seed", ", ".join(map(str, summary["seeds"]))),
-                ("Worker", execution.get("workers", "-")),
-                ("Timeout richiesto", _num(execution.get("timeout_seconds")) + " s"),
+                ("Worker nei risultati", ", ".join(map(str, execution["observed_workers"])) or "-"),
+                ("Timeout nei risultati (s)", ", ".join(map(str, execution["observed_timeout_seconds"])) or "-"),
+                ("Fonte dei parametri", execution["policy_source"]),
                 ("Cache hit", execution.get("cache_hits", "-")),
                 (
                     "Durata invocazione",
@@ -518,7 +566,16 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
         (
             "La durata invocazione riguarda il comando corrente. Se Cache hit "
             "è maggiore di zero, i record conservano i tempi delle esecuzioni "
-            "originali e non sono stati ricompilati."
+            "originali e non sono stati ricompilati. I parametri nei risultati "
+            "provengono dai singoli tentativi, quando disponibili; per i vecchi "
+            "dati senza questa informazione si usa lo stato della generazione."
+        ),
+        "",
+        (
+            "Attenzione: i risultati comprendono parametri di esecuzione diversi. "
+            "Tempi e tassi di successo non costituiscono un confronto a parità "
+            "di timeout e risorse."
+            if execution["mixed_execution_policies"] else ""
         ),
         "",
         "## Esito complessivo",
@@ -676,13 +733,15 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
                 "Soglia s",
                 "Successi sopra soglia",
                 "Timeout già osservati",
-                "Lower bound timeout",
+                "Esito ignoto alla soglia",
+                "Minimo timeout stimato",
             ),
             (
                 (
                     row["threshold_seconds"],
                     row["successful_runs_above_threshold"],
                     row["actual_timeouts_already_observed"],
+                    row["timeouts_with_unknown_outcome_at_threshold"],
                     row["lower_bound_timeouts_if_threshold_used"],
                 )
                 for row in summary["timeout_sensitivity"]
@@ -691,7 +750,9 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
         "",
         (
             "La stima è conservativa: un run già interrotto è censurato e non "
-            "rivela se sarebbe terminato con una soglia più alta."
+            "rivela se sarebbe terminato con una soglia più alta. Questi casi "
+            "restano ignoti e non sono inclusi nel minimo stimato. La stima "
+            "usa i tempi osservati e non prevede l'effetto di cambiare i worker."
         ),
         "",
         "## Copertura ranking",
@@ -714,10 +775,29 @@ def _pilot_markdown(summary: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
-    """Confronta i risultati pilot disponibili sugli stessi circuiti."""
-    paths = sorted(pilot_root.glob("*/reports/pilot_summary.json"))
-    pairs = [(path, _json(path)) for path in paths if path.is_file()]
+def build_device_comparison(
+    scope_root: Path,
+    *,
+    scope: str = "pilot",
+    device_ids: Sequence[str] | None = None,
+    catalog: ConfigurationCatalog | None = None,
+    output_root: Path | None = None,
+) -> dict[str, Any]:
+    """Confronta i dispositivi disponibili senza modificare i dati sorgente."""
+    if scope not in {"pilot", "full"}:
+        raise ValueError("scope deve essere pilot oppure full.")
+    paths = (
+        [scope_root / device_id / "reports" / f"{scope}_summary.json" for device_id in device_ids]
+        if device_ids is not None
+        else sorted(scope_root.glob(f"*/reports/{scope}_summary.json"))
+    )
+    if catalog is not None:
+        pairs = [
+            (path, build_dataset_report(path.parents[1], catalog, write=False)["summary"])
+            for path in paths
+        ]
+    else:
+        pairs = [(path, _json(path)) for path in paths if path.is_file()]
     pairs = [(path, summary) for path, summary in pairs if summary]
     if not pairs:
         return {"devices": 0, "outputs": {}}
@@ -744,6 +824,10 @@ def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
                 "device_num_qubits": summary["device"].get("num_qubits"),
                 "workers": summary["execution"].get("workers"),
                 "timeout_seconds": summary["execution"].get("timeout_seconds"),
+                "observed_workers": ", ".join(map(str, summary["execution"].get("observed_workers", []))),
+                "observed_timeout_seconds": ", ".join(map(str, summary["execution"].get("observed_timeout_seconds", []))),
+                "execution_policy_source": summary["execution"].get("policy_source"),
+                "mixed_execution_policies": summary["execution"].get("mixed_execution_policies", False),
                 "compatible_circuits": summary["circuit_coverage"]["compatible"],
                 "incompatible_circuits": summary["circuit_coverage"]["incompatible"],
                 "attempts_planned": attempts["planned"],
@@ -771,12 +855,13 @@ def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
             }
         )
     rows.sort(key=lambda row: str(row["device_id"]))
-    csv_path = pilot_root / "device_comparison.csv"
-    markdown_path = pilot_root / "device_comparison.md"
+    destination = output_root or scope_root
+    csv_path = destination / "device_comparison.csv"
+    markdown_path = destination / "device_comparison.md"
     _csv(csv_path, rows, COMPARISON_FIELDS)
     markdown = "\n".join(
         [
-            "# Confronto pilot per device",
+            f"# Confronto Dataset Qiskit {scope} per dispositivo",
             "",
             (
                 "La prima tabella usa tutti i circuiti compatibili con ciascun "
@@ -805,8 +890,8 @@ def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
                     (
                         row["device_id"],
                         row["device_num_qubits"],
-                        row["workers"],
-                        _num(row["timeout_seconds"]),
+                        row["observed_workers"] or row["workers"],
+                        row["observed_timeout_seconds"] or _num(row["timeout_seconds"]),
                         row["compatible_circuits"],
                         f"{row['success_count']}/{row['attempts_observed']}",
                         row["timeout_count"],
@@ -855,7 +940,9 @@ def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
             "",
             (
                 "Per tempi confrontabili, usare lo stesso timeout e numero di "
-                "worker ed eseguire i pilot senza altri pilot concorrenti."
+                "worker ed evitare altre compilazioni concorrenti. Con soglie diverse "
+                "(per esempio 300 s e 100 s), anche sul sottoinsieme comune i tempi "
+                "e i tassi di successo non sono un confronto a parità di condizioni."
             ),
             "",
         ]
@@ -868,15 +955,16 @@ def build_device_comparison(pilot_root: Path) -> dict[str, Any]:
     }
 
 
-def build_pilot_report(
-    output_root: Path, catalog: ConfigurationCatalog
+def build_dataset_report(
+    output_root: Path, catalog: ConfigurationCatalog, *, write: bool = True
 ) -> dict[str, Any]:
-    """Genera il riepilogo e i file di consultazione di un pilot."""
+    """Genera il riepilogo e i file di consultazione del Dataset pilot o full."""
     manifest = _json(output_root / "split_manifest.json")
     if not manifest:
         raise FileNotFoundError(output_root / "split_manifest.json")
-    if manifest.get("dataset_scope") != "pilot":
-        raise ValueError("Il report pilot richiede un manifest scope=pilot.")
+    scope = manifest.get("dataset_scope")
+    if scope not in {"pilot", "full"}:
+        raise ValueError("Il report richiede un manifest scope=pilot oppure full.")
 
     runs = read_jsonl(output_root / "qiskit_runs.jsonl")
     summaries = read_jsonl(
@@ -906,20 +994,12 @@ def build_pilot_report(
         )
     )
     execution = {
-        "workers": policy.get("workers"),
-        "timeout_seconds": policy.get("timeout_seconds"),
+        **_execution_policies(runs, policy),
         "wall_clock_seconds_this_invocation": policy.get(
             "wall_clock_seconds_this_invocation"
         ),
         "cache_hits": status.get("cache_hits"),
         "executed_now": status.get("executed_now"),
-        "observed_timeout_seconds": sorted(
-            {
-                float(row["timeout_seconds"])
-                for row in failure_rows
-                if row.get("timeout_seconds") is not None
-            }
-        ),
     }
     lookahead = [
         run
@@ -933,7 +1013,8 @@ def build_pilot_report(
     ]
     summary: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        "report_type": "qiskit_pilot",
+        "report_type": f"qiskit_{scope}",
+        "dataset_scope": scope,
         "objective": manifest["objective"]["name"],
         "device": {
             "device_id": device_id,
@@ -987,20 +1068,32 @@ def build_pilot_report(
 
     report_root = output_root / "reports"
     paths = {
-        "markdown": report_root / "pilot_report.md",
-        "summary_json": report_root / "pilot_summary.json",
+        "markdown": report_root / f"{scope}_report.md",
+        "summary_json": report_root / f"{scope}_summary.json",
         "configuration_csv": report_root / "configuration_statistics.csv",
         "circuit_csv": report_root / "circuit_statistics.csv",
         "failure_csv": report_root / "failure_details.csv",
     }
-    atomic_json_write(paths["summary_json"], summary)
-    atomic_text_write(paths["markdown"], _pilot_markdown(summary))
-    _csv(paths["configuration_csv"], configuration_rows, CONFIG_FIELDS)
-    _csv(paths["circuit_csv"], circuit_rows, CIRCUIT_FIELDS)
-    write_failure_csv(paths["failure_csv"], runs, device_id)
-    comparison = build_device_comparison(output_root.parent)
+    comparison = {"devices": 0, "outputs": {}}
+    if write:
+        atomic_json_write(paths["summary_json"], summary)
+        atomic_text_write(paths["markdown"], _dataset_markdown(summary))
+        _csv(paths["configuration_csv"], configuration_rows, CONFIG_FIELDS)
+        _csv(paths["circuit_csv"], circuit_rows, CIRCUIT_FIELDS)
+        write_failure_csv(paths["failure_csv"], runs, device_id)
+        comparison = build_device_comparison(output_root.parent, scope=scope, catalog=catalog)
     return {
         "device_id": device_id,
         "outputs": {name: str(path) for name, path in paths.items()},
         "comparison": comparison,
+        "summary": summary,
     }
+
+
+def build_pilot_report(
+    output_root: Path, catalog: ConfigurationCatalog
+) -> dict[str, Any]:
+    """Mantiene il punto di ingresso storico per i report pilot."""
+    if _json(output_root / "split_manifest.json").get("dataset_scope") != "pilot":
+        raise ValueError("Il report pilot richiede un manifest scope=pilot.")
+    return build_dataset_report(output_root, catalog)

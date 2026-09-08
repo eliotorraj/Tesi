@@ -609,5 +609,19 @@ def aggregate_device_datasets(
         atomic_jsonl_write(summaries_output, all_summaries)
         atomic_jsonl_write(rag_output, rag_examples)
         write_failure_csv(failure_output, all_runs)
+        from .reporting import build_device_comparison
+
+        comparison = build_device_comparison(
+            scope_root,
+            scope=scope,
+            device_ids=selected_devices,
+            catalog=catalog,
+            output_root=output_root / "reports",
+        )
+        statistics["device_comparison"] = comparison
+        statistics["outputs"].update({
+            "device_comparison_csv": str((output_root / "reports" / "device_comparison.csv").relative_to(scope_root)),
+            "device_comparison_markdown": str((output_root / "reports" / "device_comparison.md").relative_to(scope_root)),
+        })
         atomic_json_write(output_root / "dataset_statistics.json", statistics)
     return statistics

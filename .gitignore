@@ -22,3 +22,4 @@ datasets/experiments/
 # Risultati pilota 2.3 locali: conservarli, ma non versionarli nel protocollo v2.
 /datasets/expected_fidelity/full/ibm_heron_156/generation_status.json
 /datasets/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
+tesi/

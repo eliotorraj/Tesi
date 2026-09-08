@@ -50,8 +50,8 @@
     "num_processes": 1
   },
   "execution_policy": {
-    "workers": 2,
-    "timeout_seconds": 300
+    "workers": 6,
+    "timeout_seconds": 100
   },
   "configurations": [
     {"config_id": "o2_default_default", "study": "baseline", "optimization_level": 2, "layout_method": null, "routing_method": null},

@@ -18,6 +18,8 @@ from io import StringIO
 from pathlib import Path
 from typing import Any, Iterator, Mapping
 
+from scripts.mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS, QISKIT_WORKERS
+
 from .catalog import ConfigurationCatalog
 from .core import (
     PROJECT_ROOT,
@@ -750,8 +752,8 @@ def generate_dataset(
     scope: str,
     catalog: ConfigurationCatalog,
     *,
-    workers: int = 1,
-    timeout_seconds: float = 900.0,
+    workers: int = QISKIT_WORKERS,
+    timeout_seconds: float = COMPILATION_TIMEOUT_SECONDS,
     limit_runs: int | None = None,
     retry_failures: bool = False,
     force: bool = False,
