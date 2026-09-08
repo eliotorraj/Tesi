@@ -294,6 +294,13 @@ datasets/expected_fidelity/pilot/global/rag_examples.jsonl
 git diff --check
 ```
 
+### Visualizza i log di train con tensorboard
+```bash
+/home/elioe/Tesi-mqt-2.4-v2/.venv/bin/tensorboard \
+  --logdir /home/elioe/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/logs/rl/model_expected_fidelity_ibm_falcon_27 \
+  --host 127.0.0.1 \
+  --port 6006
+```
 ### Sviluppi successivi del protocollo 1.0
 
 I prossimi passi sono:

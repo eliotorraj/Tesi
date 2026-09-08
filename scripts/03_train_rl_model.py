@@ -46,10 +46,12 @@ from mqt_predictor_protocol import verify_circuit_directory
 from bqskit.ir.circuit import Circuit
 from bqskit.ir.gates.barrier import BarrierPlaceholder
 from bqskit.ir.gates.measure import MeasurementPlaceholder
+from gymnasium.spaces import Discrete
 from mqt.predictor.rl.actions import bqskit_actions as predictor_bqskit_actions
 from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
 from mqt.predictor.rl.helper import get_path_trained_model
+from mqt.predictor.rl.predictorenv import PredictorEnv
 from sb3_contrib import MaskablePPO
 from sb3_contrib.common.maskable.policies import MaskableMultiInputActorCriticPolicy
 from stable_baselines3.common.callbacks import BaseCallback
@@ -168,6 +170,25 @@ def configure_bqskit_runtime(seed: int = 0, action_timeout: float = 60.0) -> Non
             return _ORIGINAL_BQSKIT_COMPILE(circuit, *args, **kwargs)
 
     predictor_bqskit_actions.bqskit_compile = compile_with_project_limit
+
+
+def configure_qubit_observation_space(environment: PredictorEnv) -> dict[str, Any]:
+    """Include tutti i qubit fisici senza cambiare gli spazi già sufficienti."""
+    space = environment.observation_space["num_qubits"]
+    if not isinstance(space, Discrete) or int(space.start) != 0:
+        raise ValueError("Lo spazio num_qubits deve essere Discrete con inizio 0.")
+
+    # MQT 2.4 declares Discrete(128), but layout can expand a small input to
+    # all 133/156 Heron qubits. Discrete's upper bound is exclusive. Keep the
+    # original width for smaller targets so existing Falcon models still load.
+    size = max(int(space.n), int(environment.device.num_qubits) + 1)
+    if size != int(space.n):
+        environment.observation_space["num_qubits"] = Discrete(size, dtype=space.dtype)
+    return {
+        "profile": "device-width-inclusive-v1",
+        "num_qubits_n": size,
+        "num_qubits_start": 0,
+    }
 
 
 def load_model_or_exit(checkpoint: Path, **kwargs: Any) -> MaskablePPO:
@@ -432,6 +453,12 @@ def main() -> int:
         max_steps=args.max_steps,
     )
 
+    observation_metadata = configure_qubit_observation_space(predictor.env)
+    print(
+        "Osservazione RL: numero di qubit ammesso da 0 a "
+        f"{observation_metadata['num_qubits_n'] - 1} (incluso)."
+    )
+
     monitor_csv = tensorboard_dir / "monitor.csv"
     predictor.env = Monitor(predictor.env, filename=str(monitor_csv))
 
@@ -475,6 +502,7 @@ def main() -> int:
             "model_sha256": file_sha256(saved_path),
             "mqt_predictor_version": package_version("mqt.predictor"),
             "num_timesteps": num_timesteps,
+            "observation_space": observation_metadata,
             "protocol": PROTOCOL_ID if target_matches_frozen_protocol else None,
             "protocol_version": PROTOCOL_VERSION,
             "target_matches_frozen_protocol": target_matches_frozen_protocol,

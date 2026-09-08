@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import time
 import unittest
 from pathlib import Path
@@ -9,7 +10,12 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
 
-from mqt.predictor.rl import actions as predictor_actions
+import numpy as np
+import torch
+from mqt.bench.targets import get_device
+from mqt.predictor.rl import Predictor, actions as predictor_actions
+from qiskit import QuantumCircuit, qasm2
+from stable_baselines3.common.preprocessing import preprocess_obs
 from mqt.predictor.rl.actions import bqskit_actions as predictor_bqskit_actions
 
 
@@ -20,6 +26,144 @@ assert SPEC is not None and SPEC.loader is not None
 TRAIN_RL = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = TRAIN_RL
 SPEC.loader.exec_module(TRAIN_RL)
+
+
+class RLObservationSpaceTests(unittest.TestCase):
+    @staticmethod
+    def circuit() -> QuantumCircuit:
+        circuit = QuantumCircuit(2)
+        circuit.x(0)
+        circuit.cz(0, 1)
+        circuit.measure_all()
+        return circuit
+
+    def mapped_observation(self, environment: Any) -> dict[str, Any]:
+        observation, _ = environment.reset(self.circuit(), seed=0)
+        for name in ("BasisTranslator", "DenseLayout"):
+            action = next(
+                index for index in environment.valid_actions
+                if environment.action_set[index].name == name
+            )
+            observation, _, terminated, truncated, info = environment.step(action)
+            self.assertFalse(terminated)
+            self.assertFalse(truncated, info)
+        return observation
+
+    def test_smaller_targets_keep_existing_model_spaces(self) -> None:
+        for device_name in ("ibm_falcon_27", "ibm_falcon_127", "quantinuum_h2_56"):
+            with self.subTest(device=device_name):
+                environment = Predictor(
+                    device=get_device(device_name), figure_of_merit="expected_fidelity"
+                ).env
+                original_spaces = dict(environment.observation_space.spaces)
+                TRAIN_RL.configure_qubit_observation_space(environment)
+                for key, original in original_spaces.items():
+                    self.assertIs(environment.observation_space[key], original)
+                self.assertEqual(environment.observation_space["num_qubits"].n, 128)
+
+    def test_mapped_heron_observations_are_encodable_without_clipping(self) -> None:
+        for device_name in ("ibm_heron_133", "ibm_heron_156"):
+            with self.subTest(device=device_name):
+                environment = Predictor(
+                    device=get_device(device_name), figure_of_merit="expected_fidelity"
+                ).env
+                original_spaces = dict(environment.observation_space.spaces)
+                observation = self.mapped_observation(environment)
+                width = environment.device.num_qubits
+                self.assertEqual(observation["num_qubits"], width)
+                tensors = {
+                    key: torch.as_tensor(value).unsqueeze(0)
+                    for key, value in observation.items()
+                }
+                with self.assertRaisesRegex(RuntimeError, "Class values must be smaller"):
+                    preprocess_obs(tensors, environment.observation_space)
+
+                metadata = TRAIN_RL.configure_qubit_observation_space(environment)
+                encoded = preprocess_obs(tensors, environment.observation_space)
+                self.assertTrue(environment.observation_space.contains(observation))
+                self.assertEqual(encoded["num_qubits"].shape, (1, width + 1))
+                self.assertEqual(encoded["num_qubits"].argmax().item(), width)
+                self.assertEqual(metadata["num_qubits_n"], width + 1)
+                for key, original in original_spaces.items():
+                    if key != "num_qubits":
+                        self.assertIs(environment.observation_space[key], original)
+
+    def next_action_mask(self, environment: Any) -> np.ndarray:
+        # Exercise actual MQT passes deterministically, avoiding expensive
+        # random BQSKit actions in this pipeline-only training check.
+        name = ("BasisTranslator", "DenseLayout", "terminate")[environment.num_steps]
+        index = next(
+            index for index in environment.valid_actions
+            if environment.action_set[index].name == name
+        )
+        mask = np.zeros(environment.action_space.n, dtype=bool)
+        mask[index] = True
+        return mask
+
+    def test_heron_ppo_training_resume_and_inference(self) -> None:
+        for device_name in ("ibm_heron_133", "ibm_heron_156"):
+            with self.subTest(device=device_name), tempfile.TemporaryDirectory() as temp:
+                directory = Path(temp)
+                qasm2.dump(self.circuit(), directory / "circuit_2.qasm")
+
+                def new_environment() -> Any:
+                    environment = Predictor(
+                        device=get_device(device_name),
+                        figure_of_merit="expected_fidelity",
+                        path_training_circuits=directory,
+                        max_steps=64,
+                    ).env
+                    TRAIN_RL.configure_qubit_observation_space(environment)
+                    return environment
+
+                environment = new_environment()
+                model = TRAIN_RL.MaskablePPO(
+                    TRAIN_RL.MaskableMultiInputActorCriticPolicy,
+                    environment,
+                    n_steps=4,
+                    batch_size=4,
+                    n_epochs=1,
+                    policy_kwargs={
+                        "net_arch": {"pi": [2], "vf": [2]},
+                        "ortho_init": False,
+                    },
+                    seed=0,
+                    device="cpu",
+                )
+                with patch.object(
+                    environment, "action_masks",
+                    side_effect=lambda: self.next_action_mask(environment),
+                ):
+                    model.learn(total_timesteps=4)
+                self.assertEqual(model.num_timesteps, 4)
+                self.assertEqual(model._n_updates, 1)
+                checkpoint = directory / "model.zip"
+                model.save(checkpoint)
+
+                resumed_environment = new_environment()
+                resumed = TRAIN_RL.load_model_or_exit(checkpoint, env=resumed_environment)
+                with patch.object(
+                    resumed_environment, "action_masks",
+                    side_effect=lambda: self.next_action_mask(resumed_environment),
+                ):
+                    resumed.learn(total_timesteps=4, reset_num_timesteps=False)
+                self.assertEqual(resumed.num_timesteps, 8)
+                self.assertEqual(resumed._n_updates, 2)
+
+                # qcompile and the ML workers load the saved policy without
+                # an env. Prediction must use the widened space from the ZIP,
+                # even when MQT constructs an unmodified inference env.
+                inference_environment = Predictor(
+                    device=get_device(device_name), figure_of_merit="expected_fidelity"
+                ).env
+                observation = self.mapped_observation(inference_environment)
+                loaded = TRAIN_RL.MaskablePPO.load(checkpoint, device="cpu")
+                action, _ = loaded.predict(
+                    observation,
+                    action_masks=inference_environment.action_masks(),
+                    deterministic=True,
+                )
+                self.assertIn(int(action), inference_environment.valid_actions)
 
 
 class RLTrainingRuntimeTests(unittest.TestCase):
