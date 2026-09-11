@@ -21,7 +21,7 @@ from scripts.mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS, QISKIT_W
 def parse_args() -> argparse.Namespace:
     """Legge e controlla le opzioni della generazione."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scope", choices=("pilot", "full"), default="pilot")
+    parser.add_argument("--scope", choices=("pilot", "full"), default="full")
     parser.add_argument(
         "--split",
         choices=("train", "validation", "test"),

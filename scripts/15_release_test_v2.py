@@ -208,6 +208,27 @@ def main() -> int:
         return {"records": len(records), "unique_source_sha256": len(set(hashes))}
 
     check("rag_train_only", check_rag)
+
+    def check_qdrant() -> dict[str, Any]:
+        from prototype.quantum_assistant.adapters.rag_dataset import DEFAULT_RAG_ROOT, load_corpus
+        from prototype.quantum_assistant.adapters.qdrant_context import expected_manifest, verified_client
+        corpus = load_corpus(verify_features=True)
+        with verified_client(DEFAULT_RAG_ROOT / "index", corpus):
+            return expected_manifest(corpus)
+
+    rag_manifest = check("rag_qdrant_collection", check_qdrant)
+
+    def check_rag_validation() -> dict[str, Any]:
+        from prototype.quantum_assistant.adapters.rag_dataset import DEFAULT_RAG_ROOT
+        report_path = DEFAULT_RAG_ROOT / "validation_check.json"
+        report = load_json(report_path)
+        from prototype.quantum_assistant.adapters.rag_checks import validate_validation_report
+        if rag_manifest is None or manifest is None:
+            raise ValueError("Prerequisiti RAG non validi.")
+        validate_validation_report(report, rag_manifest, manifest)
+        return {"path": str(report_path), "sha256": file_sha256(report_path)}
+
+    check("rag_validation_pipeline", check_rag_validation)
     model_report = check(
         "mqt_models",
         lambda: (
@@ -301,6 +322,12 @@ def main() -> int:
         validation_summary_path,
         validation_results_path,
     ]
+    from prototype.quantum_assistant.adapters.rag_dataset import DEFAULT_RAG_ROOT
+    frozen_paths.extend(
+        path for path in (DEFAULT_RAG_ROOT / "index").rglob("*")
+        if path.is_file() and path.name != ".lock"
+    )
+    frozen_paths.append(DEFAULT_RAG_ROOT / "validation_check.json")
     frozen_paths.extend(
         path
         for path in CANONICAL_MODEL_ROOT_V2.rglob("*")

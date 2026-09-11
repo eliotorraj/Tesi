@@ -438,6 +438,7 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
         return build_default_service(
             device_names=(DEVICE_ID,),
             dataset_path=self.root / "missing.jsonl",
+            retrieval_backend="none",
             llm_gateway=CallableLlmGateway(callback),
             max_llm_attempts=max_attempts,
             retrieval_limit=5,
@@ -506,8 +507,11 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
         )
 
     def test_registry_accepts_first_real_global_rag_record(self) -> None:
+        # This committed pilot is a historical fixture, independent of local v2 outputs.
         dataset_path = (
             Path(__file__).resolve().parents[1]
+            / "archivio"
+            / "protocollo_v1"
             / "datasets"
             / "expected_fidelity"
             / "pilot"

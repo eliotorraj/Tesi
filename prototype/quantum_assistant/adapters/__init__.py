@@ -7,6 +7,8 @@ from .context import (
     StructuredEvidenceRegistryBuilder,
     StructuredPromptBuilder,
 )
+from .qdrant_context import QdrantContextRetriever, LocalReferenceContextRetriever, RetrievalDatabaseError
+from .rag_features import RetrievalIntegrityError
 from .explanations import DeterministicExplanationRenderer
 from .hardware import HardwareCatalogIntegrityError
 from .llm import CallableLlmGateway, UnconfiguredLlmGateway
@@ -26,6 +28,10 @@ __all__ = [
     "HardwareCatalogIntegrityError",
     "HardwareMaskBuilder",
     "JsonDatasetContextRetriever",
+    "QdrantContextRetriever",
+    "LocalReferenceContextRetriever",
+    "RetrievalDatabaseError",
+    "RetrievalIntegrityError",
     "MqtHardwareCatalog",
     "QasmRequestParser",
     "RequestSemanticValidator",

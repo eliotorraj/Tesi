@@ -10,6 +10,7 @@ import signal
 import shutil
 import sys
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import UTC, datetime
 from importlib.metadata import version as package_version
 from pathlib import Path
@@ -52,6 +53,7 @@ from mqt.bench.targets import get_device
 from mqt.predictor.rl import Predictor
 from mqt.predictor.rl.helper import get_path_trained_model
 from mqt.predictor.rl.predictorenv import PredictorEnv
+from qiskit.transpiler.passes import VF2Layout
 from sb3_contrib import MaskablePPO
 from sb3_contrib.common.maskable.policies import MaskableMultiInputActorCriticPolicy
 from stable_baselines3.common.callbacks import BaseCallback
@@ -61,6 +63,7 @@ from stable_baselines3.common.utils import set_random_seed
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_MODEL_DIR = CANONICAL_RL_MODEL_DIR_V2
 _ORIGINAL_BQSKIT_COMPILE = predictor_bqskit_actions.bqskit_compile
+VF2_LAYOUT_CALL_LIMIT = 10_000
 
 
 class AtomicCheckpointCallback(BaseCallback):
@@ -170,6 +173,41 @@ def configure_bqskit_runtime(seed: int = 0, action_timeout: float = 60.0) -> Non
             return _ORIGINAL_BQSKIT_COMPILE(circuit, *args, **kwargs)
 
     predictor_bqskit_actions.bqskit_compile = compile_with_project_limit
+
+
+def vf2_layout_metadata(seed: int) -> dict[str, Any]:
+    return {
+        "profile": "bounded-vf2-layout-v1",
+        "call_limit": VF2_LAYOUT_CALL_LIMIT,
+        "seed": seed,
+    }
+
+
+def configure_vf2_layout_runtime(environment: PredictorEnv, seed: int = 0) -> dict[str, Any]:
+    """Bound VF2's native search while preserving MQT's layout and failure handling.
+
+    VF2 can hold the GIL, so a Python signal timeout does not reliably interrupt
+    it. Its native call_limit bounds mapping extensions even before any solution
+    is found; time_limit only checks after a solution and is insufficient here.
+    """
+    for index, action in environment.action_set.items():
+        if action.name != "VF2Layout":
+            continue
+        factory = action.transpile_pass
+
+        def bounded_passes(device: Any, original_factory: Any = factory) -> list[Any]:
+            passes = original_factory(device)
+            return [
+                VF2Layout(target=device, call_limit=VF2_LAYOUT_CALL_LIMIT, seed=seed)
+                if isinstance(transpile_pass, VF2Layout) else transpile_pass
+                for transpile_pass in passes
+            ]
+
+        # Actions come from a shared registry: replace only this environment's
+        # entry, so other environments and inference retain their own settings.
+        environment.action_set[index] = replace(action, transpile_pass=bounded_passes)
+        return vf2_layout_metadata(seed)
+    raise ValueError("L'ambiente RL non contiene l'azione VF2Layout.")
 
 
 def configure_qubit_observation_space(environment: PredictorEnv) -> dict[str, Any]:
@@ -389,6 +427,8 @@ def main() -> int:
             metadata_errors.append("checkpoint non legato esclusivamente allo split train")
         if resume_metadata.get("seed") != args.seed:
             metadata_errors.append("seed del checkpoint diverso dalla run richiesta")
+        if resume_metadata.get("qiskit_vf2_layout") != vf2_layout_metadata(args.seed):
+            metadata_errors.append("profilo VF2Layout diverso o assente nel checkpoint")
         if "interrupted" in args.resume_from.stem:
             metadata_errors.append("snapshot di emergenza non riprendibile")
         if resume_timesteps % RL_ROLLOUT_STEPS:
@@ -453,13 +493,23 @@ def main() -> int:
         max_steps=args.max_steps,
     )
 
+    vf2_metadata = configure_vf2_layout_runtime(predictor.env, args.seed)
+    print(
+        f"VF2Layout: ricerca limitata a {VF2_LAYOUT_CALL_LIMIT} estensioni "
+        f"(seed={args.seed})."
+    )
     observation_metadata = configure_qubit_observation_space(predictor.env)
     print(
         "Osservazione RL: numero di qubit ammesso da 0 a "
         f"{observation_metadata['num_qubits_n'] - 1} (incluso)."
     )
 
-    monitor_csv = tensorboard_dir / "monitor.csv"
+    # Keep the previous episode log, including the interrupted rollout, for
+    # auditing. Each resumed process writes its own CSV within the same run.
+    monitor_csv = tensorboard_dir / (
+        f"resume-{started_at.strftime('%Y%m%dT%H%M%S.%fZ')}.monitor.csv"
+        if args.resume_from else "monitor.csv"
+    )
     predictor.env = Monitor(predictor.env, filename=str(monitor_csv))
 
     if args.resume_from:
@@ -500,9 +550,11 @@ def main() -> int:
             "figure_of_merit": args.metric,
             "max_steps": args.max_steps,
             "model_sha256": file_sha256(saved_path),
+            "monitor_csv": str(monitor_csv.relative_to(EXPERIMENT_ROOT)),
             "mqt_predictor_version": package_version("mqt.predictor"),
             "num_timesteps": num_timesteps,
             "observation_space": observation_metadata,
+            "qiskit_vf2_layout": vf2_metadata,
             "protocol": PROTOCOL_ID if target_matches_frozen_protocol else None,
             "protocol_version": PROTOCOL_VERSION,
             "target_matches_frozen_protocol": target_matches_frozen_protocol,
@@ -541,6 +593,7 @@ def main() -> int:
         model.learn(
             total_timesteps=remaining_timesteps,
             reset_num_timesteps=args.resume_from is None,
+            tb_log_name="MaskablePPO",
             callback=checkpoint_callback,
             progress_bar=True,
         )

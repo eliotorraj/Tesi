@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
@@ -12,7 +11,8 @@ from typing import Any
 
 from mqt.bench.targets import get_device, get_gateset
 
-from qiskit_dataset.catalog import ConfigurationCatalog, load_catalog
+from qiskit_dataset.catalog import V2_CATALOG_PATH, ConfigurationCatalog, load_catalog
+from scripts.mqt_predictor_protocol import target_payload as _target_payload
 
 from ..models import (
     HARDWARE_CATALOG_SCHEMA_VERSION,
@@ -32,8 +32,8 @@ from ..schema_validation import load_schema, validate_instance
 
 CATALOG_SCHEMA = load_schema("hardware_catalog.schema.json")
 MASK_SCHEMA = load_schema("hardware_mask_result.schema.json")
-FINGERPRINT_ALGORITHM = "assistant-hardware-catalog/2"
-TARGET_FINGERPRINT_ALGORITHM = "qiskit-dataset-target/1"
+FINGERPRINT_ALGORITHM = "assistant-hardware-catalog/3"
+TARGET_FINGERPRINT_ALGORITHM = "qiskit-dataset-target/2"
 TARGET_UNAVAILABILITY_CODE = "TARGET_LOAD_FAILED"
 
 
@@ -101,72 +101,6 @@ def _digest(value: Any) -> str:
     return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
 
 
-def _finite_float(value: Any) -> float | None:
-    """Restituisce un numero finito oppure None se il valore non è valido."""
-    if value is None:
-        return None
-    try:
-        result = float(value)
-    except (TypeError, ValueError):
-        return None
-    return result if math.isfinite(result) else None
-
-
-def _target_payload(target: Any) -> dict[str, Any]:
-    """Serializza i dati del Target che possono influire sulla fedeltà attesa.
-
-    La struttura coincide con quella del Dataset, così le due impronte possono
-    essere confrontate quando descrivono lo stesso Target.
-    """
-    instructions: list[dict[str, Any]] = []
-    for operation, qargs in target.instructions:
-        properties = None
-        try:
-            properties = target[operation.name].get(qargs)
-        except (AttributeError, KeyError, TypeError):
-            pass
-        instructions.append(
-            {
-                "name": str(operation.name),
-                "qargs": (
-                    None
-                    if qargs is None
-                    else [int(qubit) for qubit in qargs]
-                ),
-                "error": _finite_float(getattr(properties, "error", None)),
-                "duration": _finite_float(
-                    getattr(properties, "duration", None)
-                ),
-            }
-        )
-    instructions.sort(
-        key=lambda item: (
-            item["name"],
-            _canonical_json(item["qargs"]),
-            -1.0 if item["error"] is None else item["error"],
-            -1.0 if item["duration"] is None else item["duration"],
-        )
-    )
-    coupling_map = target.build_coupling_map()
-    edges = (
-        []
-        if coupling_map is None
-        else sorted(
-            [int(source), int(destination)]
-            for source, destination in coupling_map.get_edges()
-        )
-    )
-    return {
-        "device_id": str(target.description),
-        "target_type": f"{type(target).__module__}.{type(target).__qualname__}",
-        "num_qubits": int(target.num_qubits),
-        "operation_names": sorted(map(str, target.operation_names)),
-        "coupling_edges": edges,
-        "all_to_all": coupling_map is None,
-        "instructions": instructions,
-    }
-
-
 def _package_version(distribution: str) -> str:
     """Legge la versione installata oppure restituisce un valore neutro."""
     try:
@@ -180,6 +114,12 @@ def _configuration_material(catalog: ConfigurationCatalog) -> dict[str, Any]:
     return {
         "schema_version": catalog.schema_version,
         "catalog_id": catalog.catalog_id,
+        "experiment_id": catalog.experiment_id,
+        "protocol_version": catalog.protocol_version,
+        "required_versions": dict(catalog.required_versions),
+        "target_sha256": dict(catalog.target_sha256),
+        "target_fingerprint_schema_version": catalog.target_fingerprint_schema_version,
+        "execution_policy": dict(catalog.execution_policy),
         "default_device_id": catalog.default_device_id,
         "supported_device_ids": list(catalog.supported_device_ids),
         "objective": dict(catalog.objective),
@@ -248,6 +188,12 @@ def _copy_configuration_catalog(
         seeds=tuple(catalog.seeds),
         fixed_transpile_options=dict(catalog.fixed_transpile_options),
         configurations=tuple(catalog.configurations),
+        experiment_id=catalog.experiment_id,
+        protocol_version=catalog.protocol_version,
+        required_versions=dict(catalog.required_versions),
+        target_sha256=dict(catalog.target_sha256),
+        target_fingerprint_schema_version=catalog.target_fingerprint_schema_version,
+        execution_policy=dict(catalog.execution_policy),
     )
 
 
@@ -314,11 +260,18 @@ class MqtHardwareCatalog:
             raise ValueError("Configurare almeno un device.")
         self._device_names = tuple(sorted(dict.fromkeys(map(str, device_names))))
         source_catalog = (
-            load_catalog()
+            load_catalog(V2_CATALOG_PATH)
             if configuration_catalog is None
             else configuration_catalog
         )
         _validate_configuration_catalog(source_catalog)
+        if source_catalog.target_fingerprint_schema_version not in (None, 2):
+            raise HardwareCatalogIntegrityError("Versione impronta Target non supportata.")
+        for package, expected in source_catalog.required_versions.items():
+            if _package_version(package) != expected:
+                raise HardwareCatalogIntegrityError(
+                    f"Versione {package} diversa da quella richiesta dal catalogo."
+                )
         self._configuration_catalog = _copy_configuration_catalog(
             source_catalog
         )
@@ -390,6 +343,11 @@ class MqtHardwareCatalog:
                 }
             )
             target_hash = _digest(target_payload)
+            expected_hash = self._configuration_catalog.target_sha256.get(device_id)
+            if expected_hash is not None and target_hash != expected_hash:
+                raise HardwareCatalogIntegrityError(
+                    f"Target {device_id} diverso dall'impronta congelata nel catalogo."
+                )
             instruction_properties_hash = _digest(
                 target_payload["instructions"]
             )

@@ -121,6 +121,7 @@ class LlmOutputValidationTests(unittest.TestCase):
         return build_default_service(
             device_names=devices,
             dataset_path=self.root / "missing.jsonl",
+            retrieval_backend="none",
             llm_gateway=CallableLlmGateway(callback),
             max_llm_attempts=max_attempts,
             retrieval_limit=2,

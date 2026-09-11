@@ -18,7 +18,7 @@ from io import StringIO
 from pathlib import Path
 from typing import Any, Iterator, Mapping
 
-from scripts.mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS, QISKIT_WORKERS
+from scripts.mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS, LEGACY_ROOT, QISKIT_WORKERS
 
 from .catalog import ConfigurationCatalog
 from .core import (
@@ -38,7 +38,7 @@ from .core import (
 )
 
 
-CACHE_ROOT = PROJECT_ROOT / "artifacts" / "qiskit_dataset_cache"
+CACHE_ROOT = LEGACY_ROOT / "artifacts" / "qiskit_dataset_cache"
 
 
 class AttemptTimeoutError(TimeoutError):

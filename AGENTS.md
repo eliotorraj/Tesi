@@ -10,10 +10,12 @@
 
 ## MQT Predictor testing
 
-- The reproducible baseline is Python 3.12 with `mqt.predictor==2.3.0` and the compatibility pins from its official v2.3.0 lockfile.
+- The current experiment uses Python 3.12 with `mqt.predictor==2.4.0` and the exact pins in `uv.lock`. MQT Predictor 2.3.0 is historical material in `archivio/`.
+- Use `docs/protocollo_sperimentale.md` as the only current experimental protocol. Active Dataset and artifacts are under their respective `experiments/` directories.
+- Preserve the original corpus in `archivio/protocollo_v1/datasets/expected_fidelity/full/`; v2 still verifies it. Frozen manifest paths are logical references resolved by `resolve_source_reference`, not paths to rewrite.
 - Do not assume that `qcompile` works immediately after installation. MQT Predictor 2.x requires trained RL models and a trained supervised device selector.
 - A smoke-trained model only validates the pipeline; it is not evidence of compilation quality.
-- Preserve trained model artifacts before recreating `.venv`, because MQT Predictor 2.3.0 stores them inside the installed package directory.
+- Preserve trained model artifacts before recreating `.venv`, including runtime copies inside the installed package directory and canonical artifacts under `artifacts/experiments/`.
 
 ## Terminology
 
@@ -22,13 +24,10 @@
 
 ## LeanCTX
 
-- Prefer LeanCTX MCP tools for repository exploration.
-- Use `ctx_search` instead of broad recursive searches when possible.
-- Use `ctx_read` with map or signatures mode before requesting full files.
-- Use `ctx_tree` instead of recursively listing the repository.
-- Use `ctx_shell` for commands whose output may be large.
-- Expand compressed or partial results when exact source text is required.
-- Do not use lossy summaries as evidence for exact code, test failures, numerical results, or paper claims.
+- Use LeanCTX selectively for targeted searches, `map`/`signatures` reads, and verbose command output; keep compression enabled by default.
+- Use native tools for small exact operations or if the server points to another project. Do not repeat a rejected path or silently run in the wrong directory.
+- Use full/raw output only for the exact source, errors, numbers, or paper claims needed as evidence.
+- Keep tool discovery output short. Plugin statistics do not establish net Codex token or cost savings.
 
 ## Reports
 

@@ -44,6 +44,7 @@ _SUPPORTED_SCHEMA_KEYWORDS = frozenset(
         "minItems",
         "minLength",
         "minProperties",
+        "maxProperties",
         "minimum",
         "pattern",
         "properties",
@@ -80,9 +81,10 @@ def ensure_supported_schema(schema: Mapping[str, Any]) -> None:
             return
 
         expected_type = node.get("type")
+        type_names = expected_type if isinstance(expected_type, list) else [expected_type]
         if expected_type is not None and (
-            not isinstance(expected_type, str)
-            or expected_type not in _SUPPORTED_TYPES
+            not type_names
+            or any(not isinstance(name, str) or name not in _SUPPORTED_TYPES for name in type_names)
         ):
             raise ValueError(f"type non supportato in {path}: {expected_type!r}.")
         schema_format = node.get("format")
@@ -261,7 +263,8 @@ def validate_instance(
             return
 
         expected_type = current_schema.get("type")
-        if isinstance(expected_type, str) and not _is_type(value, expected_type):
+        type_names = expected_type if isinstance(expected_type, list) else [expected_type]
+        if expected_type is not None and not any(_is_type(value, name) for name in type_names):
             add(path, f"Tipo atteso: {expected_type}.")
             return
 
@@ -289,6 +292,9 @@ def validate_instance(
                 and len(value) < minimum_properties
             ):
                 add(path, f"Sono richieste almeno {minimum_properties} proprietà.")
+            maximum_properties = current_schema.get("maxProperties")
+            if isinstance(maximum_properties, int) and len(value) > maximum_properties:
+                add(path, f"Sono ammesse al massimo {maximum_properties} proprietà.")
 
         if isinstance(value, list):
             minimum_items = current_schema.get("minItems")

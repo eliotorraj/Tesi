@@ -21,6 +21,7 @@ from mqt_predictor_protocol import (
     TRAINING_CIRCUITS_V2,
     VALIDATION_CIRCUITS_V2,
     file_sha256,
+    resolve_source_reference,
     frozen_target_mismatches,
     installed_package_versions,
     package_version_mismatches,
@@ -94,7 +95,7 @@ def materialize_split(
         )
 
     for record in records:
-        source = PROJECT_ROOT / str(record["source_ref"])
+        source = resolve_source_reference(str(record["source_ref"]))
         target = destination / str(record["file_name"])
         expected_sha256 = str(record["source_sha256"])
         if target.exists():

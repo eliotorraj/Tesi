@@ -140,19 +140,19 @@ class PhaseTwoRequestTests(unittest.TestCase):
         self.assertEqual(rebuilt.to_dict(), self.catalog.to_dict())
         self.assertEqual(
             self.catalog.provenance["fingerprint_algorithm"],
-            "assistant-hardware-catalog/2",
+            "assistant-hardware-catalog/3",
         )
 
         for profile in self.catalog.devices:
             with self.subTest(device_id=profile.device_id):
-                historical = build_target_record(profile.device_id)
+                historical = build_target_record(profile.device_id, fingerprint_schema_version=2)
                 self.assertEqual(
                     profile.target_hash,
                     historical["target_sha256"],
                 )
                 self.assertEqual(
                     profile.metadata["target_fingerprint_algorithm"],
-                    "qiskit-dataset-target/1",
+                    "qiskit-dataset-target/2",
                 )
                 self.assertRegex(
                     profile.metadata["instruction_properties_hash"],

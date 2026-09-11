@@ -91,6 +91,58 @@ Questo comando esegue in ordine:
 Se prepare fallisce, non avviare il training. Correggere prima l'errore di
 ambiente, versione, Target o manifest.
 
+### Riprendere un training RL interrotto
+
+Per Quantinuum, dalla cartella del progetto:
+
+~~~bash
+.venv/bin/python scripts/16_run_pipeline_v2.py rl --devices quantinuum_h2_56
+~~~
+
+Il comando cerca automaticamente il checkpoint valido più avanzato e mantiene
+il nome della run. TensorBoard continua nella stessa cartella MaskablePPO già
+usata, con il contatore dei passi del checkpoint. Può comparire un nuovo file
+di eventi nella stessa cartella: TensorBoard lo mostra come parte dello stesso
+allenamento. Non usare `--no-auto-resume` per questa operazione.
+
+Ripartono solo i passi successivi all'ultimo rollout salvato. Il file
+`interrupted.zip`, quando presente, serve alla diagnosi e non alla ripresa.
+Ogni ripresa conserva il CSV precedente e scrive gli episodi in un nuovo file
+`resume-*.monitor.csv` dentro la stessa run. I CSV conservano anche i tentativi
+successivi al checkpoint poi scartati: non vanno sommati come passi del modello.
+Il riferimento per il progresso acquisito resta il contatore del checkpoint.
+
+### Piani precedenti a 100 secondi e 6 processi
+
+Se `prepare` segnala un piano diverso perché riporta ancora 300 secondi e
+2 processi, eseguire una volta:
+
+~~~bash
+.venv/bin/python scripts/11_freeze_method_plan_v2.py --split validation --align-execution-policy
+.venv/bin/python scripts/11_freeze_method_plan_v2.py --split test --align-execution-policy
+~~~
+
+I piani precedenti sono conservati in `plans/history/`. Circuiti ed estrazioni
+restano identici. L'opzione rifiuta ogni altra differenza e il test già aperto.
+Questi file sono locali: la modifica del codice su Git non aggiorna i piani
+presenti sull'altro computer.
+
+### Limite della ricerca VF2 durante il training RL
+
+Dall'8 settembre 2026, i nuovi training limitano VF2Layout a 10000
+estensioni della ricerca e usano il seed della run. Senza questo limite,
+la ricerca sul target Quantinuum poteva occupare una CPU per ore e fermare
+il contatore a 419 passi. Il timeout di BQSKit non copre questa operazione.
+
+Il limite è applicato nello script di training, senza modificare i pacchetti
+installati. Le azioni RL restano le stesse. Se VF2 non trova un layout entro
+il limite, l'ambiente può scegliere un'altra azione. La ricerca può quindi
+fermarsi prima di trovare il layout migliore: è una scelta di tempo di calcolo,
+non una garanzia di qualità. I metadati riportano `qiskit_vf2_layout` con
+profilo, limite e seed. La ripresa accetta solo salvataggi con lo stesso profilo,
+per evitare di mescolare due condizioni di training nella stessa run.
+I modelli già completati conservano le loro condizioni originali.
+
 ## 3. Training dei cinque modelli RL sul PC Modelli
 
 Un solo comando allena tutti i modelli in sequenza. In questo modo sulla

@@ -14,6 +14,8 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
+from scripts.mqt_predictor_protocol import LEGACY_ROOT
+
 from .catalog import ConfigurationCatalog
 
 
@@ -85,7 +87,7 @@ PILOT_FILENAMES = (
 def _dataset_storage_root(experiment_id: str | None = None) -> Path:
     """Separa gli artefatti v2 dai risultati storici del protocollo 1.0."""
     if experiment_id is None:
-        return DATASETS_ROOT
+        return LEGACY_ROOT / "datasets"
     if Path(experiment_id).name != experiment_id or experiment_id in {".", ".."}:
         raise ValueError(f"experiment_id non valido per un path: {experiment_id!r}.")
     return DATASETS_ROOT / "experiments" / experiment_id

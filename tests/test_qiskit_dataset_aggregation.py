@@ -4,7 +4,7 @@ import json
 import unittest
 
 from qiskit_dataset.aggregation import aggregate_device_datasets
-from qiskit_dataset.catalog import load_catalog
+from qiskit_dataset.catalog import LEGACY_CATALOG_PATH, load_catalog
 from qiskit_dataset.core import dataset_scope_root, sha256_file
 
 
@@ -21,7 +21,7 @@ class GlobalDatasetAggregationTests(unittest.TestCase):
     def test_pilot_check_only_reads_every_mini_dataset_without_mutation(
         self,
     ) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         scope_root = dataset_scope_root("expected_fidelity", "pilot")
         before = self._mini_dataset_snapshot(
             scope_root,

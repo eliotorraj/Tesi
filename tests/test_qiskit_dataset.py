@@ -20,7 +20,7 @@ from prototype.quantum_assistant.models import (
     HardwareProfile,
     UiSubmission,
 )
-from qiskit_dataset.catalog import load_catalog
+from qiskit_dataset.catalog import LEGACY_CATALOG_PATH, load_catalog
 from qiskit_dataset.core import (
     dataset_circuits_root,
     dataset_scope_root,
@@ -149,7 +149,7 @@ def _success_run(
 
 class QiskitCatalogTests(unittest.TestCase):
     def test_catalog_is_the_exact_twelve_tuple_allowlist(self) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         self.assertEqual(len(catalog.configurations), 12)
         self.assertEqual(catalog.allowed_keys, EXPECTED_KEYS)
         self.assertEqual(catalog.seeds, (0, 1, 2))
@@ -174,10 +174,10 @@ class QiskitCatalogTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             dataset_scope_root("expected_fidelity", "pilot", "../escape")
         with self.assertRaises(ValueError):
-            load_catalog().require_device("unknown_device")
+            load_catalog(LEGACY_CATALOG_PATH).require_device("unknown_device")
 
     def test_catalog_rejects_cross_product_and_excluded_values(self) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         for key in (
             (1, None, None),
             (2, "dense", "basic"),
@@ -249,7 +249,7 @@ class QiskitCatalogTests(unittest.TestCase):
 
 class QiskitSplitAndPlanTests(unittest.TestCase):
     def test_committed_manifests_have_expected_counts_and_no_leakage(self) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         pilot = load_manifest(
             "pilot",
             device_id=catalog.default_device_id,
@@ -299,7 +299,7 @@ class QiskitSplitAndPlanTests(unittest.TestCase):
         )
 
     def test_pilot_uses_one_shared_integrity_checked_circuit_store(self) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         shared_root = dataset_circuits_root("expected_fidelity", "pilot")
         self.assertEqual(len(list(shared_root.glob("*/*.qasm"))), 10)
         for device_id in catalog.supported_device_ids:
@@ -326,7 +326,7 @@ class QiskitSplitAndPlanTests(unittest.TestCase):
                 )
 
     def test_attempt_plan_skips_width_incompatible_circuits(self) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         compatible = _synthetic_circuit("compatible", "train")
         compatible["device_compatibility"] = {
             "compatible": True,
@@ -369,7 +369,7 @@ class QiskitSplitAndPlanTests(unittest.TestCase):
 
 class QiskitAggregationTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.catalog = load_catalog()
+        self.catalog = load_catalog(LEGACY_CATALOG_PATH)
         self.train_circuit = _synthetic_circuit("train_circuit", "train")
         self.validation_circuit = _synthetic_circuit(
             "validation_circuit",
@@ -589,7 +589,7 @@ class QiskitAggregationTests(unittest.TestCase):
 
 class QiskitFailureRecordTests(unittest.TestCase):
     def test_source_failure_preserves_full_attempt_context(self) -> None:
-        catalog = load_catalog()
+        catalog = load_catalog(LEGACY_CATALOG_PATH)
         circuit = _synthetic_circuit("missing_source", "train")
         configuration = catalog.configurations[0]
         task = {

@@ -8,9 +8,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
+from scripts.mqt_predictor_protocol import LEGACY_ROOT
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CATALOG_PATH = PROJECT_ROOT / "configs" / "qiskit_dataset_configurations.json"
+V2_CATALOG_PATH = PROJECT_ROOT / "configs" / "qiskit_dataset_configurations_v2.json"
+DEFAULT_CATALOG_PATH = V2_CATALOG_PATH
+LEGACY_CATALOG_PATH = LEGACY_ROOT / "configs" / "qiskit_dataset_configurations.json"
 
 
 @dataclass(frozen=True)

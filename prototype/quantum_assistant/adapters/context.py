@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Mapping
 
-from qiskit_dataset.catalog import ConfigurationCatalog, load_catalog
+from qiskit_dataset.catalog import V2_CATALOG_PATH, ConfigurationCatalog, load_catalog
 
 from ..models import (
     CompatibilityView,
@@ -41,26 +41,6 @@ def _json_ready(value: Any) -> Any:
     if isinstance(value, tuple):
         return [_json_ready(item) for item in value]
     return value
-
-
-def _feature_distance(
-    query: Mapping[str, float],
-    candidate: Mapping[str, Any],
-) -> float | None:
-    """Calcola la distanza media tra caratteristiche tenendo conto della scala."""
-    if set(query) - set(candidate):
-        return None
-    distances: list[float] = []
-    for name, query_value in query.items():
-        try:
-            candidate_value = float(candidate[name])
-        except (TypeError, ValueError):
-            return None
-        if not math.isfinite(candidate_value):
-            return None
-        scale = 1.0 + max(abs(query_value), abs(candidate_value))
-        distances.append(abs(query_value - candidate_value) / scale)
-    return sum(distances) / len(distances) if distances else 0.0
 
 
 def _compact_prompt_input(record_input: Mapping[str, Any]) -> dict[str, Any]:
@@ -277,7 +257,7 @@ class StructuredEvidenceRegistryBuilder:
     ) -> None:
         """Configura il catalogo usato per controllare le evidenze storiche."""
         self._configuration_catalog = (
-            load_catalog()
+            load_catalog(V2_CATALOG_PATH)
             if configuration_catalog is None
             else configuration_catalog
         )
@@ -831,146 +811,20 @@ class StructuredEvidenceRegistryBuilder:
 
 
 class JsonDatasetContextRetriever:
-    """Recupera gli esempi più vicini da JSON storici o JSONL RAG.
+    """Nome storico per il riferimento Manhattan esplicito sul solo JSONL v2.
 
-    I vecchi record espongono soltanto l'ingresso. I record RAG di addestramento
-    includono anche raccomandazione, claim, evidenze e avvertenze storiche.
+    I vecchi JSON senza provenienza train non sono più ammessi.
     """
 
-    def __init__(self, dataset_path: Path, *, required: bool = False) -> None:
-        """Configura il percorso del Dataset e se la sua presenza è obbligatoria."""
-        self._dataset_path = Path(dataset_path)
-        self._required = required
-        self._records: list[dict[str, Any]] | None = None
+    def __init__(self, dataset_path: Path, *, required: bool = False, rag_root: Path | None = None) -> None:
+        from .qdrant_context import LocalReferenceContextRetriever
+        from .rag_dataset import DEFAULT_RAG_ROOT
+        self._reference = LocalReferenceContextRetriever(
+            dataset_path, rag_root=DEFAULT_RAG_ROOT if rag_root is None else rag_root,
+        )
 
-    def _load(self) -> list[dict[str, Any]]:
-        """Carica una volta sola i record da JSON o JSONL."""
-        if self._records is not None:
-            return self._records
-        if not self._dataset_path.is_file():
-            if self._required:
-                raise FileNotFoundError(
-                    f"Dataset LLM non trovato: {self._dataset_path}"
-                )
-            self._records = []
-            return self._records
-
-        text = self._dataset_path.read_text(encoding="utf-8")
-        try:
-            payload = json.loads(text)
-        except json.JSONDecodeError:
-            records: list[dict[str, Any]] = []
-            for line_number, line in enumerate(text.splitlines(), start=1):
-                if not line.strip():
-                    continue
-                try:
-                    value = json.loads(line)
-                except json.JSONDecodeError as error:
-                    raise ValueError(
-                        f"{self._dataset_path}:{line_number}: JSONL non valido."
-                    ) from error
-                if not isinstance(value, dict):
-                    raise ValueError(
-                        f"{self._dataset_path}:{line_number}: record non oggetto."
-                    )
-                records.append(value)
-            self._records = records
-            return records
-
-        if isinstance(payload, dict) and isinstance(payload.get("records"), list):
-            self._records = [
-                item for item in payload["records"] if isinstance(item, dict)
-            ]
-        elif isinstance(payload, dict):
-            self._records = [payload]
-        elif isinstance(payload, list):
-            self._records = [item for item in payload if isinstance(item, dict)]
-        else:
-            raise ValueError(f"Formato Dataset non supportato: {self._dataset_path}.")
-        return self._records
-
-    def retrieve(
-        self,
-        request: ParsedRequest,
-        compatibility: CompatibilityView,
-        *,
-        limit: int,
-    ) -> tuple[RetrievedExample, ...]:
-        """Ordina gli esempi compatibili per distanza e restituisce i primi."""
-        if limit <= 0:
-            return ()
-        available = set(compatibility.available_device_ids)
-        ranked: list[RetrievedExample] = []
-        for record in self._load():
-            if _is_labeled_rag_record(record):
-                _validate_labeled_rag_envelope(record)
-            if isinstance(record.get("retrieval_input"), dict):
-                retrieval_input = record["retrieval_input"]
-                objective = record.get("objective") or {}
-                if objective.get("name") != request.figure_of_merit:
-                    continue
-                circuit = retrieval_input.get("circuit") or {}
-                features = (circuit.get("features") or {}).get("values") or {}
-                distance = _feature_distance(request.features, features)
-                if distance is None:
-                    continue
-                historical_devices = {
-                    str(device.get("device_id"))
-                    for device in retrieval_input.get(
-                        "compatible_devices", []
-                    )
-                    if isinstance(device, Mapping)
-                }
-                selected_device = (
-                    record.get("selected_device") or {}
-                ).get("device_id")
-                if selected_device not in historical_devices:
-                    raise EvidenceRegistryDataError(
-                        "Dataset RAG non valido "
-                        f"({record.get('rag_id', '<missing>')}, "
-                        "$.selected_device.device_id): dispositivo non "
-                        "presente tra i candidati storici."
-                    )
-                if not historical_devices.intersection(available):
-                    continue
-                if selected_device not in available:
-                    continue
-                ranked.append(
-                    RetrievedExample(
-                        record_id=str(record.get("rag_id", "<missing>")),
-                        distance=distance,
-                        prompt_input=_compact_rag_example(record),
-                    )
-                )
-                continue
-
-            record_input = record.get("input")
-            if not isinstance(record_input, dict):
-                continue
-            objective = record_input.get("objective") or {}
-            if objective.get("name") != request.figure_of_merit:
-                continue
-            circuit = record_input.get("circuit") or {}
-            features = (circuit.get("features") or {}).get("by_name") or {}
-            distance = _feature_distance(request.features, features)
-            if distance is None:
-                continue
-            historical_backends = {
-                str(backend.get("id"))
-                for backend in record_input.get("compatible_backends", [])
-                if isinstance(backend, dict)
-            }
-            if not historical_backends.intersection(available):
-                continue
-            ranked.append(
-                RetrievedExample(
-                    record_id=str(record.get("record_id", "<missing>")),
-                    distance=distance,
-                    prompt_input=_compact_prompt_input(record_input),
-                )
-            )
-        ranked.sort(key=lambda item: (item.distance, item.record_id))
-        return tuple(ranked[:limit])
+    def retrieve(self, request: ParsedRequest, compatibility: CompatibilityView, *, limit: int) -> tuple[RetrievedExample, ...]:
+        return self._reference.retrieve(request, compatibility, limit=limit)
 
 
 class StructuredPromptBuilder:
@@ -983,7 +837,7 @@ class StructuredPromptBuilder:
     ) -> None:
         """Configura il catalogo delle opzioni che l'LLM può scegliere."""
         self._configuration_catalog = (
-            load_catalog()
+            load_catalog(V2_CATALOG_PATH)
             if configuration_catalog is None
             else configuration_catalog
         )

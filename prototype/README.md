@@ -1,6 +1,10 @@
 # Prototipo dell'assistente quantistico
 <img width="1444" height="736" alt="Gemini_Generated_Image_uxvjltuxvjltuxvj" src="https://github.com/user-attachments/assets/74cb16d9-e73e-4484-ab68-6f6494885862" />
 
+Il riferimento scientifico e operativo è il
+[protocollo unico](../docs/protocollo_sperimentale.md). Il Dataset da usare è
+`datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/global/rag_examples.jsonl`.
+
 ## 1. Spiegazione generale
 
 Il prototipo prepara una raccomandazione di compilazione per un circuito
@@ -41,8 +45,9 @@ La preparazione della richiesta, il catalogo, la maschera hardware e il
 controllo della risposta sono completi. Il codice comprende anche la ricerca
 locale nel Dataset, la costruzione della richiesta per il modello e la
 compilazione finale. L'intero flusso può quindi essere provato con un
-collegamento simulato. La misura definitiva di similarità e il collegamento a
-un LLM reale devono ancora essere completati e valutati.
+collegamento simulato. La factory usa Qdrant locale persistente e la nuova
+distanza Manhattan. Restano il collegamento a un LLM reale e la valutazione
+della qualità delle sue raccomandazioni sulla validation.
 
 ## 2. Struttura della directory e compito dei file
 
@@ -94,8 +99,12 @@ La directory `adapters/` contiene le implementazioni concrete:
 - `request.py` legge il JSON, controlla OpenQASM 2, calcola le caratteristiche
   del circuito e normalizza i vincoli;
 - `hardware.py` costruisce il catalogo MQT e la maschera hardware;
-- `context.py` legge esempi JSON o JSONL dal Dataset, ordina quelli più vicini,
-  costruisce il registro immutabile e prepara il contenuto per il modello;
+- `context.py` costruisce il registro immutabile e prepara il contenuto per il modello;
+- `rag_features.py` definisce ordine, trasformazione train e Manhattan;
+- `rag_dataset.py` verifica l'unico JSONL ammesso, la provenienza e le evidenze;
+- `qdrant_context.py` prepara e verifica il database locale, cerca i vicini e offre
+  il riferimento esaustivo esplicito;
+- `rag_checks.py` prova gli 88 validation fino alla costruzione del prompt;
 - `explanations.py` costruisce la spiegazione finale a partire dai soli dati già
   validati;
 - `llm.py` definisce un collegamento configurabile al modello linguistico;
@@ -237,15 +246,19 @@ linguistico.
 
 ### 3.4 Ricerca, raccomandazione e compilazione
 
-La ricerca locale legge sia il formato JSON precedente sia gli esempi JSONL del
-Dataset corrente. Gli esempi vengono filtrati in base alla misura e ai
-dispositivi rimasti nella maschera. Poi vengono ordinati con una distanza
-semplice tra le caratteristiche numeriche dei circuiti.
+La ricerca predefinita usa Qdrant locale persistente sul solo JSONL train v2.
+Filtra esperimento, obiettivo e dispositivo vincente ammesso dalla maschera
+prima di scegliere i primi `k`. Usa Manhattan sulle 49 feature: log1p per
+conteggi, profondità e qubit, identità per gli indicatori; ogni coordinata è
+divisa per il massimo assoluto train, o per 1 se quel massimo è zero.
+Non applica centraggio, clipping o normalizzazione L2. I divisori non cambiano
+con validation o richieste degli utenti.
 
-Questa distanza permette di collaudare il flusso, ma non rappresenta ancora la
-misura finale di similarità della tesi. La misura definitiva dovrà essere
-confrontata con il trasferimento della scelta del dispositivo e della
-configurazione.
+Le distanze Qdrant sono controllate contro la formula float64, con tolleranza
+assoluta 1e-5 o relativa 1e-6. Si recuperano tutti i candidati filtrati e si
+ordinano per distanza canonica e identificativo RAG. Questo risolve anche
+le parità al confine di `k`. La modalità incorporata è esaustiva, senza HNSW
+né accelerazione tramite indici dei dati associati.
 
 La richiesta per il modello contiene:
 
@@ -325,7 +338,75 @@ soltanto un risultato validato ed emesso dalla stessa istanza del servizio.
 La base applicativa è quindi funzionante dall'ingresso strutturato fino alla
 compilazione confermata. Prima dell'esperimento finale restano da completare:
 
-1. scelta e valutazione della similarità tra circuiti;
-2. integrazione del sistema RAG definitivo;
-3. collegamento al modello linguistico scelto;
-4. valutazione comune di qualità, errori, tempi e costi.
+1. collegamento e congelamento del modello linguistico scelto;
+2. valutazione delle raccomandazioni sulla validation;
+3. valutazione comune di qualità, errori, tempi e costi.
+
+
+## Allineamento alla v2 e decisioni prima del RAG (9 settembre 2026)
+
+Il parser accetta le stesse istruzioni OpenQASM usate dalla pipeline del
+Dataset, comprese `u`, `cry` e `cp`. Gli include restano limitati alla copia
+Qiskit di `qelib1.inc`; non vengono letti file arbitrari dal computer.
+
+Il servizio e i suoi componenti usano per impostazione predefinita
+`configs/qiskit_dataset_configurations_v2.json`. Il catalogo può ancora essere
+passato esplicitamente. Le impronte dei Target sono calcolate con la stessa
+funzione della pipeline v2 e confrontate con quelle congelate. Una differenza
+nelle versioni richieste o nel Target ferma il servizio.
+
+Il contratto JSON del catalogo hardware passa alla versione `2.0.0`.
+L'impronta dello snapshot usa `assistant-hardware-catalog/3`; quella del
+Target usa `qiskit-dataset-target/2`. La richiesta resta alla versione `1.0.0`.
+Dopo l'aggiornamento occorre acquisire il nuovo snapshot per le richieste.
+
+La successiva integrazione Qdrant sostituisce la vecchia media
+`abs(q[i]-c[i])/(1+max(abs(q[i]),abs(c[i])))` con la Manhattan descritta sopra.
+Le due formule non sono equivalenti e la vecchia non è un ripiego.
+Il limite predefinito resta 5 esempi, distinto dalle tre configurazioni
+conservate per il dispositivo vincente.
+
+Gli esempi continuano a contenere il solo dispositivo vincente, con le sue
+configurazioni. Non aggiungiamo altri dispositivi per bilanciare le etichette.
+Se il vincolo hardware esclude tutti i vincitori storici, il registro resta
+vuoto e il sistema dichiara l'assenza di evidenze. Questo non significa che il
+dispositivo richiesto sia inutilizzabile.
+
+Conserviamo i 396 esempi train. Tra questi, `realamprandom_indep_qiskit_2` e
+`realamprandom_indep_tket_2` hanno la stessa impronta semantica. Sono entrambi
+in train: non aggiungono osservazioni a validation o test. La loro presenza
+può dare doppio peso a quel precedente nel recupero; accettiamo questa
+ridondanza per la versione corrente. Restano attivi i controlli di separazione
+per hash del file, hash semantico e gruppo del circuito. Non dichiariamo
+completato un controllo generale di tutte le equivalenze o quasi-equivalenze.
+
+## Uso del recupero Qdrant
+
+Dalla radice del progetto:
+
+```bash
+.venv/bin/python scripts/17_rag_v2.py prepare
+.venv/bin/python scripts/17_rag_v2.py verify
+.venv/bin/python scripts/17_rag_v2.py validation
+.venv/bin/python scripts/17_rag_v2.py query --qasm PERCORSO.qasm --k 5
+.venv/bin/python scripts/17_rag_v2.py query --qasm PERCORSO.qasm --k 5 --backend reference
+```
+
+La factory `build_default_service` accetta `retrieval_backend="qdrant"`
+(predefinito), `"reference"` o `"none"`. `retrieval_limit` cambia `k`.
+`none` disattiva deliberatamente il recupero per la variante senza RAG.
+Il parametro storico `dataset_required` resta accettato per compatibilità:
+nel recupero attivo una fonte assente produce sempre errore.
+Non si torna automaticamente al riferimento locale se Qdrant fallisce.
+
+Il JSONL resta la fonte. Manifest, trasformazione e database sono sotto
+`artifacts/experiments/<identificativo>/rag/index/`.
+La ripetizione di `prepare` verifica una raccolta esistente senza aggiungere
+punti. Una raccolta incoerente deve essere conservata e ricostruita
+esplicitamente. Per trasferimenti tra computer e ricostruzione seguire la
+sezione RAG del [protocollo unico](../docs/protocollo_sperimentale.md).
+
+Il registro è costruito solo dai primi `k` risultati. Mantiene gli stessi
+controlli sui riferimenti e resta immutabile tra i tentativi dell'LLM.
+Zero esempi compatibili è un esito normale; errore del database e raccolta
+alterata fermano il flusso. Le prove tecniche non misurano la qualità LLM.

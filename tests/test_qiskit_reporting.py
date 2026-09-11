@@ -9,7 +9,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-from qiskit_dataset.catalog import DEFAULT_CATALOG_PATH, load_catalog
+from qiskit_dataset.catalog import DEFAULT_CATALOG_PATH, LEGACY_CATALOG_PATH, load_catalog
 from qiskit_dataset.core import atomic_json_write, atomic_jsonl_write, sha256_file
 from qiskit_dataset.reporting import (
     _timeout_sensitivity,
@@ -25,7 +25,7 @@ class QiskitReportingTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        original = load_catalog()
+        original = load_catalog(LEGACY_CATALOG_PATH)
         self.catalog = replace(
             original, seeds=(0,), configurations=original.configurations[:1]
         )

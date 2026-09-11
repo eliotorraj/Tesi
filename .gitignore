@@ -23,3 +23,9 @@ datasets/experiments/
 /datasets/expected_fidelity/full/ibm_heron_156/generation_status.json
 /datasets/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
 tesi/
+
+# Materiale storico dopo il riordino del 9 settembre 2026.
+/archivio/protocollo_v1/datasets/expected_fidelity/full/ibm_heron_156/generation_status.json
+/archivio/protocollo_v1/datasets/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
+/archivio/sviluppo/
+/archivio/riordino_20260909.json

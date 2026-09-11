@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--scope",
         choices=("pilot", "full", "both"),
-        default="both",
+        default="full",
         help="Pilot da 10 circuiti, corpus completo da 600, oppure entrambi.",
     )
     parser.add_argument(

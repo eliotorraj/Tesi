@@ -103,6 +103,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         service = build_default_service(
             device_names=("ibm_falcon_27",),
             dataset_path=self.root / "not_ready_yet.json",
+            retrieval_backend="none",
             llm_gateway=CallableLlmGateway(callback),
             max_llm_attempts=2,
             retrieval_limit=3,
@@ -159,6 +160,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         wired = build_default_service(
             device_names=("ibm_falcon_27",),
             dataset_path=self.root / "missing.jsonl",
+            retrieval_backend="none",
             llm_gateway=CallableLlmGateway(
                 lambda prompt: valid_llm_response("ibm_falcon_27", prompt)
             ),
@@ -208,7 +210,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
             ("insufficient_qubits:2>1",),
         )
 
-    def test_json_retriever_exposes_only_prompt_input(self) -> None:
+    def test_retriever_rejects_legacy_json_without_train_provenance(self) -> None:
         parser = QasmRequestParser()
         request = parser.parse(self.submission)
         hardware = HardwareProfile(
@@ -247,19 +249,11 @@ class PrototypeArchitectureTests(unittest.TestCase):
         dataset_path = self.root / "dataset.json"
         dataset_path.write_text(json.dumps(dataset), encoding="utf-8")
 
-        examples = JsonDatasetContextRetriever(dataset_path).retrieve(
-            request,
-            report,
-            limit=1,
-        )
+        # La nuova ricerca accetta esclusivamente il JSONL train corrente.
+        with self.assertRaisesRegex(ValueError, "Fonte RAG non ammessa"):
+            JsonDatasetContextRetriever(dataset_path).retrieve(request, report, limit=1)
 
-        self.assertEqual(len(examples), 1)
-        serialized = repr(examples[0].prompt_input)
-        self.assertNotIn("secret_training_target", serialized)
-        self.assertNotIn("evaluation_only", serialized)
-        self.assertNotIn("historical qasm intentionally omitted", serialized)
-
-    def test_jsonl_retriever_exposes_labeled_claim_and_evidence(self) -> None:
+    def test_rag_prompt_compaction_preserves_claim_and_evidence(self) -> None:
         request = QasmRequestParser().parse(self.submission)
         hardware = HardwareProfile(
             device_id="ibm_falcon_27",
@@ -335,13 +329,8 @@ class PrototypeArchitectureTests(unittest.TestCase):
             json.dumps(record) + "\n",
             encoding="utf-8",
         )
-        examples = JsonDatasetContextRetriever(dataset_path).retrieve(
-            request,
-            report,
-            limit=1,
-        )
-        self.assertEqual(len(examples), 1)
-        prompt_example = examples[0].prompt_input
+        from prototype.quantum_assistant.adapters.rag_dataset import as_example
+        prompt_example = as_example(record, 0.0).prompt_input
         self.assertEqual(
             prompt_example["label"]["selected_device"]["device_id"],
             "ibm_falcon_27",

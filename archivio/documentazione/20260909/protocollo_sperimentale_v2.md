@@ -2,16 +2,22 @@
 
 ## Stato della pipeline
 
-La pipeline 2.0 è pronta per avviare il popolamento Qiskit di train e
-validation e i cinque addestramenti RL.
+Il 9 settembre 2026 il popolamento Qiskit di train e validation risulta
+completo su questa macchina: 87120 tentativi, 82621 successi e 4499 timeout.
+La vista globale comprende tutti i cinque dispositivi e 396 esempi RAG train.
+I timeout restano risultati terminali e non richiedono un nuovo popolamento.
 
-Non è ancora possibile dichiarare pronto qcompile. Mancano i cinque modelli RL
-con target richiesto 100000 e contatore finale atteso 100352, e il
-classificatore ML con cinque classi. Manca anche la scelta
-definitiva dei tre metodi LLM. Per questo il test resta sigillato.
+Il prototipo usa ora il parser compatibile con il corpus e le impronte Target
+v2. I piani sono stati riallineati a 100 secondi e 6 processi, conservando
+copie dei precedenti e tutte le estrazioni casuali.
 
-Il popolamento completo non è stato avviato in questa preparazione. Sono stati
-eseguiti soltanto piccoli canary su circuiti train.
+Qdrant non è ancora integrato. La distanza tra vettori resta la similarità
+corrente. Un confronto con un'altra euristica è un possibile lavoro successivo,
+non un requisito per iniziare l'integrazione.
+
+Il test resta sigillato. Su questa macchina mancano i modelli finali RL/ML e
+la verifica di qcompile. Mancano anche scelta e congelamento dei due ruoli LLM
+e la valutazione finale sulla validation.
 
 ## Perché esiste una versione 2
 
@@ -100,9 +106,21 @@ Il piano casuale usa Python Random con MT19937 e seed 20260901. Le estrazioni
 sono congelate prima degli score:
 
 - validation: 264 estrazioni, piano
-  e20ec9c7c5bca4e9eb682b6eccdd143b1417a841c16b1d9a69585907866a44b1;
+  952c4fcfa64308735a0c00688bdfc6d94b4c6c4d82732e8498da2e274dee7e18;
 - test: 270 estrazioni, piano
-  93c813e2cba1352f22ab8096b53e753bb7b05dbc99f04cd7bae62ba7ff3f72a9.
+  3c625ea7bc6f91d6d8df446159ffa288710668818d52c0a729b48d30ae869695.
+
+Il riallineamento del 9 settembre corregge i metadati dei piani rimasti a
+300 secondi e 2 processi. Le estrazioni non cambiano. Gli originali e le
+impronte dei file sono conservati in `plans/history/` nell'esperimento v2.
+Su un'altra macchina con i vecchi piani, usare esplicitamente:
+
+    .venv/bin/python scripts/11_freeze_method_plan_v2.py --split validation --align-execution-policy
+    .venv/bin/python scripts/11_freeze_method_plan_v2.py --split test --align-execution-policy
+
+Il comando rifiuta cambiamenti ai circuiti o alle estrazioni e non può
+modificare i piani dopo l'apertura del test. Ripeterlo su piani già allineati
+non cambia i file. Non modifica Dataset, seed o versione del protocollo.
 
 ## Dipendenze esatte
 

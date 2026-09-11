@@ -16,7 +16,7 @@
     "provenance"
   ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"const": "2.0.0"},
     "catalog_snapshot_id": {
       "type": "string",
       "pattern": "^hardware_catalog_[0-9a-f]{64}$"
@@ -68,7 +68,7 @@
         "package_versions"
       ],
       "properties": {
-        "fingerprint_algorithm": {"const": "assistant-hardware-catalog/2"},
+        "fingerprint_algorithm": {"const": "assistant-hardware-catalog/3"},
         "configuration_catalog_digest": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
@@ -167,7 +167,7 @@
             "target_type": {"type": "string", "minLength": 1},
             "native_gateset_id": {"type": "string", "minLength": 1},
             "target_fingerprint_algorithm": {
-              "const": "qiskit-dataset-target/1"
+              "const": "qiskit-dataset-target/2"
             },
             "calibration_kind": {
               "const": "synthetic_deterministic_target"

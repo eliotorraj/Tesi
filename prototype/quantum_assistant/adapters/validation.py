@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from qiskit_dataset.catalog import ConfigurationCatalog, load_catalog
+from qiskit_dataset.catalog import V2_CATALOG_PATH, ConfigurationCatalog, load_catalog
 
 from ..models import (
     ClaimParameters,
@@ -116,7 +116,7 @@ class StructuredRecommendationValidator:
     ) -> None:
         """Configura il catalogo e il costruttore delle spiegazioni finali."""
         self._configuration_catalog = (
-            load_catalog()
+            load_catalog(V2_CATALOG_PATH)
             if configuration_catalog is None
             else configuration_catalog
         )

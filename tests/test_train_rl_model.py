@@ -228,6 +228,68 @@ class RLTrainingRuntimeTests(unittest.TestCase):
         self.assertEqual(after, before)
 
 
+    def test_vf2_budget_is_local_and_preserves_action_ids(self) -> None:
+        environment = Predictor(device=get_device("quantinuum_h2_56"), figure_of_merit="expected_fidelity").env
+        other = Predictor(device=get_device("quantinuum_h2_56"), figure_of_merit="expected_fidelity").env
+        before = dict(environment.action_set)
+        metadata = TRAIN_RL.configure_vf2_layout_runtime(environment, seed=7)
+        self.assertEqual(metadata, TRAIN_RL.vf2_layout_metadata(7))
+        self.assertEqual(list(environment.action_set), list(before))
+        for index, old_action in before.items():
+            action = environment.action_set[index]
+            self.assertEqual((action.name, action.origin, action.pass_type),
+                             (old_action.name, old_action.origin, old_action.pass_type))
+            self.assertIs(other.action_set[index], old_action)
+            if action.name == "VF2Layout":
+                bounded = action.transpile_pass(environment.device)[0]
+                original = old_action.transpile_pass(environment.device)[0]
+                self.assertEqual(bounded.call_limit, 10_000)
+                self.assertEqual(bounded.seed, 7)
+                self.assertIsNone(original.call_limit)
+                self.assertIsNot(action, old_action)
+            else:
+                self.assertIs(action, old_action)
+
+    def test_vf2_layout_completes_on_symmetric_quantinuum_target(self) -> None:
+        environment = Predictor(device=get_device("quantinuum_h2_56"), figure_of_merit="expected_fidelity").env
+        TRAIN_RL.configure_vf2_layout_runtime(environment)
+        circuit = QuantumCircuit(20)
+        for qubit in range(19):
+            circuit.cx(qubit, qubit + 1)
+        circuit.measure_all()
+        environment.reset(circuit, seed=0)
+        for name in ("BasisTranslator", "VF2Layout"):
+            action = next(index for index in environment.valid_actions
+                          if environment.action_set[index].name == name)
+            _, _, terminated, truncated, info = environment.step(action)
+            self.assertFalse(terminated)
+            self.assertFalse(truncated, info)
+        self.assertIsNotNone(environment.layout)
+        self.assertEqual(environment.state.num_qubits, 56)
+        self.assertTrue(environment.valid_actions)
+
+    def test_vf2_no_solution_leaves_other_layout_actions_available(self) -> None:
+        environment = Predictor(device=get_device("ibm_falcon_27"), figure_of_merit="expected_fidelity").env
+        TRAIN_RL.configure_vf2_layout_runtime(environment)
+        # Falcon's coupling graph has no triangle. The native search must return
+        # without a layout; MQT must still allow another mapping action.
+        circuit = QuantumCircuit(3)
+        circuit.cx(0, 1)
+        circuit.cx(1, 2)
+        circuit.cx(2, 0)
+        circuit.measure_all()
+        environment.reset(circuit, seed=0)
+        for name in ("BasisTranslator", "VF2Layout"):
+            action = next(index for index in environment.valid_actions
+                          if environment.action_set[index].name == name)
+            _, _, terminated, truncated, info = environment.step(action)
+            self.assertFalse(terminated)
+            self.assertFalse(truncated, info)
+        self.assertIsNone(environment.layout)
+        self.assertEqual(environment.state.num_qubits, 3)
+        self.assertIn("DenseLayout", [environment.action_set[index].name
+                                      for index in environment.valid_actions])
+
     def test_checkpoint_callback_saves_after_completed_rollouts(self) -> None:
         checkpoint_dir = Path("/tmp/checkpoints")
         callback = TRAIN_RL.AtomicCheckpointCallback(

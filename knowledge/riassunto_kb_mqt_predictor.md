@@ -1,12 +1,16 @@
 # Riassunto KB — MQT Predictor, dataset, RL compiler e confronto con TuniQ
 
-> **Nota sul layout corrente (31 luglio 2026).** Questo documento conserva
-> anche riferimenti storici a esperimenti e script rimossi. I comandi operativi
-> aggiornati sono soltanto quelli nel `README.md` alla root. Il dataset corrente
-> è `datasets/device_selector_expected_fidelity.json`; i modelli finali sono in
-> `artifacts/models/`; i QASM compilati sono una cache intermedia in
-> `artifacts/cache/`; tutti i log sono in `artifacts/logs/`. Gli script correnti
-> sono numerati da `01` a `05`.
+> **Layout corrente — 9 settembre 2026.** L’unico riferimento operativo è
+> [docs/protocollo_sperimentale.md](../docs/protocollo_sperimentale.md).
+> L’esperimento corrente usa MQT Predictor 2.4.0 e le dipendenze di `uv.lock`.
+> Dataset e artefatti sono nelle rispettive cartelle `experiments/`, sotto
+> `qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2`.
+> Qdrant locale persistente 1.19.0 è ora integrato. Il recupero corrente usa
+> Manhattan sulle 49 feature, con log1p e divisori stimati solo sul train.
+> La vecchia distanza nei resoconti storici non descrive più il codice attuale.
+> Il materiale precedente è in [archivio/](../archivio/README.md).
+> Questo documento conserva anche il contesto storico: i vecchi percorsi
+> e comandi nei resoconti non descrivono il lavoro attuale.
 
 ## Contesto della conversazione
 
@@ -6227,3 +6231,66 @@ di configurazione, catalogo o Dataset, indisponibilità del modello ed eccezioni
 inattese non vengono trasformati in errori correggibili del modello. La
 compilazione accetta soltanto il risultato validato emesso dalla stessa istanza
 del servizio.
+
+
+# Aggiornamento del 9 settembre 2026 — decisioni prima di Qdrant
+
+L'utente mantiene per ora la distanza tra vettori già presente nel prototipo.
+Il confronto con Weisfeiler–Lehman o un'altra euristica è rinviato: non è più
+un prerequisito per l'integrazione di Qdrant.
+
+Gli esempi RAG conservano il solo dispositivo vincente e le sue configurazioni.
+Non si aggiungono i primi tre dispositivi e non si bilanciano artificialmente
+le etichette. Con vincoli che escludono tutti i vincitori, è accettabile avere
+zero evidenze storiche e dichiararlo nella risposta.
+
+I due esempi train con la stessa impronta semantica vengono conservati.
+Non attraversano le suddivisioni e non duplicano i circuiti di valutazione.
+La possibile ridondanza nel recupero è accettata per la versione corrente.
+I controlli esistenti sulla separazione delle suddivisioni restano obbligatori.
+
+Sono stati allineati il parser del prototipo alle istruzioni OpenQASM della
+pipeline e il catalogo alle versioni e impronte v2. I piani validation e test
+usano ora 100 secondi e 6 processi; gli originali sono archiviati e le
+estrazioni casuali restano identiche. Le istruzioni operative aggiornate sono
+nel protocollo v2 e nel README del prototipo. Qdrant non è stato integrato.
+
+
+# Riordino del 9 settembre 2026
+
+Le regole scientifiche e la procedura per i due computer sono state riunite in
+`docs/protocollo_sperimentale.md`. Le copie precedenti sono nell’archivio.
+Il Dataset e la cache correnti restano esclusivamente sotto `experiments/`.
+Gli script Qiskit usano la v2 e lo scope full come valori predefiniti.
+
+Il vecchio Dataset, il suo catalogo e la sua cache sono in
+`archivio/protocollo_v1/`. Diagnosi, copie di sicurezza e resoconti sono nelle
+altre cartelle dell’archivio. I 600 circuiti originali restano necessari per
+verificare la provenienza: il codice risolve i vecchi riferimenti nel nuovo
+percorso senza riscrivere manifest, risultati o piani. Qdrant non è stato aggiunto.
+
+## Integrazione Qdrant — 9 settembre 2026
+
+Il recupero corrente usa solo i 396 esempi train del JSONL globale v2.
+Il client ufficiale Qdrant 1.19.0 conserva una raccolta locale persistente
+di 396 punti. Le 49 coordinate seguono un ordine esplicito. Conteggi, depth e
+num_qubits usano log1p; i cinque indicatori restano invariati. Ogni coordinata
+è divisa per il massimo assoluto osservato nel train, oppure per 1 se nullo.
+I divisori non dipendono da validation, test o richieste successive.
+
+Si usa la somma delle differenze assolute, senza centraggio, clipping o L2.
+Questa scelta sostituisce la precedente distanza personalizzata: non è una
+formula equivalente. Si filtrano prima esperimento, obiettivo e vincitore
+compatibile con la maschera. I primi 5 esempi sono ordinati per Manhattan
+float64 e identificativo RAG, dopo il controllo delle distanze Qdrant float32.
+La modalità locale è esaustiva e non usa HNSW o indici accelerati sui filtri.
+
+Gli artefatti sono in `artifacts/experiments/<identificativo>/rag/`.
+Lo script `scripts/17_rag_v2.py` prepara, verifica e prova il recupero.
+Il riferimento locale si sceglie esplicitamente con `--backend reference`.
+Schema, provenienza train, sorgenti, feature, evidenze e raccolta vengono
+controllati. Il JSONL resta l'unico Dataset operativo.
+
+Sono prove di correttezza tecnica, non della qualità delle raccomandazioni.
+Il test rimane sigillato; nessun nuovo training o popolamento Qiskit è stato
+richiesto dall'integrazione. Regole complete e comandi sono nel protocollo unico.

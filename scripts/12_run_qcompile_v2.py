@@ -30,6 +30,7 @@ from mqt_predictor_protocol import (
     PROTOCOL_VERSION,
     SOURCE_MANIFEST_V2,
     file_sha256,
+    resolve_source_reference,
     installed_package_versions,
     package_version_mismatches,
     target_sha256,
@@ -304,7 +305,7 @@ def main() -> int:
     for circuit, repetition_index, run_id in ordered_jobs:
         if run_id in completed or circuit["source_sha256"] not in allowed_hashes:
             continue
-        source_path = (PROJECT_ROOT / str(circuit["source_ref"])).resolve()
+        source_path = resolve_source_reference(str(circuit["source_ref"]))
         try:
             source_path.relative_to(PROJECT_ROOT.resolve())
         except ValueError as error:

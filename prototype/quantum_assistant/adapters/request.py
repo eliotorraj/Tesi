@@ -290,6 +290,9 @@ class QasmRequestParser:
             circuit = qasm2.loads(
                 request.circuit.source,
                 include_path=(QELIB1_INCLUDE_ROOT,),
+                custom_instructions=qasm2.LEGACY_CUSTOM_INSTRUCTIONS,
+                custom_classical=qasm2.LEGACY_CUSTOM_CLASSICAL,
+                strict=False,
             )
         except Exception as exc:
             _raise_issue(

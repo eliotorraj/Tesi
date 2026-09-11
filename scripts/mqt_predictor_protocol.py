@@ -68,9 +68,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = PROTOCOL_ID
 PROTOCOL_VERSION = "2.0.0"
 EXPECTED_SPLIT_COUNTS = {"train": 422, "validation": 88, "test": 90}
-LEGACY_SOURCE_MANIFEST = (
-    PROJECT_ROOT / "datasets" / "expected_fidelity" / "full" / "split_manifest.json"
-)
+ARCHIVE_ROOT = PROJECT_ROOT / "archivio"
+LEGACY_ROOT = ARCHIVE_ROOT / "protocollo_v1"
+LEGACY_DATASET_LOGICAL_ROOT = Path("datasets/expected_fidelity")
+LEGACY_DATASET_ROOT = LEGACY_ROOT / LEGACY_DATASET_LOGICAL_ROOT
+LEGACY_SOURCE_MANIFEST = LEGACY_DATASET_ROOT / "full" / "split_manifest.json"
 LEGACY_SOURCE_MANIFEST_SHA256 = (
     "9037e08f529e6598f69cc8ffa524f593335d0e65757db771ce28b285479529ed"
 )
@@ -417,6 +419,34 @@ def semantic_circuit_sha256(path: Path) -> str:
     return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
 
 
+def resolve_source_reference(source_ref: str) -> Path:
+    """Risolvi i riferimenti congelati dopo lo spostamento del corpus in archivio."""
+    relative = Path(source_ref)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"source_ref fuori repository: {source_ref!r}")
+    root = PROJECT_ROOT.resolve()
+    if relative.is_relative_to(LEGACY_DATASET_LOGICAL_ROOT):
+        candidate = LEGACY_DATASET_ROOT / relative.relative_to(LEGACY_DATASET_LOGICAL_ROOT)
+        allowed_root = LEGACY_DATASET_ROOT.resolve()
+    else:
+        candidate = root / relative
+        allowed_root = root
+    candidate = candidate.resolve()
+    if not candidate.is_relative_to(root) or not candidate.is_relative_to(allowed_root):
+        raise ValueError(f"source_ref fuori dal corpus: {source_ref!r}")
+    return candidate
+
+
+def frozen_source_reference(path: Path) -> str:
+    """Conserva i nomi logici originali e quindi gli hash di manifest e piani v2."""
+    path = path.resolve()
+    if path.is_relative_to(LEGACY_DATASET_ROOT.resolve()):
+        return (LEGACY_DATASET_LOGICAL_ROOT / path.relative_to(LEGACY_DATASET_ROOT.resolve())).as_posix()
+    if path.is_relative_to(PROJECT_ROOT.resolve()):
+        return path.relative_to(PROJECT_ROOT.resolve()).as_posix()
+    return path.as_posix()
+
+
 def _safe_source_path(manifest_path: Path, source_ref: str) -> Path:
     """Resolve one source reference without allowing traversal."""
     root = manifest_path.parent.resolve()
@@ -488,11 +518,7 @@ def verify_source_manifest(
             {
                 "circuit_id": str(raw_record.get("circuit_id")),
                 "file_name": str(raw_record.get("file_name", path.name)),
-                "source_ref": (
-                    path.relative_to(PROJECT_ROOT).as_posix()
-                    if path.is_relative_to(PROJECT_ROOT)
-                    else path.as_posix()
-                ),
+                "source_ref": frozen_source_reference(path),
                 "source_sha256": observed_sha256,
                 "semantic_sha256": semantic_sha256,
                 "split": split,
@@ -537,11 +563,7 @@ def verify_source_manifest(
         "schema_version": "2.0.0",
         "experiment_id": EXPERIMENT_ID,
         "protocol_version": PROTOCOL_VERSION,
-        "source_manifest": (
-            manifest_path.relative_to(PROJECT_ROOT).as_posix()
-            if manifest_path.is_relative_to(PROJECT_ROOT)
-            else manifest_path.resolve().as_posix()
-        ),
+        "source_manifest": frozen_source_reference(manifest_path),
         "source_manifest_sha256": observed_manifest_sha256,
         "source_manifest_id": loaded.get("manifest_id"),
         "counts": {
@@ -688,10 +710,28 @@ def validate_test_release_record(
         or any(value is not True for value in gates.values())
     ):
         errors.append("i gate di apertura non sono tutti esplicitamente superati")
+    for rag_gate in ("rag_qdrant_collection", "rag_validation_pipeline"):
+        if not isinstance(gates, dict) or gates.get(rag_gate) is not True:
+            errors.append(f"gate RAG obbligatorio mancante: {rag_gate}")
     frozen_files = record.get("frozen_files")
     if not isinstance(frozen_files, dict) or not frozen_files:
         errors.append("elenco dei file congelati mancante")
     else:
+        rag_root = EXPERIMENT_ROOT / "rag"
+        required_rag_files = [
+            rag_root / "index" / "manifest.json",
+            rag_root / "index" / "transform.json",
+            rag_root / "index" / "qdrant" / "meta.json",
+            rag_root / "validation_check.json",
+        ]
+        required_rag_files.extend(
+            candidate for candidate in (rag_root / "index" / "qdrant").rglob("*")
+            if candidate.is_file() and candidate.name != ".lock"
+        )
+        for candidate in required_rag_files:
+            relative = candidate.relative_to(PROJECT_ROOT).as_posix()
+            if relative not in frozen_files:
+                errors.append(f"file RAG non congelato: {relative}")
         for relative_name, expected_digest in frozen_files.items():
             candidate = (PROJECT_ROOT / str(relative_name)).resolve()
             try:
