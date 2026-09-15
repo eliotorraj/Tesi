@@ -939,8 +939,14 @@ def evaluate_common_methods(
     llm_decisions: Mapping[str, Sequence[Mapping[str, Any]]],
     qcompile_runs: Sequence[Mapping[str, Any]],
     method_config_sha256: str,
+    llm_method_ids: Sequence[str] = LLM_METHOD_IDS,
+    include_qcompile: bool = True,
 ) -> list[dict[str, Any]]:
-    """Produce record omogenei senza eliminare fallimenti."""
+    """Produce record omogenei; la selezione validation può escludere MQT."""
+    if len(set(llm_method_ids)) != len(llm_method_ids) or not set(llm_method_ids).issubset(LLM_METHOD_IDS):
+        raise ValueError("Metodi LLM della valutazione non validi.")
+    if split == "test" and (tuple(llm_method_ids) != LLM_METHOD_IDS or not include_qcompile):
+        raise ValueError("Il test richiede tutti i metodi e qcompile.")
     run_index, summary_index = validate_qiskit_matrix(
         qiskit_runs,
         qiskit_summaries,
@@ -1132,7 +1138,7 @@ def evaluate_common_methods(
             )
         )
 
-    for method_id in LLM_METHOD_IDS:
+    for method_id in llm_method_ids:
         decisions = {
             str(record["source_sha256"]): record
             for record in llm_decisions[method_id]
@@ -1201,7 +1207,7 @@ def evaluate_common_methods(
     grouped_qcompile: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for record in qcompile_runs:
         grouped_qcompile[str(record["source_sha256"])].append(record)
-    for source_hash, circuit in by_hash.items():
+    for source_hash, circuit in (by_hash.items() if include_qcompile else ()):
         repetitions = sorted(
             grouped_qcompile[source_hash],
             key=lambda item: int(item["repetition_index"]),

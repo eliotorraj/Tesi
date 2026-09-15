@@ -53,6 +53,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if args.split == "validation":
+        from llm_selection.evaluate import evaluate
+        evaluate(args.output_dir)
+        return 0
     if args.split == "test":
         validate_test_release_record()
     method_config = validate_method_configuration(require_frozen=True)

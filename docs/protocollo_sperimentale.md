@@ -3,6 +3,12 @@
 Questo è l’unico protocollo operativo del progetto. Si aggiorna questo file.
 Versione sperimentale: **2.0.0**, MQT Predictor **2.4.0**.
 Ultimo riordino della documentazione: **9 settembre 2026**.
+Emendamento della selezione LLM: **13 settembre 2026**. Questo emendamento
+separa la selezione locale sulla validation dal confronto finale sul test.
+La versione 2.0.0 continua a identificare corpus, Target e matrice Qiskit:
+non si invalidano gli artefatti precedenti. La copia del protocollo precedente
+è conservata in `llm_selection/preparation/protocollo_pre_selezione.md`
+sotto la directory degli artefatti dell’esperimento.
 
 Le copie precedenti sono conservate nell’[archivio](../archivio/README.md).
 Il riordino dei file non cambia le condizioni dell’esperimento.
@@ -22,9 +28,11 @@ Qdrant locale persistente è integrato nella factory del prototipo. Usa ricerca
 esatta Manhattan sulle 49 feature trasformate con divisori stimati solo sul train.
 Il riferimento locale esplicito usa la stessa nuova formula.
 
-Il test resta sigillato. Su questa macchina mancano i modelli finali RL/ML e
-la verifica di qcompile. Mancano anche scelta e congelamento dei due ruoli LLM
-e la valutazione finale sulla validation.
+Il test resta sigillato. La selezione dei modelli locali con RAG è in preparazione.
+Le verifiche RL/ML e i canary qcompile restano necessari prima del test;
+non bloccano questa selezione. I checkpoint Quantinuum sono stati spostati
+dall’utente su D:; la loro posizione va verificata prima dei futuri canary.
+Anche i pesi LLM risiedono ora su D:, con riferimenti e impronte conservati.
 
 ## Ambiente dell’esperimento
 
@@ -1006,86 +1014,183 @@ Il canary usa un circuito train. Esegue una compilazione RL diretta per ognuno
 dei cinque device e una prova end-to-end di qcompile. Tutte e sei devono
 riuscire. Una trace vuota, troncata o non conclusa da terminate fallisce.
 
-Poi qcompile viene eseguito tre volte per ogni circuito validation:
+L’esecuzione completa di qcompile sulla validation non è richiesta.
+qcompile partecipa al confronto finale sul test, dopo i controlli sopra indicati.
+Il runner mantiene processi nuovi per ogni ripetizione e conserva subito
+successi, timeout e fallimenti.
 
-    .venv/bin/python scripts/12_run_qcompile_v2.py \
-      --split validation --timeout 100
+## Selezione locale LLM sulla validation
 
-Il runner usa un processo nuovo per ogni ripetizione. Salva subito successi,
-timeout e fallimenti. --limit-circuits N esegue un piccolo lotto riprendibile.
+La procedura operativa è in [llm_selection/README.md](../llm_selection/README.md).
+ L’infrastruttura offre controllo dello stato,
+pausa dopo il circuito corrente, ripresa e generazione delle analisi.
+Alla consegna del codice la validation non è ancora eseguita: non esistono
+una configurazione finale scelta o risultati sperimentali da dichiarare.
+Le impostazioni suggerite nella guida sono profili tecnici da verificare.
 
-## Metodi LLM
+La selezione riguarda Qwen3.5-4B, Phi-4-mini-instruct e Gemma 4 E4B-it.
+Gemma E2B-it resta un’alternativa se E4B non è sostenibile. Prima delle prove
+si registrano repository, revisioni, impronte dei pesi e provenienza della
+conversione GGUF. Una revisione del modello originale osservata oggi non
+dimostra da sola quale revisione sia stata usata dal convertitore.
 
-Il file `configs/experiment_methods_v2.json` è intenzionalmente non configurato.
-Non vengono inventati nomi di modello o revisioni.
+I pesi risiedono in D:/Tesi-mqt/llm-selection/, nella sottodirectory
+dell’esperimento. Il percorso Linux negli artefatti resta utilizzabile tramite
+un collegamento. Il disco D: dispone dello spazio necessario; il limite della
+RAM e quello della memoria video sono valutati separatamente.
+L’esecutore llama.cpp b10930 per Windows usa Vulkan sulla Radeon RX 6750 XT.
+Il codice MQT resta nel suo ambiente Python 3.12 con uv.lock invariato.
 
-Prima della validation definitiva occorre compilare e poi congelare:
+Le prove tecniche usano soltanto richieste sintetiche o circuiti train.
+Misurano caricamento, contesto, generazione e validazione delle risposte.
+Non sono risultati della selezione. I pesi originali sono provati quando
+sostenibili. Una cache a precisione ridotta è registrata separatamente dalla
+precisione dei pesi. Le richieste complete sono contate con il tokenizer
+effettivo; non si eliminano circuiti, cataloghi o evidenze. Un caso che supera
+il contesto nativo resta un fallimento di contesto, con zero chiamate LLM.
+Non si estende arbitrariamente il contesto nativo di Gemma per nascondere
+questo limite. Per i soli grafi completi, l’elenco ordinato degli archi viene
+sostituito da una regola esatta che consente di ricostruire tutti gli archi
+nello stesso ordine. Il programma controlla la reversibilità. I prompt originali
+restano conservati; il contenuto delle evidenze RAG e dei circuiti non viene tagliato.
 
-- provider;
-- identificativo e revisione del modello;
-- versione e SHA-256 del prompt;
-- temperatura;
-- timeout della richiesta;
-- massimo numero di token in uscita.
+Dal 15 settembre la rappresentazione degli input usa anche identificativi brevi
+delle fonti, oggetti condivisi per i valori ripetuti e tabelle con intestazioni
+comuni. La decodifica deve ricostruire esattamente ogni campo e valore originale,
+compresi QASM, metrica e cinque esempi RAG. Lo schema di risposta 2.0.0 rimane
+invariato. Le sigle delle fonti vengono ripristinate prima della validazione,
+senza inventare campi o correggere scelte. Istruzioni più esplicite chiariscono
+le relazioni fra claim, riferimenti e fonti. È corretto il salvataggio degli
+errori contenenti dizionari immutabili, che impediva la normale correzione
+delle risposte. Il validatore semantico conserva tutti i suoi vincoli.
 
-LLM + RAG e lo stesso LLM senza RAG devono avere modello, revisione,
-temperatura e budget identici. Cambia soltanto l'uso del RAG. Il RAG può leggere
-esclusivamente il file rag_examples.jsonl costruito dai circuiti train.
+Il controllo su 93 prompt preparati (5 train, 88 validation) conferma la
+reversibilità. Il recupero è stato rieseguito sui cinque train: l'esempio dello
+stesso sorgente e della stessa metrica compare sempre a distanza zero, al primo
+posto in quattro casi e al secondo per `portfoliovqe_indep_qiskit_6`, che ha
+più risultati a pari distanza. L'ordine del RAG resta quello originale.
+Il controllo non apre gli score validation o il test. Le prove train registrano
+se la risposta valida cita quell'esempio per entrambe le scelte e distingue
+l'etichetta principale dalle configurazioni a pari merito. Questo verifica
+il funzionamento su esempi già presenti nel Dataset, non la generalizzazione.
+Misure, comandi e limiti sono in [PROMPT_COMPATTO.md](../llm_selection/PROMPT_COMPATTO.md).
+I nuovi prompt richiedono nuovi nomi delle prove; gli esiti precedenti restano.
+Alla ripresa era già presente un limite di uscita di 4096 token, conservato:
+il confronto con le prove iniziali da 2048 deve dichiarare tale differenza.
 
-Ogni esecutore esterno deve produrre un JSONL conforme a
-schemas/method_decision_v2.schema.json. Per ogni circuito conserva anche hash
-della configurazione metodi, hash della risposta grezza, tempi, uso e
-fallimento. Il modello di frontiera ha un solo tentativo. Gli altri due ne
-hanno al massimo tre.
+Il controllo SHA-256 dei pesi prima dell’avvio usa Windows sul percorso nativo
+per evitare una lettura dei grandi file attraverso la cache WSL. Il registro
+conserva impronta, dimensione, metodo e durata. Questa modifica del 14 settembre
+segue l’arresto tecnico `qwen-prova-01`, avvenuto per RAM libera insufficiente
+prima di qualsiasi generazione. I tentativi precedenti restano conservati.
 
-La scelta dei modelli sulla validation segue questo ordine: completamento
-valido e compilabile, regret assoluto mediano, validità JSON al primo tentativo,
-numero di tentativi, latenza, token e costo. Il modello scelto con RAG viene
-riutilizzato senza una nuova selezione nella variante senza RAG.
-Il modello di frontiera viene scelto con il proprio prompt diretto.
-Prima del test si conservano anche endpoint, seed se supportato, politica dei
-tentativi, schemi, listino con data e valuta, parametri del recupero e impronta
-dell’indice. I segreti non entrano nei file dell’esperimento.
+Dal tentativo successivo a `qwen-prova-03`, i nuovi registri del server e del
+monitor Windows sono scritti direttamente sul disco D. Nel progetto rimane
+un collegamento per ogni esecuzione; gli artefatti precedenti non sono spostati.
+La modifica segue un errore `Flush(true)` sulla condivisione WSL: il salvataggio
+forzato è mantenuto e sono aggiunti operazione, percorso, tipo di eccezione
+e ultimo campione salvato alla diagnostica. La causa interna dell’annullamento
+non è stata dimostrata. Il controllo breve su D verifica soltanto il nuovo
+percorso di scrittura, non la stabilità di un’intera inferenza.
 
-Le decisioni di validation si congelano così:
+Il server usa il caricamento senza mappatura del file in memoria. Il monitor
+campiona le risorse circa ogni secondo. Sospende il processo di inferenza a
+80 °C di hotspot e lo riprende sotto 65 °C. Interrompe la prova a 95 °C di
+hotspot, 85 °C di edge o RAM libera sotto 1,5 GiB per tre campioni consecutivi.
+Questi limiti operativi non sono una diagnosi dello spegnimento del PC.
+Le pause sono registrate e contribuiscono ai tempi e al timeout.
+Non vengono modificate frequenze, tensioni o ventole.
 
-    .venv/bin/python scripts/13_import_llm_decisions_v2.py \
-      --split validation --method llm_rag \
-      --input PERCORSO_LLM_RAG_VALIDATION.jsonl
+Prima di consultare gli score si congela una griglia piccola e comune.
+La griglia in preparazione confronta tre configurazioni per ciascuna famiglia:
+prompt di base con temperatura 0; stesso prompt con temperatura 0,7;
+prompt con istruzioni di controllo più esplicite e temperatura 0.
+Le prove train possono correggere problemi tecnici prima del congelamento.
+Tutti i tentativi precedenti restano conservati e distinti.
 
-    .venv/bin/python scripts/13_import_llm_decisions_v2.py \
-      --split validation --method llm_no_rag \
-      --input PERCORSO_LLM_NO_RAG_VALIDATION.jsonl
+Le condizioni comuni comprendono gli stessi 88 circuiti, i cinque dispositivi,
+le dodici configurazioni Qiskit, la maschera di compatibilità, cinque esempi
+RAG e la stessa regola Manhattan sulle 49 feature. Il contenuto informativo
+resta uguale fra famiglie; ciascuna usa il proprio formato di chat.
+La generazione usa lo schema JSON; il validatore del prototipo verifica anche
+compatibilità, piano e correttezza delle evidenze. L’applicazione del formato
+di chat è separata dalla generazione nativa per evitare il problema osservato
+fra lo schema e il prefisso di ragionamento Qwen. Non si altera quel prefisso.
 
-    .venv/bin/python scripts/13_import_llm_decisions_v2.py \
-      --split validation --method frontier_llm \
-      --input PERCORSO_FRONTIER_VALIDATION.jsonl
+La configurazione congelata registra temperatura, top_p, top_k di generazione,
+min_p, penalità, seed, cache, contesto, limite di uscita, timeout e ragionamento.
+Il top_k di generazione non è il numero k di esempi RAG. Il limite iniziale
+di uscita è 2048 token, da verificare nelle prove tecniche; il timeout iniziale
+è 3600 secondi per chiamata. Il ragionamento esteso è disabilitato.
+La cache riusa soltanto prefissi identici. L’ordine delle tre configurazioni
+ruota fra circuiti; tempi e token riutilizzati restano visibili. Non si inserisce
+nel prompt la risposta valida ottenuta da un’altra configurazione.
 
-Gli esecutori LLM e qcompile non devono leggere gli score Qiskit di validation.
-Il valutatore controlla le loro decisioni prima di aprire la matrice che
-contiene l'oracle.
+Il primo output valido è definitivo. Sono ammesse al massimo tre chiamate,
+solo per correggere risposte non conformi. I tentativi di trasporto non sono
+ripetuti automaticamente. Un’interruzione con esito incerto è registrata;
+non viene nascosta rilanciando la chiamata. Ogni esito terminale è conservato.
+La raccolta parte prima delle chiamate e comprende input, output, evidenze,
+errori, token, tempi, memoria e provenienza. I dati mancanti restano null,
+con metodo di misura e causa. Non si inventano costi energetici.
 
-## Valutazione comune
+Il programma di generazione non apre la matrice Qiskit della validation.
+Tutte le decisioni delle configurazioni vengono sigillate prima della
+valutazione. Il valutatore controlla identità, completezza e impronte, poi
+riusa la matrice già prodotta. I tempi Qiskit storici restano distinguibili
+dai tempi delle nuove chiamate LLM.
 
-    .venv/bin/python scripts/14_evaluate_methods_v2.py --split validation
+La scelta mantiene l’ordine previsto: completamento valido e compilabile,
+regret assoluto mediano sui circuiti confrontabili, validità al primo
+tentativo, numero di chiamate, latenza e token. Non si assegna un regret
+inventato ai fallimenti. Si mostrano sia i denominatori di ogni configurazione
+sia gli insiemi comuni dei confronti. L’unità statistica è il circuito:
+i tre seed Qiskit e le correzioni non diventano osservazioni indipendenti.
+I risultati della validation motivano la scelta; non provano una superiorità
+definitiva del modello.
 
-Il valutatore produce lo stesso record per:
+La configurazione vincente viene congelata insieme a modelli, prompt,
+retrieval, regole di correzione e ambiente. Lo stesso modello e le stesse
+impostazioni saranno usati senza RAG sul test, senza una seconda selezione.
+Prima del test sono ammesse solo prove tecniche senza RAG su train.
+La scelta del modello di frontiera e i suoi parametri devono essere dichiarati
+prima del test. La loro assenza non blocca questa selezione locale.
 
-- LLM + RAG;
-- stesso LLM senza RAG;
-- LLM di frontiera;
+Il file configs/experiment_methods_v2.json mantiene i tre ruoli finali.
+Il congelamento locale può essere completo mentre il ruolo di frontiera
+è ancora da configurare: in quel caso il file complessivo non viene dichiarato
+congelato e il test resta chiuso. I piani già estratti conservano le scelte
+casuali originali. Le liste dei metodi finali contenute nel piano storico
+non impongono l’esecuzione di quei metodi nella selezione locale: il manifest
+della selezione dichiara esplicitamente questo ambito ridotto.
+
+## Valutazione della selezione e confronto finale
+
+Il valutatore della selezione non richiede qcompile, il modello di frontiera
+o la variante senza RAG. Usa le scelte LLM con RAG e i riferimenti Qiskit.
+Lo score di una coppia è la mediana dei tre seed 0, 1 e 2, soltanto quando
+tutti riescono. L’oracle esiste soltanto se l’intera matrice compatibile
+del circuito è riuscita. I timeout restano terminali; non si calcola un
+massimo parziale facendolo passare per oracle.
+
+Il confronto finale sul test mantiene tutti i metodi previsti:
+
+- LLM scelto con RAG e stesso LLM senza RAG;
+- modello di frontiera;
 - MQT Predictor con qcompile;
-- Qiskit livello 2 e 3, separato per device;
-- scelta Qiskit casuale congelata;
-- oracle esaustivo.
+- Qiskit livello 2 e 3 per ciascun dispositivo;
+- scelta Qiskit casuale congelata e oracle esaustivo.
 
-Lo score di una scelta Qiskit è la mediana dei tre seed. Tutte e tre le
-ripetizioni devono riuscire. L'oracle è disponibile soltanto quando l'intera
-matrice compatibile del circuito è riuscita. Se manca una combinazione, non
-viene calcolato un falso massimo parziale.
+Il codice rifiuta una valutazione test che escluda un metodo richiesto.
+Le analisi confermative, inclusa la verifica del contributo del RAG, riguardano
+il test. Le analisi della selezione sono descrittive, con intervalli bootstrap
+a livello di circuito, seed e denominatori dichiarati.
 
-Il riepilogo conserva successi, timeout, altri fallimenti, casi non applicabili,
-denominatori e regret rispetto all'oracle.
+Per la tesi si conservano dati originali JSON/JSONL, riepiloghi esportabili,
+procedure di analisi e figure. Il resoconto LaTeX include impostazioni,
+tentativi scartati, risultati, motivazione della scelta e limiti. Sono previsti
+un sorgente inseribile tramite input nella tesi e una compilazione autonoma
+controllata visivamente.
 
 ## Gate che apre il test
 
@@ -1106,7 +1211,8 @@ Il test può essere aperto solo se sono veri tutti questi gate:
    riferita alla stessa raccolta e a `k=5`;
 8. cinque modelli RL con target 100000, contatore 100352 e classificatore ML a cinque classi;
 9. cinque canary RL e un canary qcompile riusciti;
-10. valutazione validation completa.
+10. selezione locale validation completa, con tutti i sigilli verificati,
+    risultati canonici e prova `llm_selection/selection_complete.json` integra.
 
 Solo dopo l'audit positivo:
 

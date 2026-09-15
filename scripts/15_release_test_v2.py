@@ -263,6 +263,8 @@ def main() -> int:
     validation_results_path = validation_dir / "method_results.jsonl"
 
     def check_validation_evaluation() -> dict[str, Any]:
+        from llm_selection.finalize import verify_local_selection
+        local_selection = verify_local_selection()
         summary = load_json(validation_summary_path)
         if (
             summary.get("experiment_id") != EXPERIMENT_ID
@@ -275,6 +277,7 @@ def main() -> int:
         if not validation_results_path.is_file():
             raise FileNotFoundError(validation_results_path)
         return {
+            "local_selection": local_selection,
             "summary_sha256": file_sha256(validation_summary_path),
             "results_sha256": file_sha256(validation_results_path),
         }
@@ -322,6 +325,9 @@ def main() -> int:
         validation_summary_path,
         validation_results_path,
     ]
+    from llm_selection.finalize import FINAL, PROOF
+    from llm_selection.study import FROZEN
+    frozen_paths.extend([FINAL, PROOF, FROZEN])
     from prototype.quantum_assistant.adapters.rag_dataset import DEFAULT_RAG_ROOT
     frozen_paths.extend(
         path for path in (DEFAULT_RAG_ROOT / "index").rglob("*")
