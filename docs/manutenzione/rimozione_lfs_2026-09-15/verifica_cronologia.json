@@ -1,0 +1,10 @@
+{
+  "commits_verified": 67,
+  "allowed_file_deletions_across_commits": 1130,
+  "attributes_edits_across_commits": 39,
+  "unexpected_changes": 0,
+  "remaining_known_lfs_pointers": 0,
+  "remaining_oversized_blobs": 0,
+  "author_dates_and_messages_preserved": true,
+  "seconds": 125.65574669837952
+}
