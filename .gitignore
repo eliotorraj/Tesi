@@ -5,3 +5,7 @@ __pycache__/
 .ruff_cache/
 tmp/mqt_predictor-*
 .workspace_archive/
+
+# Vecchi pesi RL conservati fuori da Git; copie locali preservate.
+/artifacts/models/rl/*.zip
+/artifacts/checkpoints/rl/**/*.zip
