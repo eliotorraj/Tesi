@@ -1,0 +1,21 @@
+{
+  "temperature": 0.0,
+  "seed": 20260913,
+  "stream": true,
+  "cache_prompt": true,
+  "prompt": "<|im_start|>user\nReturn exactly {\"ok\":true} as JSON.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+  "json_schema": {
+    "type": "object",
+    "properties": {
+      "ok": {
+        "const": true
+      }
+    },
+    "required": [
+      "ok"
+    ],
+    "additionalProperties": false
+  },
+  "n_predict": 32,
+  "return_tokens": true
+}

@@ -1,0 +1,23 @@
+{
+  "status": "timeout",
+  "selected_device_id": null,
+  "selected_config_id": null,
+  "failure": {
+    "category": "timeout"
+  },
+  "circuit_id": "su2random_indep_qiskit_50",
+  "source_sha256": "b1064ac39fd23798db2e87140a9cd40d2c2994ebd9d00891f04c07001eb56051",
+  "split": "train",
+  "configuration_id": "p1_t0",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-14T12:28:05.572139+00:00",
+  "this_invocation_seconds": 300.5126338199989,
+  "measured_call_seconds": 300.0613444219998,
+  "python_process_peak_rss_bytes": 1787105280,
+  "python_rss_method": "Linux getrusage ru_maxrss, cumulative process high-water mark; not an exclusive per-call peak",
+  "attempts_sha256": "f4c51974b840ff45a5db5810df8e7f981cb9ef0408f654072233fcdcccb9af6e",
+  "input_prompt_sha256": "10f42e2c4fc0e2770b44d131efbdb4b8cb0c50b3b42a30e16e342d8152ddcab6"
+}

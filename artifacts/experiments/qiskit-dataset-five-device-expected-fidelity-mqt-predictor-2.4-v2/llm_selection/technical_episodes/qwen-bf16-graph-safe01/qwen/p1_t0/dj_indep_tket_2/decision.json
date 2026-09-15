@@ -1,0 +1,23 @@
+{
+  "status": "failure",
+  "selected_device_id": null,
+  "selected_config_id": null,
+  "failure": {
+    "category": "infrastructure_failure",
+    "type": "RuntimeError",
+    "message": "Local HTTP error 7: b''"
+  },
+  "circuit_id": "dj_indep_tket_2",
+  "source_sha256": "bc1833de09d70b83eed4ddd1a593a1e9ce2d7bf86baa534c1e3cbf6e6ab94c5d",
+  "split": "train",
+  "configuration_id": "p1_t0",
+  "attempt_count": 1,
+  "llm_calls": 0,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-13T21:30:55.892614+00:00",
+  "this_invocation_seconds": 2.3480204400000275,
+  "measured_call_seconds": 0,
+  "attempts_sha256": "9873069cb6fdaacecb00a3710377ba7f1bc3e8bc05b0bad534b64d74c7a89dec",
+  "input_prompt_sha256": "4019c21dc03593a4c3daa4af551f5f0f341f0aa00de44cf5e82f227c49b354f7"
+}

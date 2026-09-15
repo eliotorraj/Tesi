@@ -1,0 +1,2 @@
+Available devices:
+  Vulkan0: AMD Radeon RX 6750 XT (12272 MiB, 11474 MiB free)

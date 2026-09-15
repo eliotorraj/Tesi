@@ -1,0 +1,10 @@
+{
+  "at": "2026-09-15T06:36:54.073910+00:00",
+  "revision": "lossless-v2-20260914",
+  "llm_calls": 0,
+  "arguments": {
+    "label": "lossless-v2-check-01",
+    "verify_retrieval": true,
+    "all_splits": true
+  }
+}

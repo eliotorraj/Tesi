@@ -1,0 +1,11 @@
+{
+  "protected_files": 229874,
+  "changed_or_missing": [
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints/rl/quantinuum_h2_56/v2-quantinuum-h2-56-seed0/model_expected_fidelity_quantinuum_h2_56_latest_rollout.metadata.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints/rl/quantinuum_h2_56/v2-quantinuum-h2-56-seed0/model_expected_fidelity_quantinuum_h2_56_latest_rollout.zip",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/logs/rl/model_expected_fidelity_quantinuum_h2_56/v2-quantinuum-h2-56-seed0/MaskablePPO_3/events.out.tfevents.1788946581.DESKTOP-B6R0NTA.6060.0",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/logs/rl/model_expected_fidelity_quantinuum_h2_56/v2-quantinuum-h2-56-seed0/resume-20260909T093558.885764Z.monitor.csv"
+  ],
+  "added_outside_rag": [],
+  "unchanged": false
+}

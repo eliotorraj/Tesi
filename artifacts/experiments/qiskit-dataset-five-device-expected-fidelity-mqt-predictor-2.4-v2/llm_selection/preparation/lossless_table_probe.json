@@ -1,0 +1,156 @@
+{
+  "at": "2026-09-13T17:00:34.692233+00:00",
+  "official_tokenizers_only_not_native_chat_counts": true,
+  "rows": [
+    {
+      "model": "qwen",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 110730,
+      "table_tokens": 109074,
+      "original_chars": 196874,
+      "table_chars": 188776
+    },
+    {
+      "model": "qwen",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 97755,
+      "table_tokens": 95174,
+      "original_chars": 180356,
+      "table_chars": 167866
+    },
+    {
+      "model": "qwen",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 101048,
+      "table_tokens": 98467,
+      "original_chars": 186661,
+      "table_chars": 174171
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 150319,
+      "table_tokens": 148052,
+      "original_chars": 247526,
+      "table_chars": 236525
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 150843,
+      "table_tokens": 148647,
+      "original_chars": 247656,
+      "table_chars": 236991
+    },
+    {
+      "model": "phi",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 84249,
+      "table_tokens": 82533,
+      "original_chars": 196874,
+      "table_chars": 188776
+    },
+    {
+      "model": "phi",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 73173,
+      "table_tokens": 70561,
+      "original_chars": 180356,
+      "table_chars": 167866
+    },
+    {
+      "model": "phi",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 75929,
+      "table_tokens": 73317,
+      "original_chars": 186661,
+      "table_chars": 174171
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 116922,
+      "table_tokens": 114621,
+      "original_chars": 247526,
+      "table_chars": 236525
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 117530,
+      "table_tokens": 115299,
+      "original_chars": 247656,
+      "table_chars": 236991
+    },
+    {
+      "model": "gemma",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 113995,
+      "table_tokens": 111998,
+      "original_chars": 196874,
+      "table_chars": 188776
+    },
+    {
+      "model": "gemma",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 101686,
+      "table_tokens": 98539,
+      "original_chars": 180356,
+      "table_chars": 167866
+    },
+    {
+      "model": "gemma",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 105252,
+      "table_tokens": 102105,
+      "original_chars": 186661,
+      "table_chars": 174171
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 154302,
+      "table_tokens": 151542,
+      "original_chars": 247526,
+      "table_chars": 236525
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "exact_roundtrip": true,
+      "original_tokens": 155179,
+      "table_tokens": 152506,
+      "original_chars": 247656,
+      "table_chars": 236991
+    }
+  ]
+}

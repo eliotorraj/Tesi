@@ -1,0 +1,1959 @@
+{
+  "at": "2026-09-13T17:08:57.716174+00:00",
+  "measurement": "official tokenizer, excludes native chat wrapper",
+  "rows": [
+    {
+      "model": "qwen",
+      "split": "train",
+      "circuit_id": "ae_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 110797
+    },
+    {
+      "model": "qwen",
+      "split": "train",
+      "circuit_id": "dj_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 80462
+    },
+    {
+      "model": "qwen",
+      "split": "train",
+      "circuit_id": "portfoliovqe_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 83755
+    },
+    {
+      "model": "qwen",
+      "split": "train",
+      "circuit_id": "su2random_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 133026
+    },
+    {
+      "model": "qwen",
+      "split": "train",
+      "circuit_id": "su2random_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 133550
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 84871
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 82261
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 81848
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 82653
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 83219
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 83303
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 82958
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 84963
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 82275
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 81899
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 82746
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 83232
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 82847
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 83171
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 83630
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 83853
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 84543
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 84877
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 85393
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_15",
+      "exact_roundtrip": true,
+      "graph_tokens": 85661
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_16",
+      "exact_roundtrip": true,
+      "graph_tokens": 86131
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_17",
+      "exact_roundtrip": true,
+      "graph_tokens": 86463
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 80357
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 80995
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 88625
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 81089
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 93558
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 81097
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 98753
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 81408
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 104985
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 82088
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_70",
+      "exact_roundtrip": true,
+      "graph_tokens": 118299
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 82417
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 83458
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 84089
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 84467
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 85330
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 85854
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 86585
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 80237
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 80880
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 93654
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 81004
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 103480
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 81068
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 118792
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 81436
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 127383
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 82194
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 82621
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 83766
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 84607
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 84587
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 84828
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 85078
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 85371
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_15",
+      "exact_roundtrip": true,
+      "graph_tokens": 85644
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_16",
+      "exact_roundtrip": true,
+      "graph_tokens": 85981
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 80444
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 80952
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 88823
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 81122
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 92074
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 81349
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 102036
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 84104
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 105742
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 84091
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_70",
+      "exact_roundtrip": true,
+      "graph_tokens": 119179
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 84140
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 84299
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 85066
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 85211
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 85615
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 86063
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 86557
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 80316
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 80839
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 95482
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 81037
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 106824
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 81420
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 120574
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 84130
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 84191
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 84338
+    },
+    {
+      "model": "qwen",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 84607
+    },
+    {
+      "model": "phi",
+      "split": "train",
+      "circuit_id": "ae_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 84315
+    },
+    {
+      "model": "phi",
+      "split": "train",
+      "circuit_id": "dj_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 60939
+    },
+    {
+      "model": "phi",
+      "split": "train",
+      "circuit_id": "portfoliovqe_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 63695
+    },
+    {
+      "model": "phi",
+      "split": "train",
+      "circuit_id": "su2random_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 104688
+    },
+    {
+      "model": "phi",
+      "split": "train",
+      "circuit_id": "su2random_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 105296
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 64008
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 62303
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 61410
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 62205
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 63295
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 63191
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 62501
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 64060
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 62303
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 61441
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 62280
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 63299
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 62553
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 62682
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 63064
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 63242
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 64026
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 64203
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 64949
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_15",
+      "exact_roundtrip": true,
+      "graph_tokens": 65104
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_16",
+      "exact_roundtrip": true,
+      "graph_tokens": 65422
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_17",
+      "exact_roundtrip": true,
+      "graph_tokens": 65698
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 60860
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 61018
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 68186
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 60987
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 71785
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 61015
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 75349
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 61097
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 79674
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 61827
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_70",
+      "exact_roundtrip": true,
+      "graph_tokens": 90101
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 61522
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 62896
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 63217
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 63464
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 64349
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 64601
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 65440
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 60748
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 60920
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 69928
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 60901
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 75955
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 60955
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 86587
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 61059
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 91976
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 61831
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 61572
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 62980
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 64276
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 64464
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 64675
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 64875
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 65136
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_15",
+      "exact_roundtrip": true,
+      "graph_tokens": 65374
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_16",
+      "exact_roundtrip": true,
+      "graph_tokens": 65659
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 60967
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 61152
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 68076
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 61019
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 70829
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 61035
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 78285
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 63673
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 80330
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 63752
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_70",
+      "exact_roundtrip": true,
+      "graph_tokens": 90834
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 63982
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 64025
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 64435
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 64696
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 64986
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 65283
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 65625
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 60837
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 61034
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 71205
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 60933
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 78585
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 61056
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 88092
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 63631
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 63748
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 64018
+    },
+    {
+      "model": "phi",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 64107
+    },
+    {
+      "model": "gemma",
+      "split": "train",
+      "circuit_id": "ae_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 114070
+    },
+    {
+      "model": "gemma",
+      "split": "train",
+      "circuit_id": "dj_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 84407
+    },
+    {
+      "model": "gemma",
+      "split": "train",
+      "circuit_id": "portfoliovqe_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 87973
+    },
+    {
+      "model": "gemma",
+      "split": "train",
+      "circuit_id": "su2random_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 137023
+    },
+    {
+      "model": "gemma",
+      "split": "train",
+      "circuit_id": "su2random_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 137900
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 88969
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 86249
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 85630
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 86445
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 87383
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 87468
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingcall_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 86841
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 89063
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 86263
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 85685
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 86540
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 87394
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 86884
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "pricingput_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 87056
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 87779
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 88016
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 88857
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 89159
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 89763
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_15",
+      "exact_roundtrip": true,
+      "graph_tokens": 90001
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_16",
+      "exact_roundtrip": true,
+      "graph_tokens": 90495
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_17",
+      "exact_roundtrip": true,
+      "graph_tokens": 90847
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 84357
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 84948
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 93234
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 85037
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 98374
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 85032
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 103686
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 85306
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 109856
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 86081
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_70",
+      "exact_roundtrip": true,
+      "graph_tokens": 123584
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 86376
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 87600
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 88240
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 88628
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 89638
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 90134
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 90951
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 84241
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 84835
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 98167
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 84950
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 108185
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 85005
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 123952
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 85330
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 132429
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 86189
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 86582
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qft_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 87906
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 89018
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 89008
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 89260
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 89524
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 89828
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_15",
+      "exact_roundtrip": true,
+      "graph_tokens": 90115
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_16",
+      "exact_roundtrip": true,
+      "graph_tokens": 90467
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 84420
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 84891
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 93412
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 85070
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 96714
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 85240
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 107043
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 88407
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_60",
+      "exact_roundtrip": true,
+      "graph_tokens": 110611
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 88430
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_70",
+      "exact_roundtrip": true,
+      "graph_tokens": 124495
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 88476
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_qiskit_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 88679
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_10",
+      "exact_roundtrip": true,
+      "graph_tokens": 89473
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_11",
+      "exact_roundtrip": true,
+      "graph_tokens": 89630
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_12",
+      "exact_roundtrip": true,
+      "graph_tokens": 90049
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_13",
+      "exact_roundtrip": true,
+      "graph_tokens": 90505
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_14",
+      "exact_roundtrip": true,
+      "graph_tokens": 91012
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_2",
+      "exact_roundtrip": true,
+      "graph_tokens": 84288
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_3",
+      "exact_roundtrip": true,
+      "graph_tokens": 84780
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_30",
+      "exact_roundtrip": true,
+      "graph_tokens": 100083
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_4",
+      "exact_roundtrip": true,
+      "graph_tokens": 84983
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_40",
+      "exact_roundtrip": true,
+      "graph_tokens": 111643
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_5",
+      "exact_roundtrip": true,
+      "graph_tokens": 85309
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_50",
+      "exact_roundtrip": true,
+      "graph_tokens": 125718
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_6",
+      "exact_roundtrip": true,
+      "graph_tokens": 88431
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_7",
+      "exact_roundtrip": true,
+      "graph_tokens": 88528
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_8",
+      "exact_roundtrip": true,
+      "graph_tokens": 88672
+    },
+    {
+      "model": "gemma",
+      "split": "validation",
+      "circuit_id": "qftentangled_indep_tket_9",
+      "exact_roundtrip": true,
+      "graph_tokens": 88985
+    }
+  ]
+}

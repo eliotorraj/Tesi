@@ -1,0 +1,18 @@
+{
+  "started_at": "2026-09-13T11:31:00.599745+00:00",
+  "ended_at": "2026-09-13T11:31:01.023626+00:00",
+  "elapsed_seconds": 0.4238549070000772,
+  "ttft_content_seconds": null,
+  "ttft_any_seconds": null,
+  "content": "",
+  "reasoning": "",
+  "usage": null,
+  "timings": null,
+  "finish_reason": null,
+  "stream_done": false,
+  "curl_exit_code": 22,
+  "stream_parse_errors": [],
+  "server_errors": [],
+  "transport_retries": 0,
+  "transport_success": false
+}

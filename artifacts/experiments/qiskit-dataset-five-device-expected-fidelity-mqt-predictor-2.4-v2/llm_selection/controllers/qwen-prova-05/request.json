@@ -1,0 +1,19 @@
+{
+  "technical": true,
+  "model": "qwen",
+  "label": "qwen-prova-05",
+  "episode_label": null,
+  "precision": "Q8_0",
+  "context": 147456,
+  "cache_type": "q8_0",
+  "gpu_layers": "all",
+  "batch": 512,
+  "micro_batch": 128,
+  "pause_hotspot": 105,
+  "resume_hotspot": 100,
+  "maximum_hotspot": 108,
+  "maximum_edge": 95,
+  "circuit": null,
+  "technical_timeout": 300,
+  "technical_max_attempts": 3
+}

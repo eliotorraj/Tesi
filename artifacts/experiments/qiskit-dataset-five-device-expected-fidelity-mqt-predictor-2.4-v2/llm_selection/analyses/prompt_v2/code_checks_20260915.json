@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-15",
+  "checks": [
+    {
+      "command": "PYTHONPATH=.:tests .venv/bin/python -m unittest test_llm_selection test_compact_prompt test_claim_evidence_validation",
+      "tests": 57,
+      "seconds": 0.539,
+      "exit_code": 0
+    },
+    {
+      "command": "PYTHONPATH=.:tests .venv/bin/python -m unittest test_llm_output_validation",
+      "tests": 11,
+      "seconds": 0.455,
+      "exit_code": 0
+    }
+  ],
+  "earlier_attempts": [
+    {
+      "phase": "prompt audit startup",
+      "status": "ModuleNotFoundError: tokenizers",
+      "resolution": "Tokenizer runs in existing separate artifact runtime; uv.lock unchanged"
+    },
+    {
+      "phase": "unittest command",
+      "status": "ImportError: tests is not an importable package",
+      "resolution": "Use module names with PYTHONPATH=.:tests"
+    },
+    {
+      "phase": "unittest tool timeout",
+      "status": "Tool timeout after 1000ms; no assertion result",
+      "resolution": "Use 60000ms tool timeout"
+    },
+    {
+      "phase": "57 unit tests",
+      "status": "2 failures in synthetic resume tests",
+      "cause": "Synthetic context 4096 equalled existing max_tokens=4096, leaving no room for input",
+      "resolution": "Synthetic context derives from configured output budget plus 1024. Production parameters unchanged."
+    }
+  ],
+  "notes": [
+    "No validation scores or test circuits accessed.",
+    "JSON/schema and semantic validators were not loosened."
+  ]
+}

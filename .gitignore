@@ -6,26 +6,17 @@ __pycache__/
 tmp/mqt_predictor-*
 .workspace_archive/
 AGENTS.md
-# Il branch qiskit_dataset conserva solo la pipeline del Dataset Qiskit diretto.
-artifacts/models/
-artifacts/cache/ml/
-artifacts/checkpoints/rl/
-artifacts/logs/ml/
-artifacts/logs/rl/
-datasets/device_selector_*.json
-datasets/llm_mqt_full_pipeline_*.json
-.backups/
-artifacts/qiskit_dataset_cache/expected_fidelity/*
-# Artefatti pesanti e risultati del protocollo 2.0: si rigenerano dai manifest.
-artifacts/experiments/
-datasets/experiments/
-# Risultati pilota 2.3 locali: conservarli, ma non versionarli nel protocollo v2.
-/datasets/expected_fidelity/full/ibm_heron_156/generation_status.json
-/datasets/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
-tesi/
 
+artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models
+artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints
+
+tesi/
+AGENTS.md
 # Materiale storico dopo il riordino del 9 settembre 2026.
 /archivio/protocollo_v1/datasets/expected_fidelity/full/ibm_heron_156/generation_status.json
 /archivio/protocollo_v1/datasets/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
 /archivio/sviluppo/
 /archivio/riordino_20260909.json
+
+llm_selection/Latex.md
+llm_selection/GITHUB.md

@@ -1,0 +1,7 @@
+﻿{
+    "working_set_bytes":  6967484416,
+    "pid":  15836,
+    "private_bytes":  15751487488,
+    "reason":  "BF16 weights loaded; native schema smoke passed. F16 KV context used 3.47 GB shared GPU memory. Test Q8 cache with sufficient 163840 context to reduce spill while retaining BF16 weights.",
+    "at":  "2026-09-13T11:38:14.5154278Z"
+}

@@ -1,0 +1,11 @@
+{
+  "archived_plan": "validation_method_plan.e20ec9c7c5bca4e9eb682b6eccdd143b1417a841c16b1d9a69585907866a44b1.json",
+  "current_file_sha256": "f670512ce8eb8ad359515e9f431ac17143ec11dff7567171458bf798cd43bb97",
+  "current_plan_sha256": "952c4fcfa64308735a0c00688bdfc6d94b4c6c4d82732e8498da2e274dee7e18",
+  "previous_file_sha256": "77c3550077d08182de3a208fedce55347ea04bf5de629862c10a918ece52d1b9",
+  "previous_plan_sha256": "e20ec9c7c5bca4e9eb682b6eccdd143b1417a841c16b1d9a69585907866a44b1",
+  "random_selection_unchanged": true,
+  "reason": "Allineamento alla politica Qiskit approvata: 100 secondi, 6 processi.",
+  "schema_version": "1.0.0",
+  "test_released": false
+}

@@ -1,0 +1,14 @@
+{
+  "analysis_files": {
+    "analyze.py": "e13ed01a719281e339977f2b3aedf7bcb945e374f7a9c21fe79280d2ee09646b",
+    "offline_validation.json": "231a46f9b724d6f54aeb583cff47a767d0b227ad84fc7757effc48212eee0f16",
+    "per_circuit.csv": "5b34694d85463d4efb1690355c3edcf970f02b319f6ed4cddca8d8edc5776dc8",
+    "per_circuit.json": "f466c28e80e1996677a126d2aa793c3911eb92dad4ddd7afce7ce39e8ee258dc",
+    "prompt_section_characters.json": "cfbb9edea3bead14f4fb1c5c0051c765795533cb37e2d60586852fc3a0b5c3ea",
+    "resoconto.md": "dad33ac45b1c4a501b0f653de4d20315731b3fd93c7df9d515cbad59e3fa5499",
+    "source_hashes.json": "c4688ac0c4dc692d544c2b233d696fdf175b58b168eba25fa0d294a3f927b86b",
+    "statistics.json": "b1760ed76e7c9cdebafbfaf86567edff855a35807da401d5f85952e1063b815e"
+  },
+  "original_git_head": "a40a984669af606278e8c5d0023fd2d19c15ff4a",
+  "verification": "All 98 original file hashes remain unchanged; totals cross-checked against per-circuit records; offline revalidation completed without LLM calls."
+}

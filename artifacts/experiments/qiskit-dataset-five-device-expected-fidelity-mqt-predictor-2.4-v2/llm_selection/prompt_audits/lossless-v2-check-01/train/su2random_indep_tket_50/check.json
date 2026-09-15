@@ -1,0 +1,48 @@
+{
+  "split": "train",
+  "circuit_id": "su2random_indep_tket_50",
+  "source_sha256": "498db87f252e642885b25f0a804d340d70e3c3b27afa29ca545884b633682140",
+  "original_prompt_sha256": "9e479c7555f467faf2e62769cfc52f5e9b08479d262e73f0add274818ef4a875",
+  "roundtrip_verified": true,
+  "rag_examples": 5,
+  "clarified_tokens": 134099,
+  "compact_tokens": 91504,
+  "clarified_characters": 227451,
+  "compact_characters": 159169,
+  "retrieval_reexecuted_and_verified": true,
+  "train_self_check": {
+    "applicable": true,
+    "zero_distance_record_ids": [
+      "rag_87da6e6f7e77cdddbe1b2f9b5eda983dc6be87a957f6e0ce45c0bf2fbfee48c8"
+    ],
+    "exact_source_records": [
+      {
+        "record_id": "rag_87da6e6f7e77cdddbe1b2f9b5eda983dc6be87a957f6e0ce45c0bf2fbfee48c8",
+        "rank": 1,
+        "distance": 0.0,
+        "source_sha256": "498db87f252e642885b25f0a804d340d70e3c3b27afa29ca545884b633682140",
+        "device_id": "quantinuum_h2_56",
+        "config_id": "o2_default_default",
+        "tied_best_config_ids": [
+          "o2_default_default",
+          "o3_default_default",
+          "o2_sabre_sabre",
+          "o2_dense_sabre",
+          "o2_trivial_sabre",
+          "o3_sabre_sabre",
+          "o3_dense_sabre",
+          "o3_trivial_sabre",
+          "o2_sabre_lookahead",
+          "o2_sabre_basic",
+          "o3_sabre_lookahead",
+          "o3_sabre_basic"
+        ]
+      }
+    ],
+    "self_retrieved_at_zero": true,
+    "comparison": "Exact source SHA-256 and metric; zero feature distance alone is insufficient.",
+    "response_checked": false,
+    "response_valid": null
+  },
+  "token_reduction_percent": 31.763846113692118
+}

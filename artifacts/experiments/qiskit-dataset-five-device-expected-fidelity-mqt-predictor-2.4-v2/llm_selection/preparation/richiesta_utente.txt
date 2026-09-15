@@ -1,0 +1,174 @@
+Procedi con l’implementazione e l’esecuzione dell’intera selezione del modello LLM locale sulla validation, fino alla scelta documentata della configurazione finale e alla produzione del materiale LaTeX per la tesi.
+
+L’obiettivo comprende sia il funzionamento del sistema sia la documentazione completa dello sviluppo e degli esperimenti. Non limitarti a preparare gli script: esegui le prove, analizza i risultati e produci gli artefatti finali. Il test deve rimanere sigillato.
+
+1. Contesto e verifiche iniziali
+
+Lavora nel progetto Tesi-mqt-2.4-v2. Leggi AGENTS.md, knowledge/riassunto_kb_mqt_predictor.md e docs/protocollo_sperimentale.md. Verifica lo stato effettivo del codice e degli artefatti prima di intervenire.
+
+L’esperimento corrente usa Python 3.12, MQT Predictor 2.4.0 e le dipendenze fissate in uv.lock. Conserva ambiente MQT, modelli addestrati, processi attivi, corpus originale, manifest e risultati già prodotti.
+
+Usa “Dataset” per i dati destinati all’LLM/RAG e “Training set” per quelli del classificatore MQT.
+
+Le decisioni di questo prompt aggiornano il precedente protocollo. Documenta le modifiche e adegua coerentemente codice, schemi, valutatori e controlli, conservando traccia della versione precedente.
+
+2. Separazione tra validation e test
+
+La validation serve a scegliere il modello locale con RAG e le sue impostazioni.
+
+Non richiedere l’esecuzione completa di qcompile sulla validation per completare questa selezione. La preparazione dei modelli MQT può continuare indipendentemente.
+
+Il confronto del modello scelto senza RAG si svolgerà sul test, con modello e impostazioni già fissati. Prima del test sono ammesse prove tecniche su circuiti train per verificare il percorso senza RAG, senza una selezione separata dei suoi parametri.
+
+Mantieni i confronti finali previsti con MQT, modello di frontiera e riferimenti Qiskit. Le verifiche dei modelli MQT e dell’infrastruttura rimangono necessarie prima del test, ma non devono bloccare la selezione LLM.
+
+Non aprire il test, non eseguirlo e non usarne circuiti, caratteristiche, punteggi o risultati per prendere decisioni. Non indebolire gli altri controlli necessari alla sua apertura.
+
+3. Modelli e risorse hardware
+
+Confronta tre famiglie:
+- Qwen3.5-4B;
+- Phi-4-mini-instruct;
+- Gemma 4 E4B-it, con E2B-it come alternativa se E4B non è sostenibile sul PC.
+
+Verifica identificativi, revisioni, formati e compatibilità attraverso le fonti ufficiali. Non confondere i parametri effettivi di Gemma con quelli totali.
+
+Il PC ha 16 GB di RAM. Controlla CPU, eventuale GPU utilizzabile, memoria realmente disponibile, spazio su disco e risorse assegnate a WSL.
+
+Le risorse dedicate a WSL possono essere modificate se necessario. Distingui memoria, swap e spazio su disco: adegua soltanto ciò che serve, conserva la configurazione precedente e lascia risorse sufficienti a Windows. Non interrompere processi dell’utente o training attivi per applicare una modifica.
+
+La priorità è la qualità entro i limiti dell’hardware. Non quantizzare automaticamente tutti i modelli a 4 bit.
+
+Misura i prompt completi con il tokenizer di ciascun modello. Verifica la precisione originale quando sostenibile; altrimenti scegli una quantizzazione appropriata. Considera le varianti ufficiali QAT disponibili. Registra sempre il file effettivamente usato e la sua provenienza.
+
+Valuta memoria e tempi sulle richieste lunghe, non soltanto sul caricamento dei pesi. Non troncare silenziosamente circuiti, catalogo o evidenze per far entrare il prompt.
+
+Usa un modello alla volta e un ambiente di inferenza separato da quello MQT. Non effettuare fine-tuning.
+
+4. Preparazione del sistema e raccolta dei dati
+
+Predisponi registrazione e misure prima della prima chiamata reale.
+
+Implementa il collegamento tra prototipo e modelli locali e un esecutore degli esperimenti riprendibile. Riutilizza i componenti esistenti dove possibile.
+
+Ogni configurazione e ogni esecuzione devono avere identità e provenienza verificabili. Conserva separatamente prove tecniche, esplorazione sulla validation e configurazione finale.
+
+Salva progressivamente tutti gli esiti. Riprendi le esecuzioni incomplete senza duplicare quelle concluse. Non rilanciare una prova conclusa perché il risultato è sfavorevole e non selezionare la migliore tra più risposte valide.
+
+Prima della validation verifica sui circuiti train caricamento, prompt, schema, controlli delle evidenze, limiti di memoria, gestione degli errori e raccolta delle statistiche. Dalle misure iniziali stima la durata dell’esperimento.
+
+5. Condizioni del confronto e iperparametri
+
+Confronta i tre modelli sugli stessi 88 circuiti di validation.
+
+Mantieni uguali:
+- contenuto informativo della richiesta e obiettivo expected_fidelity;
+- catalogo dei dispositivi e delle dodici configurazioni Qiskit;
+- maschera di compatibilità;
+- esempi RAG e registro delle evidenze per ciascun circuito;
+- schema della risposta e controlli semantici;
+- regole dei tentativi e condizioni di esecuzione.
+
+Usa il formato ufficiale di conversazione di ciascun modello. Registra le differenze dovute a tokenizer, precisione o programma di inferenza.
+
+Mantieni k=5, la trasformazione corrente delle 49 feature e la distanza Manhattan. Il RAG deve leggere esclusivamente gli esempi train ammessi.
+
+Scegli e documenta una piccola ricerca di impostazioni. Definisci candidati, parametri, limiti della ricerca e criterio di selezione prima di osservare i relativi risultati.
+
+Dai ai tre modelli opportunità di regolazione comparabili prima di escluderne uno. Considera poche varianti motivate di temperatura e chiarezza del prompt. Dimensiona il limite della risposta affinché possa contenere il JSON completo. Valuta il ragionamento esteso soltanto con un esperimento esplicito e risorse dichiarate.
+
+Registra anche top_p, top_k di generazione, min_p, penalità, seed quando supportato, contesto, timeout, limiti di uscita ed eventuale generazione vincolata da schema. Non confondere top_k di generazione con k del recupero RAG.
+
+Il primo output valido è definitivo. Sono ammesse al massimo tre chiamate totali per correggere risposte non conformi. Distingui queste correzioni dalle eventuali ripetizioni di trasporto e conta tutte le chiamate effettive.
+
+6. Valutazione della qualità
+
+La misura principale è il regret assoluto:
+fedeltà stimata dell’oracle meno fedeltà stimata della coppia scelta.
+
+Non confondere regret e semplice coincidenza con l’etichetta. Registra anche accuratezza del dispositivo, della configurazione e della coppia.
+
+Le decisioni devono essere salvate e verificate prima che il valutatore acceda ai punteggi della validation. Questi punteggi non devono raggiungere modello, prompt o evidenze.
+
+Riutilizza i risultati Qiskit già disponibili per valutare le scelte. Mantieni le regole dei tre seed 0, 1 e 2 e dei risultati terminali, inclusi i timeout.
+
+Verifica quanti circuiti hanno un oracle disponibile secondo il protocollo. Non usare massimi parziali e non inventare regret per casi non valutabili.
+
+Confronta la qualità insieme all’affidabilità. Mostra denominatori e confronti sullo stesso insieme di circuiti; non favorire un modello perché fallisce sui casi difficili.
+
+Il circuito è l’unità di analisi: seed e tentativi non sono osservazioni indipendenti aggiuntive.
+
+7. Dati da conservare per la tesi
+
+Raccogli dati originali e metadati sufficienti a ricostruire tutte le prove e a creare successivamente nuove figure, grafici e analisi.
+
+Conserva almeno:
+- configurazione completa, modello, revisione, quantizzazione, tokenizer, software, versione del codice, hardware e risorse WSL;
+- identificativi di esperimento, esecuzione, circuito, split e tentativo;
+- famiglia, qubit, dimensione del circuito e lunghezza effettiva del prompt;
+- prompt, risposta originale, esempi recuperati, distanze, evidenze e decisione validata;
+- validità JSON, rispetto dello schema, compatibilità e correttezza delle evidenze;
+- successi, fallimenti, errori, timeout, interruzioni e relative cause;
+- chiamate totali, correzioni e ripetizioni di trasporto;
+- risultati dei tre seed, fedeltà stimata, oracle, regret e accuratezza;
+- tempi di caricamento, recupero, elaborazione del prompt, generazione, correzioni e durata totale;
+- token in ingresso, uscita, ragionamento e cache quando disponibili;
+- velocità di elaborazione e generazione quando misurabili;
+- picco di memoria e uso delle risorse misurabili.
+
+Distingui le prove a modello appena caricato da quelle a modello già pronto e registra le condizioni che influenzano i tempi.
+
+Specifica unità e metodo di misura. I dati mancanti devono rimanere esplicitamente mancanti. Distingui misure reali, stime e risultati di compilazione riutilizzati.
+
+Non salvare segreti. Conserva anche configurazioni scartate e risultati sfavorevoli.
+
+Usa formati aperti: per esempio JSONL per i registri, JSON per le configurazioni e CSV per i riepiloghi. Documenta campi e relazioni tra i file.
+
+8. Analisi e materiale LaTeX
+
+Genera analisi, tabelle e grafici tramite procedure versionate che leggano i dati conservati. Non trascrivere manualmente i risultati.
+
+Mostra almeno:
+- confronto complessivo di qualità e affidabilità;
+- distribuzioni del regret e dei tempi;
+- validità al primo tentativo e frequenza delle correzioni;
+- categorie di errore;
+- consumo di token e memoria;
+- risultati per famiglia di circuito e numero di qubit;
+- relazione tra lunghezza del prompt, tempi e fallimenti;
+- effetto delle impostazioni sperimentate.
+
+Usa aggregazioni e intervalli di incertezza appropriati, dichiarando sempre numerosità e limiti. Evita di presentare la selezione sulla validation come prova definitiva di superiorità.
+
+Produci un documento LaTeX inseribile nella tesi tramite input, con:
+- obiettivo e disegno dell’esperimento;
+- hardware e ambiente;
+- modelli, revisioni e precisione;
+- prompt e iperparametri;
+- metriche e regole sui fallimenti;
+- risultati e figure;
+- motivazione della scelta finale;
+- limiti e modifiche al protocollo;
+- riferimenti alle fonti e ai dati.
+
+Fornisci anche una versione compilabile autonomamente, le figure esportabili, gli eventuali riferimenti bibliografici e istruzioni per rigenerare tutto. Compila e controlla il documento.
+
+Scrivi in italiano semplice. Conserva i dettagli di riproducibilità in tabelle e appendici.
+
+9. Completamento
+
+Alla fine devono essere disponibili:
+- esecutore locale funzionante e verificato;
+- confronto completato dei tre candidati sulle configurazioni previste;
+- registri completi e riprendibili;
+- analisi riproducibili;
+- modello e configurazione finale scelti e fissati;
+- protocollo e codice coerenti con le decisioni concordate;
+- documento LaTeX verificato, tabelle e figure;
+- resoconto delle modifiche, dei controlli eseguiti e degli eventuali limiti.
+
+Fissa anche prompt, revisioni, precisione, parametri e impronta dell’indice RAG della configurazione finale. Conserva il percorso che ha portato alla scelta.
+
+Procedi autonomamente nelle scelte tecniche già autorizzate e comunica avanzamenti, risultati e problemi concreti. Non dichiarare conclusa la selezione se hai soltanto predisposto gli strumenti o se le prove sono ancora incomplete.
+
+Non aprire né eseguire il test.

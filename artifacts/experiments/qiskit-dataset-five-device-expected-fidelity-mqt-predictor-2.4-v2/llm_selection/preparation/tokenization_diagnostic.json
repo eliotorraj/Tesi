@@ -1,0 +1,113 @@
+{
+  "at": "2026-09-13T11:23:50.009062+00:00",
+  "rows": [
+    {
+      "model": "gemma",
+      "task_tokens": [
+        "Recommend",
+        "▁one",
+        "▁compatible",
+        "▁quantum",
+        "▁device",
+        "▁and",
+        "▁an",
+        "▁allow",
+        "listed",
+        "▁deterministic",
+        "▁Q",
+        "isk",
+        "it",
+        "▁compilation",
+        "▁plan",
+        "."
+      ],
+      "sections": {
+        "task": 17,
+        "live_request": 85274,
+        "retrieved_labeled_examples": 53086,
+        "allowed_evidence_registry": 14973,
+        "response_contract": 1148,
+        "configuration_catalog": 452,
+        "previous_validation_errors": 1,
+        "rules": 193
+      },
+      "representations": {
+        "default": 169281,
+        "indent2": 208893,
+        "compact": 155179
+      }
+    },
+    {
+      "model": "phi",
+      "task_tokens": [
+        "Recommend",
+        "Ġone",
+        "Ġcompatible",
+        "Ġquantum",
+        "Ġdevice",
+        "Ġand",
+        "Ġan",
+        "Ġallow",
+        "listed",
+        "Ġdeterministic",
+        "ĠQ",
+        "isk",
+        "it",
+        "Ġcompilation",
+        "Ġplan",
+        "."
+      ],
+      "sections": {
+        "task": 17,
+        "live_request": 66569,
+        "retrieved_labeled_examples": 38578,
+        "allowed_evidence_registry": 10807,
+        "response_contract": 964,
+        "configuration_catalog": 383,
+        "previous_validation_errors": 1,
+        "rules": 184
+      },
+      "representations": {
+        "default": 131502,
+        "indent2": 162290,
+        "compact": 117530
+      }
+    },
+    {
+      "model": "qwen",
+      "task_tokens": [
+        "Recommend",
+        "Ġone",
+        "Ġcompatible",
+        "Ġquantum",
+        "Ġdevice",
+        "Ġand",
+        "Ġan",
+        "Ġallow",
+        "listed",
+        "Ġdeterministic",
+        "ĠQ",
+        "isk",
+        "it",
+        "Ġcompilation",
+        "Ġplan",
+        "."
+      ],
+      "sections": {
+        "task": 17,
+        "live_request": 84624,
+        "retrieved_labeled_examples": 50109,
+        "allowed_evidence_registry": 14392,
+        "response_contract": 1086,
+        "configuration_catalog": 404,
+        "previous_validation_errors": 1,
+        "rules": 183
+      },
+      "representations": {
+        "default": 165083,
+        "indent2": 212808,
+        "compact": 150843
+      }
+    }
+  ]
+}

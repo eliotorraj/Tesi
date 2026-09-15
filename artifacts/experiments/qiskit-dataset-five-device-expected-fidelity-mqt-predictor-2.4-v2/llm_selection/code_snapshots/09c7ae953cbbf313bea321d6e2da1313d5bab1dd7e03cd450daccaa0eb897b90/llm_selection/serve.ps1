@@ -1,0 +1,92 @@
+param(
+ [Parameter(Mandatory=$true)][string]$ModelPath,
+ [Parameter(Mandatory=$true)][string]$RunDirectory,
+ [int]$Context = 131072,
+ [string]$CacheType = "q8_0",
+ [string]$GpuLayers = "all",
+ [int]$Port = 8089,
+ [int]$Batch = 128,
+ [int]$MicroBatch = 64,
+ [long]$MinimumAvailableBytes = 1610612736,
+ [int]$MaximumEdgeC = 85,
+ [int]$MaximumHotspotC = 95
+)
+$ErrorActionPreference = "Stop"
+$workspace = Split-Path -Parent $PSScriptRoot
+$experiment = Join-Path $workspace "artifacts\experiments\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\llm_selection"
+$executable = Join-Path $experiment "runtime\b10930\llama-server.exe"
+if (Get-Process -Name llama-server -ErrorAction SilentlyContinue) { throw "An existing llama-server must be inspected before starting another." }
+if (Test-Path -LiteralPath $RunDirectory) { throw "Use a new run directory; logs are never overwritten." }
+if (-not (Test-Path -LiteralPath $ModelPath)) { throw "Missing model file" }
+Add-Type -Path (Join-Path $PSScriptRoot "AmdSensors.cs")
+$sensors = [AmdSensors]::new()
+if (-not ($sensors.Read() | Where-Object { $null -ne $_.edge_c -and $null -ne $_.hotspot_c })) { $sensors.Dispose(); throw "No usable GPU temperature sensor" }
+if ([long](Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory*1024 -lt $MinimumAvailableBytes) { $sensors.Dispose(); throw "Insufficient free RAM before launch" }
+New-Item -ItemType Directory -Path $RunDirectory | Out-Null
+function Save-DurableJson($Path, $Value) {
+ $bytes=[System.Text.UTF8Encoding]::new($false).GetBytes(($Value | ConvertTo-Json -Depth 20))
+ $file=[System.IO.File]::Open($Path,[System.IO.FileMode]::CreateNew,[System.IO.FileAccess]::Write,[System.IO.FileShare]::Read)
+ try { $file.Write($bytes,0,$bytes.Length); $file.Flush($true) } finally { $file.Dispose() }
+}
+$arguments = @("-m", ('"' + $ModelPath + '"'), "--host", "127.0.0.1", "--port", $Port, "-c", $Context,
+ "--parallel", "1", "-ngl", $GpuLayers, "-fa", "on", "-ctk", $CacheType, "-ctv", $CacheType,
+ "--threads", "6", "--threads-batch", "6", "--jinja", "--no-context-shift",
+ "--cache-ram", "0", "--metrics", "--fit", "off", "-b", $Batch, "-ub", $MicroBatch)
+$start = [DateTime]::UtcNow
+$server = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $RunDirectory "stdout.log") -RedirectStandardError (Join-Path $RunDirectory "stderr.log")
+$metadata = @{ started_at=$start.ToString("o"); pid=$server.Id; process_start_time=$server.StartTime.ToUniversalTime().ToString("o"); executable=$executable; model_path=$ModelPath; arguments=$arguments; context=$Context; cache_type=$CacheType; gpu_layers=$GpuLayers; port=$Port; memory_method="Windows Process WorkingSet64 and PeakWorkingSet64; private bytes; sampled each second"; gpu_memory_peak_bytes=$null; gpu_memory_missing_reason="No per-process hardware counter collected; allocation estimates remain in server log" }
+$metadata.batch=$Batch
+$metadata.micro_batch=$MicroBatch
+$metadata.guards=@{minimum_available_bytes=$MinimumAvailableBytes;memory_consecutive_samples=3;maximum_edge_c=$MaximumEdgeC;maximum_hotspot_c=$MaximumHotspotC;missing_sensor_consecutive_samples=3;thresholds_are="Conservative experimental operating limits, not vendor failure limits or a diagnosis"}
+$metadata.measurement=@{interval_seconds=2;temperatures="AMD ADL PMLog, Celsius";gpu_memory="Windows GPUProcessMemory for owned server PID";power="AMD ASIC sensor W, not whole-PC power or energy"}
+$metadata.Remove("gpu_memory_missing_reason")
+Save-DurableJson (Join-Path $RunDirectory "launch.json") $metadata
+$metadata | ConvertTo-Json -Depth 10 -Compress
+$stream = [System.IO.StreamWriter]::new((Join-Path $RunDirectory "resources.jsonl"), $true, [System.Text.UTF8Encoding]::new($false))
+$stream.AutoFlush=$true
+$lowMemory=0
+$missingSensors=0
+$abortReason=$null
+try {
+ while (-not $server.HasExited) {
+  $server.Refresh()
+  $available=[long](Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory*1024
+  $temperatures=@($sensors.Read())
+  $usable=@($temperatures | Where-Object { $null -ne $_.edge_c -and $null -ne $_.hotspot_c })
+  if ($usable.Count -eq 0) { $missingSensors++ } else { $missingSensors=0 }
+  $gpuDedicated=$null
+  $gpuShared=$null
+  $gpuError=$null
+  try {
+   $counters=@(Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUProcessMemory | Where-Object { $_.Name -like "pid_$($server.Id)_*" })
+   if ($counters.Count -gt 0) {
+    $gpuDedicated=[long]($counters | Measure-Object DedicatedUsage -Sum).Sum
+    $gpuShared=[long]($counters | Measure-Object SharedUsage -Sum).Sum
+   }
+  } catch { $gpuError=$_.Exception.Message }
+  $row=@{utc=[DateTime]::UtcNow.ToString("o");pid=$server.Id;working_set_bytes=$server.WorkingSet64;peak_working_set_bytes=$server.PeakWorkingSet64;private_bytes=$server.PrivateMemorySize64;cpu_seconds=$server.TotalProcessorTime.TotalSeconds;system_available_bytes=$available;gpu_dedicated_bytes=$gpuDedicated;gpu_shared_bytes=$gpuShared;gpu_counter_error=$gpuError;gpu_sensors=$temperatures}
+  $stream.WriteLine(($row | ConvertTo-Json -Depth 10 -Compress))
+  $stream.Flush()
+  $stream.BaseStream.Flush($true)
+  if ($available -lt $MinimumAvailableBytes) { $lowMemory++ } else { $lowMemory=0 }
+  if ($lowMemory -ge 3) { $abortReason="available_ram_below_operational_limit" }
+  if ($usable | Where-Object { $_.edge_c -ge $MaximumEdgeC -or $_.hotspot_c -ge $MaximumHotspotC }) { $abortReason="gpu_temperature_operational_limit" }
+  if ($missingSensors -ge 3) { $abortReason="gpu_temperature_measurement_lost" }
+  if ($abortReason) {
+   Save-DurableJson (Join-Path $RunDirectory "resource_abort.json") @{at=[DateTime]::UtcNow.ToString("o");reason=$abortReason;last_sample=$row}
+   if (-not $server.HasExited) { $server.Kill() }
+   break
+  }
+  Start-Sleep -Seconds 2
+ }
+} catch {
+ $abortReason="monitor_failure"
+ Save-DurableJson (Join-Path $RunDirectory "monitor_error.json") @{at=[DateTime]::UtcNow.ToString("o");error=$_.Exception.Message}
+ throw
+} finally {
+ if (-not $server.HasExited) { $server.Kill() }
+ $server.WaitForExit()
+ $stream.Dispose()
+ $sensors.Dispose()
+ Save-DurableJson (Join-Path $RunDirectory "exit.json") @{ended_at=[DateTime]::UtcNow.ToString("o");exit_code=$server.ExitCode;abort_reason=$abortReason}
+}

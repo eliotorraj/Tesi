@@ -1,0 +1,16 @@
+{
+  "files_compared": 229874,
+  "unchanged_files": 229870,
+  "dataset_sources_results_catalog_plans_unchanged": true,
+  "changes_from_preexisting_active_training": [
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints/rl/quantinuum_h2_56/v2-quantinuum-h2-56-seed0/model_expected_fidelity_quantinuum_h2_56_latest_rollout.metadata.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints/rl/quantinuum_h2_56/v2-quantinuum-h2-56-seed0/model_expected_fidelity_quantinuum_h2_56_latest_rollout.zip",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/logs/rl/model_expected_fidelity_quantinuum_h2_56/v2-quantinuum-h2-56-seed0/MaskablePPO_3/events.out.tfevents.1788946581.DESKTOP-B6R0NTA.6060.0",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/logs/rl/model_expected_fidelity_quantinuum_h2_56/v2-quantinuum-h2-56-seed0/resume-20260909T093558.885764Z.monitor.csv"
+  ],
+  "process": "6060    6010 Wed Sep  9 11:35:37 2026 /home/elio/Tesi-mqt-2.4-v2/.venv/bin/python /home/elio/Tesi-mqt-2.4-v2/scripts/03_train_rl_model.py --device quantinuum_h2_56 --metric expected_fidelity --training-circuits /home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/sources/train --source-manifest /home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/manifests/source_circuits_v2.json --timesteps 100000 --checkpoint-every 10240 --max-steps 64 --bqskit-action-timeout 60 --seed 0 --run-name v2-quantinuum-h2-56-seed0 --resume-from /home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints/rl/quantinuum_h2_56/v2-quantinuum-h2-56-seed0/model_expected_fidelity_quantinuum_h2_56_latest_rollout.zip",
+  "process_started_local": "2026-09-09T11:35:37",
+  "baseline_local": "2026-09-09T18:44:02.843276",
+  "training_started_by_this_task": false,
+  "raw_comparison_preserved": "integrity_comparison.json"
+}

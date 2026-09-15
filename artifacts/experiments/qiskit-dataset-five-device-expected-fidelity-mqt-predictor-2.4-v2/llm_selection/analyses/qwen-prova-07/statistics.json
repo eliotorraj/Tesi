@@ -1,0 +1,196 @@
+{
+  "created_at": "2026-09-14T17:32:29.188384+00:00",
+  "label": "qwen-prova-07",
+  "method": "Read original logs; revalidate three stored responses with unchanged code and rebuilt prompt hashes. No LLM call, compilation, or validation/test score access.",
+  "original_code_hashes_verified": true,
+  "phase": "train_technical",
+  "controller_wall_seconds": 14135.764784,
+  "controller_start_utc": "2026-09-14T13:18:30.509782+00:00",
+  "controller_end_utc": "2026-09-14T17:14:06.274566+00:00",
+  "calls": 5,
+  "input_tokens_total": 542273,
+  "processed_prompt_tokens_last_observed_total": 539589,
+  "generated_tokens_total": 5897,
+  "call_seconds_total": 14035.707310804004,
+  "prompt_seconds_last_observed_total": 12621.919898,
+  "generation_seconds_completed_total": 1388.6658670000002,
+  "resource_sample_count": 13161,
+  "resources": {
+    "system_available_bytes": {
+      "count": 13161,
+      "min": 2976374784,
+      "max": 6549135360,
+      "mean_sample_weighted": 4735097689.573741,
+      "median": 4615266304
+    },
+    "working_set_bytes": {
+      "count": 13161,
+      "min": 10473472,
+      "max": 1051484160,
+      "mean_sample_weighted": 945410609.7567054,
+      "median": 937492480
+    },
+    "peak_working_set_bytes": {
+      "count": 13161,
+      "min": 10473472,
+      "max": 1077948416,
+      "mean_sample_weighted": 1058462012.046501,
+      "median": 1077948416
+    },
+    "private_bytes": {
+      "count": 13161,
+      "min": 3166208,
+      "max": 9064980480,
+      "mean_sample_weighted": 8963794375.863232,
+      "median": 8953384960
+    },
+    "gpu_dedicated_bytes": {
+      "count": 13160,
+      "min": 753664,
+      "max": 7857340416,
+      "mean_sample_weighted": 7764827694.375684,
+      "median": 7768915968.0
+    },
+    "gpu_shared_bytes": {
+      "count": 13160,
+      "min": 200704,
+      "max": 720523264,
+      "mean_sample_weighted": 720081271.6741642,
+      "median": 720523264.0
+    },
+    "cpu_seconds": {
+      "count": 13161,
+      "min": 0.046875,
+      "max": 3601.484375,
+      "mean_sample_weighted": 1820.0014282254388,
+      "median": 1848.953125
+    },
+    "edge_c": {
+      "count": 13161,
+      "min": 58,
+      "max": 74,
+      "mean_sample_weighted": 71.13236076285996,
+      "median": 71
+    },
+    "hotspot_c": {
+      "count": 13161,
+      "min": 63,
+      "max": 94,
+      "mean_sample_weighted": 86.62632018843553,
+      "median": 87
+    },
+    "gpu_activity_percent": {
+      "count": 13161,
+      "min": 0,
+      "max": 99,
+      "mean_sample_weighted": 98.55945596839146,
+      "median": 99
+    },
+    "asic_power_w": {
+      "count": 13161,
+      "min": 8,
+      "max": 117,
+      "mean_sample_weighted": 80.26183420712712,
+      "median": 82
+    },
+    "fan_rpm": {
+      "count": 13161,
+      "min": 625,
+      "max": 1729,
+      "mean_sample_weighted": 1307.0156523060557,
+      "median": 1349
+    }
+  },
+  "server_exit": {
+    "exit_code": null,
+    "last_durable_sample_utc": "2026-09-14T17:14:04.6581271Z",
+    "ended_at": "2026-09-14T17:14:06.1078968Z",
+    "thermal_paused_seconds": 0,
+    "thermal_pause_count": 0,
+    "abort_reason": null
+  },
+  "launch": {
+    "pause_utility_sha256": "ECBAD759FA863F98F4A7DE2AABE5A3006D7B77DC42C10D5CB5439B12D16C2F1A",
+    "cache_type": "q8_0",
+    "process_start_time": "2026-09-14T13:19:15.8105460Z",
+    "log_storage": {
+      "writer": "Windows",
+      "directory": "D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\server_logs\\qwen-prova-07-qwen",
+      "durability": "Flush(true) on native Windows filesystem; no WSL UNC write"
+    },
+    "micro_batch": 128,
+    "arguments": [
+      "-m",
+      "\"D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\models\\qwen\\Q8_0.gguf\"",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      8089,
+      "-c",
+      147456,
+      "--parallel",
+      "1",
+      "-ngl",
+      "all",
+      "-fa",
+      "on",
+      "-ctk",
+      "q8_0",
+      "-ctv",
+      "q8_0",
+      "--threads",
+      "6",
+      "--threads-batch",
+      "6",
+      "--jinja",
+      "--no-context-shift",
+      "--cache-ram",
+      "0",
+      "--metrics",
+      "--fit",
+      "off",
+      "--load-mode",
+      "none",
+      "-b",
+      512,
+      "-ub",
+      128
+    ],
+    "batch": 512,
+    "memory_method": "Windows Process WorkingSet64 and PeakWorkingSet64; private bytes; sampled each second",
+    "pid": 14340,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 108,
+      "minimum_available_bytes": 1610612736,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "gpu_layers": "all",
+    "context": 147456,
+    "model_path": "D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\models\\qwen\\Q8_0.gguf",
+    "started_at": "2026-09-14T13:19:15.6891234Z",
+    "gpu_memory_peak_bytes": null,
+    "executable": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\artifacts\\experiments\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\llm_selection\\runtime\\b10930\\llama-server.exe",
+    "port": 8089,
+    "measurement": {
+      "power": "AMD ASIC sensor W, not whole-PC power or energy",
+      "gpu_memory": "Windows GPUProcessMemory for owned server PID",
+      "temperatures": "AMD ADL PMLog, Celsius",
+      "interval_seconds": 1
+    }
+  },
+  "raw_files_count": 98,
+  "raw_bytes": 21104116,
+  "limitations": [
+    "Timeout progress is the last saved observation, not a measurement at cancellation.",
+    "Resource means are sample-weighted; GPU memory counters apply to server PID, activity/temperature/power apply to adapter.",
+    "Private bytes are committed address space, not resident RAM. Shared GPU memory alone does not prove paging.",
+    "Three decision.json files report measured_call_seconds=0 despite real timings saved in call/response.json.",
+    "Use timings.cache_n for reused prefix tokens; usage.cached_tokens is a different end-of-call counter.",
+    "This technical run provides no quality score, validation ranking, or hardware fidelity result."
+  ]
+}

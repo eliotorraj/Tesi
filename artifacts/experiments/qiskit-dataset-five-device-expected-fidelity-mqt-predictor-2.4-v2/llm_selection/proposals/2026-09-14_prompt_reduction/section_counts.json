@@ -1,0 +1,26 @@
+{
+  "live_request": {
+    "characters": 15453,
+    "tokens_standalone": 9214
+  },
+  "retrieved_labeled_examples": {
+    "characters": 105048,
+    "tokens_standalone": 53840
+  },
+  "allowed_evidence_registry": {
+    "characters": 30365,
+    "tokens_standalone": 15611
+  },
+  "response_contract": {
+    "characters": 3185,
+    "tokens_standalone": 1098
+  },
+  "configuration_catalog": {
+    "characters": 1547,
+    "tokens_standalone": 404
+  },
+  "rules": {
+    "characters": 1051,
+    "tokens_standalone": 183
+  }
+}

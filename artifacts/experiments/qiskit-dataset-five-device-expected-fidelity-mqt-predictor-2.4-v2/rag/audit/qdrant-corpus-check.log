@@ -1,0 +1,17 @@
+{
+  "corpus_sha256": "e69ca13cd27642fe654ad4a350ba74dd6b2c539cc5667623fc58cfb1db516bb1",
+  "counts": {
+    "by_split": {
+      "test": 90,
+      "train": 422,
+      "validation": 88
+    },
+    "circuits": 600,
+    "leakage_groups": 15,
+    "unique_semantic_sha256": 573,
+    "unique_source_sha256": 574
+  },
+  "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "status": "verified",
+  "writes": false
+}

@@ -1,0 +1,42 @@
+{
+  "ae_indep_qiskit_60": {
+    "schema_sent": true,
+    "finish_reason": "limit",
+    "grammar_chars_in_final_event": 6640,
+    "json_valid": false,
+    "schema_valid": false,
+    "reason": "Unterminated string starting at: line 59 column 20 (char 3174)"
+  },
+  "dj_indep_tket_2": {
+    "schema_sent": true,
+    "finish_reason": "eos",
+    "grammar_chars_in_final_event": 6640,
+    "json_valid": true,
+    "schema_valid": true,
+    "schema_errors": []
+  },
+  "portfoliovqe_indep_qiskit_6": {
+    "schema_sent": true,
+    "finish_reason": "eos",
+    "grammar_chars_in_final_event": 6640,
+    "json_valid": true,
+    "schema_valid": true,
+    "schema_errors": []
+  },
+  "su2random_indep_qiskit_50": {
+    "schema_sent": true,
+    "finish_reason": null,
+    "grammar_chars_in_final_event": 0,
+    "json_valid": null,
+    "schema_valid": null,
+    "reason": "no generated content"
+  },
+  "su2random_indep_tket_50": {
+    "schema_sent": true,
+    "finish_reason": null,
+    "grammar_chars_in_final_event": 0,
+    "json_valid": null,
+    "schema_valid": null,
+    "reason": "no generated content"
+  }
+}

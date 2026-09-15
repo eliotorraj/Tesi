@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-09-15",
+  "stage": "native_weight_sha256_verification",
+  "category": "tool_inactivity_timeout",
+  "tool_timeout_ms": 60000,
+  "llm_calls": 0,
+  "controller_process_running_after_check": false,
+  "evidence": "ctx_shell terminated invocation after 60s without output; ps and CLI status checked before retry.",
+  "retry_controller_label": "qwen-prompt-v2-02"
+}

@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Return exactly {\"ok\":true} as JSON."
+    }
+  ],
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "reasoning_effort": "none"
+}

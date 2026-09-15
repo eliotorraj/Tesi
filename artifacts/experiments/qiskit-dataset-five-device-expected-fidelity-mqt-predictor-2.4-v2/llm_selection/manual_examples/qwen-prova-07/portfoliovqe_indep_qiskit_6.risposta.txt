@@ -1,0 +1,84 @@
+{
+  "schema_version": "2.0.0",
+  "request_id": "ef378bdd-dc62-545e-8f02-14f08ebce1f3",
+  "catalog_snapshot_id": "hardware_catalog_d1c339c8243cc208ebbf34fa22724ea19bcbe9af0c49b43fc98794e3cfe66dac",
+  "selected_device": "quantinuum_h2_56",
+  "figure_of_merit": "expected_fidelity",
+  "compiler": "qiskit",
+  "qiskit_plan": {
+    "optimization_level": 2,
+    "seed_transpiler": 0,
+    "layout_method": null,
+    "routing_method": null
+  },
+  "evidence_refs": [
+    {
+      "reference_id": "claim_f1ed81613a96c9bd3eb040b010d7c5f37ccd696ad2c3e78a661755aab956bb7e",
+      "record_id": "rag_3afe0a12eaef4f2cf915e143428c9ca89a0d2b592103acf93337350570fadcb2",
+      "source_type": "historical_result",
+      "source_id": "claim_f1ed81613a96c9bd3eb040b010d7c5f37ccd696ad2c3e78a661755aab956bb7e",
+      "source_claim_id": "claim_f1ed81613a96c9bd3eb040b010d7c5f37ccd696ad2c3e78a661755aab956bb7e"
+    },
+    {
+      "reference_id": "claim_6b5e59c88c5a058d51560efe73468dd18e67e877ba500fba7384f4343cd51d8e",
+      "record_id": "rag_60e2150eb1c2cdb020f8f8b2bf1c1f62a53724f999f1f79e90d3b309b1368d58",
+      "source_type": "historical_result",
+      "source_id": "claim_6b5e59c88c5a058d51560efe73468dd18e67e877ba500fba7384f4343cd51d8e",
+      "source_claim_id": "claim_6b5e59c88c5a058d51560efe73468dd18e67e877ba500fba7384f4343cd51d8e"
+    },
+    {
+      "reference_id": "claim_6d4678d2000845d2ce61876e5b7b42ce25b1eae592351e8978af0158b44d4505",
+      "record_id": "rag_96b5c7c8427261d3d3774e329d66f4e01a8b0953e0779e0eaf7ee4e10eab45b6",
+      "source_type": "historical_result",
+      "source_id": "claim_6d4678d2000845d2ce61876e5b7b42ce25b1eae592351e8978af0158b44d4505",
+      "source_claim_id": "claim_6d4678d2000845d2ce61876e5b7b42ce25b1eae592351e8978af0158b44d4505"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_f1ed81613a96c9bd3eb040b010d7c5f37ccd696ad2c3e78a661755aab956bb7e",
+      "claim_type": "historical_configuration_support",
+      "parameters": {
+        "device_id": "quantinuum_h2_56",
+        "configuration_id": "o2_default_default",
+        "caveat_id": "expected_fidelity_is_estimate"
+      },
+      "evidence_ref_ids": [
+        "evidence_e0cf3e634b65c8b7882b2dd3262592ec6786a5b4089b997ec5cdbb4271472deb"
+      ]
+    },
+    {
+      "claim_id": "claim_6b5e59c88c5a058d51560efe73468dd18e67e877ba500fba7384f4343cd51d8e",
+      "claim_type": "historical_configuration_support",
+      "parameters": {
+        "device_id": "quantinuum_h2_56",
+        "configuration_id": "o2_default_default",
+        "caveat_id": "expected_fidelity_is_estimate"
+      },
+      "evidence_ref_ids": [
+        "evidence_de5d69d5579bae5c1f2ace775b11f8693c4726f9d18ccb3d04fcc45665b9e946"
+      ]
+    },
+    {
+      "claim_id": "claim_6d4678d2000845d2ce61876e5b7b42ce25b1eae592351e8978af0158b44d4505",
+      "claim_type": "historical_configuration_support",
+      "parameters": {
+        "device_id": "quantinuum_h2_56",
+        "configuration_id": "o2_default_default",
+        "caveat_id": "expected_fidelity_is_estimate"
+      },
+      "evidence_ref_ids": [
+        "evidence_e40257b1b678a2c1e1301a3c24eaf1892d468aa20c3f7828923cd12390d1e469"
+      ]
+    },
+    {
+      "claim_id": "claim_f7d8fcc685e39cd2aafc71754dea49122545a45377b131a01c00221de0be0a6b",
+      "claim_type": "live_compatibility",
+      "parameters": {
+        "device_id": "quantinuum_h2_56",
+        "caveat_id": "closed_candidate_set"
+      },
+      "evidence_ref_ids": []
+    }
+  ]
+}

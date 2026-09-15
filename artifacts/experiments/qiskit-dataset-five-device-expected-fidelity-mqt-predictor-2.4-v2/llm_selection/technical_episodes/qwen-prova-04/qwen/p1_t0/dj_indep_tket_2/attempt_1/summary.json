@@ -1,0 +1,40 @@
+{
+  "attempt": 1,
+  "input_tokens": 80612,
+  "response": {
+    "started_at": "2026-09-14T11:19:23.054103+00:00",
+    "ended_at": "2026-09-14T11:32:43.840452+00:00",
+    "elapsed_seconds": 800.7864102309995,
+    "ttft_content_seconds": null,
+    "ttft_any_seconds": null,
+    "content": "",
+    "reasoning": "",
+    "usage": null,
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 26176,
+      "prompt_ms": 790528.933,
+      "prompt_per_token_ms": 30.200524640892418,
+      "prompt_per_second": 33.112007552543304,
+      "predicted_n": 0,
+      "predicted_ms": 0.0,
+      "predicted_per_token_ms": 0.0,
+      "predicted_per_second": 0.0
+    },
+    "finish_reason": null,
+    "stream_done": false,
+    "curl_exit_code": 56,
+    "stream_parse_errors": [],
+    "server_errors": [],
+    "transport_retries": 0,
+    "server_final": null,
+    "transport_success": false
+  },
+  "llm_calls": 1,
+  "status": "transport_failure",
+  "issues": [],
+  "failure": {
+    "category": "transport_failure"
+  },
+  "resource_run_key": "2026-09-14T10:18:49.5525541Z"
+}

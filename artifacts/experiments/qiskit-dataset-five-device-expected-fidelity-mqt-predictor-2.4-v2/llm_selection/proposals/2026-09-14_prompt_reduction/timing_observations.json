@@ -1,0 +1,1708 @@
+{
+  "previous_dj": [
+    {
+      "tokens": 1536,
+      "progress_rounded": 0.02,
+      "elapsed_seconds": 3.29,
+      "average_tokens_per_second": 467.04
+    },
+    {
+      "tokens": 2048,
+      "progress_rounded": 0.03,
+      "elapsed_seconds": 4.54,
+      "average_tokens_per_second": 451.18
+    },
+    {
+      "tokens": 2560,
+      "progress_rounded": 0.03,
+      "elapsed_seconds": 5.82,
+      "average_tokens_per_second": 440.07
+    },
+    {
+      "tokens": 3072,
+      "progress_rounded": 0.04,
+      "elapsed_seconds": 7.13,
+      "average_tokens_per_second": 430.64
+    },
+    {
+      "tokens": 3584,
+      "progress_rounded": 0.04,
+      "elapsed_seconds": 8.49,
+      "average_tokens_per_second": 421.91
+    },
+    {
+      "tokens": 4096,
+      "progress_rounded": 0.05,
+      "elapsed_seconds": 9.88,
+      "average_tokens_per_second": 414.63
+    },
+    {
+      "tokens": 4608,
+      "progress_rounded": 0.06,
+      "elapsed_seconds": 11.29,
+      "average_tokens_per_second": 408.24
+    },
+    {
+      "tokens": 5120,
+      "progress_rounded": 0.06,
+      "elapsed_seconds": 12.73,
+      "average_tokens_per_second": 402.33
+    },
+    {
+      "tokens": 5632,
+      "progress_rounded": 0.07,
+      "elapsed_seconds": 14.19,
+      "average_tokens_per_second": 396.98
+    },
+    {
+      "tokens": 6144,
+      "progress_rounded": 0.08,
+      "elapsed_seconds": 15.68,
+      "average_tokens_per_second": 391.85
+    },
+    {
+      "tokens": 6656,
+      "progress_rounded": 0.08,
+      "elapsed_seconds": 17.2,
+      "average_tokens_per_second": 386.94
+    },
+    {
+      "tokens": 7168,
+      "progress_rounded": 0.09,
+      "elapsed_seconds": 18.75,
+      "average_tokens_per_second": 382.34
+    },
+    {
+      "tokens": 7680,
+      "progress_rounded": 0.1,
+      "elapsed_seconds": 20.3,
+      "average_tokens_per_second": 378.32
+    },
+    {
+      "tokens": 8192,
+      "progress_rounded": 0.1,
+      "elapsed_seconds": 21.89,
+      "average_tokens_per_second": 374.28
+    },
+    {
+      "tokens": 8704,
+      "progress_rounded": 0.11,
+      "elapsed_seconds": 23.5,
+      "average_tokens_per_second": 370.39
+    },
+    {
+      "tokens": 9216,
+      "progress_rounded": 0.11,
+      "elapsed_seconds": 25.14,
+      "average_tokens_per_second": 366.58
+    },
+    {
+      "tokens": 9728,
+      "progress_rounded": 0.12,
+      "elapsed_seconds": 26.81,
+      "average_tokens_per_second": 362.8
+    },
+    {
+      "tokens": 10240,
+      "progress_rounded": 0.13,
+      "elapsed_seconds": 28.52,
+      "average_tokens_per_second": 359.01
+    },
+    {
+      "tokens": 10752,
+      "progress_rounded": 0.13,
+      "elapsed_seconds": 30.28,
+      "average_tokens_per_second": 355.08
+    },
+    {
+      "tokens": 11264,
+      "progress_rounded": 0.14,
+      "elapsed_seconds": 32.09,
+      "average_tokens_per_second": 350.97
+    },
+    {
+      "tokens": 11776,
+      "progress_rounded": 0.15,
+      "elapsed_seconds": 33.97,
+      "average_tokens_per_second": 346.67
+    },
+    {
+      "tokens": 12288,
+      "progress_rounded": 0.15,
+      "elapsed_seconds": 35.93,
+      "average_tokens_per_second": 341.99
+    },
+    {
+      "tokens": 12800,
+      "progress_rounded": 0.16,
+      "elapsed_seconds": 38.01,
+      "average_tokens_per_second": 336.78
+    },
+    {
+      "tokens": 13312,
+      "progress_rounded": 0.17,
+      "elapsed_seconds": 40.16,
+      "average_tokens_per_second": 331.48
+    },
+    {
+      "tokens": 13824,
+      "progress_rounded": 0.17,
+      "elapsed_seconds": 42.44,
+      "average_tokens_per_second": 325.75
+    },
+    {
+      "tokens": 14336,
+      "progress_rounded": 0.18,
+      "elapsed_seconds": 44.78,
+      "average_tokens_per_second": 320.16
+    },
+    {
+      "tokens": 14848,
+      "progress_rounded": 0.18,
+      "elapsed_seconds": 47.25,
+      "average_tokens_per_second": 314.24
+    },
+    {
+      "tokens": 15360,
+      "progress_rounded": 0.19,
+      "elapsed_seconds": 49.87,
+      "average_tokens_per_second": 307.99
+    },
+    {
+      "tokens": 15872,
+      "progress_rounded": 0.2,
+      "elapsed_seconds": 52.65,
+      "average_tokens_per_second": 301.47
+    },
+    {
+      "tokens": 16384,
+      "progress_rounded": 0.2,
+      "elapsed_seconds": 55.49,
+      "average_tokens_per_second": 295.26
+    },
+    {
+      "tokens": 16896,
+      "progress_rounded": 0.21,
+      "elapsed_seconds": 58.51,
+      "average_tokens_per_second": 288.79
+    },
+    {
+      "tokens": 17408,
+      "progress_rounded": 0.22,
+      "elapsed_seconds": 61.7,
+      "average_tokens_per_second": 282.14
+    },
+    {
+      "tokens": 17920,
+      "progress_rounded": 0.22,
+      "elapsed_seconds": 65.06,
+      "average_tokens_per_second": 275.45
+    },
+    {
+      "tokens": 18432,
+      "progress_rounded": 0.23,
+      "elapsed_seconds": 68.61,
+      "average_tokens_per_second": 268.67
+    },
+    {
+      "tokens": 18944,
+      "progress_rounded": 0.24,
+      "elapsed_seconds": 72.3,
+      "average_tokens_per_second": 262.03
+    },
+    {
+      "tokens": 19456,
+      "progress_rounded": 0.24,
+      "elapsed_seconds": 76.13,
+      "average_tokens_per_second": 255.56
+    },
+    {
+      "tokens": 19968,
+      "progress_rounded": 0.25,
+      "elapsed_seconds": 80.15,
+      "average_tokens_per_second": 249.14
+    },
+    {
+      "tokens": 20480,
+      "progress_rounded": 0.25,
+      "elapsed_seconds": 84.3,
+      "average_tokens_per_second": 242.95
+    },
+    {
+      "tokens": 20992,
+      "progress_rounded": 0.26,
+      "elapsed_seconds": 88.52,
+      "average_tokens_per_second": 237.13
+    },
+    {
+      "tokens": 21504,
+      "progress_rounded": 0.27,
+      "elapsed_seconds": 92.86,
+      "average_tokens_per_second": 231.57
+    },
+    {
+      "tokens": 22016,
+      "progress_rounded": 0.27,
+      "elapsed_seconds": 97.38,
+      "average_tokens_per_second": 226.09
+    },
+    {
+      "tokens": 22528,
+      "progress_rounded": 0.28,
+      "elapsed_seconds": 102.07,
+      "average_tokens_per_second": 220.72
+    },
+    {
+      "tokens": 23040,
+      "progress_rounded": 0.29,
+      "elapsed_seconds": 106.84,
+      "average_tokens_per_second": 215.64
+    },
+    {
+      "tokens": 23552,
+      "progress_rounded": 0.29,
+      "elapsed_seconds": 111.76,
+      "average_tokens_per_second": 210.73
+    },
+    {
+      "tokens": 24064,
+      "progress_rounded": 0.3,
+      "elapsed_seconds": 116.75,
+      "average_tokens_per_second": 206.11
+    },
+    {
+      "tokens": 24576,
+      "progress_rounded": 0.3,
+      "elapsed_seconds": 121.86,
+      "average_tokens_per_second": 201.67
+    },
+    {
+      "tokens": 25088,
+      "progress_rounded": 0.31,
+      "elapsed_seconds": 127.14,
+      "average_tokens_per_second": 197.32
+    },
+    {
+      "tokens": 25600,
+      "progress_rounded": 0.32,
+      "elapsed_seconds": 132.65,
+      "average_tokens_per_second": 192.99
+    },
+    {
+      "tokens": 26112,
+      "progress_rounded": 0.32,
+      "elapsed_seconds": 138.21,
+      "average_tokens_per_second": 188.93
+    },
+    {
+      "tokens": 26624,
+      "progress_rounded": 0.33,
+      "elapsed_seconds": 143.86,
+      "average_tokens_per_second": 185.07
+    },
+    {
+      "tokens": 27136,
+      "progress_rounded": 0.34,
+      "elapsed_seconds": 149.63,
+      "average_tokens_per_second": 181.35
+    },
+    {
+      "tokens": 27648,
+      "progress_rounded": 0.34,
+      "elapsed_seconds": 155.66,
+      "average_tokens_per_second": 177.62
+    },
+    {
+      "tokens": 28160,
+      "progress_rounded": 0.35,
+      "elapsed_seconds": 161.87,
+      "average_tokens_per_second": 173.97
+    },
+    {
+      "tokens": 28672,
+      "progress_rounded": 0.36,
+      "elapsed_seconds": 168.26,
+      "average_tokens_per_second": 170.41
+    },
+    {
+      "tokens": 29184,
+      "progress_rounded": 0.36,
+      "elapsed_seconds": 174.71,
+      "average_tokens_per_second": 167.05
+    },
+    {
+      "tokens": 29696,
+      "progress_rounded": 0.37,
+      "elapsed_seconds": 181.33,
+      "average_tokens_per_second": 163.76
+    },
+    {
+      "tokens": 30208,
+      "progress_rounded": 0.37,
+      "elapsed_seconds": 188.03,
+      "average_tokens_per_second": 160.65
+    },
+    {
+      "tokens": 30720,
+      "progress_rounded": 0.38,
+      "elapsed_seconds": 194.93,
+      "average_tokens_per_second": 157.6
+    },
+    {
+      "tokens": 31232,
+      "progress_rounded": 0.39,
+      "elapsed_seconds": 201.86,
+      "average_tokens_per_second": 154.72
+    },
+    {
+      "tokens": 31744,
+      "progress_rounded": 0.39,
+      "elapsed_seconds": 208.86,
+      "average_tokens_per_second": 151.99
+    },
+    {
+      "tokens": 32256,
+      "progress_rounded": 0.4,
+      "elapsed_seconds": 216.03,
+      "average_tokens_per_second": 149.31
+    },
+    {
+      "tokens": 32768,
+      "progress_rounded": 0.41,
+      "elapsed_seconds": 223.35,
+      "average_tokens_per_second": 146.71
+    },
+    {
+      "tokens": 33280,
+      "progress_rounded": 0.41,
+      "elapsed_seconds": 230.73,
+      "average_tokens_per_second": 144.23
+    },
+    {
+      "tokens": 33792,
+      "progress_rounded": 0.42,
+      "elapsed_seconds": 238.18,
+      "average_tokens_per_second": 141.87
+    },
+    {
+      "tokens": 34304,
+      "progress_rounded": 0.43,
+      "elapsed_seconds": 245.73,
+      "average_tokens_per_second": 139.6
+    },
+    {
+      "tokens": 34816,
+      "progress_rounded": 0.43,
+      "elapsed_seconds": 253.44,
+      "average_tokens_per_second": 137.37
+    },
+    {
+      "tokens": 35328,
+      "progress_rounded": 0.44,
+      "elapsed_seconds": 261.28,
+      "average_tokens_per_second": 135.21
+    },
+    {
+      "tokens": 35840,
+      "progress_rounded": 0.44,
+      "elapsed_seconds": 269.19,
+      "average_tokens_per_second": 133.14
+    },
+    {
+      "tokens": 36352,
+      "progress_rounded": 0.45,
+      "elapsed_seconds": 277.29,
+      "average_tokens_per_second": 131.1
+    },
+    {
+      "tokens": 36864,
+      "progress_rounded": 0.46,
+      "elapsed_seconds": 285.46,
+      "average_tokens_per_second": 129.14
+    },
+    {
+      "tokens": 37376,
+      "progress_rounded": 0.46,
+      "elapsed_seconds": 293.88,
+      "average_tokens_per_second": 127.18
+    },
+    {
+      "tokens": 37888,
+      "progress_rounded": 0.47,
+      "elapsed_seconds": 302.43,
+      "average_tokens_per_second": 125.28
+    },
+    {
+      "tokens": 38400,
+      "progress_rounded": 0.48,
+      "elapsed_seconds": 311.21,
+      "average_tokens_per_second": 123.39
+    },
+    {
+      "tokens": 38912,
+      "progress_rounded": 0.48,
+      "elapsed_seconds": 320.23,
+      "average_tokens_per_second": 121.51
+    },
+    {
+      "tokens": 39424,
+      "progress_rounded": 0.49,
+      "elapsed_seconds": 329.35,
+      "average_tokens_per_second": 119.7
+    },
+    {
+      "tokens": 39936,
+      "progress_rounded": 0.5,
+      "elapsed_seconds": 338.63,
+      "average_tokens_per_second": 117.93
+    },
+    {
+      "tokens": 40448,
+      "progress_rounded": 0.5,
+      "elapsed_seconds": 348.01,
+      "average_tokens_per_second": 116.23
+    },
+    {
+      "tokens": 40960,
+      "progress_rounded": 0.51,
+      "elapsed_seconds": 357.51,
+      "average_tokens_per_second": 114.57
+    },
+    {
+      "tokens": 41472,
+      "progress_rounded": 0.51,
+      "elapsed_seconds": 367.09,
+      "average_tokens_per_second": 112.97
+    },
+    {
+      "tokens": 41984,
+      "progress_rounded": 0.52,
+      "elapsed_seconds": 376.78,
+      "average_tokens_per_second": 111.43
+    },
+    {
+      "tokens": 42496,
+      "progress_rounded": 0.53,
+      "elapsed_seconds": 386.54,
+      "average_tokens_per_second": 109.94
+    },
+    {
+      "tokens": 43008,
+      "progress_rounded": 0.53,
+      "elapsed_seconds": 396.44,
+      "average_tokens_per_second": 108.49
+    },
+    {
+      "tokens": 43520,
+      "progress_rounded": 0.54,
+      "elapsed_seconds": 406.42,
+      "average_tokens_per_second": 107.08
+    },
+    {
+      "tokens": 44032,
+      "progress_rounded": 0.55,
+      "elapsed_seconds": 416.47,
+      "average_tokens_per_second": 105.73
+    },
+    {
+      "tokens": 44544,
+      "progress_rounded": 0.55,
+      "elapsed_seconds": 426.64,
+      "average_tokens_per_second": 104.41
+    },
+    {
+      "tokens": 45056,
+      "progress_rounded": 0.56,
+      "elapsed_seconds": 436.95,
+      "average_tokens_per_second": 103.11
+    },
+    {
+      "tokens": 45568,
+      "progress_rounded": 0.57,
+      "elapsed_seconds": 447.34,
+      "average_tokens_per_second": 101.86
+    },
+    {
+      "tokens": 46080,
+      "progress_rounded": 0.57,
+      "elapsed_seconds": 457.86,
+      "average_tokens_per_second": 100.64
+    },
+    {
+      "tokens": 46592,
+      "progress_rounded": 0.58,
+      "elapsed_seconds": 468.46,
+      "average_tokens_per_second": 99.46
+    },
+    {
+      "tokens": 47104,
+      "progress_rounded": 0.58,
+      "elapsed_seconds": 479.11,
+      "average_tokens_per_second": 98.31
+    },
+    {
+      "tokens": 47616,
+      "progress_rounded": 0.59,
+      "elapsed_seconds": 489.9,
+      "average_tokens_per_second": 97.19
+    },
+    {
+      "tokens": 48128,
+      "progress_rounded": 0.6,
+      "elapsed_seconds": 500.87,
+      "average_tokens_per_second": 96.09
+    },
+    {
+      "tokens": 48640,
+      "progress_rounded": 0.6,
+      "elapsed_seconds": 511.94,
+      "average_tokens_per_second": 95.01
+    },
+    {
+      "tokens": 49152,
+      "progress_rounded": 0.61,
+      "elapsed_seconds": 523.12,
+      "average_tokens_per_second": 93.96
+    },
+    {
+      "tokens": 49664,
+      "progress_rounded": 0.62,
+      "elapsed_seconds": 534.32,
+      "average_tokens_per_second": 92.95
+    },
+    {
+      "tokens": 50176,
+      "progress_rounded": 0.62,
+      "elapsed_seconds": 545.7,
+      "average_tokens_per_second": 91.95
+    },
+    {
+      "tokens": 50688,
+      "progress_rounded": 0.63,
+      "elapsed_seconds": 557.18,
+      "average_tokens_per_second": 90.97
+    },
+    {
+      "tokens": 51200,
+      "progress_rounded": 0.64,
+      "elapsed_seconds": 568.74,
+      "average_tokens_per_second": 90.02
+    },
+    {
+      "tokens": 51712,
+      "progress_rounded": 0.64,
+      "elapsed_seconds": 580.38,
+      "average_tokens_per_second": 89.1
+    },
+    {
+      "tokens": 52224,
+      "progress_rounded": 0.65,
+      "elapsed_seconds": 592.17,
+      "average_tokens_per_second": 88.19
+    },
+    {
+      "tokens": 52736,
+      "progress_rounded": 0.65,
+      "elapsed_seconds": 604.04,
+      "average_tokens_per_second": 87.31
+    },
+    {
+      "tokens": 53248,
+      "progress_rounded": 0.66,
+      "elapsed_seconds": 615.94,
+      "average_tokens_per_second": 86.45
+    },
+    {
+      "tokens": 53760,
+      "progress_rounded": 0.67,
+      "elapsed_seconds": 627.88,
+      "average_tokens_per_second": 85.62
+    },
+    {
+      "tokens": 54272,
+      "progress_rounded": 0.67,
+      "elapsed_seconds": 639.85,
+      "average_tokens_per_second": 84.82
+    },
+    {
+      "tokens": 54784,
+      "progress_rounded": 0.68,
+      "elapsed_seconds": 651.92,
+      "average_tokens_per_second": 84.03
+    },
+    {
+      "tokens": 55296,
+      "progress_rounded": 0.69,
+      "elapsed_seconds": 664.08,
+      "average_tokens_per_second": 83.27
+    },
+    {
+      "tokens": 55808,
+      "progress_rounded": 0.69,
+      "elapsed_seconds": 676.4,
+      "average_tokens_per_second": 82.51
+    },
+    {
+      "tokens": 56320,
+      "progress_rounded": 0.7,
+      "elapsed_seconds": 688.8,
+      "average_tokens_per_second": 81.77
+    },
+    {
+      "tokens": 56832,
+      "progress_rounded": 0.71,
+      "elapsed_seconds": 701.31,
+      "average_tokens_per_second": 81.04
+    },
+    {
+      "tokens": 57344,
+      "progress_rounded": 0.71,
+      "elapsed_seconds": 713.93,
+      "average_tokens_per_second": 80.32
+    },
+    {
+      "tokens": 57856,
+      "progress_rounded": 0.72,
+      "elapsed_seconds": 726.62,
+      "average_tokens_per_second": 79.62
+    },
+    {
+      "tokens": 58368,
+      "progress_rounded": 0.72,
+      "elapsed_seconds": 739.38,
+      "average_tokens_per_second": 78.94
+    },
+    {
+      "tokens": 58880,
+      "progress_rounded": 0.73,
+      "elapsed_seconds": 752.09,
+      "average_tokens_per_second": 78.29
+    },
+    {
+      "tokens": 59392,
+      "progress_rounded": 0.74,
+      "elapsed_seconds": 764.93,
+      "average_tokens_per_second": 77.64
+    },
+    {
+      "tokens": 59904,
+      "progress_rounded": 0.74,
+      "elapsed_seconds": 777.76,
+      "average_tokens_per_second": 77.02
+    },
+    {
+      "tokens": 60416,
+      "progress_rounded": 0.75,
+      "elapsed_seconds": 790.62,
+      "average_tokens_per_second": 76.42
+    },
+    {
+      "tokens": 60928,
+      "progress_rounded": 0.76,
+      "elapsed_seconds": 803.52,
+      "average_tokens_per_second": 75.83
+    },
+    {
+      "tokens": 61440,
+      "progress_rounded": 0.76,
+      "elapsed_seconds": 816.62,
+      "average_tokens_per_second": 75.24
+    },
+    {
+      "tokens": 61952,
+      "progress_rounded": 0.77,
+      "elapsed_seconds": 829.72,
+      "average_tokens_per_second": 74.67
+    },
+    {
+      "tokens": 62464,
+      "progress_rounded": 0.77,
+      "elapsed_seconds": 842.85,
+      "average_tokens_per_second": 74.11
+    },
+    {
+      "tokens": 62976,
+      "progress_rounded": 0.78,
+      "elapsed_seconds": 856.15,
+      "average_tokens_per_second": 73.56
+    },
+    {
+      "tokens": 63488,
+      "progress_rounded": 0.79,
+      "elapsed_seconds": 869.51,
+      "average_tokens_per_second": 73.02
+    },
+    {
+      "tokens": 64000,
+      "progress_rounded": 0.79,
+      "elapsed_seconds": 883.0,
+      "average_tokens_per_second": 72.48
+    },
+    {
+      "tokens": 64512,
+      "progress_rounded": 0.8,
+      "elapsed_seconds": 896.43,
+      "average_tokens_per_second": 71.97
+    },
+    {
+      "tokens": 65024,
+      "progress_rounded": 0.81,
+      "elapsed_seconds": 910.06,
+      "average_tokens_per_second": 71.45
+    },
+    {
+      "tokens": 65536,
+      "progress_rounded": 0.81,
+      "elapsed_seconds": 923.86,
+      "average_tokens_per_second": 70.94
+    },
+    {
+      "tokens": 66048,
+      "progress_rounded": 0.82,
+      "elapsed_seconds": 937.63,
+      "average_tokens_per_second": 70.44
+    },
+    {
+      "tokens": 66560,
+      "progress_rounded": 0.83,
+      "elapsed_seconds": 951.61,
+      "average_tokens_per_second": 69.94
+    },
+    {
+      "tokens": 67072,
+      "progress_rounded": 0.83,
+      "elapsed_seconds": 965.63,
+      "average_tokens_per_second": 69.46
+    },
+    {
+      "tokens": 67584,
+      "progress_rounded": 0.84,
+      "elapsed_seconds": 979.7,
+      "average_tokens_per_second": 68.98
+    },
+    {
+      "tokens": 68096,
+      "progress_rounded": 0.84,
+      "elapsed_seconds": 993.86,
+      "average_tokens_per_second": 68.52
+    },
+    {
+      "tokens": 68608,
+      "progress_rounded": 0.85,
+      "elapsed_seconds": 1008.24,
+      "average_tokens_per_second": 68.05
+    },
+    {
+      "tokens": 69120,
+      "progress_rounded": 0.86,
+      "elapsed_seconds": 1022.7,
+      "average_tokens_per_second": 67.59
+    },
+    {
+      "tokens": 69632,
+      "progress_rounded": 0.86,
+      "elapsed_seconds": 1037.27,
+      "average_tokens_per_second": 67.13
+    },
+    {
+      "tokens": 70144,
+      "progress_rounded": 0.87,
+      "elapsed_seconds": 1051.88,
+      "average_tokens_per_second": 66.68
+    },
+    {
+      "tokens": 70656,
+      "progress_rounded": 0.88,
+      "elapsed_seconds": 1066.58,
+      "average_tokens_per_second": 66.25
+    },
+    {
+      "tokens": 71168,
+      "progress_rounded": 0.88,
+      "elapsed_seconds": 1081.49,
+      "average_tokens_per_second": 65.81
+    },
+    {
+      "tokens": 71680,
+      "progress_rounded": 0.89,
+      "elapsed_seconds": 1096.38,
+      "average_tokens_per_second": 65.38
+    },
+    {
+      "tokens": 72192,
+      "progress_rounded": 0.9,
+      "elapsed_seconds": 1111.53,
+      "average_tokens_per_second": 64.95
+    },
+    {
+      "tokens": 72704,
+      "progress_rounded": 0.9,
+      "elapsed_seconds": 1126.68,
+      "average_tokens_per_second": 64.53
+    },
+    {
+      "tokens": 73216,
+      "progress_rounded": 0.91,
+      "elapsed_seconds": 1141.94,
+      "average_tokens_per_second": 64.12
+    },
+    {
+      "tokens": 73728,
+      "progress_rounded": 0.91,
+      "elapsed_seconds": 1157.32,
+      "average_tokens_per_second": 63.71
+    },
+    {
+      "tokens": 74240,
+      "progress_rounded": 0.92,
+      "elapsed_seconds": 1172.73,
+      "average_tokens_per_second": 63.31
+    },
+    {
+      "tokens": 74752,
+      "progress_rounded": 0.93,
+      "elapsed_seconds": 1188.33,
+      "average_tokens_per_second": 62.9
+    },
+    {
+      "tokens": 75264,
+      "progress_rounded": 0.93,
+      "elapsed_seconds": 1204.07,
+      "average_tokens_per_second": 62.51
+    },
+    {
+      "tokens": 75776,
+      "progress_rounded": 0.94,
+      "elapsed_seconds": 1219.86,
+      "average_tokens_per_second": 62.12
+    },
+    {
+      "tokens": 76288,
+      "progress_rounded": 0.95,
+      "elapsed_seconds": 1235.76,
+      "average_tokens_per_second": 61.73
+    },
+    {
+      "tokens": 76800,
+      "progress_rounded": 0.95,
+      "elapsed_seconds": 1251.8,
+      "average_tokens_per_second": 61.35
+    },
+    {
+      "tokens": 77312,
+      "progress_rounded": 0.96,
+      "elapsed_seconds": 1267.92,
+      "average_tokens_per_second": 60.98
+    },
+    {
+      "tokens": 77824,
+      "progress_rounded": 0.97,
+      "elapsed_seconds": 1284.13,
+      "average_tokens_per_second": 60.6
+    },
+    {
+      "tokens": 78336,
+      "progress_rounded": 0.97,
+      "elapsed_seconds": 1300.42,
+      "average_tokens_per_second": 60.24
+    },
+    {
+      "tokens": 78848,
+      "progress_rounded": 0.98,
+      "elapsed_seconds": 1316.85,
+      "average_tokens_per_second": 59.88
+    },
+    {
+      "tokens": 79360,
+      "progress_rounded": 0.98,
+      "elapsed_seconds": 1333.4,
+      "average_tokens_per_second": 59.52
+    },
+    {
+      "tokens": 79872,
+      "progress_rounded": 0.99,
+      "elapsed_seconds": 1350.05,
+      "average_tokens_per_second": 59.16
+    },
+    {
+      "tokens": 80384,
+      "progress_rounded": 1.0,
+      "elapsed_seconds": 1366.88,
+      "average_tokens_per_second": 58.81
+    },
+    {
+      "tokens": 80480,
+      "progress_rounded": 1.0,
+      "elapsed_seconds": 1371.06,
+      "average_tokens_per_second": 58.7
+    },
+    {
+      "tokens": 80608,
+      "progress_rounded": 1.0,
+      "elapsed_seconds": 1374.46,
+      "average_tokens_per_second": 58.65
+    }
+  ],
+  "live_chat_dj": [
+    {
+      "tokens": 1536,
+      "progress_rounded": 0.02,
+      "elapsed_seconds": 3.53,
+      "average_tokens_per_second": 434.79
+    },
+    {
+      "tokens": 2048,
+      "progress_rounded": 0.03,
+      "elapsed_seconds": 4.84,
+      "average_tokens_per_second": 422.72
+    },
+    {
+      "tokens": 2560,
+      "progress_rounded": 0.04,
+      "elapsed_seconds": 6.19,
+      "average_tokens_per_second": 413.75
+    },
+    {
+      "tokens": 3072,
+      "progress_rounded": 0.04,
+      "elapsed_seconds": 7.56,
+      "average_tokens_per_second": 406.49
+    },
+    {
+      "tokens": 3584,
+      "progress_rounded": 0.05,
+      "elapsed_seconds": 8.96,
+      "average_tokens_per_second": 399.84
+    },
+    {
+      "tokens": 4096,
+      "progress_rounded": 0.05,
+      "elapsed_seconds": 10.41,
+      "average_tokens_per_second": 393.54
+    },
+    {
+      "tokens": 4608,
+      "progress_rounded": 0.06,
+      "elapsed_seconds": 11.87,
+      "average_tokens_per_second": 388.29
+    },
+    {
+      "tokens": 5120,
+      "progress_rounded": 0.07,
+      "elapsed_seconds": 13.36,
+      "average_tokens_per_second": 383.15
+    },
+    {
+      "tokens": 5632,
+      "progress_rounded": 0.07,
+      "elapsed_seconds": 14.88,
+      "average_tokens_per_second": 378.4
+    },
+    {
+      "tokens": 6144,
+      "progress_rounded": 0.08,
+      "elapsed_seconds": 16.44,
+      "average_tokens_per_second": 373.72
+    },
+    {
+      "tokens": 6656,
+      "progress_rounded": 0.09,
+      "elapsed_seconds": 18.01,
+      "average_tokens_per_second": 369.51
+    },
+    {
+      "tokens": 7168,
+      "progress_rounded": 0.09,
+      "elapsed_seconds": 19.62,
+      "average_tokens_per_second": 365.29
+    },
+    {
+      "tokens": 7680,
+      "progress_rounded": 0.1,
+      "elapsed_seconds": 21.28,
+      "average_tokens_per_second": 360.85
+    },
+    {
+      "tokens": 8192,
+      "progress_rounded": 0.11,
+      "elapsed_seconds": 23.0,
+      "average_tokens_per_second": 356.22
+    },
+    {
+      "tokens": 8704,
+      "progress_rounded": 0.11,
+      "elapsed_seconds": 24.74,
+      "average_tokens_per_second": 351.88
+    },
+    {
+      "tokens": 9216,
+      "progress_rounded": 0.12,
+      "elapsed_seconds": 26.53,
+      "average_tokens_per_second": 347.4
+    },
+    {
+      "tokens": 9728,
+      "progress_rounded": 0.12,
+      "elapsed_seconds": 28.34,
+      "average_tokens_per_second": 343.26
+    },
+    {
+      "tokens": 10240,
+      "progress_rounded": 0.13,
+      "elapsed_seconds": 30.24,
+      "average_tokens_per_second": 338.67
+    },
+    {
+      "tokens": 10752,
+      "progress_rounded": 0.14,
+      "elapsed_seconds": 32.21,
+      "average_tokens_per_second": 333.81
+    },
+    {
+      "tokens": 11264,
+      "progress_rounded": 0.14,
+      "elapsed_seconds": 34.21,
+      "average_tokens_per_second": 329.22
+    },
+    {
+      "tokens": 11776,
+      "progress_rounded": 0.15,
+      "elapsed_seconds": 36.28,
+      "average_tokens_per_second": 324.61
+    },
+    {
+      "tokens": 12288,
+      "progress_rounded": 0.16,
+      "elapsed_seconds": 38.47,
+      "average_tokens_per_second": 319.43
+    },
+    {
+      "tokens": 12800,
+      "progress_rounded": 0.16,
+      "elapsed_seconds": 40.73,
+      "average_tokens_per_second": 314.3
+    },
+    {
+      "tokens": 13312,
+      "progress_rounded": 0.17,
+      "elapsed_seconds": 43.11,
+      "average_tokens_per_second": 308.82
+    },
+    {
+      "tokens": 13824,
+      "progress_rounded": 0.17,
+      "elapsed_seconds": 45.57,
+      "average_tokens_per_second": 303.34
+    },
+    {
+      "tokens": 14336,
+      "progress_rounded": 0.18,
+      "elapsed_seconds": 48.14,
+      "average_tokens_per_second": 297.77
+    },
+    {
+      "tokens": 14848,
+      "progress_rounded": 0.19,
+      "elapsed_seconds": 50.85,
+      "average_tokens_per_second": 291.97
+    },
+    {
+      "tokens": 15360,
+      "progress_rounded": 0.19,
+      "elapsed_seconds": 53.65,
+      "average_tokens_per_second": 286.33
+    },
+    {
+      "tokens": 15872,
+      "progress_rounded": 0.2,
+      "elapsed_seconds": 56.54,
+      "average_tokens_per_second": 280.73
+    },
+    {
+      "tokens": 16384,
+      "progress_rounded": 0.21,
+      "elapsed_seconds": 59.66,
+      "average_tokens_per_second": 274.62
+    },
+    {
+      "tokens": 16896,
+      "progress_rounded": 0.21,
+      "elapsed_seconds": 62.99,
+      "average_tokens_per_second": 268.24
+    },
+    {
+      "tokens": 17408,
+      "progress_rounded": 0.22,
+      "elapsed_seconds": 66.39,
+      "average_tokens_per_second": 262.21
+    },
+    {
+      "tokens": 17920,
+      "progress_rounded": 0.23,
+      "elapsed_seconds": 69.91,
+      "average_tokens_per_second": 256.32
+    },
+    {
+      "tokens": 18432,
+      "progress_rounded": 0.23,
+      "elapsed_seconds": 73.57,
+      "average_tokens_per_second": 250.54
+    },
+    {
+      "tokens": 18944,
+      "progress_rounded": 0.24,
+      "elapsed_seconds": 77.36,
+      "average_tokens_per_second": 244.89
+    },
+    {
+      "tokens": 19456,
+      "progress_rounded": 0.24,
+      "elapsed_seconds": 81.31,
+      "average_tokens_per_second": 239.27
+    },
+    {
+      "tokens": 19968,
+      "progress_rounded": 0.25,
+      "elapsed_seconds": 85.43,
+      "average_tokens_per_second": 233.72
+    },
+    {
+      "tokens": 20480,
+      "progress_rounded": 0.26,
+      "elapsed_seconds": 89.73,
+      "average_tokens_per_second": 228.25
+    },
+    {
+      "tokens": 20992,
+      "progress_rounded": 0.26,
+      "elapsed_seconds": 94.14,
+      "average_tokens_per_second": 222.99
+    },
+    {
+      "tokens": 21504,
+      "progress_rounded": 0.27,
+      "elapsed_seconds": 98.71,
+      "average_tokens_per_second": 217.85
+    },
+    {
+      "tokens": 22016,
+      "progress_rounded": 0.28,
+      "elapsed_seconds": 103.35,
+      "average_tokens_per_second": 213.03
+    },
+    {
+      "tokens": 22528,
+      "progress_rounded": 0.28,
+      "elapsed_seconds": 108.13,
+      "average_tokens_per_second": 208.35
+    },
+    {
+      "tokens": 23040,
+      "progress_rounded": 0.29,
+      "elapsed_seconds": 113.02,
+      "average_tokens_per_second": 203.86
+    },
+    {
+      "tokens": 23552,
+      "progress_rounded": 0.29,
+      "elapsed_seconds": 118.03,
+      "average_tokens_per_second": 199.54
+    },
+    {
+      "tokens": 24064,
+      "progress_rounded": 0.3,
+      "elapsed_seconds": 123.25,
+      "average_tokens_per_second": 195.25
+    },
+    {
+      "tokens": 24576,
+      "progress_rounded": 0.31,
+      "elapsed_seconds": 128.72,
+      "average_tokens_per_second": 190.93
+    },
+    {
+      "tokens": 25088,
+      "progress_rounded": 0.31,
+      "elapsed_seconds": 134.3,
+      "average_tokens_per_second": 186.81
+    },
+    {
+      "tokens": 25600,
+      "progress_rounded": 0.32,
+      "elapsed_seconds": 139.89,
+      "average_tokens_per_second": 183.0
+    },
+    {
+      "tokens": 26112,
+      "progress_rounded": 0.33,
+      "elapsed_seconds": 145.61,
+      "average_tokens_per_second": 179.33
+    },
+    {
+      "tokens": 26624,
+      "progress_rounded": 0.33,
+      "elapsed_seconds": 151.4,
+      "average_tokens_per_second": 175.85
+    },
+    {
+      "tokens": 27136,
+      "progress_rounded": 0.34,
+      "elapsed_seconds": 157.29,
+      "average_tokens_per_second": 172.52
+    },
+    {
+      "tokens": 27648,
+      "progress_rounded": 0.35,
+      "elapsed_seconds": 163.41,
+      "average_tokens_per_second": 169.19
+    },
+    {
+      "tokens": 28160,
+      "progress_rounded": 0.35,
+      "elapsed_seconds": 169.83,
+      "average_tokens_per_second": 165.81
+    },
+    {
+      "tokens": 28672,
+      "progress_rounded": 0.36,
+      "elapsed_seconds": 176.31,
+      "average_tokens_per_second": 162.62
+    },
+    {
+      "tokens": 29184,
+      "progress_rounded": 0.36,
+      "elapsed_seconds": 182.86,
+      "average_tokens_per_second": 159.6
+    },
+    {
+      "tokens": 29696,
+      "progress_rounded": 0.37,
+      "elapsed_seconds": 189.56,
+      "average_tokens_per_second": 156.66
+    },
+    {
+      "tokens": 30208,
+      "progress_rounded": 0.38,
+      "elapsed_seconds": 196.35,
+      "average_tokens_per_second": 153.85
+    },
+    {
+      "tokens": 30720,
+      "progress_rounded": 0.38,
+      "elapsed_seconds": 203.28,
+      "average_tokens_per_second": 151.12
+    },
+    {
+      "tokens": 31232,
+      "progress_rounded": 0.39,
+      "elapsed_seconds": 210.19,
+      "average_tokens_per_second": 148.59
+    },
+    {
+      "tokens": 31744,
+      "progress_rounded": 0.4,
+      "elapsed_seconds": 217.34,
+      "average_tokens_per_second": 146.06
+    },
+    {
+      "tokens": 32256,
+      "progress_rounded": 0.4,
+      "elapsed_seconds": 224.55,
+      "average_tokens_per_second": 143.65
+    },
+    {
+      "tokens": 32768,
+      "progress_rounded": 0.41,
+      "elapsed_seconds": 231.9,
+      "average_tokens_per_second": 141.3
+    },
+    {
+      "tokens": 33280,
+      "progress_rounded": 0.42,
+      "elapsed_seconds": 239.45,
+      "average_tokens_per_second": 138.98
+    },
+    {
+      "tokens": 33792,
+      "progress_rounded": 0.42,
+      "elapsed_seconds": 247.19,
+      "average_tokens_per_second": 136.71
+    },
+    {
+      "tokens": 34304,
+      "progress_rounded": 0.43,
+      "elapsed_seconds": 254.92,
+      "average_tokens_per_second": 134.57
+    },
+    {
+      "tokens": 34816,
+      "progress_rounded": 0.43,
+      "elapsed_seconds": 262.65,
+      "average_tokens_per_second": 132.55
+    },
+    {
+      "tokens": 35328,
+      "progress_rounded": 0.44,
+      "elapsed_seconds": 270.58,
+      "average_tokens_per_second": 130.57
+    },
+    {
+      "tokens": 35840,
+      "progress_rounded": 0.45,
+      "elapsed_seconds": 278.63,
+      "average_tokens_per_second": 128.63
+    },
+    {
+      "tokens": 36352,
+      "progress_rounded": 0.45,
+      "elapsed_seconds": 286.81,
+      "average_tokens_per_second": 126.74
+    },
+    {
+      "tokens": 36864,
+      "progress_rounded": 0.46,
+      "elapsed_seconds": 295.21,
+      "average_tokens_per_second": 124.87
+    },
+    {
+      "tokens": 37376,
+      "progress_rounded": 0.47,
+      "elapsed_seconds": 303.6,
+      "average_tokens_per_second": 123.11
+    },
+    {
+      "tokens": 37888,
+      "progress_rounded": 0.47,
+      "elapsed_seconds": 312.21,
+      "average_tokens_per_second": 121.36
+    },
+    {
+      "tokens": 38400,
+      "progress_rounded": 0.48,
+      "elapsed_seconds": 320.92,
+      "average_tokens_per_second": 119.66
+    },
+    {
+      "tokens": 38912,
+      "progress_rounded": 0.48,
+      "elapsed_seconds": 329.83,
+      "average_tokens_per_second": 117.97
+    },
+    {
+      "tokens": 39424,
+      "progress_rounded": 0.49,
+      "elapsed_seconds": 339.08,
+      "average_tokens_per_second": 116.27
+    },
+    {
+      "tokens": 39936,
+      "progress_rounded": 0.5,
+      "elapsed_seconds": 348.23,
+      "average_tokens_per_second": 114.68
+    },
+    {
+      "tokens": 40448,
+      "progress_rounded": 0.5,
+      "elapsed_seconds": 357.76,
+      "average_tokens_per_second": 113.06
+    },
+    {
+      "tokens": 40960,
+      "progress_rounded": 0.51,
+      "elapsed_seconds": 367.27,
+      "average_tokens_per_second": 111.53
+    },
+    {
+      "tokens": 41472,
+      "progress_rounded": 0.52,
+      "elapsed_seconds": 376.98,
+      "average_tokens_per_second": 110.01
+    },
+    {
+      "tokens": 41984,
+      "progress_rounded": 0.52,
+      "elapsed_seconds": 386.68,
+      "average_tokens_per_second": 108.57
+    },
+    {
+      "tokens": 42496,
+      "progress_rounded": 0.53,
+      "elapsed_seconds": 396.59,
+      "average_tokens_per_second": 107.15
+    },
+    {
+      "tokens": 43008,
+      "progress_rounded": 0.54,
+      "elapsed_seconds": 406.54,
+      "average_tokens_per_second": 105.79
+    },
+    {
+      "tokens": 43520,
+      "progress_rounded": 0.54,
+      "elapsed_seconds": 416.48,
+      "average_tokens_per_second": 104.49
+    },
+    {
+      "tokens": 44032,
+      "progress_rounded": 0.55,
+      "elapsed_seconds": 426.51,
+      "average_tokens_per_second": 103.24
+    },
+    {
+      "tokens": 44544,
+      "progress_rounded": 0.55,
+      "elapsed_seconds": 436.7,
+      "average_tokens_per_second": 102.0
+    },
+    {
+      "tokens": 45056,
+      "progress_rounded": 0.56,
+      "elapsed_seconds": 447.04,
+      "average_tokens_per_second": 100.79
+    },
+    {
+      "tokens": 45568,
+      "progress_rounded": 0.57,
+      "elapsed_seconds": 457.48,
+      "average_tokens_per_second": 99.61
+    },
+    {
+      "tokens": 46080,
+      "progress_rounded": 0.57,
+      "elapsed_seconds": 468.02,
+      "average_tokens_per_second": 98.46
+    },
+    {
+      "tokens": 46592,
+      "progress_rounded": 0.58,
+      "elapsed_seconds": 478.63,
+      "average_tokens_per_second": 97.34
+    },
+    {
+      "tokens": 47104,
+      "progress_rounded": 0.59,
+      "elapsed_seconds": 489.46,
+      "average_tokens_per_second": 96.24
+    },
+    {
+      "tokens": 47616,
+      "progress_rounded": 0.59,
+      "elapsed_seconds": 500.43,
+      "average_tokens_per_second": 95.15
+    },
+    {
+      "tokens": 48128,
+      "progress_rounded": 0.6,
+      "elapsed_seconds": 511.45,
+      "average_tokens_per_second": 94.1
+    },
+    {
+      "tokens": 48640,
+      "progress_rounded": 0.6,
+      "elapsed_seconds": 522.66,
+      "average_tokens_per_second": 93.06
+    },
+    {
+      "tokens": 49152,
+      "progress_rounded": 0.61,
+      "elapsed_seconds": 534.0,
+      "average_tokens_per_second": 92.05
+    },
+    {
+      "tokens": 49664,
+      "progress_rounded": 0.62,
+      "elapsed_seconds": 545.48,
+      "average_tokens_per_second": 91.05
+    },
+    {
+      "tokens": 50176,
+      "progress_rounded": 0.62,
+      "elapsed_seconds": 557.09,
+      "average_tokens_per_second": 90.07
+    },
+    {
+      "tokens": 50688,
+      "progress_rounded": 0.63,
+      "elapsed_seconds": 568.67,
+      "average_tokens_per_second": 89.13
+    },
+    {
+      "tokens": 51200,
+      "progress_rounded": 0.64,
+      "elapsed_seconds": 580.36,
+      "average_tokens_per_second": 88.22
+    },
+    {
+      "tokens": 51712,
+      "progress_rounded": 0.64,
+      "elapsed_seconds": 592.43,
+      "average_tokens_per_second": 87.29
+    },
+    {
+      "tokens": 52224,
+      "progress_rounded": 0.65,
+      "elapsed_seconds": 604.57,
+      "average_tokens_per_second": 86.38
+    },
+    {
+      "tokens": 52736,
+      "progress_rounded": 0.66,
+      "elapsed_seconds": 616.52,
+      "average_tokens_per_second": 85.54
+    },
+    {
+      "tokens": 53248,
+      "progress_rounded": 0.66,
+      "elapsed_seconds": 628.7,
+      "average_tokens_per_second": 84.7
+    },
+    {
+      "tokens": 53760,
+      "progress_rounded": 0.67,
+      "elapsed_seconds": 640.87,
+      "average_tokens_per_second": 83.89
+    },
+    {
+      "tokens": 54272,
+      "progress_rounded": 0.67,
+      "elapsed_seconds": 652.98,
+      "average_tokens_per_second": 83.11
+    },
+    {
+      "tokens": 54784,
+      "progress_rounded": 0.68,
+      "elapsed_seconds": 665.33,
+      "average_tokens_per_second": 82.34
+    },
+    {
+      "tokens": 55296,
+      "progress_rounded": 0.69,
+      "elapsed_seconds": 677.88,
+      "average_tokens_per_second": 81.57
+    },
+    {
+      "tokens": 55808,
+      "progress_rounded": 0.69,
+      "elapsed_seconds": 690.5,
+      "average_tokens_per_second": 80.82
+    },
+    {
+      "tokens": 56320,
+      "progress_rounded": 0.7,
+      "elapsed_seconds": 703.29,
+      "average_tokens_per_second": 80.08
+    },
+    {
+      "tokens": 56832,
+      "progress_rounded": 0.71,
+      "elapsed_seconds": 716.16,
+      "average_tokens_per_second": 79.36
+    },
+    {
+      "tokens": 57344,
+      "progress_rounded": 0.71,
+      "elapsed_seconds": 729.19,
+      "average_tokens_per_second": 78.64
+    },
+    {
+      "tokens": 57856,
+      "progress_rounded": 0.72,
+      "elapsed_seconds": 742.5,
+      "average_tokens_per_second": 77.92
+    },
+    {
+      "tokens": 58368,
+      "progress_rounded": 0.73,
+      "elapsed_seconds": 755.97,
+      "average_tokens_per_second": 77.21
+    },
+    {
+      "tokens": 58880,
+      "progress_rounded": 0.73,
+      "elapsed_seconds": 769.17,
+      "average_tokens_per_second": 76.55
+    },
+    {
+      "tokens": 59392,
+      "progress_rounded": 0.74,
+      "elapsed_seconds": 782.67,
+      "average_tokens_per_second": 75.88
+    },
+    {
+      "tokens": 59904,
+      "progress_rounded": 0.74,
+      "elapsed_seconds": 796.23,
+      "average_tokens_per_second": 75.23
+    },
+    {
+      "tokens": 60416,
+      "progress_rounded": 0.75,
+      "elapsed_seconds": 809.79,
+      "average_tokens_per_second": 74.61
+    },
+    {
+      "tokens": 60928,
+      "progress_rounded": 0.76,
+      "elapsed_seconds": 823.45,
+      "average_tokens_per_second": 73.99
+    },
+    {
+      "tokens": 61440,
+      "progress_rounded": 0.76,
+      "elapsed_seconds": 837.3,
+      "average_tokens_per_second": 73.38
+    },
+    {
+      "tokens": 61952,
+      "progress_rounded": 0.77,
+      "elapsed_seconds": 851.17,
+      "average_tokens_per_second": 72.78
+    },
+    {
+      "tokens": 62464,
+      "progress_rounded": 0.78,
+      "elapsed_seconds": 864.91,
+      "average_tokens_per_second": 72.22
+    },
+    {
+      "tokens": 62976,
+      "progress_rounded": 0.78,
+      "elapsed_seconds": 878.68,
+      "average_tokens_per_second": 71.67
+    },
+    {
+      "tokens": 63488,
+      "progress_rounded": 0.79,
+      "elapsed_seconds": 892.49,
+      "average_tokens_per_second": 71.14
+    }
+  ],
+  "live_resource_snapshot": {
+    "thermal_paused_seconds": 0,
+    "pid": 7300,
+    "thermal_paused": false,
+    "gpu_dedicated_bytes": 7579705344,
+    "gpu_shared_bytes": 720523264,
+    "thermal_pause_count": 0,
+    "gpu_sensors": [
+      {
+        "adapter_index": 0,
+        "adapter_name": "AMD Radeon RX 6750 XT",
+        "return_code": 0,
+        "edge_c": 71,
+        "hotspot_c": 89,
+        "memory_c": null,
+        "fan_rpm": 1388,
+        "asic_power_w": 89,
+        "gpu_activity_percent": 99
+      }
+    ],
+    "working_set_bytes": 1031823360,
+    "private_bytes": 8866672640,
+    "cpu_seconds": 236.40625,
+    "peak_working_set_bytes": 1084616704,
+    "utc": "2026-09-14T18:43:06.2674862Z",
+    "system_available_bytes": 2734514176,
+    "gpu_counter_error": null
+  }
+}

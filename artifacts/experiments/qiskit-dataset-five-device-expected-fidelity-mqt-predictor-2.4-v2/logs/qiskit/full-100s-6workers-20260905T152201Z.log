@@ -1,0 +1,56 @@
+
+>>> /home/elio/Tesi-mqt-2.4-v2/.venv/bin/python /home/elio/Tesi-mqt-2.4-v2/scripts/07_prepare_qiskit_dataset.py --scope full --catalog /home/elio/Tesi-mqt-2.4-v2/configs/qiskit_dataset_configurations_v2.json --device ibm_falcon_27
+{
+  "full": {
+    "counts": {
+      "attempts_planned": 14760,
+      "by_family": {
+        "ae": 30,
+        "dj": 70,
+        "graphstate": 68,
+        "portfolioqaoa": 10,
+        "portfoliovqe": 18,
+        "pricingcall": 7,
+        "pricingput": 7,
+        "qaoa": 24,
+        "qft": 38,
+        "qftentangled": 36,
+        "qnn": 14,
+        "random": 16,
+        "realamprandom": 26,
+        "su2random": 22,
+        "twolocalrandom": 26,
+        "vqe": 28,
+        "wstate": 70
+      },
+      "by_generator": {
+        "qiskit": 261,
+        "tket": 249
+      },
+      "by_split": {
+        "train": 422,
+        "validation": 88
+      },
+      "circuits": 510,
+      "compatible_circuits": 410,
+      "duplicate_hash_groups": 26,
+      "incompatible_circuits": 100,
+      "source_corpus_circuits": 600,
+      "unique_source_hashes": 484
+    },
+    "manifest_id": "manifest_81bbd62027ade9e6e48719aa9d7f7cb85f0a1cf2c1470264d16a086f826acfa2"
+  }
+}
+
+>>> /home/elio/Tesi-mqt-2.4-v2/.venv/bin/python /home/elio/Tesi-mqt-2.4-v2/scripts/08_generate_qiskit_dataset.py --scope full --split train --catalog /home/elio/Tesi-mqt-2.4-v2/configs/qiskit_dataset_configurations_v2.json --device ibm_falcon_27 --workers 6 --timeout-seconds 100
+[full/ibm_falcon_27] cache_hit=0; da_eseguire=12204; workers=6
+[full/ibm_falcon_27] 1/12204 tentativi eseguiti (success=1)
+[full/ibm_falcon_27] 25/12204 tentativi eseguiti (success=25)
+[full/ibm_falcon_27] 50/12204 tentativi eseguiti (success=50)
+[full/ibm_falcon_27] 75/12204 tentativi eseguiti (success=75)
+[full/ibm_falcon_27] 100/12204 tentativi eseguiti (success=99, timeout=1)
+[full/ibm_falcon_27] 125/12204 tentativi eseguiti (success=124, timeout=1)
+
+Interruzione richiesta. Attendi il messaggio di salvataggio del checkpoint, poi rilancia lo stesso comando.
+/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 5 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

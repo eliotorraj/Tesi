@@ -1,0 +1,14 @@
+{
+  "pid": 2978796,
+  "process_group": 2978796,
+  "started_at": "2026-09-05T15:22:01.713878+00:00",
+  "command": [
+    "/home/elio/Tesi-mqt-2.4-v2/.venv/bin/python",
+    "/home/elio/Tesi-mqt-2.4-v2/scripts/16_run_pipeline_v2.py",
+    "qiskit-full"
+  ],
+  "cwd": "/home/elio/Tesi-mqt-2.4-v2",
+  "log": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/logs/qiskit/full-100s-6workers-20260905T152201Z.log",
+  "workers": 6,
+  "timeout_seconds": 100
+}

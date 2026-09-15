@@ -1,0 +1,38 @@
+{
+  "split": "train",
+  "circuit_id": "dj_indep_tket_2",
+  "source_sha256": "bc1833de09d70b83eed4ddd1a593a1e9ce2d7bf86baa534c1e3cbf6e6ab94c5d",
+  "original_prompt_sha256": "4019c21dc03593a4c3daa4af551f5f0f341f0aa00de44cf5e82f227c49b354f7",
+  "roundtrip_verified": true,
+  "rag_examples": 5,
+  "clarified_tokens": 81011,
+  "compact_tokens": 34306,
+  "clarified_characters": 160151,
+  "compact_characters": 86581,
+  "retrieval_reexecuted_and_verified": true,
+  "train_self_check": {
+    "applicable": true,
+    "zero_distance_record_ids": [
+      "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec"
+    ],
+    "exact_source_records": [
+      {
+        "record_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec",
+        "rank": 1,
+        "distance": 0.0,
+        "source_sha256": "bc1833de09d70b83eed4ddd1a593a1e9ce2d7bf86baa534c1e3cbf6e6ab94c5d",
+        "device_id": "ibm_falcon_127",
+        "config_id": "o2_default_default",
+        "tied_best_config_ids": [
+          "o2_default_default",
+          "o3_default_default"
+        ]
+      }
+    ],
+    "self_retrieved_at_zero": true,
+    "comparison": "Exact source SHA-256 and metric; zero feature distance alone is insufficient.",
+    "response_checked": false,
+    "response_valid": null
+  },
+  "token_reduction_percent": 57.65266445297552
+}

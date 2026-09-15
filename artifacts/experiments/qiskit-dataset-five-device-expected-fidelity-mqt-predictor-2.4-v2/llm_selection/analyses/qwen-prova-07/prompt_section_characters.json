@@ -1,0 +1,55 @@
+{
+  "unit": "compact JSON characters after reversible encoding; not tokens",
+  "circuits": {
+    "ae_indep_qiskit_60": {
+      "task": 99,
+      "live_request": 81456,
+      "retrieved_labeled_examples": 83145,
+      "allowed_evidence_registry": 26220,
+      "response_contract": 3185,
+      "configuration_catalog": 1547,
+      "previous_validation_errors": 2,
+      "rules": 1051
+    },
+    "dj_indep_tket_2": {
+      "task": 99,
+      "live_request": 15453,
+      "retrieved_labeled_examples": 105048,
+      "allowed_evidence_registry": 30365,
+      "response_contract": 3185,
+      "configuration_catalog": 1547,
+      "previous_validation_errors": 2,
+      "rules": 1051
+    },
+    "portfoliovqe_indep_qiskit_6": {
+      "task": 99,
+      "live_request": 17187,
+      "retrieved_labeled_examples": 109597,
+      "allowed_evidence_registry": 30387,
+      "response_contract": 3185,
+      "configuration_catalog": 1547,
+      "previous_validation_errors": 2,
+      "rules": 1051
+    },
+    "su2random_indep_qiskit_50": {
+      "task": 99,
+      "live_request": 87503,
+      "retrieved_labeled_examples": 101778,
+      "allowed_evidence_registry": 28755,
+      "response_contract": 3185,
+      "configuration_catalog": 1547,
+      "previous_validation_errors": 2,
+      "rules": 1051
+    },
+    "su2random_indep_tket_50": {
+      "task": 99,
+      "live_request": 90207,
+      "retrieved_labeled_examples": 99606,
+      "allowed_evidence_registry": 28353,
+      "response_contract": 3185,
+      "configuration_catalog": 1547,
+      "previous_validation_errors": 2,
+      "rules": 1051
+    }
+  }
+}

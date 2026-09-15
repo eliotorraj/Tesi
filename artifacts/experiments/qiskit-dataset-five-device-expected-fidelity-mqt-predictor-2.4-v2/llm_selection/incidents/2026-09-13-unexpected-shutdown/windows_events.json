@@ -1,0 +1,23 @@
+[
+  {
+    "message": "L’ultimo arresto imprevisto del sistema si è verificato in data 13:53:17 alle ‎13/‎09/‎2026.",
+    "provider": "EventLog",
+    "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='EventLog'/><EventID Qualifiers='32768'>6008</EventID><Version>0</Version><Level>2</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2026-09-13T11:54:38.5671792Z'/><EventRecordID>96892</EventRecordID><Correlation/><Execution ProcessID='2492' ThreadID='2600'/><Channel>System</Channel><Computer>DESKTOP-B6R0NTA</Computer><Security/></System><EventData><Data>13:53:17</Data><Data>‎13/‎09/‎2026</Data><Data></Data><Data></Data><Data>3199</Data><Data></Data><Data></Data><Binary>EA07090000000D000D00350011000701EA07090000000D000B003500110007013C0000003C000000000000000000000000000000000000000000000000000000</Binary></EventData></Event>",
+    "time": "2026-09-13T11:54:38.5671792Z",
+    "id": 6008
+  },
+  {
+    "message": "Il processo C:\\WINDOWS\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe (DESKTOP-B6R0NTA) ha iniziato il Spegni del computer DESKTOP-B6R0NTA per conto dell'utente DESKTOP-B6R0NTA\\User a causa del motivo seguente: Altro (non pianificato)\r\n Codice motivo: 0x0\r\n Tipo di arresto : Spegni\r\n Commento: ",
+    "provider": "User32",
+    "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='User32' Guid='{b0aa8734-56f7-41cc-b2f4-de228e98b946}' EventSourceName='User32'/><EventID Qualifiers='32768'>1074</EventID><Version>0</Version><Level>4</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x8080000000000000</Keywords><TimeCreated SystemTime='2026-09-12T18:54:21.2908232Z'/><EventRecordID>96712</EventRecordID><Correlation/><Execution ProcessID='1036' ThreadID='4168'/><Channel>System</Channel><Computer>DESKTOP-B6R0NTA</Computer><Security UserID='S-1-5-21-3790837308-3663946617-78446813-1001'/></System><EventData><Data Name='param1'>C:\\WINDOWS\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe (DESKTOP-B6R0NTA)</Data><Data Name='param2'>DESKTOP-B6R0NTA</Data><Data Name='param3'>Altro (non pianificato)</Data><Data Name='param4'>0x0</Data><Data Name='param5'>Spegni</Data><Data Name='param6'></Data><Data Name='param7'>DESKTOP-B6R0NTA\\User</Data></EventData></Event>",
+    "time": "2026-09-12T18:54:21.2908232Z",
+    "id": 1074
+  },
+  {
+    "message": "Il processo C:\\WINDOWS\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe (DESKTOP-B6R0NTA) ha iniziato il Riavvia del computer DESKTOP-B6R0NTA per conto dell'utente DESKTOP-B6R0NTA\\User a causa del motivo seguente: Altro (non pianificato)\r\n Codice motivo: 0x0\r\n Tipo di arresto : Riavvia\r\n Commento: ",
+    "provider": "User32",
+    "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='User32' Guid='{b0aa8734-56f7-41cc-b2f4-de228e98b946}' EventSourceName='User32'/><EventID Qualifiers='32768'>1074</EventID><Version>0</Version><Level>4</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x8080000000000000</Keywords><TimeCreated SystemTime='2026-09-12T18:48:10.2302052Z'/><EventRecordID>96545</EventRecordID><Correlation/><Execution ProcessID='860' ThreadID='1184'/><Channel>System</Channel><Computer>DESKTOP-B6R0NTA</Computer><Security UserID='S-1-5-21-3790837308-3663946617-78446813-1001'/></System><EventData><Data Name='param1'>C:\\WINDOWS\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe (DESKTOP-B6R0NTA)</Data><Data Name='param2'>DESKTOP-B6R0NTA</Data><Data Name='param3'>Altro (non pianificato)</Data><Data Name='param4'>0x0</Data><Data Name='param5'>Riavvia</Data><Data Name='param6'></Data><Data Name='param7'>DESKTOP-B6R0NTA\\User</Data></EventData></Event>",
+    "time": "2026-09-12T18:48:10.2302052Z",
+    "id": 1074
+  }
+]

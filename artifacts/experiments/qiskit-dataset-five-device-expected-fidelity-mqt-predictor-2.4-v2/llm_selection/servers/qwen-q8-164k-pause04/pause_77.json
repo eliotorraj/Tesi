@@ -1,0 +1,6 @@
+{
+    "output":  "Process 8736 suspended.\r\n\r\n",
+    "pid":  8736,
+    "action":  "suspend_owned_inference_process",
+    "at":  "2026-09-13T17:12:54.4469947Z"
+}

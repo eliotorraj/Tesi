@@ -1,0 +1,75 @@
+{
+  "at": "2026-09-15",
+  "prompt_checks_passed": 93,
+  "train_self_retrieval_passed": 5,
+  "self_example_ranks": {
+    "ae_indep_qiskit_60": 1,
+    "dj_indep_tket_2": 1,
+    "portfoliovqe_indep_qiskit_6": 2,
+    "su2random_indep_qiskit_50": 1,
+    "su2random_indep_tket_50": 1
+  },
+  "response_exports": [
+    {
+      "attempt": 1,
+      "export_sha256": "fde63109589f0131141f705db291548e579db4453be4c5a3112b36f9a36f6ba2",
+      "json_and_schema_valid": true,
+      "semantically_valid": false
+    },
+    {
+      "attempt": 2,
+      "export_sha256": "1c1a04fea5f0a0e792ade05ec61826182128045e631ca724f943d11f29a7efd9",
+      "json_and_schema_valid": true,
+      "semantically_valid": false
+    },
+    {
+      "attempt": 3,
+      "export_sha256": "5bf5b0fda9ffa53f17a63d3f8e02b9848ca6f393c92003ecff1955050a188e0e",
+      "json_and_schema_valid": true,
+      "semantically_valid": false
+    }
+  ],
+  "historical_files_unchanged": {
+    "count": 98,
+    "manifest_sha256": "c4688ac0c4dc692d544c2b233d696fdf175b58b168eba25fa0d294a3f927b86b"
+  },
+  "code_sha256": {
+    "llm_selection/__init__.py": "f428135966a373401492a335b11666453649ca665c4c39cb696a5df35c380402",
+    "llm_selection/acquire.py": "dc174ddff715b54c1d0a491b8cd87008e0c20d8656663575ce4fc7113727861f",
+    "llm_selection/chat.py": "c68d3de30b3bd008ae28b5fa5bc8e22713ba7d4821ee8b8cdec263c3e681794e",
+    "llm_selection/cli.py": "34df29235ac3636091514a2a83eac94d34b48c09635420c2ea06b24cdcb5747f",
+    "llm_selection/common.py": "57f314c5e60f105a4489cb608bf91a255b34e283ddd69b64a7d69d30135197f2",
+    "llm_selection/compact_prompt.py": "744d3f7be7bfdeb49c256d9b5d018a64a09721d100cf4a0dee78d147ed6cb986",
+    "llm_selection/complete_graph.py": "3fac1cafd172dfc542a6a900e7580e40f0510959a297a1a8ef869a3816d3771c",
+    "llm_selection/configuration.py": "91149daaaf73f0d5a7477c916f8d585b3453796dd759f646b3349ec9232d9ed0",
+    "llm_selection/controller.py": "c4573f464f3fc9993449307a55fbd69130b21e12270d9a1554881da8bff7787a",
+    "llm_selection/evaluate.py": "f482e20dc83c70203842bbe928c00cfcd096ce6f5961dcb86c9a4034839be726",
+    "llm_selection/finalize.py": "f51fe73f1cdbc6a5dea1436c8643da3fb01b3f9032219d73516fb59a17a45466",
+    "llm_selection/gateway.py": "8e91ecb65d1a1687a8696a675c0397f85e4d5da1b45b0904279e13b6519018cf",
+    "llm_selection/hardware.py": "d938b6874eb12e63dcb12da126e9a380117bee76a622631f2824177ac0d1bfdb",
+    "llm_selection/inspect_tokenization.py": "6e45fc895817bb24a681cfe949d289a427a33e2b908214f1c00fa9d7d8822f2e",
+    "llm_selection/output_contract.py": "c13ba8d85eb35727f774194284111280626094c933dd2aaddb8b4159fcf3d4cd",
+    "llm_selection/plots.py": "71ac4be84f0c8501aa2b44cea516e2fbf69016e48c9f6dadb49be943fb445a7b",
+    "llm_selection/prepare.py": "6229e233c9e6418360058b5921fc9f9d94b39eb62756ba6426df63b6a4dfbc73",
+    "llm_selection/probe_wire.py": "cecfc5657dea4641175d10fb8175f2319a6612088337ccb0d6c5450e30c7a791",
+    "llm_selection/prompt_audit.py": "944f37f8146ab3ebd1bab9f6135fbb50bc56d4f6bd62859b5688782ef29be0dc",
+    "llm_selection/prompt_report.py": "12b8be454f3aa20cebaf0d0925d8936eb6514fe24e41be5de874f6424fd5f775",
+    "llm_selection/provenance.py": "048476d59736877e965ed759c09a7336f51e0e61a89e22e6e123f36ee71df1b1",
+    "llm_selection/recovery.py": "928bd7a6d4326cb8e0f06a233bd80dc88cb04b4931e4dfdfb47417468b4126bb",
+    "llm_selection/render_pdf.py": "82c68e741a13b77ce427a03b389a5d620c3f2d427e774211dff144a020e35377",
+    "llm_selection/report.py": "194b3b7b5ac3a3145a7df7898506a5f279c683fb1c1160c23217f6e2a2440e0f",
+    "llm_selection/run.py": "3a6361c090ad1214d71faf182859aa0c3624a1ad1fdfd8eb18b9596c5f9ed530",
+    "llm_selection/runtime_check.py": "6500a57b2047ce5c70737d6ac8e580b61b58a151696fac0c261691b045f7c2c1",
+    "llm_selection/server_state.py": "f464e6983ff437df56e19a5fba4147723e01be16fdd4c483ca3a7c2405e1dedf",
+    "llm_selection/setup_report.py": "e6b96c5ef6399c00c3e50d583dee070252158aee904a9fb69f46cf74dbcb3f03",
+    "llm_selection/smoke_transport.py": "58af18987bb60f8103faec3774220a638d26391d8b44c38a72c91d1eec7cce12",
+    "llm_selection/storage.py": "cb0d4de0857d480d08f94c0d24308e8922f95ba7169d0cc2d4472b821d663042",
+    "llm_selection/study.py": "bbc62d373104f1a5f00a169db4a32e3a092ec6590a1c1e3f7126b657d84f9c16",
+    "llm_selection/technical.py": "94ab9fb651c014bdba51ef60ef82c74ccfcda7615c4204c245ba374c2f025b19",
+    "llm_selection/token_counts.py": "7a71b699f56b5bc245f69a67a199b6e8bd736cf45c6e54877803c4114543f416",
+    "llm_selection/tokenization.py": "c82bd09ac082ce2f0e81eef95e2c728bf5e78a03140795c7a6f556d989555c2a",
+    "llm_selection/train_check.py": "dc0b7732e63ce95f11c8fd88e2c0bdead8816e767a291707c1a28514dbe409ee",
+    "llm_selection/weights.py": "d7422af44451c3e51d93a6705a8c7c09d35aba2c1693316da5be0eaede879146",
+    "llm_selection/wire.py": "9c4f0ef09d7efdc0360eaf7c6774701a5469d3f3f6955eaedec1a6e82badf3ca"
+  }
+}

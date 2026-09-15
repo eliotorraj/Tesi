@@ -1,0 +1,26 @@
+{
+  "files": {
+    "checks.json": "16ff1ed7928a906d2423b457cceb73e0deaf79dfc5e1b3106c51e488d97c4358",
+    "compact_2.json": "45cd435d8d5f96dfa1c40c84b474b498671629bb20c7a500fd0be5645df0175a",
+    "compact_2.txt": "56e239a55b7bf8cf913534a7758183526d3549287df36a02ba185ac52fbc7b89",
+    "compact_2_aliases.json": "b40c82e12cd42cebb2e01bf6fab8c883616e059aa28a5f00c68ed5e8dcdd0225",
+    "compact_2_aliases.txt": "86ea4afcd472637f725f278e84674d78e965a4b00122dfe7587a431a19ee1850",
+    "compact_2_aliases_map.json": "4a7405831498328aae0fbccf5fb2e9ae8df661187050d36de3b8560e8dd1e87c",
+    "compact_5.json": "e4c89fd04425d667fa67d4d89495f41043df8b27f3692b674a0bfcae88ca0ab5",
+    "compact_5.txt": "37ae98dd76dc9099253a13c92b01e18898567add47c1b431f34541e6586a5ce2",
+    "compact_5_aliases.json": "5ce05ab8c2f5f0ff192573a1e36b29f4c61e6e4299a4849650a938bbb01139b1",
+    "compact_5_aliases.txt": "e234051e908f01e19e5f8f22429387ed1a1cac7b78ac7e397ddaa4df759d3512",
+    "compact_5_aliases_map.json": "15cfc4c8bad4c6b4bc5fbfc51e53f03c79544f745b38e858a22e9d67c7f50ca7",
+    "counts.json": "4e543042a97439f946f5af78fd57b6b32f3cc3003dd6e3dfc2205a91eaa73a86",
+    "metadata.json": "cf37d7748074c2e72f85907fe5d41eaf35e71cbf861d36dce5ac76a1e6a0d675",
+    "original_2.json": "53ee209e0b26833a6969a439faddb00b8ff35fe9e3ade6746ec82526a7f11595",
+    "original_2.txt": "332618ae03ea8328197caf4a6105636207a82e2ef8185a4be6d1bc5e9924c8cd",
+    "original_5.json": "1f36ae7259012a0e2a95fd1d2b579d63edad3841e402613fe0d598f1f85dc3a4",
+    "original_5.txt": "b1095c07177b7be3b248224fc0d162f9f9a5880a014cd29c6e094217c3d93fe2",
+    "probe.py": "2911dccb559bd13a141ba3fc7b18c2f1bd2ce06365bc70e68a947774869cddd8",
+    "proposta.md": "c952251de0c8dbf5291faf849d0c9b786893f190cc9331e68d0a52fd0565daa3",
+    "section_counts.json": "203a9f1c0edc0f6353f03b39aeee2502281cac48380c815629600feae25dfb68",
+    "timing_observations.json": "18b1b340d487740b7685efc0a22104ff094a796530e5c3b40e580473e7052ec1"
+  },
+  "checks": "Six draft hashes verified; 98 original run files unchanged; no hardware changes and no generation requested."
+}

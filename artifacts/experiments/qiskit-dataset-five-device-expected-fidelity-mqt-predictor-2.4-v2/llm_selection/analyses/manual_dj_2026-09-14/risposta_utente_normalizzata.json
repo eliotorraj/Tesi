@@ -1,0 +1,82 @@
+{
+  "schema_version": "2.0.0",
+  "request_id": "9eb636fc-ab4a-5fa2-bbd6-768002d5f585",
+  "catalog_snapshot_id": "hardware_catalog_d1c339c8243cc208ebbf34fa22724ea19bcbe9af0c49b43fc98794e3cfe66dac",
+  "selected_device": "ibm_falcon_127",
+  "figure_of_merit": "expected_fidelity",
+  "compiler": "qiskit",
+  "qiskit_plan": {
+    "optimization_level": 2,
+    "seed_transpiler": 0,
+    "layout_method": null,
+    "routing_method": null
+  },
+  "evidence_refs": [
+    {
+      "reference_id": "claim_01f62c82c62e074dc9edae58c8ebb2383c30b9c08f08dc2400c9d55eb18c913f",
+      "record_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec",
+      "source_type": "historical_result",
+      "source_id": "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+    },
+    {
+      "reference_id": "claim_1caa3c09da607ca8770b586fb1404fdd6cc5b4ecdcd6fc3d9542bc48c32f0bb9",
+      "record_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec",
+      "source_type": "historical_result",
+      "source_id": "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+    },
+    {
+      "reference_id": "claim_live_compat_127",
+      "record_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec",
+      "source_type": "historical_result",
+      "source_id": "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+    },
+    {
+      "reference_id": "claim_scientific_caveat_1",
+      "record_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec",
+      "source_type": "historical_result",
+      "source_id": "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_01f62c82c62e074dc9edae58c8ebb2383c30b9c08f08dc2400c9d55eb18c913f",
+      "claim_type": "historical_device_support",
+      "parameters": {
+        "device_id": "ibm_falcon_127"
+      },
+      "evidence_ref_ids": [
+        "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+      ]
+    },
+    {
+      "claim_id": "claim_1caa3c09da607ca8770b586fb1404fdd6cc5b4ecdcd6fc3d9542bc48c32f0bb9",
+      "claim_type": "historical_configuration_support",
+      "parameters": {
+        "configuration_id": "o2_default_default"
+      },
+      "evidence_ref_ids": [
+        "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+      ]
+    },
+    {
+      "claim_id": "claim_live_compat_127",
+      "claim_type": "live_compatibility",
+      "parameters": {
+        "device_id": "ibm_falcon_127"
+      },
+      "evidence_ref_ids": [
+        "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+      ]
+    },
+    {
+      "claim_id": "claim_scientific_caveat_1",
+      "claim_type": "scientific_caveat",
+      "parameters": {
+        "caveat_id": "expected_fidelity_is_estimate"
+      },
+      "evidence_ref_ids": [
+        "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "created_at": "2026-09-14T20:08:45.941484+00:00",
+  "kind": "technical_manual_chat_offline_analysis",
+  "split": "train",
+  "circuit_id": "dj_indep_tket_2",
+  "server_label": "qwen-chat-20260914-182526",
+  "server_task_id": 93,
+  "model_inference_launched_by_analysis": false,
+  "scores_read_for_new_decision": false,
+  "context_reconstruction_seconds": 6.237166276005155,
+  "original_prompt_sha256": "4019c21dc03593a4c3daa4af551f5f0f341f0aa00de44cf5e82f227c49b354f7",
+  "original_source_sha256": "bc1833de09d70b83eed4ddd1a593a1e9ce2d7bf86baa534c1e3cbf6e6ab94c5d",
+  "response_origin": "Trascrizione del messaggio utente; escape Markdown prima degli underscore rimossi; nessuna correzione semantica.",
+  "reasoning_origin": "/mnt/c/Users/User/.codex/attachments/f4b3083e-f14d-4381-82b2-ed68a7ab5137/pasted-text.txt",
+  "source_sha256": {
+    "/mnt/c/Users/User/.codex/attachments/f4b3083e-f14d-4381-82b2-ed68a7ab5137/pasted-text.txt": "75fc7715de464e4f9956f0867d2fa425b3a15bd48e747ac7ec7cc695879b4004",
+    "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/prompts/train/dj_indep_tket_2.json": "3bb8f16f21d0d75616293317df551c82748d570183e9a8487c42599b00746f41",
+    "/home/elio/Tesi-mqt-2.4-v2/schemas/llm_recommendation.schema.json": "085886928f443f92d479fc43da8b6797a1e186268697f22aed8e4e40db3f0269",
+    "/home/elio/Tesi-mqt-2.4-v2/prototype/quantum_assistant/adapters/validation.py": "78ced31320e0eaec1d3ceac639faf82a40dd314c570a08544af3f72d8ead0d94",
+    "/home/elio/Tesi-mqt-2.4-v2/prototype/quantum_assistant/adapters/context.py": "89d38cb3c1f609d0795c93a810bbacca87d677e199755763adea0e294c5aadb6"
+  },
+  "comparison_limits": [
+    "Parametri della chat non ricostruibili completamente dal solo log.",
+    "Ragionamento presente nella chat; prova automatica p1_t0 chiedeva enable_thinking=false.",
+    "Associazione chat/risposta dal prompt indicato dall'utente e dagli identificativi corrispondenti."
+  ]
+}

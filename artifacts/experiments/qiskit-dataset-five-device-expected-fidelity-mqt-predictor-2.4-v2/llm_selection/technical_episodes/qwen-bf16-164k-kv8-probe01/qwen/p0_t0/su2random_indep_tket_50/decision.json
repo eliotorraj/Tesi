@@ -1,0 +1,21 @@
+{
+  "status": "failure",
+  "selected_device_id": null,
+  "selected_config_id": null,
+  "failure": {
+    "category": "interrupted_attempt"
+  },
+  "circuit_id": "su2random_indep_tket_50",
+  "source_sha256": "498db87f252e642885b25f0a804d340d70e3c3b27afa29ca545884b633682140",
+  "split": "train",
+  "configuration_id": "p0_t0",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-13T12:03:00.199170+00:00",
+  "this_invocation_seconds": 0.003581457999985105,
+  "measured_call_seconds": 0,
+  "attempts_sha256": "5e3b5401a2cc7bf12f158d1cec24bc042c52512f7eb283144989ef0863d791de",
+  "input_prompt_sha256": "9e479c7555f467faf2e62769cfc52f5e9b08479d262e73f0add274818ef4a875"
+}

@@ -1,0 +1,14 @@
+{
+  "exact_prompt_and_response_exports_verified": true,
+  "original_files_unchanged": 98,
+  "independent_schema_validation": "two complete responses conform; one truncated; two no content",
+  "chat_file_check": "passed",
+  "chat_lifecycle_simulations": [
+    "normal_exit",
+    "keyboard_interrupt",
+    "existing_server_refused"
+  ],
+  "actual_model_started": false,
+  "new_inferences": 0,
+  "helper_sha256": "c68d3de30b3bd008ae28b5fa5bc8e22713ba7d4821ee8b8cdec263c3e681794e"
+}

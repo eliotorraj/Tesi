@@ -1,0 +1,1 @@
+{"elapsed_seconds": 0.4236497619999682, "line": "{\"error\":{\"code\":400,\"message\":\"Failed to initialize samplers: Unexpected empty grammar stack after accepting piece: <think> (248068)\",\"type\":\"invalid_request_error\"}}"}

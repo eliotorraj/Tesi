@@ -1,0 +1,79 @@
+=== Ambiente Python ===
+Python:      3.12.13
+Eseguibile:  /home/elio/Tesi-mqt-2.4-v2/.venv/bin/python
+Sistema:     Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43
+
+=== Versioni fissate da MQT Predictor 2.4.0 ===
+mqt.predictor            2.4.0              OK
+mqt.bench                2.2.3              OK
+qiskit                   2.5.0              OK
+qiskit-aer               0.17.2             OK
+qiskit-ibm-runtime       0.47.0             OK
+qiskit-qasm3-import      0.6.0              OK
+pytket                   2.18.1             OK
+pytket-qiskit            0.77.0             OK
+bqskit                   1.2.1              OK
+numpy                    2.5.1              OK
+scikit-learn             1.9.0              OK
+sb3-contrib              2.9.0              OK
+stable-baselines3        2.9.0              OK
+gymnasium                1.3.0              OK
+torch                    2.13.0             OK
+joblib                   1.5.3              OK
+tensorboard              2.21.0             OK
+
+=== Protocollo sperimentale congelato ===
+Protocollo:       qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2
+Schema Target:    v2
+Figure of merit: expected_fidelity
+ibm_falcon_27            qubit=27  fingerprint=OK
+  protocollo 2.4-v2:       b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104
+  ambiente corrente:       b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104
+  legacy registrato:       f30536987677ef5017fe3a89b8b4ee0a3e7252a1a226cc3db95fd9b2e822d991
+  corrente schema legacy:  26635440926845b45d938185c4d45022c84d3bc48fe7e82fd35f1b0b9ae31218
+ibm_heron_133            qubit=133 fingerprint=OK
+  protocollo 2.4-v2:       2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3
+  ambiente corrente:       2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3
+  legacy registrato:       804f28754ad200e42a328ba910639c9d6fd3233dff35035e7f3cb85a2fc5168a
+  corrente schema legacy:  4694e431568f7db80a416f72268a7e9b6088b13609e88e59ce429705a8749ffe
+ibm_falcon_127           qubit=127 fingerprint=OK
+  protocollo 2.4-v2:       5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd
+  ambiente corrente:       5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd
+  legacy registrato:       225e5f6fd85af0b37a1dd7c6306dd046a8c7ca585f135dda6e6418dd16f76b48
+  corrente schema legacy:  d857b68374bb2b9fdf1096ed31efd38c409107cbaf6474baac70a34b741907a1
+ibm_heron_156            qubit=156 fingerprint=OK
+  protocollo 2.4-v2:       207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003
+  ambiente corrente:       207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003
+  legacy registrato:       a30f41e65c03fb900a4b8852261a8407c56c389560f4031ecb43099c1bec5089
+  corrente schema legacy:  9bc83e5a4e185e9b4f0c0b144e9ca868a6b6c3217b1da53538e771fe3675f3b2
+quantinuum_h2_56         qubit=56  fingerprint=OK
+  protocollo 2.4-v2:       ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee
+  ambiente corrente:       ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee
+  legacy registrato:       8c5576ac2f280a98f797dceb53186f97500e901d9784cc328187e156cbbe9b8f
+  corrente schema legacy:  8c5576ac2f280a98f797dceb53186f97500e901d9784cc328187e156cbbe9b8f
+
+MIGRAZIONE TARGET ATTESA: 4/5 Target MQT Bench 2.2.3 differiscono nei dati nativi dalle impronte MQT Bench 2.0.0 del branch qiskit_dataset, dopo avere normalizzato schema e control-flow. 1 Target differisce soltanto per rappresentazione/schema. Poiché cambia anche la versione Qiskit, rigenera comunque per tutti i device Qiskit default/random e gli score oracle nell'ambiente 2.4.0 prima del confronto finale.
+
+=== Artefatti richiesti da qcompile ===
+model_expected_fidelity_ibm_falcon_27.zip    NON PRONTO
+  - canonico: file mancante
+  - runtime: file mancante
+model_expected_fidelity_ibm_heron_133.zip    NON PRONTO
+  - canonico: file mancante
+  - runtime: file mancante
+model_expected_fidelity_ibm_falcon_127.zip   NON PRONTO
+  - canonico: file mancante
+  - runtime: file mancante
+model_expected_fidelity_ibm_heron_156.zip    NON PRONTO
+  - canonico: file mancante
+  - runtime: file mancante
+model_expected_fidelity_quantinuum_h2_56.zip NON PRONTO
+  - canonico: file mancante
+  - runtime: file mancante
+trained_clf_expected_fidelity.joblib         NON PRONTO
+  - canonico: file mancante
+  - runtime: file mancante
+
+I pacchetti possono essere installati correttamente anche prima del training. Per rendere obbligatori gli artefatti usa --require-models.
+
+=== ESITO: installazione 2.4.0 conforme (ambiente pronto, modelli da completare) ===

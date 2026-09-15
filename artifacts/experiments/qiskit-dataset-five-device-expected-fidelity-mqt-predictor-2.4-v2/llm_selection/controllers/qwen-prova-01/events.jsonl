@@ -1,0 +1,4 @@
+{"at": "2026-09-14T09:34:21.827839+00:00", "event": "weight_hash_check_started", "model": "qwen"}
+{"at": "2026-09-14T09:36:17.523573+00:00", "event": "server_ready", "model": "qwen", "startup_wall_seconds": 69.5460421790001, "run_directory": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/servers/qwen-prova-01-qwen"}
+{"at": "2026-09-14T09:36:17.541006+00:00", "event": "runner_started", "model": "qwen", "command": ["/home/elio/Tesi-mqt-2.4-v2/.venv/bin/python", "-m", "llm_selection.run", "--model", "qwen", "--server-run", "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/servers/qwen-prova-01-qwen", "--label", "qwen-prova-01", "--technical", "--config", "p1_t0", "--technical-timeout", "3600"]}
+{"at": "2026-09-14T09:36:37.547681+00:00", "event": "runner_ended", "model": "qwen", "exit_code": 1}

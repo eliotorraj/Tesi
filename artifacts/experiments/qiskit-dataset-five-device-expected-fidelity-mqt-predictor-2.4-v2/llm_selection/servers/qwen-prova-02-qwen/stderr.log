@@ -1,0 +1,12 @@
+0.01.002.924 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.01.013.424 W srv  llama_server: -----------------
+0.01.013.612 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.01.013.621 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.01.013.622 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.01.013.622 W srv  llama_server: -----------------
+0.01.023.341 I srv    load_model: loading model 'D:\Tesi-mqt\llm-selection\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\models\qwen\Q8_0.gguf'
+0.31.454.306 I cmn          init: llama threadpool init, n_threads = 6
+0.31.599.869 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 147456, kv_unified = 'false'
+0.31.602.582 W srv          init: --cache-idle-slots requires --cache-ram, disabling
+0.31.625.986 I srv  llama_server: model loaded
+0.31.626.000 I srv  llama_server: listening on http://127.0.0.1:8089

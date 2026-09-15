@@ -1,0 +1,1 @@
+{"prompt":"<|im_start|>user\nReturn exactly {\"ok\":true} as JSON.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"}

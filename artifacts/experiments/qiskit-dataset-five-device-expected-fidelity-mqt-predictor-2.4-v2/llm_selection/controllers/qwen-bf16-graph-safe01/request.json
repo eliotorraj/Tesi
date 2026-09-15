@@ -1,0 +1,15 @@
+{
+  "technical": true,
+  "model": "qwen",
+  "label": "qwen-bf16-graph-safe01",
+  "precision": "BF16",
+  "context": 147456,
+  "cache_type": "q8_0",
+  "gpu_layers": "all",
+  "batch": 64,
+  "micro_batch": 16,
+  "circuit": [
+    "dj_indep_tket_2"
+  ],
+  "technical_timeout": 7200
+}

@@ -1,0 +1,178 @@
+{
+  "record_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec",
+  "rank": 1,
+  "distance": 0.0,
+  "selected_device_id": "ibm_falcon_127",
+  "source_claims": [
+    {
+      "claim_id": "claim_01f62c82c62e074dc9edae58c8ebb2383c30b9c08f08dc2400c9d55eb18c913f",
+      "claim_type": "selected_device",
+      "evidence_ids": [
+        "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4",
+        "evidence_be5d9e3afd0c106acd8b3897d2f3b0e0352911b7dee97dcd3dbba7cc4d77f65b",
+        "evidence_86b7a39458c556ca7b3f5de520ae0aa6e7609bfb3db875d421fd75815c38eea1",
+        "evidence_fd6d3cacf6dd71f513b5637fd054922b71f621c635925c0ae29173c8ea537cfc",
+        "evidence_bf070002208f4ef886a8c91a52c325d291e779ec89bc6ef8b732d372ad5a57c8"
+      ],
+      "caveat_ids": [
+        "expected_fidelity_is_estimate",
+        "ranking_is_not_causal",
+        "closed_candidate_set"
+      ]
+    },
+    {
+      "claim_id": "claim_1caa3c09da607ca8770b586fb1404fdd6cc5b4ecdcd6fc3d9542bc48c32f0bb9",
+      "claim_type": "ranked_configuration",
+      "evidence_ids": [
+        "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4"
+      ],
+      "caveat_ids": [
+        "expected_fidelity_is_estimate",
+        "ranking_is_not_causal"
+      ]
+    },
+    {
+      "claim_id": "claim_68143f1599c1e7440e8aa37a5acee1a964e730e29c261f1708a7894d10d8526b",
+      "claim_type": "ranked_configuration",
+      "evidence_ids": [
+        "evidence_0ca785ba86920058b90f5b0320853e09d36938cb4f660fe29963823ee75673f2"
+      ],
+      "caveat_ids": [
+        "expected_fidelity_is_estimate",
+        "ranking_is_not_causal"
+      ]
+    },
+    {
+      "claim_id": "claim_206170530b12b6cf542627c2f78e15e48f69880e414d3116d869e3edab3092c5",
+      "claim_type": "ranked_configuration",
+      "evidence_ids": [
+        "evidence_30c2437c86377c7072bf41095e0a70a8a513e9edbbd5c8330ac200c132f18454"
+      ],
+      "caveat_ids": [
+        "expected_fidelity_is_estimate",
+        "ranking_is_not_causal"
+      ]
+    }
+  ],
+  "top_configurations": [
+    {
+      "rank": 1,
+      "device_id": "ibm_falcon_127",
+      "configuration_id": "o2_default_default",
+      "claim_id": "claim_1caa3c09da607ca8770b586fb1404fdd6cc5b4ecdcd6fc3d9542bc48c32f0bb9",
+      "evidence_id": "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4",
+      "optimization_level": 2,
+      "layout_method": null,
+      "routing_method": null,
+      "summary_id": "summary_ad6fd697b8f7b0d1221530344f6168cf60767988f17c614d0e07965f4f8f1aa1",
+      "median_score": 0.9994380656
+    },
+    {
+      "rank": 2,
+      "device_id": "ibm_falcon_127",
+      "configuration_id": "o3_default_default",
+      "claim_id": "claim_68143f1599c1e7440e8aa37a5acee1a964e730e29c261f1708a7894d10d8526b",
+      "evidence_id": "evidence_0ca785ba86920058b90f5b0320853e09d36938cb4f660fe29963823ee75673f2",
+      "optimization_level": 3,
+      "layout_method": null,
+      "routing_method": null,
+      "summary_id": "summary_90b335f6f3c0bde528383428ed18220c0eb29f4e8148e09b13838ff9cdb9b9ec",
+      "median_score": 0.9994380656
+    },
+    {
+      "rank": 3,
+      "device_id": "ibm_falcon_127",
+      "configuration_id": "o2_dense_sabre",
+      "claim_id": "claim_206170530b12b6cf542627c2f78e15e48f69880e414d3116d869e3edab3092c5",
+      "evidence_id": "evidence_30c2437c86377c7072bf41095e0a70a8a513e9edbbd5c8330ac200c132f18454",
+      "optimization_level": 2,
+      "layout_method": "dense",
+      "routing_method": "sabre",
+      "summary_id": "summary_f6567b543392342366c7ef9eb4beb34f8b5289f5fd7886971d0a527cc9752670",
+      "median_score": 0.9986690964
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "evidence_8e32b0ef9d8dcca9f830b0cbd9cfd4b51e35d80a56eedc0c845ef0c887c602b4",
+      "device_id": "ibm_falcon_127",
+      "configuration_id": "o2_default_default",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.9994380656,
+      "summary_id": "summary_ad6fd697b8f7b0d1221530344f6168cf60767988f17c614d0e07965f4f8f1aa1",
+      "sample_count": 3
+    },
+    {
+      "evidence_id": "evidence_be5d9e3afd0c106acd8b3897d2f3b0e0352911b7dee97dcd3dbba7cc4d77f65b",
+      "device_id": "ibm_heron_133",
+      "configuration_id": "o3_default_default",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.999435863,
+      "summary_id": "summary_0fbe351a4009dc16074bc4dc6527d02fb4066422e6dede3b5e48a64b8dab22bf",
+      "sample_count": 3
+    },
+    {
+      "evidence_id": "evidence_86b7a39458c556ca7b3f5de520ae0aa6e7609bfb3db875d421fd75815c38eea1",
+      "device_id": "ibm_heron_156",
+      "configuration_id": "o3_default_default",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.9993557374,
+      "summary_id": "summary_1bdc494dd44afc2edacbc37aea63b7bb1c45747686ad36fa35e2f95ddd0ce609",
+      "sample_count": 3
+    },
+    {
+      "evidence_id": "evidence_fd6d3cacf6dd71f513b5637fd054922b71f621c635925c0ae29173c8ea537cfc",
+      "device_id": "ibm_falcon_27",
+      "configuration_id": "o3_default_default",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.9985789665,
+      "summary_id": "summary_47265a14c203ca69fa8ac5dc953d8dc28dceb6d4ec374f004c0b516ab2cb5126",
+      "sample_count": 3
+    },
+    {
+      "evidence_id": "evidence_bf070002208f4ef886a8c91a52c325d291e779ec89bc6ef8b732d372ad5a57c8",
+      "device_id": "quantinuum_h2_56",
+      "configuration_id": "o3_default_default",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.9968228031,
+      "summary_id": "summary_6c4875fddce1ec8cd2e2b5807c269f6e236653f3606549d1a178d25ff773a6e7",
+      "sample_count": 3
+    },
+    {
+      "evidence_id": "evidence_0ca785ba86920058b90f5b0320853e09d36938cb4f660fe29963823ee75673f2",
+      "device_id": "ibm_falcon_127",
+      "configuration_id": "o3_default_default",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.9994380656,
+      "summary_id": "summary_90b335f6f3c0bde528383428ed18220c0eb29f4e8148e09b13838ff9cdb9b9ec",
+      "sample_count": 3
+    },
+    {
+      "evidence_id": "evidence_30c2437c86377c7072bf41095e0a70a8a513e9edbbd5c8330ac200c132f18454",
+      "device_id": "ibm_falcon_127",
+      "configuration_id": "o2_dense_sabre",
+      "metric": "median_expected_fidelity_across_seeds",
+      "value": 0.9986690964,
+      "summary_id": "summary_f6567b543392342366c7ef9eb4beb34f8b5289f5fd7886971d0a527cc9752670",
+      "sample_count": 3
+    }
+  ],
+  "caveats": [
+    {
+      "caveat_id": "expected_fidelity_is_estimate",
+      "text": "Expected fidelity è una stima offline calcolata dal Target sintetico MQT Bench, non una misura ottenuta su hardware reale."
+    },
+    {
+      "caveat_id": "ranking_is_not_causal",
+      "text": "Il ranking descrive risultati osservati con catalogo, versioni e seed fissati; non dimostra che una feature del circuito abbia causato la scelta."
+    },
+    {
+      "caveat_id": "closed_candidate_set",
+      "text": "L'etichetta vale soltanto tra device compatibili e configurazioni effettivamente valutati in questo protocollo."
+    },
+    {
+      "caveat_id": "constraints_not_applied",
+      "text": "Gli esempi offline non applicano vincoli utente; al retrieval i vincoli devono filtrare candidati e configurazioni senza riscrivere la ground truth."
+    }
+  ]
+}

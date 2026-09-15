@@ -1,0 +1,31 @@
+{
+  "commands": {
+    "prepare_repeat": 0,
+    "verify_index": 0,
+    "pretest_audit": 1,
+    "install_check": 0,
+    "query_qdrant": 0,
+    "query_reference": 0
+  },
+  "repeat_preserves_manifests": true,
+  "query_matches_reference": true,
+  "test_sealed": true,
+  "gates": {
+    "catalog": true,
+    "frozen_targets": true,
+    "method_configuration": false,
+    "mqt_models": false,
+    "qcompile_canary": false,
+    "qiskit_validation_matrix": true,
+    "rag_qdrant_collection": true,
+    "rag_train_only": true,
+    "rag_validation_pipeline": true,
+    "software_versions": true,
+    "source_manifest": true,
+    "test_method_plan": true,
+    "training_partition": true,
+    "validation_evaluation": false,
+    "validation_method_plan": true,
+    "validation_partition": true
+  }
+}

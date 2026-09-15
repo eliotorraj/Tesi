@@ -1,0 +1,24 @@
+{
+  "collection": "circuit49_manhattan_v1",
+  "dashboard_url": "http://127.0.0.1:6333/dashboard/",
+  "dimension": 49,
+  "distance": "Manhattan",
+  "original_index_files": {
+    "manifest.json": "97afb411c4cd529d69bcaa4285023486145882f4ad1e1396c8e4ac6f72bad57b",
+    "qdrant/collection/circuit49_manhattan_v1/storage.sqlite": "ac55842b830bd4f4e1acc522d2ffc55659511b941e9212286d169d625e4faf33",
+    "qdrant/meta.json": "0b183c6622cbebee10e68c8bffa527b596619b3057e47947f4cad2b6fa4ef27d",
+    "transform.json": "f7bbf8467e55e0d5a4e48cbac0db59489368834829fc740fe4dfe0417f2a624b"
+  },
+  "original_index_unchanged": true,
+  "payload_json_max_rounding": 1.1102230246251565e-16,
+  "payload_json_rounded_values": 782,
+  "payload_json_rounding_tolerance_ulps": 2,
+  "points": 396,
+  "purpose": "dataset_inspection",
+  "retrieval_backend_changed": false,
+  "server_version": "1.19.1",
+  "source_manifest_sha256": "238f4da9c9803b9e813afed0d4a476f18fb2fffdd566713a10c7528319cde181",
+  "split": "train",
+  "status": "verified",
+  "vectors_equal_float32": true
+}

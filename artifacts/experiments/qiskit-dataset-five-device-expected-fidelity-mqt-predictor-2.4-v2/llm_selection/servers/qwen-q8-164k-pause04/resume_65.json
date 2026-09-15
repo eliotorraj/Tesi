@@ -1,0 +1,7 @@
+{
+    "output":  "Process 8736 resumed.\r\n\r\n",
+    "pid":  8736,
+    "total_pause_seconds":  181.29310660000002,
+    "action":  "resume_owned_inference_process",
+    "at":  "2026-09-13T17:11:48.1332751Z"
+}

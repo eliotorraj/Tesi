@@ -1,0 +1,7 @@
+{
+  "date": "2026-09-15",
+  "check": "All identical train examples are rank 1",
+  "result": "failed",
+  "implication": "Self retrieval at distance zero remains true for all five, but rank 1 must not be assumed in case of tied feature distance.",
+  "action": "Check actual rank in report and correct documentation; preserve original RAG ordering."
+}

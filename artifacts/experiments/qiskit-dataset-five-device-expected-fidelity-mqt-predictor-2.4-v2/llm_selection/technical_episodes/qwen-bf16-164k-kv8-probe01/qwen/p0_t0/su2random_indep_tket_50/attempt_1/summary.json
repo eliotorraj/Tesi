@@ -1,0 +1,11 @@
+{
+  "attempt": 1,
+  "status": "interrupted",
+  "issues": [],
+  "llm_calls": 1,
+  "call_outcome_known": false,
+  "failure": {
+    "category": "interrupted_attempt"
+  },
+  "recovered_at": "2026-09-13T12:03:00.196271+00:00"
+}

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/elio/Tesi-mqt-2.4-v2/llm_selection/controller.py", line 119, in <module>
+    if __name__=="__main__": main()
+                             ^^^^^^
+  File "/home/elio/Tesi-mqt-2.4-v2/llm_selection/controller.py", line 104, in main
+    if result.returncode: raise RuntimeError("Runner stopped; remaining cases must not be relabeled as model failures")
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Runner stopped; remaining cases must not be relabeled as model failures

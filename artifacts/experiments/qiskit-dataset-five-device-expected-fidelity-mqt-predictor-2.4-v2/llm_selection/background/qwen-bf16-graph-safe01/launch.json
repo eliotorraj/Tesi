@@ -1,0 +1,33 @@
+﻿{
+    "phase":  "technical_train_only",
+    "pid":  16532,
+    "arguments":  [
+                      "-d",
+                      "Ubuntu",
+                      "--cd",
+                      "/home/elio/Tesi-mqt-2.4-v2",
+                      "--",
+                      ".venv/bin/python",
+                      "-m",
+                      "llm_selection.controller",
+                      "--technical",
+                      "--model",
+                      "qwen",
+                      "--label",
+                      "qwen-bf16-graph-safe01",
+                      "--precision",
+                      "BF16",
+                      "--context",
+                      147456,
+                      "--cache-type",
+                      "q8_0",
+                      "--gpu-layers",
+                      "all",
+                      "--circuit",
+                      "dj_indep_tket_2",
+                      "--technical-timeout",
+                      7200
+                  ],
+    "directory":  "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\artifacts\\experiments\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\llm_selection\\background\\qwen-bf16-graph-safe01",
+    "at":  "2026-09-13T21:27:15.3124637Z"
+}

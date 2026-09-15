@@ -1,0 +1,59 @@
+{
+  "schema_version": "2.0.0",
+  "request_id": "88a4b929-5d74-576f-8737-6a38216c9abc",
+  "catalog_snapshot_id": "hardware_catalog_d1c339c8243cc208ebbf34fa22724ea19bcbe9af0c49b43fc98794e3cfe66dac",
+  "selected_device": "ibm_heron_156",
+  "figure_of_merit": "expected_fidelity",
+  "compiler": "qiskit",
+  "qiskit_plan": {
+    "optimization_level": 3,
+    "seed_transpiler": 0,
+    "layout_method": null,
+    "routing_method": null
+  },
+  "evidence_refs": [
+    {
+      "reference_id": "claim_077ff19051d67c993adca5af8acdd13d8c3f06b5888dd351258d816f4d027dc2",
+      "record_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1",
+      "source_type": "historical_result",
+      "source_id": "claim_077ff19051d67c993adca5af8acdd13d8c3f06b5888dd351258d816f4d027dc2",
+      "source_claim_id": "claim_077ff19051d67c993adca5af8acdd13d8c3f06b5888dd351258d816f4d027dc2"
+    },
+    {
+      "reference_id": "claim_42a4d9b19e3ee4a3b82eb1301dc74fe3af54357921bffeb3c75780b51d46307f",
+      "record_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1",
+      "source_type": "historical_result",
+      "source_id": "claim_42a4d9b19e3ee4a3b82eb1301dc74fe3af54357921bffeb3c75780b51d46307f",
+      "source_claim_id": "claim_42a4d9b19e3ee4a3b82eb1301dc74fe3af54357921bffeb3c75780b51d46307f"
+    },
+    {
+      "reference_id": "claim_60b4eb57d7a64fd4d838b55c566658ddb4a1c2c87f90835989d6fe2080ac703d",
+      "record_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1",
+      "source_type": "historical_result",
+      "source_id": "claim_60b4eb57d7a64fd4d838b55c566658ddb4a1c2c87f90835989d6fe2080ac703d",
+      "source_claim_id": "claim_60b4eb57d7a64fd4d838b55c566658ddb4a1c2c87f90835989d6fe2080ac703d"
+    },
+    {
+      "reference_id": "claim_402348a2399a740b5217fe08cfaf4fe6dd99cd42e35cc0eac9a2990b8bbb7f3f",
+      "record_id": "rag_321407bc5c9c4b68a5793c4779b119747957586a7a32afba6d50549287ad966d",
+      "source_type": "historical_result",
+      "source_id": "claim_402348a2399a740b5217fe08cfaf4fe6dd99cd42e35cc0eac9a2990b8bbb7f3f",
+      "source_claim_id": "claim_402348a2399a740b5217fe08cfaf4fe6dd99cd42e35cc0eac9a2990b8bbb7f3f"
+    },
+    {
+      "reference_id": "claim_7b56aa80846fa1c8685cdffe5f3062bc24568ffcb2a1e99685486b26807386d7",
+      "record_id": "rag_321407bc5c9c4b68a5793c4779b119747957586a7a32afba6d50549287ad966d",
+      "source_type": "historical_result",
+      "source_id": "claim_7b56aa80846fa1c8685cdffe5f3062bc24568ffcb2a1e99685486b26807386d7",
+      "source_claim_id": "claim_7b56aa80846fa1c8685cdffe5f3062bc24568ffcb2a1e99685486b26807386d7"
+    },
+    {
+      "reference_id": "claim_9e9bf909f69a91c3553969c7fda8c1b97a808ce27a9c87f27986782bb6d04e32",
+      "record_id": "rag_90de9505f4efdf58265844d9072ecd5ae450427c6f97580630acc94d33808dbe",
+      "source_type": "historical_result",
+      "source_id": "claim_9e9bf909f69a91c3553969c7fda8c1b97a808ce27a9c87f27986782bb6d04e32",
+      "source_claim_id": "claim_9e9bf909f69a91c3553969c7fda8c1b97a808ce27a9c87f27986782bb6d04e32"
+    },
+    {
+      "reference_id": "claim_281f58f9878c5d3473fa56d501a4d51f5c2aa2599c73e7619375c193e0cbebfc",
+      "record_id": "rag_03c9a0eeef0d80b2bb011a1c1dcb070483ca41b660a164bf1

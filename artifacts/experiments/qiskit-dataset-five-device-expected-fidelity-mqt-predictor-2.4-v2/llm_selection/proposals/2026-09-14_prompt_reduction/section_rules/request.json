@@ -1,0 +1,5 @@
+{
+  "content": "[\"Return exactly one JSON object matching the response schema, without Markdown or surrounding text.\",\"Never select unavailable hardware.\",\"Use only a configuration allowed by the selected hardware.\",\"Do not invent hardware, scores, pass traces, or measurements.\",\"Historical labels and evidence are examples, not live ground truth.\",\"Return only structured claims and evidence_refs; do not write explanations, evidence text, warnings, scores, or measurements.\",\"Every historical claim must cite only record, source claim, and evidence ids from allowed_evidence_registry.\",\"When historical records are available, support both the selected device and the exact Qiskit configuration with historical claims, and always include live_compatibility.\",\"When no historical records are available, use historical_evidence_unavailable, no evidence_refs, and always include live_compatibility.\",\"Scientific caveats are resolved and rendered by the application from validated source links.\",\"The final circuit will be produced only by the deterministic compiler.\"]",
+  "add_special": false,
+  "parse_special": true
+}

@@ -1,0 +1,16 @@
+PROPOSTA DA VALUTARE. Non applicata al generatore di prompt.
+Queste istruzioni chiariscono regole già applicate dal validatore.
+
+1. claim_id identifica una nuova affermazione nella risposta. Deve essere univoco; può essere nuovo e breve, senza dover copiare l'ID di un claim storico.
+2. reference_id identifica un nuovo riferimento nella risposta. Deve essere univoco. claims[].evidence_ref_ids deve contenere questi reference_id, non source_id.
+3. Per source_type=historical_result, ciascun riferimento deve contenere record_id, source_claim_id e source_id presi dallo stesso record. source_claim_id identifica un source_claim; source_id identifica una sua evidenza.
+4. Un claim storico deve citare tutte e sole le evidence_ids del source_claim scelto. Creare un riferimento separato per ogni evidenza. Non duplicare la stessa tupla (record_id, source_type, source_id, source_claim_id).
+5. Ogni riferimento deve essere usato esattamente una volta. Due claim possono usare la stessa evidenza storica attraverso riferimenti distinti soltanto se cambia la tupla sopra.
+6. historical_device_support richiede parameters={device_id: dispositivo scelto}. Usare un source_claim di tipo selected_device che sostenga quel dispositivo.
+7. historical_configuration_support richiede parameters={device_id: dispositivo scelto, configuration_id: configurazione scelta}. Usare il corrispondente source_claim di tipo ranked_configuration e la sua evidenza.
+8. live_compatibility richiede parameters={device_id: dispositivo scelto} ed evidence_ref_ids=[]. La compatibilità della richiesta corrente è verificata dall'applicazione. Non significa disponibilità online dell'hardware.
+9. Con storia disponibile includere esattamente un historical_device_support, un historical_configuration_support e un live_compatibility. Senza storia: solo un live_compatibility e un historical_evidence_unavailable, senza riferimenti.
+10. scientific_caveat è facoltativo: l'applicazione rende già le avvertenze dei claim storici validati. Se lo includi, usa parameters={caveat_id: ID esistente} e un riferimento source_type=scientific_caveat, source_id=caveat_id, senza source_claim_id. L'avvertenza deve appartenere al record e a un claim storico effettivamente citato.
+
+Questa bozza richiede ancora una prova sul modello; non è una dimostrazione di miglioramento.
+Per una versione del prompt con alias, i nomi brevi devono essere risolti tramite la mappa salvata prima della validazione.

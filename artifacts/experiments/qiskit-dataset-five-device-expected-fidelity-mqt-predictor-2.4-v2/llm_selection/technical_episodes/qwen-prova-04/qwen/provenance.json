@@ -1,0 +1,509 @@
+{
+  "at": "2026-09-14T10:19:04.265805+00:00",
+  "code_hashes": {
+    "llm_selection/AmdSensors.cs": "eceebdf6449e8c0c7be164448863023edd495a06e01c831932918547027d2127",
+    "llm_selection/__init__.py": "f428135966a373401492a335b11666453649ca665c4c39cb696a5df35c380402",
+    "llm_selection/acquire.py": "dc174ddff715b54c1d0a491b8cd87008e0c20d8656663575ce4fc7113727861f",
+    "llm_selection/cli.py": "34df29235ac3636091514a2a83eac94d34b48c09635420c2ea06b24cdcb5747f",
+    "llm_selection/common.py": "5f97a2086c9b87089e2329eb64ad37fa88651cab7774fb0580f0c30fff8a6a26",
+    "llm_selection/complete_graph.py": "3fac1cafd172dfc542a6a900e7580e40f0510959a297a1a8ef869a3816d3771c",
+    "llm_selection/configuration.py": "b054aea45d05f6f9e82cb2e96b6bed8724bf225ae54d9aa050a082e4bb75356c",
+    "llm_selection/controller.py": "6a4a66f4db65a710e7276ffaf80f1e9885e83c3a29e510064e1ed5152babccdc",
+    "llm_selection/evaluate.py": "f482e20dc83c70203842bbe928c00cfcd096ce6f5961dcb86c9a4034839be726",
+    "llm_selection/finalize.py": "f51fe73f1cdbc6a5dea1436c8643da3fb01b3f9032219d73516fb59a17a45466",
+    "llm_selection/gateway.py": "8730dfa7279286ceb72df2452dadf15e8279a4bec3fdcd5763a426e614e81dbe",
+    "llm_selection/gpu_monitor.ps1": "b31802c0a651816164ebc8cd152a5ec07c03ee237aea339a8acfba3716b4155a",
+    "llm_selection/inspect_server.ps1": "7799e3e019123da6ec19deed4beef22240796b4522ff79f55f126ae9e7025371",
+    "llm_selection/inspect_tokenization.py": "6e45fc895817bb24a681cfe949d289a427a33e2b908214f1c00fa9d7d8822f2e",
+    "llm_selection/launch_technical.ps1": "ffcb8d502a8c79e21c167d06b99bf408e42d1e4de31fa24ffab6cd86660699f9",
+    "llm_selection/plots.py": "71ac4be84f0c8501aa2b44cea516e2fbf69016e48c9f6dadb49be943fb445a7b",
+    "llm_selection/prepare.py": "6229e233c9e6418360058b5921fc9f9d94b39eb62756ba6426df63b6a4dfbc73",
+    "llm_selection/probe_storage.ps1": "4952f9e7deb0bb8d25113bc8972dba8f944e098613341be6b17cb62e35a40a2a",
+    "llm_selection/probe_wire.py": "cecfc5657dea4641175d10fb8175f2319a6612088337ccb0d6c5450e30c7a791",
+    "llm_selection/provenance.py": "048476d59736877e965ed759c09a7336f51e0e61a89e22e6e123f36ee71df1b1",
+    "llm_selection/recovery.py": "928bd7a6d4326cb8e0f06a233bd80dc88cb04b4931e4dfdfb47417468b4126bb",
+    "llm_selection/render_pdf.py": "82c68e741a13b77ce427a03b389a5d620c3f2d427e774211dff144a020e35377",
+    "llm_selection/report.py": "194b3b7b5ac3a3145a7df7898506a5f279c683fb1c1160c23217f6e2a2440e0f",
+    "llm_selection/run.py": "1cab9a9635a2f25dbe33273fc39e1f4ffd1808de728e5047db8d934842e9c25c",
+    "llm_selection/runtime_check.py": "6500a57b2047ce5c70737d6ac8e580b61b58a151696fac0c261691b045f7c2c1",
+    "llm_selection/serve.ps1": "18da8e68e4528c3c9c252704c293f8c5c9ef30bbc2416b93523984c558c25d1d",
+    "llm_selection/server_state.py": "f464e6983ff437df56e19a5fba4147723e01be16fdd4c483ca3a7c2405e1dedf",
+    "llm_selection/setup_report.py": "e6b96c5ef6399c00c3e50d583dee070252158aee904a9fb69f46cf74dbcb3f03",
+    "llm_selection/smoke_transport.py": "58af18987bb60f8103faec3774220a638d26391d8b44c38a72c91d1eec7cce12",
+    "llm_selection/stop.ps1": "83720c636ea329de0070677d7122773a5edb3637abe74b2519f3f51bab5f55e4",
+    "llm_selection/storage.py": "cb0d4de0857d480d08f94c0d24308e8922f95ba7169d0cc2d4472b821d663042",
+    "llm_selection/study.py": "e847005896544a23bcc3d744ff128bf6edbec58b665bd95db2af0ff1b0b9cfb6",
+    "llm_selection/technical.py": "94ab9fb651c014bdba51ef60ef82c74ccfcda7615c4204c245ba374c2f025b19",
+    "llm_selection/token_counts.py": "7a71b699f56b5bc245f69a67a199b6e8bd736cf45c6e54877803c4114543f416",
+    "llm_selection/verify_weights.ps1": "2923c055b60485c05012ce3999e84deb114f61e07d8666a22a899b67d836979d",
+    "llm_selection/weights.py": "d7422af44451c3e51d93a6705a8c7c09d35aba2c1693316da5be0eaede879146",
+    "llm_selection/wire.py": "9c4f0ef09d7efdc0360eaf7c6774701a5469d3f3f6955eaedec1a6e82badf3ca",
+    "prototype/quantum_assistant/__init__.py": "a3ef2a0db32c761feb64894a8f1b7a87cc0573be3408d5ee7b5c8c82e4624512",
+    "prototype/quantum_assistant/adapters/__init__.py": "43404058094847f91d547cf5f8348cd4adbb0bc1c021a2e0dd95b3ce1ee6f2c8",
+    "prototype/quantum_assistant/adapters/compilation.py": "6f9d20a575221abcd4f56bd5a211ca6196b32eb920295be7ecef0bf7e6534c1f",
+    "prototype/quantum_assistant/adapters/context.py": "89d38cb3c1f609d0795c93a810bbacca87d677e199755763adea0e294c5aadb6",
+    "prototype/quantum_assistant/adapters/explanations.py": "5b35c86d97080a7baf73368f77d5699ba252f9ce63a119f682ca45926baa2c49",
+    "prototype/quantum_assistant/adapters/hardware.py": "0ccfb961ede66c9fd0742747587d33ef239447cd3dd95074de426e30f6818cab",
+    "prototype/quantum_assistant/adapters/llm.py": "55f4d301a67d6a8da141ad9d36b1e9ff91ffccab4aa3ecc967b38f33376fb76a",
+    "prototype/quantum_assistant/adapters/parsing.py": "cf4d2531ff0cb2c7623c090f5a97d96ca70799023dcaf217cbe3ece805a88724",
+    "prototype/quantum_assistant/adapters/qdrant_context.py": "468b595b5c862030d089a611b56805ad4f68d4465dfc6ca864e551ac747aa5b5",
+    "prototype/quantum_assistant/adapters/rag_checks.py": "fa9332f868e5d2beea277cde6c0c49f25ba4150267c6bd8b1f43b44b190aee2d",
+    "prototype/quantum_assistant/adapters/rag_dataset.py": "ec2ea50500c0ba326f090336717cc2828e5c23e6d6981be21d35421aa99c846a",
+    "prototype/quantum_assistant/adapters/rag_features.py": "43013abb3743f64802c07b07567bd35b2543bb10eb451e85f7cdd65de2b4e34b",
+    "prototype/quantum_assistant/adapters/request.py": "05b9530b069eae4cc27018b2e3080d66e5bf8e27b6e59c432d424ba3b2552d24",
+    "prototype/quantum_assistant/adapters/validation.py": "78ced31320e0eaec1d3ceac639faf82a40dd314c570a08544af3f72d8ead0d94",
+    "prototype/quantum_assistant/controller.py": "a377b30312e18ee7f4fd69ff7277b28f6f6275124898b64350f032b8c5c8d285",
+    "prototype/quantum_assistant/errors.py": "f73b2cac0f2796adf41db63f39695873f0bbfb61fde4d3407003c5abf4e95a3c",
+    "prototype/quantum_assistant/factory.py": "3623710b86cbb73327a5e90f4ded5f5e12bb3d74a66e6b49344ada40f568333f",
+    "prototype/quantum_assistant/models.py": "fa131af28e95633d8442b7e341b6ef75eeb1872bccce13eb42961660b241d647",
+    "prototype/quantum_assistant/ports.py": "921f717f6e46e7ce21c9e745b52c74e89b7f5a0703a9a4ca2bc3a1e5ef2aa724",
+    "prototype/quantum_assistant/schema_validation.py": "0b3a19abb2adf03ee0a980c4b02fe47b11da446ffe895cf3c8f97e38587d1862",
+    "prototype/quantum_assistant/services.py": "0d7858183a195f29484458e7b6cef65510d10936a3e591a6af917eaee4f6f81f",
+    "qiskit_dataset/__init__.py": "db3cb07fe7ea99d2e35dca70468edba1d675deb66dd12cc4fb76d18be41d6289",
+    "qiskit_dataset/aggregation.py": "ce7044b1a742a2496b0fdac572ae9b0dd0579daf1a34247277d37ad9af114471",
+    "qiskit_dataset/catalog.py": "dd5b0994a36ef9f082a07670c346e6c6d8d410ccdc8f8ad6ebc9a313e137c6fa",
+    "qiskit_dataset/core.py": "3abb6b19b68d39de8c9985308b64f460181e3af2ca9752bf80c58cedfeff9eca",
+    "qiskit_dataset/experiment_v2.py": "aaa7e52ab6694e8f407470a9d39aad5eb216714e89abfc83a3ddb1c56792bdab",
+    "qiskit_dataset/generation.py": "0220a36623138bb29969c45a65aadd4d57814011e51362c676680ccca8a5acd4",
+    "qiskit_dataset/reporting.py": "a8a9eb3a641716b2b979edd691dccb83bdaf7983b8759cad8cc518d216180535",
+    "qiskit_dataset/views.py": "e9a923ce905134b072e35d86ce41b1629caeb1aeb353daedc4c6d120b66eda22",
+    "scripts/14_evaluate_methods_v2.py": "a09fabdd8443d31c0d025ecc8190665c682255d5c89f1b1961ee0b3aad931780",
+    "scripts/15_release_test_v2.py": "95889fe022e8ce6c22d6b6e886ac655e02ab68c9a5bd05722327927eb0583c47",
+    "scripts/mqt_predictor_protocol.py": "535c652d85290752c25f24ae59d0bdb0bddc8461f7ae4c4a436d9e6ace043d1f"
+  },
+  "code_snapshot": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/code_snapshots/5a79d66de0c534f3469107344e09da693f86915747aaa89dc25257701d471beb",
+  "git_head": "a40a984669af606278e8c5d0023fd2d19c15ff4a",
+  "git_status": " M .gitignore\n M AGENTS.md\n M docs/protocollo_sperimentale.md\n M qiskit_dataset/experiment_v2.py\n M scripts/14_evaluate_methods_v2.py\n M scripts/15_release_test_v2.py\n?? llm_selection/\n?? tests/test_llm_selection.py\n",
+  "python": "3.12.13",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "dependencies": [
+    [
+      "Farama-Notifications",
+      "0.0.6"
+    ],
+    [
+      "Jinja2",
+      "3.1.6"
+    ],
+    [
+      "Markdown",
+      "3.10.2"
+    ],
+    [
+      "MarkupSafe",
+      "3.0.3"
+    ],
+    [
+      "PyJWT",
+      "2.13.0"
+    ],
+    [
+      "Pygments",
+      "2.20.0"
+    ],
+    [
+      "Werkzeug",
+      "3.1.8"
+    ],
+    [
+      "absl-py",
+      "2.4.0"
+    ],
+    [
+      "annotated-types",
+      "0.7.0"
+    ],
+    [
+      "antlr4-python3-runtime",
+      "4.13.2"
+    ],
+    [
+      "anyio",
+      "4.14.2"
+    ],
+    [
+      "bqskit",
+      "1.2.1"
+    ],
+    [
+      "bqskitrs",
+      "0.4.1"
+    ],
+    [
+      "certifi",
+      "2026.6.17"
+    ],
+    [
+      "cffi",
+      "2.0.0"
+    ],
+    [
+      "charset-normalizer",
+      "3.4.7"
+    ],
+    [
+      "cloudpickle",
+      "3.1.2"
+    ],
+    [
+      "cryptography",
+      "49.0.0"
+    ],
+    [
+      "cuda-bindings",
+      "13.3.1"
+    ],
+    [
+      "cuda-pathfinder",
+      "1.8.0"
+    ],
+    [
+      "cuda-toolkit",
+      "13.0.3.0"
+    ],
+    [
+      "dill",
+      "0.4.1"
+    ],
+    [
+      "filelock",
+      "3.29.4"
+    ],
+    [
+      "fsspec",
+      "2026.6.0"
+    ],
+    [
+      "graphviz",
+      "0.21"
+    ],
+    [
+      "grpcio",
+      "1.81.1"
+    ],
+    [
+      "gymnasium",
+      "1.3.0"
+    ],
+    [
+      "h11",
+      "0.16.0"
+    ],
+    [
+      "h2",
+      "4.4.1"
+    ],
+    [
+      "hpack",
+      "4.2.0"
+    ],
+    [
+      "httpcore",
+      "1.0.9"
+    ],
+    [
+      "httpx",
+      "0.28.1"
+    ],
+    [
+      "hyperframe",
+      "6.1.0"
+    ],
+    [
+      "ibm-cloud-sdk-core",
+      "3.25.0"
+    ],
+    [
+      "ibm-platform-services",
+      "0.76.0"
+    ],
+    [
+      "ibm-quantum-schemas",
+      "0.11.20260824"
+    ],
+    [
+      "idna",
+      "3.18"
+    ],
+    [
+      "joblib",
+      "1.5.3"
+    ],
+    [
+      "lark",
+      "1.3.1"
+    ],
+    [
+      "markdown-it-py",
+      "4.2.0"
+    ],
+    [
+      "mdurl",
+      "0.1.2"
+    ],
+    [
+      "mpmath",
+      "1.3.0"
+    ],
+    [
+      "mqt.bench",
+      "2.2.3"
+    ],
+    [
+      "mqt.predictor",
+      "2.4.0"
+    ],
+    [
+      "narwhals",
+      "2.25.0"
+    ],
+    [
+      "networkx",
+      "3.6.1"
+    ],
+    [
+      "numpy",
+      "2.5.1"
+    ],
+    [
+      "nvidia-cublas",
+      "13.1.1.3"
+    ],
+    [
+      "nvidia-cuda-cupti",
+      "13.0.85"
+    ],
+    [
+      "nvidia-cuda-nvrtc",
+      "13.0.88"
+    ],
+    [
+      "nvidia-cuda-runtime",
+      "13.0.96"
+    ],
+    [
+      "nvidia-cudnn-cu13",
+      "9.20.0.48"
+    ],
+    [
+      "nvidia-cufft",
+      "12.0.0.61"
+    ],
+    [
+      "nvidia-cufile",
+      "1.15.1.6"
+    ],
+    [
+      "nvidia-curand",
+      "10.4.0.35"
+    ],
+    [
+      "nvidia-cusolver",
+      "12.0.4.66"
+    ],
+    [
+      "nvidia-cusparse",
+      "12.6.3.3"
+    ],
+    [
+      "nvidia-cusparselt-cu13",
+      "0.8.1"
+    ],
+    [
+      "nvidia-nccl-cu13",
+      "2.29.7"
+    ],
+    [
+      "nvidia-nvjitlink",
+      "13.3.33"
+    ],
+    [
+      "nvidia-nvshmem-cu13",
+      "3.4.5"
+    ],
+    [
+      "nvidia-nvtx",
+      "13.0.85"
+    ],
+    [
+      "openqasm3",
+      "1.0.1"
+    ],
+    [
+      "orjson",
+      "3.12.0"
+    ],
+    [
+      "packaging",
+      "26.2"
+    ],
+    [
+      "pillow",
+      "12.2.0"
+    ],
+    [
+      "portalocker",
+      "3.2.0"
+    ],
+    [
+      "protobuf",
+      "7.35.1"
+    ],
+    [
+      "psutil",
+      "7.2.2"
+    ],
+    [
+      "pybase64",
+      "1.5.0"
+    ],
+    [
+      "pycparser",
+      "3.0"
+    ],
+    [
+      "pydantic",
+      "2.13.4"
+    ],
+    [
+      "pydantic_core",
+      "2.46.4"
+    ],
+    [
+      "pyspnego",
+      "0.12.1"
+    ],
+    [
+      "python-dateutil",
+      "2.9.0.post0"
+    ],
+    [
+      "pytket",
+      "2.18.1"
+    ],
+    [
+      "pytket-qiskit",
+      "0.77.0"
+    ],
+    [
+      "qdrant-client",
+      "1.19.0"
+    ],
+    [
+      "qiskit",
+      "2.5.0"
+    ],
+    [
+      "qiskit-aer",
+      "0.17.2"
+    ],
+    [
+      "qiskit-ibm-runtime",
+      "0.47.0"
+    ],
+    [
+      "qiskit-qasm3-import",
+      "0.6.0"
+    ],
+    [
+      "qwasm",
+      "1.0.1"
+    ],
+    [
+      "requests",
+      "2.34.2"
+    ],
+    [
+      "requests_ntlm",
+      "1.3.0"
+    ],
+    [
+      "rich",
+      "15.0.0"
+    ],
+    [
+      "rustworkx",
+      "0.18.0"
+    ],
+    [
+      "samplomatic",
+      "0.21.0"
+    ],
+    [
+      "sb3_contrib",
+      "2.9.0"
+    ],
+    [
+      "scikit-learn",
+      "1.9.0"
+    ],
+    [
+      "scipy",
+      "1.17.1"
+    ],
+    [
+      "setuptools",
+      "82.0.1"
+    ],
+    [
+      "six",
+      "1.17.0"
+    ],
+    [
+      "stable_baselines3",
+      "2.9.0"
+    ],
+    [
+      "stevedore",
+      "5.8.0"
+    ],
+    [
+      "symengine",
+      "0.14.1"
+    ],
+    [
+      "sympy",
+      "1.14.0"
+    ],
+    [
+      "tensorboard",
+      "2.21.0"
+    ],
+    [
+      "tensorboard-data-server",
+      "0.7.2"
+    ],
+    [
+      "threadpoolctl",
+      "3.6.0"
+    ],
+    [
+      "torch",
+      "2.13.0"
+    ],
+    [
+      "tqdm",
+      "4.68.3"
+    ],
+    [
+      "triton",
+      "3.7.1"
+    ],
+    [
+      "typing-inspection",
+      "0.4.2"
+    ],
+    [
+      "typing_extensions",
+      "4.15.0"
+    ],
+    [
+      "urllib3",
+      "2.7.0"
+    ]
+  ],
+  "uv_lock_sha256": "b1f494902348a7d39a9013dc92ceabb80ecf5ebba841b1a1c989ca7d065d75eb",
+  "meminfo": "MemTotal:       10183308 kB\nMemFree:         4664828 kB\nMemAvailable:    6709784 kB\nBuffers:           13292 kB\nCached:          1819764 kB\nSwapCached:            0 kB\nActive:           159044 kB\nInactive:        4458976 kB\nActive(anon):       2712 kB\nInactive(anon):  2785744 kB\nActive(file):     156332 kB\nInactive(file):  1673232 kB\nUnevictable:           0 kB\nMlocked:               0 kB\nSwapTotal:       3145728 kB\nSwapFree:        3145728 kB\nDirty:               868 kB\nWriteback:             0 kB\nAnonPages:       2784400 kB\nMapped:           594704 kB\nShmem:              3584 kB\nKReclaimable:     420012 kB\nSlab:             520044 kB\nSReclaimable:     420012 kB\nSUnreclaim:       100032 kB\nKernelStack:        7492 kB\nPageTables:        50740 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     8237380 kB\nCommitted_AS:    6877260 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       35768 kB\nVmallocChunk:          0 kB\nPercpu:             6592 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:     16384 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:       68608 kB\nDirectMap2M:     6221824 kB\nDirectMap1G:    13631488 kB\n",
+  "cpuinfo": "processor\t: 0\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 0\ncpu cores\t: 6\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 0\ncpu cores\t: 6\napicid\t\t: 1\ninitial apicid\t: 1\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 1\ncpu cores\t: 6\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 1\ncpu cores\t: 6\napicid\t\t: 3\ninitial apicid\t: 3\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 4\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 2\ncpu cores\t: 6\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 5\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 2\ncpu cores\t: 6\napicid\t\t: 5\ninitial apicid\t: 5\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 6\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 3\ncpu cores\t: 6\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 7\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 3\ncpu cores\t: 6\napicid\t\t: 7\ninitial apicid\t: 7\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 8\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 4\ncpu cores\t: 6\napicid\t\t: 8\ninitial apicid\t: 8\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 9\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 4\ncpu cores\t: 6\napicid\t\t: 9\ninitial apicid\t: 9\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 10\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 5\ncpu cores\t: 6\napicid\t\t: 10\ninitial apicid\t: 10\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 11\nvendor_id\t: AuthenticAMD\ncpu family\t: 25\nmodel\t\t: 80\nmodel name\t: AMD Ryzen 5 5600G with Radeon Graphics\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 3899.895\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 12\ncore id\t\t: 5\ncpu cores\t: 6\napicid\t\t: 11\ninitial apicid\t: 11\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass srso ibpb_no_ret spectre_v2_user tsa\nbogomips\t: 7799.79\nTLB size\t: 2560 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:\n\n",
+  "test_content_accessed": false
+}

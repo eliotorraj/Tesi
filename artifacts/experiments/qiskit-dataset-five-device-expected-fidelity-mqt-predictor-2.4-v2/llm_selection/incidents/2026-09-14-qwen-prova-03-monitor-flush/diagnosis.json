@@ -1,0 +1,32 @@
+{
+  "at": "2026-09-14T10:13:55.225624+00:00",
+  "phase": "train_technical",
+  "source_run": "qwen-prova-03",
+  "monitor_error": {
+    "at": "2026-09-14T09:59:41.2123580Z",
+    "error": "Eccezione durante la chiamata di \"Flush\" con \"1\" argomento/i: \"L'operazione è stata annullata.\""
+  },
+  "exit_record": {
+    "abort_reason": "monitor_failure",
+    "thermal_pause_count": 41,
+    "ended_at": "2026-09-14T09:59:41.4169838Z",
+    "thermal_paused_seconds": 81.7632597,
+    "exit_code": null
+  },
+  "input_tokens": 110880,
+  "processed_tokens": 21184,
+  "llm_calls": 1,
+  "generated_output_tokens": 0,
+  "observed_cause": "Windows StreamWriter BaseStream.Flush(true) canceled on WSL UNC resource log",
+  "root_cause_status": "Underlying cancellation cause not proven",
+  "correction": "New Windows server logs use native D storage; historical logs preserved; forced durable flush retained",
+  "limits": [
+    "Historical pause counter stops at last sample and omits subsequent blocked flush time",
+    "Long inference has not been rerun by the assistant"
+  ],
+  "storage_check": "storage_checks/flush-check-899e1b198109/result.json",
+  "sources": [
+    "https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream.flush",
+    "https://learn.microsoft.com/en-us/windows/wsl/filesystems"
+  ]
+}

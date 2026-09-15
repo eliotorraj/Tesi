@@ -1,0 +1,56 @@
+[
+  {
+    "variant": "original_5",
+    "rag_examples": 5,
+    "input_tokens": 80612,
+    "characters": 157959,
+    "note": "Original prompt; five RAG records.",
+    "prompt_sha256": "cf54bddb594fabbe67be5595a98faff7e1a2819de4d6695816ab91edf5b37ee8",
+    "reduction_percent": 0.0
+  },
+  {
+    "variant": "original_2",
+    "rag_examples": 2,
+    "input_tokens": 38729,
+    "characters": 76344,
+    "note": "Only k changes to two; matching registry/allowed IDs updated.",
+    "prompt_sha256": "e4677654194521d8ab63d4028abbd05b5b8cafa54da18b058efd0b9eae097637",
+    "reduction_percent": 51.95628442415521
+  },
+  {
+    "variant": "compact_5",
+    "rag_examples": 5,
+    "input_tokens": 29391,
+    "characters": 58607,
+    "note": "Five records; duplicate evidence removed, aggregate stability retained; per-seed observations and provenance stay in source artifacts.",
+    "prompt_sha256": "c4ca01b1c2ebf1efc6c04623eb3817c2b63e0f6f139123f0ac1fa769794354ec",
+    "reduction_percent": 63.54016771696522
+  },
+  {
+    "variant": "compact_2",
+    "rag_examples": 2,
+    "input_tokens": 17602,
+    "characters": 35890,
+    "note": "Same compact representation with two records.",
+    "prompt_sha256": "846ea7c3ff7ae46abcb2b3cd7182e994aaf69d54c676f08b2cbf97d855992bb6",
+    "reduction_percent": 78.16454125936585
+  },
+  {
+    "variant": "compact_5_aliases",
+    "rag_examples": 5,
+    "input_tokens": 18372,
+    "characters": 45315,
+    "note": "Five records; duplicate evidence removed, aggregate stability retained; per-seed observations and provenance stay in source artifacts. Short reversible IDs require a new application adapter.",
+    "prompt_sha256": "1f9d4ef3102beb2a180ec9ed445c924eeb0473c91707db23a6ff4a8e916d4364",
+    "reduction_percent": 77.20934848409667
+  },
+  {
+    "variant": "compact_2_aliases",
+    "rag_examples": 2,
+    "input_tokens": 13182,
+    "characters": 30662,
+    "note": "Same compact representation with two records. Short reversible IDs require a new application adapter.",
+    "prompt_sha256": "c2cf84bb0d620807eba1e95169f9327fdb2e9b30e06bff571084278054d25162",
+    "reduction_percent": 83.64759589143056
+  }
+]

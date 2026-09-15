@@ -1,0 +1,32 @@
+{
+    "reason":  "available_ram_below_operational_limit",
+    "last_sample":  {
+                        "thermal_paused_seconds":  0,
+                        "pid":  4852,
+                        "thermal_paused":  false,
+                        "gpu_dedicated_bytes":  7175069696,
+                        "gpu_shared_bytes":  683098112,
+                        "thermal_pause_count":  0,
+                        "gpu_sensors":  [
+                                            {
+                                                "adapter_index":  0,
+                                                "adapter_name":  "AMD Radeon RX 6750 XT",
+                                                "return_code":  0,
+                                                "edge_c":  48,
+                                                "hotspot_c":  58,
+                                                "memory_c":  null,
+                                                "fan_rpm":  614,
+                                                "asic_power_w":  30,
+                                                "gpu_activity_percent":  0
+                                            }
+                                        ],
+                        "working_set_bytes":  864370688,
+                        "private_bytes":  8293658624,
+                        "cpu_seconds":  2.25,
+                        "peak_working_set_bytes":  989253632,
+                        "utc":  "2026-09-14T09:54:15.6193731Z",
+                        "system_available_bytes":  1300205568,
+                        "gpu_counter_error":  null
+                    },
+    "at":  "2026-09-14T09:54:15.6250891Z"
+}

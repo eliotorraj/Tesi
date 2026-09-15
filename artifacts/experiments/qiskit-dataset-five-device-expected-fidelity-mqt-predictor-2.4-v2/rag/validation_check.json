@@ -1,0 +1,3604 @@
+{
+  "compilations": 0,
+  "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+  "index_manifest_sha256": "238f4da9c9803b9e813afed0d4a476f18fb2fffdd566713a10c7528319cde181",
+  "k": 5,
+  "llm_calls": 0,
+  "max_canonical_distance_error": 0.0,
+  "max_qdrant_score_error": 1.6062536456473708e-07,
+  "qdrant_score_abs_tolerance": 1e-05,
+  "qdrant_score_rel_tolerance": 1e-06,
+  "rows": [
+    {
+      "circuit_id": "pricingcall_indep_qiskit_11",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.568106738463007,
+          "rag_id": "rag_3fc15d69c35cfade39cca440ef4e8f402a7b8870c7ab7d30a53908079518f516"
+        },
+        {
+          "distance": 4.568106738463007,
+          "rag_id": "rag_80a90838fc07aebd209ae9b10fdfad21d21a672b73ed60ecd2e6e8e42f559bd4"
+        },
+        {
+          "distance": 4.576498141345151,
+          "rag_id": "rag_b7fd0e6e1c4fd6fbb3e4e3a4644b37a7560e135b22cddb018dcf983fac5ec2da"
+        },
+        {
+          "distance": 4.576498141345151,
+          "rag_id": "rag_fbfe56de23b6f65b7009e212d833218cc17f54c0b922a91f7f24b19aa2d5c5f3"
+        },
+        {
+          "distance": 4.585133806805965,
+          "rag_id": "rag_0f8f2d2038b1c3306d17cb4bde98a2a037df93584cb82476179a88f91216d123"
+        }
+      ],
+      "prompt_sha256": "9d3ccee7e9cc84d9db595d4209d177d9465cd59212b79f089ce677ca8c8da406",
+      "query_audit": {
+        "max_qdrant_score_error": 1.351702074714467e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "8a76d38b8f55da5551aa7de8b4bbc0377cab7442cf4cd1f944391a89b56f0f16",
+      "retrieval_and_prompt_seconds": 5.351223205998394,
+      "source_sha256": "36f58505d5126e70b8c176ce9018a7def04486820f93fcbf381ecefaf9c0fec4",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingcall_indep_qiskit_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.4769678432081297,
+          "rag_id": "rag_995e63d9cdd26244ba8241d12a2b3f183fd7001f4452c9e1c2dd6545075c5e8b"
+        },
+        {
+          "distance": 3.4802760161311816,
+          "rag_id": "rag_2a71368c6b881182d360c97a031495c2681b1a5cdee18a218682f39c9bf3d7dd"
+        },
+        {
+          "distance": 3.4802760161311816,
+          "rag_id": "rag_9a624bdc6f07df7111c0b65feb7a02476eea49e021867acf1397cc1e34a642ca"
+        },
+        {
+          "distance": 3.5089915333671,
+          "rag_id": "rag_57f39765a71cd4c6b9af04ba6e14f535f0fe7adaf4bba00f7decdf86956682ae"
+        },
+        {
+          "distance": 3.518280493415527,
+          "rag_id": "rag_ab897d2206aaa59ab1dca4c70049c723f75658a1096d8f758741f61c0d7cde72"
+        }
+      ],
+      "prompt_sha256": "33ee728c29ad6aa5fae9dc0da7bf75a4732a16391ad2c6c416d5cde59b31f023",
+      "query_audit": {
+        "max_qdrant_score_error": 1.6062536456473708e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "935a56d8b6c5fd2abd42cb410d6080480e9beb32d20467afebdd93638b3bf701",
+      "retrieval_and_prompt_seconds": 5.696570287000213,
+      "source_sha256": "3bfbab0c9e8d1f3d439975f907ccb451367de4b6de5018a9fb71f4ddd6dc3905",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingcall_indep_qiskit_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.8458838404286912,
+          "rag_id": "rag_6d48c581e7eac8c7eb32e4b154ea67775bc08e94f3af08bc66c9ba84593dc4fd"
+        },
+        {
+          "distance": 3.8458838404286912,
+          "rag_id": "rag_a3c8f298731aa911589df5698eca1c7a80f486874da74473fb6c15a8a5970aa2"
+        },
+        {
+          "distance": 3.8628697525630966,
+          "rag_id": "rag_83c653a172f052f445aa7b5e380fe50b1bd89f8f8156d16a112accc384ea7f23"
+        },
+        {
+          "distance": 3.8628697525630966,
+          "rag_id": "rag_8e7fb6b57eb61905a9872eebf8576fde146d1b45f3f8d5977cbd5d94fe2163ed"
+        },
+        {
+          "distance": 3.877649203131998,
+          "rag_id": "rag_4faf0501db0065dddcbe776f120bd1b3e07438599a747786e726c232163e8228"
+        }
+      ],
+      "prompt_sha256": "b79431c821795f475e90cfed746e6a2f104fa73f4c69532282b369d93b105a16",
+      "query_audit": {
+        "max_qdrant_score_error": 1.2846652186482288e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "39730d101b33619a4d9d80962c3a2d5f8e4dcc55a49220f4817484deb168b81f",
+      "retrieval_and_prompt_seconds": 5.322425195001415,
+      "source_sha256": "fc7bc11bf5e6387a48f6cb866e022aa9ea6b172b538afdcc16ba30c585162036",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingcall_indep_qiskit_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.169080581484803,
+          "rag_id": "rag_61009d44e8457ebdb9281e8d6064ddc25bfe0587e0524d4f1d5632f71f5dcda8"
+        },
+        {
+          "distance": 4.169080581484803,
+          "rag_id": "rag_fab8580fe2daf99b525ff95eaae3f5fecbb646f03de103e132a2f9b4921d0181"
+        },
+        {
+          "distance": 4.191194494881976,
+          "rag_id": "rag_0ec16adce266e31eb42cde2552dc356bda7e76b659f9bab4406932b07f8bb09e"
+        },
+        {
+          "distance": 4.191194494881976,
+          "rag_id": "rag_45c878c2af2fc58f03635c84c5284f0263707773a6f9cde81087657798c9c8ca"
+        },
+        {
+          "distance": 4.210798270694878,
+          "rag_id": "rag_14ed1286340d56556c7d6f90b356c58a3f2508f723b9df9325ec725ac3da8ac2"
+        }
+      ],
+      "prompt_sha256": "53c2f0c317c8a193e1324a2dba34171a536ecc27f47dd126415e2f9af0a8e167",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3517020569508986e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d97879642bb11c05a5c4b46f482441235c3cebbdeee1e6877be15adce83beb97",
+      "retrieval_and_prompt_seconds": 5.7788393090013415,
+      "source_sha256": "460f74698f226244635f7e0c1999aa34f3c3e7a332945b71f2ef224a8100abab",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingcall_indep_tket_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.289895678730411,
+          "rag_id": "rag_4c431d8981fcb7db3e6021b66cba09d712116a164d4eb023a58874a455479f0b"
+        },
+        {
+          "distance": 3.3487846734625735,
+          "rag_id": "rag_0e70b8dcfbae5a314cec88c5b464305f34dfdfbf24ec610be564d932215a3126"
+        },
+        {
+          "distance": 3.4477232598225123,
+          "rag_id": "rag_79cc6eecaea539dbf710959a657d99939e8cba50197f54060a38a6a82373d5ad"
+        },
+        {
+          "distance": 3.4552623363271797,
+          "rag_id": "rag_ab897d2206aaa59ab1dca4c70049c723f75658a1096d8f758741f61c0d7cde72"
+        },
+        {
+          "distance": 3.456743915426729,
+          "rag_id": "rag_995e63d9cdd26244ba8241d12a2b3f183fd7001f4452c9e1c2dd6545075c5e8b"
+        }
+      ],
+      "prompt_sha256": "38109678468a09e8495a4536f2bef8068f297939f76ce78fe149610170961dfd",
+      "query_audit": {
+        "max_qdrant_score_error": 1.270425427080113e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b6cf6489fa3e5e04132f1c59d143ef2016386f98c25ac793000eef01f00e86e1",
+      "retrieval_and_prompt_seconds": 5.497386361999816,
+      "source_sha256": "1af4704f58937a532889607d380c1435ac8033eaf33496021e76481e39b7457c",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingcall_indep_tket_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.9493719419448112,
+          "rag_id": "rag_79cc6eecaea539dbf710959a657d99939e8cba50197f54060a38a6a82373d5ad"
+        },
+        {
+          "distance": 3.96153723851771,
+          "rag_id": "rag_1298faa94d09374529e731d4a17f2d627b10abf4e1803482d42abdd00908fc4c"
+        },
+        {
+          "distance": 4.034494013374143,
+          "rag_id": "rag_4c431d8981fcb7db3e6021b66cba09d712116a164d4eb023a58874a455479f0b"
+        },
+        {
+          "distance": 4.047322821217438,
+          "rag_id": "rag_6d48c581e7eac8c7eb32e4b154ea67775bc08e94f3af08bc66c9ba84593dc4fd"
+        },
+        {
+          "distance": 4.047322821217438,
+          "rag_id": "rag_a3c8f298731aa911589df5698eca1c7a80f486874da74473fb6c15a8a5970aa2"
+        }
+      ],
+      "prompt_sha256": "28f4dc2d8ba4b498cd0c211e4fbe800edd16f3f75e3cd4201ae998825a238d3c",
+      "query_audit": {
+        "max_qdrant_score_error": 1.2846652097664446e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "1dd7f184606ab4cd70ed13b75976265dc57f576b6c65c4e6ef61bdc50518804f",
+      "retrieval_and_prompt_seconds": 5.617236183999921,
+      "source_sha256": "fc138974f0cb426e716de24a061e6164c4f3e79908e68d38c4e36889b5992db8",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingcall_indep_tket_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.387137142585583,
+          "rag_id": "rag_61009d44e8457ebdb9281e8d6064ddc25bfe0587e0524d4f1d5632f71f5dcda8"
+        },
+        {
+          "distance": 4.387137142585583,
+          "rag_id": "rag_fab8580fe2daf99b525ff95eaae3f5fecbb646f03de103e132a2f9b4921d0181"
+        },
+        {
+          "distance": 4.4092510559827565,
+          "rag_id": "rag_0ec16adce266e31eb42cde2552dc356bda7e76b659f9bab4406932b07f8bb09e"
+        },
+        {
+          "distance": 4.4092510559827565,
+          "rag_id": "rag_45c878c2af2fc58f03635c84c5284f0263707773a6f9cde81087657798c9c8ca"
+        },
+        {
+          "distance": 4.428854831795658,
+          "rag_id": "rag_14ed1286340d56556c7d6f90b356c58a3f2508f723b9df9325ec725ac3da8ac2"
+        }
+      ],
+      "prompt_sha256": "748338148eacc1b93192c3b3a2f4a8ad8630ecde4d0169a65f3a3e1555d2f42c",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3517020569508986e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d5f3118c0443361c677d0c451a68fb2b209d93695294ea79cc8937a56b787f54",
+      "retrieval_and_prompt_seconds": 6.7895891400003165,
+      "source_sha256": "b6efaa6936b9c46e408e7cb9dea0464d3e80c643eb5ff760ea5f2700dbc03808",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_qiskit_11",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.6311555512273115,
+          "rag_id": "rag_3fc15d69c35cfade39cca440ef4e8f402a7b8870c7ab7d30a53908079518f516"
+        },
+        {
+          "distance": 4.6311555512273115,
+          "rag_id": "rag_80a90838fc07aebd209ae9b10fdfad21d21a672b73ed60ecd2e6e8e42f559bd4"
+        },
+        {
+          "distance": 4.639546954109454,
+          "rag_id": "rag_b7fd0e6e1c4fd6fbb3e4e3a4644b37a7560e135b22cddb018dcf983fac5ec2da"
+        },
+        {
+          "distance": 4.639546954109454,
+          "rag_id": "rag_fbfe56de23b6f65b7009e212d833218cc17f54c0b922a91f7f24b19aa2d5c5f3"
+        },
+        {
+          "distance": 4.648182619570268,
+          "rag_id": "rag_0f8f2d2038b1c3306d17cb4bde98a2a037df93584cb82476179a88f91216d123"
+        }
+      ],
+      "prompt_sha256": "0a7c8b0225bda3851219a98290f87b677be5803bdd39b0f8eb00f788ba778ba2",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3517020569508986e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "f039f55f2970e7ae5ec25d95df4524ed3cbc03d2c54f3e52e03cc5fd908b4d03",
+      "retrieval_and_prompt_seconds": 6.204474392998236,
+      "source_sha256": "25d880ca2624e8e6aff67b084b9e396f19184b835356038bcc9e058d78616b75",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_qiskit_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.4769678432081297,
+          "rag_id": "rag_995e63d9cdd26244ba8241d12a2b3f183fd7001f4452c9e1c2dd6545075c5e8b"
+        },
+        {
+          "distance": 3.4802760161311816,
+          "rag_id": "rag_2a71368c6b881182d360c97a031495c2681b1a5cdee18a218682f39c9bf3d7dd"
+        },
+        {
+          "distance": 3.4802760161311816,
+          "rag_id": "rag_9a624bdc6f07df7111c0b65feb7a02476eea49e021867acf1397cc1e34a642ca"
+        },
+        {
+          "distance": 3.5089915333671,
+          "rag_id": "rag_57f39765a71cd4c6b9af04ba6e14f535f0fe7adaf4bba00f7decdf86956682ae"
+        },
+        {
+          "distance": 3.518280493415527,
+          "rag_id": "rag_ab897d2206aaa59ab1dca4c70049c723f75658a1096d8f758741f61c0d7cde72"
+        }
+      ],
+      "prompt_sha256": "637f7a0cfa2b1169a82564486908a22dd6426a93394c0a0a35952924eb000c8a",
+      "query_audit": {
+        "max_qdrant_score_error": 1.6062536456473708e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "935a56d8b6c5fd2abd42cb410d6080480e9beb32d20467afebdd93638b3bf701",
+      "retrieval_and_prompt_seconds": 9.404663379998965,
+      "source_sha256": "161510049964fa1b6431c785e9d5483c072c4c6b35dd049433da4f6d0ea6ce12",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_qiskit_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.8261679267738162,
+          "rag_id": "rag_6d48c581e7eac8c7eb32e4b154ea67775bc08e94f3af08bc66c9ba84593dc4fd"
+        },
+        {
+          "distance": 3.8261679267738162,
+          "rag_id": "rag_a3c8f298731aa911589df5698eca1c7a80f486874da74473fb6c15a8a5970aa2"
+        },
+        {
+          "distance": 3.8431538389082216,
+          "rag_id": "rag_83c653a172f052f445aa7b5e380fe50b1bd89f8f8156d16a112accc384ea7f23"
+        },
+        {
+          "distance": 3.8431538389082216,
+          "rag_id": "rag_8e7fb6b57eb61905a9872eebf8576fde146d1b45f3f8d5977cbd5d94fe2163ed"
+        },
+        {
+          "distance": 3.8579332894771228,
+          "rag_id": "rag_4faf0501db0065dddcbe776f120bd1b3e07438599a747786e726c232163e8228"
+        }
+      ],
+      "prompt_sha256": "68972c605f82ed713fe56bb9905ce3a125db6f28738eca2a10a2dd4c861c8bef",
+      "query_audit": {
+        "max_qdrant_score_error": 1.2846652186482288e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "9c26e90b9f924537470d977b339e6d69ca0f52ddc6021105e93d47a99dcd5c1a",
+      "retrieval_and_prompt_seconds": 6.7436781719989085,
+      "source_sha256": "e5b9b4189e5a71ef733cce3b7d346d7e462e52d994c060b80d165d5747d499d5",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_qiskit_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.27056057998205,
+          "rag_id": "rag_61009d44e8457ebdb9281e8d6064ddc25bfe0587e0524d4f1d5632f71f5dcda8"
+        },
+        {
+          "distance": 4.27056057998205,
+          "rag_id": "rag_fab8580fe2daf99b525ff95eaae3f5fecbb646f03de103e132a2f9b4921d0181"
+        },
+        {
+          "distance": 4.292674493379222,
+          "rag_id": "rag_0ec16adce266e31eb42cde2552dc356bda7e76b659f9bab4406932b07f8bb09e"
+        },
+        {
+          "distance": 4.292674493379222,
+          "rag_id": "rag_45c878c2af2fc58f03635c84c5284f0263707773a6f9cde81087657798c9c8ca"
+        },
+        {
+          "distance": 4.312278269192124,
+          "rag_id": "rag_14ed1286340d56556c7d6f90b356c58a3f2508f723b9df9325ec725ac3da8ac2"
+        }
+      ],
+      "prompt_sha256": "5a71a2873803b6a8a26e0710b73c2de1ee9ab70b77034caaa836ced423669a13",
+      "query_audit": {
+        "max_qdrant_score_error": 1.351702074714467e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "0163ee0ec37ea6a10b6683642054ba0889caf8339b3a995619f4e0d982ace16a",
+      "retrieval_and_prompt_seconds": 5.967927981000685,
+      "source_sha256": "7e700f7748cbb57cc439df28d32e542ac60d78b30fc35183e14e8b87b915ec3f",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_tket_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.289895678730411,
+          "rag_id": "rag_4c431d8981fcb7db3e6021b66cba09d712116a164d4eb023a58874a455479f0b"
+        },
+        {
+          "distance": 3.3487846734625735,
+          "rag_id": "rag_0e70b8dcfbae5a314cec88c5b464305f34dfdfbf24ec610be564d932215a3126"
+        },
+        {
+          "distance": 3.4477232598225123,
+          "rag_id": "rag_79cc6eecaea539dbf710959a657d99939e8cba50197f54060a38a6a82373d5ad"
+        },
+        {
+          "distance": 3.4552623363271797,
+          "rag_id": "rag_ab897d2206aaa59ab1dca4c70049c723f75658a1096d8f758741f61c0d7cde72"
+        },
+        {
+          "distance": 3.456743915426729,
+          "rag_id": "rag_995e63d9cdd26244ba8241d12a2b3f183fd7001f4452c9e1c2dd6545075c5e8b"
+        }
+      ],
+      "prompt_sha256": "e701dd088dab7c8f6ee6e58e75582211e870da744b8812e44fded4ea5812cb56",
+      "query_audit": {
+        "max_qdrant_score_error": 1.270425427080113e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b6cf6489fa3e5e04132f1c59d143ef2016386f98c25ac793000eef01f00e86e1",
+      "retrieval_and_prompt_seconds": 5.91851280300034,
+      "source_sha256": "67d875369790e4b2b63cbeb0d93b59577c83ad8156467d8a20073baedfa50a14",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_tket_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.009504869801169,
+          "rag_id": "rag_79cc6eecaea539dbf710959a657d99939e8cba50197f54060a38a6a82373d5ad"
+        },
+        {
+          "distance": 4.064900361677995,
+          "rag_id": "rag_1298faa94d09374529e731d4a17f2d627b10abf4e1803482d42abdd00908fc4c"
+        },
+        {
+          "distance": 4.107455749073795,
+          "rag_id": "rag_6d48c581e7eac8c7eb32e4b154ea67775bc08e94f3af08bc66c9ba84593dc4fd"
+        },
+        {
+          "distance": 4.107455749073795,
+          "rag_id": "rag_a3c8f298731aa911589df5698eca1c7a80f486874da74473fb6c15a8a5970aa2"
+        },
+        {
+          "distance": 4.1244416612082,
+          "rag_id": "rag_83c653a172f052f445aa7b5e380fe50b1bd89f8f8156d16a112accc384ea7f23"
+        }
+      ],
+      "prompt_sha256": "d8a3525a61f9c8da9a3c481f0eb16fedad37c5e101b3845b0fd0bd1cb0568354",
+      "query_audit": {
+        "max_qdrant_score_error": 1.2704254093165446e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "e4ce01beaf42591e6d8cfa759e0e3efae95b9fc32f3e7a9bad8818d2b2a159f6",
+      "retrieval_and_prompt_seconds": 5.638431680999929,
+      "source_sha256": "32077a35dcb20190aca9b7cc1fda948f02cd418d2ffd3037ad94f233e5406ab5",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "pricingput_indep_tket_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.605323340998411,
+          "rag_id": "rag_61009d44e8457ebdb9281e8d6064ddc25bfe0587e0524d4f1d5632f71f5dcda8"
+        },
+        {
+          "distance": 4.605323340998411,
+          "rag_id": "rag_fab8580fe2daf99b525ff95eaae3f5fecbb646f03de103e132a2f9b4921d0181"
+        },
+        {
+          "distance": 4.627437254395584,
+          "rag_id": "rag_0ec16adce266e31eb42cde2552dc356bda7e76b659f9bab4406932b07f8bb09e"
+        },
+        {
+          "distance": 4.627437254395584,
+          "rag_id": "rag_45c878c2af2fc58f03635c84c5284f0263707773a6f9cde81087657798c9c8ca"
+        },
+        {
+          "distance": 4.647041030208486,
+          "rag_id": "rag_14ed1286340d56556c7d6f90b356c58a3f2508f723b9df9325ec725ac3da8ac2"
+        }
+      ],
+      "prompt_sha256": "92cc97774d914ec9d7872c2f5c0eb4e47d6a634cefff4c004919b778204c3941",
+      "query_audit": {
+        "max_qdrant_score_error": 1.351702074714467e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "0da576e5edc47befb35ff677449f01e87518f1dd4d4f1db2c0aa7aebd0b555e8",
+      "retrieval_and_prompt_seconds": 5.675081910001609,
+      "source_sha256": "0b1db481a20e05d50c0991221648ced89fea943975097cf617bf769d339195df",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_10",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.193347678606604,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.236786807063785,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.236786807063785,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.2589706040148854,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.3236606210215,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "de9ca4ab1f188b24a50958fa56f3a6516266838cadce754cdc667b9d4e97b4fc",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272578897651e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "cefaece7923373b3e15a9f48860215b313a18d6324a8ed6fc10028abe7412809",
+      "retrieval_and_prompt_seconds": 5.399693258001207,
+      "source_sha256": "b7dde4b8f943884e6d45a8dd478ae658a1cf2044fa860ace66a53f61be53f779",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_11",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.2771636567115725,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.2771636567115725,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.3138594132956896,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.379482338703971,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.4361273985973053,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "92fc52cb79dfa60a255d22116dc75ebaa7423a7c491849d4636c0a6487c86f16",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272667715493e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "8ec2e8af5d1f0239ea326b0cf623d53cc5dc79bffbe6ef7cb59741382d1c1fa2",
+      "retrieval_and_prompt_seconds": 5.736987946998852,
+      "source_sha256": "a554708fad64f81e293dfe148f9752cf127ae7abcd672e62da1d184c1510a2e2",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_12",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.4219166013364526,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.4219166013364526,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.477778285161031,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.518658979393444,
+          "rag_id": "rag_9ddcfd2036fdd3e7103a9941e718efefd99df925f26734c7364df60eb9a7e992"
+        },
+        {
+          "distance": 3.532570625700956,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        }
+      ],
+      "prompt_sha256": "b5c3efeb6f83b23d20de177da901fe7f50de3b803749e1cc94e28cc0809be689",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272667715493e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "2dcfdfc76648d0cadd6a0399bed61c8bc3a39c6865ddb60c1d3ba1e9632cac03",
+      "retrieval_and_prompt_seconds": 5.374295863999578,
+      "source_sha256": "305045885fe1dffcfbf3fa8c0c081c7651e56fbcb048d3a1122d7da565759c08",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_13",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.518458772626091,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.518458772626091,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.5625571634186572,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.5625571634186572,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.5743204564506694,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        }
+      ],
+      "prompt_sha256": "77bf7be29b764a5bc66f8c0839992ea600dcdd0f3bc1ca2a2a0b0c82dc43e571",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "a220755cd7e954fe6ac8dcac748032336d34dca528c88c5354f83ab3f569eceb",
+      "retrieval_and_prompt_seconds": 5.270153487999778,
+      "source_sha256": "3aeafa52636088502892e371fe3ecfa55c95fc7028720ffceb075f8eee69dd15",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_14",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.6268904698044637,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.6268904698044637,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.6540441023958197,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.6540441023958197,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.6568029431615927,
+          "rag_id": "rag_f357f5d29abb95cab07898cf5d39121527ab56f950259d79f4ab790c6f944e54"
+        }
+      ],
+      "prompt_sha256": "1e0e94b1f382607ff46d01f559b1d8f5eb7ff959a08f3af5d35d95f153e50168",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831704046572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "ed850df4f74aec62642f5edcd4beb16a1d661bd04635a82d2f4f451a1ae2928f",
+      "retrieval_and_prompt_seconds": 5.517927328000951,
+      "source_sha256": "076db9a7219eb3c8641d758d8a9acc9e242b6dd477bd615f27b6d3dea6e5d24f",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_15",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.6500705972342513,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.6500705972342513,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.6799830705913803,
+          "rag_id": "rag_f357f5d29abb95cab07898cf5d39121527ab56f950259d79f4ab790c6f944e54"
+        },
+        {
+          "distance": 3.7084721562067573,
+          "rag_id": "rag_01fbc8e261b322052c4669d86e73c8810087374e52bc8d1f1ff3af9923e72182"
+        },
+        {
+          "distance": 3.734257442396577,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        }
+      ],
+      "prompt_sha256": "d4e312a02e529d7fb160296c864bafcbff8480b83d6bf41382e1182bdc810369",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "4715be4c4e9852a06a98a0790afc711fb3664635cfeae58b4037318c5c7cd609",
+      "retrieval_and_prompt_seconds": 5.7255712959995435,
+      "source_sha256": "bdc8c11f7a94d779b95ebf287121e6b29ca200c7d55a072faddad32d532bc59e",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_16",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.7049306081069417,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.7049306081069417,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.7348430814640703,
+          "rag_id": "rag_f357f5d29abb95cab07898cf5d39121527ab56f950259d79f4ab790c6f944e54"
+        },
+        {
+          "distance": 3.7633321670794477,
+          "rag_id": "rag_01fbc8e261b322052c4669d86e73c8810087374e52bc8d1f1ff3af9923e72182"
+        },
+        {
+          "distance": 3.790532298455693,
+          "rag_id": "rag_017cec2b3d9904d2e4d0229d5ef427ba6b06482daa1eb9b8bfa6562b60054306"
+        }
+      ],
+      "prompt_sha256": "9831975eef4218d79220efab201ffee00e1fe4ca7d5b67387ddd9db20a65b289",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831792864414e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "cc58a40341aa8274e07a1e046e8d25f27532023dd39c909f94a94ee48687d14e",
+      "retrieval_and_prompt_seconds": 5.370906667998497,
+      "source_sha256": "5abedf465ab8b4d64086266e4af2e86e56dd55a6e26516846fc39eaaffe6065c",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_17",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.753324188213937,
+          "rag_id": "rag_f357f5d29abb95cab07898cf5d39121527ab56f950259d79f4ab790c6f944e54"
+        },
+        {
+          "distance": 3.7707681190048863,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.7707681190048863,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.7818132738293144,
+          "rag_id": "rag_01fbc8e261b322052c4669d86e73c8810087374e52bc8d1f1ff3af9923e72182"
+        },
+        {
+          "distance": 3.8090134052055595,
+          "rag_id": "rag_017cec2b3d9904d2e4d0229d5ef427ba6b06482daa1eb9b8bfa6562b60054306"
+        }
+      ],
+      "prompt_sha256": "ca5f4b53d9bd921a6405ac7927102f393e858824cd0dd955b0a5a5566765f78e",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "3db6b389b80b9b2f270e35677723193a0718c28c844b87719a74678875258756",
+      "retrieval_and_prompt_seconds": 5.6449620189996494,
+      "source_sha256": "d8872ea27acbc5ff232206b654ee543cc24c99d0486e134d2b867007a0dc7858",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_2",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 0.890293584070962,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 0.890293584070962,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.2147095554379408,
+          "rag_id": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+        },
+        {
+          "distance": 1.3282979296184974,
+          "rag_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22"
+        },
+        {
+          "distance": 1.3282979296184974,
+          "rag_id": "rag_ac78efae5394c006180d56ef8af493c66e326a35679fd4bc8af0da527503646f"
+        }
+      ],
+      "prompt_sha256": "9146ca7aa9b7a3611580bfdab67405cb07bf4156ed4733cdb38043608f9fef5b",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3757507932865565e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "48438fac70ad0d33d5ad29fd57f7f7bf1c4503f6b64d7b22bcc5c70eaf1b4f6c",
+      "retrieval_and_prompt_seconds": 5.4175644159986405,
+      "source_sha256": "aa91238ec5978b739b87b3a657746a8786de113397a5abeadf726d1dd9c836b3",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_3",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 1.371857152157952,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 1.371857152157952,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.7627085917186682,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 1.7627085917186682,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 1.8346210337264144,
+          "rag_id": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+        }
+      ],
+      "prompt_sha256": "0bc35b2b92cdd2263cc94b5d4c189c6d1fcc1e735457b11dc382c96d29a117cb",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439577712723e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "1cd64ab8102c784dc71837e3cf1b3896e71c2b98a4138e552e627028bf8b32f6",
+      "retrieval_and_prompt_seconds": 5.583436377000908,
+      "source_sha256": "7f613ccae98ac8124d086ee9a39d94b1ed019520da8c3277395b109fd22d7d4d",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_30",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.330408606871467,
+          "rag_id": "rag_bc485113fd8215e8e3e9d7ab87783ecb1c0b2452ed3dd031b7ceb83ed59d905b"
+        },
+        {
+          "distance": 4.368054193126184,
+          "rag_id": "rag_808bd79d63f6def5d0142ca236c73cadc1b3ac32ff8f89ebb7f00abfc5e401a3"
+        },
+        {
+          "distance": 4.372042320447955,
+          "rag_id": "rag_a5e6d8d8225fb5890780d435a8e14c2b441b666a63f21ac1e59c1f5a25edf737"
+        },
+        {
+          "distance": 4.372042320447955,
+          "rag_id": "rag_b451736bc49a6c49082de5d999849f99b7aaf65bcedb981fb74f5faf43dfc483"
+        },
+        {
+          "distance": 4.387441745523743,
+          "rag_id": "rag_2bef9ae30b4132f50dc39d48aecf450bfb2619016943edfa822dc2a7a986f015"
+        }
+      ],
+      "prompt_sha256": "5c06794ff532de224ebe0840a812ca8d903b06f82b4e58e03be0041d9eb227cb",
+      "query_audit": {
+        "max_qdrant_score_error": 1.184340208126855e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "fc06ae87ddceb62213c2a8549f833c5382a4396af901d53ceec384db26fe328e",
+      "retrieval_and_prompt_seconds": 5.375104147002276,
+      "source_sha256": "7f30b1db5ee05975ae25b9ce92476d0530c10cf6edaf1d2896e4c78a75ebbab8",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_4",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 1.9132041771010388,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 1.9132041771010388,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 2.0810833764043677,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.0810833764043677,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.1922158066501902,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        }
+      ],
+      "prompt_sha256": "3bcf6d5bd1be286e1b2238014bb9f881b43e8c904a90d7821391b3e0d7469c1c",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439577712723e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "699f901c137714c66103f7049812b12869cd9e76f64627f76f284bd2d8bca968",
+      "retrieval_and_prompt_seconds": 5.61151137699926,
+      "source_sha256": "ea84355871fa77560419766f8000de4dcb0eea29468bcb0d89a1c84edff34f61",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_40",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.591807304243303,
+          "rag_id": "rag_12c7530a18343b2a8437a971c7d215e2ce0297e627eba640ab46b895a3121152"
+        },
+        {
+          "distance": 4.696619414716002,
+          "rag_id": "rag_bc485113fd8215e8e3e9d7ab87783ecb1c0b2452ed3dd031b7ceb83ed59d905b"
+        },
+        {
+          "distance": 4.703260401448969,
+          "rag_id": "rag_b75c76cb19daaacc3f9fc43fcc571077513e99a15d391d83b212eb2635f3bbd8"
+        },
+        {
+          "distance": 4.7347205469322,
+          "rag_id": "rag_808bd79d63f6def5d0142ca236c73cadc1b3ac32ff8f89ebb7f00abfc5e401a3"
+        },
+        {
+          "distance": 4.738253128292489,
+          "rag_id": "rag_a5e6d8d8225fb5890780d435a8e14c2b441b666a63f21ac1e59c1f5a25edf737"
+        }
+      ],
+      "prompt_sha256": "106b14afec5009a50467ccd7c6986edc1825f614694473628a54ecb6dc17c3d9",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1843401992450708e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "e812ae81bee07c891544307fc6e93d979af280d1719d451f47d2d7c4119259fa",
+      "retrieval_and_prompt_seconds": 5.250062954000896,
+      "source_sha256": "fe261655c9b5ac797e51913d9f15efffbb74418c7ec7e34e348dc43f310f4337",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.29694520315894,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 2.29694520315894,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 2.338321236564391,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.338321236564391,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.378244315882182,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        }
+      ],
+      "prompt_sha256": "1e1bcd21f46895c6741973bbd9a0f75dea1db01927e973db187a220f2264e282",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439577712723e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "83d5e19a70dfd2c344baa8a4fb55268612137792e3f46c870146631fbaed1d38",
+      "retrieval_and_prompt_seconds": 5.439129524002055,
+      "source_sha256": "0285fd21a0dd1ca29cd386de85a1a8af49cc7d71f5c86f6451b55a11c68864a8",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_50",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.8719147486149,
+          "rag_id": "rag_12c7530a18343b2a8437a971c7d215e2ce0297e627eba640ab46b895a3121152"
+        },
+        {
+          "distance": 4.904138085762663,
+          "rag_id": "rag_1a3d9ed5653d51abe2b274dd6b501f31b1ee31fd80722f0f7fe0730a10215794"
+        },
+        {
+          "distance": 4.969653277607363,
+          "rag_id": "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144"
+        },
+        {
+          "distance": 4.969653277607363,
+          "rag_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1"
+        },
+        {
+          "distance": 4.9767268590875995,
+          "rag_id": "rag_bc485113fd8215e8e3e9d7ab87783ecb1c0b2452ed3dd031b7ceb83ed59d905b"
+        }
+      ],
+      "prompt_sha256": "5fd47c57ec0ccdc239e93c5f9ddd6802daa82033e6b9d203391e48a8d40f3c69",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1843401992450708e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "11c9d4b888950639a98e3a83b2861fbbd1bdbe78c4ae14367f7efc2ff8631a65",
+      "retrieval_and_prompt_seconds": 5.239829785001348,
+      "source_sha256": "724581f2ffc7cfb252724ba7e154473281b2ddac0bfcce6bdc48339a08aa1a59",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_6",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.661555935794108,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.661555935794108,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.692687806320691,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.692687806320691,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.7240760062847613,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        }
+      ],
+      "prompt_sha256": "09e3b10222756413b5673a375791d25146ca0a5d048581b37dda8084e183be3a",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3040113078233162e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b375902d44c4dab8183bcfebaef7251a1d05acdcaf323ccaac1d2d1b6c9bdea0",
+      "retrieval_and_prompt_seconds": 5.637916823001433,
+      "source_sha256": "cbe1ca5505b485bd87b2e68f2b38ecae377e29f823c30e4c44d3f5f87d4266f7",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_60",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156"
+      ],
+      "examples": [
+        {
+          "distance": 5.048123621714759,
+          "rag_id": "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144"
+        },
+        {
+          "distance": 5.048123621714759,
+          "rag_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1"
+        },
+        {
+          "distance": 5.15439909180474,
+          "rag_id": "rag_312ada178e874b66e35dab0c3dc8fcd9c794e165d9b69f2d7962c1e6e5fdf1f4"
+        },
+        {
+          "distance": 5.182760684779386,
+          "rag_id": "rag_c2e1b538c349550f19ae2eb1efb54479086e8249b0233c28f2ab1d2e94687e9c"
+        },
+        {
+          "distance": 5.219573547389762,
+          "rag_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1"
+        }
+      ],
+      "prompt_sha256": "88b35deabf35faec2715b6fc1f0ece63fefad089e5a567587673bf78e4271b11",
+      "query_audit": {
+        "max_qdrant_score_error": 9.991680904875011e-08
+      },
+      "registry_count": 5,
+      "registry_sha256": "4f8c8bd1c76ad44bf2abc0c8ef35f2bcb01b537f033269330b024cfb6e14a61e",
+      "retrieval_and_prompt_seconds": 5.04887670899916,
+      "source_sha256": "cce1fbe95d47893ec1fabdd0557aaf7b142d8796e5a1d3bcdc19d05064d3dfb1",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.827292709222107,
+          "rag_id": "rag_b6ac9c8200ae452c6b9acef52ad42476f0d2badd249e95b9a5939d317947ee6a"
+        },
+        {
+          "distance": 2.889121073939012,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.889121073939012,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.8909489151615655,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.8909489151615655,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        }
+      ],
+      "prompt_sha256": "28c6501834771158f9f657a0478ce69673f7f7bfdea7ac79ab42e9d6817dc852",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3040113078233162e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b90638cacfe2ab3406fe76fcf6e8348b8357e4a8c37d17ccc0496033c1149f63",
+      "retrieval_and_prompt_seconds": 5.2897433530015405,
+      "source_sha256": "01de4bb89da48a3fc09c31d41d509c1446c6a4a3b329612c5baf0d39c56a922e",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_70",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156"
+      ],
+      "examples": [
+        {
+          "distance": 5.112917034392257,
+          "rag_id": "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144"
+        },
+        {
+          "distance": 5.112917034392257,
+          "rag_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1"
+        },
+        {
+          "distance": 5.247554097456884,
+          "rag_id": "rag_c2e1b538c349550f19ae2eb1efb54479086e8249b0233c28f2ab1d2e94687e9c"
+        },
+        {
+          "distance": 5.344432350031526,
+          "rag_id": "rag_a3c80c116141d53da69eac2f04b6449e1311c6ed13943f3ba118899177706845"
+        },
+        {
+          "distance": 5.344965534461967,
+          "rag_id": "rag_312ada178e874b66e35dab0c3dc8fcd9c794e165d9b69f2d7962c1e6e5fdf1f4"
+        }
+      ],
+      "prompt_sha256": "f54eebefe6e6a962b90aaa86dbad35315260ffa98ff9919882355d494cb14c97",
+      "query_audit": {
+        "max_qdrant_score_error": 9.991681082510695e-08
+      },
+      "registry_count": 5,
+      "registry_sha256": "bb8c1f3a64eff8a3a8a17f29a3fcede91f7ad290df1c0ddb92295f5e50bc97b5",
+      "retrieval_and_prompt_seconds": 4.926907355998992,
+      "source_sha256": "571e6dcfb9cb47509aeb3d737f76f876f7aca6b54c7bb2e336c6bc3fafeead7a",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_8",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.025130886313862,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.025397490896295,
+          "rag_id": "rag_d5da78a3bf1909e8ec75706e58ed06a3e07c7a19c8842d9ff830c43930ba9c92"
+        },
+        {
+          "distance": 3.025397490896295,
+          "rag_id": "rag_e3154640233fea3eae281732b0de2bca1ca841f19d3aee43e38a1388626a3ceb"
+        },
+        {
+          "distance": 3.072487147983353,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.090221063384502,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "f026ccf1e2eafcbc76bd3debef172a1f8949d3bfb5ff09cdf7cc81390870a36d",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3040113078233162e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "586be6c353f3b0ffdfd1678c828e0765029272d181bd48a119ea5e96f16a5a37",
+      "retrieval_and_prompt_seconds": 5.557446288999927,
+      "source_sha256": "e4664972befc3ffed396f3842bf910be22c2fbe7f293d3c295b971dfe094d398",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_qiskit_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.0554364506764964,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.099570370777781,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.143009499234962,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.143009499234962,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.1475760440048677,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "71158affae4eb77f85c394989044568a1acd8bda76e84a9a243f92fcb41696c8",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272667715493e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "2e0464712a273c2b662a42364bbba646150162694146abf50b265b755b3a5950",
+      "retrieval_and_prompt_seconds": 5.275860818001092,
+      "source_sha256": "e0c3acec67c0fb535add575a46e01889b30ec7970005214fd2188b94ae3a55a5",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_10",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.22059776230367,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.2640368907608512,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.2640368907608512,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.286220687711952,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.3509107047185664,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "62c0dbb5ab2277bd82d8208e7ba30c007e4bdbd4643819ad3aaad50bd191f20e",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272667715493e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "cb67db06d9fda8f880f4cae1aa25d222acb2c49cbb091bdd778ca7904beefa15",
+      "retrieval_and_prompt_seconds": 5.557112742000754,
+      "source_sha256": "2d481c889ddcf1b667a05cc4e1df3adeb57ecb494f810459eae1ee6d6a3545b1",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_11",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.3058138119815985,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.3058138119815985,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.342509568565715,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.408132493973997,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.4647775538673313,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "b67ea6b74b88c5f1b7edf6f5f39f3971531bd6e94804cb89b7016135b07b1de4",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272578897651e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "15c0d8daa4c17e4ceaa6ce9c8dc57f0d22e78a138dc25b9ccfdb056ee2d6dec5",
+      "retrieval_and_prompt_seconds": 5.400140164998447,
+      "source_sha256": "437382c52778f9855b20567b6a89995bf6c921ecdfe988a7294c89de4694c725",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_12",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.4518432029513,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.4518432029513,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.507704886775878,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.5485855810082914,
+          "rag_id": "rag_9ddcfd2036fdd3e7103a9941e718efefd99df925f26734c7364df60eb9a7e992"
+        },
+        {
+          "distance": 3.5624972273158035,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        }
+      ],
+      "prompt_sha256": "e21b74f6d07dcc48e11308939e1116248800682113c485f38a19551e68c761a3",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831704046572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "25850890950a7f08abb2a46f78813bb76e99e7b8b0781795e2289628b5af6a0b",
+      "retrieval_and_prompt_seconds": 5.45573012299792,
+      "source_sha256": "578ca1538ba5952c92b1156faaab1b315572648a16edd47ce6e74b211e2cd7cf",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_13",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.549558007931565,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.549558007931565,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.5936563987241312,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.5936563987241312,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.6054196917561434,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        }
+      ],
+      "prompt_sha256": "16cbc5c17db2e93b76828bda6ed4ce797c02179f665d80a8ba22552c7f13f060",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831704046572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "000f59aa7bfd2088167c88bcf25eae7340b0fb4154672f76a7d9d253aca6c0e1",
+      "retrieval_and_prompt_seconds": 5.391134898000018,
+      "source_sha256": "5f60f88a310c9603f9a9d785faa50171c2cc7f21573b3468339cb5f1375d9581",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_14",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.6590739794165206,
+          "rag_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8"
+        },
+        {
+          "distance": 3.6590739794165206,
+          "rag_id": "rag_66fb9596d0286149299f26ccd1d7a20e4a1ed0cf761bf3cb3eb4445a18043506"
+        },
+        {
+          "distance": 3.6862276120078765,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.6862276120078765,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.6889864527736496,
+          "rag_id": "rag_f357f5d29abb95cab07898cf5d39121527ab56f950259d79f4ab790c6f944e54"
+        }
+      ],
+      "prompt_sha256": "f71bd8ac2c23d507f936dc2b98214e408b5622118356b9ab1f5e376c45493f7a",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831792864414e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "034b1a3f71a09caccc4d88cda10ce723a063243ed2bf0876d03f8368d0209798",
+      "retrieval_and_prompt_seconds": 5.825136218001717,
+      "source_sha256": "3c0032ab406110a2fe132c18b709fdf6aaa9c7bad083b94380ae804c1a84e10d",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_2",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 0.8952270099859524,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 0.8952270099859524,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.2196429813529313,
+          "rag_id": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+        },
+        {
+          "distance": 1.3332313555334876,
+          "rag_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22"
+        },
+        {
+          "distance": 1.3332313555334876,
+          "rag_id": "rag_ac78efae5394c006180d56ef8af493c66e326a35679fd4bc8af0da527503646f"
+        }
+      ],
+      "prompt_sha256": "c9c4d3887a3162650acedd272b2219c00edfe6454225f41ab8c0ff1811cedf0c",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3757508021683407e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "c4360d4d30433be12b637b2f468e689ce69a5869a03e88a15e378d3d938e9022",
+      "retrieval_and_prompt_seconds": 6.3079906170023605,
+      "source_sha256": "7db8d54421301dc2db47ecac89e1509d48dc3b9aa0b89d2486ea3c05abeab151",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_3",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 1.3817240039879326,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 1.3817240039879326,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.7725754435486487,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 1.7725754435486487,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 1.8444878855563953,
+          "rag_id": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+        }
+      ],
+      "prompt_sha256": "443fa12bf090f2c73e30d337727c982ff0269ef83c5c23648a1692ccab73eef7",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439577712723e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "54f617a0eee4d47237d7b1ff4cd38372c3ef847c3022839fd5fd8e1b30cb87f1",
+      "retrieval_and_prompt_seconds": 6.0331794769990665,
+      "source_sha256": "e1e15528db887b212921bef83eb55caff29af6d52c6a9c912ab913d8fe7966ca",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_30",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.288185561868563,
+          "rag_id": "rag_b43e5df8972dab6edd1e16ec0c83b96c09f9c8011f394275d259c984d1ed1653"
+        },
+        {
+          "distance": 4.373665794646734,
+          "rag_id": "rag_bc485113fd8215e8e3e9d7ab87783ecb1c0b2452ed3dd031b7ceb83ed59d905b"
+        },
+        {
+          "distance": 4.41131138090145,
+          "rag_id": "rag_808bd79d63f6def5d0142ca236c73cadc1b3ac32ff8f89ebb7f00abfc5e401a3"
+        },
+        {
+          "distance": 4.415299508223221,
+          "rag_id": "rag_a5e6d8d8225fb5890780d435a8e14c2b441b666a63f21ac1e59c1f5a25edf737"
+        },
+        {
+          "distance": 4.415299508223221,
+          "rag_id": "rag_b451736bc49a6c49082de5d999849f99b7aaf65bcedb981fb74f5faf43dfc483"
+        }
+      ],
+      "prompt_sha256": "43938c2c5776bb8639f94e77e0207f0fa589cfcbc6c2952323dafb3a94bf961c",
+      "query_audit": {
+        "max_qdrant_score_error": 1.184340208126855e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "ad693e061b733448a091561ad3aa16f22bf91bf5c37dc1948de82456500068d2",
+      "retrieval_and_prompt_seconds": 5.510740567999164,
+      "source_sha256": "fb972fb1278d5c2db19669a9b31af867abd9480fe18b75fb31f408e1cbf49a65",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_4",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 1.9270540546260937,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 1.9270540546260937,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 2.0949332539294225,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.0949332539294225,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.206065684175245,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        }
+      ],
+      "prompt_sha256": "667a0e4c4e6f0bb128560afc29af3caa307bd6a9ef5219f4b2e222f19df032f2",
+      "query_audit": {
+        "max_qdrant_score_error": 1.417543948889488e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "ae31887594ccbb2047df3ed8bfccb1fb8633a1413d759921d0876afe46dbd3e5",
+      "retrieval_and_prompt_seconds": 5.654368278999755,
+      "source_sha256": "e321e636db011e29ea171daebef2b08bdd08e0d118fb3c043cac237ee2c831a2",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_40",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.4501569162145636,
+          "rag_id": "rag_c73b0aa79a591a36c1e827962655577ccb798c9481fb1d7928910bb4fd0e7a99"
+        },
+        {
+          "distance": 4.455642327167799,
+          "rag_id": "rag_b43e5df8972dab6edd1e16ec0c83b96c09f9c8011f394275d259c984d1ed1653"
+        },
+        {
+          "distance": 4.639213475651827,
+          "rag_id": "rag_12c7530a18343b2a8437a971c7d215e2ce0297e627eba640ab46b895a3121152"
+        },
+        {
+          "distance": 4.66958694715989,
+          "rag_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854"
+        },
+        {
+          "distance": 4.7440255861245255,
+          "rag_id": "rag_bc485113fd8215e8e3e9d7ab87783ecb1c0b2452ed3dd031b7ceb83ed59d905b"
+        }
+      ],
+      "prompt_sha256": "482a39d37519baccc649bcdc6e31cd1f2723ba66a059f095f6e9edc42c7b19f9",
+      "query_audit": {
+        "max_qdrant_score_error": 1.259246573681594e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b6b4642163001ad03cb87b170a786680092d58ab733bc4fe7302f53882a194d9",
+      "retrieval_and_prompt_seconds": 5.334210271998018,
+      "source_sha256": "8a43c326dd5f3d38d5ab379d0e8a8083ec533ad9392f775f899b1482b0e08fbd",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.3140120527574624,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 2.3140120527574624,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 2.355388086162913,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.355388086162913,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.3953111654807047,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        }
+      ],
+      "prompt_sha256": "83d2835e28ac136d37e59fb8c8f341d7a6d16446106a7a399c0261e8aa284217",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439666530565e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "39ccf82e7910391819ee4d7ee57a832da864142b0753b8bd00ef5e17c42a813a",
+      "retrieval_and_prompt_seconds": 5.5320810839984915,
+      "source_sha256": "4e265938c4f2c57738fa583bcdb23665540244f64e7049d4f643a381fb03f3f1",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_50",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.575080786855208,
+          "rag_id": "rag_c73b0aa79a591a36c1e827962655577ccb798c9481fb1d7928910bb4fd0e7a99"
+        },
+        {
+          "distance": 4.5805661978084435,
+          "rag_id": "rag_b43e5df8972dab6edd1e16ec0c83b96c09f9c8011f394275d259c984d1ed1653"
+        },
+        {
+          "distance": 4.581729473167319,
+          "rag_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854"
+        },
+        {
+          "distance": 4.92253043191314,
+          "rag_id": "rag_12c7530a18343b2a8437a971c7d215e2ce0297e627eba640ab46b895a3121152"
+        },
+        {
+          "distance": 4.954753769060903,
+          "rag_id": "rag_1a3d9ed5653d51abe2b274dd6b501f31b1ee31fd80722f0f7fe0730a10215794"
+        }
+      ],
+      "prompt_sha256": "1d477e48883a5dee1ee92b943739ad6afb549b01b7bdb4d6301b9f29d25c51f2",
+      "query_audit": {
+        "max_qdrant_score_error": 1.259246573681594e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "c94d3e584667d045d8cd41a14f8aa45f44cde7e328a749846a1c7d409e116309",
+      "retrieval_and_prompt_seconds": 5.365238697002496,
+      "source_sha256": "43188aca8fdb5050b0495d4920d394fad02a91ac2bfd8f7c5eb68ec393402368",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_6",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.6812896394540693,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.6812896394540693,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.7124215099806523,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.7124215099806523,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.7438097099447227,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        }
+      ],
+      "prompt_sha256": "d14e5a1356d7dd858edbab2d4d155bf038fe0950fdbf14a2e84e262e5dd910eb",
+      "query_audit": {
+        "max_qdrant_score_error": 1.304011298941532e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "6a76b6953828ce3695888a7a731d4ae46f2eba51ddd3a0f31ec7fd769b439c07",
+      "retrieval_and_prompt_seconds": 5.700792610001372,
+      "source_sha256": "ae5d24bd6f3fd0904c7444cf4f1dedf1aff97a0d1d29e65adb49708893734b90",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_60",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156"
+      ],
+      "examples": [
+        {
+          "distance": 5.101357006620412,
+          "rag_id": "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144"
+        },
+        {
+          "distance": 5.101357006620412,
+          "rag_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1"
+        },
+        {
+          "distance": 5.207632476710393,
+          "rag_id": "rag_312ada178e874b66e35dab0c3dc8fcd9c794e165d9b69f2d7962c1e6e5fdf1f4"
+        },
+        {
+          "distance": 5.235994069685039,
+          "rag_id": "rag_c2e1b538c349550f19ae2eb1efb54479086e8249b0233c28f2ab1d2e94687e9c"
+        },
+        {
+          "distance": 5.332872322259681,
+          "rag_id": "rag_a3c80c116141d53da69eac2f04b6449e1311c6ed13943f3ba118899177706845"
+        }
+      ],
+      "prompt_sha256": "bc21550d5acd2bfcb7c378be31b1d25b9794bbb6c5acbbf449d5b5afc3fc6dd6",
+      "query_audit": {
+        "max_qdrant_score_error": 9.991681082510695e-08
+      },
+      "registry_count": 5,
+      "registry_sha256": "2ca9c662323f62144310a4ad815f0d4452b155d7ec37a4cd3bcacaaaf1576b25",
+      "retrieval_and_prompt_seconds": 5.099037055999361,
+      "source_sha256": "caac8e5a0802079d44aa1ab201788ff9836e31d47ec124ee601bfaf2dc872460",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.8492929847356194,
+          "rag_id": "rag_b6ac9c8200ae452c6b9acef52ad42476f0d2badd249e95b9a5939d317947ee6a"
+        },
+        {
+          "distance": 2.9111213494525243,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.9111213494525243,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.912949190675078,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.912949190675078,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        }
+      ],
+      "prompt_sha256": "47cec39cc5e13411ddf7ae82eab8050fc10b3dcfcb9b62609fbdcf87bc4fa9d2",
+      "query_audit": {
+        "max_qdrant_score_error": 1.3040113078233162e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "5e9ee1f50580054ec45e42aaa6c8ba97794871b5e58314e9839868277acd2814",
+      "retrieval_and_prompt_seconds": 5.3384970810002415,
+      "source_sha256": "2836d5d7eb2a88e78957465099961ecc45c20556aeabc19f5672250bd48dc292",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_8",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.049097375649755,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.0493639802321884,
+          "rag_id": "rag_d5da78a3bf1909e8ec75706e58ed06a3e07c7a19c8842d9ff830c43930ba9c92"
+        },
+        {
+          "distance": 3.0493639802321884,
+          "rag_id": "rag_e3154640233fea3eae281732b0de2bca1ca841f19d3aee43e38a1388626a3ceb"
+        },
+        {
+          "distance": 3.0964536373192457,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.114187552720395,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "599ca6e5db99630e61182be28420c05389e72c861c9adb2f45b895d59c78212a",
+      "query_audit": {
+        "max_qdrant_score_error": 1.375315337170946e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "9d97af58fb62fe187b57a8bd329b67657fb3d94e79a3743c80e7e1aae97db8de",
+      "retrieval_and_prompt_seconds": 5.495753926999896,
+      "source_sha256": "593c67106fec6d6ea4f9f094a7b8ce8b82cadb9216baa18ce206a824ea694015",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qft_indep_tket_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.081136902913424,
+          "rag_id": "rag_c84c0d607abd35b93491a8c360d17a7d806189fc70cb0436b53de9cb9bbdac4a"
+        },
+        {
+          "distance": 3.125270823014709,
+          "rag_id": "rag_34030b63d26f23b5e1cc650cc2a05d756a0d338fa549458e5e65dde23b868ee5"
+        },
+        {
+          "distance": 3.16870995147189,
+          "rag_id": "rag_1d16e081f9b12590c980396f039d139b072423721797c8ddf773aa30a5ca8048"
+        },
+        {
+          "distance": 3.16870995147189,
+          "rag_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49"
+        },
+        {
+          "distance": 3.173276496241795,
+          "rag_id": "rag_866dd7c434812204ac27eb3c1922a9498f5d11fc5d048eaaf3b81bab272a1d68"
+        }
+      ],
+      "prompt_sha256": "b89eb5ed66322b5b80ec16177b47e64bf54e4704f7a607e2f75e0815f72f9859",
+      "query_audit": {
+        "max_qdrant_score_error": 1.375315337170946e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "c2534a0c52d75691132e3203a0c69aeb3cb271ab4c85bfd464f476f35479887f",
+      "retrieval_and_prompt_seconds": 5.634952262000297,
+      "source_sha256": "32097b0388baabc632934cd187471e4a49541d3d220d9d2ea8320e51ba703253",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_10",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.2531874496328324,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.2531874496328324,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.2612743518087237,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        },
+        {
+          "distance": 3.2612743518087237,
+          "rag_id": "rag_abc21b72611b77ecf2d4752527de049c9e377e186df5f819d1c758ed66bed378"
+        },
+        {
+          "distance": 3.2612743518087237,
+          "rag_id": "rag_e4df99e4475a594f49c04fa7897c94e0b3a77b5ce43c5b91f0eb5ee35da5fc3b"
+        }
+      ],
+      "prompt_sha256": "44f9f586c1c5c9267071d3fcaae1e54947ffa0141e82a1b8c6e0b0f2ebca28f1",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272667715493e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d4a8fabaedb6a1f4c6d66de568b37b5e56a680c5136c3d1c853774736117cfcf",
+      "retrieval_and_prompt_seconds": 5.594435793998855,
+      "source_sha256": "0e4fbafbbca55457fe41251b3997e13aad5d63634419c2ae740b8deb461f712e",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_11",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.3217880294391975,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.3217880294391975,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.3254688743405936,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.3254688743405936,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.333555776516485,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "b730b4404fb76cc52886986b07fc453d22c2c595165fdc757905d242aabce8cd",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272667715493e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "08f832b5549bda7fe30cb11d9cc74a388f73320f6fedfa11cfc4bd7dedf5540d",
+      "retrieval_and_prompt_seconds": 5.458337550000579,
+      "source_sha256": "b05ffaafc37537706601b825b24163c1ecdc04da78ef6dcae93060862405862f",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_12",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.4291560995478427,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.4291560995478427,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.4328369444492384,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.4328369444492384,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.4409238466251297,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "d208a0704f40fb984d5fcea2c86faf8083fb1782d67a83d32d56d9986db9f42f",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272578897651e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "09c04253e91be22312809ab8c26984373be0b4409eea5ba4a2856a1ee84dda6c",
+      "retrieval_and_prompt_seconds": 5.428974619997462,
+      "source_sha256": "324356140a5655bbd33fe4725100a0b1fb7faf0075eb5c5cf305aace80b1cb2c",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_13",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.486738263494652,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.486738263494652,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.490419108396048,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.490419108396048,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.498506010571939,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "9adcbcbdaaa1fd844a7879c08e3748bf050169073b1299342ef50097a95f8cf7",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "9179883b609e9587b4ca3ba194cb9df071efb0f6273e1eea287613ac6a2e1b14",
+      "retrieval_and_prompt_seconds": 5.562963101998321,
+      "source_sha256": "f819ee737610028bb714bb2e52e2c18b1008584c16a02ab8dedabfd9100a7ca5",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_14",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.5770894161042253,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.5770894161042253,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.580770261005621,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.580770261005621,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.5888571631815123,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "390a49574765ed8c56654ce79dc16f06efd5dc56cec601e84cfb8bbd30f66b36",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831704046572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "52e9c0c6ccdd7c6d7c46565529e2708e131a7aa3f3eb42038babd9a74029f9c5",
+      "retrieval_and_prompt_seconds": 5.43421152099836,
+      "source_sha256": "66b43fe63304981f142d759375b1c99e1ae5d13fd3189234692c4af69349431c",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_15",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.624520766822404,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.624520766822404,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.6282016117238,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.6282016117238,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.636288513899691,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "a2c2e535907a0c201becf02ce47b65674b8401e67a88d4d7157605caf4ff9fb8",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "7b57e8c7950edddb4027913ab732c417201620c711fc88a47bb900acd5e907bd",
+      "retrieval_and_prompt_seconds": 5.2811774170004355,
+      "source_sha256": "d9b3362bfe3dd5164f69557c3eb3aadb3e960d378c203a075c987e5e8b3e5fa1",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_16",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.7023927601250857,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.7023927601250857,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.7060736050264813,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.7060736050264813,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.7141605072023727,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "c0c0626a49b4cf0a36cac33cee167aef9d076d674cc891dc66898956a7789cc4",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "30f18014c0b46dd3193c69ebafaaa39367238c5312ee1967e7b61638c04edb76",
+      "retrieval_and_prompt_seconds": 5.4931735250029305,
+      "source_sha256": "69fb36a700d50fc4e65fd263f383c8320bedff37575e94ea54746dc462e8305e",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_2",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 0.9826034823784926,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 0.9826034823784926,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.2203820487532053,
+          "rag_id": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+        },
+        {
+          "distance": 1.3604765277589808,
+          "rag_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec"
+        },
+        {
+          "distance": 1.3625418515051906,
+          "rag_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22"
+        }
+      ],
+      "prompt_sha256": "614c3c2031e847e8ca5a4290bb5a6f6fbf608e3c2c60892cdd7c20346ba58abc",
+      "query_audit": {
+        "max_qdrant_score_error": 1.6062536456473708e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "0c28e16fdd9abd42a5797ec05965066de9eeb16709988ed6067c9db28f966f2b",
+      "retrieval_and_prompt_seconds": 5.359435800997744,
+      "source_sha256": "02d66e8b66849fdd0f0581b84924adbd1bd2d7603e25e5e9faa447ac2a6708d0",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_3",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 1.567833394621424,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 1.567833394621424,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.8727439886401802,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 1.8727439886401802,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.0018287586137715,
+          "rag_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec"
+        }
+      ],
+      "prompt_sha256": "05aa72d337bd84fe1161d627d2afd683e9f9376044e369443ac91fd002994f79",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439577712723e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "603027ac4fe37aa128ce8d28f380907fefe34d11548220686568948a304e74ca",
+      "retrieval_and_prompt_seconds": 5.472294006001903,
+      "source_sha256": "5ab4253ed51b729f331c9f3cc78bfecd3ecb2fed2e98818816bf3f64e22f1bfe",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_30",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.237566350877536,
+          "rag_id": "rag_14ab090ab1799be67f1ac7e4f7aeb1913c1ed4a2b7c19be346924af1c8918f10"
+        },
+        {
+          "distance": 4.365880473666368,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 4.365880473666368,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 4.37408484837314,
+          "rag_id": "rag_68246d53e7564a20970657cb2ec76e832c6c447166452aeac39ba2362dcc4159"
+        },
+        {
+          "distance": 4.37703602972316,
+          "rag_id": "rag_a633780f6c7ac49f37d5a969604abfaa5fa6cd06aaaeca4735571ce98fe0e9a6"
+        }
+      ],
+      "prompt_sha256": "07fa9b4c0d88af7cf1e8215a1dd708df64a6f646283d37abad852d199ffecec1",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1973977187551554e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "3355661e0062f75c7bbadc114046c2a609c5c6b89d5ce856dfc5f16328ec49fc",
+      "retrieval_and_prompt_seconds": 5.508392676001677,
+      "source_sha256": "ca439e2942e81c818cec5a11dfee8fc011598e6292abcc6caa87601662d6cb26",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_4",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.247032201147874,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 2.247032201147874,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 2.2763832619230646,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.2763832619230646,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.3930544842819574,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        }
+      ],
+      "prompt_sha256": "67df6f72d3817e725c72148740d1b5f232f20a8245848e85526186c0874e77f3",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439622121644e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "14259e48dd487ecf4fd4cf35b7593f1f5105d66496459aba72d4da96a86f2a49",
+      "retrieval_and_prompt_seconds": 5.516398959000071,
+      "source_sha256": "d7a22ac29418bcf9f00346732fe1b985f8e0b9df60273404dabbf4a62027715f",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_40",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.435629622237722,
+          "rag_id": "rag_0df3005170a850533d02849791bf674819d6717ec36a16ac0bba726624977fe0"
+        },
+        {
+          "distance": 4.46535341206729,
+          "rag_id": "rag_14ab090ab1799be67f1ac7e4f7aeb1913c1ed4a2b7c19be346924af1c8918f10"
+        },
+        {
+          "distance": 4.618169417871325,
+          "rag_id": "rag_a633780f6c7ac49f37d5a969604abfaa5fa6cd06aaaeca4735571ce98fe0e9a6"
+        },
+        {
+          "distance": 4.618169417871325,
+          "rag_id": "rag_e30030cfcfa262bd037163c48f98265260398b7e5519b5f7808b2d0f0271510d"
+        },
+        {
+          "distance": 4.618169417871325,
+          "rag_id": "rag_f52b3a0c95eed218127f70a1d4c7d8bc736952766f8602fcc424a2783af2da98"
+        }
+      ],
+      "prompt_sha256": "25b4a543809cd5af9526efa31a44ec0e0e0c2e82cf5295c1a92324eb772a095b",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1973977098733712e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "39b09e37f87abccc7eed5665177ada150511fca3a6c122004870535de8ac20dc",
+      "retrieval_and_prompt_seconds": 5.529704164000577,
+      "source_sha256": "cbe5277957f406ff432f614f2e4742c7e3fadc5e70fba7538a6957be751a5c88",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.5702064232301396,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.5702064232301396,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.5881514805699095,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.5881514805699095,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.632726493720793,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        }
+      ],
+      "prompt_sha256": "43bdf090e0aa599e063c3044288d75f772da86a3a8c2e8f7c95758fadc534220",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439577712723e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d047a9b7671c7e8ccf06bb234ef06e3895d577f68def2c5b307d7dee93a70455",
+      "retrieval_and_prompt_seconds": 5.526806447000126,
+      "source_sha256": "4ee5846eef239e2b0e0d3f950f78b5b4b8af213f0063eb50be6bf50bdbb4385d",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_50",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.598416365351628,
+          "rag_id": "rag_97296d18af1dc542109e5ef23836d3b5cb23e47fe0aae5e3af771db663dc41f9"
+        },
+        {
+          "distance": 4.609325308240889,
+          "rag_id": "rag_0df3005170a850533d02849791bf674819d6717ec36a16ac0bba726624977fe0"
+        },
+        {
+          "distance": 4.6390490980704575,
+          "rag_id": "rag_14ab090ab1799be67f1ac7e4f7aeb1913c1ed4a2b7c19be346924af1c8918f10"
+        },
+        {
+          "distance": 4.80039343825946,
+          "rag_id": "rag_a633780f6c7ac49f37d5a969604abfaa5fa6cd06aaaeca4735571ce98fe0e9a6"
+        },
+        {
+          "distance": 4.80039343825946,
+          "rag_id": "rag_e30030cfcfa262bd037163c48f98265260398b7e5519b5f7808b2d0f0271510d"
+        }
+      ],
+      "prompt_sha256": "8aa8066f58d99df162c37108c2cadd0870bfa50f4a3b29f16b1e442f3723b310",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1973977098733712e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d05d2a16aba9d2ed2f85d0bb25af7bf8e3caa32f3a2d3146cdadac8d2639a269",
+      "retrieval_and_prompt_seconds": 5.820742160001828,
+      "source_sha256": "9a6e2be97c6253ba084feff2e920da5cecfd132aa18e6c8c81f3ce97ccd81c13",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_6",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.8087091112623073,
+          "rag_id": "rag_36bdbdf7f12119fce6f57a92aad7645c0fe51cd5167676d5896f895f66e9bb98"
+        },
+        {
+          "distance": 2.8087091112623073,
+          "rag_id": "rag_a4742a74487ceec5e30aaec38114212922a557a74e1db931971cd628fbb28b67"
+        },
+        {
+          "distance": 2.8087091112623073,
+          "rag_id": "rag_c40d8cf4c3160455df131910d26d4718241063f15ab2737cda364c9f5be5c0e3"
+        },
+        {
+          "distance": 2.829246622471147,
+          "rag_id": "rag_7a5b23a05153e4e35fb1edb86cadf2226831d1c596e2e375878234b07443b50b"
+        },
+        {
+          "distance": 2.829246622471147,
+          "rag_id": "rag_81363ccc6bca737b21a027244b91351777d7fc29ce192769f7703462c4819a6b"
+        }
+      ],
+      "prompt_sha256": "0a04c3d3a153f6fe7b23fb42fa14543cf7240aad97e8a64a2c8fd941ffdb9aee",
+      "query_audit": {
+        "max_qdrant_score_error": 1.304011303382424e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d8bdff385d09b755bdb5ab386a181d69270c684739c279afd3f5d1df25ee616a",
+      "retrieval_and_prompt_seconds": 5.52779030000238,
+      "source_sha256": "7c8832728feaaf34fac1fda49dfcbfbf655902b5b4eb3f1b11e43f21d15de5bf",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_60",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156"
+      ],
+      "examples": [
+        {
+          "distance": 4.7369458785411025,
+          "rag_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1"
+        },
+        {
+          "distance": 5.562226883993445,
+          "rag_id": "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144"
+        },
+        {
+          "distance": 5.562226883993445,
+          "rag_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1"
+        },
+        {
+          "distance": 5.674764882865652,
+          "rag_id": "rag_312ada178e874b66e35dab0c3dc8fcd9c794e165d9b69f2d7962c1e6e5fdf1f4"
+        },
+        {
+          "distance": 5.6968639470580715,
+          "rag_id": "rag_c2e1b538c349550f19ae2eb1efb54479086e8249b0233c28f2ab1d2e94687e9c"
+        }
+      ],
+      "prompt_sha256": "f4f45a0214eff5ccfa38a6d709269f1b9af60d84eb41d57c9328ce1288b8fcbc",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1973977098733712e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "7eccacfc51a58afb58fcc138fb3a6bb29c2b678de23e9eced08141d579ba1b39",
+      "retrieval_and_prompt_seconds": 5.01288577699961,
+      "source_sha256": "ebded1336e249b5d06b4391e2a0e56345543782057553c5e72f18828fb6b4c68",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.903211351242417,
+          "rag_id": "rag_7a5b23a05153e4e35fb1edb86cadf2226831d1c596e2e375878234b07443b50b"
+        },
+        {
+          "distance": 2.903211351242417,
+          "rag_id": "rag_81363ccc6bca737b21a027244b91351777d7fc29ce192769f7703462c4819a6b"
+        },
+        {
+          "distance": 2.903211351242417,
+          "rag_id": "rag_f76d879139f3263a22145390fd63117c97d675a5bed39f936c555e281092a711"
+        },
+        {
+          "distance": 2.9314928140926684,
+          "rag_id": "rag_161beb85a2648809118aa666aa067cec4604a8bc60d0aa66e748cdade7a7d5dd"
+        },
+        {
+          "distance": 2.9314928140926684,
+          "rag_id": "rag_ce0e784045f8631b37ac562159a69c40b63739d2a05eb3809d4f2cd04d23cac0"
+        }
+      ],
+      "prompt_sha256": "f19400d2d446a84c8b696613e71d76e12ab32cf6946cf122b16ee7139c8f6c3f",
+      "query_audit": {
+        "max_qdrant_score_error": 1.304011303382424e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "5e3f4f5a0487397f7c66b2c0553d8a77e11dffad1fcf9022a8969be8ac8f6352",
+      "retrieval_and_prompt_seconds": 5.3363467669987585,
+      "source_sha256": "f0e0170b510412a7e964e82f14793115a9e53a1b250283a74abd893a45b5f20e",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_70",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156"
+      ],
+      "examples": [
+        {
+          "distance": 4.854708888502938,
+          "rag_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1"
+        },
+        {
+          "distance": 5.648962648924377,
+          "rag_id": "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144"
+        },
+        {
+          "distance": 5.648962648924377,
+          "rag_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1"
+        },
+        {
+          "distance": 5.7782130922360055,
+          "rag_id": "rag_c2e1b538c349550f19ae2eb1efb54479086e8249b0233c28f2ab1d2e94687e9c"
+        },
+        {
+          "distance": 5.875091344810647,
+          "rag_id": "rag_a3c80c116141d53da69eac2f04b6449e1311c6ed13943f3ba118899177706845"
+        }
+      ],
+      "prompt_sha256": "373811d20cd07f971f0fcfa87a0283ae994fff2a6bbf6e915a255b49a7329e86",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1973977187551554e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "185e17e2ae3196a8b1161632ad5593372b571b6e4aeb08ea204df125b6263736",
+      "retrieval_and_prompt_seconds": 5.04795675800051,
+      "source_sha256": "3034242ccb770a7373f1951a99ee2d0eb41fb292c130489282d0f2f0d68a5459",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_8",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.0489302117091097,
+          "rag_id": "rag_161beb85a2648809118aa666aa067cec4604a8bc60d0aa66e748cdade7a7d5dd"
+        },
+        {
+          "distance": 3.0489302117091097,
+          "rag_id": "rag_ce0e784045f8631b37ac562159a69c40b63739d2a05eb3809d4f2cd04d23cac0"
+        },
+        {
+          "distance": 3.0489302117091097,
+          "rag_id": "rag_e0fab435fa991d02fd3085a2b6dad0a645a0b8bc5063a88c9aa83a0ffb9d0dc7"
+        },
+        {
+          "distance": 3.0728707413577263,
+          "rag_id": "rag_7a5b23a05153e4e35fb1edb86cadf2226831d1c596e2e375878234b07443b50b"
+        },
+        {
+          "distance": 3.0728707413577263,
+          "rag_id": "rag_81363ccc6bca737b21a027244b91351777d7fc29ce192769f7703462c4819a6b"
+        }
+      ],
+      "prompt_sha256": "9c2e7bf9ae6b6490cc070edd0f3acf21d07857c4ee4d93d1e32ef5bf7ee85e01",
+      "query_audit": {
+        "max_qdrant_score_error": 1.304011298941532e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b39a6f49fce7c3b334dc7d4c06250cb0ba082cd08632b50b94a12ef49d0f21e0",
+      "retrieval_and_prompt_seconds": 5.772782111998822,
+      "source_sha256": "8711737782301f568af1980707e62c989655488357aa858d6c63bb8e206ae4fc",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_qiskit_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.1294484443257464,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        },
+        {
+          "distance": 3.1294484443257464,
+          "rag_id": "rag_abc21b72611b77ecf2d4752527de049c9e377e186df5f819d1c758ed66bed378"
+        },
+        {
+          "distance": 3.1294484443257464,
+          "rag_id": "rag_e4df99e4475a594f49c04fa7897c94e0b3a77b5ce43c5b91f0eb5ee35da5fc3b"
+        },
+        {
+          "distance": 3.1439022318554413,
+          "rag_id": "rag_161beb85a2648809118aa666aa067cec4604a8bc60d0aa66e748cdade7a7d5dd"
+        },
+        {
+          "distance": 3.1439022318554413,
+          "rag_id": "rag_ce0e784045f8631b37ac562159a69c40b63739d2a05eb3809d4f2cd04d23cac0"
+        }
+      ],
+      "prompt_sha256": "677de29024184911a219643aee8c934f2e33b9035800adada377b38d4688727a",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272578897651e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "0e04a20a4971cec177d3ebbfbef7baee617256d2064e46503ae554591d5755c8",
+      "retrieval_and_prompt_seconds": 5.380064241999207,
+      "source_sha256": "fea8eb37e38bc24d3352d9446471b5cf8f6b8af6ae4c0f931d5942564936274c",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_10",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.280437533329899,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.280437533329899,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.28852443550579,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        },
+        {
+          "distance": 3.28852443550579,
+          "rag_id": "rag_abc21b72611b77ecf2d4752527de049c9e377e186df5f819d1c758ed66bed378"
+        },
+        {
+          "distance": 3.28852443550579,
+          "rag_id": "rag_e4df99e4475a594f49c04fa7897c94e0b3a77b5ce43c5b91f0eb5ee35da5fc3b"
+        }
+      ],
+      "prompt_sha256": "4846f2c077d4782ea8af0a6d19ad4f0b8adf0a8e4c2e30e58a9cb6beafcd4bb6",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272623306572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "f3be494b2ca289152b020bbb66fc3878f202f08039ec9a536f346b83345efd77",
+      "retrieval_and_prompt_seconds": 5.408933187001821,
+      "source_sha256": "fb544354273681ee0ee4ddb55da1f8b9ecc456519bbc7c9ba9ca5192267d30c1",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_11",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.3504381847092235,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.3504381847092235,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.3541190296106196,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.3541190296106196,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.3622059317865105,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "15296c950ea292578d1d29a49ccbb5b11e8d23fa1a9c974d55f0dd3e33139bd9",
+      "query_audit": {
+        "max_qdrant_score_error": 1.1771272623306572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "4c2f54e776b405e3980bfe8fee2a4caacfd37659008981db82b95c58ddd838a3",
+      "retrieval_and_prompt_seconds": 5.42826783900091,
+      "source_sha256": "e419679d0d709670515a9bd3ab734bb64adaec3fa9aa2c70327821b68679ddf6",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_12",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.4590827011626897,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.4590827011626897,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.4627635460640858,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.4627635460640858,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.4708504482399767,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "a13079829b9fc32dcd1c9e8f2351eaf4e26b189acccbae3f76d980b799fbab93",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831704046572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "363dbcce36d14b4b5408b7df95eef07585a46f427deb6d4d07d4cbcc8e7e3327",
+      "retrieval_and_prompt_seconds": 5.708666344999074,
+      "source_sha256": "ca8fa925b5ed116ae8a5c2b39bec55fe6e0ed2c689cac6099fc8ebdab712f789",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_13",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.517837498800126,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.517837498800126,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.5215183437015223,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.5215183437015223,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.529605245877413,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "7083e3c28904c4d11383cda0fb5c206cc70a197b99c623a904417228d7b9ed7e",
+      "query_audit": {
+        "max_qdrant_score_error": 1.0901831704046572e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "d48bad7ec0602506260ad3ec419aefd958b9972a48b8c5a31fdbacb7c7134dd0",
+      "retrieval_and_prompt_seconds": 5.348738619999494,
+      "source_sha256": "5165b25f4e2aa6784eb911379bc82272bd1976561e35948a66e5ea2f8841c124",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_14",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.609272925716282,
+          "rag_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2"
+        },
+        {
+          "distance": 3.609272925716282,
+          "rag_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d"
+        },
+        {
+          "distance": 3.612953770617678,
+          "rag_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1"
+        },
+        {
+          "distance": 3.612953770617678,
+          "rag_id": "rag_b6b7e033cd0e60e81c81817ea0c38d8261715108ee2d8652c2d79f6d64818078"
+        },
+        {
+          "distance": 3.621040672793569,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        }
+      ],
+      "prompt_sha256": "ea6b7da251ef1956cf332c12e6fac5be3d6b22bff0d67892153791a405538f29",
+      "query_audit": {
+        "max_qdrant_score_error": 1.090183161522873e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "62b55d4b9e60fc987b363a467c1d2e84d451dce4c960ff9728a60800c15aa868",
+      "retrieval_and_prompt_seconds": 5.535045365999395,
+      "source_sha256": "a5636886e9464fdc27789da8605954b9890b6cb051827a7b7474c5a9cb90dc77",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_2",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 0.987536908293483,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 0.987536908293483,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.2253154746681958,
+          "rag_id": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+        },
+        {
+          "distance": 1.365409953673971,
+          "rag_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec"
+        },
+        {
+          "distance": 1.367475277420181,
+          "rag_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22"
+        }
+      ],
+      "prompt_sha256": "f3a7ad372ac1fafbd3b10eba70c2ea5782ef918979e7bb1823b1b53cde1cf212",
+      "query_audit": {
+        "max_qdrant_score_error": 1.6062536456473708e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "79c0d98552205f8c2876a4af1229558205b073e7f3b24dd843b09054dd8a341f",
+      "retrieval_and_prompt_seconds": 5.383733873000892,
+      "source_sha256": "7dbad3b73a033c87b1585126125dcb7bd34ef2dcd9a4d6ef33927f1b4fb1e1a5",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_3",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 1.5777002464514047,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 1.5777002464514047,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 1.882610840470161,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 1.882610840470161,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.011695610443752,
+          "rag_id": "rag_8c8998ae237cbe6253734b6e206e9a867d1496569a75dde4385d598a542c64ec"
+        }
+      ],
+      "prompt_sha256": "d3d3dafed268539606d83e5f0ab4bca25bf16eb7c9775bbfe1500773c8523275",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439533303802e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "fc85946876a0929a3847b1e1c351580aa34a035e4ee57a45138d2553321261c0",
+      "retrieval_and_prompt_seconds": 5.274085558001389,
+      "source_sha256": "522f46a8512925a333fd4b48d590b6033704af95271701bc516525623e5f024b",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_30",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.8940721891052865,
+          "rag_id": "rag_b43e5df8972dab6edd1e16ec0c83b96c09f9c8011f394275d259c984d1ed1653"
+        },
+        {
+          "distance": 4.1629443322261785,
+          "rag_id": "rag_c73b0aa79a591a36c1e827962655577ccb798c9481fb1d7928910bb4fd0e7a99"
+        },
+        {
+          "distance": 4.199844957969328,
+          "rag_id": "rag_e4f0e25fde9608d49aad2a09451d6081d0cf81f1452347c5f9293ff0e36db2d9"
+        },
+        {
+          "distance": 4.272462336565478,
+          "rag_id": "rag_72e6730be0327099c5b7eedec2aceab6940bef8f84e47e4a0389a1014cdf15b7"
+        },
+        {
+          "distance": 4.352073153621519,
+          "rag_id": "rag_7100b8eef718a85c82237a9f625e0cd06513088211f5fba4244880e33bfad4c5"
+        }
+      ],
+      "prompt_sha256": "2fab4d7239414f169f3754356d28cb0fc813cf792bebf1b63e6e17b685388d34",
+      "query_audit": {
+        "max_qdrant_score_error": 1.197397700991587e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "971667a320b673df76e616db45a2527308227fd67dd9c1cf61c10adb1fd9602e",
+      "retrieval_and_prompt_seconds": 5.583329551998759,
+      "source_sha256": "29ae3aab3c3cffdd4aae3632b669ecc3fbb3aff69a74044f0f0bfe1eecea804a",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_4",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.2608820786729287,
+          "rag_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9"
+        },
+        {
+          "distance": 2.2608820786729287,
+          "rag_id": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612"
+        },
+        {
+          "distance": 2.290233139448119,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.290233139448119,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.4069043618070123,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        }
+      ],
+      "prompt_sha256": "220a6d7d8f59944a964f45e5630f7441af383936194b7d1f30b9605a40d21fae",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439622121644e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "8038a9d3c45467862b17be94fd8da2062d355ee0f56fb47def8613744417cb79",
+      "retrieval_and_prompt_seconds": 5.567431683997711,
+      "source_sha256": "e87a1b41612b871fd81cda70b8ac119b3c234d908a1640e11c02e8b55debe1b8",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_40",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.015791078309391,
+          "rag_id": "rag_c73b0aa79a591a36c1e827962655577ccb798c9481fb1d7928910bb4fd0e7a99"
+        },
+        {
+          "distance": 4.021276489262625,
+          "rag_id": "rag_b43e5df8972dab6edd1e16ec0c83b96c09f9c8011f394275d259c984d1ed1653"
+        },
+        {
+          "distance": 4.2352211092547165,
+          "rag_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854"
+        },
+        {
+          "distance": 4.527106107229379,
+          "rag_id": "rag_e4f0e25fde9608d49aad2a09451d6081d0cf81f1452347c5f9293ff0e36db2d9"
+        },
+        {
+          "distance": 4.631749052416445,
+          "rag_id": "rag_72e6730be0327099c5b7eedec2aceab6940bef8f84e47e4a0389a1014cdf15b7"
+        }
+      ],
+      "prompt_sha256": "73a117a25324d30545d297dabf340404d0eb1302de6995fef18a595abad9cab9",
+      "query_audit": {
+        "max_qdrant_score_error": 1.259246573681594e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "03638e159b0fec8649a81e1e9aa712c0e68f4fa40a6815abf32f228dafb04a3d",
+      "retrieval_and_prompt_seconds": 5.454225322999264,
+      "source_sha256": "8596e62d85245a097ff86af07de391478726291337bee1202881b2d439ba7a20",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_5",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.587273272828662,
+          "rag_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71"
+        },
+        {
+          "distance": 2.587273272828662,
+          "rag_id": "rag_94494703cada79940c0e418b85143867f61ea889a874ea9b0c8b57a253ec26ac"
+        },
+        {
+          "distance": 2.6052183301684315,
+          "rag_id": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd"
+        },
+        {
+          "distance": 2.6052183301684315,
+          "rag_id": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12"
+        },
+        {
+          "distance": 2.6435028487438474,
+          "rag_id": "rag_4d7c4dcf91aaa14d832929fe101edc60f7aba17114a97cbf33bb409fb40871e3"
+        }
+      ],
+      "prompt_sha256": "9179f7dfce032fd9bc4256c42bf79cea44c872ba0b02fa4d5953ed0a3d97e6e8",
+      "query_audit": {
+        "max_qdrant_score_error": 1.4175439622121644e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b12ce41a967a1fa3efb26968ac3c4d771974303b54caf9bf356fb760dfa1eb34",
+      "retrieval_and_prompt_seconds": 5.512136889999965,
+      "source_sha256": "6d749d14a8289fda494305da5c0b66e0ee18416f605a3c1e932c8b792e7504cd",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_50",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 4.110440980643079,
+          "rag_id": "rag_c73b0aa79a591a36c1e827962655577ccb798c9481fb1d7928910bb4fd0e7a99"
+        },
+        {
+          "distance": 4.1159263915963145,
+          "rag_id": "rag_b43e5df8972dab6edd1e16ec0c83b96c09f9c8011f394275d259c984d1ed1653"
+        },
+        {
+          "distance": 4.11708966695519,
+          "rag_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854"
+        },
+        {
+          "distance": 4.831114810916676,
+          "rag_id": "rag_e4f0e25fde9608d49aad2a09451d6081d0cf81f1452347c5f9293ff0e36db2d9"
+        },
+        {
+          "distance": 4.8510091215577,
+          "rag_id": "rag_a633780f6c7ac49f37d5a969604abfaa5fa6cd06aaaeca4735571ce98fe0e9a6"
+        }
+      ],
+      "prompt_sha256": "087477c1ddd8b764333f87b69ee15c71be3c8de4f2582ff4278d05a3b40c9d56",
+      "query_audit": {
+        "max_qdrant_score_error": 1.2592466092087307e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "3237b65cf8035f84973e83c52bb41e87b0fc3399f876ba30411c4536334f5c93",
+      "retrieval_and_prompt_seconds": 5.409487352000724,
+      "source_sha256": "c5b0f6b61f8dbd077de7b8c37e2e1190909e1d38fc5c7bc3c43889ccaa6e41ca",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_6",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.8284428149222687,
+          "rag_id": "rag_36bdbdf7f12119fce6f57a92aad7645c0fe51cd5167676d5896f895f66e9bb98"
+        },
+        {
+          "distance": 2.8284428149222687,
+          "rag_id": "rag_a4742a74487ceec5e30aaec38114212922a557a74e1db931971cd628fbb28b67"
+        },
+        {
+          "distance": 2.8284428149222687,
+          "rag_id": "rag_c40d8cf4c3160455df131910d26d4718241063f15ab2737cda364c9f5be5c0e3"
+        },
+        {
+          "distance": 2.8489803261311084,
+          "rag_id": "rag_7a5b23a05153e4e35fb1edb86cadf2226831d1c596e2e375878234b07443b50b"
+        },
+        {
+          "distance": 2.8489803261311084,
+          "rag_id": "rag_81363ccc6bca737b21a027244b91351777d7fc29ce192769f7703462c4819a6b"
+        }
+      ],
+      "prompt_sha256": "b80ad559c222e152c095d9019fb8426f2d1b01b874437e9e176f1336f50c0057",
+      "query_audit": {
+        "max_qdrant_score_error": 1.304011303382424e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "b1d82263d572554e112d2f17f75a2c2d763c870d155874bf7214e829e37abbbb",
+      "retrieval_and_prompt_seconds": 5.728425369001343,
+      "source_sha256": "3ddbd391ba42ef3d14e419cbab2432ad97bcfb498cb75595de4d9597c34029a1",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_7",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 2.92521162675593,
+          "rag_id": "rag_7a5b23a05153e4e35fb1edb86cadf2226831d1c596e2e375878234b07443b50b"
+        },
+        {
+          "distance": 2.92521162675593,
+          "rag_id": "rag_81363ccc6bca737b21a027244b91351777d7fc29ce192769f7703462c4819a6b"
+        },
+        {
+          "distance": 2.92521162675593,
+          "rag_id": "rag_f76d879139f3263a22145390fd63117c97d675a5bed39f936c555e281092a711"
+        },
+        {
+          "distance": 2.9534930896061806,
+          "rag_id": "rag_161beb85a2648809118aa666aa067cec4604a8bc60d0aa66e748cdade7a7d5dd"
+        },
+        {
+          "distance": 2.9534930896061806,
+          "rag_id": "rag_ce0e784045f8631b37ac562159a69c40b63739d2a05eb3809d4f2cd04d23cac0"
+        }
+      ],
+      "prompt_sha256": "2309d0bed47814b8c6aef9441dd84df3b571076234fb27c3371146abcc0f3ee3",
+      "query_audit": {
+        "max_qdrant_score_error": 1.304011303382424e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "3b86c4034a84034d11390afb4cee119aee9b309dbc849a529c1456df79e004ce",
+      "retrieval_and_prompt_seconds": 5.524289487002534,
+      "source_sha256": "7291d114d86a51d3ad321d85dd6fce60901e72364c0df8a50261d1c7f57f0dc4",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_8",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.0728967010450026,
+          "rag_id": "rag_161beb85a2648809118aa666aa067cec4604a8bc60d0aa66e748cdade7a7d5dd"
+        },
+        {
+          "distance": 3.0728967010450026,
+          "rag_id": "rag_ce0e784045f8631b37ac562159a69c40b63739d2a05eb3809d4f2cd04d23cac0"
+        },
+        {
+          "distance": 3.0728967010450026,
+          "rag_id": "rag_e0fab435fa991d02fd3085a2b6dad0a645a0b8bc5063a88c9aa83a0ffb9d0dc7"
+        },
+        {
+          "distance": 3.096837230693619,
+          "rag_id": "rag_7a5b23a05153e4e35fb1edb86cadf2226831d1c596e2e375878234b07443b50b"
+        },
+        {
+          "distance": 3.096837230693619,
+          "rag_id": "rag_81363ccc6bca737b21a027244b91351777d7fc29ce192769f7703462c4819a6b"
+        }
+      ],
+      "prompt_sha256": "114859a41ba9f0f87f00f061bfcd439c8a661db045fff7288143e638ad8d76b9",
+      "query_audit": {
+        "max_qdrant_score_error": 1.375315341611838e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "c57bc15201b27ca5687cac4aa80eb8d39926b923482d81020b3003b225aba601",
+      "retrieval_and_prompt_seconds": 5.869216737999523,
+      "source_sha256": "c62aca60cb1367f745fd740af3f31248e556897398e25694c4ffc7123c8dde1e",
+      "status": "prepared"
+    },
+    {
+      "circuit_id": "qftentangled_indep_tket_9",
+      "devices": [
+        "ibm_falcon_127",
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ],
+      "examples": [
+        {
+          "distance": 3.155148896562674,
+          "rag_id": "rag_7930711d0314c803bb492ef7559ac7390daf77017a06d5207a6f63e37358f165"
+        },
+        {
+          "distance": 3.155148896562674,
+          "rag_id": "rag_abc21b72611b77ecf2d4752527de049c9e377e186df5f819d1c758ed66bed378"
+        },
+        {
+          "distance": 3.155148896562674,
+          "rag_id": "rag_e4df99e4475a594f49c04fa7897c94e0b3a77b5ce43c5b91f0eb5ee35da5fc3b"
+        },
+        {
+          "distance": 3.169602684092369,
+          "rag_id": "rag_161beb85a2648809118aa666aa067cec4604a8bc60d0aa66e748cdade7a7d5dd"
+        },
+        {
+          "distance": 3.169602684092369,
+          "rag_id": "rag_ce0e784045f8631b37ac562159a69c40b63739d2a05eb3809d4f2cd04d23cac0"
+        }
+      ],
+      "prompt_sha256": "b38d90df363558ecf0a4f10c002ef1f62b6017a836d0128ab9b57420f331ed2a",
+      "query_audit": {
+        "max_qdrant_score_error": 1.375315337170946e-07
+      },
+      "registry_count": 5,
+      "registry_sha256": "6454795cbdaa25c79f43d5716b567707031d722208f7ba0df7cd7d8de5e27a94",
+      "retrieval_and_prompt_seconds": 5.694492542999797,
+      "source_sha256": "cea499894ccfb6aa00408be1c0d657730de162119a97dbb5d9140944042c2cd7",
+      "status": "prepared"
+    }
+  ],
+  "scope": "parsing_mask_retrieval_evidence_prompt_only",
+  "status": "passed",
+  "test_accessed": false,
+  "transform_sha256": "be6eeae0e6b538b0d216de41ef1a2d0571018a680f23ef159286b10a9bc30479",
+  "validation_count": 88
+}

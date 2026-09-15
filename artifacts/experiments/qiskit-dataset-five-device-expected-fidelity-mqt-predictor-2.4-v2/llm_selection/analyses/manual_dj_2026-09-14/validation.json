@@ -1,0 +1,65 @@
+{
+  "is_valid": false,
+  "issues": [
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[0].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
+      "path": "$.evidence_refs[1]",
+      "message": "La stessa fonte storica non può essere dichiarata due volte."
+    },
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[1].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
+      "path": "$.evidence_refs[2]",
+      "message": "La stessa fonte storica non può essere dichiarata due volte."
+    },
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[2].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
+      "path": "$.evidence_refs[3]",
+      "message": "La stessa fonte storica non può essere dichiarata due volte."
+    },
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[3].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+      "path": "$.claims[0].evidence_ref_ids[0]",
+      "message": "Il claim cita un riferimento non dichiarato nella risposta."
+    },
+    {
+      "code": "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
+      "path": "$.claims[0].evidence_ref_ids",
+      "message": "Il sostegno storico del dispositivo richiede almeno un'evidenza."
+    },
+    {
+      "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+      "path": "$.claims[1].parameters",
+      "message": "I parametri non corrispondono al tipo di claim dichiarato."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+      "path": "$.claims[1].evidence_ref_ids[0]",
+      "message": "Il claim cita un riferimento non dichiarato nella risposta."
+    },
+    {
+      "code": "LLM_OUTPUT_ISSUES_TRUNCATED",
+      "path": "$",
+      "message": "Sono stati omessi 10 errori aggiuntivi."
+    }
+  ]
+}

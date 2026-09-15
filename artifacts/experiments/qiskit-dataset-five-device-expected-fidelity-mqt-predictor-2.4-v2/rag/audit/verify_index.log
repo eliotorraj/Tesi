@@ -1,0 +1,34 @@
+{
+  "status": "verified",
+  "manifest": {
+    "index_version": "qdrant-local-circuit49/1",
+    "experiment_id": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2",
+    "collection": "circuit49_manhattan_v1",
+    "mode": "local_persistent",
+    "search": "exact",
+    "distance": "Manhattan",
+    "dimension": 49,
+    "points_count": 396,
+    "source_jsonl_sha256": "f11d65adf3b301993b124b53b88af538caeb215a74955011572dfcbe1845063a",
+    "transform_sha256": "be6eeae0e6b538b0d216de41ef1a2d0571018a680f23ef159286b10a9bc30479",
+    "points_sha256": "a17d2fcaddff10c619f35be4733a6d7b152332228cd46a6c527b34dfb855234c",
+    "provenance": {
+      "source_manifest_sha256": "c599eab17b6f64528067016e3d175cbfed597334f779ef8e515cf8787a788f53",
+      "catalog_sha256": "ee741108b2e25190e6f3fe69d5eb27f8cef3c2e8eeef2b37543059228d438ebc",
+      "train_summaries_sha256": "ae4fd60680eb322f2a3fd7055ee46cabd452937368f0aed7b558ff951a266fc1",
+      "train_sources_sha256": "005004c52588819ba30c76ed1b366ad3f867dfc65597ab817284b6a618a3b54f",
+      "rag_schema_sha256": "10e58ad347884e7179936dabc78b69d352cd693616d355e5be6e5e533c410b25"
+    },
+    "software": {
+      "qdrant-client": "1.19.0",
+      "numpy": "2.5.1",
+      "mqt.predictor": "2.4.0",
+      "qiskit": "2.5.0",
+      "portalocker": "3.2.0"
+    },
+    "python": "3.12.13",
+    "uv_lock_sha256": "b1f494902348a7d39a9013dc92ceabb80ecf5ebba841b1a1c989ca7d065d75eb",
+    "default_k": 5,
+    "sha256": "238f4da9c9803b9e813afed0d4a476f18fb2fffdd566713a10c7528319cde181"
+  }
+}

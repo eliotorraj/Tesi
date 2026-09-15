@@ -1,0 +1,29 @@
+{
+  "at": "2026-09-14T09:49:20.172165+00:00",
+  "source_run": "qwen-prova-01",
+  "cause": "available_ram_below_operational_limit",
+  "available_bytes": 1090904064,
+  "threshold_bytes": 1610612736,
+  "hotspot_c": 52,
+  "llm_calls": 0,
+  "python_peak_rss_bytes": 1789194240,
+  "corrections": [
+    "Explicit resource diagnostic in controller",
+    "Native Windows model checksum to avoid WSL file-cache reads"
+  ],
+  "native_hash_smoke": {
+    "kind": "small_source_file_not_model_weights",
+    "result": {
+      "size_bytes": 71,
+      "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\llm_selection\\__init__.py",
+      "method": "Windows .NET SHA256.ComputeHash streaming on the native model path",
+      "started_at": "2026-09-14T09:49:20.0173887Z",
+      "expected_sha256": "f428135966a373401492a335b11666453649ca665c4c39cb696a5df35c380402",
+      "elapsed_seconds": 0.0530053,
+      "sha256": "f428135966a373401492a335b11666453649ca665c4c39cb696a5df35c380402",
+      "valid": true,
+      "ended_at": "2026-09-14T09:49:20.0673923Z"
+    }
+  },
+  "long_inference_retested": false
+}

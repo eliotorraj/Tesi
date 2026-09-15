@@ -1,0 +1,7 @@
+{
+    "abort_reason":  "gpu_temperature_operational_limit",
+    "thermal_pause_count":  74,
+    "ended_at":  "2026-09-13T17:04:31.1283047Z",
+    "thermal_paused_seconds":  164.03227679999998,
+    "exit_code":  null
+}

@@ -1,0 +1,29 @@
+{
+    "reason":  "gpu_temperature_operational_limit",
+    "last_sample":  {
+                        "working_set_bytes":  907337728,
+                        "system_available_bytes":  6269227008,
+                        "gpu_sensors":  [
+                                            {
+                                                "adapter_index":  0,
+                                                "adapter_name":  "AMD Radeon RX 6750 XT",
+                                                "return_code":  0,
+                                                "edge_c":  74,
+                                                "hotspot_c":  95,
+                                                "memory_c":  null,
+                                                "fan_rpm":  1747,
+                                                "asic_power_w":  173,
+                                                "gpu_activity_percent":  94
+                                            }
+                                        ],
+                        "utc":  "2026-09-13T16:50:55.8350877Z",
+                        "private_bytes":  9095372800,
+                        "peak_working_set_bytes":  1047359488,
+                        "gpu_dedicated_bytes":  7690674176,
+                        "gpu_shared_bytes":  700334080,
+                        "pid":  10336,
+                        "gpu_counter_error":  null,
+                        "cpu_seconds":  27.71875
+                    },
+    "at":  "2026-09-13T16:50:55.8413183Z"
+}

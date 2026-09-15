@@ -1,0 +1,15 @@
+[
+  {
+    "attempt": 1,
+    "status": "failed_before_data_analysis",
+    "error": "ModuleNotFoundError: No module named 'jsonschema'",
+    "action": "Usato validate_instance già presente nel progetto. Nessuna dipendenza installata."
+  },
+  {
+    "attempt": 2,
+    "status": "completed",
+    "schema_valid": true,
+    "semantic_valid": false,
+    "diagnostic_issue_count": 21
+  }
+]

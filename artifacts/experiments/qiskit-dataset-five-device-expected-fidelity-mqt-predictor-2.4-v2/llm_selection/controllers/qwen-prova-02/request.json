@@ -1,0 +1,14 @@
+{
+  "technical": true,
+  "model": "qwen",
+  "label": "qwen-prova-02",
+  "episode_label": null,
+  "precision": "Q8_0",
+  "context": 147456,
+  "cache_type": "q8_0",
+  "gpu_layers": "all",
+  "batch": 64,
+  "micro_batch": 16,
+  "circuit": null,
+  "technical_timeout": 3600
+}

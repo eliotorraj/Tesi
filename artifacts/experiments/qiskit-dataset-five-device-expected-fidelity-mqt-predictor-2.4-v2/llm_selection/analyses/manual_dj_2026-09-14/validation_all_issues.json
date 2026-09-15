@@ -1,0 +1,112 @@
+{
+  "is_valid": false,
+  "issue_count": 21,
+  "issues": [
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[0].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
+      "path": "$.evidence_refs[1]",
+      "message": "La stessa fonte storica non può essere dichiarata due volte."
+    },
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[1].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
+      "path": "$.evidence_refs[2]",
+      "message": "La stessa fonte storica non può essere dichiarata due volte."
+    },
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[2].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
+      "path": "$.evidence_refs[3]",
+      "message": "La stessa fonte storica non può essere dichiarata due volte."
+    },
+    {
+      "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+      "path": "$.evidence_refs[3].source_claim_id",
+      "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+      "path": "$.claims[0].evidence_ref_ids[0]",
+      "message": "Il claim cita un riferimento non dichiarato nella risposta."
+    },
+    {
+      "code": "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
+      "path": "$.claims[0].evidence_ref_ids",
+      "message": "Il sostegno storico del dispositivo richiede almeno un'evidenza."
+    },
+    {
+      "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+      "path": "$.claims[1].parameters",
+      "message": "I parametri non corrispondono al tipo di claim dichiarato."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+      "path": "$.claims[1].evidence_ref_ids[0]",
+      "message": "Il claim cita un riferimento non dichiarato nella risposta."
+    },
+    {
+      "code": "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
+      "path": "$.claims[1].evidence_ref_ids",
+      "message": "Il sostegno storico della configurazione richiede almeno un'evidenza."
+    },
+    {
+      "code": "LLM_OUTPUT_CONFIGURATION_CLAIM_MISMATCH",
+      "path": "$.claims[1].parameters",
+      "message": "Il claim deve riguardare il dispositivo e la configurazione raccomandati."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+      "path": "$.claims[2].evidence_ref_ids[0]",
+      "message": "Il claim cita un riferimento non dichiarato nella risposta."
+    },
+    {
+      "code": "LLM_OUTPUT_LIVE_CLAIM_HAS_EVIDENCE",
+      "path": "$.claims[2].evidence_ref_ids",
+      "message": "La compatibilità corrente è verificata dal prototipo e non usa evidenze storiche."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+      "path": "$.claims[3].evidence_ref_ids[0]",
+      "message": "Il claim cita un riferimento non dichiarato nella risposta."
+    },
+    {
+      "code": "LLM_OUTPUT_CAVEAT_EVIDENCE_REQUIRED",
+      "path": "$.claims[3].evidence_ref_ids",
+      "message": "L'avvertenza deve citare almeno una fonte scientifica del registro."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNUSED",
+      "path": "$.evidence_refs[0]",
+      "message": "Ogni riferimento dichiarato deve essere usato da un claim."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNUSED",
+      "path": "$.evidence_refs[1]",
+      "message": "Ogni riferimento dichiarato deve essere usato da un claim."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNUSED",
+      "path": "$.evidence_refs[2]",
+      "message": "Ogni riferimento dichiarato deve essere usato da un claim."
+    },
+    {
+      "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNUSED",
+      "path": "$.evidence_refs[3]",
+      "message": "Ogni riferimento dichiarato deve essere usato da un claim."
+    }
+  ],
+  "diagnostic_only": "Limite di restituzione errori alzato nel processo locale da 12 a 1000; controlli invariati."
+}

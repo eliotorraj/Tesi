@@ -1,0 +1,190 @@
+{
+  "ae_indep_qiskit_60": {
+    "revalidated": true,
+    "is_valid": false,
+    "issues": [
+      {
+        "code": "LLM_OUTPUT_JSON_INVALID",
+        "path": "$",
+        "message": "La risposta deve contenere un solo oggetto JSON valido, senza testo o blocchi Markdown aggiuntivi."
+      }
+    ],
+    "original_summarizer_exception": {
+      "type": "TypeError",
+      "message": "cannot pickle 'mappingproxy' object",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/qwen-prova-07/analyze.py\", line 67, in <module>\n    summarize_response(r,1,count,service,context,registry)\n  File \"/home/elio/Tesi-mqt-2.4-v2/llm_selection/run.py\", line 50, in summarize_response\n    summary[\"issues\"]=[asdict(item) for item in validated.issues]\n                       ^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1329, in asdict\n    return _asdict_inner(obj, dict_factory)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1339, in _asdict_inner\n    f.name: _asdict_inner(getattr(obj, f.name), dict)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1386, in _asdict_inner\n    return copy.deepcopy(obj)\n           ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/copy.py\", line 151, in deepcopy\n    rv = reductor(4)\n         ^^^^^^^^^^^\nTypeError: cannot pickle 'mappingproxy' object\n"
+    },
+    "json_syntax_valid": false,
+    "json_error": "Unterminated string starting at: line 59 column 20 (char 3174)"
+  },
+  "dj_indep_tket_2": {
+    "revalidated": true,
+    "is_valid": false,
+    "issues": [
+      {
+        "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+        "path": "$.evidence_refs[0].source_claim_id",
+        "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+      },
+      {
+        "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+        "path": "$.evidence_refs[1].source_claim_id",
+        "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+      },
+      {
+        "code": "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
+        "path": "$.evidence_refs[2].source_claim_id",
+        "message": "Un risultato storico deve indicare il claim sorgente del medesimo record."
+      },
+      {
+        "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+        "path": "$.claims[0].parameters",
+        "message": "I parametri non corrispondono al tipo di claim dichiarato."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[0].evidence_ref_ids[0]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[0].evidence_ref_ids[1]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[0].evidence_ref_ids[2]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[0].evidence_ref_ids[3]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[0].evidence_ref_ids[4]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
+        "path": "$.claims[0].evidence_ref_ids",
+        "message": "Il sostegno storico del dispositivo richiede almeno un'evidenza."
+      },
+      {
+        "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+        "path": "$.claims[1].parameters",
+        "message": "I parametri non corrispondono al tipo di claim dichiarato."
+      },
+      {
+        "code": "LLM_OUTPUT_ISSUES_TRUNCATED",
+        "path": "$",
+        "message": "Sono stati omessi 15 errori aggiuntivi."
+      }
+    ],
+    "original_summarizer_exception": {
+      "type": "TypeError",
+      "message": "cannot pickle 'mappingproxy' object",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/qwen-prova-07/analyze.py\", line 67, in <module>\n    summarize_response(r,1,count,service,context,registry)\n  File \"/home/elio/Tesi-mqt-2.4-v2/llm_selection/run.py\", line 50, in summarize_response\n    summary[\"issues\"]=[asdict(item) for item in validated.issues]\n                       ^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1329, in asdict\n    return _asdict_inner(obj, dict_factory)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1339, in _asdict_inner\n    f.name: _asdict_inner(getattr(obj, f.name), dict)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1386, in _asdict_inner\n    return copy.deepcopy(obj)\n           ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/copy.py\", line 151, in deepcopy\n    rv = reductor(4)\n         ^^^^^^^^^^^\nTypeError: cannot pickle 'mappingproxy' object\n"
+    },
+    "json_syntax_valid": true,
+    "unaccepted_proposal": {
+      "selected_device": "ibm_falcon_127",
+      "qiskit_plan": {
+        "optimization_level": 2,
+        "seed_transpiler": 0,
+        "layout_method": null,
+        "routing_method": null
+      }
+    }
+  },
+  "portfoliovqe_indep_qiskit_6": {
+    "revalidated": true,
+    "is_valid": false,
+    "issues": [
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_UNKNOWN",
+        "path": "$.evidence_refs[0].source_id",
+        "message": "L'evidenza non appartiene al record storico indicato."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_UNKNOWN",
+        "path": "$.evidence_refs[1].source_id",
+        "message": "L'evidenza non appartiene al record storico indicato."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_UNKNOWN",
+        "path": "$.evidence_refs[2].source_id",
+        "message": "L'evidenza non appartiene al record storico indicato."
+      },
+      {
+        "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+        "path": "$.claims[0].parameters",
+        "message": "I parametri non corrispondono al tipo di claim dichiarato."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[0].evidence_ref_ids[0]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
+        "path": "$.claims[0].evidence_ref_ids",
+        "message": "Il sostegno storico della configurazione richiede almeno un'evidenza."
+      },
+      {
+        "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+        "path": "$.claims[1].parameters",
+        "message": "I parametri non corrispondono al tipo di claim dichiarato."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[1].evidence_ref_ids[0]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
+        "path": "$.claims[1].evidence_ref_ids",
+        "message": "Il sostegno storico della configurazione richiede almeno un'evidenza."
+      },
+      {
+        "code": "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
+        "path": "$.claims[2].parameters",
+        "message": "I parametri non corrispondono al tipo di claim dichiarato."
+      },
+      {
+        "code": "LLM_OUTPUT_EVIDENCE_REFERENCE_UNKNOWN",
+        "path": "$.claims[2].evidence_ref_ids[0]",
+        "message": "Il claim cita un riferimento non dichiarato nella risposta."
+      },
+      {
+        "code": "LLM_OUTPUT_ISSUES_TRUNCATED",
+        "path": "$",
+        "message": "Sono stati omessi 6 errori aggiuntivi."
+      }
+    ],
+    "original_summarizer_exception": {
+      "type": "TypeError",
+      "message": "cannot pickle 'mappingproxy' object",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/qwen-prova-07/analyze.py\", line 67, in <module>\n    summarize_response(r,1,count,service,context,registry)\n  File \"/home/elio/Tesi-mqt-2.4-v2/llm_selection/run.py\", line 50, in summarize_response\n    summary[\"issues\"]=[asdict(item) for item in validated.issues]\n                       ^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1329, in asdict\n    return _asdict_inner(obj, dict_factory)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1339, in _asdict_inner\n    f.name: _asdict_inner(getattr(obj, f.name), dict)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py\", line 1386, in _asdict_inner\n    return copy.deepcopy(obj)\n           ^^^^^^^^^^^^^^^^^^\n  File \"/home/elio/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/copy.py\", line 151, in deepcopy\n    rv = reductor(4)\n         ^^^^^^^^^^^\nTypeError: cannot pickle 'mappingproxy' object\n"
+    },
+    "json_syntax_valid": true,
+    "unaccepted_proposal": {
+      "selected_device": "quantinuum_h2_56",
+      "qiskit_plan": {
+        "optimization_level": 2,
+        "seed_transpiler": 0,
+        "layout_method": null,
+        "routing_method": null
+      }
+    }
+  },
+  "su2random_indep_qiskit_50": {
+    "revalidated": false,
+    "reason": "no response content; timeout"
+  },
+  "su2random_indep_tket_50": {
+    "revalidated": false,
+    "reason": "no response content; timeout"
+  }
+}
