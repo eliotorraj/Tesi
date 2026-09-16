@@ -4,7 +4,7 @@ import argparse
 import hashlib
 from .tokenization import count_texts
 from .common import OUTPUT, now, read_json, write_json
-from .compact_prompt import encode, decode, model_input, audit, REVISION
+from prototype.prompting.compact import encode, decode, model_input, audit, REVISION
 from .configuration import messages
 from .train_check import check
 

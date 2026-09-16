@@ -2,7 +2,7 @@
 from __future__ import annotations
 import argparse
 import copy
-from .compact_prompt import audit as encoding_audit, expand_response, REVISION
+from prototype.prompting.compact import audit as encoding_audit, expand_response, REVISION
 from .common import json_ready
 import fcntl
 import json

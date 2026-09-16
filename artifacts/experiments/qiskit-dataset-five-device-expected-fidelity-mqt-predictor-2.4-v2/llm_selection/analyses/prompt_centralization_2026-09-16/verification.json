@@ -1,0 +1,64 @@
+{
+  "checked_at": "2026-09-16T09:02:27.398981+00:00",
+  "kind": "implementation_checks_not_model_evaluation",
+  "git_head": "dc632fec45188a2b384b61d0f9a6989ca237703f",
+  "code_sha256": {
+    "llm_selection/chat.py": "12a3076130508924df20e5868c048ab038e3a37eba52c6422941d46b16b83c8c",
+    "llm_selection/configuration.py": "f1d35f36d44eb9a5834d3d3dc8c034881cb0d1c7eee9dd6ba271bd63835ae0f4",
+    "llm_selection/gateway.py": "6fe16121f9d06b3937ee05fb3033da171d8099030c73c400b90206d5b0e42ef3",
+    "llm_selection/prompt_audit.py": "43386593be923fdb59f915d26f4e16c603ff7e82da8235c95972b8c42f991758",
+    "llm_selection/provenance.py": "5b80776be5d227c8b0d3218ad4410d2a313b89f4989638c5877d82a356d8bbea",
+    "llm_selection/run.py": "17d21687b5c5ad7ddc5c6a91a877d1375b092faaa8b30d50af03e9cc2948471d",
+    "prototype/prompting/__init__.py": "14c1f9bc08a1d92c45d58e10ba8bc36943790e18009ff20f239b6ed713f6007f",
+    "prototype/prompting/compact.py": "744d3f7be7bfdeb49c256d9b5d018a64a09721d100cf4a0dee78d147ed6cb986",
+    "prototype/prompting/complete_graph.py": "82773d23ceaf6a7057d57df0554138544588de3b6f686b44af43440e6cc7661e",
+    "prototype/prompting/output_contract.py": "c13ba8d85eb35727f774194284111280626094c933dd2aaddb8b4159fcf3d4cd",
+    "prototype/prompting/rendering.py": "f5269104ca6defb2273fc0520249ec3e75ca9190ee90a6ed8c4df3ffb0944c27",
+    "prototype/prompting/wire.py": "9c4f0ef09d7efdc0360eaf7c6774701a5469d3f3f6955eaedec1a6e82badf3ca",
+    "tests/test_compact_prompt.py": "069da02dc0c61628dd230a9e07156d19b8fe0ac13b317011b02f0f34b1f19a28",
+    "tests/test_llm_chat.py": "598699ad0eda5ccbbcdbd655afaef45f13d6d6193a3503da6b7253f59cafafac"
+  },
+  "comparison": {
+    "prompts": 93,
+    "messages_compared": 186,
+    "differences": [],
+    "dataset_recompiled": false,
+    "inference_calls": 0
+  },
+  "tests": {
+    "passed": 67,
+    "exit_code": 0,
+    "modules": [
+      "test_compact_prompt",
+      "test_llm_chat",
+      "test_llm_selection",
+      "test_claim_evidence_validation"
+    ],
+    "model_startup": "mocked"
+  },
+  "chat_file_checks": {
+    "models": [
+      "qwen",
+      "phi",
+      "gemma"
+    ],
+    "exit_code": 0,
+    "server_started": false,
+    "weight_content_hashed": false
+  },
+  "prior_check_attempts": [
+    {
+      "status": "test_import_error",
+      "cause": "tool invocation did not supply the test module search path",
+      "tests_executed": 0
+    },
+    {
+      "status": "wrapper_timeout",
+      "timeout_seconds": 30,
+      "cause": "tool execution time limit; no pass/fail result claimed"
+    }
+  ],
+  "inference_calls": 0,
+  "qiskit_compilations": 0,
+  "test_split_accessed": false
+}

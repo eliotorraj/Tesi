@@ -1,0 +1,25 @@
+{
+  "at": "2026-09-16T00:11:53.274017+00:00",
+  "phase": "train_manual_chat",
+  "model": "qwen",
+  "profile": {
+    "weight_precision": "Q8_0",
+    "context": 147456,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 108,
+      "minimum_available_bytes": 1610612736,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    }
+  },
+  "reference_launch": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/servers/qwen-prova-07-qwen/launch.json",
+  "note": "Server e risorse registrati. Esportare dalla chat messaggi e impostazioni: non sono catturati automaticamente da questo avvio."
+}

@@ -2,7 +2,7 @@
 
 Questo è l’unico protocollo operativo del progetto. Si aggiorna questo file.
 Versione sperimentale: **2.0.0**, MQT Predictor **2.4.0**.
-Ultimo riordino della documentazione: **9 settembre 2026**.
+Ultimo riordino della documentazione: **15 settembre 2026**.
 Emendamento della selezione LLM: **13 settembre 2026**. Questo emendamento
 separa la selezione locale sulla validation dal confronto finale sul test.
 La versione 2.0.0 continua a identificare corpus, Target e matrice Qiskit:
@@ -15,24 +15,28 @@ Il riordino dei file non cambia le condizioni dell’esperimento.
 
 ## Stato della pipeline
 
-Il 9 settembre 2026 il popolamento Qiskit di train e validation risulta
-completo su questa macchina: 87120 tentativi, 82621 successi e 4499 timeout.
-La vista globale comprende tutti i cinque dispositivi e 396 esempi RAG train.
-I timeout restano risultati terminali e non richiedono un nuovo popolamento.
+Il quadro sintetico aggiornato è nel [README principale](../README.md#che-cosa-abbiamo-fatto-e-dove-siamo).
+Al 15 settembre 2026 il Dataset Qiskit di train e validation è completo:
+87120 tentativi, 82621 successi e 4499 timeout. Il RAG usa 396 esempi train;
+Qdrant e la preparazione dei prompt sugli 88 validation sono verificati.
 
-Il prototipo usa ora il parser compatibile con il corpus e le impronte Target
-v2. I piani sono stati riallineati a 100 secondi e 6 processi, conservando
-copie dei precedenti e tutte le estrazioni casuali.
+Il collegamento LLM locale è implementato e le prove tecniche sul train sono
+in corso. Nell'ultima prova Qwen sul circuito DJ, nessuna delle tre risposte
+è interamente valida: dispositivo e configurazione sono corretti, ma rimangono
+errori nei riferimenti alle evidenze. Questo non è un risultato della selezione
+sulla validation. Si conserva il [resoconto della prova](resoconti/2026-09-15_prompt_compatto.md).
 
-Qdrant locale persistente è integrato nella factory del prototipo. Usa ricerca
-esatta Manhattan sulle 49 feature trasformate con divisori stimati solo sul train.
-Il riferimento locale esplicito usa la stessa nuova formula.
+È presente un modello RL canonico Quantinuum con 100352 passi registrati.
+L'utente ha comunicato l'avvio del training `ibm_falcon_27` durante questa
+ricognizione; non viene dedotto un completamento dal solo avvio.
+I cinque modelli finali, il classificatore ML e le verifiche qcompile non
+risultano tutti completati e verificati su questa macchina.
+La posizione dei pesi e dei checkpoint esterni su D: va verificata prima
+dei futuri controlli; la loro presenza in un registro non basta.
 
-Il test resta sigillato. La selezione dei modelli locali con RAG è in preparazione.
-Le verifiche RL/ML e i canary qcompile restano necessari prima del test;
-non bloccano questa selezione. I checkpoint Quantinuum sono stati spostati
-dall’utente su D:; la loro posizione va verificata prima dei futuri canary.
-Anche i pesi LLM risiedono ora su D:, con riferimenti e impronte conservati.
+Il test resta sigillato. La selezione locale può procedere indipendentemente
+dal completamento del ramo MQT, che resta necessario per il confronto finale.
+Il riordino documentale non avvia, arresta o modifica gli esperimenti.
 
 ## Ambiente dell’esperimento
 
@@ -1021,7 +1025,7 @@ successi, timeout e fallimenti.
 
 ## Selezione locale LLM sulla validation
 
-La procedura operativa è in [llm_selection/README.md](../llm_selection/README.md).
+La procedura operativa è in [guida della selezione LLM](approfondimenti/selezione_llm.md).
  L’infrastruttura offre controllo dello stato,
 pausa dopo il circuito corrente, ripresa e generazione delle analisi.
 Alla consegna del codice la validation non è ancora eseguita: non esistono
@@ -1073,8 +1077,13 @@ Il controllo non apre gli score validation o il test. Le prove train registrano
 se la risposta valida cita quell'esempio per entrambe le scelte e distingue
 l'etichetta principale dalle configurazioni a pari merito. Questo verifica
 il funzionamento su esempi già presenti nel Dataset, non la generalizzazione.
-Misure, comandi e limiti sono in [PROMPT_COMPATTO.md](../llm_selection/PROMPT_COMPATTO.md).
+Misure, comandi e limiti sono in [resoconto sul prompt compatto](resoconti/2026-09-15_prompt_compatto.md).
 I nuovi prompt richiedono nuovi nomi delle prove; gli esiti precedenti restano.
+Dal 16 settembre codifica e messaggi sono centralizzati in `prototype/prompting/`,
+come descritto nella [guida comune](approfondimenti/compattazione_prompt.md).
+La centralizzazione conserva i messaggi precedenti e non modifica Dataset,
+recupero, schema di risposta o parametri della selezione. La scelta del modello
+nella [chat manuale](approfondimenti/chat_locale.md) resta separata dalla selezione.
 Alla ripresa era già presente un limite di uscita di 4096 token, conservato:
 il confronto con le prove iniziali da 2048 deve dichiarare tale differenza.
 
@@ -1094,9 +1103,14 @@ non è stata dimostrata. Il controllo breve su D verifica soltanto il nuovo
 percorso di scrittura, non la stabilità di un’intera inferenza.
 
 Il server usa il caricamento senza mappatura del file in memoria. Il monitor
-campiona le risorse circa ogni secondo. Sospende il processo di inferenza a
-80 °C di hotspot e lo riprende sotto 65 °C. Interrompe la prova a 95 °C di
-hotspot, 85 °C di edge o RAM libera sotto 1,5 GiB per tre campioni consecutivi.
+campiona le risorse circa ogni secondo. I valori predefiniti rilevati nel codice
+il 15 settembre (`llm_selection/hardware.py` e `serve.ps1`) sono: pausa a
+105 °C di hotspot, ripresa sotto 100 °C, arresto a 108 °C di hotspot o 95 °C
+di edge; arresto per RAM libera sotto 1,5 GiB per tre campioni consecutivi.
+La precedente descrizione riportava 80/65 °C per pausa/ripresa e 95/85 °C per
+arresto hotspot/edge: era rimasta indietro rispetto al codice già presente.
+Il riordino aggiorna questa descrizione, senza cambiare le impostazioni.
+Per interpretare una prova valgono i parametri salvati nel suo registro.
 Questi limiti operativi non sono una diagnosi dello spegnimento del PC.
 Le pause sono registrate e contribuiscono ai tempi e al timeout.
 Non vengono modificate frequenze, tensioni o ventole.
@@ -1120,8 +1134,9 @@ fra lo schema e il prefisso di ragionamento Qwen. Non si altera quel prefisso.
 La configurazione congelata registra temperatura, top_p, top_k di generazione,
 min_p, penalità, seed, cache, contesto, limite di uscita, timeout e ragionamento.
 Il top_k di generazione non è il numero k di esempi RAG. Il limite iniziale
-di uscita è 2048 token, da verificare nelle prove tecniche; il timeout iniziale
-è 3600 secondi per chiamata. Il ragionamento esteso è disabilitato.
+di uscita era 2048 token; il codice corrente usa 4096. Ogni prova conserva
+il proprio limite e i confronti devono dichiarare la differenza. Il timeout
+predefinito è 3600 secondi per chiamata. Il ragionamento esteso è disabilitato.
 La cache riusa soltanto prefissi identici. L’ordine delle tre configurazioni
 ruota fra circuiti; tempi e token riutilizzati restano visibili. Non si inserisce
 nel prompt la risposta valida ottenuta da un’altra configurazione.

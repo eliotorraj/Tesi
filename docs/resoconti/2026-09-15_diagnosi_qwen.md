@@ -1,113 +1,16 @@
-# Chat locale Qwen e controllo delle risposte
+# Diagnosi delle prime risposte Qwen — 15 settembre 2026
 
-**Aggiornamento 15 settembre 2026:** il nuovo testo DJ compatto e i comandi
-sono in [PROMPT_COMPATTO.md](PROMPT_COMPATTO.md). I prompt lunghi descritti
-qui sotto restano disponibili per riprodurre le prove precedenti.
+Questo resoconto riguarda la prova `qwen-prova-07`, precedente al prompt compatto.
+Conserva i problemi osservati e il piano di diagnosi formulato allora.
+Il problema di registrazione `mappingproxy` e la compattazione sono stati poi
+corretti: esiti e limiti sono nel [resoconto successivo](2026-09-15_prompt_compatto.md).
+Le proposte in fondo non sono tutte prove già eseguite.
 
-Questa guida riguarda prove manuali sul train. Non avvia la validation.
-Il riferimento scientifico resta docs/protocollo_sperimentale.md.
-
-## Aprire la chat
-
-Dal terminale Ubuntu:
-
-```bash
-cd /home/elio/Tesi-mqt-2.4-v2
-.venv/bin/python -m llm_selection.chat --check
-.venv/bin/python -m llm_selection.chat
-```
-
-Il primo comando controlla file e profilo senza caricare il modello.
-Il secondo verifica i pesi e avvia Qwen3.5-4B Q8_0, con lo stesso profilo hardware
-registrato in qwen-prova-07, incluso il contesto di 147.456 token.
-Attendere il messaggio con l'indirizzo e aprire nel browser Windows:
-http://127.0.0.1:8089
-
-La pagina è la chat integrata di llama.cpp. Non occorre installare un altro programma.
-Il terminale deve restare aperto. Ctrl+C chiude il server posseduto da questa sessione.
-Chiudere la pagina del browser da solo non spegne il server.
-
-Il nome della sessione contiene data e ora. È possibile scegliere un nome nuovo:
-`--label qwen-chat-personale-01`. I registri non vengono sovrascritti.
-Non aprire contemporaneamente la chat e una prova automatica.
-Il monitor esistente conserva controlli di memoria e temperatura.
-Le soglie sono quelle dell'esecuzione di riferimento, non vengono aumentate.
-
-Il controllo --check è stato eseguito. Non sono stati avviati il server o nuove
-inferenze per preparare questa guida: l'interazione effettiva della chat resta da provare.
-
-## Prompt train pronto
-
-I file si trovano in:
+I file citati appartengono a:
 
 ```text
 artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/manual_examples/qwen-prova-07/
 ```
-
-Aprire dj_indep_tket_2.prompt_chat.txt, selezionare tutto e incollare in una
-conversazione nuova. È esattamente il contenuto del messaggio utente salvato
-nella prova, senza aggiungere i marcatori speciali del formato di chat.
-Il prompt riguarda un circuito train da due qubit, con cinque esempi RAG.
-Non è una versione abbreviata. Ha 157.959 caratteri; nella prova il messaggio
-formattato dal modello occupava 80.612 token.
-
-Per esplorare il comportamento, impostare temperatura 0, ragionamento disabilitato
-e, se disponibili nei controlli dell'interfaccia, massimo 4.096 token in uscita.
-4.096 è una nuova soglia esplorativa, non un valore già validato.
-La fase di lettura resta lunga anche se si cambia il limite della risposta.
-Le opzioni esatte della pagina dipendono dalla versione; registrare quelle usate.
-
-La pagina applica il proprio formato di conversazione e le proprie impostazioni.
-Incollare uno schema come testo non attiva automaticamente la generazione vincolata.
-Questa chat libera non è quindi una replica esatta della prova con schema.
-Non abbiamo verificato i controlli avanzati della pagina installata.
-
-Per conservare una prova manuale, esportare o salvare messaggi completi e impostazioni
-nella cartella manual_chats/NOME mostrata dal comando. Il programma di avvio salva
-profilo, provenienza, eventi e risorse; non intercetta automaticamente le conversazioni
-del browser. Contrassegnare eventuali tempi non misurati come mancanti.
-
-## Ripetere una richiesta con lo schema realmente applicato
-
-È disponibile anche dj_indep_tket_2.request_original.json: richiesta nativa originale,
-con json_schema, prompt già formattato e n_predict=2048.
-dj_indep_tket_2.schema.json contiene lo schema da solo.
-
-Dopo l'avvio del server, il seguente comando Ubuntu effettua UNA nuova inferenza
-e registra richiesta, flusso, risposta e tempi in una cartella distinta.
-Non si deve incollare request_original.json nella chat.
-Questo esempio modifica esplicitamente il limite a 4.096 e il timeout a 5.400 s;
-è una nuova prova tecnica, non una riproduzione con parametri identici.
-
-```bash
-cd /home/elio/Tesi-mqt-2.4-v2
-.venv/bin/python - <<'PY'
-from datetime import datetime, timezone
-from llm_selection.common import OUTPUT, read_json, write_json
-from llm_selection.gateway import generate
-label = datetime.now(timezone.utc).strftime("qwen-manuale-%Y%m%d-%H%M%S")
-directory = OUTPUT / "manual_calls" / label
-directory.mkdir(parents=True, exist_ok=False)
-request = read_json(OUTPUT / "manual_examples/qwen-prova-07/dj_indep_tket_2.request_original.json")
-request["n_predict"] = 4096
-write_json(directory / "experiment.json", {
-    "phase": "train_manual_diagnostic", "circuit": "dj_indep_tket_2",
-    "original_run": "qwen-prova-07", "output_limit": 4096,
-    "timeout_seconds": 5400,
-    "note": "Server started separately: record the manual_chats session name and settings."
-})
-result = generate(request, directory / "call", timeout=5400)
-(directory / "risposta.txt").write_text(result["content"], encoding="utf-8")
-print(result["content"])
-print("Fine:", result["finish_reason"], "secondi:", result["elapsed_seconds"])
-print("File:", directory)
-PY
-```
-
-Il comando non passa dal riepilogo che contiene il difetto mappingproxy.
-Non convalida semanticamente la risposta e non la trasforma in una decisione ufficiale.
-Per una misura confrontabile partire da un server senza precedenti conversazioni
-o registrare il riuso del prefisso tramite timings.cache_n.
 
 ## Leggere ciò che Qwen ha già scritto
 
@@ -191,3 +94,52 @@ mantenendo un confronto equo tra famiglie.
 Fonti ufficiali consultate:
 [server b10930](https://github.com/ggml-org/llama.cpp/blob/b10930/tools/server/README.md)
 e [grammatiche e limiti del supporto JSON Schema](https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md).
+
+
+## Richiesta nativa storica (spostata dalla guida chat il 16 settembre)
+
+Questa procedura conserva il formato precedente e non passa dal costruttore
+comune dei prompt. È materiale di diagnosi storica.
+
+## Ripetere una richiesta con lo schema realmente applicato
+
+È disponibile anche dj_indep_tket_2.request_original.json: richiesta nativa originale,
+con json_schema, prompt già formattato e n_predict=2048.
+dj_indep_tket_2.schema.json contiene lo schema da solo.
+
+Dopo l'avvio del server, il seguente comando Ubuntu effettua UNA nuova inferenza
+e registra richiesta, flusso, risposta e tempi in una cartella distinta.
+Non si deve incollare request_original.json nella chat.
+Questo esempio modifica esplicitamente il limite a 4.096 e il timeout a 5.400 s;
+è una nuova prova tecnica, non una riproduzione con parametri identici.
+
+```bash
+cd /home/elio/Tesi-mqt-2.4-v2
+.venv/bin/python - <<'PY'
+from datetime import datetime, timezone
+from llm_selection.common import OUTPUT, read_json, write_json
+from llm_selection.gateway import generate
+label = datetime.now(timezone.utc).strftime("qwen-manuale-%Y%m%d-%H%M%S")
+directory = OUTPUT / "manual_calls" / label
+directory.mkdir(parents=True, exist_ok=False)
+request = read_json(OUTPUT / "manual_examples/qwen-prova-07/dj_indep_tket_2.request_original.json")
+request["n_predict"] = 4096
+write_json(directory / "experiment.json", {
+    "phase": "train_manual_diagnostic", "circuit": "dj_indep_tket_2",
+    "original_run": "qwen-prova-07", "output_limit": 4096,
+    "timeout_seconds": 5400,
+    "note": "Server started separately: record the manual_chats session name and settings."
+})
+result = generate(request, directory / "call", timeout=5400)
+(directory / "risposta.txt").write_text(result["content"], encoding="utf-8")
+print(result["content"])
+print("Fine:", result["finish_reason"], "secondi:", result["elapsed_seconds"])
+print("File:", directory)
+PY
+```
+
+La chiamata seguente usa direttamente il collegamento al server.
+Non convalida semanticamente la risposta e non la trasforma in una decisione ufficiale.
+Per una misura confrontabile partire da un server senza precedenti conversazioni
+o registrare il riuso del prefisso tramite timings.cache_n.
+

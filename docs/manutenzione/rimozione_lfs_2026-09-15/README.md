@@ -17,7 +17,7 @@ Clonare il repository non ripristina i dati esterni richiesti dal programma.
 
 ## Copie di sicurezza
 
-Sul PC della pulizia, .lfs-maintenance/20260915-removal/ contiene:
+Sul PC della pulizia, volude D: Tesi-mqt/.lfs-maintenance/20260915-removal/ contiene:
 
 - original-git/: copia di Git e degli oggetti LFS disponibili.
 - analysis.git/: cronologia originale, inclusi i riferimenti delle pull request.

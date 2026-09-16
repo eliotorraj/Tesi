@@ -1,23 +1,4 @@
-"""Istruzioni esplicite delle regole già applicate dal validatore."""
-RULES = (
-    "Output the same full recommendation object required by response_contract; do not omit fields or simplify it. "
-    "claim_id identifies a new output claim; reference_id identifies a new output reference. "
-    "Use short, unique local IDs such as c1 and ref1. They need not be historical IDs. "
-    "claims[].evidence_ref_ids must match evidence_refs[].reference_id, NEVER source_id. "
-    "For each historical_result reference, include record_id, source_claim_id AND source_id from the same registry record. "
-    "source_claim_id identifies a source_claim; source_id identifies one of that source_claim's evidence_ids. "
-    "A historical claim must cite ALL AND ONLY the evidence_ids of its selected source_claim: create one reference per evidence. "
-    "Do not duplicate (record_id,source_type,source_claim_id,source_id); each output reference must be used by exactly one output claim. "
-    "historical_device_support parameters are exactly {device_id}; use a selected_device source_claim supporting the chosen device. "
-    "historical_configuration_support parameters are exactly {device_id,configuration_id}; use its matching ranked_configuration source_claim. "
-    "live_compatibility parameters are exactly {device_id}, and evidence_ref_ids must be []. "
-    "Live means compatibility with this request, checked by the application; it does not mean online hardware availability. "
-    "With history include exactly one historical_device_support, one historical_configuration_support, and one live_compatibility. "
-    "Without history include only one live_compatibility and one historical_evidence_unavailable with parameters={} and no references. "
-    "scientific_caveat is optional: the application already renders caveats attached to validated historical sources. "
-    "If included, its parameters are exactly {caveat_id}; cite source_type=scientific_caveat, source_id=caveat_id, "
-    "with no source_claim_id, from a record and source_claim actually cited by your historical claims. "
-    "When an example has the same circuit identity and metric and its choice is allowed, use that historical result as the strongest evidence. "
-    "Zero feature distance alone does not prove circuit identity. "
-    "Do not claim a new measured score. Schema field types alone do not replace these relationship rules."
-)
+"""Compatibilità delle istruzioni, centralizzate in prototype.prompting."""
+from prototype.prompting.output_contract import RULES
+
+__all__ = ["RULES"]

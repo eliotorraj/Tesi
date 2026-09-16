@@ -99,7 +99,7 @@ class CompactPromptTests(unittest.TestCase):
         config = {"id": "p0_t0", "prompt_variant": "base", "temperature": 0.0}
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)/"case"
-            with patch.object(run, "audit_tokens", return_value=100), patch.object(run, "native_payload", return_value={}), \
+            with patch.object(run, "audit_tokens", return_value=100), patch.object(run, "native_payload", side_effect=lambda request, _: request), \
                     patch.object(run, "generate", side_effect=responses) as generate:
                 result = run.episode(directory, saved, config, f.service, f.prepared, f.registry, 0.1,
                                      {"context": 131072})
@@ -108,11 +108,17 @@ class CompactPromptTests(unittest.TestCase):
                 self.assertEqual(result["measured_call_seconds"], 5.5)
                 repair = read_json(directory/"attempt_2"/"prompt.json")["previous_validation_errors"]
                 self.assertIn("LLM_OUTPUT_SOURCE_CLAIM_REQUIRED", {i["code"] for i in repair})
-                with patch("llm_selection.configuration.BASE_INSTRUCTION", "Changed instructions"):
+                with patch("prototype.prompting.rendering.BASE_INSTRUCTION", "Changed instructions"):
                     with self.assertRaisesRegex(ValueError, "new episode label"):
                         run.episode(directory, saved, config, f.service, f.prepared, f.registry, 0.1,
                                     {"context": 131072})
                 self.assertEqual(generate.call_count, 2)
+                from prototype.prompting import messages as shared_messages
+                for number, call in enumerate(generate.call_args_list, 1):
+                    sent = call.args[0]
+                    recorded = read_json(directory/f"attempt_{number}"/"prompt.json")
+                    self.assertEqual(sent["messages"], shared_messages(recorded, "base"))
+                    self.assertIn("shared_values", sent["messages"][0]["content"])
 
     def test_zero_distance_does_not_substitute_for_source_identity(self):
         saved = {"circuit_metadata": {"split": "train"}, "source_sha256": "actual",
@@ -136,6 +142,48 @@ class CompactPromptTests(unittest.TestCase):
         encoded["prompt"]["unexpected"] = {"$use": "cycle"}
         with self.assertRaises(ValueError):
             decode(encoded)
+
+
+    def test_local_gateway_uses_shared_messages_and_restores_source_ids(self):
+        from prototype.quantum_assistant.models import PromptEnvelope
+        from prototype.prompting import messages as shared_messages
+        from llm_selection import gateway
+        f = self.fixture
+        response = f._response()
+        encoding = audit(self.prompt)
+        inverse = {original: short for short, original in encoding["aliases"].items()}
+        for reference in response["evidence_refs"]:
+            for key in ("record_id", "source_claim_id", "source_id"):
+                reference[key] = inverse.get(reference[key], reference[key])
+        config = {"prompt_variant": "checklist", "temperature": 0.0}
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(gateway, "audit_tokens", return_value=10), \
+                    patch.object(gateway, "native_payload", side_effect=lambda request, _: request), \
+                    patch.object(gateway, "generate", return_value={
+                        "transport_success": True, "content": json.dumps(response)}) as generate:
+                result = gateway.LocalLlmGateway(folder, config, 8192, 60).generate(
+                    PromptEnvelope(payload=self.prompt))
+            transmitted = generate.call_args.args[0]
+            self.assertEqual(transmitted["messages"], shared_messages(self.prompt, "checklist"))
+            self.assertIn("shared_values", transmitted["messages"][0]["content"])
+            self.assertNotIn(fixtures.RECORD_ID, transmitted["messages"][0]["content"])
+            self.assertEqual(result, f._response())
+            self.assertTrue(f._validate(result).is_valid)
+            recorded = next(Path(folder).glob("*/encoding.json"))
+            self.assertEqual(read_json(recorded), encoding)
+
+    def test_common_encoding_is_recorded_in_code_provenance(self):
+        from llm_selection.provenance import code_files, ROOT
+        shared = ROOT / "prototype/prompting"
+        tracked = set(code_files())
+        self.assertTrue(set(shared.glob("*.py")).issubset(tracked))
+
+    def test_legacy_imports_delegate_to_the_shared_implementation(self):
+        from prototype.prompting import compact, complete_graph, wire
+        from llm_selection import compact_prompt, complete_graph as legacy_graph, wire as legacy_wire
+        self.assertIs(compact_prompt.encode, compact.encode)
+        self.assertIs(legacy_graph.encode, complete_graph.encode)
+        self.assertIs(legacy_wire.unpack, wire.unpack)
 
 if __name__ == "__main__":
     unittest.main()

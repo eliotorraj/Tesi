@@ -3,7 +3,7 @@ import json
 import sys
 from tokenizers import Tokenizer
 from .common import OUTPUT, write_json, read_json, now
-from .wire import encode_prompt, INSTRUCTION
+from prototype.prompting.wire import encode_prompt, INSTRUCTION
 def main():
     rows=[]
     for model in ("qwen","phi","gemma"):

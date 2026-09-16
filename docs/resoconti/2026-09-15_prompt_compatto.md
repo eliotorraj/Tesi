@@ -1,5 +1,9 @@
 # Prompt chiaro e compatto — 15 settembre 2026
 
+Resoconto di sviluppo e di una prova tecnica sul train. Per orientarsi usare
+[la guida del modulo](../../llm_selection/README.md); per le prove manuali
+[la guida alla chat](../approfondimenti/chat_locale.md).
+
 Questa modifica prepara la prossima prova tecnica. Il circuito completo,
 la metrica e tutti i cinque esempi RAG restano nel prompt. La struttura JSON
 della risposta resta quella dello schema 2.0.0. Le regole del validatore non
@@ -69,7 +73,7 @@ QASM pone un limite alla riduzione possibile. La reversibilità dimostra che
 i dati sono rimasti; non dimostra da sola che un modello interpreti altrettanto
 bene la nuova rappresentazione.
 
-Dati riproducibili: [riepilogo JSON](reports/prompt_lossless_v2.json).
+Dati riproducibili: [riepilogo JSON](../../llm_selection/reports/prompt_lossless_v2.json).
 L'audit completo è sotto `$LLM_OUTPUT/prompt_audits/lossless-v2-check-01/`.
 
 ## Verifica dell'esempio train
@@ -138,11 +142,11 @@ Il profilo usa già tutti i livelli sulla GPU; non è stata aumentata la VRAM
 assegnata. Queste misure non dimostrano la causa unica della vecchia lentezza.
 Il server è stato chiuso al termine.
 
-I dati completi sono nel [resoconto JSON](reports/qwen_prompt_v2_dj.json).
+I dati completi sono nel [resoconto JSON](../../llm_selection/reports/qwen_prompt_v2_dj.json).
 Il testo originale è disponibile separatamente per
-[tentativo 1](reports/qwen_prompt_v2_dj_responses/attempt_1.txt),
-[tentativo 2](reports/qwen_prompt_v2_dj_responses/attempt_2.txt) e
-[tentativo 3](reports/qwen_prompt_v2_dj_responses/attempt_3.txt).
+[tentativo 1](../../llm_selection/reports/qwen_prompt_v2_dj_responses/attempt_1.txt),
+[tentativo 2](../../llm_selection/reports/qwen_prompt_v2_dj_responses/attempt_2.txt) e
+[tentativo 3](../../llm_selection/reports/qwen_prompt_v2_dj_responses/attempt_3.txt).
 Le sigle presenti in questi testi sono quelle effettivamente prodotte da Qwen.
 
 Il resoconto e le copie testuali si rigenerano senza inferenza:
@@ -207,8 +211,9 @@ profilo hardware di `qwen-prova-07`, sul solo DJ. Il nome deve essere nuovo:
   --technical-timeout 3600 --technical-max-attempts 3
 ```
 
-Queste soglie sono quelle della prova di riferimento registrata, non i valori
-predefiniti della guida generale. Il comando conserva temperature, memoria,
+Queste soglie sono quelle della prova di riferimento registrata.
+Coincidono con i valori presenti nel codice al riordino del 15 settembre 2026;
+le prime istruzioni della guida riportavano ancora i valori precedenti. Il comando conserva temperature, memoria,
 pause, prompt, risposte, errori, token e tempi. Alla prima risposta valida termina;
 le chiamate successive servono soltanto a correggere errori.
 
@@ -239,4 +244,4 @@ in `$LLM_OUTPUT/analyses/prompt_v2/`. Il primo avvio `qwen-prompt-v2-01`
 la verifica SHA-256 aveva prodotto un risultato valido. Il tentativo resta
 conservato e la ripartenza usa un nome nuovo.
 
-Per pubblicare codice e documentazione: [istruzioni GitHub](GITHUB.md).
+Per pubblicare codice e documentazione: [resoconto storico GitHub](2026-09-15_pubblicazione_github.md).

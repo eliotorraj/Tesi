@@ -121,7 +121,7 @@ class LocalLlmGateway:
         from uuid import uuid4
         from .configuration import payload
         directory=self.directory/str(uuid4())
-        from .compact_prompt import audit as encoding_audit, expand_response
+        from prototype.prompting.compact import audit as encoding_audit, expand_response
         request_payload=payload(prompt.payload,self.configuration)
         encoding=encoding_audit(prompt.payload)
         write_json(directory/"encoding.json",encoding)

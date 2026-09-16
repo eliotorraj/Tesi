@@ -8,7 +8,7 @@ from .common import ROOT, OUTPUT, digest, now, write_json
 
 def code_files():
     paths=[]
-    for folder in ("prototype/quantum_assistant","qiskit_dataset","llm_selection"):
+    for folder in ("prototype/quantum_assistant","prototype/prompting","qiskit_dataset","llm_selection"):
         paths.extend((ROOT/folder).rglob("*.py"))
     paths.extend([ROOT/"scripts/mqt_predictor_protocol.py",ROOT/"llm_selection/serve.ps1",ROOT/"llm_selection/gpu_monitor.ps1",ROOT/"llm_selection/AmdSensors.cs",ROOT/"llm_selection/stop.ps1"])
     paths.extend([ROOT/"scripts/14_evaluate_methods_v2.py",ROOT/"scripts/15_release_test_v2.py"])

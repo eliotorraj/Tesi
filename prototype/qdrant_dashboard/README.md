@@ -4,6 +4,13 @@ La dashboard ufficiale si apre su [localhost:6333/dashboard](http://localhost:63
 Per funzionare richiede Docker Desktop e il contenitore Qdrant in esecuzione.
 Se il browser mostra «connessione rifiutata», avviare prima i servizi.
 
+## Contenuto della cartella
+
+| File | A cosa serve |
+| --- | --- |
+| [compose.yaml](compose.yaml) | Avvia il server Qdrant locale e conserva la copia consultabile nel volume Docker. |
+| README.md | Spiega come aprire, esplorare e fermare la dashboard. |
+
 ## Avvio
 
 Da PowerShell, nella radice del progetto:
@@ -61,3 +68,5 @@ docker compose -f prototype/qdrant_dashboard/compose.yaml stop
 ```
 
 Per riaprirlo, ripetere il comando di avvio. Non serve importare di nuovo i punti.
+
+[Torna alla guida del prototipo](../README.md).

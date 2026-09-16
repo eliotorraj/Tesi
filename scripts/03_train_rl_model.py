@@ -445,9 +445,9 @@ def main() -> int:
             f"Il modello canonico esiste gia: {canonical_model}\n"
             "Usa --allow-overwrite solo se vuoi davvero sostituirlo."
         )
-
+    checkpoint_root = Path("/mnt/d/RL_Models_Tesi/MODELLI NUOVI")
     checkpoint_dir = (
-        EXPERIMENT_ROOT
+        checkpoint_root
         / "checkpoints"
         / "rl"
         / device.description
