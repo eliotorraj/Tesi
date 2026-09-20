@@ -1,0 +1,7 @@
+{
+  "exit_code": 0,
+  "seconds": 86.377,
+  "command": "../../.venv/bin/python -m unittest discover -s tests -v",
+  "cwd": "archivio/esperimento_v2",
+  "phase": "technical_regression_no_experimental_Test"
+}

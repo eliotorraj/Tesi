@@ -1,7 +1,0 @@
-[
-  {
-    "code": "FACT_NOT_SUPPORTED",
-    "path": "$.facts[0]",
-    "message": "Fact 1 (selected_device_matches_example, example_id=E2) does not match the provided data. Observed data: {\"circuit\": \"wstate_indep_tket_5\", \"historical_device\": \"ibm_heron_156\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
-  }
-]

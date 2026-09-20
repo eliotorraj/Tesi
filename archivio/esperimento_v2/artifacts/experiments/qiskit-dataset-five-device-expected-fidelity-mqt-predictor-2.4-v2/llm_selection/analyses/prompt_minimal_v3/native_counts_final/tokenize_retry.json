@@ -1,0 +1,16 @@
+{
+  "executable": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/runtime/b10930/llama-tokenize.exe",
+  "model": "D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\models\\qwen\\Q8_0.gguf",
+  "jobs": [
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts_final/portfoliovqe_indep_qiskit_6/section_retrieved_labeled_examples.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts_final/portfoliovqe_indep_qiskit_6/section_retrieved_labeled_examples.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts_final/portfoliovqe_indep_qiskit_6/section_retrieved_labeled_examples.retry1.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts_final/portfoliovqe_indep_qiskit_6/section_response_schema.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts_final/portfoliovqe_indep_qiskit_6/section_response_schema.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts_final/portfoliovqe_indep_qiskit_6/section_response_schema.retry1.log"
+    }
+  ]
+}

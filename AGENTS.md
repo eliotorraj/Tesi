@@ -2,8 +2,8 @@
 
 ## Local knowledge base
 
-- Treat every file under `knowledge/` as the project's primary local knowledge base.
-- Read `knowledge/riassunto_kb_mqt_predictor.md` first for the conversation context, then consult the papers when a claim needs confirmation.
+- Treat every file under `archivio/esperimento_v2/knowledge/` as the project's primary local knowledge base.
+- Read `archivio/esperimento_v2/knowledge/riassunto_kb_mqt_predictor.md` first for the conversation context, then consult the papers when a claim needs confirmation.
 - Distinguish clearly between the 2023 compilation-option predictor and the 2025 MQT Predictor architecture.
 - Distinguish facts from the papers, facts from current software documentation, and our own engineering inferences.
 - For current APIs and installation details, prefer the official MQT repository, documentation, and PyPI metadata because the software may have changed since publication.
@@ -11,8 +11,8 @@
 ## MQT Predictor testing
 
 - The current experiment uses Python 3.12 with `mqt.predictor==2.4.0` and the exact pins in `uv.lock`. MQT Predictor 2.3.0 is historical material in `archivio/`.
-- Use `docs/protocollo_sperimentale.md` as the only current experimental protocol. Active Dataset and artifacts are under their respective `experiments/` directories.
-- Preserve the original corpus in `archivio/protocollo_v1/datasets/expected_fidelity/full/`; v2 still verifies it. Frozen manifest paths are logical references resolved by `resolve_source_reference`, not paths to rewrite.
+- Use `prototipo/docs/protocollo_sperimentale.md` as the only current experimental protocol. The frozen Dataset and artifacts are under `archivio/esperimento_v2/`; the standalone demonstrator is `prototipo/`.
+- Preserve the original corpus in `archivio/esperimento_v2/archivio/protocollo_v1/datasets/expected_fidelity/full/`; v2 still verifies it. Frozen manifest paths are logical references resolved by `resolve_source_reference`, not paths to rewrite.
 - Do not assume that `qcompile` works immediately after installation. MQT Predictor 2.x requires trained RL models and a trained supervised device selector.
 - A smoke-trained model only validates the pipeline; it is not evidence of compilation quality.
 - Preserve trained model artifacts before recreating `.venv`, including runtime copies inside the installed package directory and canonical artifacts under `artifacts/experiments/`.
@@ -56,3 +56,11 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+## Organizzazione dal 20 settembre 2026
+
+- `prototipo/` contiene la dimostrazione autonoma Qwen con temperatura 0.
+- `archivio/esperimento_v2/` conserva l’intero ambiente sperimentale e il vecchio archivio, con percorsi relativi invariati. I suoi sorgenti congelati non vanno ottimizzati in-place.
+- Il protocollo corrente e la guida sono in `prototipo/docs/`; le copie interne all’archivio sono storiche.
+- Non aprire il Test: prima occorre collegare il controllo di apertura alla selezione ufficiale `local-llm-v2`, completare MQT e verificare tutte le condizioni.
+- `tesi/` resta una cartella locale esclusa da Git.

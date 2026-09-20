@@ -1,0 +1,90 @@
+{
+  "study_id": "local-llm-v2",
+  "winner": "qwen/p0_t0",
+  "configuration": {
+    "id": "p0_t0",
+    "prompt_variant": "facts",
+    "temperature": 0.0
+  },
+  "fixed": {
+    "max_tokens": 4096,
+    "top_p": 0.95,
+    "top_k": 40,
+    "min_p": 0.0,
+    "seed": 20260913,
+    "repeat_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0,
+    "mirostat": 0,
+    "typical_p": 1.0,
+    "cache_prompt": true,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "timings_per_token": true,
+    "return_progress": true,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    },
+    "reasoning_effort": "none",
+    "reasoning_format": "none"
+  },
+  "policy": {
+    "contract": "4.0.0",
+    "prompt_revision": "facts-v4-toon3-20260919",
+    "facts_min": 1,
+    "facts_max": 2,
+    "hypothesis_max_characters": 1000,
+    "hypothesis_semantics": "not validated; avoid citation IDs by instruction only",
+    "max_completed_attempts": 3,
+    "exhausted_facts": "accept final structurally valid response with allowed pair; record facts as unverified",
+    "interruptions": "archive incomplete physical call; repeat same logical attempt without consuming budget",
+    "timeout_without_resource_interruption": "terminal timeout, not an unlimited retry",
+    "reference": "maximum median score among compatible pairs with all seeds 0,1,2 successful",
+    "missing_scores": "null, publish circuit identities and denominators",
+    "selection_order": [
+      "maximum valid_and_compilable",
+      "minimum median observed regret on common circuits",
+      "minimum repairs",
+      "minimum all physical generation calls",
+      "minimum measured call seconds if complete",
+      "minimum output tokens if complete",
+      "lexicographic"
+    ],
+    "bootstrap": {
+      "unit": "circuit",
+      "draws": 2000,
+      "seed": 20260913,
+      "scope": "descriptive"
+    },
+    "recoverable_resource_failures": "wait until resources recover; no model failure",
+    "unexplained_transport_restarts": 3
+  },
+  "study_sha256": "dca8051cb605a1b76aa29fc9d514271b5bd3653df1d977ed1c223f19f1fe6003",
+  "selection_sha256": "70a38ac5863b92bdfae8aaa4c5d73f98a04efe0d1f92274f1e679ad7953d84fc",
+  "profile": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "weight_precision": "Q8_0",
+    "artifact": {
+      "model_key": "qwen",
+      "base_repository": "Qwen/Qwen3.5-4B",
+      "base_revision_observed": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+      "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+      "filename": "Qwen3.5-4B-Q8_0.gguf",
+      "gguf_sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1",
+      "size_bytes": 4482403488,
+      "weight_precision": "Q8_0",
+      "downloaded_at": "2026-09-13T16:31:34.344925+00:00",
+      "base_revision_of_conversion": "not independently established",
+      "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q8_0.gguf",
+      "local_path": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/qwen/Q8_0.gguf"
+    }
+  },
+  "source_sha256": "3c14683280887913a075b79cb5f1ffe263504bd6a912b0406fdc2d399c1ade67"
+}

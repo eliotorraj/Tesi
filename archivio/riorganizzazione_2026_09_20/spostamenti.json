@@ -1,0 +1,71 @@
+{
+  "backup_commit": "e9f5155c716b052a9fc889ca355840f584b9da38",
+  "backup_tag": "pre-riorganizzazione-2026-09-20",
+  "moves": [
+    {
+      "from": "archivio/",
+      "to": "archivio/esperimento_v2/archivio/"
+    },
+    {
+      "from": "knowledge",
+      "to": "archivio/esperimento_v2/knowledge"
+    },
+    {
+      "from": "docs",
+      "to": "archivio/esperimento_v2/docs"
+    },
+    {
+      "from": "prototype",
+      "to": "archivio/esperimento_v2/prototype"
+    },
+    {
+      "from": "configs",
+      "to": "archivio/esperimento_v2/configs"
+    },
+    {
+      "from": "schemas",
+      "to": "archivio/esperimento_v2/schemas"
+    },
+    {
+      "from": "artifacts",
+      "to": "archivio/esperimento_v2/artifacts"
+    },
+    {
+      "from": "tests",
+      "to": "archivio/esperimento_v2/tests"
+    },
+    {
+      "from": "llm_selection",
+      "to": "archivio/esperimento_v2/llm_selection"
+    },
+    {
+      "from": "datasets",
+      "to": "archivio/esperimento_v2/datasets"
+    },
+    {
+      "from": "scripts",
+      "to": "archivio/esperimento_v2/scripts"
+    },
+    {
+      "from": "qiskit_dataset",
+      "to": "archivio/esperimento_v2/qiskit_dataset"
+    },
+    {
+      "from": "pyproject.toml",
+      "to": "archivio/esperimento_v2/pyproject.toml"
+    },
+    {
+      "from": "uv.lock",
+      "to": "archivio/esperimento_v2/uv.lock"
+    },
+    {
+      "from": ".python-version",
+      "to": "archivio/esperimento_v2/.python-version"
+    },
+    {
+      "from": ".gitattributes",
+      "to": "archivio/esperimento_v2/.gitattributes"
+    }
+  ],
+  "note": "Spostamenti senza alterare contenuto dei file; tesi e ambiente virtuale restano nella radice."
+}

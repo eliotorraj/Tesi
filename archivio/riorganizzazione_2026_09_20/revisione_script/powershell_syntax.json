@@ -1,0 +1,56 @@
+[
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\gpu_monitor.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\inspect_server.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\launch_technical.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\probe_storage.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\resource_probe.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\serve.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\stop.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\tokenize_files.ps1"
+  },
+  {
+    "checker": "System.Management.Automation.Language.Parser",
+    "errors": [],
+    "passed": true,
+    "path": "\\\\wsl.localhost\\Ubuntu\\home\\elio\\Tesi-mqt-2.4-v2\\.workspace_archive\\revisione_script_20260920\\source_copy\\llm_selection\\verify_weights.ps1"
+  }
+]

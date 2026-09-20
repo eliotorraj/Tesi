@@ -1,0 +1,6 @@
+{
+  "node": "archivio/esperimento_v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/runtime/toon/node-v22.23.2-linux-x64/bin/node",
+  "checker": "node --check",
+  "passed": true,
+  "output": ""
+}

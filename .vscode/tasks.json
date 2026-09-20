@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Tesi: compila PDF",
+      "type": "process",
+      "command": "latexmk",
+      "args": [
+        "-norc",
+        "-r",
+        "tesi/latexmkrc",
+        "-cd",
+        "tesi/main.tex"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

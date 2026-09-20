@@ -1,5 +1,0 @@
-Rimuovi vecchi modelli RL e checkpoint da Git
-
-Rimuove soltanto gli archivi ZIP storici sotto artifacts/models/rl e artifacts/checkpoints/rl. Le copie locali e gli artefatti dell'esperimento corrente rimangono invariati. Aggiunge le esclusioni per evitare nuovi caricamenti.
-
-Gli oggetti LFS conservati nella cronologia richiedono una pulizia separata dello storage GitHub.

@@ -1,0 +1,29 @@
+{
+  "study": "local-llm-v2",
+  "ok": true,
+  "groups": {
+    "code": 121,
+    "inputs": 201,
+    "technical/qwen": 448,
+    "validation/qwen": 7465,
+    "technical/phi": 538,
+    "validation/phi": 11155,
+    "technical/gemma": 592,
+    "validation/gemma": 10777,
+    "selection": 8
+  },
+  "unique_files_checked": 31305,
+  "failures": [],
+  "external_dependencies": {
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/gemma/official_config.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/gemma/official_config.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/gemma/official_tokenizer.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/gemma/official_tokenizer.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/gemma/official_tokenizer_config.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/gemma/official_tokenizer_config.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/phi/official_config.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/phi/official_config.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/phi/official_tokenizer.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/phi/official_tokenizer.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/phi/official_tokenizer_config.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/phi/official_tokenizer_config.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/qwen/official_config.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/qwen/official_config.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/qwen/official_tokenizer.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/qwen/official_tokenizer.json",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/models/qwen/official_tokenizer_config.json": "/mnt/d/Tesi-mqt/llm-selection/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/qwen/official_tokenizer_config.json"
+  },
+  "scope": "file hashes only; no Test release, inference, scoring or model loading"
+}

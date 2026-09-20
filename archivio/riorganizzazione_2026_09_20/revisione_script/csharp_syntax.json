@@ -1,0 +1,5 @@
+{
+  "checker": "PowerShell Add-Type compilation only",
+  "instantiated": false,
+  "passed": true
+}

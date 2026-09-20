@@ -1,0 +1,8 @@
+[graphify watch] community set changed since labeling (628 saved labels, 641 communities now; renamed 282 community(ies) by their hub). Run `graphify label` to refresh names with the LLM.
+[graphify watch] 113224 file(s) not classified (no supported extension or shebang), skipped: .git, .gitattributes, .gitignore, .graphify_version, .lock, .python-version (+113218 more)
+[graphify] backed up curated graph (5 files) -> 2026-09-18/
+Graph has 18210 nodes (above 5000 limit). Building aggregated community view...
+graph.html written (aggregated: 641 community nodes, 4658 cross-community edges)
+Tip: run with --obsidian for full node-level detail.
+[graphify watch] Rebuilt: 18210 nodes, 64572 edges, 641 communities
+[graphify watch] graph.json, graph.html and GRAPH_REPORT.md updated in /home/elio/Tesi-mqt-2.4-v2/graphify-out

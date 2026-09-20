@@ -1,0 +1,1 @@
+"""Componenti autonomi del prototipo."""

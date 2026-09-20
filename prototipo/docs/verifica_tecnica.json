@@ -1,0 +1,36 @@
+{
+  "kind": "technical_portable_separation",
+  "offline": {
+    "train_feature_vectors_equal": 396,
+    "qdrant_reference_queries_initial": 396,
+    "qdrant_reference_queries_final": 5,
+    "facts_v4_validated": true,
+    "invalid_device_rejected": true,
+    "fallback_only_third_completed_response": true,
+    "context_overflow_zero_generation": true,
+    "toon_roundtrip": true,
+    "synthetic_bell_compilation_valid": true
+  },
+  "correction": "First synthetic fixture mistakenly included prohibited schema_version; corrected and checks repeated. Runtime data unchanged.",
+  "windows_setup": "PowerShell syntax and CPU runtime --version checked; clean laptop installation not performed",
+  "cpu_runtime_version": "0.4.0-dev build10930 commit56381e407",
+  "laptop_cpu_inference": "not_run",
+  "desktop_real_inference": "not_completed_server_startup_blocked_before_any_llm_call",
+  "desktop_startup_issues": [
+    "UNC script execution policy required per-process bypass",
+    "UNC PowerShell5.1 controller stalled before server; terminated owned PID18960",
+    "Native PowerShell5.1 attempt stalled before server; terminated owned child7336 of15680",
+    "Native PowerShell7 child5316 and owned wrapper7444 stopped after final bounded attempt; no server and no inference observed. Cause not isolated; possible script/signature/module/WMI or file access initialization remains unconfirmed."
+  ],
+  "offline_reports": [
+    "runs/offline-1789928112913004340.json",
+    "runs/offline-initial-correction.json"
+  ],
+  "llm_calls_executed": 0,
+  "owned_processes_stopped": [
+    18960,
+    7336,
+    5316,
+    7444
+  ]
+}

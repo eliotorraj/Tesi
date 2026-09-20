@@ -1,0 +1,23 @@
+{
+  "source_backup_commit": "e9f5155c716b052a9fc889ca355840f584b9da38",
+  "feature_source_version": "mqt.predictor 2.4.0",
+  "source_sha256": {
+    "helper.py": "0fce66f0539a8af620cd7a2c95ed6d371bc69d469bd5ac8250a805443c4d3e98",
+    "utils.py": "069ee2da89cb34a5c71e92eaf886f680ad7f37bc260df7c2da76ca4ae45c301c"
+  },
+  "feature_functions": [
+    "get_openqasm_gates",
+    "dict_to_featurevector",
+    "create_feature_vector",
+    "SupermarqFeatures",
+    "calc_supermarq_features"
+  ],
+  "changes": [
+    "standalone train corpus integrity seal",
+    "portable runtime dependency subset",
+    "Python native HTTP; Windows curl from WSL",
+    "nonstreaming response capture with same sampling and schema",
+    "Node 22 runtime location portable; TOON codec unchanged",
+    "CPU laptop context 16384/batch128/microbatch64; technical adaptation"
+  ]
+}

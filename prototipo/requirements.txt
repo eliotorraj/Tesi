@@ -1,0 +1,6 @@
+qiskit==2.5.0
+mqt.bench==2.2.3
+numpy==2.5.1
+networkx==3.6.1
+qdrant-client==1.19.0
+portalocker==3.2.0

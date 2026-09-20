@@ -1,0 +1,15 @@
+{
+  "operational": {
+    "files": 147,
+    "lines": 34750,
+    "syntax_passed": 147,
+    "manual_full": 14,
+    "manual_partial": 1,
+    "static_only": 132
+  },
+  "historical_files": 1880,
+  "historical_unique_hashes": 195,
+  "historical_identical_to_operational": 1567,
+  "historic_paths_resolved": 1880,
+  "python_modules_documented": 120
+}

@@ -1,0 +1,7 @@
+{
+  "observation": "The source reaches the failed launch.json write before entering the cleanup try at line 77.",
+  "source_lines": "52-76",
+  "failure": "Injected disk-write failure",
+  "real_processes_started": false,
+  "fake_process_started": true
+}

@@ -1,0 +1,7 @@
+{
+    "abort_reason":  "available_ram_below_operational_limit",
+    "thermal_pause_count":  0,
+    "ended_at":  "2026-09-14T09:36:28.4725846Z",
+    "thermal_paused_seconds":  0,
+    "exit_code":  null
+}

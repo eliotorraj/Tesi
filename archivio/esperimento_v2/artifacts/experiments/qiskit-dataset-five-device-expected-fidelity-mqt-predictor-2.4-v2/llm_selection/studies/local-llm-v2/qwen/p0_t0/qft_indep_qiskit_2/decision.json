@@ -1,0 +1,22 @@
+{
+  "status": "success",
+  "selected_device_id": "ibm_falcon_127",
+  "selected_config_id": "o3_default_default",
+  "failure": null,
+  "circuit_id": "qft_indep_qiskit_2",
+  "source_sha256": "aa91238ec5978b739b87b3a657746a8786de113397a5abeadf726d1dd9c836b3",
+  "split": "validation",
+  "configuration_id": "p0_t0",
+  "attempt_count": 3,
+  "llm_calls": 3,
+  "repair_count": 2,
+  "transport_retries": 0,
+  "facts_status": "unverified",
+  "accepted_with_unverified_facts": true,
+  "hypothesis_status": "not_evaluated",
+  "ended_at": "2026-09-19T19:28:34.746176+00:00",
+  "measured_call_seconds": 17.444905560000052,
+  "measured_call_seconds_observed": 17.444905560000052,
+  "attempts_sha256": "422208cfdc47bb002762c7170c2b9e5f08af87dbf010ce8489e9d068983e2693",
+  "input_prompt_sha256": "9146ca7aa9b7a3611580bfdab67405cb07bf4156ed4733cdb38043608f9fef5b"
+}

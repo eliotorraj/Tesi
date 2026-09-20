@@ -1,0 +1,10 @@
+{
+  "source": "llm_selection/gateway.py:22",
+  "injected_exception": "TimeoutExpired",
+  "persisted_files": [
+    "request.json"
+  ],
+  "transport_metadata_saved": false,
+  "captured_partial_stdout_saved": false,
+  "real_network_requests": false
+}

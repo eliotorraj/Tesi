@@ -1,0 +1,20 @@
+{
+  "operational_count": 147,
+  "all_current_hashes_match": false,
+  "mismatches": [
+    "archivio/esperimento_v2/llm_selection/v2/plots.py"
+  ],
+  "markdown_table_rows": 147,
+  "finding_count": 2,
+  "original_files_changed_by_review": false,
+  "known_variant_changes": [
+    {
+      "path": "llm_selection/v2/plots.py",
+      "reviewed_sha256": "b59750c03312b3adfae4aa3c3189214a3f99847127e66e940ba3ac021326ea6f",
+      "current_sha256": "388a0c8fa823482f23477bd38012effa3031e5f5695815361acd97017afcae88",
+      "current_syntax_passed": true
+    }
+  ],
+  "unexpected_mismatches": [],
+  "note": "Il solo plots.py è stato ripristinato dal coordinatore. La revisione non ha modificato i sorgenti."
+}

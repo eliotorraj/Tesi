@@ -1,0 +1,25 @@
+{
+  "completed": [
+    "backup_before_changes_pushed",
+    "main_updated_preserving_history",
+    "codex_branch_names_removed",
+    "two_project_areas",
+    "current_protocol_and_step_by_step_guide",
+    "frozen_validation_integrity_31305_files",
+    "archive_regression_266_tests",
+    "latex_pdf_39_pages",
+    "static_script_review_147_files"
+  ],
+  "pending": [
+    "real_Qwen_end_to_end_run_confirmation",
+    "actual_laptop_memory_latency_measurement",
+    "manual_review_remaining_132_scripts_and_partial_file",
+    "test_release_adoption_of_local_llm_v2_and_no_rag_contract",
+    "MQT_and_frontier_prerequisites_before_Test"
+  ],
+  "test_released": false,
+  "budget_stop": "weekly_used_percent_must_remain_below_42",
+  "delivery_branch": "riorganizzazione-prototipo",
+  "main_preserved_at": "99ee834e8faa633df857e55dfbb6fbe7aa798c00",
+  "real_llm_calls": 0
+}

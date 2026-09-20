@@ -1,0 +1,8 @@
+{
+  "file": "llm_selection/v2/plots.py",
+  "reason": "Modifica preesistente dopo congelamento; ripristinata copia esatta usata dallo studio. Versione successiva conservata separatamente.",
+  "sha256_before": "b59750c03312b3adfae4aa3c3189214a3f99847127e66e940ba3ac021326ea6f",
+  "sha256_frozen": "388a0c8fa823482f23477bd38012effa3031e5f5695815361acd97017afcae88",
+  "source": "archivio/esperimento_v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/code_snapshots/6c0aad310d3d90f63ae4f887b8c074207a04f8b86ffa19783b835efbbdadec04/llm_selection/v2/plots.py",
+  "preserved_modified_copy": "plots_post_validation.py"
+}
