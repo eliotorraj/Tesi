@@ -14,9 +14,7 @@ Per capire esattamente il prossimo passo leggere la
 [guida passo passo](prototipo/docs/guida_passo_passo.md) e il
 [protocollo corrente](prototipo/docs/protocollo_sperimentale.md).
 
-La cartella locale [tesi/](tesi/README.md) contiene la stesura LaTeX ed è esclusa
-da Git. `.venv/`, `.codex/`, `.workspace_archive/` e `graphify-out/` sono strumenti
-locali; non sono altre fasi dell'esperimento. `.vscode/` contiene preferenze editor.
+
 
 ## Punti da completare prima del Test
 
