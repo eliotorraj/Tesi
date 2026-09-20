@@ -1,0 +1,67 @@
+[
+  {
+    "circuit": "ae_indep_qiskit_60",
+    "attempt": "attempt_1",
+    "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/ae_indep_qiskit_60/attempt_1",
+    "extraction": {
+      "prompt.txt": "call/request.json -> prompt",
+      "risposta.txt": "call/response.json -> content"
+    },
+    "sha256": {
+      "prompt.txt": "a9268115a9750de43b8cc402712128dc2ed5f57ab1cc098fa7db5d913f8f96fe",
+      "risposta.txt": "4fcb277259c6517555ae1be835e80ff8ff4ce2f18e39eaf925f936dd9f3f20a8"
+    }
+  },
+  {
+    "circuit": "dj_indep_tket_2",
+    "attempt": "attempt_1",
+    "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/dj_indep_tket_2/attempt_1",
+    "extraction": {
+      "prompt.txt": "call/request.json -> prompt",
+      "risposta.txt": "call/response.json -> content"
+    },
+    "sha256": {
+      "prompt.txt": "0e5539fbfe9fc41b43f7957abb24ec2d0a4e6582d571dddf804f848666040775",
+      "risposta.txt": "fc39a066dd471d5236d8c44709d63e679ef7550624bbc6c8ec21c9e7c3126759"
+    }
+  },
+  {
+    "circuit": "portfoliovqe_indep_qiskit_6",
+    "attempt": "attempt_1",
+    "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+    "extraction": {
+      "prompt.txt": "call/request.json -> prompt",
+      "risposta.txt": "call/response.json -> content"
+    },
+    "sha256": {
+      "prompt.txt": "096acbbd4bd7bacc9d4a19c6d56927d35c3d07677f2076263f62cc251c07bd3d",
+      "risposta.txt": "dadcbf566fd7f7530df8e2652420511ab6ac43e04bb9c06c2b4a9951d0a8b117"
+    }
+  },
+  {
+    "circuit": "su2random_indep_qiskit_50",
+    "attempt": "attempt_1",
+    "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/su2random_indep_qiskit_50/attempt_1",
+    "extraction": {
+      "prompt.txt": "call/request.json -> prompt",
+      "risposta.txt": "call/response.json -> content"
+    },
+    "sha256": {
+      "prompt.txt": "bb700264000dd703774e6db5cea631f92245c372fde011f0d0bf06206d0d2dce",
+      "risposta.txt": "451ce3be4c9b11b26ce4d8655f02c9a5bc667db0b8b72914048084e6721762b4"
+    }
+  },
+  {
+    "circuit": "su2random_indep_tket_50",
+    "attempt": "attempt_1",
+    "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/su2random_indep_tket_50/attempt_1",
+    "extraction": {
+      "prompt.txt": "call/request.json -> prompt",
+      "risposta.txt": "call/response.json -> content"
+    },
+    "sha256": {
+      "prompt.txt": "fb2a6fb8f599de9bd696f5d100d2a6108c3ed6d025787de75acb1c5f0eb3ff3c",
+      "risposta.txt": "f72141015af2de565cc69a690d95b840ba37da06fc94d7fa292c8979df4e1cff"
+    }
+  }
+]

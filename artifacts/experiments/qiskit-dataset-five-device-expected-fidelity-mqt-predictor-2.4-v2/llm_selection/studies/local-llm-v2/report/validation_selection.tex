@@ -1,0 +1,129 @@
+\providecommand{\ValidationFiguresPath}{figures/}
+
+\section{Seconda selezione dei modelli locali sulla validation}
+
+Studio local-llm-v2. Contratto di risposta 4.0.0. Sono confrontate nove combinazioni sugli stessi 88 circuiti. Il test resta separato.
+
+\subsection{Dati, impostazioni e controlli}
+
+Qwen, Phi e Gemma usano lo stesso prompt, derivato dalla precedente checklist, alle temperature 0, 0,4 e 0,7. Si recuperano cinque esempi dal train, con distanza Manhattan sulle 49 caratteristiche e trasformazioni fissate sul train. Il formato del prompt è TOON e la risposta è JSON. Nella validation gli score del circuito corrente non entrano nel prompt né nei messaggi correttivi.
+
+La risposta contiene una coppia ammessa, da uno a due fatti strutturati e un'ipotesi libera fino a 1000 caratteri. I quattro fatti riguardano la presenza della coppia nei risultati mostrati, il dispositivo storico, l'uguaglianza del numero di qubit o la capacità del dispositivo. Il testo dell'ipotesi non viene verificato semanticamente.
+
+Si consentono tre tentativi logici. Dopo il terzo, una risposta conforme con coppia ammessa viene accettata anche se i fatti restano errati. Questo successo operativo non certifica la spiegazione o la qualità della compilazione. Le chiamate interrotte sono conservate, annullate nel conteggio logico e ripetute al recupero delle risorse.
+
+La GPU è una Radeon RX 6750 XT. Limite hotspot 110 gradi, pausa a 105 e ripresa a 100; limite edge 95 gradi. Soglia RAM disponibile 1 GiB. Sono impostazioni operative richieste, non una garanzia specifica del produttore. Il monitor campiona RAM, VRAM e temperature; i massimi campionati possono perdere picchi istantanei.
+
+\begin{center}\begin{tabular}{lrr}\toprule Modello & Contesto & Micro-batch\\\midrule
+
+qwen & 60000 & 128\\
+
+phi & 60000 & 128\\
+
+gemma & 60000 & 128\\
+
+\bottomrule\end{tabular}\end{center}
+
+Pesi Q8\_0; revisioni, hash, hardware, dipendenze e dati di provenienza sono conservati nei manifest dello studio.
+
+\begin{center}\begin{tabular}{lr}\toprule Parametro & Valore\\\midrule
+
+max\_tokens & 4096\\
+
+top\_p & 0.95\\
+
+top\_k & 40\\
+
+min\_p & 0.0\\
+
+seed & 20260913\\
+
+\bottomrule\end{tabular}\end{center}
+
+\subsection{Risultati}
+
+\begin{center}\small\begin{tabular}{lrrrr}\toprule Prova & Casi & Successi & Fatti verificati & Correzioni\\\midrule
+
+gemma/p0\_t0 & 88 & 88 & 52 & 100\\
+
+gemma/p0\_t04 & 88 & 88 & 44 & 105\\
+
+gemma/p0\_t07 & 88 & 88 & 34 & 115\\
+
+phi/p0\_t0 & 88 & 88 & 67 & 99\\
+
+phi/p0\_t04 & 88 & 88 & 74 & 113\\
+
+phi/p0\_t07 & 88 & 88 & 71 & 129\\
+
+qwen/p0\_t0 & 88 & 88 & 70 & 43\\
+
+qwen/p0\_t04 & 88 & 88 & 71 & 44\\
+
+qwen/p0\_t07 & 88 & 88 & 81 & 49\\
+
+\bottomrule\end{tabular}\end{center}
+
+\subsection{Qualità della scelta e selezione}
+
+\[R_{\mathrm{osservato}}(c)=\max_{p\in P_{\mathrm{riuscite}}(c)} \mathrm{mediana}(F_{p,0},F_{p,1},F_{p,2})-F_{\mathrm{scelta}}(c).\]
+
+Si riusano le compilazioni Qiskit. Il riferimento considera solo coppie con tre ripetizioni riuscite. Copre 88 circuiti; 70 matrici sono incomplete e quindi questo riferimento non certifica il massimo esaustivo. L'oracle completo sui 18 circuiti resta un'analisi aggiuntiva. Uno score mancante resta null.
+
+La selezione ordina completezza, regret mediano sui circuiti comuni, correzioni, chiamate fisiche, tempi e token. Il circuito è l'unità statistica. Gli intervalli appaiati al 95 per cento usano 2000 ricampionamenti e seed 20260913; sono descrittivi e non correggono la selezione tra candidati.
+
+Vincitore: qwen/p0\_t0. Passaggi e denominatori sono in selection.json.
+
+\begin{center}\small\begin{tabular}{lrr}\toprule Prova & Regret n & Mediana regret\\\midrule
+
+gemma/p0\_t0 & 88 & 0.1323\\
+
+gemma/p0\_t04 & 88 & 0.139\\
+
+gemma/p0\_t07 & 88 & 0.1276\\
+
+phi/p0\_t0 & 88 & 0\\
+
+phi/p0\_t04 & 88 & 0\\
+
+phi/p0\_t07 & 88 & 0\\
+
+qwen/p0\_t0 & 88 & 0\\
+
+qwen/p0\_t04 & 88 & 0\\
+
+qwen/p0\_t07 & 88 & 0\\
+
+\bottomrule\end{tabular}\end{center}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath regret_osservato.png}
+
+\caption{Regret osservato. Ogni punto statistico rappresenta un circuito; n indica i circuiti valutabili.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath fatti.png}
+
+\caption{Esiti dei controlli sui fatti. La motivazione libera non viene validata semanticamente.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath chiamate.png}
+
+\caption{Correzioni e interruzioni sono conteggiate separatamente. Le interruzioni non consumano tentativi logici.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath costo.png}
+
+\caption{Totali solo quando tutte le chiamate sono misurabili. I valori mancanti non diventano zero; attese e caricamenti sono nei registri del supervisore.}\end{figure}
+
+\clearpage\subsection{Provenienza e limiti}
+
+Questa versione è stata progettata dopo aver esaminato la prima validation. Le due versioni restano separate. La correttezza dei fatti strutturati non misura la correttezza del testo libero né dimostra un rapporto causale fra motivazione e scelta. La presenza di un precedente storico non garantisce prestazioni sul nuovo circuito.
+
+I tempi HTTP includono le pause dentro la chiamata; attese di recupero e caricamenti sono registrati separatamente. I token mancanti restano espliciti. Tutti i tentativi, anche interrotti, restano disponibili.
+
+Le istruzioni per rigenerare sorgenti e figure sono nella guida dello studio. CSV, JSON e JSONL conservano i dati delle analisi. Ogni risultato di validation viene letto soltanto dopo i sigilli. Nessun dato del test è utilizzato.

@@ -1,0 +1,10 @@
+{
+  "selected_device": "quantinuum_h2_56",
+  "config_id": "o2_default_default",
+  "claim": "The selected device has 56 qubits, matching the circuit's 50 qubit requirement, and supports the native U3-like gates (rx, ry, rz) needed for the circuit. The default configuration is chosen as it is tied for the best score in historical examples E1, E3, and E4.",
+  "evidence": [
+    "E1",
+    "E3",
+    "E4"
+  ]
+}

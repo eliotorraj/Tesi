@@ -1,0 +1,46 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E3",
+      "record_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1",
+      "result": "verified",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_70",
+        "historical_rows": [
+          {
+            "rank": 2,
+            "device_id": "ibm_heron_156",
+            "config_id": "o3_sabre_sabre",
+            "median_score": 0.4396095789,
+            "tied_score_config_ids": [
+              "o3_sabre_sabre"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E3",
+      "record_id": "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1",
+      "result": "verified",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_70",
+        "historical_device": "ibm_heron_156"
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": true,
+  "validation_seconds": 0.007001013000262901
+}

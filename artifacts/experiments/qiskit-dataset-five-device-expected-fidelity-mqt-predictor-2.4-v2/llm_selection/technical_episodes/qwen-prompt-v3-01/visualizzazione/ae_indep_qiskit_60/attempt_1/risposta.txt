@@ -1,0 +1,12 @@
+{
+  "selected_device": "ibm_heron_156",
+  "config_id": "o3_default_default",
+  "claim": "The circuit requires 60 qubits and depth 354; ibm_heron_156 supports 156 qubits and native gates match the circuit's operation set. The o3_default_default configuration is ranked highest in historical examples for this device.",
+  "evidence": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5"
+  ]
+}

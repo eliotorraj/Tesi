@@ -1,0 +1,62 @@
+{
+  "qwen": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 110,
+      "minimum_available_bytes": 1073741824,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "weight_precision": "Q8_0",
+    "precision_reason": "Profilo precedente riutilizzato; nuova verifica tecnica train con schema v4.",
+    "technical_evidence": []
+  },
+  "phi": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 110,
+      "minimum_available_bytes": 1073741824,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "weight_precision": "Q8_0",
+    "precision_reason": "Profilo precedente riutilizzato; nuova verifica tecnica train con schema v4.",
+    "technical_evidence": []
+  },
+  "gemma": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 110,
+      "minimum_available_bytes": 1073741824,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "weight_precision": "Q8_0",
+    "precision_reason": "Profilo precedente riutilizzato; nuova verifica tecnica train con schema v4.",
+    "technical_evidence": []
+  }
+}

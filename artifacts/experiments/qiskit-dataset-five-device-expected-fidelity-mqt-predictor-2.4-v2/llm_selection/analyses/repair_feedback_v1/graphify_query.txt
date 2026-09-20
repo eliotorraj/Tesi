@@ -1,0 +1,23 @@
+Graph: graphify-out/graph.json (18210 nodes) | Traversal: BFS depth=2 | Start: ['feedback()'] | 33 nodes found
+
+[!] TRUNCATED: showing 18 of 33 nodes (~500-token budget). The answer may be among the 15 cut nodes — raise the token budget (CLI: --budget) or narrow the query (e.g. context_filter=['call'], or get_node for a specific symbol).
+
+NODE feedback() [src=prototype/prompting/minimal.py loc=L137 community=statistics]
+NODE minimal.py [src=prototype/prompting/minimal.py loc=L1 community=statistics]
+NODE model_input() [src=prototype/prompting/minimal.py loc=L163 community=statistics]
+NODE Una frase per tipo di errore; nessun valore arbitrario dalla risposta. [src=prototype/prompting/minimal.py loc=L138 community=statistics]
+NODE json [src= loc= community=pathlib]
+NODE hashlib [src= loc= community=pathlib]
+NODE dataclasses [src= loc= community=typing]
+NODE re [src= loc= community=re]
+NODE copy [src= loc= community=statistics]
+NODE llm_selection/run.py [src=llm_selection/run.py loc=L1 community=statistics]
+NODE prototype/quantum_assistant/schema_validation.py [src=prototype/quantum_assistant/schema_validation.py loc=L1 community=prototype/quantum_assistant/models.py]
+NODE test_minimal_prompt.py [src=tests/test_minimal_prompt.py loc=L1 community=io]
+NODE minimal_audit.py [src=llm_selection/minimal_audit.py loc=L1 community=statistics]
+NODE citation_context() [src=prototype/prompting/minimal.py loc=L58 community=statistics]
+NODE messages() [src=prototype/prompting/rendering.py loc=L13 community=statistics]
+NODE llm_selection/prompt_audit.py [src=llm_selection/prompt_audit.py loc=L1 community=statistics]
+NODE audit() [src=prototype/prompting/minimal.py loc=L195 community=statistics]
+NODE response_schema() [src=prototype/prompting/minimal.py loc=L71 community=statistics]
+... (truncated — 15 more nodes cut by ~500-token budget. Narrow with context_filter=['call'] or use get_node for a specific symbol)

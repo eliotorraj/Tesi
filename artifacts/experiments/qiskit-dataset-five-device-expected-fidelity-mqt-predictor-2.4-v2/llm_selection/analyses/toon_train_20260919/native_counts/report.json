@@ -1,0 +1,383 @@
+{
+  "at": "2026-09-18T22:49:42.164496+00:00",
+  "revision": "minimal-v3-toon1-20260919",
+  "toon": {
+    "format": "TOON",
+    "package": "@toon-format/toon",
+    "version": "4.1.1",
+    "options": {
+      "indentSize": 2,
+      "delimiter": ","
+    },
+    "node_version": "v22.23.2",
+    "projection": "feature_rows_and_ordered_adjacency_v1"
+  },
+  "rows": [
+    {
+      "model": "qwen",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/ae_indep_qiskit_60/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 75193,
+        "minimal_json": 11382,
+        "minimal_toon": 10436,
+        "original_full_json": 111358
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 946,
+      "reduction_json_to_toon_percent": 8.311368827973997,
+      "reduction_original_to_toon_percent": 86.12104850185523
+    },
+    {
+      "model": "qwen",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/dj_indep_tket_2/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "exact_archived_request",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 34318,
+        "minimal_json": 11667,
+        "minimal_toon": 10771,
+        "original_full_json": 81023
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 896,
+      "reduction_json_to_toon_percent": 7.679780577697781,
+      "reduction_original_to_toon_percent": 68.61413835305088
+    },
+    {
+      "model": "qwen",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 36265,
+        "minimal_json": 12692,
+        "minimal_toon": 11718,
+        "original_full_json": 84316
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 974,
+      "reduction_json_to_toon_percent": 7.674125433343837,
+      "reduction_original_to_toon_percent": 67.68785330208189
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/su2random_indep_qiskit_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 90831,
+        "minimal_json": 12458,
+        "minimal_toon": 11403,
+        "original_full_json": 133587
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1055,
+      "reduction_json_to_toon_percent": 8.468454005458337,
+      "reduction_original_to_toon_percent": 87.44591604187998
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/su2random_indep_tket_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 91516,
+        "minimal_json": 12488,
+        "minimal_toon": 11434,
+        "original_full_json": 134111
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1054,
+      "reduction_json_to_toon_percent": 8.44010249839846,
+      "reduction_original_to_toon_percent": 87.50600987805412
+    },
+    {
+      "model": "phi",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/ae_indep_qiskit_60/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 59791,
+        "minimal_json": 8657,
+        "minimal_toon": 8259,
+        "original_full_json": 84869
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 398,
+      "reduction_json_to_toon_percent": 4.597435601247546,
+      "reduction_original_to_toon_percent": 86.1868843136927
+    },
+    {
+      "model": "phi",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/dj_indep_tket_2/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 28506,
+        "minimal_json": 9063,
+        "minimal_toon": 8733,
+        "original_full_json": 61493
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 330,
+      "reduction_json_to_toon_percent": 3.6411784177424744,
+      "reduction_original_to_toon_percent": 69.3643443485582
+    },
+    {
+      "model": "phi",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 29961,
+        "minimal_json": 9853,
+        "minimal_toon": 9436,
+        "original_full_json": 64249
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 417,
+      "reduction_json_to_toon_percent": 4.232213539023643,
+      "reduction_original_to_toon_percent": 68.50572410800709
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/su2random_indep_qiskit_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 75207,
+        "minimal_json": 9636,
+        "minimal_toon": 9121,
+        "original_full_json": 105242
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 515,
+      "reduction_json_to_toon_percent": 5.344541303445416,
+      "reduction_original_to_toon_percent": 87.87213956147698
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/su2random_indep_tket_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 75895,
+        "minimal_json": 9635,
+        "minimal_toon": 9121,
+        "original_full_json": 105850
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 514,
+      "reduction_json_to_toon_percent": 5.334717176959003,
+      "reduction_original_to_toon_percent": 87.98208050596219
+    },
+    {
+      "model": "gemma",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/ae_indep_qiskit_60/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 77738,
+        "minimal_json": 12078,
+        "minimal_toon": 10784,
+        "original_full_json": 114688
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1294,
+      "reduction_json_to_toon_percent": 10.7136943202517,
+      "reduction_original_to_toon_percent": 86.12776248424194
+    },
+    {
+      "model": "gemma",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/dj_indep_tket_2/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 37296,
+        "minimal_json": 12395,
+        "minimal_toon": 11169,
+        "original_full_json": 85025
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1226,
+      "reduction_json_to_toon_percent": 9.891085114965714,
+      "reduction_original_to_toon_percent": 70.0530888030888
+    },
+    {
+      "model": "gemma",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 39276,
+        "minimal_json": 13514,
+        "minimal_toon": 12293,
+        "original_full_json": 88591
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1221,
+      "reduction_json_to_toon_percent": 9.035074737309456,
+      "reduction_original_to_toon_percent": 68.70098788063957
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/su2random_indep_qiskit_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 93871,
+        "minimal_json": 13280,
+        "minimal_toon": 11986,
+        "original_full_json": 137641
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1294,
+      "reduction_json_to_toon_percent": 9.743975903614455,
+      "reduction_original_to_toon_percent": 87.23141332253837
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/su2random_indep_tket_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0,
+      "tokens": {
+        "original_v2": 94833,
+        "minimal_json": 13311,
+        "minimal_toon": 12017,
+        "original_full_json": 138518
+      },
+      "archived_token_ids_exact": true,
+      "saved_json_to_toon": 1294,
+      "reduction_json_to_toon_percent": 9.72128314927504,
+      "reduction_original_to_toon_percent": 87.32825071441376
+    }
+  ],
+  "tokenizer_executable_sha256": "5253e5abc542ed0b0efbaf40674d4738c1fd9e2f76cd19c282c81b1d8cfafd84",
+  "method": "Native llama.cpp b10930 tokenizer, original Q8_0 GGUF per model, complete native template replay, --no-bos --no-escape --ids",
+  "schema": "Readable JSON schema counted once in text; external json_schema constrains generation and is not prompt text.",
+  "limits": "No inference, quality, latency, output-token or total-consumption measurement. Counts are prepared input tokens.",
+  "stages": [
+    "original_v2",
+    "minimal_json",
+    "minimal_toon",
+    "original_full_json"
+  ],
+  "totals": {
+    "qwen": {
+      "original_v2": 328123,
+      "minimal_json": 60687,
+      "minimal_toon": 55762,
+      "original_full_json": 544395,
+      "reduction_json_to_toon_percent": 8.115411867451016,
+      "reduction_original_to_toon_percent": 83.00576308274641
+    },
+    "phi": {
+      "original_v2": 269360,
+      "minimal_json": 46844,
+      "minimal_toon": 44670,
+      "original_full_json": 421703,
+      "reduction_json_to_toon_percent": 4.640935872256858,
+      "reduction_original_to_toon_percent": 83.41624591624591
+    },
+    "gemma": {
+      "original_v2": 343014,
+      "minimal_json": 64578,
+      "minimal_toon": 58249,
+      "original_full_json": 564463,
+      "reduction_json_to_toon_percent": 9.800551271330793,
+      "reduction_original_to_toon_percent": 83.01847737993202
+    }
+  }
+}

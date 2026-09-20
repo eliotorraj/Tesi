@@ -1,0 +1,9 @@
+{
+  "selected_device": "quantinuum_h2_56",
+  "config_id": "o3_default_default",
+  "claim": "The 6-qubit circuit with 26 depth and Ry/Cz gates is compatible with the 56-qubit fully connected Quantinuum device. Configuration o3_default_default is selected as it offers high optimization level 3 with default layout and routing, which is historically supported by E2 and E4 for similar 6-7 qubit circuits on this hardware.",
+  "evidence": [
+    "E2",
+    "E4"
+  ]
+}

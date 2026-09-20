@@ -1,0 +1,126 @@
+{
+  "executable": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/runtime/b10930/llama-tokenize.exe",
+  "model": "D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\models\\qwen\\Q8_0.gguf",
+  "jobs": [
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/before.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/before_tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/before_tokenizer.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/after.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/after_tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/after_tokenizer.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_figure_of_merit.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_figure_of_merit.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_figure_of_merit.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_circuit.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_circuit.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_circuit.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_compatible_hardware.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_compatible_hardware.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_compatible_hardware.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_configuration_catalog.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_configuration_catalog.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_configuration_catalog.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_retrieved_labeled_examples.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_retrieved_labeled_examples.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_retrieved_labeled_examples.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_response_schema.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_response_schema.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/dj_indep_tket_2/section_response_schema.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/before.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/before_tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/before_tokenizer.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/after.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/after_tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/after_tokenizer.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_figure_of_merit.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_figure_of_merit.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_figure_of_merit.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_circuit.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_circuit.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_circuit.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_compatible_hardware.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_compatible_hardware.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_compatible_hardware.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_configuration_catalog.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_configuration_catalog.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_configuration_catalog.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_retrieved_labeled_examples.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_retrieved_labeled_examples.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_retrieved_labeled_examples.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_response_schema.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_response_schema.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/ae_indep_qiskit_60/section_response_schema.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/before.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/before_tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/before_tokenizer.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/after.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/after_tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/after_tokenizer.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_figure_of_merit.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_figure_of_merit.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_figure_of_merit.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_circuit.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_circuit.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_circuit.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_compatible_hardware.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_compatible_hardware.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_compatible_hardware.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_configuration_catalog.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_configuration_catalog.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_configuration_catalog.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_retrieved_labeled_examples.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_retrieved_labeled_examples.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_retrieved_labeled_examples.log"
+    },
+    {
+      "input": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_response_schema.txt",
+      "output": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_response_schema.tokens.json",
+      "stderr": "//wsl.localhost/Ubuntu/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/native_counts/portfoliovqe_indep_qiskit_6/section_response_schema.log"
+    }
+  ]
+}

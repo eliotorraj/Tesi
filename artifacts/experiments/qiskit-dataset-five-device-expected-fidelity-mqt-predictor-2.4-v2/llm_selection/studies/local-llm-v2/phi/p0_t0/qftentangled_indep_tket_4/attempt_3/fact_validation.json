@@ -1,0 +1,47 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E5",
+      "record_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_5",
+        "historical_rows": []
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E5",
+      "record_id": "rag_876108a53a771128f9cc124acc98b653b91ca27c773a8f136092054ce3b93f71",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_5",
+        "historical_device": "ibm_falcon_127"
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_pair_among_reported_best, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_tket_5\", \"historical_rows\": []}. Rule: example_id required: selected_device and config_id occur together in that example's displayed top_configurations, including explicit tied_score_config_ids; not necessarily rank 1 or a unique winner. Correct this fact; an allowed proposed pair need not change."
+    },
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_matches_example, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_tket_5\", \"historical_device\": \"ibm_falcon_127\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010324651000701124
+}

@@ -1,0 +1,13 @@
+{
+  "input_files_checked": 6350,
+  "input_changes": [],
+  "selection_proof_files_checked": 9,
+  "selection_proof_changes": [],
+  "reviewed_attempts": 792,
+  "reviewed_claims": 789,
+  "study_not_modified": true,
+  "scripts": {
+    "audit.py": "d34094e6c3fcd7502ff2d5552ffc35214653889a36fc0c798fb76b462502f0ea",
+    "review.py": "b6392777abd57646ed632ad7af70ca85afed5c20136f1e257cb93793d94a0fba"
+  }
+}

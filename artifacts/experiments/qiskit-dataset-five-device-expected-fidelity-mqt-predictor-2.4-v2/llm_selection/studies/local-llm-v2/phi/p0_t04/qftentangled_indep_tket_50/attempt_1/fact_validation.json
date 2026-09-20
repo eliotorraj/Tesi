@@ -1,0 +1,82 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E3",
+      "record_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854",
+      "result": "verified",
+      "resolved": {
+        "circuit": "ae_indep_tket_50",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_default_default",
+            "median_score": 0.3410498617,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_sabre_sabre",
+            "median_score": 0.3410498617,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 3,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_dense_sabre",
+            "median_score": 0.3410498617,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E3",
+      "record_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854",
+      "result": "unsupported",
+      "resolved": {}
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E3) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010531638999964343
+}

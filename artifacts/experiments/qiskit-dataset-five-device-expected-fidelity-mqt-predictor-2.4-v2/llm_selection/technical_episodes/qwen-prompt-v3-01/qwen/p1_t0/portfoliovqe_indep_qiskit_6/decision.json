@@ -1,0 +1,60 @@
+{
+  "status": "success",
+  "selected_device_id": "quantinuum_h2_56",
+  "selected_config_id": "o3_default_default",
+  "failure": null,
+  "circuit_id": "portfoliovqe_indep_qiskit_6",
+  "source_sha256": "7dafebd46e73b9b279f1ef96da32f7d563de3721b856b4570375ab81951e06fc",
+  "split": "train",
+  "configuration_id": "p1_t0",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-18T16:16:38.804998+00:00",
+  "this_invocation_seconds": 21.78671246799786,
+  "measured_call_seconds": 20.799889690999407,
+  "python_process_peak_rss_bytes": 1791979520,
+  "python_rss_method": "Linux getrusage ru_maxrss, cumulative process high-water mark; not an exclusive per-call peak",
+  "attempts_sha256": "17ca29fdb2f0e82dd18cb9b0f240da775050278f3f3b1d89c1599ec0da9c78fd",
+  "input_prompt_sha256": "9b102d4a73dc3c6e207c5ccdedf7da6aeb045468b712f591e93c3841f817c391",
+  "train_self_check": {
+    "applicable": true,
+    "zero_distance_record_ids": [
+      "rag_3afe0a12eaef4f2cf915e143428c9ca89a0d2b592103acf93337350570fadcb2",
+      "rag_8df9e5749937cc35807dcaad6edafdfb814bbb30dd6151f27411b19b3990f987"
+    ],
+    "exact_source_records": [
+      {
+        "record_id": "rag_8df9e5749937cc35807dcaad6edafdfb814bbb30dd6151f27411b19b3990f987",
+        "rank": 2,
+        "distance": 0.0,
+        "source_sha256": "7dafebd46e73b9b279f1ef96da32f7d563de3721b856b4570375ab81951e06fc",
+        "device_id": "quantinuum_h2_56",
+        "config_id": "o3_default_default",
+        "tied_best_config_ids": [
+          "o3_default_default",
+          "o3_sabre_sabre",
+          "o3_dense_sabre",
+          "o3_trivial_sabre",
+          "o3_sabre_lookahead",
+          "o3_sabre_basic"
+        ]
+      }
+    ],
+    "self_retrieved_at_zero": true,
+    "comparison": "Exact source SHA-256 and metric; zero feature distance alone is insufficient.",
+    "response_checked": true,
+    "response_valid": true,
+    "selected_device": "quantinuum_h2_56",
+    "selected_config": "o3_default_default",
+    "matches_primary_label": true,
+    "matches_tied_optimum": true,
+    "cited_record_ids": [
+      "rag_8df9e5749937cc35807dcaad6edafdfb814bbb30dd6151f27411b19b3990f987",
+      "rag_96b5c7c8427261d3d3774e329d66f4e01a8b0953e0779e0eaf7ee4e10eab45b6"
+    ],
+    "cites_self_record": true,
+    "citation_scope": "References only; free-text reasoning and causal use are not verified"
+  }
+}

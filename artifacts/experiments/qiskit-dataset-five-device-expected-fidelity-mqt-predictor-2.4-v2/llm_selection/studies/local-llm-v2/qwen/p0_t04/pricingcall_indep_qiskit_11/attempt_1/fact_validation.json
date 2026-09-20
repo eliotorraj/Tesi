@@ -1,0 +1,37 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E3",
+      "record_id": "rag_b7fd0e6e1c4fd6fbb3e4e3a4644b37a7560e135b22cddb018dcf983fac5ec2da",
+      "result": "verified",
+      "resolved": {
+        "circuit": "vqe_indep_tket_15",
+        "historical_device": "ibm_falcon_127"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": null,
+      "record_id": null,
+      "result": "verified",
+      "resolved": {
+        "device_id": "ibm_falcon_127",
+        "device_num_qubits": 127,
+        "current_num_qubits": 11
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17257565000001307
+}

@@ -1,0 +1,5 @@
+{
+  "reason": "Native Windows tokenizer could not open 264-character UNC input. Retry uses extended UNC paths. Original failure log preserved.",
+  "missing_files": 2,
+  "inference_calls": 0
+}

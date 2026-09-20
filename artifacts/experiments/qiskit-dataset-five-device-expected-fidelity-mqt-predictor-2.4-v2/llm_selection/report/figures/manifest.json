@@ -1,0 +1,54 @@
+[
+  [
+    "regret",
+    "Regret assoluto. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero."
+  ],
+  [
+    "tempi",
+    "Tempo delle chiamate [min]. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero."
+  ],
+  [
+    "token",
+    "Token di uscita, tutte le chiamate. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero."
+  ],
+  [
+    "memoria",
+    "Picco RAM campionato del processo [GiB]. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero."
+  ],
+  [
+    "vram",
+    "Picco VRAM campionato del processo [GiB]. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero."
+  ],
+  [
+    "affidabilita",
+    "Affidabilità e correzioni sugli stessi 88 circuiti per ogni impostazione."
+  ],
+  [
+    "errori",
+    "Categorie degli errori. I registri distinguono trasporto, contesto, risposta e compilazione."
+  ],
+  [
+    "lunghezza_prompt",
+    "Lunghezza del prompt, tempi e fallimenti. Le impostazioni dello stesso circuito non sono repliche indipendenti."
+  ],
+  [
+    "family_1",
+    "Affidabilità per famiglia di circuito. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv."
+  ],
+  [
+    "num_qubits_1",
+    "Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv."
+  ],
+  [
+    "num_qubits_2",
+    "Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv."
+  ],
+  [
+    "num_qubits_3",
+    "Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv."
+  ],
+  [
+    "num_qubits_4",
+    "Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv."
+  ]
+]

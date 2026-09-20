@@ -1,0 +1,4 @@
+model,episodes,total_call_seconds,total_call_seconds_measured_episodes,total_input_tokens,total_input_tokens_measured_episodes,total_output_tokens,total_output_tokens_measured_episodes,physical_calls,physical_calls_measured_episodes,median_call_seconds_per_episode
+qwen,264,3597.324415342997,264,4619210,264,57060,264,400,264,8.689566737499831
+phi,264,7629.17625484503,264,5757693,264,88574,264,605,264,16.703186664000896
+gemma,264,3947.318036262983,264,7252473,264,70218,264,584,264,8.034715344000688

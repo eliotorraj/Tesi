@@ -1,0 +1,209 @@
+\providecommand{\ValidationFiguresPath}{figures/}
+
+\section{Selezione del modello LLM locale}
+
+Sono confrontate tre famiglie e tre impostazioni sugli stessi 88 circuiti di validation. La scelta riguarda il modello locale con RAG. Il test resta separato e non viene aperto da questa procedura.
+
+\subsection{Hardware, dati e misure}
+
+Il PC usa AMD Ryzen 5 5600G, 16 GB di RAM e Radeon RX 6750 XT con 12 GB di VRAM. WSL ha un limite di 10 GB di RAM e swap separato. I pesi sono sul disco D. L'ambiente MQT conserva Python 3.12 e uv.lock; llama.cpp b10930 usa Vulkan e carica un modello alla volta.
+
+Si recuperano cinque esempi dal solo train. La distanza è Manhattan su 49 caratteristiche, con log1p e divisori stimati sul train. Circuiti completi, catalogo, maschera ed evidenze sono conservati. Il grafo completo di connettività è scritto con una regola esatta che permette di ricostruire tutti gli archi nello stesso ordine. Nessun prompt viene troncato per farlo entrare nel contesto.
+
+Il monitor conserva campioni di RAM, VRAM e temperatura. Le pause automatiche del solo processo di inferenza sono incluse nei tempi. I limiti operativi sono prudenziali e non identificano la causa dello spegnimento iniziale del PC. La potenza del sensore ASIC non è l'energia consumata dall'intero computer.
+
+\begin{center}\begin{tabular}{llll}\toprule Modello & Pesi & Contesto & Cache KV\\\midrule
+
+qwen & Q8\_0 & 60000 & q8\_0\\
+
+phi & Q8\_0 & 60000 & q8\_0\\
+
+gemma & Q8\_0 & 60000 & q8\_0\\
+
+\bottomrule\end{tabular}\end{center}
+
+Gemma E4B ha un numero di parametri totali maggiore del numero di parametri attivi. Revisioni, dimensioni, SHA-256, tokenizer e motivazioni della precisione sono conservati nei manifest e nella configurazione finale.
+
+\subsection{Prove tecniche e sviluppo}
+
+Le prove tecniche precedono il congelamento e usano il train. I file technical\_episodes.csv e server\_runs.csv riportano anche configurazioni scartate, interruzioni e caricamenti arrestati prima di una risposta. I registri esplorativi precedenti sono conservati in technical/ e incidents/.
+
+Il riepilogo degli episodi tecnici registrati contiene 68 episodi: 20 failure, 1 interrupted\_or\_pending, 33 success, 14 timeout. Questi conteggi non fanno parte dei risultati della validation.
+
+\subsection{Impostazioni e criteri}
+
+Le impostazioni confrontate sono: prompt base a temperatura 0; prompt base a temperatura 0,7; prompt con controlli espliciti a temperatura 0. Il ragionamento esteso è disabilitato. La prima risposta valida è definitiva. Si ammettono al massimo tre chiamate per correggere risposte non conformi; trasporto, interruzioni e correzioni sono registrati separatamente.
+
+\begin{center}\begin{tabular}{lr}\toprule Parametro & Valore\\\midrule
+
+max\_tokens & 4096\\
+
+top\_p & 0.95\\
+
+top\_k & 40\\
+
+min\_p & 0.0\\
+
+seed & 20260913\\
+
+repeat\_penalty & 1.0\\
+
+presence\_penalty & 0.0\\
+
+frequency\_penalty & 0.0\\
+
+mirostat & 0\\
+
+typical\_p & 1.0\\
+
+Timeout per chiamata [s] & 3600\\
+
+\bottomrule\end{tabular}\end{center}
+
+\[R(c)=F_{\mathrm{oracle}}(c)-F_{\mathrm{scelta}}(c).\]
+
+La fedeltà di una coppia è la mediana dei seed 0, 1 e 2, solo se tutti e tre riescono. L'oracle richiede l'intera matrice compatibile riuscita. I regret mancanti restano mancanti. I punteggi e i tempi Qiskit sono riutilizzati da risultati precedenti. I nuovi tempi delle chiamate LLM sono misurati.
+
+Prima di leggere gli score sono sigillate tutte le decisioni. La selezione privilegia le scelte valide e compilabili; a parità usa la mediana del regret sullo stesso insieme di circuiti riusciti e valutabili. Seguono validità JSON iniziale, chiamate e costi misurati. Il circuito è l'unità statistica: seed e tentativi non aumentano la numerosità.
+
+\subsection{Risultati}
+
+\begin{center}\small\begin{tabular}{lrrrr}\toprule Prova & Riuscite/88 & Regret $n$ & Mediana regret & Valide alla prima\\\midrule
+
+gemma/p0\_t0 & 88 & 18 & 0.006643 & 88\\
+
+gemma/p0\_t07 & 87 & 18 & 0.001615 & 87\\
+
+gemma/p1\_t0 & 88 & 18 & 0.006643 & 88\\
+
+phi/p0\_t0 & 88 & 18 & 0.004031 & 88\\
+
+phi/p0\_t07 & 87 & 18 & 0.001962 & 87\\
+
+phi/p1\_t0 & 88 & 18 & 0.004031 & 88\\
+
+qwen/p0\_t0 & 88 & 18 & 0.003378 & 88\\
+
+qwen/p0\_t07 & 88 & 18 & 0.0019 & 88\\
+
+qwen/p1\_t0 & 87 & 18 & 0.005555 & 87\\
+
+\bottomrule\end{tabular}\end{center}
+
+La configurazione selezionata è \textbf{qwen/p0\_t07}. I passaggi della scelta, con valori e denominatori, sono conservati in selection.json. Questa selezione non dimostra una superiorità generale del modello.
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath regret.png}
+
+\caption{Regret assoluto. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath tempi.png}
+
+\caption{Tempo delle chiamate [min]. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath token.png}
+
+\caption{Token di uscita, tutte le chiamate. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath memoria.png}
+
+\caption{Picco RAM campionato del processo [GiB]. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath vram.png}
+
+\caption{Picco VRAM campionato del processo [GiB]. La numerosità indica i casi misurabili; i valori assenti non sono sostituiti con zero.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath affidabilita.png}
+
+\caption{Affidabilità e correzioni sugli stessi 88 circuiti per ogni impostazione.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath errori.png}
+
+\caption{Categorie degli errori. I registri distinguono trasporto, contesto, risposta e compilazione.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath lunghezza_prompt.png}
+
+\caption{Lunghezza del prompt, tempi e fallimenti. Le impostazioni dello stesso circuito non sono repliche indipendenti.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath family_1.png}
+
+\caption{Affidabilità per famiglia di circuito. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath num_qubits_1.png}
+
+\caption{Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath num_qubits_2.png}
+
+\caption{Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath num_qubits_3.png}
+
+\caption{Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath num_qubits_4.png}
+
+\caption{Affidabilità per numero di qubit. I regret e gli altri indicatori dei gruppi sono esportati in groups.csv.}\end{figure}
+
+\clearpage\subsection{Incertezza e limiti}
+
+Il file paired\_uncertainty.json confronta il vincitore e le alternative sugli stessi circuiti valutabili. Riporta la mediana delle differenze appaiate di regret e intervalli percentili al 95\%, con 2000 ricampionamenti di circuiti e seed 20260913. Con meno di due circuiti non si calcola l'intervallo. Questi intervalli sono descrittivi e non correggono la selezione tra più impostazioni.
+
+Cache, ordine delle richieste, pause e altri programmi del PC influenzano i tempi. I massimi campionati possono perdere picchi istantanei. I valori mancanti rimangono espliciti. Le prove tecniche e le configurazioni scartate sono conservate separatamente.
+
+La validation locale non richiede qcompile completo. Sul test restano previsti modello senza RAG, MQT, modello di frontiera e riferimenti Qiskit, dopo i controlli richiesti dal protocollo. Questo documento non contiene risultati del test.
+
+\subsection{Dati e fonti}
+
+Per rigenerare il documento usare la procedura nel README di llm\_selection. episodes.csv, trials.csv, groups.csv e i registri JSON/JSONL permettono nuove analisi senza trascrivere i risultati.
+
+qwen: Succes rate 100\% on 5 train circuits and less usage of tokens. Batch 512, micro-batch 128, livelli GPU all.
+
+phi: Succes rate 100\% on 5 train circuits and less usage of tokens. Batch 512, micro-batch 128, livelli GPU all.
+
+gemma: Success rate 100\% on 5 train circuits and less usage of tokens. Batch 512, micro-batch 128, livelli GPU all.
+
+qwen: \url{https://huggingface.co/Qwen/Qwen3.5-4B}.
+
+Pesi effettivi: \url{https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q8_0.gguf}.
+
+SHA-256: \texttt{\seqsplit{10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1}}.
+
+phi: \url{https://huggingface.co/microsoft/Phi-4-mini-instruct}.
+
+Pesi effettivi: \url{https://huggingface.co/unsloth/Phi-4-mini-instruct-GGUF/resolve/78eb92a46fc37e6b524df991ed9aca9bc6aa7b80/Phi-4-mini-instruct.Q8_0.gguf}.
+
+SHA-256: \texttt{\seqsplit{26188c6050d525376a88b04514c236c5e28a36730f1e936f2a00314212b7ba42}}.
+
+gemma: \url{https://huggingface.co/google/gemma-4-E4B-it}.
+
+Pesi effettivi: \url{https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF/resolve/b8093469224f83f5c38f691eb906c380e9e63114/gemma-4-E4B-it-Q8_0.gguf}.
+
+SHA-256: \texttt{\seqsplit{34be82b17b4942d389b9b527170c4b058027abdd32531fda063d3d97dd8ce80a}}.
+
+\url{https://github.com/ggml-org/llama.cpp/blob/b10930/tools/server/README.md}.

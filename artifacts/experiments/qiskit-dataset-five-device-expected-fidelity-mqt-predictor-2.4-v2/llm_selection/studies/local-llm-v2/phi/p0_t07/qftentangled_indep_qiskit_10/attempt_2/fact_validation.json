@@ -1,0 +1,45 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E5",
+      "record_id": "rag_e4df99e4475a594f49c04fa7897c94e0b3a77b5ce43c5b91f0eb5ee35da5fc3b",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "realamprandom_indep_tket_9",
+        "current_num_qubits": 10,
+        "example_num_qubits": 9
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E5",
+      "record_id": "rag_e4df99e4475a594f49c04fa7897c94e0b3a77b5ce43c5b91f0eb5ee35da5fc3b",
+      "result": "unsupported",
+      "resolved": {}
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (same_qubit_count_as_example, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"realamprandom_indep_tket_9\", \"current_num_qubits\": 10, \"example_num_qubits\": 9}. Rule: example_id required: current and example circuits have exactly the same num_qubits; this does not establish similar topology or performance. Correct this fact; an allowed proposed pair need not change."
+    },
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E5) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": true,
+  "validation_seconds": 0.1731070469995757
+}

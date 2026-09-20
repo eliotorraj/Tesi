@@ -1,0 +1,7 @@
+{
+  "started_at": "2026-09-18T15:08:33.844665+00:00",
+  "phase": "train_prompt_technical_checks",
+  "inference_calls": 0,
+  "validation_started": false,
+  "test_split_opened": false
+}

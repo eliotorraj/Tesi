@@ -1,0 +1,44 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1",
+      "record_id": "rag_0df3005170a850533d02849791bf674819d6717ec36a16ac0bba726624977fe0",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "ae_indep_qiskit_40",
+        "historical_device": "quantinuum_h2_56"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E1",
+      "record_id": "rag_0df3005170a850533d02849791bf674819d6717ec36a16ac0bba726624977fe0",
+      "result": "unsupported",
+      "resolved": {}
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_device_matches_example, example_id=E1) does not match the provided data. Observed data: {\"circuit\": \"ae_indep_qiskit_40\", \"historical_device\": \"quantinuum_h2_56\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+    },
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E1) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010461908999786829
+}

@@ -39,36 +39,9 @@ def qasm_for_two_qubit_circuit() -> str:
 
 
 def valid_llm_response(device_id: str, prompt) -> dict[str, object]:
-    live_request = prompt.payload["live_request"]
-    return {
-        "schema_version": "2.0.0",
-        "request_id": live_request["request_id"],
-        "catalog_snapshot_id": live_request["catalog_snapshot_id"],
-        "selected_device": device_id,
-        "figure_of_merit": "expected_fidelity",
-        "compiler": "qiskit",
-        "qiskit_plan": {
-            "optimization_level": 2,
-            "seed_transpiler": 7,
-            "layout_method": None,
-            "routing_method": None,
-        },
-        "evidence_refs": [],
-        "claims": [
-            {
-                "claim_id": "live-compatibility",
-                "claim_type": "live_compatibility",
-                "parameters": {"device_id": device_id},
-                "evidence_ref_ids": [],
-            },
-            {
-                "claim_id": "historical-evidence-unavailable",
-                "claim_type": "historical_evidence_unavailable",
-                "parameters": {},
-                "evidence_ref_ids": [],
-            },
-        ],
-    }
+    return {"selected_device": device_id, "config_id": "o2_default_default",
+            "claim": "Scelta senza supporto: non sono disponibili risultati storici utilizzabili.",
+            "evidence": []}
 
 
 class PrototypeArchitectureTests(unittest.TestCase):
@@ -115,23 +88,11 @@ class PrototypeArchitectureTests(unittest.TestCase):
             result.recommendation.selected_device,
             "ibm_falcon_27",
         )
-        self.assertEqual(
-            result.recommendation.explanation,
-            (
-                "Il dispositivo ibm_falcon_27 rispetta i vincoli verificati "
-                "per la richiesta corrente. Tra i circuiti più simili "
-                "recuperati non sono disponibili risultati storici "
-                "utilizzabili per sostenere la raccomandazione."
-            ),
-        )
+        self.assertEqual(result.recommendation.explanation,
+                         valid_llm_response("ibm_falcon_27", prompts[-1])["claim"])
         self.assertEqual(result.recommendation.evidence, ())
-        self.assertEqual(
-            result.recommendation.warnings,
-            (
-                "La raccomandazione non dispone di evidenze storiche "
-                "utilizzabili.",
-            ),
-        )
+        self.assertEqual(result.recommendation.schema_version, "3.0.0")
+        self.assertIn("non è verificato semanticamente", result.recommendation.warnings[0])
         self.assertTrue(
             prompts[1].payload["previous_validation_errors"],
         )

@@ -1,0 +1,9 @@
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o2_default_default",
+  "claim": "The selected device ibm_falcon_127 supports the required 2 qubits and native gates (cx, h, x) for the circuit, and the default configuration offers high fidelity based on historical performance on similar small-depth circuits.",
+  "evidence": [
+    "E1",
+    "E3"
+  ]
+}

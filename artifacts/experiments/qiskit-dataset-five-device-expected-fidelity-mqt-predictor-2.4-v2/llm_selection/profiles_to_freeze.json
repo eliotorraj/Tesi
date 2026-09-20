@@ -1,0 +1,80 @@
+{
+  "qwen": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 108,
+      "minimum_available_bytes": 1610612736,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "weight_precision": "Q8_0",
+    "precision_reason": "Succes rate 100% on 5 train circuits and less usage of tokens",
+    "technical_evidence": [
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-toon-01/qwen/p1_t0/ae_indep_qiskit_60/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-toon-01/qwen/p1_t0/dj_indep_tket_2/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-toon-01/qwen/p1_t0/portfoliovqe_indep_qiskit_6/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-toon-01/qwen/p1_t0/su2random_indep_qiskit_50/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-toon-01/qwen/p1_t0/su2random_indep_tket_50/decision.json"
+    ]
+  },
+  "phi": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 108,
+      "minimum_available_bytes": 1610612736,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "weight_precision": "Q8_0",
+    "precision_reason": "Succes rate 100% on 5 train circuits and less usage of tokens",
+    "technical_evidence": [
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-toon-01/phi/p1_t0/ae_indep_qiskit_60/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-toon-01/phi/p1_t0/dj_indep_tket_2/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-toon-01/phi/p1_t0/portfoliovqe_indep_qiskit_6/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-toon-01/phi/p1_t0/su2random_indep_qiskit_50/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-toon-01/phi/p1_t0/su2random_indep_tket_50/decision.json"
+    ]
+  },
+  "gemma": {
+    "context": 60000,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 108,
+      "minimum_available_bytes": 1610612736,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis",
+      "memory_consecutive_samples": 3,
+      "pause_hotspot_c": 105,
+      "missing_sensor_consecutive_samples": 3,
+      "resume_hotspot_c": 100
+    },
+    "weight_precision": "Q8_0",
+    "precision_reason": "Success rate 100% on 5 train circuits and less usage of tokens",
+    "technical_evidence": [
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-toon-01/gemma/p1_t0/ae_indep_qiskit_60/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-toon-01/gemma/p1_t0/dj_indep_tket_2/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-toon-01/gemma/p1_t0/portfoliovqe_indep_qiskit_6/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-toon-01/gemma/p1_t0/su2random_indep_qiskit_50/decision.json",
+      "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-toon-01/gemma/p1_t0/su2random_indep_tket_50/decision.json"
+    ]
+  }
+}

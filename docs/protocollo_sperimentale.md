@@ -142,6 +142,13 @@ incompatibili con circuito e Target. La richiesta è identica per sistema comple
 e variante senza RAG; il LLM di frontiera riceve lo stesso circuito e lo stesso
 spazio di scelta, ma non la maschera calcolata.
 
+La richiesta canonica conserva il sorgente e le impronte. Dal 18 settembre 2026
+la vista inviata al sistema LLM con/senza RAG omette QASM e provenienza e usa
+le caratteristiche numeriche complete. Gli artefatti originali non cambiano.
+La stessa rappresentazione di circuito e catalogo si applica al confronto
+con/senza RAG. Il prompt diretto del modello di frontiera resta quello distinto
+previsto sotto; questa modifica non ridefinisce automaticamente quel metodo.
+
 ## Metodi e spazio di scelta
 
 La fonte normativa delle dodici configurazioni è il
@@ -1050,15 +1057,16 @@ Misurano caricamento, contesto, generazione e validazione delle risposte.
 Non sono risultati della selezione. I pesi originali sono provati quando
 sostenibili. Una cache a precisione ridotta è registrata separatamente dalla
 precisione dei pesi. Le richieste complete sono contate con il tokenizer
-effettivo; non si eliminano circuiti, cataloghi o evidenze. Un caso che supera
+effettivo. Fino al 17 settembre non si eliminavano contenuti dal prompt. Un caso che supera
 il contesto nativo resta un fallimento di contesto, con zero chiamate LLM.
 Non si estende arbitrariamente il contesto nativo di Gemma per nascondere
 questo limite. Per i soli grafi completi, l’elenco ordinato degli archi viene
 sostituito da una regola esatta che consente di ricostruire tutti gli archi
 nello stesso ordine. Il programma controlla la reversibilità. I prompt originali
-restano conservati; il contenuto delle evidenze RAG e dei circuiti non viene tagliato.
+restano conservati. Il requisito storico di conservare ogni contenuto nel
+prompt è superato dalla vista essenziale descritta sotto.
 
-Dal 15 settembre la rappresentazione degli input usa anche identificativi brevi
+Nella revisione storica del 15 settembre la rappresentazione degli input usa identificativi brevi
 delle fonti, oggetti condivisi per i valori ripetuti e tabelle con intestazioni
 comuni. La decodifica deve ricostruire esattamente ogni campo e valore originale,
 compresi QASM, metrica e cinque esempi RAG. Lo schema di risposta 2.0.0 rimane
@@ -1178,6 +1186,69 @@ congelato e il test resta chiuso. I piani già estratti conservano le scelte
 casuali originali. Le liste dei metodi finali contenute nel piano storico
 non impongono l’esecuzione di quei metodi nella selezione locale: il manifest
 della selezione dichiara esplicitamente questo ambito ridotto.
+
+### Vista essenziale e citazioni locali — 18 settembre 2026
+
+La vista introdotta con `minimal-v3-20260918` usa JSON, senza TOON.
+Conserva cinque esempi, ordine del recupero, tutte le feature e valori originali.
+Elimina dal testo LLM QASM, hash, manifest, metadati e ripetizioni delle evidenze.
+Il catalogo hardware compare una volta; gli esempi ne indicano solo i nomi.
+Il registro completo rimane interno al prototipo.
+
+La risposta v3 richiede `selected_device`, `config_id`, `claim` ed `evidence`.
+Il claim è testo libero breve; evidence contiene alias E1...E5 degli esempi.
+I parametri Qiskit derivano dal catalogo. Il seed del piano singolo è il primo
+seed previsto, attualmente 0; le ripetizioni sperimentali restano governate dal
+protocollo. Metadati della richiesta e versione sono assegnati dal programma.
+
+Il validatore controlla scelta compatibile, configurazione ammessa e citazioni
+risolvibili nel contesto della richiesta. Rifiuta riferimenti sconosciuti o
+ripetuti. Non richiede claim/caveat strutturati né ID multilivello.
+La risoluzione delle citazioni non prova l'uso causale degli esempi e non
+verifica semanticamente ogni affermazione libera. Questo limite va riportato
+nelle analisi; i successi v3 non sono direttamente equivalenti ai successi del
+vecchio controllo semantico v2. Senza RAG le evidenze sono vuote.
+
+Il documento canonico, le mappe, le richieste inviate e le risposte restano
+conservati. Nessun vecchio tentativo viene riscritto o dichiarato riuscito
+secondo il nuovo contratto. Serve una nuova etichetta per nuove esecuzioni.
+Le misure su tre casi train del 18 settembre riguardano soltanto i token;
+non costituiscono selezione sulla validation o prova di qualità.
+Vedere la [guida del prompt essenziale](approfondimenti/compattazione_prompt.md).
+
+La revisione `minimal-v3-repair1-20260918` modifica solo le correzioni:
+una frase indica il campo errato e il catalogo o gli esempi dai quali scegliere.
+I messaggi di uno stesso tipo sono accorpati; una sola istruzione finale chiede
+il JSON completo per il circuito corrente. Non si copiano cataloghi, risposte
+errate o identificativi canonici. Senza RAG si chiede evidence vuota.
+Il primo prompt, gli esempi, le feature e il massimo di tre tentativi restano
+invariati. Una revisione diversa richiede una nuova etichetta anche per una
+prova interrotta. L'efficacia delle nuove correzioni richiede nuove inferenze;
+i fallimenti storici restano conservati.
+
+
+
+### Codifica TOON — 19 settembre 2026
+
+La revisione `minimal-v3-toon1-20260919` codifica in TOON i dati della vista
+essenziale. Lo schema leggibile e la risposta richiesta restano JSON.
+Usa l'encoder ufficiale `@toon-format/toon` 4.1.1, con runtime locale
+e versioni fissate. Le feature condividono una tabella; gli archi hardware
+possono essere raggruppati per sorgente. Ogni conversione è decodificata
+e ricostruita prima dell'invio, verificando valori, zeri e ordine degli archi.
+Non cambia il recupero, il numero di esempi, i controlli o le correzioni.
+
+Sui cinque circuiti train, i tokenizer nativi misurano una riduzione aggiuntiva
+rispetto al JSON essenziale pari a 8,12% per Qwen, 4,64% per Phi e 9,80% per
+Gemma. Sono somme di token di ingresso, con template di chat e schema inclusi;
+non sono misure di qualità o consumo delle risposte.
+Le nuove richieste sono preparate e contate, non ancora eseguite.
+Le prove tecniche useranno nuove etichette prima del congelamento della
+selezione sulla validation. Il test resta separato.
+
+Il [resoconto](resoconti/2026-09-19_prompt_toon.md) collega il documento completo,
+le figure, i 15 confronti per circuito, le richieste originali o ricostruite,
+i token misurati e le procedure riproducibili.
 
 ## Valutazione della selezione e confronto finale
 
@@ -1327,3 +1398,81 @@ Il comando seguente deve fallire fino al training completo:
 
 Anche qualsiasi accesso test deve fallire prima del record di apertura,
 compresa la modalità dry-run.
+
+
+### Seconda selezione locale con fatti strutturati — 19 settembre 2026
+
+Questa sezione disciplina lo studio successivo a local-llm-v1 e prevale,
+per questa seconda selezione, sulle regole operative v1 descritte sopra.
+La prima validation e il suo vincitore restano conservati con le vecchie regole.
+La revisione è stata decisa dopo l'analisi della prima validation; non è una
+replica indipendente e non modifica l'isolamento del test.
+
+Il nuovo contratto v4 richiede coppia ammessa, da uno a due fatti distinti
+e ipotesi libera fino a 1000 caratteri. I fatti riguardano: presenza della coppia
+nei risultati mostrati di un esempio, stesso dispositivo, stesso numero di
+qubit, capacità del dispositivo. Il controllo usa solo dati già nel prompt.
+Il testo libero è un'ipotesi non validata semanticamente e deve evitare gli ID
+degli esempi per istruzione, senza un ulteriore giudice automatico.
+
+La prima risposta conforme con coppia ammessa e fatti corretti è definitiva.
+I fatti errati attivano correzioni fino a tre tentativi logici complessivi.
+Al terzo, una risposta conforme con coppia ammessa è accettata anche se i fatti
+restano errati; questo viene dichiarato separatamente. Zero fatti, più di due,
+JSON non conforme o coppia non ammessa non sono coperti dal fallback.
+Il successo operativo della risposta non implica score disponibile: la
+compilabilità osservata e la qualità richiedono i risultati Qiskit.
+
+Le chiamate interrotte sono annullate nel conteggio logico e archiviate,
+senza eliminare i dati. Dopo il recupero si ripete lo stesso attempt_N.
+Una risposta completa già salvata viene recuperata senza una nuova chiamata.
+Le chiamate fisiche e i loro costi comprendono anche le interruzioni.
+Un timeout senza interruzione delle risorse rimane terminale.
+Gli errori di trasporto senza causa accertata consentono tre recuperi automatici,
+poi l'esecuzione resta sospesa e riprendibile. Gli arresti accertati per risorse
+attendono il recupero; non sono errori del modello.
+Limiti operativi richiesti: hotspot 110 °C, pausa 105 °C, ripresa 100 °C;
+edge 95 °C; RAM disponibile minima 1 GiB per tre campioni consecutivi.
+Prima di ricaricare si attendono tre campioni con almeno 1 GiB,
+hotspot non superiore a 100 °C ed edge sotto 92 °C.
+
+La griglia usa Qwen, Phi e Gemma con unico prompt e temperature 0, 0,4 e 0,7,
+denominate p0_t0, p0_t04 e p0_t07. Cinque circuiti train per le nove
+combinazioni verificano il funzionamento prima del congelamento.
+Gli stessi 88 circuiti validation producono 792 episodi.
+Le prove train possono recuperare lo stesso circuito e non misurano
+la generalizzazione. Tutti i parametri, i profili e il codice vengono congelati.
+
+Il riferimento principale è la massima mediana di expected_fidelity fra
+le coppie compatibili con tutti i seed 0, 1 e 2 riusciti.
+Esiste per tutti gli 88 circuiti nei dati attuali. Il regret osservato è
+riferimento meno mediana della scelta. Le 70 matrici incomplete restano
+dichiarate; l'oracle esaustivo e il suo regret sui 18 circuiti completi restano
+aggiuntivi. Non si imputa un punteggio ai fallimenti. Si pubblicano sempre
+denominatori e identità dei circuiti confrontabili.
+
+La selezione ordina: maggior numero di scelte valide e compilabili; minor
+regret osservato mediano sull'intersezione dei circuiti dei candidati;
+meno correzioni; meno chiamate fisiche; tempi e token, solo se completi;
+ordine lessicografico. I fatti errati dopo tre tentativi non annullano una
+scelta ammessa. Correttezza dei fatti, esiti iniziali e finali, ipotesi non
+verificata e uso dei diversi tipi di fatto sono riportati separatamente.
+I confronti appaiati ricampionano circuiti, non seed o tentativi:
+2000 ricampionamenti, seed 20260913, intervalli descrittivi al 95%.
+
+Ogni studio possiede congelamento, prompt, prove, sigilli, analisi e rapporto
+LaTeX/PDF propri. Tutte le decisioni sono sigillate prima di leggere gli score.
+Prima si possono conservare gli hash della matrice, senza usarne i valori
+nell'inferenza. Le impostazioni finali del nuovo studio non sovrascrivono
+i risultati storici. I comandi sono in llm_selection/v2/README.md.
+
+### Correzioni documentali dopo le prove train dello studio locale v2
+
+I tentativi conservano le impronte originali. Prima del congelamento sono
+ammesse correzioni limitate ai moduli del rapporto e alle sole funzioni
+preparatorie di congelamento. Per study.py si richiede identità dell'albero
+sintattico al di fuori di freeze e verify_technical_code. Tutti gli altri
+moduli di inferenza e valutazione devono avere impronte identiche a quelle
+usate nel train. Le differenze ammesse, le impronte dei due stati e la copia
+del codice provato sono registrate in technical_code_reviews. Dopo il
+congelamento resta obbligatoria l'identità completa del codice.

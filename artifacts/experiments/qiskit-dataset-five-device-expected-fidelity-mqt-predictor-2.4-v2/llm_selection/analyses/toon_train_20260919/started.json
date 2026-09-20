@@ -1,0 +1,16 @@
+{
+  "at": "2026-09-18T22:38:49.101730+00:00",
+  "scope": [
+    "prototype/prompting/minimal.py",
+    "prototype/prompting/rendering.py",
+    "llm_selection/provenance.py",
+    "tests/test_minimal_prompt.py",
+    "tests/test_compact_prompt.py",
+    "docs/protocollo_sperimentale.md",
+    "docs/approfondimenti/compattazione_prompt.md",
+    "prototype/prompting/README.md",
+    "llm_selection/README.md"
+  ],
+  "new_inference_calls": 0,
+  "validation_started": false
+}

@@ -1,0 +1,368 @@
+\providecommand{\ValidationFiguresPath}{figures/}
+
+\section{Selezione dei modelli locali sulla validation}
+
+Questo è un resoconto esplicativo della selezione del modello locale vincitore, basato sui risultati della validation. La selezione è stata effettuata dopo aver esaminato i dati della validation, e il modello vincitore è stato scelto in base a criteri di completezza, qualità delle scelte e efficienza delle chiamate.
+Sono stati considerati tre modelli locali: Qwen3.5-4B, Phi-4-mini-instruct e Gemma-4-E4B-it, tutti con pesi e KV-cache quantizzati a 8-bit, ciascuno testato a tre temperature diverse (0, 0.4 e 0.7). La validazione ha coinvolto 88 circuiti, con l'obiettivo di valutare la capacità dei modelli di selezionare coppie hardware/configurazione valide e di generare \textit{facts} coerenti con le scelte effettuate.
+Nei paragrafi seguenti, vengono presentati i dati, le impostazioni e i controlli della validation, seguiti dai risultati ottenuti dai modelli, con un'analisi dettagliata della qualità delle scelte e della selezione del modello vincitore.
+Verrà inoltre spiegato il nuovo meccanismo di validazione, che si concentra sulla correttezza dei \textit{facts} strutturati e non sulla qualità dell'ipotesi libera, e come questo approccio ha influenzato la selezione del modello vincitore.
+
+\paragraph{Riduzione del prompt.}
+Il prompt iniziale era molto lungo soprattutto per la quantità di
+informazioni ripetute negli esempi RAG. Ogni esempio riportava,
+oltre ai risultati storici, descrizioni dei dispositivi, configurazioni,
+codice QASM e metadati di provenienza. Informazioni comuni ai diversi
+esempi comparivano quindi più volte nella stessa richiesta.
+
+La riduzione è avvenuta separando i dati necessari alla scelta del
+modello da quelli utili alla conservazione e alla verifica
+dell'esperimento. Il catalogo dei dispositivi e delle configurazioni
+è stato centralizzato, evitando di ripeterne le descrizioni complete
+all'interno di ogni esempio. Gli esempi conservano le caratteristiche
+numeriche del circuito, i dispositivi compatibili, il dispositivo
+storicamente selezionato e le prime tre configurazioni ordinate,
+con i relativi score e le eventuali parità.
+Il QASM e i metadati esclusi dal prompt restano negli archivi
+dell'esperimento.
+
+Anche i lunghi identificativi degli esempi, basati su hash,
+sono stati sostituiti nel prompt con riferimenti brevi:
+\texttt{E1}, \texttt{E2}, fino a \texttt{E5}.
+Questi riferimenti sono assegnati secondo l'ordine degli esempi
+recuperati e rimangono invariati durante i tentativi di correzione
+della stessa richiesta. Il programma conserva la corrispondenza
+con gli identificativi originali, così ogni riferimento prodotto
+dal modello può essere ricondotto all'esempio corretto.
+Gli identificativi brevi valgono quindi all'interno della singola
+richiesta, non identificano globalmente un circuito.
+
+Infine, i dati sono stati rappresentati in formato TOON, che usa
+strutture compatte e tabellari per ridurre ulteriormente la ripetizione
+dei nomi dei campi. La riduzione principale deriva dunque dalla
+rimozione dei contenuti ripetuti e non necessari al modello;
+TOON aggiunge un ulteriore risparmio nella rappresentazione.
+Restano invariati obiettivo, vincoli, caratteristiche numeriche,
+numero e ordine degli esempi recuperati e parametri di generazione.
+
+Il contributo maggiore alla riduzione dei token deriva dalla
+semplificazione dei contenuti, che comprende la centralizzazione
+dei cataloghi, l'eliminazione delle informazioni ripetute negli
+esempi RAG e l'esclusione di QASM e metadati dal testo inviato
+al modello.
+
+Sono state fatte 2 compattazioni successive: la prima sostituisce gli hash con identificativi brevi e centralizza i cataloghi; la seconda riduce ulteriormente i contenuti, eliminando le informazioni non necessarie al modello. 
+La rappresentazione finale è in formato TOON.
+
+Sui cinque circuiti di train considerati, il passaggio dal JSON
+integrale ricostruito alla prima forma compatta,
+che comprendeva principalmentegli identificativi brevi, riduce i token
+del 39,7\% per Qwen, del 36,1\% per Phi e del 39,2\% per Gemma.
+Queste percentuali riguardano l'intera prima compattazione:
+non misurano il solo contributo della sostituzione degli hash.
+
+La seconda riduzione dei contenuti produce un risparmio
+ancora maggiore rispetto al prompt già compattato:
+81,5\% per Qwen, 82,6\% per Phi e 81,2\% per Gemma,
+prima dell'ulteriore passaggio a TOON.
+Il problema principale non era quindi soltanto la lunghezza
+degli identificativi, ma soprattutto la quantità di contenuti
+ripetuti o esclusi dalla nuova vista essenziale.
+Non è stato misurato separatamente il contributo della sola
+centralizzazione rispetto alla rimozione degli altri contenuti.
+
+Le percentuali delle due fasi hanno basi di confronto diverse
+e non devono essere sommate.
+Nel confronto preparatorio su cinque circuiti di train,
+la riduzione complessiva dei token di ingresso rispetto al formato
+precedente è stata di circa l'83\%.
+Il solo passaggio dal JSON già ridotto a TOON ha fornito un risparmio
+aggiuntivo dell'8,12\% per Qwen, del 4,64\% per Phi e del 9,80\%
+per Gemma. Il riferimento precedente usato in questo confronto
+impiegava già gli identificativi brevi: queste percentuali
+non includono quindi il precedente risparmio ottenuto sostituendo
+gli hash con gli alias.
+Le misure riguardano la lunghezza dei prompt, non la qualità
+delle risposte.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{\ValidationFiguresPath confronto_token.png}
+    \caption{Token di ingresso complessivi su cinque circuiti di train,
+    misurati con il tokenizzatore di ciascun modello.
+    A sinistra, confronto con il formato precedente ricostruito;
+    a destra, dettaglio del risparmio aggiuntivo ottenuto con TOON
+    rispetto al JSON già ridotto.}
+    \label{fig:riduzione-prompt}
+\end{figure}
+
+\subsection{Dati, impostazioni e controlli}
+
+Qwen, Phi e Gemma usano lo stesso prompt, alle temperature 0, 0,4 e 0,7. Si recuperano tramite RAG i cinque esempi di train più vicini, con distanza Manhattan sulle 49 caratteristiche. Il formato del prompt è TOON e la risposta è JSON. Nella validation gli score del circuito corrente non entrano nel prompt né nei messaggi correttivi.
+La risposta è strutturata così: contiene un hardware ammesso, una configurazione qiskit ammessa, da uno a due \textit{facts} strutturati e un'ipotesi libera fino a 1000 caratteri. La struttura di claim + evidence è stata quindi traformata in una struttura in cui i \textit{facts} sono rappresentati come affermazioni verificabili, e l'ipotesi invece come un commento libero del modello, non verificabile. Sono previsti quattro tipi di \textit{facts}:  la presenza della coppia hardware e configurazione qiskit nei risultati mostrati, il dispositivo storico, l'uguaglianza del numero di qubit o la capacità del dispositivo.
+Un esempio reale, ottenuto dalla validation, della struttura JSON della risposta è mostrato qui sotto.
+{\scriptsize
+\begin{verbatim}
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o3_default_default",
+  "facts": [
+    {
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "selected_device_matches_example",
+      "example_id": "E2"
+    }
+  ],
+  "hypothesis": "This pair is selected because it appears as the top-ranked configuration for the IBM Falcon 127 
+                 device in the provided historical examples, and the device choice aligns with the 
+                 best-performing setup for a similar circuit generated by Qiskit. The hypothesis suggests that
+                 this configuration offers a robust baseline for execution on this hardware, though its specific
+                 performance on the current circuit remains untested."
+}
+\end{verbatim}
+}
+Il prototipo quando riceve la risposta JSON del modello, controlla la correttezza dei \textit{facts}, ma non quella dell'ipotesi libera, che rimane un tentativo del modello di spiegare la sua scelta, senza pretendere che la spiegazione sia coerente o veritiera.
+
+La validation è stata impostata in questo modo: per ogni circuito, il modello genera una risposta. Se i \textit{facts} sono tutti corretti, la risposta è accettata. Se uno o più \textit{facts} sono errati, il modello riceve un messaggio di errore e può correggere la risposta in massimo altri 2 tentativi.
+Dopo il terzo, se la coppia hardware e configurazione non è valida, il tentativo risulta un fallimento registrato, se invece una risposta propone un hardware e una configurazione ammessa viene accettata, indipendentemente dalla correttezza dei \textit{facts}. Questo perchè l'obiettivo della validation è misurare la capacità del modello di selezionare una coppia hardware/configurazione valida.
+La correttezza dei \textit{facts} è comunque registrata, per misurare la capacità del modello di generare evidence sensate e coerenti con la selezione effettuata. La validazione non certifica la qualità della compilazione, né la correttezza del testo libero.
+
+\paragraph{Ambiente di esecuzione:}
+Il pc su cui è stata svolta la validation ha queste componenti:
+La CPU è un AMD Ryzen 5 5500G, la RAM è 16GB DDR4 3200 MHz.
+La GPU è una Radeon RX 6750 XT con 12GB di VRAM. Limite hotspot 110 gradi, pausa a 105 e ripresa a 100; limite edge 95 gradi. Il monitor campiona RAM, VRAM e temperature; i massimi campionati possono perdere picchi istantanei.
+L'ambiente di esecuzione è quello contenuto nel file uv.lock
+
+Ogni modello ha ricevuto lo stesso prompt, con gli stessi esempi di train, e ha affrontato gli stessi 88 circuiti a tre temperature. I tentativi di correzione (retry) sono stati contati separatamente.
+
+In questa tabella sono riportati i parametri di esecuzione dei modelli locali. Tra questi abbiamo il contesto massimo, il numero massimo di token generati per singola risposta (la più lunga è stata di soli 288 token), i parametri di campionamento top\_p e top\_k (rispettivamente i token più probabili fino a raggiungere una certa probabilità cumulativa e i k token più probabili), la probabilità minima per token (esclude i token sotto una certa probabilità) e il seed usato per la generazione dei numeri casuali.
+\begin{center}\begin{tabular}{lr}\toprule Parametro & Valore\\\midrule
+Context window tokens & 60000\\
+
+max\_tokens & 4096\\
+
+top\_p & 0.95\\
+
+top\_k & 40\\
+
+min\_p & 0.0\\
+
+seed & 20260913\\
+
+\bottomrule\end{tabular}\end{center}
+
+\subsection{Risultati}
+
+\begin{center}\small\begin{tabular}{lrrrr}\toprule Prova & Circuiti & Successi & Risposte verificate & Retry totali\\\midrule
+
+gemma, t=0 & 88 & 88 & 52/88 & 100\\
+
+gemma, t=0.4 & 88 & 88 & 44/88 & 105\\
+
+gemma, t=0.7 & 88 & 88 & 34/88 & 115\\
+
+phi, t=0 & 88 & 88 & 67/88 & 99\\
+
+phi, t=0.4 & 88 & 88 & 74/88 & 113\\
+
+phi, t=0.7 & 88 & 88 & 71/88 & 129\\
+
+qwen, t=0 & 88 & 88 & 70/88 & 43\\
+
+qwen, t=0.4 & 88 & 88 & 71/88 & 44\\
+
+qwen, t=0.7 & 88 & 88 & 81/88 & 49\\
+
+\bottomrule\end{tabular}\end{center}
+
+
+Ogni riga riguarda 88 circuiti per una combinazione di modello e temperatura.
+Successi indica i circuiti per cui è disponibile una coppia dispositivo/configurazione ammessa.
+Risposte verificate conta gli episodi in cui tutti i \textit{facts} della risposta
+finale sono corretti.
+Per esempio, Gemma a temperatura t=0 ha 52 risposte verificate su 88
+(59,1 \%), mentre 36 sono state accettate con \textit{facts} ancora errati.
+Le correzioni sono chiamate aggiuntive dopo la prima risposta: un episodio
+può contribuire zero, una o due correzioni. Nella stessa riga, 29 episodi
+non richiedono correzioni, 18 ne richiedono una e 41 ne richiedono due:
+$18+2\cdot41=100$. In totale sono 188 chiamate. Il conteggio dei singoli \textit{facts}
+è distinto: 236 \textit{facts} verificati su 374 controllati in tutti i tentativi.
+
+\subsection{Qualità della scelta e selezione}
+
+Il regret misura quanto si perde scegliendo una coppia dispositivo/configurazione rispetto al migliore risultato osservato per lo stesso circuito. Un valore basso indica una scelta vicina al riferimento; zero indica un pareggio. Questa misura permette di confrontare la qualit\`a delle scelte dei modelli, oltre alla loro validit\`a.
+
+Per confrontare i candidati usiamo il regret medio sugli stessi circuiti: ogni circuito contribuisce alla media, anche quando la maggior parte delle scelte ha regret zero. Lo score di ciascuna coppia resta invece la mediana dei tre seed di compilazione, come negli esempi RAG.
+
+\[
+ S(c,p)=\operatorname{mediana}_{s\in\{0,1,2\}} F(c,p,s), \qquad
+ R_{\mathrm{osservato}}(c)=\max_{p\in P_{\mathrm{riuscite}}(c)}S(c,p)-S(c,p_{\mathrm{scelta}}).
+\]
+\[
+ \overline{R}_{\mathrm{osservato}}(m)=\frac{1}{|Validation|}\sum_{c\in Validation}R_{\mathrm{osservato}}^{(m)}(c),
+ \qquad |Validation|=88.
+\]
+$m$ identifica il candidato, cio\`e la combinazione di modello e temperatura; $Validation$ contiene i circuiti comuni del confronto. $R_{\mathrm{osservato}}^{(m)}(c)$ \`e il regret del candidato $m$ sul circuito $c$.
+$c$ è il circuito; $p$ è la coppia dispositivo/configurazione.
+$F(c,p,s)$ è la expected fidelity ottenuta dalla compilazione con seed Qiskit $s$.
+La mediana dei tre seed è lo score rappresentativo della coppia, attenua l'effetto di una compilazione isolata
+particolarmente favorevole o sfavorevole. Il massimo considera le coppie osservate
+con tutte e tre le compilazioni riuscite.
+Il regret è la differenza fra questo massimo e lo score della scelta:
+zero significa pareggio col migliore risultato osservato; un valore maggiore
+indica una perdita maggiore.
+La media del regret nella tabella è un'altra aggregazione:
+si calcola dopo, sui risultati degli 88 circuiti, non sui tre seed.
+
+Il riferimento considera solo coppie con tre ripetizioni riuscite. Per tutti gli 88 circuiti è possibile calcolare il regret rispetto alla migliore coppia valutata con successo. 
+Tuttavia, quando è stato generato il dataset, in particolare lo split di validation, per 70 circuiti alcune coppie dispositivo/configurazione non hanno completato tutte e tre le compilazioni richieste, cioè 70 circuiti hanno compilato con successo solo alcune delle tre ripetizioni. Il riferimento potrebbe quindi non essere la migliore coppia fra tutte quelle previste. Soltanto per 18 circuiti il confronto comprende tutte le coppie previste.
+Questa limitazione non impedisce di confrontare i candidati, perché tutti affrontano gli stessi circuiti e le stesse coppie. Il confronto è quindi valido, anche se il riferimento non è sempre la migliore coppia teorica.
+
+Il modello viene selezionato in base a dei criteri in ordine di importanza:
+\begin{itemize}
+  \item la completezza, cioè il numero di circuiti con coppia dispositivo/configurazione ammessa (più alto è meglio);
+  \item il regret medio, cioè la media dei regret osservati sui circuiti comuni (più basso è meglio);
+  \item il numero di correzioni richieste (più basso è meglio);
+  \item il numero di chiamate fisiche, cioè il numero di tentativi logici che hanno generato una chiamata fisica al modello (più basso è meglio);
+  \item il tempo totale di chiamata, cioè la somma dei tempi di tutte le chiamate fisiche (più basso è meglio);
+  \item il numero di token generati, cioè la somma dei token di ingresso e di uscita di tutte le chiamate fisiche (più basso è meglio).
+\end{itemize}
+
+
+Il confronto con il regret medio conferma qwen, t=0 come vincitore.
+
+\begin{center}\small\begin{tabular}{lrr}\toprule Prova & Circuiti & Regret medio\\\midrule
+
+gemma, t=0 & 88 & 0.163919\\
+
+gemma, t=0.4 & 88 & 0.159019\\
+
+gemma, t=0.7 & 88 & 0.159506\\
+
+phi, t=0 & 88 & 0.015251\\
+
+phi, t=0.4 & 88 & 0.020738\\
+
+phi, t=0.7 & 88 & 0.025134\\
+
+qwen, t=0 & 88 & 0.015047\\
+
+qwen, t=0.4 & 88 & 0.020694\\
+
+qwen, t=0.7 & 88 & 0.018812\\
+
+\bottomrule\end{tabular}\end{center}
+
+
+
+\begin{center}\small
+  \begin{tabular}{lrrrr}\toprule
+    Prova & Zeri su 88 & Mediana & Media & Massimo\\\midrule
+    gemma, t=0 & 2 & 0.1323 & 0.1639 & 0.5329\\
+    gemma, t=0.4 & 2 & 0.1390 & 0.1590 & 0.5420\\
+    gemma, t=0.7 & 2 & 0.1276 & 0.1595 & 0.5420\\
+    phi, t=0 & 51 & 0.0000 & 0.0153 & 0.1616\\
+    phi, t=0.4 & 50 & 0.0000 & 0.0207 & 0.1791\\
+    phi, t=0.7 & 45 & 0.0000 & 0.0251 & 0.3439\\
+    qwen, t=0 & 53 & 0.0000 & 0.0150 & 0.1616\\
+    qwen, t=0.4 & 46 & 0.0000 & 0.0207 & 0.2752\\
+    qwen, t=0.7 & 48 & 0.0000 & 0.0188 & 0.2754\\
+\bottomrule\end{tabular}\end{center}
+    
+\paragraph{Perché alcune mediane sono zero.}
+Con 88 valori ordinati la mediana è la media del 44-esimo e del 45-esimo.
+Qwen e Phi hanno almeno 45 zeri in ogni configurazione: entrambi i valori
+centrali sono quindi esattamente zero, anche se altri circuiti hanno perdite.
+Non si tratta di zeri dovuti all'arrotondamento della tabella seguente.
+Gemma ha due zeri su 88 per ciascuna temperatura e mediane positive.
+La media e il massimo descrivono anche gli errori che la mediana non evidenzia.
+La media guida il confronto; la mediana e il massimo restano misure descrittive.
+
+Il dispositivo Quantinuum appartiene al migliore risultato osservato in
+70 circuiti su 88. Qwen e Phi lo scelgono spesso, mentre Gemma non lo sceglie
+mai in questa validation. Questa è una differenza osservata nelle decisioni,
+non una prova del motivo interno per cui i modelli scelgono.
+In 72 circuiti più coppie raggiungono lo stesso score massimo osservato.
+Nessun riferimento osservato ha score zero.
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath regret_osservato.png}
+
+\caption{Regret osservato: rettangolo fra primo e terzo quartile (50 per cento centrale), linea arancione alla mediana. I baffi arrivano ai valori estremi entro 1,5 volte la distanza fra quartili. I puntini mostrano solo i circuiti oltre i baffi; non tutti gli 88 circuiti. Valori uguali possono sovrapporsi. Un punto esterno non è automaticamente un errore nei dati. n indica i circuiti valutabili.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath fatti.png}
+
+\caption{Esiti dei controlli sui \textit{facts}. La motivazione libera non viene validata semanticamente.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath chiamate.png}
+
+\caption{Correzioni e interruzioni sono conteggiate separatamente. Le interruzioni non consumano tentativi logici.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath costo.png}
+
+\caption{Totali solo quando tutte le chiamate sono misurabili. I valori mancanti non diventano zero; attese e caricamenti sono nei registri del supervisore.}\end{figure}
+
+
+\clearpage\subsection{Tempi e token per modello}
+Ogni modello ha affrontato 264 episodi: gli stessi 88 circuiti a tre temperature.
+I totali includono tutte le chiamate di generazione, comprese le correzioni;
+non rappresentano il costo di una sola risposta. Tutti i contatori qui usati
+sono disponibili per tutti gli episodi.
+Il tempo misura la durata delle chiamate e comprende eventuali pause
+dentro di esse. Non è il tempo totale trascorso dall'avvio alla fine
+dell'esperimento: caricamento, recupero esterno, preparazione dei contesti
+e chiamate tecniche di tokenizzazione sono esclusi da questo totale.
+I token di ingresso vengono contati per ogni chiamata, anche se il contesto
+viene ripetuto nelle correzioni o il server ne riusa parti in cache.
+I token di uscita comprendono tutte le risposte, anche quelle corrette
+successivamente. I modelli usano tokenizzatori diversi: il conteggio non
+corrisponde allo stesso numero di parole né a un costo monetario.
+I modelli sono eseguiti in sequenza sullo stesso computer: temperature,
+pause e cache possono influenzare i tempi. Non è una misura isolata
+della velocità intrinseca del modello.
+
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Modello & Episodi & Minuti  & Token ingresso & Token uscita\\\midrule
+qwen & 264 & 59.96 & 4,619,210 & 57,060\\
+phi & 264 & 127.15 & 5,757,693 & 88,574\\
+gemma & 264 & 65.79 & 7,252,473 & 70,218\\
+\bottomrule\end{tabular}\end{center}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{\ValidationFiguresPath tempi_modelli.png}
+\caption{Tempi misurati nelle chiamate: totale per modello e dettaglio per temperatura. Correzioni incluse.}\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{\ValidationFiguresPath token_modelli.png}
+\caption{Token complessivi di ingresso e uscita per modello; 264 episodi ciascuno. Le due scale sono differenti.}\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{\ValidationFiguresPath token_temperature.png}
+\caption{Token di ingresso e uscita per modello e temperatura; 88 episodi per barra.}\end{figure}
+
+\clearpage\subsection{Provenienza e limiti}
+
+La correttezza dei \textit{facts} strutturati non garantisce
+che l'ipotesi sia corretta o coerente con essi.
+Il meccanismo permette però di verificare le affermazioni
+rispetto agli esempi forniti e, quando risultano errate,
+di chiedere al modello una correzione.
+L'ipotesi rimane una proposta libera, non sottoposta a verifica.
+Dopo un massimo di tre tentativi, una coppia dispositivo/configurazione
+ammessa viene comunque accettata, mentre gli eventuali
+\textit{facts} ancora errati vengono registrati come non verificati.
+Questo perchè anche se i \textit{facts} sono errati, la coppia selezionata può comunque essere usata per compilare il circuito ed ottenere uno score da misurare in fase di test.
+La presenza di un precedente storico non garantisce prestazioni sul nuovo circuito, questo andrà valutato in fase di test.
+I tempi includono le pause dentro la chiamata; attese di recupero e caricamenti sono registrati separatamente.
+
+\subsection{Resoconto della selezione}
+
+Come descritto nella sezione precedente, la selezione del modello vincitore è basata su più criteri in ordine di importanza.
+Il modello vincitore è qwen, t=0, che ha completato tutti i 88 circuiti con coppia dispositivo/configurazione ammessa, ha il regret medio più basso (0.015047), ha richiesto un numero di correzioni relativamente basso (43) ed ha il maggior numero di fatti verificati al primo tentativo, ha effettuato un numero di chiamate fisiche contenuto e ha generato un numero di token inferiore rispetto agli altri modelli e in tempi più brevi.
+A questo punto, qwen, t=0 è stato selezionato come modello locale per la fase successiva di test e valutazione dell'intero sistema LLM + RAG.

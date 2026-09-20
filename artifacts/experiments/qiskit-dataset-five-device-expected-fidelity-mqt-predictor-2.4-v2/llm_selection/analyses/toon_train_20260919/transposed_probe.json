@@ -1,0 +1,50 @@
+{
+  "method": "Official Qwen tokenizer, body only; exploration",
+  "rows": [
+    {
+      "circuit": "ae_indep_qiskit_60",
+      "counts": {
+        "adjacency_','": 11707,
+        "adjacency_'\\t'": 12130,
+        "feature_table_','": 10059,
+        "feature_table_'\\t'": 10483
+      }
+    },
+    {
+      "circuit": "dj_indep_tket_2",
+      "counts": {
+        "adjacency_','": 12042,
+        "adjacency_'\\t'": 12486,
+        "feature_table_','": 10394,
+        "feature_table_'\\t'": 10839
+      }
+    },
+    {
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "counts": {
+        "adjacency_','": 12989,
+        "adjacency_'\\t'": 13433,
+        "feature_table_','": 11341,
+        "feature_table_'\\t'": 11786
+      }
+    },
+    {
+      "circuit": "su2random_indep_qiskit_50",
+      "counts": {
+        "adjacency_','": 12674,
+        "adjacency_'\\t'": 13098,
+        "feature_table_','": 11026,
+        "feature_table_'\\t'": 11451
+      }
+    },
+    {
+      "circuit": "su2random_indep_tket_50",
+      "counts": {
+        "adjacency_','": 12705,
+        "adjacency_'\\t'": 13129,
+        "feature_table_','": 11057,
+        "feature_table_'\\t'": 11482
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+test_context_cannot_be_reused_for_other_request_registry_or_order (test_minimal_prompt.MinimalPromptTests.test_context_cannot_be_reused_for_other_request_registry_or_order) ... ok
+test_device_configuration_restrictions_remain_enforced (test_minimal_prompt.MinimalPromptTests.test_device_configuration_restrictions_remain_enforced) ... ok
+test_episode_repair_recovery_and_contract_change_protection (test_minimal_prompt.MinimalPromptTests.test_episode_repair_recovery_and_contract_change_protection) ... ERROR
+test_feedback_cannot_reintroduce_qasm_or_ids (test_minimal_prompt.MinimalPromptTests.test_feedback_cannot_reintroduce_qasm_or_ids) ... ok
+test_free_claim_citations_resolve_without_fabricated_structured_claims (test_minimal_prompt.MinimalPromptTests.test_free_claim_citations_resolve_without_fabricated_structured_claims) ... ok
+test_invalid_references_json_types_and_claim (test_minimal_prompt.MinimalPromptTests.test_invalid_references_json_types_and_claim) ... ok
+test_local_gateway_records_request_bound_map_and_raw_answer (test_minimal_prompt.MinimalPromptTests.test_local_gateway_records_request_bound_map_and_raw_answer) ... ok
+test_projection_preserves_order_features_and_canonical_input (test_minimal_prompt.MinimalPromptTests.test_projection_preserves_order_features_and_canonical_input) ... ok
+test_schema_and_transport_agree_without_old_contract (test_minimal_prompt.MinimalPromptTests.test_schema_and_transport_agree_without_old_contract) ... ok
+test_service_repairs_with_stable_aliases_and_compilation_gate (test_minimal_prompt.MinimalPromptTests.test_service_repairs_with_stable_aliases_and_compilation_gate) ... ok
+test_unknown_alias_for_shorter_context_and_no_rag (test_minimal_prompt.MinimalPromptTests.test_unknown_alias_for_shorter_context_and_no_rag) ... ok
+
+======================================================================
+ERROR: test_episode_repair_recovery_and_contract_change_protection (test_minimal_prompt.MinimalPromptTests.test_episode_repair_recovery_and_contract_change_protection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elio/Tesi-mqt-2.4-v2/tests/test_minimal_prompt.py", line 205, in test_episode_repair_recovery_and_contract_change_protection
+    result = run.episode(directory, saved, {"prompt_variant": "base", "temperature": 0},
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elio/Tesi-mqt-2.4-v2/llm_selection/run.py", line 199, in episode
+    split=saved["circuit_metadata"]["split"],configuration_id=configuration["id"],
+                                                              ~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.169s
+
+FAILED (errors=1)

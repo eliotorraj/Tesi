@@ -1,0 +1,12 @@
+[
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[0]",
+    "message": "Fact 1 (selected_pair_among_reported_best, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"wstate_indep_tket_7\", \"historical_rows\": []}. Rule: example_id required: selected_device and config_id occur together in that example's displayed top_configurations, including explicit tied_score_config_ids; not necessarily rank 1 or a unique winner. Correct this fact; an allowed proposed pair need not change."
+  },
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[1]",
+    "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E5) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+  }
+]

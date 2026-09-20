@@ -1,0 +1,48 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1",
+      "record_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "realamprandom_indep_qiskit_11",
+        "historical_device": "quantinuum_h2_56"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E3",
+      "record_id": "rag_3adfdf0d6a5023cfe61f7cd709fd5189592b4d17410e11d8bf871194de6f2aa1",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "realamprandom_indep_qiskit_10",
+        "current_num_qubits": 16,
+        "example_num_qubits": 10
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_device_matches_example, example_id=E1) does not match the provided data. Observed data: {\"circuit\": \"realamprandom_indep_qiskit_11\", \"historical_device\": \"quantinuum_h2_56\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+    },
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (same_qubit_count_as_example, example_id=E3) does not match the provided data. Observed data: {\"circuit\": \"realamprandom_indep_qiskit_10\", \"current_num_qubits\": 16, \"example_num_qubits\": 10}. Rule: example_id required: current and example circuits have exactly the same num_qubits; this does not establish similar topology or performance. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": true,
+  "validation_seconds": 0.010423707999507315
+}

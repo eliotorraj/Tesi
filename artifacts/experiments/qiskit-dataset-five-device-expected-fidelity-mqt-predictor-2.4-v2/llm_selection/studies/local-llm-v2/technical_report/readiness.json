@@ -1,0 +1,12 @@
+{
+  "at": "2026-09-19T19:08:23.246633+00:00",
+  "study_id": "local-llm-v2",
+  "frozen_study_sha256": "376ee085e91f35391072656e10a82e7f35ec56f94e4393ecb914223e339c80d8",
+  "verification_sha256": "deeb71aab0336dda5bc37bcef3e5e258763031c4a1140e70d632b4d536a4adc7",
+  "pdf_sha256": "680721d4809a5039ef598946bf76079b7b6486652071ef401a1e18b35a9716fc",
+  "full_suite_tests_passed": 266,
+  "study_and_predecessor_verified": true,
+  "validation_started": false,
+  "test_released": false,
+  "command": ".venv/bin/python -m llm_selection.v2 validate --study local-llm-v2"
+}

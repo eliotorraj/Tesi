@@ -1,0 +1,19 @@
+{
+  "revision": "facts-v4-toon3-20260919",
+  "schema_version": "4.0.0",
+  "schema_sha256": "1b637e8e04230697ddc262407ad8c47d5864ce8b9bb5dc15ab50cbd4bd24f3e9",
+  "model_view_sha256": "05c8e0a8b89cd2f9a4e7795a69e7a17c289c4e5e2172b03697cc98ef4998821a",
+  "citation_context": {
+    "request_id": "ccf3b9ee-55bb-543d-ae02-b4555684e805",
+    "catalog_snapshot_id": "hardware_catalog_d1c339c8243cc208ebbf34fa22724ea19bcbe9af0c49b43fc98794e3cfe66dac",
+    "record_ids": [
+      "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1",
+      "rag_1cb91fde7db57576e748aea3d08b35ca73cf3b699961c8399303e42314769144",
+      "rag_2be69156852d73d60c75338d1a7db26df5a83e5c2828236617ddb65b5353cab1",
+      "rag_312ada178e874b66e35dab0c3dc8fcd9c794e165d9b69f2d7962c1e6e5fdf1f4",
+      "rag_c2e1b538c349550f19ae2eb1efb54479086e8249b0233c28f2ab1d2e94687e9c"
+    ],
+    "registry_sha256": "7eccacfc51a58afb58fcc138fb3a6bb29c2b678de23e9eced08141d579ba1b39",
+    "request_sha256": "87e455d66b56bc4d615f283759961254af7126caac47fa2f4808f749ee51bfd6"
+  }
+}

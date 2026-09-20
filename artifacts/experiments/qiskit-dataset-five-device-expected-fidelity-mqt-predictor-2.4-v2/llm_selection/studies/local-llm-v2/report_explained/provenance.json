@@ -1,0 +1,15 @@
+{
+  "source_sha256": {
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/frozen_study.json": "376ee085e91f35391072656e10a82e7f35ec56f94e4393ecb914223e339c80d8",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/episode_results.json": "6326251e0005afe76259f810d091850c16dc2c327464f1a90ee867399f78a111",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/selection.json": "96527dd635ed1dde232c9eb9bf9218a098adbce8f6b3d657e1301fd2beb2138b",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/final_configuration.json": "3c14683280887913a075b79cb5f1ffe263504bd6a912b0406fdc2d399c1ade67",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/report/validation_selection.tex": "dfff885211b02d88aba46639777e46fadba4971852174e23e3bd2197dd11bf8c",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/report/standalone.pdf": "2ce1665396aa64adc5f7d8c4679251b6558b0771f22c4652ef0181c135533aa5"
+  },
+  "script_sha256": "284b57a3b47718c1c343a06ec82583decf250ccb608f9869d28145d1a304c002",
+  "script": "scripts/report_local_validation_v2.py",
+  "no_new_inference": true,
+  "original_report_unchanged": true,
+  "selection_unchanged": true
+}

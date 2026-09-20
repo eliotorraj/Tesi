@@ -1,5 +1,7 @@
 # Selezione locale LLM: guida operativa
 
+> **Seconda validation, 19 settembre 2026:** la nuova procedura con fatti strutturati, temperature 0/0,4/0,7 e recupero delle interruzioni è descritta nella [guida v2](../../llm_selection/v2/README.md). I comandi sotto documentano la procedura storica v1.
+
 Questa guida contiene i comandi per preparare ed eseguire la selezione degli LLM.
 Per capire il ruolo dei programmi partire da [llm_selection/README.md](../../llm_selection/README.md).
 Il riferimento scientifico resta [il protocollo](../protocollo_sperimentale.md).
@@ -137,8 +139,9 @@ nome nuovo, aggiornando anche `PHI_PROVA` se si sceglie il nuovo profilo. Conser
 Per riprendere invece lo stesso profilo dopo una pausa, usare `--episode-label`,
 come spiegato nel punto 5.
 
-La connettività completa è rappresentata con una regola esatta e reversibile:
-il contenuto del circuito e delle evidenze non viene tagliato. I conteggi
+La codifica storica manteneva circuito ed evidenze completi. Dal 18 settembre
+la [vista essenziale](compattazione_prompt.md) conserva le feature ma omette
+QASM, provenienza e ripetizioni dal testo LLM; gli originali restano nei registri. I conteggi
 esplorativi sono in `preparation/complete_graph_token_probe.json`. Nelle prime misure alcuni prompt di Gemma superavano il contesto nativo.
 Il prompt è stato poi compattato: la compatibilità corrente va misurata di nuovo
 per ogni tokenizer e profilo. Un superamento del contesto produce un fallimento

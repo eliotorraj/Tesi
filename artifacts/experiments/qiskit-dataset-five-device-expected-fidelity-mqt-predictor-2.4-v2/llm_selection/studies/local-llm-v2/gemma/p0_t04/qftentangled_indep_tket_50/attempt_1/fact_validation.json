@@ -1,0 +1,26 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E3",
+      "record_id": "rag_e05549d147741347253ec449c93f1b38d41102fe0dad1cf733687bf8d363d854",
+      "result": "verified",
+      "resolved": {
+        "circuit": "ae_indep_tket_50",
+        "current_num_qubits": 50,
+        "example_num_qubits": 50
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17017995200149016
+}

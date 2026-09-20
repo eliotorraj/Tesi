@@ -1,2 +1,3 @@
 {"at": "2026-09-14T09:32:50.114823+00:00", "event": "transfer_started", "offset": 0, "status": 200, "content_range": null, "content_length": "10151914"}
 {"at": "2026-09-14T09:32:50.291719+00:00", "event": "hash_checked", "sha256": "8533d07f9ccbd7a65824b9e0459041bca34af1eb33daba48f59215593753a3b7", "expected_sha256": "8533d07f9ccbd7a65824b9e0459041bca34af1eb33daba48f59215593753a3b7", "valid": true}
+{"at": "2026-09-19T10:39:38.214682+00:00", "event": "existing_file_verified", "sha256": "8533d07f9ccbd7a65824b9e0459041bca34af1eb33daba48f59215593753a3b7"}

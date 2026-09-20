@@ -1,0 +1,4 @@
+  File "<string>", line 30
+    (d/'errore_aggiunto.txt').write_text('
+                                         ^
+SyntaxError: unterminated string literal (detected at line 30)

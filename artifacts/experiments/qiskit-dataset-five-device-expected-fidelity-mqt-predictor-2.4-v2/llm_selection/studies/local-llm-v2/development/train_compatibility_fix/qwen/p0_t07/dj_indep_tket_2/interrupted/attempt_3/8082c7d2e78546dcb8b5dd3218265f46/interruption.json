@@ -1,0 +1,7 @@
+{
+  "at": "2026-09-19T18:26:09.162815+00:00",
+  "logical_attempt": 3,
+  "reason": "resource_interruption",
+  "consumes_attempt": false,
+  "physical_generation_dispatched": true
+}

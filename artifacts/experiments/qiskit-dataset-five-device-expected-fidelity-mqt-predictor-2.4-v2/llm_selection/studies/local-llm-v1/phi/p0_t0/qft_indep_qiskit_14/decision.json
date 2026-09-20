@@ -1,0 +1,24 @@
+{
+  "status": "success",
+  "selected_device_id": "quantinuum_h2_56",
+  "selected_config_id": "o2_sabre_sabre",
+  "failure": null,
+  "circuit_id": "qft_indep_qiskit_14",
+  "source_sha256": "076db9a7219eb3c8641d758d8a9acc9e242b6dd477bd615f27b6d3dea6e5d24f",
+  "split": "validation",
+  "configuration_id": "p0_t0",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-19T12:25:42.793423+00:00",
+  "this_invocation_seconds": 53.61672098999952,
+  "measured_call_seconds": 53.21734030300013,
+  "python_process_peak_rss_bytes": 1695678464,
+  "python_rss_method": "Linux getrusage ru_maxrss, cumulative process high-water mark; not an exclusive per-call peak",
+  "attempts_sha256": "1bd95d92d7cbfaacdd8d38b0553c70b3d82fc6ba4fd5f5f0a64b9227f51fe1b8",
+  "input_prompt_sha256": "1e0e94b1f382607ff46d01f559b1d8f5eb7ff959a08f3af5d35d95f153e50168",
+  "train_self_check": {
+    "applicable": false
+  }
+}

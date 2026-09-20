@@ -1,0 +1,30 @@
+[
+  {
+    "name": "regret_osservato",
+    "caption": "Regret osservato. Ogni punto statistico rappresenta un circuito; n indica i circuiti valutabili."
+  },
+  {
+    "name": "fatti",
+    "caption": "Esiti dei controlli sui fatti. La motivazione libera non viene validata semanticamente."
+  },
+  {
+    "name": "chiamate",
+    "caption": "Correzioni e interruzioni sono conteggiate separatamente. Le interruzioni non consumano tentativi logici."
+  },
+  {
+    "name": "costo",
+    "caption": "Totali solo quando tutte le chiamate sono misurabili. I valori mancanti non diventano zero; attese e caricamenti sono nei registri del supervisore."
+  },
+  {
+    "name": "tempi_modelli",
+    "caption": "Tempi delle chiamate per modello e temperatura."
+  },
+  {
+    "name": "token_modelli",
+    "caption": "Token complessivi per modello."
+  },
+  {
+    "name": "token_temperature",
+    "caption": "Token per modello e temperatura."
+  }
+]

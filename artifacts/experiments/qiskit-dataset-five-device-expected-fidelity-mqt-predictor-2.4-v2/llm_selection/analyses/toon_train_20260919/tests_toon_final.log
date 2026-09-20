@@ -1,0 +1,11 @@
+test_nonuniform_features_and_special_strings_are_not_lost (test_toon_prompt.ToonTests.test_nonuniform_features_and_special_strings_are_not_lost) ... ok
+test_precision_loss_is_rejected_instead_of_sending_changed_data (test_toon_prompt.ToonTests.test_precision_loss_is_rejected_instead_of_sending_changed_data) ... ok
+test_provenance_includes_the_installed_encoder_and_lock (test_toon_prompt.ToonTests.test_provenance_includes_the_installed_encoder_and_lock) ... ok
+test_real_codec_preserves_complete_prompt_and_json_answer_contract (test_toon_prompt.ToonTests.test_real_codec_preserves_complete_prompt_and_json_answer_contract) ... ok
+test_repair_and_no_rag_use_the_same_codec_without_new_aliases (test_toon_prompt.ToonTests.test_repair_and_no_rag_use_the_same_codec_without_new_aliases) ... ok
+test_table_keeps_all_features_and_directed_edge_order (test_toon_prompt.ToonTests.test_table_keeps_all_features_and_directed_edge_order) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.643s
+
+OK

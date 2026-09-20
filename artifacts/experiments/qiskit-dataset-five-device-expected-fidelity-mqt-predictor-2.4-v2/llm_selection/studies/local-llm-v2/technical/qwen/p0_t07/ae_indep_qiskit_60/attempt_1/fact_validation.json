@@ -1,0 +1,40 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E1",
+      "record_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1",
+      "result": "unsupported",
+      "resolved": {}
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E1",
+      "record_id": "rag_41745170494aad87de8def3a3d77e8eb50238fe2c00f8d88e2e8f96829f48fe1",
+      "result": "verified",
+      "resolved": {
+        "circuit": "ae_indep_qiskit_60",
+        "current_num_qubits": 60,
+        "example_num_qubits": 60
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_device_has_enough_qubits, example_id=E1) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.1662350280003011
+}

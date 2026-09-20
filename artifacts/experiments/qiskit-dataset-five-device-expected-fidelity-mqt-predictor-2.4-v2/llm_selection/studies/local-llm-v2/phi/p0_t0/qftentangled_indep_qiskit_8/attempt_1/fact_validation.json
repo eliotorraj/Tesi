@@ -1,0 +1,40 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": null,
+      "record_id": null,
+      "result": "unsupported",
+      "resolved": {}
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": null,
+      "record_id": null,
+      "result": "verified",
+      "resolved": {
+        "device_id": "quantinuum_h2_56",
+        "device_num_qubits": 56,
+        "current_num_qubits": 8
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_pair_among_reported_best, example_id=None) does not match the provided data. Observed data: {}. Rule: example_id required: selected_device and config_id occur together in that example's displayed top_configurations, including explicit tied_score_config_ids; not necessarily rank 1 or a unique winner. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.1737034500001755
+}

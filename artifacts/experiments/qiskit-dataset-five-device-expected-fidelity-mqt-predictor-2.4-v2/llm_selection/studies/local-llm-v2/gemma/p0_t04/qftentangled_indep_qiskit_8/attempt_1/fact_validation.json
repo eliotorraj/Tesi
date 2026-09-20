@@ -1,0 +1,43 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E3",
+      "record_id": "rag_e0fab435fa991d02fd3085a2b6dad0a645a0b8bc5063a88c9aa83a0ffb9d0dc7",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "su2random_indep_qiskit_8",
+        "historical_device": "quantinuum_h2_56"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E3",
+      "record_id": "rag_e0fab435fa991d02fd3085a2b6dad0a645a0b8bc5063a88c9aa83a0ffb9d0dc7",
+      "result": "verified",
+      "resolved": {
+        "circuit": "su2random_indep_qiskit_8",
+        "current_num_qubits": 8,
+        "example_num_qubits": 8
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_device_matches_example, example_id=E3) does not match the provided data. Observed data: {\"circuit\": \"su2random_indep_qiskit_8\", \"historical_device\": \"quantinuum_h2_56\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010140652000700356
+}

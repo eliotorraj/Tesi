@@ -1,0 +1,41 @@
+{
+  "release": {
+    "version": "v22.23.2",
+    "date": "2026-07-28",
+    "files": [
+      "aix-ppc64",
+      "headers",
+      "linux-arm64",
+      "linux-armv7l",
+      "linux-ppc64le",
+      "linux-s390x",
+      "linux-x64",
+      "osx-arm64-tar",
+      "osx-x64-pkg",
+      "osx-x64-tar",
+      "src",
+      "win-arm64-7z",
+      "win-arm64-zip",
+      "win-x64-7z",
+      "win-x64-exe",
+      "win-x64-msi",
+      "win-x64-zip",
+      "win-x86-7z",
+      "win-x86-exe",
+      "win-x86-msi",
+      "win-x86-zip"
+    ],
+    "npm": "10.9.8",
+    "v8": "12.4.254.21",
+    "uv": "1.51.0",
+    "zlib": "1.3.1",
+    "openssl": "3.5.7",
+    "modules": "127",
+    "lts": "Jod",
+    "security": true
+  },
+  "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz",
+  "sha256": "d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307",
+  "method": "official tarball verified using SHASUMS256.txt",
+  "npm_windows_error": "Maximum call stack size exceeded with UNC prefix; using project-local Linux Node runtime"
+}

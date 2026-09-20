@@ -1,0 +1,12 @@
+[
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[0]",
+    "message": "Fact 1 (selected_pair_among_reported_best, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_tket_9\", \"historical_rows\": []}. Rule: example_id required: selected_device and config_id occur together in that example's displayed top_configurations, including explicit tied_score_config_ids; not necessarily rank 1 or a unique winner. Correct this fact; an allowed proposed pair need not change."
+  },
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[1]",
+    "message": "Fact 2 (selected_device_matches_example, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_tket_9\", \"historical_device\": \"ibm_falcon_127\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+  }
+]

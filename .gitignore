@@ -6,7 +6,7 @@ __pycache__/
 tmp/mqt_predictor-*
 .workspace_archive/
 AGENTS.md
-
+graphify-out
 artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/*
 !artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/README.md
 artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/checkpoints/*
@@ -126,3 +126,9 @@ llm_selection/GITHUB.md
 /datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/ibm_heron_133/qiskit_runs.jsonl
 /datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
 /datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/quantinuum_h2_56/qiskit_runs.jsonl
+
+# Strumenti locali e cache rigenerabili (20 settembre 2026).
+/.codex/
+/artifacts/experiments/*/llm_selection/runtime/tectonic-cache/
+/artifacts/experiments/*/llm_selection/runtime/toon/node-v*/
+/artifacts/experiments/*/llm_selection/runtime/toon/node-v*.tar.xz

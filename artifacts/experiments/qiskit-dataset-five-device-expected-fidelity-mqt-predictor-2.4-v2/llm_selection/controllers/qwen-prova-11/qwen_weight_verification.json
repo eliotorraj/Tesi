@@ -1,0 +1,11 @@
+{
+  "size_bytes": 4482403488,
+  "path": "D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\models\\qwen\\Q8_0.gguf",
+  "method": "Windows .NET SHA256.ComputeHash streaming on the native model path",
+  "started_at": "2026-09-16T19:42:24.6427342Z",
+  "expected_sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1",
+  "elapsed_seconds": 324.4880857,
+  "sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1",
+  "valid": true,
+  "ended_at": "2026-09-16T19:47:49.1278200Z"
+}

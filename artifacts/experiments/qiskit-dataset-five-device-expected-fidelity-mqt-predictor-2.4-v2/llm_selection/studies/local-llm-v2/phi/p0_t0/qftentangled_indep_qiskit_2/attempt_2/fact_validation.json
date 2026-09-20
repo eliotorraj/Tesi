@@ -1,0 +1,39 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E5",
+      "record_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22",
+      "result": "verified",
+      "resolved": {
+        "circuit": "wstate_indep_tket_2",
+        "historical_device": "ibm_falcon_127"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E5",
+      "record_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22",
+      "result": "unsupported",
+      "resolved": {}
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E5) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": true,
+  "validation_seconds": 0.009968905000278028
+}

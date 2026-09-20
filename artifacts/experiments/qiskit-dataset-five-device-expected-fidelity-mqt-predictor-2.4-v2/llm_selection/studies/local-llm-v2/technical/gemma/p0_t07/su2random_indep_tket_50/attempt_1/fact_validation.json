@@ -1,0 +1,43 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1",
+      "record_id": "rag_87da6e6f7e77cdddbe1b2f9b5eda983dc6be87a957f6e0ce45c0bf2fbfee48c8",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "su2random_indep_tket_50",
+        "historical_device": "quantinuum_h2_56"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E1",
+      "record_id": "rag_87da6e6f7e77cdddbe1b2f9b5eda983dc6be87a957f6e0ce45c0bf2fbfee48c8",
+      "result": "verified",
+      "resolved": {
+        "circuit": "su2random_indep_tket_50",
+        "current_num_qubits": 50,
+        "example_num_qubits": 50
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_device_matches_example, example_id=E1) does not match the provided data. Observed data: {\"circuit\": \"su2random_indep_tket_50\", \"historical_device\": \"quantinuum_h2_56\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17072780200032867
+}

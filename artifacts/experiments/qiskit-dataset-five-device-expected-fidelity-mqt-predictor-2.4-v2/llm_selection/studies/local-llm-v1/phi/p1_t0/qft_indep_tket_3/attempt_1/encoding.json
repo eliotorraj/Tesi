@@ -1,0 +1,47 @@
+{
+  "serialization": {
+    "format": "TOON",
+    "package": "@toon-format/toon",
+    "version": "4.1.1",
+    "options": {
+      "indentSize": 2,
+      "delimiter": ","
+    },
+    "node_version": "v22.23.2",
+    "projection": "feature_rows_and_ordered_adjacency_v1"
+  },
+  "toon_roundtrip_verified": true,
+  "toon_sha256": "45d8197a9a5156d95054253ca73c53ae984a97cb2f86c3f9f62564c855a5f0c7",
+  "revision": "minimal-v3-toon1-20260919",
+  "response_contract_version": "3.0.0",
+  "aliases": {
+    "E1": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9",
+    "E2": "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612",
+    "E3": "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd",
+    "E4": "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12",
+    "E5": "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+  },
+  "citation_context": {
+    "request_id": "6b1cada0-71fc-5f3b-81c2-7eec7869a27b",
+    "catalog_snapshot_id": "hardware_catalog_d1c339c8243cc208ebbf34fa22724ea19bcbe9af0c49b43fc98794e3cfe66dac",
+    "record_ids": [
+      "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9",
+      "rag_e0c769275f3e7626464ec07baff68416a233dc6541ed6495ff44d57c7d6b7612",
+      "rag_096eba46a6a898b208acf32cec9be1c86793ec117d94b6632b767b7286a0c1dd",
+      "rag_e62e51c28cb43b8e7e0307ef63bbbc20df24dcbf63337cedd0068887c9c1ca12",
+      "rag_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd"
+    ],
+    "registry_sha256": "54f617a0eee4d47237d7b1ff4cd38372c3ef847c3022839fd5fd8e1b30cb87f1",
+    "request_sha256": "728fecf2a6f97d0b12665de3aab29edd944226ce006052df9f09450f234d9c98"
+  },
+  "original_sha256": "443fa12bf090f2c73e30d337727c982ff0269ef83c5c23648a1692ccab73eef7",
+  "model_input_sha256": "550b6fc134e9c924197329e224ecf7cdbe3194c7dabb21334ad1136b6ae18061",
+  "rag_example_count": 5,
+  "omissions": [
+    "qasm2",
+    "provenance",
+    "source_identifiers",
+    "duplicated_evidence"
+  ],
+  "roundtrip_verified": false
+}

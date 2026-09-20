@@ -1,0 +1,47 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E5",
+      "record_id": "rag_0da1bf097ce0dd2c408b21bf2048224f6657a65121bed617b78a7faf8fe244e7",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "portfoliovqe_indep_qiskit_5",
+        "historical_rows": []
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E5",
+      "record_id": "rag_0da1bf097ce0dd2c408b21bf2048224f6657a65121bed617b78a7faf8fe244e7",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "portfoliovqe_indep_qiskit_5",
+        "historical_device": "ibm_heron_156"
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (selected_pair_among_reported_best, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"portfoliovqe_indep_qiskit_5\", \"historical_rows\": []}. Rule: example_id required: selected_device and config_id occur together in that example's displayed top_configurations, including explicit tied_score_config_ids; not necessarily rank 1 or a unique winner. Correct this fact; an allowed proposed pair need not change."
+    },
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_matches_example, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"portfoliovqe_indep_qiskit_5\", \"historical_device\": \"ibm_heron_156\"}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17355018299895164
+}

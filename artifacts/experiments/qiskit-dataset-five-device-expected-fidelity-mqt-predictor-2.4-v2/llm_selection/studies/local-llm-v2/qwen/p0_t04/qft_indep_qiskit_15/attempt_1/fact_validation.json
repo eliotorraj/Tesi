@@ -1,0 +1,98 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1",
+      "record_id": "rag_5b0e8de267f22b5361679a55e98a81fdc7ff62dbb8230d463685cb854fe396e8",
+      "result": "verified",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_16",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o2_default_default",
+            "median_score": 0.950985875,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_default_default",
+            "median_score": 0.950985875,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 3,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o2_sabre_sabre",
+            "median_score": 0.950985875,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": null,
+      "record_id": null,
+      "result": "verified",
+      "resolved": {
+        "device_id": "quantinuum_h2_56",
+        "device_num_qubits": 56,
+        "current_num_qubits": 15
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17097245100001146
+}

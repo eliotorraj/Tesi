@@ -117,8 +117,7 @@ Ogni collegamento porta alla guida dei file di quell'area.
 | [docs/](docs/README.md) | Protocollo, approfondimenti, resoconti e manutenzione. |
 | [knowledge/](knowledge/README.md) | Concetti e articoli di riferimento. |
 | [archivio/](archivio/README.md) | Materiale storico e corpus originale ancora necessario alla verifica dei dati. |
-| [tesi/](tesi/README.md) | Bozza locale LaTeX, bibliografia e note di redazione; cartella attualmente esclusa da Git. |
-| [.vscode/](.vscode/README.md) | Preferenze dell'editor. |
+|[.vscode/](.vscode/README.md) | Preferenze dell'editor. |
 
 I dati correnti sono nelle rispettive cartelle `experiments/`, sotto
 `qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2`.

@@ -1,0 +1,37 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1",
+      "record_id": "rag_b9c1fb7bf7412f810a2bf71bd5ff5ff310bbc4925096722a6f8a506bddba83b2",
+      "result": "verified",
+      "resolved": {
+        "circuit": "realamprandom_indep_qiskit_11",
+        "historical_device": "quantinuum_h2_56"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E2",
+      "record_id": "rag_db9e86897976763afd3d8362f0ca7bd65309dde4f7a5686ff2541c1f706e083d",
+      "result": "verified",
+      "resolved": {
+        "circuit": "realamprandom_indep_tket_11",
+        "current_num_qubits": 11,
+        "example_num_qubits": 11
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": true,
+  "validation_seconds": 0.16788954200001172
+}

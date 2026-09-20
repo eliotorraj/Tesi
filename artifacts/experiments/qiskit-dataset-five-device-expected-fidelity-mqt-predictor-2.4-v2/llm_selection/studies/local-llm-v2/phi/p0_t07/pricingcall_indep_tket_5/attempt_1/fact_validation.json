@@ -1,0 +1,100 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1",
+      "record_id": "rag_4c431d8981fcb7db3e6021b66cba09d712116a164d4eb023a58874a455479f0b",
+      "result": "verified",
+      "resolved": {
+        "circuit": "ae_indep_tket_5",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o2_default_default",
+            "median_score": 0.9766500216,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_default_default",
+            "median_score": 0.9766500216,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 3,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o2_sabre_sabre",
+            "median_score": 0.9766500216,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E1",
+      "record_id": "rag_4c431d8981fcb7db3e6021b66cba09d712116a164d4eb023a58874a455479f0b",
+      "result": "unsupported",
+      "resolved": {}
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E1) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17019680400062498
+}

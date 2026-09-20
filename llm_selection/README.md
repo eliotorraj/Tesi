@@ -1,13 +1,21 @@
 # Selezione del modello linguistico locale
 
+> **Seconda validation, 19 settembre 2026:** la nuova procedura con fatti strutturati, temperature 0/0,4/0,7 e recupero delle interruzioni è descritta nella [guida v2](v2/README.md). I comandi sotto documentano la procedura storica v1.
+
 Questa cartella prepara il confronto fra Qwen, Phi e Gemma. Serve a scegliere
 quale modello locale e quali impostazioni usare per proporre un dispositivo
 quantistico e una configurazione Qiskit, aiutandosi con esempi del Dataset RAG.
 
-Il modello riceve il circuito completo, la metrica, le alternative ammesse e
-cinque esempi recuperati dal train. La risposta deve contenere una scelta e
-riferimenti verificabili alle fonti. Il programma controlla sia la struttura
-JSON sia il significato dei collegamenti fra affermazioni e fonti.
+Il modello riceve tutte le caratteristiche numeriche del circuito, la metrica,
+le alternative ammesse e cinque esempi recuperati dal train. I dati sono
+codificati in TOON; lo schema e la risposta restano JSON.
+Il programma controlla il formato, le scelte ammesse e i riferimenti E1...E5.
+Questi controlli non certificano la verità della motivazione libera.
+
+La codifica corrente è `minimal-v3-toon1-20260919`. Per installarla su un nuovo
+ambiente usare `.venv/bin/python -m llm_selection.setup_toon`.
+Misure, istruzioni e comandi per le prove train sono nel
+[resoconto TOON](../docs/resoconti/2026-09-19_prompt_toon.md).
 
 ## Come si inserisce nel progetto
 
@@ -93,7 +101,7 @@ anche per le richieste di correzione.
 | `runtime_check.py` | Elenca i componenti dell'ambiente separato senza caricare modelli. |
 | `smoke_transport.py` | Esegue una piccola prova sintetica del collegamento, distinta dalla selezione. |
 
-### Relazione della tesi
+### Report a partire dai dati
 
 | File | A cosa serve |
 | --- | --- |

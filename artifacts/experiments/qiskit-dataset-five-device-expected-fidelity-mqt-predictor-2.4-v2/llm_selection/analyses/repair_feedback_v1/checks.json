@@ -1,0 +1,26 @@
+{
+  "revision": "minimal-v3-repair1-20260918",
+  "test_counts": {
+    "minimal": 13,
+    "llm_selection": 28,
+    "compact": 10,
+    "architecture": 5
+  },
+  "total_tests_passed": 56,
+  "new_inference_calls": 0,
+  "first_phi_message_unchanged": true,
+  "code_sha256": {
+    "prototype/prompting/minimal.py": "f98146276aaea82ec140afe5f1dc1b23f417b1ac4aa4a53b4feef265043f4d72",
+    "prototype/prompting/rendering.py": "a9cec9a898a453b0b56ddccf21d037b725185839b440b7fd33dabf648d0547c6",
+    "llm_selection/run.py": "aff1782683168974af786bfb0155e82f4936ca278cae62f37fde90116d51ec54",
+    "tests/test_minimal_prompt.py": "19cecbe4b9b9b4efe91b3dd06673eb7167c4ec826443a49743b276dfc737aad0",
+    "docs/approfondimenti/compattazione_prompt.md": "f2cab46fba53ec4cbd8d07d6b2979547640a1f30f76082b2a789bdddf7967ae0",
+    "docs/protocollo_sperimentale.md": "2db949df005d6eea97a4022d92b86b8acd1b3c2c801a5552d16536f5a8313e15",
+    "prototype/prompting/README.md": "23909aaee7a4bd1193ad2821a16d81fee37f60b625bb828ef04541c4deb2bd30"
+  },
+  "graphify_updated": true,
+  "graphify_query_passed": true,
+  "scoped_diff_check_passed": true,
+  "graph_nodes": 18210,
+  "graph_edges": 64572
+}

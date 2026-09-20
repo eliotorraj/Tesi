@@ -1,0 +1,24 @@
+{
+  "status": "success",
+  "selected_device_id": "ibm_heron_156",
+  "selected_config_id": "o3_default_default",
+  "failure": null,
+  "circuit_id": "qftentangled_indep_tket_4",
+  "source_sha256": "e87a1b41612b871fd81cda70b8ac119b3c234d908a1640e11c02e8b55debe1b8",
+  "split": "validation",
+  "configuration_id": "p0_t07",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-19T14:30:15.244422+00:00",
+  "this_invocation_seconds": 3.0925587309993716,
+  "measured_call_seconds": 2.7322302390002733,
+  "python_process_peak_rss_bytes": 1750200320,
+  "python_rss_method": "Linux getrusage ru_maxrss, cumulative process high-water mark; not an exclusive per-call peak",
+  "attempts_sha256": "08c48e4e2acb4ed09339f5789eb69815a599057b02389b245dd7aa927f69bff1",
+  "input_prompt_sha256": "220a6d7d8f59944a964f45e5630f7441af383936194b7d1f30b9605a40d21fae",
+  "train_self_check": {
+    "applicable": false
+  }
+}

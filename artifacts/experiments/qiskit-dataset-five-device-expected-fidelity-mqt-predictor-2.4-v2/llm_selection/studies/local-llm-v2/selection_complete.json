@@ -1,0 +1,15 @@
+{
+  "study_id": "local-llm-v2",
+  "winner": "qwen/p0_t0",
+  "test_released": false,
+  "files": {
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/final_configuration.json": "3c14683280887913a075b79cb5f1ffe263504bd6a912b0406fdc2d399c1ade67",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/all_decisions_sealed.json": "cfad42c4164942f7b7a38737158986d4a559bd57a00a4017700772db28e12b72",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/baseline_results_exhaustive.json": "969b8a8d848910b4ae5082a503b6fe8ecaf84d87db6eab65eb1187ed8f7f097c",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/episode_results.json": "6326251e0005afe76259f810d091850c16dc2c327464f1a90ee867399f78a111",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/input_fingerprints.json": "4493c1e0675b71970e432e541afa351bdfb63fc048172fadfd3216af97874faf",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/selection.json": "96527dd635ed1dde232c9eb9bf9218a098adbce8f6b3d657e1301fd2beb2138b",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/fact_checks.jsonl": "2e052de68d203f60bc7190af31ffd861275c383b50f90f2e24f66a895cad30f9",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v2/analysis/reference_scores.jsonl": "691f7b10e3d86dd978ef8b43bab86f410af16e96284c8d5874b8fd532391b25c"
+  }
+}

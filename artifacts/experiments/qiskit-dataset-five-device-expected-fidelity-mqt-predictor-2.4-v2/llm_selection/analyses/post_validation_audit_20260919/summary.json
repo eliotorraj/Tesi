@@ -1,0 +1,172 @@
+{
+  "attempts": 792,
+  "status_counts": {
+    "success": 789,
+    "transport_failure": 3
+  },
+  "attempt_count_distribution": {
+    "1": 792
+  },
+  "all_examples_train": true,
+  "no_current_hash_in_examples": true,
+  "claim_groups": 646,
+  "flag_counts": {
+    "superlative_with_ties_review": 194,
+    "selected_device_not_winner_in_cited_examples": 138,
+    "selected_pair_not_in_cited_top_or_ties": 144,
+    "numeric_claim_review": 64,
+    "named_circuit_not_in_cited_examples": 18,
+    "strong_language_review": 78,
+    "negative_support_review": 3
+  },
+  "winner": "qwen/p0_t07",
+  "selection_steps": [
+    {
+      "criterion": "valid_and_compilable",
+      "best": 88,
+      "remaining": [
+        "gemma/p0_t0",
+        "gemma/p1_t0",
+        "phi/p0_t0",
+        "phi/p1_t0",
+        "qwen/p0_t0",
+        "qwen/p0_t07"
+      ]
+    },
+    {
+      "criterion": "median_regret_common",
+      "values": {
+        "gemma/p0_t0": 0.006643481750000013,
+        "gemma/p1_t0": 0.006643481750000013,
+        "phi/p0_t0": 0.004030626000000037,
+        "phi/p1_t0": 0.004030626000000037,
+        "qwen/p0_t0": 0.0033784027000000605,
+        "qwen/p0_t07": 0.0019003071000000538
+      },
+      "common_source_hashes": [
+        "0285fd21a0dd1ca29cd386de85a1a8af49cc7d71f5c86f6451b55a11c68864a8",
+        "02d66e8b66849fdd0f0581b84924adbd1bd2d7603e25e5e9faa447ac2a6708d0",
+        "3ddbd391ba42ef3d14e419cbab2432ad97bcfb498cb75595de4d9597c34029a1",
+        "4e265938c4f2c57738fa583bcdb23665540244f64e7049d4f643a381fb03f3f1",
+        "4ee5846eef239e2b0e0d3f950f78b5b4b8af213f0063eb50be6bf50bdbb4385d",
+        "522f46a8512925a333fd4b48d590b6033704af95271701bc516525623e5f024b",
+        "5ab4253ed51b729f331c9f3cc78bfecd3ecb2fed2e98818816bf3f64e22f1bfe",
+        "6d749d14a8289fda494305da5c0b66e0ee18416f605a3c1e932c8b792e7504cd",
+        "7c8832728feaaf34fac1fda49dfcbfbf655902b5b4eb3f1b11e43f21d15de5bf",
+        "7db8d54421301dc2db47ecac89e1509d48dc3b9aa0b89d2486ea3c05abeab151",
+        "7dbad3b73a033c87b1585126125dcb7bd34ef2dcd9a4d6ef33927f1b4fb1e1a5",
+        "7f613ccae98ac8124d086ee9a39d94b1ed019520da8c3277395b109fd22d7d4d",
+        "aa91238ec5978b739b87b3a657746a8786de113397a5abeadf726d1dd9c836b3",
+        "d7a22ac29418bcf9f00346732fe1b985f8e0b9df60273404dabbf4a62027715f",
+        "e1e15528db887b212921bef83eb55caff29af6d52c6a9c912ab913d8fe7966ca",
+        "e321e636db011e29ea171daebef2b08bdd08e0d118fb3c043cac237ee2c831a2",
+        "e87a1b41612b871fd81cda70b8ac119b3c234d908a1640e11c02e8b55debe1b8",
+        "ea84355871fa77560419766f8000de4dcb0eea29468bcb0d89a1c84edff34f61"
+      ],
+      "remaining": [
+        "qwen/p0_t07"
+      ]
+    }
+  ],
+  "per_trial": {
+    "gemma/p0_t0": {
+      "attempts": 88,
+      "success": 88,
+      "flags": {
+        "superlative_with_ties_review": 13,
+        "selected_device_not_winner_in_cited_examples": 34,
+        "selected_pair_not_in_cited_top_or_ties": 34,
+        "numeric_claim_review": 1
+      }
+    },
+    "gemma/p0_t07": {
+      "attempts": 88,
+      "success": 87,
+      "flags": {
+        "superlative_with_ties_review": 16,
+        "selected_device_not_winner_in_cited_examples": 36,
+        "selected_pair_not_in_cited_top_or_ties": 36,
+        "numeric_claim_review": 3
+      }
+    },
+    "gemma/p1_t0": {
+      "attempts": 88,
+      "success": 88,
+      "flags": {
+        "selected_device_not_winner_in_cited_examples": 42,
+        "selected_pair_not_in_cited_top_or_ties": 42,
+        "superlative_with_ties_review": 4
+      }
+    },
+    "phi/p0_t0": {
+      "attempts": 88,
+      "success": 88,
+      "flags": {
+        "named_circuit_not_in_cited_examples": 7,
+        "numeric_claim_review": 13,
+        "superlative_with_ties_review": 15,
+        "selected_device_not_winner_in_cited_examples": 2,
+        "selected_pair_not_in_cited_top_or_ties": 3,
+        "strong_language_review": 6
+      }
+    },
+    "phi/p0_t07": {
+      "attempts": 88,
+      "success": 87,
+      "flags": {
+        "superlative_with_ties_review": 29,
+        "named_circuit_not_in_cited_examples": 2,
+        "strong_language_review": 4,
+        "numeric_claim_review": 12,
+        "selected_device_not_winner_in_cited_examples": 6,
+        "selected_pair_not_in_cited_top_or_ties": 10
+      }
+    },
+    "phi/p1_t0": {
+      "attempts": 88,
+      "success": 88,
+      "flags": {
+        "named_circuit_not_in_cited_examples": 9,
+        "superlative_with_ties_review": 3,
+        "strong_language_review": 11,
+        "selected_pair_not_in_cited_top_or_ties": 1
+      }
+    },
+    "qwen/p0_t0": {
+      "attempts": 88,
+      "success": 88,
+      "flags": {
+        "superlative_with_ties_review": 47,
+        "strong_language_review": 26,
+        "numeric_claim_review": 26,
+        "selected_device_not_winner_in_cited_examples": 1,
+        "selected_pair_not_in_cited_top_or_ties": 1,
+        "negative_support_review": 1
+      }
+    },
+    "qwen/p0_t07": {
+      "attempts": 88,
+      "success": 88,
+      "flags": {
+        "superlative_with_ties_review": 29,
+        "strong_language_review": 20,
+        "negative_support_review": 1,
+        "selected_device_not_winner_in_cited_examples": 15,
+        "selected_pair_not_in_cited_top_or_ties": 15,
+        "numeric_claim_review": 8
+      }
+    },
+    "qwen/p1_t0": {
+      "attempts": 88,
+      "success": 87,
+      "flags": {
+        "superlative_with_ties_review": 38,
+        "selected_device_not_winner_in_cited_examples": 2,
+        "selected_pair_not_in_cited_top_or_ties": 2,
+        "strong_language_review": 11,
+        "negative_support_review": 1,
+        "numeric_claim_review": 1
+      }
+    }
+  }
+}

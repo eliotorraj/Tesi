@@ -1,0 +1,10 @@
+{
+  "scope": [
+    "prototype/prompting/minimal.py",
+    "prototype/prompting/rendering.py",
+    "llm_selection/run.py",
+    "tests/test_minimal_prompt.py"
+  ],
+  "method": "graphify update incremental backend, changed_paths",
+  "reason": "La scansione completa include oltre 118000 artefatti: aggiornamento limitato ai quattro sorgenti modificati."
+}

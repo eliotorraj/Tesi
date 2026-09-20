@@ -1,0 +1,7 @@
+[
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[1]",
+    "message": "Fact 2 (same_qubit_count_as_example, example_id=E5) does not match the provided data. Observed data: {\"circuit\": \"su2random_indep_qiskit_9\", \"current_num_qubits\": 14, \"example_num_qubits\": 9}. Rule: example_id required: current and example circuits have exactly the same num_qubits; this does not establish similar topology or performance. Correct this fact; an allowed proposed pair need not change."
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E3",
+      "record_id": "rag_550fde126686c9b970f2072282abd7a3e300a22952e4fd814700182c3b365d49",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "graphstate_indep_qiskit_11",
+        "current_num_qubits": 10,
+        "example_num_qubits": 11
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[0]",
+      "message": "Fact 1 (same_qubit_count_as_example, example_id=E3) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_qiskit_11\", \"current_num_qubits\": 10, \"example_num_qubits\": 11}. Rule: example_id required: current and example circuits have exactly the same num_qubits; this does not establish similar topology or performance. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17174519499985763
+}

@@ -1,0 +1,918 @@
+figure_of_merit: expected_fidelity
+circuit:
+  name: ae_indep_qiskit_60
+  num_qubits: 60
+  depth: 354
+  operation_names[8	]: barrier	cp	cx	h	measure	u	u2	u3
+compatible_hardware[3	]:
+  - id: ibm_falcon_127
+    num_qubits: 127
+    operation_names[15	]: box	break	continue	cx	delay	for_loop	id	if_else	measure	reset	rz	switch_case	sx	while_loop	x
+    native_gateset_id: ibm_falcon
+    coupling_adjacency:
+      "0"[2	]: 1	14
+      "1"[2	]: 0	2
+      "2"[2	]: 1	3
+      "3"[2	]: 2	4
+      "4"[3	]: 3	5	15
+      "5"[2	]: 4	6
+      "6"[2	]: 5	7
+      "7"[2	]: 6	8
+      "8"[2	]: 7	16
+      "9"[1	]: 10
+      "10"[2	]: 9	11
+      "11"[2	]: 10	12
+      "12"[3	]: 11	13	17
+      "13"[1	]: 12
+      "14"[2	]: 0	18
+      "15"[2	]: 4	22
+      "16"[2	]: 8	26
+      "17"[2	]: 12	30
+      "18"[2	]: 14	19
+      "19"[2	]: 18	20
+      "20"[3	]: 19	21	33
+      "21"[2	]: 20	22
+      "22"[3	]: 15	21	23
+      "23"[2	]: 22	24
+      "24"[3	]: 23	25	34
+      "25"[2	]: 24	26
+      "26"[3	]: 16	25	27
+      "27"[2	]: 26	28
+      "28"[3	]: 27	29	35
+      "29"[2	]: 28	30
+      "30"[3	]: 17	29	31
+      "31"[2	]: 30	32
+      "32"[2	]: 31	36
+      "33"[2	]: 20	39
+      "34"[2	]: 24	43
+      "35"[2	]: 28	47
+      "36"[2	]: 32	51
+      "37"[2	]: 38	52
+      "38"[2	]: 37	39
+      "39"[3	]: 33	38	40
+      "40"[2	]: 39	41
+      "41"[3	]: 40	42	53
+      "42"[2	]: 41	43
+      "43"[3	]: 34	42	44
+      "44"[2	]: 43	45
+      "45"[3	]: 44	46	54
+      "46"[2	]: 45	47
+      "47"[3	]: 35	46	48
+      "48"[2	]: 47	49
+      "49"[3	]: 48	50	55
+      "50"[2	]: 49	51
+      "51"[2	]: 36	50
+      "52"[2	]: 37	56
+      "53"[2	]: 41	60
+      "54"[2	]: 45	64
+      "55"[2	]: 49	68
+      "56"[2	]: 52	57
+      "57"[2	]: 56	58
+      "58"[3	]: 57	59	71
+      "59"[2	]: 58	60
+      "60"[3	]: 53	59	61
+      "61"[2	]: 60	62
+      "62"[3	]: 61	63	72
+      "63"[2	]: 62	64
+      "64"[3	]: 54	63	65
+      "65"[2	]: 64	66
+      "66"[3	]: 65	67	73
+      "67"[2	]: 66	68
+      "68"[3	]: 55	67	69
+      "69"[2	]: 68	70
+      "70"[2	]: 69	74
+      "71"[2	]: 58	77
+      "72"[2	]: 62	81
+      "73"[2	]: 66	85
+      "74"[2	]: 70	89
+      "75"[2	]: 76	90
+      "76"[2	]: 75	77
+      "77"[3	]: 71	76	78
+      "78"[2	]: 77	79
+      "79"[3	]: 78	80	91
+      "80"[2	]: 79	81
+      "81"[3	]: 72	80	82
+      "82"[2	]: 81	83
+      "83"[3	]: 82	84	92
+      "84"[2	]: 83	85
+      "85"[3	]: 73	84	86
+      "86"[2	]: 85	87
+      "87"[3	]: 86	88	93
+      "88"[2	]: 87	89
+      "89"[2	]: 74	88
+      "90"[2	]: 75	94
+      "91"[2	]: 79	98
+      "92"[2	]: 83	102
+      "93"[2	]: 87	106
+      "94"[2	]: 90	95
+      "95"[2	]: 94	96
+      "96"[3	]: 95	97	109
+      "97"[2	]: 96	98
+      "98"[3	]: 91	97	99
+      "99"[2	]: 98	100
+      "100"[3	]: 99	101	110
+      "101"[2	]: 100	102
+      "102"[3	]: 92	101	103
+      "103"[2	]: 102	104
+      "104"[3	]: 103	105	111
+      "105"[2	]: 104	106
+      "106"[3	]: 93	105	107
+      "107"[2	]: 106	108
+      "108"[2	]: 107	112
+      "109"[1	]: 96
+      "110"[2	]: 100	118
+      "111"[2	]: 104	122
+      "112"[2	]: 108	126
+      "113"[1	]: 114
+      "114"[2	]: 113	115
+      "115"[2	]: 114	116
+      "116"[2	]: 115	117
+      "117"[2	]: 116	118
+      "118"[3	]: 110	117	119
+      "119"[2	]: 118	120
+      "120"[2	]: 119	121
+      "121"[2	]: 120	122
+      "122"[3	]: 111	121	123
+      "123"[2	]: 122	124
+      "124"[2	]: 123	125
+      "125"[2	]: 124	126
+      "126"[2	]: 112	125
+  - id: ibm_heron_133
+    num_qubits: 133
+    operation_names[15	]: box	break	continue	cz	delay	for_loop	id	if_else	measure	reset	rz	switch_case	sx	while_loop	x
+    native_gateset_id: ibm_heron
+    coupling_adjacency:
+      "0"[2	]: 1	15
+      "1"[2	]: 0	2
+      "2"[2	]: 1	3
+      "3"[2	]: 2	4
+      "4"[3	]: 3	5	16
+      "5"[2	]: 4	6
+      "6"[2	]: 5	7
+      "7"[2	]: 6	8
+      "8"[3	]: 7	9	17
+      "9"[2	]: 8	10
+      "10"[2	]: 9	11
+      "11"[2	]: 10	12
+      "12"[3	]: 11	13	18
+      "13"[2	]: 12	14
+      "14"[1	]: 13
+      "15"[2	]: 0	19
+      "16"[2	]: 4	23
+      "17"[2	]: 8	27
+      "18"[2	]: 12	31
+      "19"[2	]: 15	20
+      "20"[2	]: 19	21
+      "21"[3	]: 20	22	34
+      "22"[2	]: 21	23
+      "23"[3	]: 16	22	24
+      "24"[2	]: 23	25
+      "25"[3	]: 24	26	35
+      "26"[2	]: 25	27
+      "27"[3	]: 17	26	28
+      "28"[2	]: 27	29
+      "29"[3	]: 28	30	36
+      "30"[2	]: 29	31
+      "31"[3	]: 18	30	32
+      "32"[2	]: 31	33
+      "33"[2	]: 32	37
+      "34"[2	]: 21	40
+      "35"[2	]: 25	44
+      "36"[2	]: 29	48
+      "37"[2	]: 33	52
+      "38"[2	]: 39	53
+      "39"[2	]: 38	40
+      "40"[3	]: 34	39	41
+      "41"[2	]: 40	42
+      "42"[3	]: 41	43	54
+      "43"[2	]: 42	44
+      "44"[3	]: 35	43	45
+      "45"[2	]: 44	46
+      "46"[3	]: 45	47	55
+      "47"[2	]: 46	48
+      "48"[3	]: 36	47	49
+      "49"[2	]: 48	50
+      "50"[3	]: 49	51	56
+      "51"[2	]: 50	52
+      "52"[2	]: 37	51
+      "53"[2	]: 38	57
+      "54"[2	]: 42	61
+      "55"[2	]: 46	65
+      "56"[2	]: 50	69
+      "57"[2	]: 53	58
+      "58"[2	]: 57	59
+      "59"[3	]: 58	60	72
+      "60"[2	]: 59	61
+      "61"[3	]: 54	60	62
+      "62"[2	]: 61	63
+      "63"[3	]: 62	64	73
+      "64"[2	]: 63	65
+      "65"[3	]: 55	64	66
+      "66"[2	]: 65	67
+      "67"[3	]: 66	68	74
+      "68"[2	]: 67	69
+      "69"[3	]: 56	68	70
+      "70"[2	]: 69	71
+      "71"[2	]: 70	75
+      "72"[2	]: 59	78
+      "73"[2	]: 63	82
+      "74"[2	]: 67	86
+      "75"[2	]: 71	90
+      "76"[2	]: 77	91
+      "77"[2	]: 76	78
+      "78"[3	]: 72	77	79
+      "79"[2	]: 78	80
+      "80"[3	]: 79	81	92
+      "81"[2	]: 80	82
+      "82"[3	]: 73	81	83
+      "83"[2	]: 82	84
+      "84"[3	]: 83	85	93
+      "85"[2	]: 84	86
+      "86"[3	]: 74	85	87
+      "87"[2	]: 86	88
+      "88"[3	]: 87	89	94
+      "89"[2	]: 88	90
+      "90"[2	]: 75	89
+      "91"[2	]: 76	95
+      "92"[2	]: 80	99
+      "93"[2	]: 84	103
+      "94"[2	]: 88	107
+      "95"[2	]: 91	96
+      "96"[2	]: 95	97
+      "97"[3	]: 96	98	110
+      "98"[2	]: 97	99
+      "99"[3	]: 92	98	100
+      "100"[2	]: 99	101
+      "101"[3	]: 100	102	111
+      "102"[2	]: 101	103
+      "103"[3	]: 93	102	104
+      "104"[2	]: 103	105
+      "105"[3	]: 104	106	112
+      "106"[2	]: 105	107
+      "107"[3	]: 94	106	108
+      "108"[2	]: 107	109
+      "109"[2	]: 108	113
+      "110"[2	]: 97	116
+      "111"[2	]: 101	120
+      "112"[2	]: 105	124
+      "113"[2	]: 109	128
+      "114"[2	]: 115	129
+      "115"[2	]: 114	116
+      "116"[3	]: 110	115	117
+      "117"[2	]: 116	118
+      "118"[3	]: 117	119	130
+      "119"[2	]: 118	120
+      "120"[3	]: 111	119	121
+      "121"[2	]: 120	122
+      "122"[3	]: 121	123	131
+      "123"[2	]: 122	124
+      "124"[3	]: 112	123	125
+      "125"[2	]: 124	126
+      "126"[3	]: 125	127	132
+      "127"[2	]: 126	128
+      "128"[2	]: 113	127
+      "129"[1	]: 114
+      "130"[1	]: 118
+      "131"[1	]: 122
+      "132"[1	]: 126
+  - id: ibm_heron_156
+    num_qubits: 156
+    operation_names[15	]: box	break	continue	cz	delay	for_loop	id	if_else	measure	reset	rz	switch_case	sx	while_loop	x
+    native_gateset_id: ibm_heron
+    coupling_adjacency:
+      "0"[1	]: 1
+      "1"[2	]: 0	2
+      "2"[2	]: 1	3
+      "3"[3	]: 2	4	16
+      "4"[2	]: 3	5
+      "5"[2	]: 4	6
+      "6"[2	]: 5	7
+      "7"[3	]: 6	8	17
+      "8"[2	]: 7	9
+      "9"[2	]: 8	10
+      "10"[2	]: 9	11
+      "11"[3	]: 10	12	18
+      "12"[2	]: 11	13
+      "13"[2	]: 12	14
+      "14"[2	]: 13	15
+      "15"[2	]: 14	19
+      "16"[2	]: 3	23
+      "17"[2	]: 7	27
+      "18"[2	]: 11	31
+      "19"[2	]: 15	35
+      "20"[1	]: 21
+      "21"[3	]: 20	22	36
+      "22"[2	]: 21	23
+      "23"[3	]: 16	22	24
+      "24"[2	]: 23	25
+      "25"[3	]: 24	26	37
+      "26"[2	]: 25	27
+      "27"[3	]: 17	26	28
+      "28"[2	]: 27	29
+      "29"[3	]: 28	30	38
+      "30"[2	]: 29	31
+      "31"[3	]: 18	30	32
+      "32"[2	]: 31	33
+      "33"[3	]: 32	34	39
+      "34"[2	]: 33	35
+      "35"[2	]: 19	34
+      "36"[2	]: 21	41
+      "37"[2	]: 25	45
+      "38"[2	]: 29	49
+      "39"[2	]: 33	53
+      "40"[1	]: 41
+      "41"[3	]: 36	40	42
+      "42"[2	]: 41	43
+      "43"[3	]: 42	44	56
+      "44"[2	]: 43	45
+      "45"[3	]: 37	44	46
+      "46"[2	]: 45	47
+      "47"[3	]: 46	48	57
+      "48"[2	]: 47	49
+      "49"[3	]: 38	48	50
+      "50"[2	]: 49	51
+      "51"[3	]: 50	52	58
+      "52"[2	]: 51	53
+      "53"[3	]: 39	52	54
+      "54"[2	]: 53	55
+      "55"[2	]: 54	59
+      "56"[2	]: 43	63
+      "57"[2	]: 47	67
+      "58"[2	]: 51	71
+      "59"[2	]: 55	75
+      "60"[1	]: 61
+      "61"[3	]: 60	62	76
+      "62"[2	]: 61	63
+      "63"[3	]: 56	62	64
+      "64"[2	]: 63	65
+      "65"[3	]: 64	66	77
+      "66"[2	]: 65	67
+      "67"[3	]: 57	66	68
+      "68"[2	]: 67	69
+      "69"[3	]: 68	70	78
+      "70"[2	]: 69	71
+      "71"[3	]: 58	70	72
+      "72"[2	]: 71	73
+      "73"[3	]: 72	74	79
+      "74"[2	]: 73	75
+      "75"[2	]: 59	74
+      "76"[2	]: 61	81
+      "77"[2	]: 65	85
+      "78"[2	]: 69	89
+      "79"[2	]: 73	93
+      "80"[1	]: 81
+      "81"[3	]: 76	80	82
+      "82"[2	]: 81	83
+      "83"[3	]: 82	84	96
+      "84"[2	]: 83	85
+      "85"[3	]: 77	84	86
+      "86"[2	]: 85	87
+      "87"[3	]: 86	88	97
+      "88"[2	]: 87	89
+      "89"[3	]: 78	88	90
+      "90"[2	]: 89	91
+      "91"[3	]: 90	92	98
+      "92"[2	]: 91	93
+      "93"[3	]: 79	92	94
+      "94"[2	]: 93	95
+      "95"[2	]: 94	99
+      "96"[2	]: 83	103
+      "97"[2	]: 87	107
+      "98"[2	]: 91	111
+      "99"[2	]: 95	115
+      "100"[1	]: 101
+      "101"[3	]: 100	102	116
+      "102"[2	]: 101	103
+      "103"[3	]: 96	102	104
+      "104"[2	]: 103	105
+      "105"[3	]: 104	106	117
+      "106"[2	]: 105	107
+      "107"[3	]: 97	106	108
+      "108"[2	]: 107	109
+      "109"[3	]: 108	110	118
+      "110"[2	]: 109	111
+      "111"[3	]: 98	110	112
+      "112"[2	]: 111	113
+      "113"[3	]: 112	114	119
+      "114"[2	]: 113	115
+      "115"[2	]: 99	114
+      "116"[2	]: 101	121
+      "117"[2	]: 105	125
+      "118"[2	]: 109	129
+      "119"[2	]: 113	133
+      "120"[1	]: 121
+      "121"[3	]: 116	120	122
+      "122"[2	]: 121	123
+      "123"[3	]: 122	124	136
+      "124"[2	]: 123	125
+      "125"[3	]: 117	124	126
+      "126"[2	]: 125	127
+      "127"[3	]: 126	128	137
+      "128"[2	]: 127	129
+      "129"[3	]: 118	128	130
+      "130"[2	]: 129	131
+      "131"[3	]: 130	132	138
+      "132"[2	]: 131	133
+      "133"[3	]: 119	132	134
+      "134"[2	]: 133	135
+      "135"[2	]: 134	139
+      "136"[2	]: 123	143
+      "137"[2	]: 127	147
+      "138"[2	]: 131	151
+      "139"[2	]: 135	155
+      "140"[1	]: 141
+      "141"[2	]: 140	142
+      "142"[2	]: 141	143
+      "143"[3	]: 136	142	144
+      "144"[2	]: 143	145
+      "145"[2	]: 144	146
+      "146"[2	]: 145	147
+      "147"[3	]: 137	146	148
+      "148"[2	]: 147	149
+      "149"[2	]: 148	150
+      "150"[2	]: 149	151
+      "151"[3	]: 138	150	152
+      "152"[2	]: 151	153
+      "153"[2	]: 152	154
+      "154"[2	]: 153	155
+      "155"[2	]: 139	154
+configuration_catalog[12	]{config_id	optimization_level	layout_method	routing_method}:
+  o2_default_default	2	null	null
+  o3_default_default	3	null	null
+  o2_sabre_sabre	2	sabre	sabre
+  o2_dense_sabre	2	dense	sabre
+  o2_trivial_sabre	2	trivial	sabre
+  o3_sabre_sabre	3	sabre	sabre
+  o3_dense_sabre	3	dense	sabre
+  o3_trivial_sabre	3	trivial	sabre
+  o2_sabre_lookahead	2	sabre	lookahead
+  o2_sabre_basic	2	sabre	basic
+  o3_sabre_lookahead	3	sabre	lookahead
+  o3_sabre_basic	3	sabre	basic
+retrieved_labeled_examples[5	]:
+  - id: E1
+    circuit:
+      circuit_id: ae_indep_qiskit_60
+      benchmark_family: ae
+      generator: qiskit
+      num_qubits: 60
+      depth: 354
+      size: 2126
+    compatible_devices[3	]: ibm_heron_133	ibm_falcon_127	ibm_heron_156
+    selected_device: ibm_heron_156
+    top_configurations[3	]:
+      - rank: 1
+        device_id: ibm_heron_156
+        config_id: o3_default_default
+        median_score: 0.0001017826
+        tied_score_config_ids[1	]: o3_default_default
+      - rank: 2
+        device_id: ibm_heron_156
+        config_id: o2_default_default
+        median_score: 0.0000800411
+        tied_score_config_ids[1	]: o2_default_default
+      - rank: 3
+        device_id: ibm_heron_156
+        config_id: o3_sabre_sabre
+        median_score: 0.0000100929
+        tied_score_config_ids[1	]: o3_sabre_sabre
+    constraints:
+      constraint_set_id: null
+      hard_constraints: []
+      preferences: []
+      schema_version: 0.1.0
+      status: not_applied_offline
+  - id: E2
+    circuit:
+      circuit_id: dj_indep_qiskit_60
+      benchmark_family: dj
+      generator: qiskit
+      num_qubits: 60
+      depth: 62
+      size: 237
+    compatible_devices[3	]: ibm_heron_133	ibm_falcon_127	ibm_heron_156
+    selected_device: ibm_heron_156
+    top_configurations[3	]:
+      - rank: 1
+        device_id: ibm_heron_156
+        config_id: o3_default_default
+        median_score: 0.6821663608
+        tied_score_config_ids[1	]: o3_default_default
+      - rank: 2
+        device_id: ibm_heron_156
+        config_id: o2_default_default
+        median_score: 0.6811205998
+        tied_score_config_ids[1	]: o2_default_default
+      - rank: 3
+        device_id: ibm_heron_156
+        config_id: o3_sabre_sabre
+        median_score: 0.6419844687
+        tied_score_config_ids[1	]: o3_sabre_sabre
+    constraints:
+      constraint_set_id: null
+      hard_constraints: []
+      preferences: []
+      schema_version: 0.1.0
+      status: not_applied_offline
+  - id: E3
+    circuit:
+      circuit_id: dj_indep_qiskit_70
+      benchmark_family: dj
+      generator: qiskit
+      num_qubits: 70
+      depth: 72
+      size: 277
+    compatible_devices[3	]: ibm_heron_133	ibm_falcon_127	ibm_heron_156
+    selected_device: ibm_heron_156
+    top_configurations[3	]:
+      - rank: 1
+        device_id: ibm_heron_156
+        config_id: o3_default_default
+        median_score: 0.6436003382
+        tied_score_config_ids[1	]: o3_default_default
+      - rank: 2
+        device_id: ibm_heron_156
+        config_id: o2_default_default
+        median_score: 0.6197989481
+        tied_score_config_ids[1	]: o2_default_default
+      - rank: 3
+        device_id: ibm_heron_156
+        config_id: o3_sabre_sabre
+        median_score: 0.5956265176
+        tied_score_config_ids[1	]: o3_sabre_sabre
+    constraints:
+      constraint_set_id: null
+      hard_constraints: []
+      preferences: []
+      schema_version: 0.1.0
+      status: not_applied_offline
+  - id: E4
+    circuit:
+      circuit_id: dj_indep_qiskit_80
+      benchmark_family: dj
+      generator: qiskit
+      num_qubits: 80
+      depth: 82
+      size: 317
+    compatible_devices[3	]: ibm_heron_133	ibm_falcon_127	ibm_heron_156
+    selected_device: ibm_heron_156
+    top_configurations[3	]:
+      - rank: 1
+        device_id: ibm_heron_156
+        config_id: o3_default_default
+        median_score: 0.5789445504
+        tied_score_config_ids[1	]: o3_default_default
+      - rank: 2
+        device_id: ibm_heron_156
+        config_id: o2_default_default
+        median_score: 0.5655865062
+        tied_score_config_ids[1	]: o2_default_default
+      - rank: 3
+        device_id: ibm_heron_156
+        config_id: o3_sabre_sabre
+        median_score: 0.5425033357
+        tied_score_config_ids[1	]: o3_sabre_sabre
+    constraints:
+      constraint_set_id: null
+      hard_constraints: []
+      preferences: []
+      schema_version: 0.1.0
+      status: not_applied_offline
+  - id: E5
+    circuit:
+      circuit_id: dj_indep_qiskit_90
+      benchmark_family: dj
+      generator: qiskit
+      num_qubits: 90
+      depth: 92
+      size: 357
+    compatible_devices[3	]: ibm_heron_133	ibm_falcon_127	ibm_heron_156
+    selected_device: ibm_heron_156
+    top_configurations[3	]:
+      - rank: 1
+        device_id: ibm_heron_156
+        config_id: o3_default_default
+        median_score: 0.5504877923
+        tied_score_config_ids[1	]: o3_default_default
+      - rank: 2
+        device_id: ibm_heron_156
+        config_id: o2_default_default
+        median_score: 0.539205429
+        tied_score_config_ids[1	]: o2_default_default
+      - rank: 3
+        device_id: ibm_heron_156
+        config_id: o3_sabre_sabre
+        median_score: 0.5127476624
+        tied_score_config_ids[1	]: o3_sabre_sabre
+    constraints:
+      constraint_set_id: null
+      hard_constraints: []
+      preferences: []
+      schema_version: 0.1.0
+      status: not_applied_offline
+circuit_features:
+  current:
+    gate_count_u3: 59
+    gate_count_u2: 59
+    gate_count_u1: 0
+    gate_count_cx: 118
+    gate_count_id: 0
+    gate_count_u0: 0
+    gate_count_u: 60
+    gate_count_p: 0
+    gate_count_x: 0
+    gate_count_y: 0
+    gate_count_z: 0
+    gate_count_h: 59
+    gate_count_s: 0
+    gate_count_sdg: 0
+    gate_count_t: 0
+    gate_count_tdg: 0
+    gate_count_rx: 0
+    gate_count_ry: 0
+    gate_count_rz: 0
+    gate_count_sx: 0
+    gate_count_sxdg: 0
+    gate_count_cz: 0
+    gate_count_cy: 0
+    gate_count_swap: 0
+    gate_count_ch: 0
+    gate_count_ccx: 0
+    gate_count_cswap: 0
+    gate_count_crx: 0
+    gate_count_cry: 0
+    gate_count_crz: 0
+    gate_count_cu1: 0
+    gate_count_cp: 1711
+    gate_count_cu3: 0
+    gate_count_csx: 0
+    gate_count_cu: 0
+    gate_count_rxx: 0
+    gate_count_rzz: 0
+    gate_count_rccx: 0
+    gate_count_rc3x: 0
+    gate_count_c3x: 0
+    gate_count_c3sqrtx: 0
+    gate_count_c4x: 0
+    num_qubits: 60
+    depth: 354
+    program_communication: 1
+    critical_depth: 0.1273920174958994
+    entanglement_ratio: 0.8852855759922555
+    parallelism: 0.08196878291678636
+    liveness: 0.18620527306967985
+  E1:
+    values:
+      critical_depth: 0.1273920174958994
+      depth: 354
+      entanglement_ratio: 0.8852855759922555
+      gate_count_c3sqrtx: 0
+      gate_count_c3x: 0
+      gate_count_c4x: 0
+      gate_count_ccx: 0
+      gate_count_ch: 0
+      gate_count_cp: 1711
+      gate_count_crx: 0
+      gate_count_cry: 0
+      gate_count_crz: 0
+      gate_count_cswap: 0
+      gate_count_csx: 0
+      gate_count_cu: 0
+      gate_count_cu1: 0
+      gate_count_cu3: 0
+      gate_count_cx: 118
+      gate_count_cy: 0
+      gate_count_cz: 0
+      gate_count_h: 59
+      gate_count_id: 0
+      gate_count_p: 0
+      gate_count_rc3x: 0
+      gate_count_rccx: 0
+      gate_count_rx: 0
+      gate_count_rxx: 0
+      gate_count_ry: 0
+      gate_count_rz: 0
+      gate_count_rzz: 0
+      gate_count_s: 0
+      gate_count_sdg: 0
+      gate_count_swap: 0
+      gate_count_sx: 0
+      gate_count_sxdg: 0
+      gate_count_t: 0
+      gate_count_tdg: 0
+      gate_count_u: 60
+      gate_count_u0: 0
+      gate_count_u1: 0
+      gate_count_u2: 59
+      gate_count_u3: 59
+      gate_count_x: 0
+      gate_count_y: 0
+      gate_count_z: 0
+      liveness: 0.18620527306967985
+      num_qubits: 60
+      parallelism: 0.08196878291678636
+      program_communication: 1
+  E2:
+    values:
+      critical_depth: 1
+      depth: 62
+      entanglement_ratio: 0.33146067415730335
+      gate_count_c3sqrtx: 0
+      gate_count_c3x: 0
+      gate_count_c4x: 0
+      gate_count_ccx: 0
+      gate_count_ch: 0
+      gate_count_cp: 0
+      gate_count_crx: 0
+      gate_count_cry: 0
+      gate_count_crz: 0
+      gate_count_cswap: 0
+      gate_count_csx: 0
+      gate_count_cu: 0
+      gate_count_cu1: 0
+      gate_count_cu3: 0
+      gate_count_cx: 59
+      gate_count_cy: 0
+      gate_count_cz: 0
+      gate_count_h: 58
+      gate_count_id: 0
+      gate_count_p: 0
+      gate_count_rc3x: 0
+      gate_count_rccx: 0
+      gate_count_rx: 0
+      gate_count_rxx: 0
+      gate_count_ry: 0
+      gate_count_rz: 0
+      gate_count_rzz: 0
+      gate_count_s: 0
+      gate_count_sdg: 0
+      gate_count_swap: 0
+      gate_count_sx: 0
+      gate_count_sxdg: 0
+      gate_count_t: 0
+      gate_count_tdg: 0
+      gate_count_u: 0
+      gate_count_u0: 0
+      gate_count_u1: 0
+      gate_count_u2: 61
+      gate_count_u3: 0
+      gate_count_x: 0
+      gate_count_y: 0
+      gate_count_z: 0
+      liveness: 0.07956989247311828
+      num_qubits: 60
+      parallelism: 0.03171131765992346
+      program_communication: 0.03333333333333333
+  E3:
+    values:
+      critical_depth: 1
+      depth: 72
+      entanglement_ratio: 0.3317307692307692
+      gate_count_c3sqrtx: 0
+      gate_count_c3x: 0
+      gate_count_c4x: 0
+      gate_count_ccx: 0
+      gate_count_ch: 0
+      gate_count_cp: 0
+      gate_count_crx: 0
+      gate_count_cry: 0
+      gate_count_crz: 0
+      gate_count_cswap: 0
+      gate_count_csx: 0
+      gate_count_cu: 0
+      gate_count_cu1: 0
+      gate_count_cu3: 0
+      gate_count_cx: 69
+      gate_count_cy: 0
+      gate_count_cz: 0
+      gate_count_h: 70
+      gate_count_id: 0
+      gate_count_p: 0
+      gate_count_rc3x: 0
+      gate_count_rccx: 0
+      gate_count_rx: 0
+      gate_count_rxx: 0
+      gate_count_ry: 0
+      gate_count_rz: 0
+      gate_count_rzz: 0
+      gate_count_s: 0
+      gate_count_sdg: 0
+      gate_count_swap: 0
+      gate_count_sx: 0
+      gate_count_sxdg: 0
+      gate_count_t: 0
+      gate_count_tdg: 0
+      gate_count_u: 0
+      gate_count_u0: 0
+      gate_count_u1: 0
+      gate_count_u2: 69
+      gate_count_u3: 0
+      gate_count_x: 0
+      gate_count_y: 0
+      gate_count_z: 0
+      liveness: 0.06865079365079366
+      num_qubits: 70
+      parallelism: 0.027375201288244767
+      program_communication: 0.02857142857142857
+  E4:
+    values:
+      critical_depth: 1
+      depth: 82
+      entanglement_ratio: 0.3319327731092437
+      gate_count_c3sqrtx: 0
+      gate_count_c3x: 0
+      gate_count_c4x: 0
+      gate_count_ccx: 0
+      gate_count_ch: 0
+      gate_count_cp: 0
+      gate_count_crx: 0
+      gate_count_cry: 0
+      gate_count_crz: 0
+      gate_count_cswap: 0
+      gate_count_csx: 0
+      gate_count_cu: 0
+      gate_count_cu1: 0
+      gate_count_cu3: 0
+      gate_count_cx: 79
+      gate_count_cy: 0
+      gate_count_cz: 0
+      gate_count_h: 80
+      gate_count_id: 0
+      gate_count_p: 0
+      gate_count_rc3x: 0
+      gate_count_rccx: 0
+      gate_count_rx: 0
+      gate_count_rxx: 0
+      gate_count_ry: 0
+      gate_count_rz: 0
+      gate_count_rzz: 0
+      gate_count_s: 0
+      gate_count_sdg: 0
+      gate_count_swap: 0
+      gate_count_sx: 0
+      gate_count_sxdg: 0
+      gate_count_t: 0
+      gate_count_tdg: 0
+      gate_count_u: 0
+      gate_count_u0: 0
+      gate_count_u1: 0
+      gate_count_u2: 79
+      gate_count_u3: 0
+      gate_count_x: 0
+      gate_count_y: 0
+      gate_count_z: 0
+      liveness: 0.060365853658536583
+      num_qubits: 80
+      parallelism: 0.024081506637851188
+      program_communication: 0.025
+  E5:
+    values:
+      critical_depth: 1
+      depth: 92
+      entanglement_ratio: 0.332089552238806
+      gate_count_c3sqrtx: 0
+      gate_count_c3x: 0
+      gate_count_c4x: 0
+      gate_count_ccx: 0
+      gate_count_ch: 0
+      gate_count_cp: 0
+      gate_count_crx: 0
+      gate_count_cry: 0
+      gate_count_crz: 0
+      gate_count_cswap: 0
+      gate_count_csx: 0
+      gate_count_cu: 0
+      gate_count_cu1: 0
+      gate_count_cu3: 0
+      gate_count_cx: 89
+      gate_count_cy: 0
+      gate_count_cz: 0
+      gate_count_h: 94
+      gate_count_id: 0
+      gate_count_p: 0
+      gate_count_rc3x: 0
+      gate_count_rccx: 0
+      gate_count_rx: 0
+      gate_count_rxx: 0
+      gate_count_ry: 0
+      gate_count_rz: 0
+      gate_count_rzz: 0
+      gate_count_s: 0
+      gate_count_sdg: 0
+      gate_count_swap: 0
+      gate_count_sx: 0
+      gate_count_sxdg: 0
+      gate_count_t: 0
+      gate_count_tdg: 0
+      gate_count_u: 0
+      gate_count_u0: 0
+      gate_count_u1: 0
+      gate_count_u2: 85
+      gate_count_u3: 0
+      gate_count_x: 0
+      gate_count_y: 0
+      gate_count_z: 0
+      liveness: 0.05386473429951691
+      num_qubits: 90
+      parallelism: 0.02149487054225696
+      program_communication: 0.022222222222222223

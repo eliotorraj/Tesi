@@ -1,0 +1,10 @@
+{
+  "episodes": 45,
+  "success": 45,
+  "verified_facts": 35,
+  "accepted_unverified_facts": 10,
+  "logical_attempts": 85,
+  "physical_calls": 85,
+  "repairs": 40,
+  "interruptions": 0
+}

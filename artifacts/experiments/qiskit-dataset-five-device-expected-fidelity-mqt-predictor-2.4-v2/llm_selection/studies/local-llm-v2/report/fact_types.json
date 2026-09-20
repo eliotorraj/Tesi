@@ -1,0 +1,42 @@
+[
+  {
+    "assertion": "same_qubit_count_as_example",
+    "result": "unsupported",
+    "count": 347
+  },
+  {
+    "assertion": "same_qubit_count_as_example",
+    "result": "verified",
+    "count": 259
+  },
+  {
+    "assertion": "selected_device_has_enough_qubits",
+    "result": "unsupported",
+    "count": 526
+  },
+  {
+    "assertion": "selected_device_has_enough_qubits",
+    "result": "verified",
+    "count": 464
+  },
+  {
+    "assertion": "selected_device_matches_example",
+    "result": "unsupported",
+    "count": 261
+  },
+  {
+    "assertion": "selected_device_matches_example",
+    "result": "verified",
+    "count": 664
+  },
+  {
+    "assertion": "selected_pair_among_reported_best",
+    "result": "unsupported",
+    "count": 168
+  },
+  {
+    "assertion": "selected_pair_among_reported_best",
+    "result": "verified",
+    "count": 464
+  }
+]

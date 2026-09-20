@@ -1,0 +1,2 @@
+Dispositivo non ammesso: scegli selected_device dagli ID di compatible_hardware.
+Rispondi nuovamente con l’intero JSON richiesto per il circuito corrente.

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tesi.local/schemas/method_result_v2.schema.json",
+  "title": "Common experimental method result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "protocol_version",
+    "method_id",
+    "split",
+    "circuit_id",
+    "source_sha256",
+    "status",
+    "selected_device_id",
+    "selected_config_id",
+    "repetitions",
+    "score",
+    "oracle_score",
+    "regret_absolute",
+    "regret_relative",
+    "failure_category",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "experiment_id": {
+      "const": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2"
+    },
+    "protocol_version": {"const": "2.0.0"},
+    "method_id": {"type": "string"},
+    "split": {"enum": ["validation", "test"]},
+    "circuit_id": {"type": "string"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "status": {"enum": ["success", "failure", "timeout", "not_applicable"]},
+    "selected_device_id": {"type": ["string", "null"]},
+    "selected_config_id": {"type": ["string", "null"]},
+    "repetitions": {"type": "array", "minItems": 0, "maxItems": 3},
+    "score": {"type": ["number", "null"]},
+    "oracle_score": {"type": ["number", "null"]},
+    "regret_absolute": {"type": ["number", "null"]},
+    "regret_relative": {"type": ["number", "null"]},
+    "failure_category": {"type": ["string", "null"]},
+    "provenance": {"type": "object"}
+  }
+}

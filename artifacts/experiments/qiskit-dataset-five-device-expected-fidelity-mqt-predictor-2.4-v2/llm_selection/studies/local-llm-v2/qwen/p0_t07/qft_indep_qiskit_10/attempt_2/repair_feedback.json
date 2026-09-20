@@ -1,0 +1,7 @@
+[
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[1]",
+    "message": "Fact 2 (selected_device_matches_example, example_id=None) does not match the provided data. Observed data: {}. Rule: example_id required: selected_device equals that example's selected_device; this says nothing about config_id. Correct this fact; an allowed proposed pair need not change."
+  }
+]

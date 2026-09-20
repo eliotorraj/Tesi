@@ -1,0 +1,16 @@
+{
+  "at": "2026-09-18T15:38:51.742055+00:00",
+  "full_unit_tests_passed": 236,
+  "subsequent_targeted_tests_passed": 21,
+  "train_retrieval_cases_verified": 3,
+  "new_llm_inference_calls": 0,
+  "test_split_accessed": false,
+  "validation_run_started": false,
+  "token_report": "native_counts_final/report.json",
+  "scoped_diff_check_passed": true,
+  "compileall_passed": true,
+  "graphify_updated": true,
+  "graph_nodes": 18208,
+  "graph_edges": 64576,
+  "graphify_query_passed": true
+}

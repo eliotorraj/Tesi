@@ -1,0 +1,37 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1",
+      "record_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9",
+      "result": "verified",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_3",
+        "historical_device": "ibm_heron_156"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E5",
+      "record_id": "rag_225d293c15731e7bdb30b0f522322f6235b5aabd5cd715e66470cf1b4d5f8e22",
+      "result": "verified",
+      "resolved": {
+        "circuit": "wstate_indep_tket_2",
+        "current_num_qubits": 2,
+        "example_num_qubits": 2
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010372695999649295
+}

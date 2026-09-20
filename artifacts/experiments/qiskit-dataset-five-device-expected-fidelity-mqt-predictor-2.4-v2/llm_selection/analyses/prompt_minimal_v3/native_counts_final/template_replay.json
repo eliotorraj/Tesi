@@ -1,0 +1,8 @@
+{
+  "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v2-02/qwen/p1_t0/dj_indep_tket_2/attempt_1",
+  "prefix": "<|im_start|>user\n",
+  "suffix": "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+  "template_request_sha256": "874befc9631fbcc475e4aa6453ed0b71f0d3268020ce63b9da2267d82c163609",
+  "template_response_sha256": "dc8c411ec94c406e92236326cb1f67d321a197384a74d6c68add2062002a70b3",
+  "method": "Reuse the exact wrapper of one user message, same model, no tools, thinking disabled."
+}

@@ -1,0 +1,26 @@
+{
+  "qwen": {
+    "original_v2": 328123,
+    "minimal_json": 60687,
+    "minimal_toon": 55762,
+    "original_full_json": 544395,
+    "reduction_json_to_toon_percent": 8.115411867451016,
+    "reduction_original_to_toon_percent": 83.00576308274641
+  },
+  "phi": {
+    "original_v2": 269360,
+    "minimal_json": 46844,
+    "minimal_toon": 44670,
+    "original_full_json": 421703,
+    "reduction_json_to_toon_percent": 4.640935872256858,
+    "reduction_original_to_toon_percent": 83.41624591624591
+  },
+  "gemma": {
+    "original_v2": 343014,
+    "minimal_json": 64578,
+    "minimal_toon": 58249,
+    "original_full_json": 564463,
+    "reduction_json_to_toon_percent": 9.800551271330793,
+    "reduction_original_to_toon_percent": 83.01847737993202
+  }
+}

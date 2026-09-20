@@ -435,7 +435,7 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
         self.temp_dir.cleanup()
 
     def _service(self, callback, *, max_attempts: int = 3):
-        return build_default_service(
+        service = build_default_service(
             device_names=(DEVICE_ID,),
             dataset_path=self.root / "missing.jsonl",
             retrieval_backend="none",
@@ -443,6 +443,10 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
             max_llm_attempts=max_attempts,
             retrieval_limit=5,
         )
+
+        # This suite exercises archived v2 claim semantics explicitly.
+        service.prompt_builder.legacy_contract = True
+        return service
 
     def _response(self) -> dict[str, object]:
         return _historical_response(

@@ -1,0 +1,43 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E2",
+      "record_id": "rag_56dbc07e02c1c10142733c72ce3d55de44f530383dd57d771f2b8957abf393c1",
+      "result": "verified",
+      "resolved": {
+        "circuit": "dj_indep_tket_3",
+        "historical_device": "ibm_heron_156"
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E4",
+      "record_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9",
+      "result": "unsupported",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_3",
+        "current_num_qubits": 2,
+        "example_num_qubits": 3
+      }
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (same_qubit_count_as_example, example_id=E4) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_tket_3\", \"current_num_qubits\": 2, \"example_num_qubits\": 3}. Rule: example_id required: current and example circuits have exactly the same num_qubits; this does not establish similar topology or performance. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.009773547000804683
+}

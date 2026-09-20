@@ -1,0 +1,22 @@
+{
+  "status": "success",
+  "selected_device_id": "ibm_heron_156",
+  "selected_config_id": "o2_default_default",
+  "failure": null,
+  "circuit_id": "qft_indep_qiskit_4",
+  "source_sha256": "ea84355871fa77560419766f8000de4dcb0eea29468bcb0d89a1c84edff34f61",
+  "split": "validation",
+  "configuration_id": "p0_t07",
+  "attempt_count": 3,
+  "llm_calls": 3,
+  "repair_count": 2,
+  "transport_retries": 0,
+  "facts_status": "unverified",
+  "accepted_with_unverified_facts": true,
+  "hypothesis_status": "not_evaluated",
+  "ended_at": "2026-09-19T19:30:56.150483+00:00",
+  "measured_call_seconds": 16.89902564699969,
+  "measured_call_seconds_observed": 16.89902564699969,
+  "attempts_sha256": "853cc7e2b4b063ae264330e8427b6af6fc6b4453d47fffa10b92f89548753e1b",
+  "input_prompt_sha256": "3bcf6d5bd1be286e1b2238014bb9f881b43e8c904a90d7821391b3e0d7469c1c"
+}

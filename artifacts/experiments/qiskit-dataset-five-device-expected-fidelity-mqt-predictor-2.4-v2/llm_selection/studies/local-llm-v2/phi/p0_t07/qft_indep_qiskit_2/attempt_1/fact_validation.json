@@ -1,0 +1,60 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "unverified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1",
+      "record_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9",
+      "result": "verified",
+      "resolved": {
+        "circuit": "graphstate_indep_tket_3",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "ibm_heron_156",
+            "config_id": "o2_default_default",
+            "median_score": 0.9932900958,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "ibm_heron_156",
+            "config_id": "o3_default_default",
+            "median_score": 0.9932900958,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E1",
+      "record_id": "rag_6eb6c06779f43094dc3bb5cab9e09df5a5399f1996e706c53b877625c0c4a6c9",
+      "result": "unsupported",
+      "resolved": {}
+    }
+  ],
+  "issues": [
+    {
+      "code": "FACT_NOT_SUPPORTED",
+      "path": "$.facts[1]",
+      "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E1) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+    }
+  ],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010539050999796018
+}

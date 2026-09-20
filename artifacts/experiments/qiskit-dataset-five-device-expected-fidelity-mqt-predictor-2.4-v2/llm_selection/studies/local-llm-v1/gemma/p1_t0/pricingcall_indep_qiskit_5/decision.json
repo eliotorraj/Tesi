@@ -1,0 +1,24 @@
+{
+  "status": "success",
+  "selected_device_id": "ibm_heron_156",
+  "selected_config_id": "o2_default_default",
+  "failure": null,
+  "circuit_id": "pricingcall_indep_qiskit_5",
+  "source_sha256": "3bfbab0c9e8d1f3d439975f907ccb451367de4b6de5018a9fb71f4ddd6dc3905",
+  "split": "validation",
+  "configuration_id": "p1_t0",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-19T14:53:24.183729+00:00",
+  "this_invocation_seconds": 24.859834914000004,
+  "measured_call_seconds": 23.535663916999994,
+  "python_process_peak_rss_bytes": 1695731712,
+  "python_rss_method": "Linux getrusage ru_maxrss, cumulative process high-water mark; not an exclusive per-call peak",
+  "attempts_sha256": "cd2c77e37a7a2bf24096a1e1c4246fba21302c3acdad206e20b50f0a9a53fe7e",
+  "input_prompt_sha256": "33ee728c29ad6aa5fae9dc0da7bf75a4732a16391ad2c6c416d5cde59b31f023",
+  "train_self_check": {
+    "applicable": false
+  }
+}

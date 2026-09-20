@@ -1,0 +1,571 @@
+diff --git a/docs/approfondimenti/compattazione_prompt.md b/docs/approfondimenti/compattazione_prompt.md
+index e0de922b2f..693a6e95f0 100644
+--- a/docs/approfondimenti/compattazione_prompt.md
++++ b/docs/approfondimenti/compattazione_prompt.md
+@@ -1,115 +1,157 @@
+-# Compattazione comune dei prompt
+-
+-La rappresentazione compatta è definita in
+-[prototype/prompting/](../../prototype/prompting/README.md).
+-Serve alla selezione LLM, al collegamento locale del prototipo e
+-all'esportazione dei prompt per le prove manuali.
+-
+-## Il comando tecnico usa già il prompt ridotto
+-
+-Da Ubuntu, nella radice del progetto:
+-
+-```bash
+-QWEN_PROVA="qwen-tecnica-$(date +%Y%m%d-%H%M%S)"
+-.venv/bin/python -m llm_selection.controller --technical \
+-  --model qwen --label "$QWEN_PROVA" \
+-  --precision Q8_0 --context 147456
++# Prompt essenziale dell'assistente
++
++Dal 18 settembre 2026 chat del prototipo, prove automatiche ed esportazione
++usano la vista essenziale. Dal 19 settembre la revisione corrente è
++`minimal-v3-toon1-20260919`: i dati del prompt usano TOON, mentre lo schema
++e la risposta richiesta restano JSON.
++Il confronto precedente, riportato sotto, riguarda la riduzione dei contenuti
++in JSON. Il [resoconto TOON](../resoconti/2026-09-19_prompt_toon.md) misura
++anche il risparmio aggiuntivo sui cinque circuiti train per tutti i tre modelli.
++
++## Che cosa vede il modello
++
++Il programma prepara ancora la richiesta completa. Conserva QASM, identificativi
++originali, manifest e registro delle evidenze nei dati dell'esperimento.
++Prima dell'invio produce una vista più piccola:
++
++- circuito corrente con tutte le caratteristiche numeriche originali;
++- obiettivo e vincoli normalizzati;
++- un catalogo dei dispositivi compatibili e delle configurazioni ammesse;
++- cinque esempi nello stesso ordine del recupero;
++- per ciascun esempio: circuito e caratteristiche, nomi dei dispositivi
++  compatibili, dispositivo vincente e prime tre configurazioni ordinate,
++  con associazione al dispositivo, mediana storica e parità già registrate.
++
++Le feature non sono arrotondate e gli zeri restano presenti. Il modello non
++riceve QASM, hash, manifest, versioni dei dati, copie del registro delle evidenze
++o descrizioni hardware ripetute dentro gli esempi. I risultati storici non
++sono nuove misure del circuito da valutare.
++
++La topologia completa è indicata esplicitamente come tale, senza elencare
++tutti gli archi. Le altre topologie conservano tutti i collegamenti diretti.
++Nel testo TOON possono essere raggruppati per qubit sorgente, solo quando
++la trasformazione conserva anche l'ordine originale degli archi.
++Le feature sono una tabella con colonne per circuito corrente ed esempi;
++la conversione viene decodificata e confrontata automaticamente con la vista
++essenziale prima di inviare il prompt.
++Se tutti i dispositivi ammettono le configurazioni del catalogo, non si ripete
++l'elenco completo per ogni dispositivo; eventuali restrizioni restano esplicite.
++
++## Risposta e controlli
++
++La risposta ha quattro campi:
++
++```json
++{
++  "selected_device": "ibm_falcon_27",
++  "config_id": "o2_default_default",
++  "claim": "Motivazione breve delle due scelte, basata sugli esempi citati.",
++  "evidence": ["E2", "E4"]
++}
+ ```
+ 
+-Non serve un'opzione aggiuntiva. Il percorso è:
+-
+-```text
+-controller → run.episode → configuration.payload
+-           → prototype.prompting.rendering.messages
+-           → codifica compatta → formato nativo del modello → invio
+-```
+-
+-La prima richiesta e le eventuali correzioni seguono lo stesso percorso.
+-Il profilo tecnico esegue i casi train previsti dalla procedura; non avvia
+-la selezione sulla validation.
+-
+-## Dati completi e rappresentazione per il modello
+-
+-Il costruttore del prototipo prepara il contesto completo: richiesta, circuito,
+-catalogo, esempi, registro delle evidenze, schema di risposta ed eventuali errori.
+-Il componente comune:
+-
+-- sostituisce gli identificativi lunghi delle fonti con sigle;
+-- conserva una sola copia dei valori ripetuti;
+-- rappresenta alcuni gruppi di oggetti come tabelle;
+-- usa una regola esatta per i soli grafi completi.
+-
+-Il circuito, i valori numerici, gli esempi e lo schema della risposta restano
+-invariati. Prima di proseguire viene verificata la ricostruzione dell'oggetto
+-originale. Questa proprietà non dimostra che un modello sappia interpretarlo
+-correttamente: i controlli semantici restano necessari.
+-
+-Il Dataset Qiskit, gli esempi originali e l'indice Qdrant non cambiano.
+-La trasformazione avviene dopo il recupero degli esempi.
+-
+-## Un solo punto da modificare
+-
+-| File condiviso | Responsabilità |
+-| --- | --- |
+-| `compact.py` | Codifica completa, verifica inversa, impronte e ripristino degli identificativi nella risposta. |
+-| `rendering.py` | Istruzioni e costruzione dei messaggi nelle varianti già previste. |
+-| `output_contract.py` | Regole esplicite delle relazioni fra affermazioni e fonti. |
+-| `complete_graph.py` | Rappresentazione dei grafi completi. |
+-| `wire.py` | Codifica e lettura delle tabelle. |
+-
+-`llm_selection/configuration.py` conserva griglia e parametri di generazione,
+-ma richiama il costruttore comune. I vecchi moduli di codifica in
+-`llm_selection/` rimandano all'implementazione condivisa per mantenere
+-compatibili gli import precedenti.
+-
+-Per nuovi collegamenti a modelli utilizzare il componente comune. Il trasporto
+-HTTP grezzo riceve invece una richiesta già formattata: non deve tentare di
+-compattarla nuovamente. Le chiamate diagnostiche con richieste storiche restano
+-riconoscibili come riproduzioni di quel formato.
+-
+-## Registri e provenienza
+-
+-Ogni tentativo automatico conserva il prompt completo in `prompt.json`, la
+-versione e la mappa delle sigle in `encoding.json`, e la richiesta effettiva
+-negli artefatti del trasporto. La risposta originale rimane conservata.
+-Prima della validazione si ripristinano soltanto gli identificativi noti;
+-non si correggono scelte o collegamenti sbagliati.
+-
+-Le copie del codice delle prove includono anche `prototype/prompting/`.
+-La revisione della codifica resta `lossless-v2-20260914`: lo spostamento del
+-codice mantiene lo stesso formato. Le nuove copie del codice distinguono
+-comunque l'implementazione centralizzata dalle prove precedenti.
+-
+-## Chat manuale
+-
+-La [guida della chat](chat_locale.md) permette di scegliere Qwen, Phi o Gemma.
+-Per incollare il contesto dell'esperimento usare un `prompt_chat.txt` esportato
+-da `llm_selection.prompt_audit`: l'esportatore usa lo stesso costruttore comune.
+-
+-La chat libera del browser non trasforma automaticamente testo arbitrario e non
+-applica da sola lo schema di generazione o il validatore dell'esperimento.
+-L'avvio della chat e l'esecuzione della prova tecnica sono operazioni separate.
+-
+-## Verifiche della centralizzazione — 16 settembre 2026
+-
+-È stato conservato un riferimento dei messaggi prima della modifica.
+-Sono stati confrontati tutti i 93 prompt preparati (5 train e 88 validation)
+-nelle varianti base e con istruzioni di controllo: **186 messaggi identici**,
+-con mappe della codifica e file sorgente invariati. Nessuna inferenza o nuova
+-compilazione è stata necessaria. Il contenuto del test non è stato letto.
+-
+-I test mirati controllano il messaggio passato al trasporto, le correzioni,
+-il ripristino delle fonti, la provenienza del codice e la scelta del modello
+-della chat con avvii simulati. **67 test mirati superati**. I controlli `--check` sui file reali sono
+-riusciti per Qwen, Phi e Gemma senza avviare server. Il caricamento e
+-la generazione reali non sono stati rieseguiti durante il training RL.
+-
+-I dati del controllo sono conservati nel [registro JSON](../../artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_centralization_2026-09-16/verification.json),
+-con impronte dei messaggi e uscita dei test nella stessa cartella.
+-
+-Per ripetere i test mirati da Ubuntu:
+-
+-```bash
+-PYTHONPATH=.:tests .venv/bin/python -m unittest \
+-  test_compact_prompt test_llm_chat test_llm_selection test_claim_evidence_validation -v
+-```
++È un esempio di formato, non una risposta prodotta da Qwen.
++La versione 3.0.0 è registrata dal programma; il modello non deve ricopiarla.
++Il programma ricava i parametri Qiskit dal catalogo e usa il primo seed del
++protocollo, attualmente 0. Non corregge silenziosamente le scelte.
++
++E1...E5 sono riferimenti locali, assegnati nell'ordine del recupero.
++La mappa resta uguale durante le correzioni della stessa richiesta e non viene
++inviata al modello. Il contesto delle citazioni contiene anche l'identità
++della richiesta, il catalogo e impronte del registro e della richiesta effettiva.
++Controlla sorgente, obiettivo, vincoli e feature, evitando di riutilizzare
++una mappa appartenente a un'altra richiesta.
++
++Il validatore verifica formato, dispositivo compatibile, configurazione ammessa
++e appartenenza delle citazioni agli esempi forniti. Rifiuta riferimenti
++sconosciuti e duplicati. Con risultati storici richiede almeno una citazione;
++senza RAG richiede una lista vuota. Lo stesso esempio può motivare entrambe le
++scelte. Non servono identificativi separati di claim o caveat.
++
++**La risoluzione della citazione non verifica semanticamente il testo libero
++e non dimostra che il modello abbia causalmente usato quell'esempio.**
++Questo limite è registrato anche nella raccomandazione e nelle avvertenze.
++Le vecchie verifiche multilivello non sono applicate al nuovo claim libero.
++La compilazione rimane protetta: occorrono una raccomandazione emessa e
++validata dal servizio e la conferma dell'utente.
++
++## File e registri
++
++La vista è in `prototype/prompting/minimal.py`; i messaggi in
++`prototype/prompting/rendering.py`. Il contratto esterno è
++`schemas/llm_recommendation_v3.schema.json`.
++Lo stesso schema usato nelle istruzioni vincola la generazione.
++
++Ogni tentativo conserva `prompt.json` completo, `encoding.json` con
++revisione e corrispondenze, richiesta effettiva e risposta originale.
++La raccomandazione validata conserva sia gli alias sia gli ID originali risolti.
++Dalla revisione `minimal-v3-repair1-20260918`, gli errori rimandati al modello
++sono frasi brevi in `previous_validation_errors`, senza codici lunghi o copie
++della risposta precedente. Ogni tipo di errore compare una sola volta:
++
++- Dispositivo non ammesso: scegliere `selected_device` dagli ID di `compatible_hardware`.
++- Configurazione non ammessa: scegliere `config_id` da `configuration_catalog`,
++  rispettando i vincoli del dispositivo.
++- Evidence non valida: usare gli ID di `retrieved_labeled_examples`, senza
++  duplicati e con almeno un riferimento. Senza esempi storici usare `[]`.
++
++Una sola frase finale chiede di restituire l'intero JSON per il circuito corrente.
++Gli altri errori di formato ricevono un richiamo allo schema.
++Il programma reinvia il contesto ridotto completo, con gli stessi esempi e alias;
++il primo tentativo resta identico. Nei registri canonici rimangono i codici
++e i dettagli originali. Nessun valore arbitrario della risposta errata viene
++reinserito nel prompt.
++Le prove avviate con una revisione diversa non possono essere riprese con le
++nuove correzioni, anche se il testo del primo tentativo è uguale.
++Nuove istruzioni richiedono un nuovo nome della prova; gli esiti precedenti
++non vengono sovrascritti.
++
++Il formato v2 rimane leggibile con `compact.py`, `legacy_rendering.py`
++e il validatore storico. Il parametro `legacy_contract=True` del costruttore
++serve soltanto alla riproduzione esplicita delle prove precedenti.
++Il percorso ordinario usa v3. Non è richiesta la ricostruzione del documento
++canonico a partire dalla vista ridotta.
++
++## Misure del 18 settembre
++
++Sono stati confrontati tre casi train, senza inferenza:
++
++| Circuito | Token prima | Token dopo | Riduzione |
++| --- | ---: | ---: | ---: |
++| dj_indep_tket_2 | 34.318 | 11.667 | 66,00% |
++| ae_indep_qiskit_60 | 75.193 | 11.382 | 84,86% |
++| portfoliovqe_indep_qiskit_6 | 36.265 | 12.692 | 65,00% |
++
++Conteggi ottenuti con `llama-tokenize.exe` b10930 e lo stesso GGUF Qwen Q8_0
++del caso di riferimento. Il formato nativo è ripreso dalla richiesta
++archiviata: un messaggio utente, nessuno strumento, ragionamento disattivato.
++Per il primo caso è verificata l'uguaglianza dell'intera sequenza degli ID dei
++token con quella prodotta dal server originale, non solo del numero.
++
++Il primo riferimento è una richiesta effettivamente inviata in passato.
++Gli altri due riferimenti sono ricostruiti con il formato v2.
++Le richieste nuove sono preparate e contate, non inviate al modello.
++Lo schema leggibile fa parte del testo contato; `json_schema` passato
++separatamente a llama.cpp vincola la generazione e non aggiunge token al prompt.
++I conteggi delle singole sezioni sono diagnostici e non necessariamente additivi.
++
++Non sono misure di qualità, latenza o memoria. Alcuni esempi train includono
++lo stesso circuito: queste prove non dimostrano generalizzazione.
++Non sono stati avviati selezione sulla validation o accesso al test.
++
++Dati, richieste e log sono in
++`artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/`.
++Le procedure riproducibili sono `llm_selection/minimal_audit.py` e
++`llm_selection/tokenize_files.ps1`: preparazione, conteggio locale e
++conclusione del controllo sono passaggi separati. Usare sempre una nuova
++cartella di destinazione.
++
++La precedente centralizzazione del 16 settembre e la codifica reversibile
++restano documentate nei loro artefatti storici. I loro risultati non sono
++attribuiti a questa revisione.
++
++Il recupero reale e la compatibilità dei vecchi prompt train sono stati
++verificati per tutti e tre i casi. Risposte di esempio costruite dalle
++etichette storiche superano il nuovo validatore; non sono nuove risposte LLM.
++La suite completa ha superato 236 test. I log comprendono anche gli errori
++iniziali, corretti prima della consegna.
+diff --git a/docs/protocollo_sperimentale.md b/docs/protocollo_sperimentale.md
+index 67be880fd1..ce6331f98d 100644
+--- a/docs/protocollo_sperimentale.md
++++ b/docs/protocollo_sperimentale.md
+@@ -142,6 +142,13 @@ incompatibili con circuito e Target. La richiesta è identica per sistema comple
+ e variante senza RAG; il LLM di frontiera riceve lo stesso circuito e lo stesso
+ spazio di scelta, ma non la maschera calcolata.
+ 
++La richiesta canonica conserva il sorgente e le impronte. Dal 18 settembre 2026
++la vista inviata al sistema LLM con/senza RAG omette QASM e provenienza e usa
++le caratteristiche numeriche complete. Gli artefatti originali non cambiano.
++La stessa rappresentazione di circuito e catalogo si applica al confronto
++con/senza RAG. Il prompt diretto del modello di frontiera resta quello distinto
++previsto sotto; questa modifica non ridefinisce automaticamente quel metodo.
++
+ ## Metodi e spazio di scelta
+ 
+ La fonte normativa delle dodici configurazioni è il
+@@ -1050,15 +1057,16 @@ Misurano caricamento, contesto, generazione e validazione delle risposte.
+ Non sono risultati della selezione. I pesi originali sono provati quando
+ sostenibili. Una cache a precisione ridotta è registrata separatamente dalla
+ precisione dei pesi. Le richieste complete sono contate con il tokenizer
+-effettivo; non si eliminano circuiti, cataloghi o evidenze. Un caso che supera
++effettivo. Fino al 17 settembre non si eliminavano contenuti dal prompt. Un caso che supera
+ il contesto nativo resta un fallimento di contesto, con zero chiamate LLM.
+ Non si estende arbitrariamente il contesto nativo di Gemma per nascondere
+ questo limite. Per i soli grafi completi, l’elenco ordinato degli archi viene
+ sostituito da una regola esatta che consente di ricostruire tutti gli archi
+ nello stesso ordine. Il programma controlla la reversibilità. I prompt originali
+-restano conservati; il contenuto delle evidenze RAG e dei circuiti non viene tagliato.
++restano conservati. Il requisito storico di conservare ogni contenuto nel
++prompt è superato dalla vista essenziale descritta sotto.
+ 
+-Dal 15 settembre la rappresentazione degli input usa anche identificativi brevi
++Nella revisione storica del 15 settembre la rappresentazione degli input usa identificativi brevi
+ delle fonti, oggetti condivisi per i valori ripetuti e tabelle con intestazioni
+ comuni. La decodifica deve ricostruire esattamente ogni campo e valore originale,
+ compresi QASM, metrica e cinque esempi RAG. Lo schema di risposta 2.0.0 rimane
+@@ -1179,6 +1187,69 @@ casuali originali. Le liste dei metodi finali contenute nel piano storico
+ non impongono l’esecuzione di quei metodi nella selezione locale: il manifest
+ della selezione dichiara esplicitamente questo ambito ridotto.
+ 
++### Vista essenziale e citazioni locali — 18 settembre 2026
++
++La vista introdotta con `minimal-v3-20260918` usa JSON, senza TOON.
++Conserva cinque esempi, ordine del recupero, tutte le feature e valori originali.
++Elimina dal testo LLM QASM, hash, manifest, metadati e ripetizioni delle evidenze.
++Il catalogo hardware compare una volta; gli esempi ne indicano solo i nomi.
++Il registro completo rimane interno al prototipo.
++
++La risposta v3 richiede `selected_device`, `config_id`, `claim` ed `evidence`.
++Il claim è testo libero breve; evidence contiene alias E1...E5 degli esempi.
++I parametri Qiskit derivano dal catalogo. Il seed del piano singolo è il primo
++seed previsto, attualmente 0; le ripetizioni sperimentali restano governate dal
++protocollo. Metadati della richiesta e versione sono assegnati dal programma.
++
++Il validatore controlla scelta compatibile, configurazione ammessa e citazioni
++risolvibili nel contesto della richiesta. Rifiuta riferimenti sconosciuti o
++ripetuti. Non richiede claim/caveat strutturati né ID multilivello.
++La risoluzione delle citazioni non prova l'uso causale degli esempi e non
++verifica semanticamente ogni affermazione libera. Questo limite va riportato
++nelle analisi; i successi v3 non sono direttamente equivalenti ai successi del
++vecchio controllo semantico v2. Senza RAG le evidenze sono vuote.
++
++Il documento canonico, le mappe, le richieste inviate e le risposte restano
++conservati. Nessun vecchio tentativo viene riscritto o dichiarato riuscito
++secondo il nuovo contratto. Serve una nuova etichetta per nuove esecuzioni.
++Le misure su tre casi train del 18 settembre riguardano soltanto i token;
++non costituiscono selezione sulla validation o prova di qualità.
++Vedere la [guida del prompt essenziale](approfondimenti/compattazione_prompt.md).
++
++La revisione `minimal-v3-repair1-20260918` modifica solo le correzioni:
++una frase indica il campo errato e il catalogo o gli esempi dai quali scegliere.
++I messaggi di uno stesso tipo sono accorpati; una sola istruzione finale chiede
++il JSON completo per il circuito corrente. Non si copiano cataloghi, risposte
++errate o identificativi canonici. Senza RAG si chiede evidence vuota.
++Il primo prompt, gli esempi, le feature e il massimo di tre tentativi restano
++invariati. Una revisione diversa richiede una nuova etichetta anche per una
++prova interrotta. L'efficacia delle nuove correzioni richiede nuove inferenze;
++i fallimenti storici restano conservati.
++
++
++
++### Codifica TOON — 19 settembre 2026
++
++La revisione `minimal-v3-toon1-20260919` codifica in TOON i dati della vista
++essenziale. Lo schema leggibile e la risposta richiesta restano JSON.
++Usa l'encoder ufficiale `@toon-format/toon` 4.1.1, con runtime locale
++e versioni fissate. Le feature condividono una tabella; gli archi hardware
++possono essere raggruppati per sorgente. Ogni conversione è decodificata
++e ricostruita prima dell'invio, verificando valori, zeri e ordine degli archi.
++Non cambia il recupero, il numero di esempi, i controlli o le correzioni.
++
++Sui cinque circuiti train, i tokenizer nativi misurano una riduzione aggiuntiva
++rispetto al JSON essenziale pari a 8,12% per Qwen, 4,64% per Phi e 9,80% per
++Gemma. Sono somme di token di ingresso, con template di chat e schema inclusi;
++non sono misure di qualità o consumo delle risposte.
++Le nuove richieste sono preparate e contate, non ancora eseguite.
++Le prove tecniche useranno nuove etichette prima del congelamento della
++selezione sulla validation. Il test resta separato.
++
++Il [resoconto](resoconti/2026-09-19_prompt_toon.md) collega il documento completo,
++le figure, i 15 confronti per circuito, le richieste originali o ricostruite,
++i token misurati e le procedure riproducibili.
++
+ ## Valutazione della selezione e confronto finale
+ 
+ Il valutatore della selezione non richiede qcompile, il modello di frontiera
+diff --git a/llm_selection/README.md b/llm_selection/README.md
+index 4f2013cc7f..bd62e839dd 100644
+--- a/llm_selection/README.md
++++ b/llm_selection/README.md
+@@ -4,10 +4,16 @@ Questa cartella prepara il confronto fra Qwen, Phi e Gemma. Serve a scegliere
+ quale modello locale e quali impostazioni usare per proporre un dispositivo
+ quantistico e una configurazione Qiskit, aiutandosi con esempi del Dataset RAG.
+ 
+-Il modello riceve il circuito completo, la metrica, le alternative ammesse e
+-cinque esempi recuperati dal train. La risposta deve contenere una scelta e
+-riferimenti verificabili alle fonti. Il programma controlla sia la struttura
+-JSON sia il significato dei collegamenti fra affermazioni e fonti.
++Il modello riceve tutte le caratteristiche numeriche del circuito, la metrica,
++le alternative ammesse e cinque esempi recuperati dal train. I dati sono
++codificati in TOON; lo schema e la risposta restano JSON.
++Il programma controlla il formato, le scelte ammesse e i riferimenti E1...E5.
++Questi controlli non certificano la verità della motivazione libera.
++
++La codifica corrente è `minimal-v3-toon1-20260919`. Per installarla su un nuovo
++ambiente usare `.venv/bin/python -m llm_selection.setup_toon`.
++Misure, istruzioni e comandi per le prove train sono nel
++[resoconto TOON](../docs/resoconti/2026-09-19_prompt_toon.md).
+ 
+ ## Come si inserisce nel progetto
+ 
+diff --git a/llm_selection/provenance.py b/llm_selection/provenance.py
+index 06911e6bef..d4fc740b68 100644
+--- a/llm_selection/provenance.py
++++ b/llm_selection/provenance.py
+@@ -13,6 +13,12 @@ def code_files():
+     paths.extend([ROOT/"scripts/mqt_predictor_protocol.py",ROOT/"llm_selection/serve.ps1",ROOT/"llm_selection/gpu_monitor.ps1",ROOT/"llm_selection/AmdSensors.cs",ROOT/"llm_selection/stop.ps1"])
+     paths.extend([ROOT/"scripts/14_evaluate_methods_v2.py",ROOT/"scripts/15_release_test_v2.py"])
+     paths.extend((ROOT/"llm_selection").glob("*.ps1"))
++    paths.extend((ROOT/"schemas").glob("*.json"))
++    toon = ROOT/"prototype/prompting/toon_runtime"
++    paths.extend(toon.glob("*.mjs"))
++    paths.extend(toon.glob("*.json"))
++    sdk = toon/"node_modules/@toon-format/toon"
++    paths.extend(p for p in sdk.rglob("*") if p.is_file())
+     return sorted(set(paths))
+ 
+ def code_hashes():
+diff --git a/prototype/prompting/README.md b/prototype/prompting/README.md
+index e6258c0c1b..3dea1f5c6f 100644
+--- a/prototype/prompting/README.md
++++ b/prototype/prompting/README.md
+@@ -1,21 +1,50 @@
+-# Preparazione comune dei messaggi LLM
+-
+-Questa cartella trasforma il contesto completo dell'assistente in messaggi
+-compatti per il modello. Mantiene ricostruibili circuito, esempi e valori.
+-La stessa implementazione viene usata dalla selezione locale, dal collegamento
+-LLM del prototipo e dall'esportazione dei prompt per la chat.
+-
+-| File | A cosa serve |
+-| --- | --- |
+-| `__init__.py` | Espone le funzioni comuni della cartella. |
+-| `compact.py` | Abbrevia le fonti, raccoglie le ripetizioni e verifica la ricostruzione; ripristina le sigle delle risposte. |
+-| `complete_graph.py` | Rappresenta i grafi completi tramite una regola esatta. |
+-| `wire.py` | Converte gruppi di dati in tabelle e li ricostruisce. |
+-| `rendering.py` | Compone istruzioni e dati nei messaggi inviati al modello. |
+-| `output_contract.py` | Spiega le regole che una risposta deve rispettare. |
+-
+-Il Dataset resta completo e il recupero RAG precede questa trasformazione.
+-Questa cartella non carica modelli e non esegue compilazioni.
+-
+-Dettagli, percorso del comando tecnico e verifiche nella
+-[guida della compattazione](../../docs/approfondimenti/compattazione_prompt.md).
++# Rappresentazione dei prompt
++
++Questo componente separa i dati completi dell'esperimento dal testo inviato
++al modello. La vista corrente è `minimal-v3-toon1-20260919`.
++I dati in ingresso usano TOON; lo schema e la risposta restano JSON.
++
++- `minimal.py`: selezione dei contenuti, alias E1...E5, contesto delle citazioni,
++  schema v3 e metadati esterni.
++- `rendering.py`: messaggi comuni a chat, prove e correzioni.
++- `toon.py`: disposizione reversibile delle feature e dei collegamenti hardware,
++  codifica TOON e verifica automatica della ricostruzione.
++- `toon_runtime/`: encoder ufficiale `@toon-format/toon` 4.1.1 e versioni fissate.
++- `compact.py`, `complete_graph.py`, `wire.py`, `output_contract.py`,
++  `legacy_rendering.py`: lettura e confronto del precedente formato v2.
++
++La riduzione avviene dopo il recupero. Non cambia Dataset, indice, distanza,
++numero/ordine degli esempi o caratteristiche numeriche.
++QASM e provenienza restano nel documento canonico, fuori dal testo LLM.
++
++La risposta corrente contiene dispositivo, configurazione, claim libero e
++citazioni degli esempi. I controlli applicativi risolvono le citazioni e
++verificano la scelta; non certificano la verità della motivazione.
++
++Procedura, misure e limiti nella
++[guida](../../docs/approfondimenti/compattazione_prompt.md).
++
++Le correzioni aggiungono una frase per dispositivo, configurazione o evidence
++non ammessi. Gli errori dello stesso tipo compaiono una sola volta.
++La richiesta di restituire il JSON completo compare una sola volta in fondo
++al messaggio. Il primo tentativo non riceve istruzioni di correzione.
++
++## Installazione riproducibile
++
++Dalla radice del progetto:
++
++```bash
++.venv/bin/python -m llm_selection.setup_toon
++```
++
++La procedura installa Node Linux e l'encoder nelle cartelle locali del progetto.
++Verifica le impronte fissate e usa `npm ci`. Non cambia l'ambiente Python MQT.
++Node è conservato negli artefatti; `node_modules/` non va aggiunto a Git.
++Se manca l'encoder, l'invio fallisce con l'indicazione del comando di installazione.
++
++Le feature condividono una tabella, con colonne `current`, `E1`...`E5`.
++I collegamenti diretti usano liste di vicini quando è possibile ricostruire
++esattamente anche l'ordine degli archi. La decodifica viene verificata prima
++dell'invio; nessuna feature o cifra viene eliminata intenzionalmente.
++`messages(..., serialization="json")` riproduce il precedente JSON ridotto
++per i confronti. La risposta e la gestione degli errori non cambiano.
+diff --git a/prototype/prompting/rendering.py b/prototype/prompting/rendering.py
+index 0917137ce2..6c8121ff8b 100644
+--- a/prototype/prompting/rendering.py
++++ b/prototype/prompting/rendering.py
+@@ -1,35 +1,36 @@
+-"""Messaggi comuni dell’assistente, indipendenti da modello e trasporto."""
++"""Messaggi essenziali condivisi da chat, prove e tentativi correttivi."""
+ import json
++from .minimal import NOTE, model_input, response_schema
+ 
+-BASE_INSTRUCTION = (
+-    "Read the complete request below. Recommend one compatible device and one allowed "
+-    "Qiskit configuration. Return only the JSON object required by response_contract. "
+-    "Use the historical examples as evidence, never as a measurement of the new circuit."
+-)
++BASE_INSTRUCTION = NOTE
++REPAIR_INSTRUCTION = "Rispondi nuovamente con l’intero JSON richiesto per il circuito corrente."
+ CHECKLIST = (
+-    "Before answering, check internally: copy the live request_id and catalog_snapshot_id; "
+-    "select hardware from the compatible list; match all plan fields to one allowed configuration; "
+-    "include live_compatibility; support both device and exact configuration with historical claims. "
+-    "Each historical reference needs the exact record_id, evidence source_id and source_claim_id "
+-    "from allowed_evidence_registry. The parameters of each cited historical claim must match "
+-    "the corresponding source claim. Do not output this checklist or extra prose."
++    "Check that the device is compatible, config_id is allowed for it, and every cited "
++    "example ID was supplied. Do not report a measured score for the new circuit."
+ )
+ 
+-def messages(prompt, variant, *, compact=True):
+-    from .complete_graph import encode as graph_encode, NOTE as graph_note
+-    from .compact import encode, model_input, NOTE
+-    from .output_contract import RULES
+-    represented = model_input(encode(prompt)) if compact else graph_encode(prompt)
+-    note = (NOTE + "\n\n" if compact else "") + graph_note
+-    text = BASE_INSTRUCTION + "\n\n" + RULES + "\n\n" + note + "\n\n" + json.dumps(represented,ensure_ascii=False,separators=(",",":"))
+-    if variant == "checklist":
+-        checklist=CHECKLIST if prompt.get("retrieved_labeled_examples") else (
+-            "Before answering, check internally: copy the live request_id and catalog_snapshot_id; "
+-            "select hardware from the compatible list; match all plan fields to one allowed configuration; "
+-            "include live_compatibility and use only the evidence actually provided. "
+-            "No historical examples were retrieved; do not invent historical references or claims. "
+-            "Do not output this checklist or extra prose.")
+-        text += "\n\n" + checklist
+-    elif variant != "base": raise ValueError("Unknown prompt variant")
+-    return [{"role":"user","content":text}]
+ 
++def messages(prompt, variant, *, compact=True, serialization="toon"):
++    if not compact:
++        raise ValueError("Full canonical prompts are archival data, not model input")
++    represented = model_input(prompt)
++    schema = {k: v for k, v in response_schema(prompt).items()
++              if k not in ("$schema", "$id", "title")}
++    if serialization == "json":
++        represented["response_schema"] = schema
++        text = BASE_INSTRUCTION + "\n" + json.dumps(represented, ensure_ascii=False, separators=(",", ":"))
++    elif serialization == "toon":
++        from .toon import encode_view, NOTE as TOON_NOTE
++        fence = chr(96) * 3
++        text = (BASE_INSTRUCTION + "\n" + TOON_NOTE + "\n" + fence + "toon\n"
++                + encode_view(represented) + "\n" + fence + "\nresponse_schema: "
++                + json.dumps(schema, ensure_ascii=False, separators=(",", ":")))
++    else:
++        raise ValueError("Unknown prompt serialization")
++    if variant == "checklist":
++        text += "\n" + CHECKLIST
++    elif variant != "base":
++        raise ValueError("Unknown prompt variant")
++    if represented.get("previous_validation_errors"):
++        text += "\n" + REPAIR_INSTRUCTION
++    return [{"role": "user", "content": text}]

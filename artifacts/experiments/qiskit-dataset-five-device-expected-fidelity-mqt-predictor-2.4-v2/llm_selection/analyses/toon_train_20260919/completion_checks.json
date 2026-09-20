@@ -1,0 +1,106 @@
+{
+  "at": "2026-09-18T23:05:22.774522+00:00",
+  "revision": "minimal-v3-toon1-20260919",
+  "cases": [
+    {
+      "model": "qwen",
+      "circuit": "ae_indep_qiskit_60",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "qwen",
+      "circuit": "dj_indep_tket_2",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "qwen",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_qiskit_50",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_tket_50",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "phi",
+      "circuit": "ae_indep_qiskit_60",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "phi",
+      "circuit": "dj_indep_tket_2",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "phi",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_qiskit_50",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_tket_50",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "gemma",
+      "circuit": "ae_indep_qiskit_60",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "gemma",
+      "circuit": "dj_indep_tket_2",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "gemma",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_qiskit_50",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_tket_50",
+      "current_prompt_matches_counted_text": true,
+      "current_roundtrip_verified": true
+    }
+  ],
+  "scoped_diff_check": true,
+  "suggested_labels_available": {
+    "qwen": true,
+    "phi": true,
+    "gemma": true
+  },
+  "inference_calls": 0,
+  "validation_started": false,
+  "test_content_accessed": false,
+  "code_snapshot": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/code_snapshots/4d8699a72e61024e7a5a931d69521cc3dd538c0ddfc609ef5eca918e2dc55a8e"
+}

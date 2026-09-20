@@ -1,0 +1,5 @@
+{'circuit': 'ae_indep_qiskit_60', 'counts': {"adjacency_','": 11707, "adjacency_'\\t'": 12130, "feature_table_','": 10301, "feature_table_'\\t'": 10725}}
+{'circuit': 'dj_indep_tket_2', 'counts': {"adjacency_','": 12042, "adjacency_'\\t'": 12486, "feature_table_','": 10636, "feature_table_'\\t'": 11081}}
+{'circuit': 'portfoliovqe_indep_qiskit_6', 'counts': {"adjacency_','": 12989, "adjacency_'\\t'": 13433, "feature_table_','": 11583, "feature_table_'\\t'": 12028}}
+{'circuit': 'su2random_indep_qiskit_50', 'counts': {"adjacency_','": 12674, "adjacency_'\\t'": 13098, "feature_table_','": 11268, "feature_table_'\\t'": 11693}}
+{'circuit': 'su2random_indep_tket_50', 'counts': {"adjacency_','": 12705, "adjacency_'\\t'": 13129, "feature_table_','": 11299, "feature_table_'\\t'": 11724}}

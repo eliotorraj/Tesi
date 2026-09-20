@@ -1,0 +1,51 @@
+{
+  "at": "2026-09-18T15:26:36.336317+00:00",
+  "revision": "minimal-v3-20260918",
+  "rows": [
+    {
+      "circuit_id": "dj_indep_tket_2",
+      "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v2-02/qwen/p1_t0/dj_indep_tket_2/attempt_1",
+      "split": "train",
+      "examples": 5,
+      "features_preserved": true,
+      "canonical_unchanged": true,
+      "before_kind": "archived_native_request",
+      "after_kind": "prepared_native_request_not_sent"
+    },
+    {
+      "circuit_id": "ae_indep_qiskit_60",
+      "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/prompts/train/ae_indep_qiskit_60.json",
+      "split": "train",
+      "examples": 5,
+      "features_preserved": true,
+      "canonical_unchanged": true,
+      "before_kind": "legacy_v2_reconstructed",
+      "after_kind": "prepared_native_request_not_sent"
+    },
+    {
+      "circuit_id": "portfoliovqe_indep_qiskit_6",
+      "source": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/prompts/train/portfoliovqe_indep_qiskit_6.json",
+      "split": "train",
+      "examples": 5,
+      "features_preserved": true,
+      "canonical_unchanged": true,
+      "before_kind": "legacy_v2_reconstructed",
+      "after_kind": "prepared_native_request_not_sent"
+    }
+  ],
+  "reference": "/home/elio/Tesi-mqt-2.4-v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v2-02/qwen/p1_t0/dj_indep_tket_2/attempt_1",
+  "model_path": "D:\\Tesi-mqt\\llm-selection\\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\\models\\qwen\\Q8_0.gguf",
+  "tokenizer_binary_sha256": "5253e5abc542ed0b0efbaf40674d4738c1fd9e2f76cd19c282c81b1d8cfafd84",
+  "tokenizer_options": [
+    "--offline",
+    "--no-bos",
+    "--no-escape",
+    "--ids"
+  ],
+  "schema_handling": "Readable schema is included once in the message. Native json_schema separately constrains generation and adds no prompt tokens.",
+  "limitations": [
+    "No inference or answer-quality measurement.",
+    "Historical train examples may include the current source; not evidence of generalization.",
+    "Native wrapper replay must be checked by exact archived token-ID equality before reporting counts."
+  ]
+}

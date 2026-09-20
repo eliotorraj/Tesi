@@ -1,0 +1,25 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E5",
+      "record_id": "rag_66e6c4509085c042594a54ec4f03040df0a682ab5cf32b784eba73cabfb8f52e",
+      "result": "verified",
+      "resolved": {
+        "circuit": "dj_indep_qiskit_90",
+        "historical_device": "ibm_heron_156"
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.006359740000334568
+}

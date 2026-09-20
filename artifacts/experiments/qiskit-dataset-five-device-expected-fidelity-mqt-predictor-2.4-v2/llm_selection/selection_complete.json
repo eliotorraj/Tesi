@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "status": "local_selection_complete",
+  "winner": "qwen/p0_t07",
+  "files": {
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/frozen_study.json": "ac8f55fd15e99f8a3dabe7c04b925f69f734563326d36e910873cb7c9ad7d952",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/final_configuration.json": "4c55dd30c5a604012f5d81676ff22c2f597cd3103cb8230a849bb4821c07da99",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v1/analysis/selection.json": "793ac9aa2b85c764bfb0f143af068e20970d8ed4be91d58e5c6437a4d6e68c6c",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v1/analysis/episode_results.json": "839ea12d40da5531f0f2d3ab33a67d5732e9cc186324fd64772b3e5063021cef",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v1/analysis/baseline_results.json": "969b8a8d848910b4ae5082a503b6fe8ecaf84d87db6eab65eb1187ed8f7f097c",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v1/analysis/input_fingerprints.json": "68f21e9be9da57c07ba9e0e5bf5499d1887b7302af30ea981ce4c78f4562f7a5",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/method_results/validation/evaluation/evaluation_summary.json": "69369e9a6cc4277d3d777d34dd838d0b895c64332f161cba04a3fbdc1552df77",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/method_results/validation/evaluation/method_results.jsonl": "f3b774fcf6e9d54de6489f7605d991edcfe07579aa1719d25ad528b1ae97c052",
+    "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/studies/local-llm-v1/all_decisions_sealed.json": "46a35f58265b81c2f55f3c7476102e14f659152596668de3503365fe4bac3b45"
+  },
+  "local_method_fields_sha256": "78682aaacb2e4c5de78a841fc96bd770b8da634d27e1393708f6623b6947bf07",
+  "test_released": false
+}

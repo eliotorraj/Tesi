@@ -1,0 +1,5 @@
+{'circuit': 'ae_indep_qiskit_60', 'counts': {'minimal_json': 11069, "direct_','": 16919, "direct_'\\t'": 17865, "direct_'|'": 17899, "edges_table_','": 13184, "edges_table_'\\t'": 13194, "edges_table_'|'": 13231}}
+{'circuit': 'dj_indep_tket_2', 'counts': {'minimal_json': 11354, "direct_','": 17534, "direct_'\\t'": 18531, "direct_'|'": 18583, "edges_table_','": 13578, "edges_table_'\\t'": 13583, "edges_table_'|'": 13639}}
+{'circuit': 'portfoliovqe_indep_qiskit_6', 'counts': {'minimal_json': 12379, "direct_','": 18481, "direct_'\\t'": 19478, "direct_'|'": 19631, "edges_table_','": 14525, "edges_table_'\\t'": 14530, "edges_table_'|'": 14687}}
+{'circuit': 'su2random_indep_qiskit_50', 'counts': {'minimal_json': 12145, "direct_','": 17886, "direct_'\\t'": 18833, "direct_'|'": 18993, "edges_table_','": 14151, "edges_table_'\\t'": 14162, "edges_table_'|'": 14325}}
+{'circuit': 'su2random_indep_tket_50', 'counts': {'minimal_json': 12175, "direct_','": 17917, "direct_'\\t'": 18864, "direct_'|'": 19023, "edges_table_','": 14182, "edges_table_'\\t'": 14193, "edges_table_'|'": 14355}}

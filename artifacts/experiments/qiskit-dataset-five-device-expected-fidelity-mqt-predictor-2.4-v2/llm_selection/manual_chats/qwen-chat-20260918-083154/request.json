@@ -1,0 +1,25 @@
+{
+  "at": "2026-09-18T08:31:57.661311+00:00",
+  "phase": "train_manual_chat",
+  "model": "qwen",
+  "profile": {
+    "weight_precision": "Q8_0",
+    "context": 147456,
+    "cache_type": "q8_0",
+    "gpu_layers": "all",
+    "batch": 512,
+    "micro_batch": 128,
+    "guards": {
+      "minimum_available_bytes": 1610612736,
+      "memory_consecutive_samples": 3,
+      "maximum_edge_c": 95,
+      "maximum_hotspot_c": 108,
+      "pause_hotspot_c": 105,
+      "resume_hotspot_c": 100,
+      "missing_sensor_consecutive_samples": 3,
+      "thresholds_are": "User-requested experimental operating limits, not vendor specifications or a diagnosis"
+    }
+  },
+  "profile_revision": "manual-chat-defaults-v1",
+  "note": "Server e risorse registrati. Esportare dalla chat messaggi e impostazioni: non sono catturati automaticamente da questo avvio."
+}

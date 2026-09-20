@@ -1,0 +1,68 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E5",
+      "record_id": "rag_a633780f6c7ac49f37d5a969604abfaa5fa6cd06aaaeca4735571ce98fe0e9a6",
+      "result": "verified",
+      "resolved": {
+        "circuit": "realamprandom_indep_qiskit_30",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_default_default",
+            "median_score": 0.1232778266,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_sabre_sabre",
+            "median_score": 0.1232778266,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 3,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_dense_sabre",
+            "median_score": 0.1232778266,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": true,
+  "validation_seconds": 0.010068257000966696
+}

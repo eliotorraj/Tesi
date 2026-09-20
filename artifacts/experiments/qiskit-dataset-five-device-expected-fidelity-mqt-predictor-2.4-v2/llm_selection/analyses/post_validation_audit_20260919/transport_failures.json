@@ -1,0 +1,161 @@
+[
+  {
+    "id": "gemma/p0_t07/pricingcall_indep_qiskit_5/attempt_1",
+    "response": {
+      "started_at": "2026-09-19T14:46:32.820315+00:00",
+      "ended_at": "2026-09-19T14:46:34.810390+00:00",
+      "elapsed_seconds": 1.9900856989988824,
+      "curl_exit_code": 56,
+      "stream_done": false,
+      "transport_success": false,
+      "content": ""
+    },
+    "stderr": "curl: (56) Recv failure: Connection was reset\n",
+    "resource_abort": {
+      "reason": "available_ram_below_operational_limit",
+      "last_sample": {
+        "thermal_paused_seconds": 0,
+        "pid": 8112,
+        "thermal_paused": false,
+        "gpu_dedicated_bytes": 5920034816,
+        "gpu_shared_bytes": 740782080,
+        "thermal_pause_count": 0,
+        "gpu_sensors": [
+          {
+            "adapter_index": 0,
+            "adapter_name": "AMD Radeon RX 6750 XT",
+            "return_code": 0,
+            "edge_c": 66,
+            "hotspot_c": 98,
+            "memory_c": null,
+            "fan_rpm": 1698,
+            "asic_power_w": 171,
+            "gpu_activity_percent": 99
+          }
+        ],
+        "working_set_bytes": 3953332224,
+        "private_bytes": 9973497856,
+        "cpu_seconds": 14.25,
+        "peak_working_set_bytes": 4032147456,
+        "utc": "2026-09-19T14:46:33.8118184Z",
+        "system_available_bytes": 1572421632,
+        "gpu_counter_error": null
+      },
+      "at": "2026-09-19T14:46:34.6034578Z"
+    },
+    "exit": {
+      "exit_code": null,
+      "last_durable_sample_utc": "2026-09-19T14:46:33.8118184Z",
+      "ended_at": "2026-09-19T14:46:35.2966056Z",
+      "thermal_paused_seconds": 0,
+      "thermal_pause_count": 0,
+      "abort_reason": "available_ram_below_operational_limit"
+    }
+  },
+  {
+    "id": "phi/p0_t07/qft_indep_tket_50/attempt_1",
+    "response": {
+      "started_at": "2026-09-19T12:53:18.362053+00:00",
+      "ended_at": "2026-09-19T12:53:20.025070+00:00",
+      "elapsed_seconds": 1.6631240809983865,
+      "curl_exit_code": 56,
+      "stream_done": false,
+      "transport_success": false,
+      "content": ""
+    },
+    "stderr": "curl: (56) Recv failure: Connection was reset\n",
+    "resource_abort": {
+      "reason": "gpu_temperature_operational_limit",
+      "last_sample": {
+        "thermal_paused_seconds": 123.03183789999996,
+        "pid": 2992,
+        "thermal_paused": false,
+        "gpu_dedicated_bytes": 8501186560,
+        "gpu_shared_bytes": 673787904,
+        "thermal_pause_count": 93,
+        "gpu_sensors": [
+          {
+            "adapter_index": 0,
+            "adapter_name": "AMD Radeon RX 6750 XT",
+            "return_code": 0,
+            "edge_c": 72,
+            "hotspot_c": 108,
+            "memory_c": null,
+            "fan_rpm": 2139,
+            "asic_power_w": 173,
+            "gpu_activity_percent": 97
+          }
+        ],
+        "working_set_bytes": 852942848,
+        "private_bytes": 9340055552,
+        "cpu_seconds": 523.796875,
+        "peak_working_set_bytes": 960675840,
+        "utc": "2026-09-19T12:53:18.7992644Z",
+        "system_available_bytes": 2961145856,
+        "gpu_counter_error": null
+      },
+      "at": "2026-09-19T12:53:19.7775137Z"
+    },
+    "exit": {
+      "exit_code": null,
+      "last_durable_sample_utc": "2026-09-19T12:53:18.7992644Z",
+      "ended_at": "2026-09-19T12:53:20.1151758Z",
+      "thermal_paused_seconds": 123.03183789999996,
+      "thermal_pause_count": 93,
+      "abort_reason": "gpu_temperature_operational_limit"
+    }
+  },
+  {
+    "id": "qwen/p1_t0/qft_indep_qiskit_6/attempt_1",
+    "response": {
+      "started_at": "2026-09-19T11:15:32.105744+00:00",
+      "ended_at": "2026-09-19T11:15:35.225237+00:00",
+      "elapsed_seconds": 3.1194970999999896,
+      "curl_exit_code": 56,
+      "stream_done": false,
+      "transport_success": false,
+      "content": ""
+    },
+    "stderr": "curl: (56) Recv failure: Connection was reset\n",
+    "resource_abort": {
+      "reason": "gpu_temperature_operational_limit",
+      "last_sample": {
+        "thermal_paused_seconds": 27.473700499999996,
+        "pid": 10368,
+        "thermal_paused": false,
+        "gpu_dedicated_bytes": 5824278528,
+        "gpu_shared_bytes": 698175488,
+        "thermal_pause_count": 20,
+        "gpu_sensors": [
+          {
+            "adapter_index": 0,
+            "adapter_name": "AMD Radeon RX 6750 XT",
+            "return_code": 0,
+            "edge_c": 73,
+            "hotspot_c": 108,
+            "memory_c": null,
+            "fan_rpm": 2010,
+            "asic_power_w": 200,
+            "gpu_activity_percent": 99
+          }
+        ],
+        "working_set_bytes": 910192640,
+        "private_bytes": 6985871360,
+        "cpu_seconds": 197.5625,
+        "peak_working_set_bytes": 1071931392,
+        "utc": "2026-09-19T11:15:34.4482834Z",
+        "system_available_bytes": 3597185024,
+        "gpu_counter_error": null
+      },
+      "at": "2026-09-19T11:15:35.0363103Z"
+    },
+    "exit": {
+      "exit_code": null,
+      "last_durable_sample_utc": "2026-09-19T11:15:34.4482834Z",
+      "ended_at": "2026-09-19T11:15:35.4462113Z",
+      "thermal_paused_seconds": 27.473700499999996,
+      "thermal_pause_count": 20,
+      "abort_reason": "gpu_temperature_operational_limit"
+    }
+  }
+]

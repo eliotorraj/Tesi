@@ -1,0 +1,98 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1",
+      "record_id": "rag_14ab090ab1799be67f1ac7e4f7aeb1913c1ed4a2b7c19be346924af1c8918f10",
+      "result": "verified",
+      "resolved": {
+        "circuit": "ae_indep_qiskit_30",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o2_default_default",
+            "median_score": 0.5183143469,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_default_default",
+            "median_score": 0.5183143469,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 3,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o2_sabre_sabre",
+            "median_score": 0.5183143469,
+            "tied_score_config_ids": [
+              "o2_default_default",
+              "o3_default_default",
+              "o2_sabre_sabre",
+              "o2_dense_sabre",
+              "o2_trivial_sabre",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o2_sabre_lookahead",
+              "o2_sabre_basic",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E1",
+      "record_id": "rag_14ab090ab1799be67f1ac7e4f7aeb1913c1ed4a2b7c19be346924af1c8918f10",
+      "result": "verified",
+      "resolved": {
+        "circuit": "ae_indep_qiskit_30",
+        "current_num_qubits": 30,
+        "example_num_qubits": 30
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.17803283800003555
+}

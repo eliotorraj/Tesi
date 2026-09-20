@@ -1,0 +1,207 @@
+{
+  "at": "2026-09-18T22:49:42.164496+00:00",
+  "revision": "minimal-v3-toon1-20260919",
+  "toon": {
+    "format": "TOON",
+    "package": "@toon-format/toon",
+    "version": "4.1.1",
+    "options": {
+      "indentSize": 2,
+      "delimiter": ","
+    },
+    "node_version": "v22.23.2",
+    "projection": "feature_rows_and_ordered_adjacency_v1"
+  },
+  "rows": [
+    {
+      "model": "qwen",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/ae_indep_qiskit_60/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "qwen",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/dj_indep_tket_2/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "exact_archived_request",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "qwen",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/su2random_indep_qiskit_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "qwen",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/qwen-prompt-v3-01/qwen/p1_t0/su2random_indep_tket_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "phi",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/ae_indep_qiskit_60/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "phi",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/dj_indep_tket_2/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "phi",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/su2random_indep_qiskit_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "phi",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/phi-prompt-v3-02/phi/p1_t0/su2random_indep_tket_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "gemma",
+      "circuit": "ae_indep_qiskit_60",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/ae_indep_qiskit_60/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "gemma",
+      "circuit": "dj_indep_tket_2",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/dj_indep_tket_2/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "gemma",
+      "circuit": "portfoliovqe_indep_qiskit_6",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/portfoliovqe_indep_qiskit_6/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_qiskit_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/su2random_indep_qiskit_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    },
+    {
+      "model": "gemma",
+      "circuit": "su2random_indep_tket_50",
+      "split": "train",
+      "examples": 5,
+      "archived_attempt": "artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/technical_episodes/gemma-prompt-v3-01/gemma/p1_t0/su2random_indep_tket_50/attempt_1",
+      "json_baseline_exact": true,
+      "original_v2_kind": "reconstructed_legacy_v2",
+      "original_full_kind": "reconstructed_unaliased_legacy_with_exact_complete_graph_rule",
+      "toon_roundtrip_verified": true,
+      "new_inference_calls": 0
+    }
+  ],
+  "tokenizer_executable_sha256": "5253e5abc542ed0b0efbaf40674d4738c1fd9e2f76cd19c282c81b1d8cfafd84",
+  "method": "Native llama.cpp b10930 tokenizer, original Q8_0 GGUF per model, complete native template replay, --no-bos --no-escape --ids",
+  "schema": "Readable JSON schema counted once in text; external json_schema constrains generation and is not prompt text.",
+  "limits": "No inference, quality, latency, output-token or total-consumption measurement. Counts are prepared input tokens.",
+  "stages": [
+    "original_v2",
+    "minimal_json",
+    "minimal_toon",
+    "original_full_json"
+  ]
+}

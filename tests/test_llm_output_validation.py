@@ -118,7 +118,7 @@ class LlmOutputValidationTests(unittest.TestCase):
         max_attempts: int = 3,
         devices: tuple[str, ...] = ("ibm_falcon_27",),
     ):
-        return build_default_service(
+        service = build_default_service(
             device_names=devices,
             dataset_path=self.root / "missing.jsonl",
             retrieval_backend="none",
@@ -126,6 +126,9 @@ class LlmOutputValidationTests(unittest.TestCase):
             max_llm_attempts=max_attempts,
             retrieval_limit=2,
         )
+        # This suite preserves validation/replay of the archived v2 schema.
+        service.prompt_builder.legacy_contract = True
+        return service
 
     def test_valid_json_text_and_mapping_are_accepted_first_pass(self) -> None:
         for output_kind in ("text", "mapping", "text_with_whitespace"):

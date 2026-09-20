@@ -1,0 +1,91 @@
+\providecommand{\ValidationFiguresPath}{figures/}
+
+\section{Prove tecniche sul train}
+
+Studio local-llm-v2. Contratto di risposta 4.0.0. Queste prove verificano il funzionamento su cinque circuiti di train; non misurano la generalizzazione. Il recupero tecnico può includere lo stesso circuito di train, come documentato nei prompt.
+
+\subsection{Dati, impostazioni e controlli}
+
+Qwen, Phi e Gemma usano lo stesso prompt, derivato dalla precedente checklist, alle temperature 0, 0,4 e 0,7. Si recuperano cinque esempi dal train, con distanza Manhattan sulle 49 caratteristiche e trasformazioni fissate sul train. Il formato del prompt è TOON e la risposta è JSON. Nella validation gli score del circuito corrente non entrano nel prompt né nei messaggi correttivi.
+
+La risposta contiene una coppia ammessa, da uno a due fatti strutturati e un'ipotesi libera fino a 1000 caratteri. I quattro fatti riguardano la presenza della coppia nei risultati mostrati, il dispositivo storico, l'uguaglianza del numero di qubit o la capacità del dispositivo. Il testo dell'ipotesi non viene verificato semanticamente.
+
+Si consentono tre tentativi logici. Dopo il terzo, una risposta conforme con coppia ammessa viene accettata anche se i fatti restano errati. Questo successo operativo non certifica la spiegazione o la qualità della compilazione. Le chiamate interrotte sono conservate, annullate nel conteggio logico e ripetute al recupero delle risorse.
+
+La GPU è una Radeon RX 6750 XT. Limite hotspot 110 gradi, pausa a 105 e ripresa a 100; limite edge 95 gradi. Soglia RAM disponibile 1 GiB. Sono impostazioni operative richieste, non una garanzia specifica del produttore. Il monitor campiona RAM, VRAM e temperature; i massimi campionati possono perdere picchi istantanei.
+
+\begin{center}\begin{tabular}{lrr}\toprule Modello & Contesto & Micro-batch\\\midrule
+
+qwen & 60000 & 128\\
+
+phi & 60000 & 128\\
+
+gemma & 60000 & 128\\
+
+\bottomrule\end{tabular}\end{center}
+
+Pesi Q8\_0; revisioni, hash, hardware, dipendenze e dati di provenienza sono conservati nei manifest dello studio.
+
+\begin{center}\begin{tabular}{lr}\toprule Parametro & Valore\\\midrule
+
+max\_tokens & 4096\\
+
+top\_p & 0.95\\
+
+top\_k & 40\\
+
+min\_p & 0.0\\
+
+seed & 20260913\\
+
+\bottomrule\end{tabular}\end{center}
+
+\subsection{Risultati}
+
+\begin{center}\small\begin{tabular}{lrrrr}\toprule Prova & Casi & Successi & Fatti verificati & Correzioni\\\midrule
+
+gemma/p0\_t0 & 5 & 5 & 4 & 4\\
+
+gemma/p0\_t04 & 5 & 5 & 4 & 5\\
+
+gemma/p0\_t07 & 5 & 5 & 2 & 8\\
+
+phi/p0\_t0 & 5 & 5 & 5 & 7\\
+
+phi/p0\_t04 & 5 & 5 & 4 & 4\\
+
+phi/p0\_t07 & 5 & 5 & 5 & 3\\
+
+qwen/p0\_t0 & 5 & 5 & 4 & 3\\
+
+qwen/p0\_t04 & 5 & 5 & 4 & 2\\
+
+qwen/p0\_t07 & 5 & 5 & 3 & 4\\
+
+\bottomrule\end{tabular}\end{center}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath fatti.png}
+
+\caption{Esiti dei controlli sui fatti. La motivazione libera non viene validata semanticamente.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath chiamate.png}
+
+\caption{Correzioni e interruzioni sono conteggiate separatamente. Le interruzioni non consumano tentativi logici.}\end{figure}
+
+\begin{figure}[htbp]\centering
+
+\includegraphics[width=\linewidth]{\ValidationFiguresPath costo.png}
+
+\caption{Totali solo quando tutte le chiamate sono misurabili. I valori mancanti non diventano zero; attese e caricamenti sono nei registri del supervisore.}\end{figure}
+
+\clearpage\subsection{Provenienza e limiti}
+
+Questa versione è stata progettata dopo aver esaminato la prima validation. Le due versioni restano separate. La correttezza dei fatti strutturati non misura la correttezza del testo libero né dimostra un rapporto causale fra motivazione e scelta. La presenza di un precedente storico non garantisce prestazioni sul nuovo circuito.
+
+I tempi HTTP includono le pause dentro la chiamata; attese di recupero e caricamenti sono registrati separatamente. I token mancanti restano espliciti. Tutti i tentativi, anche interrotti, restano disponibili.
+
+Le istruzioni per rigenerare sorgenti e figure sono nella guida dello studio. CSV, JSON e JSONL conservano i dati delle analisi. Ogni risultato di validation viene letto soltanto dopo i sigilli. Nessun dato del test è utilizzato.

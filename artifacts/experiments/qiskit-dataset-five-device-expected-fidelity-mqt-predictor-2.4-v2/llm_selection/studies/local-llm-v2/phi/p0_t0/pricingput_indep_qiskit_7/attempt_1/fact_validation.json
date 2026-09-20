@@ -1,0 +1,46 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1",
+      "record_id": "rag_6d48c581e7eac8c7eb32e4b154ea67775bc08e94f3af08bc66c9ba84593dc4fd",
+      "result": "verified",
+      "resolved": {
+        "circuit": "wstate_indep_qiskit_7",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "ibm_falcon_127",
+            "config_id": "o3_default_default",
+            "median_score": 0.9775234083,
+            "tied_score_config_ids": [
+              "o3_default_default"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1",
+      "record_id": "rag_6d48c581e7eac8c7eb32e4b154ea67775bc08e94f3af08bc66c9ba84593dc4fd",
+      "result": "verified",
+      "resolved": {
+        "circuit": "wstate_indep_qiskit_7",
+        "historical_device": "ibm_falcon_127"
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.009947818000000552
+}

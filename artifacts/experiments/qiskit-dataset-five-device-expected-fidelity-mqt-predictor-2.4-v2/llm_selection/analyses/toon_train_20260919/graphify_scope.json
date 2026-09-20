@@ -1,0 +1,22 @@
+{
+  "method": "graphify.watch._rebuild_code, scoped AST incremental update",
+  "started_at": "2026-09-18T22:59:54.299270+00:00",
+  "changed_paths": [
+    "prototype/prompting/toon.py",
+    "prototype/prompting/minimal.py",
+    "prototype/prompting/rendering.py",
+    "prototype/prompting/toon_runtime/codec.mjs",
+    "prototype/prompting/toon_runtime/package.json",
+    "prototype/prompting/toon_runtime/package-lock.json",
+    "prototype/prompting/toon_runtime/node-lock.json",
+    "llm_selection/setup_toon.py",
+    "llm_selection/toon_audit.py",
+    "llm_selection/toon_report.py",
+    "llm_selection/provenance.py",
+    "tests/test_minimal_prompt.py",
+    "tests/test_toon_prompt.py"
+  ],
+  "completed_at": "2026-09-18T23:05:50.924008+00:00",
+  "update_exit_code": 0,
+  "query_after_exit_code": 0
+}

@@ -1,0 +1,24 @@
+Graph: graphify-out/graph.json (18262 nodes) | Traversal: BFS depth=2 | Start: ['encode()', 'encode_view()', 'encode_prompt()', 'prompt_v2/final_checks.py', 'prototype/prompting/rendering.py', 'toon_audit.py', 'view_scope'] | 232 nodes found
+
+[!] TRUNCATED: showing 19 of 232 nodes (~700-token budget). The answer may be among the 213 cut nodes — raise the token budget (CLI: --budget) or narrow the query (e.g. context_filter=['call'], or get_node for a specific symbol).
+
+NODE encode() [src=artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/code_snapshots/0ac206996da05e481497b231c8f9ab3d129b4291838e1be98cd41c0adb597700/llm_selection/compact_prompt.py loc=L61 community=0ac206996da05e481497b231c8f9ab3d129b4291838e1be98cd41c0adb597700/llm_selection/compact_prompt.py]
+NODE encode_view() [src=prototype/prompting/toon.py loc=L101 community=minimal.py]
+NODE encode_prompt() [src=artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/code_snapshots/722d8f35e47f63bbb1c2fc694aabc6f8efcf3eb4ae3e60f71ab398dc64322b07/prototype/prompting/wire.py loc=L32 community=722d8f35e47f63bbb1c2fc694aabc6f8efcf3eb4ae3e60f71ab398dc64322b07/prototype/prompting/compact.py]
+NODE prompt_v2/final_checks.py [src=artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_v2/final_checks.py loc=L1 community=write_json]
+NODE prototype/prompting/rendering.py [src=prototype/prompting/rendering.py loc=L1 community=minimal.py]
+NODE toon_audit.py [src=llm_selection/toon_audit.py loc=L1 community=minimal.py]
+NODE view_scope [src=schemas/qiskit_rag_example.schema.json loc=L26 community=properties]
+NODE pathlib [src= loc= community=pathlib]
+NODE json [src= loc= community=pathlib]
+NODE argparse [src= loc= community=load_catalog]
+NODE hashlib [src= loc= community=stable_sha256]
+NODE copy [src= loc= community=pathlib]
+NODE write_json() [src=llm_selection/common.py loc=L36 community=write_json]
+NODE read_json() [src=llm_selection/common.py loc=L33 community=write_json]
+NODE llm_selection/common.py [src=llm_selection/common.py loc=L1 community=write_json]
+NODE minimal.py [src=prototype/prompting/minimal.py loc=L1 community=minimal.py]
+NODE test_minimal_prompt.py [src=tests/test_minimal_prompt.py loc=L1 community=minimal.py]
+NODE model_input() [src=prototype/prompting/minimal.py loc=L163 community=minimal.py]
+NODE messages() [src=prototype/prompting/rendering.py loc=L13 community=minimal.py]
+... (truncated — 213 more nodes cut by ~700-token budget. Narrow with context_filter=['call'] or use get_node for a specific symbol)

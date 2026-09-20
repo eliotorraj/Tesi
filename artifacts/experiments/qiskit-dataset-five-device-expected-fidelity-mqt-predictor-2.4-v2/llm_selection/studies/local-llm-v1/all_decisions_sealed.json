@@ -1,0 +1,9 @@
+{
+  "study_sha256": "abebbac4bdf5cb1bd8a63aed9cc223e934b7ee2ec73614c9580765e53bb54075",
+  "model_seals": {
+    "qwen": "e81042c83775013fbc0500c4147b79b8d9a6eb30da036f620d724f268b7dae06",
+    "phi": "6400446b3feb34e04c1afe49230934ca3767d28fa61767a59030d034ef8bef8c",
+    "gemma": "6411a4a79136dc90f0439134a7a7856e577d065ae71628ea837a4296ef75f64e"
+  },
+  "decisions_expected": 792
+}

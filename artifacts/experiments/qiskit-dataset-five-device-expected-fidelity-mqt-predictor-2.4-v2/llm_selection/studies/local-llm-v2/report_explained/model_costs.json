@@ -1,0 +1,41 @@
+[
+  {
+    "model": "qwen",
+    "episodes": 264,
+    "total_call_seconds": 3597.324415342997,
+    "total_call_seconds_measured_episodes": 264,
+    "total_input_tokens": 4619210,
+    "total_input_tokens_measured_episodes": 264,
+    "total_output_tokens": 57060,
+    "total_output_tokens_measured_episodes": 264,
+    "physical_calls": 400,
+    "physical_calls_measured_episodes": 264,
+    "median_call_seconds_per_episode": 8.689566737499831
+  },
+  {
+    "model": "phi",
+    "episodes": 264,
+    "total_call_seconds": 7629.17625484503,
+    "total_call_seconds_measured_episodes": 264,
+    "total_input_tokens": 5757693,
+    "total_input_tokens_measured_episodes": 264,
+    "total_output_tokens": 88574,
+    "total_output_tokens_measured_episodes": 264,
+    "physical_calls": 605,
+    "physical_calls_measured_episodes": 264,
+    "median_call_seconds_per_episode": 16.703186664000896
+  },
+  {
+    "model": "gemma",
+    "episodes": 264,
+    "total_call_seconds": 3947.318036262983,
+    "total_call_seconds_measured_episodes": 264,
+    "total_input_tokens": 7252473,
+    "total_input_tokens_measured_episodes": 264,
+    "total_output_tokens": 70218,
+    "total_output_tokens_measured_episodes": 264,
+    "physical_calls": 584,
+    "physical_calls_measured_episodes": 264,
+    "median_call_seconds_per_episode": 8.034715344000688
+  }
+]

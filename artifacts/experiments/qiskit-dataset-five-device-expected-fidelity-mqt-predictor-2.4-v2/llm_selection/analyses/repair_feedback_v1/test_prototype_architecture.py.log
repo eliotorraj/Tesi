@@ -1,0 +1,12 @@
+test_invalid_llm_response_is_retried_then_compiled_after_confirmation (test_prototype_architecture.PrototypeArchitectureTests.test_invalid_llm_response_is_retried_then_compiled_after_confirmation) ... /home/elio/Tesi-mqt-2.4-v2/.venv/lib/python3.12/site-packages/stevedore/extension.py:340: DeprecationWarning: Since backends now support running jobs that contain both fractional gates and dynamic circuit, IBMFractionalTranslationPlugin is deprecated as of qiskit-ibm-runtime 0.42.0 and will be removed no sooner than 3 months after the release date. Use IBMDynamicFractionalTranslationPlugin instead.
+  obj = plugin(*invoke_args, **invoke_kwds)
+ok
+test_legacy_positional_service_constructor_remains_compatible (test_prototype_architecture.PrototypeArchitectureTests.test_legacy_positional_service_constructor_remains_compatible) ... ok
+test_rag_prompt_compaction_preserves_claim_and_evidence (test_prototype_architecture.PrototypeArchitectureTests.test_rag_prompt_compaction_preserves_claim_and_evidence) ... ok
+test_retriever_rejects_legacy_json_without_train_provenance (test_prototype_architecture.PrototypeArchitectureTests.test_retriever_rejects_legacy_json_without_train_provenance) ... ok
+test_width_filter_marks_small_hardware_unavailable (test_prototype_architecture.PrototypeArchitectureTests.test_width_filter_marks_small_hardware_unavailable) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.077s
+
+OK

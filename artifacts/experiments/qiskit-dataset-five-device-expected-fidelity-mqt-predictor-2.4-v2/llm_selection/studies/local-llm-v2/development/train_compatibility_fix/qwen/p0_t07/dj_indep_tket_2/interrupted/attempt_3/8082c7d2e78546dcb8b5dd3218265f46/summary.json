@@ -1,0 +1,39 @@
+{
+  "attempt": 3,
+  "input_tokens": 11120,
+  "response": {
+    "started_at": "2026-09-19T18:26:03.074555+00:00",
+    "ended_at": "2026-09-19T18:26:09.152503+00:00",
+    "elapsed_seconds": 6.077950413999133,
+    "ttft_content_seconds": 0.4266168679987459,
+    "ttft_any_seconds": 0.4266168679987459,
+    "content": "{\n  \"selected_device\": \"ibm_heron_156\",\n  \"config_id\": \"o2_default_default\",\n  \"facts\": [\n    {\n      \"assertion\": \"selected_device_matches_example\",\n      \"example_id\": \"E4\"\n    },\n    {\n      \"assertion\": \"selected_device_has_enough_qubits\",\n      \"example_id\": \"E4\"\n    }\n  ],\n  \"hypothesis\": \"I propose this pair because the device matches the historical selection for a similar 2-qubit circuit and possesses sufficient qubits to run the current task. The hypothesis is a proposal, not a verified fact: do not claim that performance on the current circuit is known or guaranteed. Historical results belong only to their original circuits.\"",
+    "reasoning": "",
+    "usage": null,
+    "timings": {
+      "cache_n": 11021,
+      "prompt_n": 99,
+      "prompt_ms": 371.256,
+      "prompt_per_token_ms": 3.7500606060606057,
+      "prompt_per_second": 266.6623569720085,
+      "predicted_n": 169,
+      "predicted_ms": 5497.256,
+      "predicted_per_token_ms": 32.721761904761905,
+      "predicted_per_second": 30.560701557286034
+    },
+    "finish_reason": null,
+    "stream_done": false,
+    "curl_exit_code": 56,
+    "stream_parse_errors": [],
+    "server_errors": [],
+    "transport_retries": 0,
+    "server_final": null,
+    "transport_success": false
+  },
+  "llm_calls": 1,
+  "status": "transport_failure",
+  "issues": [],
+  "failure": {
+    "category": "transport_failure"
+  }
+}

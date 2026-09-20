@@ -1,0 +1,24 @@
+{
+  "status": "success",
+  "selected_device_id": "quantinuum_h2_56",
+  "selected_config_id": "o2_default_default",
+  "failure": null,
+  "circuit_id": "qftentangled_indep_tket_6",
+  "source_sha256": "3ddbd391ba42ef3d14e419cbab2432ad97bcfb498cb75595de4d9597c34029a1",
+  "split": "validation",
+  "configuration_id": "p0_t07",
+  "attempt_count": 1,
+  "llm_calls": 1,
+  "repair_count": 0,
+  "transport_retries": 0,
+  "ended_at": "2026-09-19T12:03:22.352858+00:00",
+  "this_invocation_seconds": 3.834707351000361,
+  "measured_call_seconds": 3.4706546030001846,
+  "python_process_peak_rss_bytes": 1762357248,
+  "python_rss_method": "Linux getrusage ru_maxrss, cumulative process high-water mark; not an exclusive per-call peak",
+  "attempts_sha256": "5e7f56a3783a41d18d25d58be9665c61df6aba4fee00fbb7645794e9c2f60929",
+  "input_prompt_sha256": "b80ad559c222e152c095d9019fb8426f2d1b01b874437e9e176f1336f50c0057",
+  "train_self_check": {
+    "applicable": false
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-19T15:49:16.634143+00:00",
+  "technical": false,
+  "models": [
+    "qwen",
+    "phi",
+    "gemma"
+  ]
+}

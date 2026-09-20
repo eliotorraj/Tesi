@@ -1,0 +1,79 @@
+{
+  "schema_version": "4.0.0",
+  "json_valid": true,
+  "schema_valid": true,
+  "selection_valid": true,
+  "facts_status": "verified",
+  "fact_checks": [
+    {
+      "index": 0,
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E5",
+      "record_id": "rag_ab897d2206aaa59ab1dca4c70049c723f75658a1096d8f758741f61c0d7cde72",
+      "result": "verified",
+      "resolved": {
+        "circuit": "dj_indep_tket_10",
+        "historical_rows": [
+          {
+            "rank": 1,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_default_default",
+            "median_score": 0.9719992064,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 2,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_sabre_sabre",
+            "median_score": 0.9719992064,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          },
+          {
+            "rank": 3,
+            "device_id": "quantinuum_h2_56",
+            "config_id": "o3_dense_sabre",
+            "median_score": 0.9719992064,
+            "tied_score_config_ids": [
+              "o3_default_default",
+              "o3_sabre_sabre",
+              "o3_dense_sabre",
+              "o3_trivial_sabre",
+              "o3_sabre_lookahead",
+              "o3_sabre_basic"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "assertion": "selected_device_matches_example",
+      "example_id": "E5",
+      "record_id": "rag_ab897d2206aaa59ab1dca4c70049c723f75658a1096d8f758741f61c0d7cde72",
+      "result": "verified",
+      "resolved": {
+        "circuit": "dj_indep_tket_10",
+        "historical_device": "quantinuum_h2_56"
+      }
+    }
+  ],
+  "issues": [],
+  "hypothesis_status": "not_evaluated",
+  "explanation_fully_verified": false,
+  "hypothesis_contains_example_ids": false,
+  "validation_seconds": 0.010143759000129648
+}

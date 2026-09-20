@@ -1,0 +1,10 @@
+accepted_unverified_facts,circuits,facts_checked,facts_verified,failures,final_facts_verified,first_attempt_facts_verified,interruptions,median_regret_absolute,physical_calls,regret_available,regret_source_hashes,repairs,total_call_seconds,total_output_tokens,trial_id,valid_and_compilable
+1,5,18,13,{},4,2,0,,9,0,[],4,85.03374575499765,1124,gemma/p0_t0,5
+1,5,20,13,{},4,2,0,,10,0,[],5,90.2357901009982,1218,gemma/p0_t04,5
+3,5,26,15,{},2,1,0,,13,0,[],8,85.79613673800122,1591,gemma/p0_t07,5
+0,5,23,15,{},5,0,0,,12,0,[],7,146.4934956080033,1728,phi/p0_t0,5
+1,5,18,11,{},4,2,0,,9,0,[],4,136.83013357100208,1411,phi/p0_t04,5
+0,5,15,11,{},5,2,0,,8,0,[],3,88.68754199999967,1151,phi/p0_t07,5
+1,5,16,12,{},4,3,0,,8,0,[],3,78.98499675999847,1303,qwen/p0_t0,5
+1,5,14,11,{},4,4,0,,7,0,[],2,68.9279049910001,1002,qwen/p0_t04,5
+2,5,18,11,{},3,3,0,,9,0,[],4,58.62207033600316,1123,qwen/p0_t07,5

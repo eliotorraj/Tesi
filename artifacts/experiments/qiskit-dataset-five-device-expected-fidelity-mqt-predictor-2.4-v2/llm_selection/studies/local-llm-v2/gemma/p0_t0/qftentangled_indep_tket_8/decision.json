@@ -1,0 +1,22 @@
+{
+  "status": "success",
+  "selected_device_id": "ibm_falcon_127",
+  "selected_config_id": "o2_default_default",
+  "failure": null,
+  "circuit_id": "qftentangled_indep_tket_8",
+  "source_sha256": "c62aca60cb1367f745fd740af3f31248e556897398e25694c4ffc7123c8dde1e",
+  "split": "validation",
+  "configuration_id": "p0_t0",
+  "attempt_count": 2,
+  "llm_calls": 2,
+  "repair_count": 1,
+  "transport_retries": 0,
+  "facts_status": "verified",
+  "accepted_with_unverified_facts": false,
+  "hypothesis_status": "not_evaluated",
+  "ended_at": "2026-09-20T00:00:23.107658+00:00",
+  "measured_call_seconds": 5.455487027000345,
+  "measured_call_seconds_observed": 5.455487027000345,
+  "attempts_sha256": "295ca56388198d9c435237670e89b6f8aab1c714c8c304d8ebe3aedce9259563",
+  "input_prompt_sha256": "114859a41ba9f0f87f00f061bfcd439c8a661db045fff7288143e638ad8d76b9"
+}

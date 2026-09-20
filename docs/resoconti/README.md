@@ -8,6 +8,7 @@ Per le regole scientifiche usare il [protocollo corrente](../protocollo_sperimen
 
 | Documento | Che cosa permette di ricostruire |
 | --- | --- |
+| [Seconda validation: fatti e ipotesi](2026-09-19_validation_fatti_v4.md) | Nuovo contratto, correzioni, ripresa delle interruzioni, regret osservato e prove train. |
 | [Ricognizione e riordino del 15–16 settembre](2026-09-16_ricognizione_documentazione.md) | Stato osservato, riorganizzazione, fonti controllate e limiti della verifica. |
 | [Prompt compatto, 15 settembre](2026-09-15_prompt_compatto.md) | Riduzione reversibile dei prompt, controlli e prova Qwen sul circuito train DJ. |
 | [Diagnosi Qwen, 15 settembre](2026-09-15_diagnosi_qwen.md) | Lettura delle risposte precedenti, errori e ipotesi da verificare. |

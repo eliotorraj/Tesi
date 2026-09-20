@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-18T17:17:12.197744+00:00",
+  "scope": [
+    "prototype/prompting/minimal.py",
+    "prototype/prompting/rendering.py",
+    "llm_selection/run.py",
+    "tests/test_minimal_prompt.py",
+    "docs/approfondimenti/compattazione_prompt.md",
+    "docs/protocollo_sperimentale.md",
+    "prototype/prompting/README.md"
+  ],
+  "purpose": "Messaggi compatti per dispositivo, configurazione e citazioni non ammesse; nessuna inferenza."
+}

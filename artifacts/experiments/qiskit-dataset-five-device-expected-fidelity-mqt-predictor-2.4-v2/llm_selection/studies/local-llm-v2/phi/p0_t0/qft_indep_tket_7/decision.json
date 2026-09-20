@@ -1,0 +1,22 @@
+{
+  "status": "success",
+  "selected_device_id": "quantinuum_h2_56",
+  "selected_config_id": "o2_default_default",
+  "failure": null,
+  "circuit_id": "qft_indep_tket_7",
+  "source_sha256": "2836d5d7eb2a88e78957465099961ecc45c20556aeabc19f5672250bd48dc292",
+  "split": "validation",
+  "configuration_id": "p0_t0",
+  "attempt_count": 2,
+  "llm_calls": 2,
+  "repair_count": 1,
+  "transport_retries": 0,
+  "facts_status": "verified",
+  "accepted_with_unverified_facts": false,
+  "hypothesis_status": "not_evaluated",
+  "ended_at": "2026-09-19T21:38:22.275694+00:00",
+  "measured_call_seconds": 9.881559420000485,
+  "measured_call_seconds_observed": 9.881559420000485,
+  "attempts_sha256": "7e31bdb2451d9cc0da09caea6a726fe9397d592b6868e8f3b5369d818c42cd51",
+  "input_prompt_sha256": "47cec39cc5e13411ddf7ae82eab8050fc10b3dcfcb9b62609fbdcf87bc4fa9d2"
+}

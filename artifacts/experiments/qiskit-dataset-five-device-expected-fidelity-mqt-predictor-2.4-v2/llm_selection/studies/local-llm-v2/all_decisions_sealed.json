@@ -1,0 +1,8 @@
+{
+  "study_sha256": "dca8051cb605a1b76aa29fc9d514271b5bd3653df1d977ed1c223f19f1fe6003",
+  "models": {
+    "qwen": "68c9154c4125467badd40dc74d1b70e8c9b912097b1d43860f78fdeaa8e4b877",
+    "phi": "57da63ce41db4529ea65c182f60ec0b901a0c89c0d72a8da8acdf3cdeb265ab9",
+    "gemma": "f1cee9eb49b9db0d5365e60083271399bd037a007e144bdec6d2514f527113e9"
+  }
+}

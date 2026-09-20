@@ -1,0 +1,22 @@
+{
+  "status": "success",
+  "selected_device_id": "quantinuum_h2_56",
+  "selected_config_id": "o3_sabre_lookahead",
+  "failure": null,
+  "circuit_id": "qftentangled_indep_qiskit_50",
+  "source_sha256": "9a6e2be97c6253ba084feff2e920da5cecfd132aa18e6c8c81f3ce97ccd81c13",
+  "split": "validation",
+  "configuration_id": "p0_t07",
+  "attempt_count": 2,
+  "llm_calls": 2,
+  "repair_count": 1,
+  "transport_retries": 0,
+  "facts_status": "verified",
+  "accepted_with_unverified_facts": false,
+  "hypothesis_status": "not_evaluated",
+  "ended_at": "2026-09-19T22:04:18.150551+00:00",
+  "measured_call_seconds": 56.94016055099928,
+  "measured_call_seconds_observed": 56.94016055099928,
+  "attempts_sha256": "8bf9139cd484ca81965c492affa9f5247b6c8ac338b135aa72e1aac5ef2d73f1",
+  "input_prompt_sha256": "8aa8066f58d99df162c37108c2cadd0870bfa50f4a3b29f16b1e442f3723b310"
+}

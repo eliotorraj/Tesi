@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "llm_recommendation_v4.schema.json",
+  "title": "LLM recommendation 4.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "selected_device",
+    "config_id",
+    "facts",
+    "hypothesis"
+  ],
+  "properties": {
+    "selected_device": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "config_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "facts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assertion"
+        ],
+        "properties": {
+          "assertion": {
+            "type": "string",
+            "enum": [
+              "selected_pair_among_reported_best",
+              "selected_device_matches_example",
+              "same_qubit_count_as_example",
+              "selected_device_has_enough_qubits"
+            ]
+          },
+          "example_id": {
+            "type": "string",
+            "pattern": "^E[1-5]$"
+          }
+        }
+      }
+    },
+    "hypothesis": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    }
+  }
+}

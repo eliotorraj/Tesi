@@ -1,0 +1,12 @@
+[
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[0]",
+    "message": "Fact 1 (same_qubit_count_as_example, example_id=E1) does not match the provided data. Observed data: {\"circuit\": \"graphstate_indep_tket_3\", \"current_num_qubits\": 4, \"example_num_qubits\": 3}. Rule: example_id required: current and example circuits have exactly the same num_qubits; this does not establish similar topology or performance. Correct this fact; an allowed proposed pair need not change."
+  },
+  {
+    "code": "FACT_NOT_SUPPORTED",
+    "path": "$.facts[1]",
+    "message": "Fact 2 (selected_device_has_enough_qubits, example_id=E2) does not match the provided data. Observed data: {}. Rule: no example_id: selected device num_qubits >= current circuit num_qubits; this does not establish compilation quality. Correct this fact; an allowed proposed pair need not change."
+  }
+]

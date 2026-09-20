@@ -76,7 +76,7 @@ class ResumeTests(unittest.TestCase):
         self.root=Path(self.temporary.name)/"trial"/"case"
         self.saved={"prompt_sha256":"input","source_sha256":"source","circuit_id":"case",
             "circuit_metadata":{"split":"train"},"registry_sha256":"registry","examples":[],
-            "features":[],"retrieval_and_prompt_seconds":0.1,"prompt":{"live_request":{"compatible_hardware":[]},"response_contract":{"json_schema":{}}}}
+            "features":[],"retrieval_and_prompt_seconds":0.1,"prompt":{"live_request":{"request_id":"fixture","catalog_snapshot_id":"fixture","figure_of_merit":"expected_fidelity","circuit":{"features":{}},"compatible_hardware":[]},"allowed_evidence_registry":{"records":[]},"configuration_catalog":{"allowed_configurations":[]},"response_contract":{"json_schema":{}}}}
         self.config={"id":"p0_t0","prompt_variant":"base","temperature":0.0}
         self.service=SimpleNamespace(validator=SimpleNamespace(validate=lambda *a,**k:SimpleNamespace(
             issues=[Issue()],is_valid=False)))
@@ -109,6 +109,8 @@ class ResumeTests(unittest.TestCase):
     def test_saved_complete_response_is_recovered_without_a_new_call(self):
         response={"transport_success":True,"content":"saved","elapsed_seconds":1.0,"curl_exit_code":0}
         write_json(self.root/"attempt_1"/"call"/"response.json",response)
+        write_json(self.root/"attempt_1"/"prompt.json", self.saved["prompt"])
+        write_json(self.root/"attempt_1"/"encoding.json", run.encoding_audit(self.saved["prompt"]))
         summary={"status":"success","attempt":1,"issues":[],"llm_calls":1,"response":response,
                  "selected_device_id":"device","selected_config_id":"config"}
         with patch.object(run,"summarize_response",return_value=summary) as validate,patch.object(run,"generate") as generate:

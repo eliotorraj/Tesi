@@ -1,0 +1,294 @@
+--- before/prototype/prompting/minimal.py
++++ after/prototype/prompting/minimal.py
+@@ -9,7 +9,7 @@
+ 
+ from prototype.quantum_assistant.schema_validation import load_schema
+ 
+-REVISION = "minimal-v3-20260918"
++REVISION = "minimal-v3-repair1-20260918"
+ CONTRACT_VERSION = "3.0.0"
+ SCHEMA = load_schema("llm_recommendation_v3.schema.json")
+ NOTE = (
+@@ -134,17 +134,29 @@
+     return result
+ 
+ 
+-def feedback(issues):
+-    """Non reinserisce nel prompt valori arbitrari riportati negli errori dello schema."""
++def feedback(issues, *, has_examples=True):
++    """Una frase per tipo di errore; nessun valore arbitrario dalla risposta."""
+     result = []
+     for issue in issues:
+-        code = issue.get("code", "")
+-        if not re.fullmatch(r"[A-Z_]{1,96}", code):
+-            code = "LLM_OUTPUT_SCHEMA_INVALID"
+         path = issue.get("path", "$")
+-        if not re.fullmatch(r"\$(\.(selected_device|config_id|claim|evidence)(\[[0-9]+\])?)?", path):
+-            path = "$"
+-        result.append({"code": code, "field": path})
++        if path == "$.selected_device":
++            message = "Dispositivo non ammesso: scegli selected_device dagli ID di compatible_hardware."
++        elif path == "$.config_id":
++            message = (
++                "Configurazione non ammessa: scegli config_id da configuration_catalog, "
++                "rispettando i vincoli del dispositivo scelto."
++            )
++        elif re.fullmatch(r"\$\.evidence(\[[0-9]+\])?", path):
++            message = (
++                "Evidence non valida: usa solo gli ID di retrieved_labeled_examples, "
++                "senza duplicati e con almeno un riferimento."
++                if has_examples else
++                "Evidence non valida: non ci sono esempi storici; usa evidence: []."
++            )
++        else:
++            message = "Risposta non conforme allo schema."
++        if message not in result:
++            result.append(message)
+     return result
+ 
+ 
+@@ -173,7 +185,9 @@
+     if live.get("constraints"):
+         result["constraints"] = copy.deepcopy(live["constraints"])
+     if prompt.get("previous_validation_errors"):
+-        result["previous_validation_errors"] = feedback(prompt["previous_validation_errors"])
++        result["previous_validation_errors"] = feedback(
++            prompt["previous_validation_errors"],
++            has_examples=bool(prompt["allowed_evidence_registry"]["records"]))
+     # Request prose can contain pasted QASM/provenance; validated constraints suffice.
+     return result
+ 
+--- before/prototype/prompting/rendering.py
++++ after/prototype/prompting/rendering.py
+@@ -3,6 +3,7 @@
+ from .minimal import NOTE, model_input, response_schema
+ 
+ BASE_INSTRUCTION = NOTE
++REPAIR_INSTRUCTION = "Rispondi nuovamente con l’intero JSON richiesto per il circuito corrente."
+ CHECKLIST = (
+     "Check that the device is compatible, config_id is allowed for it, and every cited "
+     "example ID was supplied. Do not report a measured score for the new circuit."
+@@ -22,4 +23,6 @@
+         text += "\n" + CHECKLIST
+     elif variant != "base":
+         raise ValueError("Unknown prompt variant")
++    if represented.get("previous_validation_errors"):
++        text += "\n" + REPAIR_INSTRUCTION
+     return [{"role": "user", "content": text}]
+--- before/llm_selection/run.py
++++ after/llm_selection/run.py
+@@ -87,7 +87,8 @@
+     initial_request_sha256 = digest(payload(saved["prompt"], configuration))
+     if (directory/"decision.json").exists():
+         previous=read_json(directory/"begin.json")
+-        if previous.get("initial_request_sha256") != initial_request_sha256:
++        if (previous.get("initial_request_sha256") != initial_request_sha256
++                or previous.get("prompt_encoding_revision") != REVISION):
+             raise ValueError("Changed prompt encoding/instructions: use a new episode label")
+         if previous["input_prompt_sha256"] != saved["prompt_sha256"] or previous["configuration"] != configuration:
+             raise ValueError("Terminal episode belongs to different inputs")
+@@ -110,7 +111,8 @@
+             "original_preparation_reused":True,"launch":launch}
+     if (directory/"begin.json").exists():
+         old=read_json(directory/"begin.json")
+-        if old.get("initial_request_sha256") != initial_request_sha256:
++        if (old.get("initial_request_sha256") != initial_request_sha256
++                or old.get("prompt_encoding_revision") != REVISION):
+             raise ValueError("Changed prompt encoding/instructions: use a new episode label")
+         if old["input_prompt_sha256"] != saved["prompt_sha256"] or old["configuration"] != configuration:
+             raise ValueError("Cannot resume an episode with changed inputs")
+--- before/tests/test_minimal_prompt.py
++++ after/tests/test_minimal_prompt.py
+@@ -10,7 +10,7 @@
+ 
+ import test_claim_evidence_validation as fixtures
+ from prototype.prompting.minimal import audit, citation_context, model_input, response_schema
+-from prototype.prompting.rendering import messages
++from prototype.prompting.rendering import messages, REPAIR_INSTRUCTION
+ from prototype.quantum_assistant.adapters.context import StructuredPromptBuilder
+ from prototype.quantum_assistant.models import ApprovedCompilation, CompilationArtifact, PromptEnvelope
+ from prototype.quantum_assistant.services import UnvalidatedRecommendationError
+@@ -159,6 +159,67 @@
+         self.assertNotIn("a" * 64, text)
+         self.assertEqual(citation_context(prompt), self.context)
+ 
++    def test_correction_messages_cover_validator_errors_without_repeating_context(self):
++        cases = [
++            (self.response(selected_device="ibm_falcon_156"), "Dispositivo non ammesso"),
++            (self.response(config_id="invented"), "Configurazione non ammessa"),
++            (self.response(evidence=["E6"]), "Evidence non valida"),
++            (self.response(evidence=["E1", "E1"]), "Evidence non valida"),
++            (self.response(evidence=[]), "Evidence non valida"),
++            ("not json", "Risposta non conforme allo schema"),
++        ]
++        self.assertNotIn(REPAIR_INSTRUCTION, messages(self.prompt, "base")[0]["content"])
++        for response, expected in cases:
++            with self.subTest(expected=expected, response=response):
++                result = self.validate(response)
++                self.assertFalse(result.is_valid)
++                prompt = copy.deepcopy(self.prompt)
++                prompt["previous_validation_errors"] = [i.to_dict() for i in result.issues]
++                view = model_input(prompt)
++                original_view = model_input(self.prompt)
++                errors = view.pop("previous_validation_errors")
++                self.assertEqual(view, original_view)
++                self.assertEqual(len(errors), 1)
++                self.assertIn(expected, errors[0])
++                for variant in ("base", "checklist"):
++                    text = payload(prompt, {"temperature": 0, "prompt_variant": variant})["messages"][0]["content"]
++                    self.assertIn(expected, text)
++                    self.assertEqual(text.count(REPAIR_INSTRUCTION), 1)
++                    self.assertNotIn("LLM_OUTPUT_", text)
++                    self.assertEqual(text.count('"compatible_hardware":'), 1)
++                self.assertEqual(citation_context(prompt), self.context)
++
++    def test_correction_deduplicates_categories_and_handles_no_rag(self):
++        result = self.validate(self.response(selected_device="missing", config_id="missing"))
++        prompt = copy.deepcopy(self.prompt)
++        prompt["previous_validation_errors"] = [i.to_dict() for i in result.issues] * 3
++        self.assertEqual(len(model_input(prompt)["previous_validation_errors"]), 2)
++        compatibility = replace(self.f.prepared.mask_result,
++            available=(replace(self.f.prepared.mask_result.available[0],
++                               allowed_qiskit_configuration_ids=("o3_default_default",)),))
++        result = self.f.service.validator.validate(
++            self.response(), self.f.prepared.request, compatibility,
++            self.f.prepared.hardware_catalog, evidence_registry=self.registry, citation_context=self.context)
++        prompt["previous_validation_errors"] = [i.to_dict() for i in result.issues]
++        self.assertIn("vincoli del dispositivo", model_input(prompt)["previous_validation_errors"][0])
++        short_prompt = self.f.service.prompt_builder.build(
++            self.f.prepared.request, self.f.prepared.mask_result, (self.f.example,),
++            evidence_registry=self.f.registry).payload
++        result = self.validate(self.response(evidence=["E4", "E5"]),
++                               registry=self.f.registry, context=citation_context(short_prompt))
++        short_prompt["previous_validation_errors"] = [i.to_dict() for i in result.issues]
++        self.assertEqual(len(model_input(short_prompt)["previous_validation_errors"]), 1)
++        self.assertIn("retrieved_labeled_examples", model_input(short_prompt)["previous_validation_errors"][0])
++        registry = self.f.service.evidence_registry_builder.build(())
++        empty_prompt = self.f.service.prompt_builder.build(
++            self.f.prepared.request, self.f.prepared.mask_result, (), evidence_registry=registry).payload
++        result = self.validate(self.response(), registry=registry, context=citation_context(empty_prompt))
++        empty_prompt["previous_validation_errors"] = [i.to_dict() for i in result.issues]
++        errors = model_input(empty_prompt)["previous_validation_errors"]
++        self.assertEqual(len(errors), 1)
++        self.assertIn("evidence: []", errors[0])
++        self.assertNotIn("almeno un riferimento", errors[0])
++
+     def test_service_repairs_with_stable_aliases_and_compilation_gate(self):
+         service = self.f.service
+         service.context_retriever = Mock()
+@@ -173,6 +234,8 @@
+         self.assertEqual(result.attempts, 2)
+         self.assertEqual(citation_context(sent[0]), citation_context(sent[1]))
+         self.assertTrue(sent[1]["previous_validation_errors"])
++        self.assertIn("Evidence non valida", messages(sent[1], "base")[0]["content"])
++        self.assertIn(REPAIR_INSTRUCTION, messages(sent[1], "base")[0]["content"])
+         service.context_retriever.retrieve.assert_called_once()
+         service.compiler.compile.assert_not_called()
+         with self.assertRaises(UnvalidatedRecommendationError):
+@@ -215,6 +278,18 @@
+                 after = json.loads((directory/"attempt_2/encoding.json").read_text())
+                 self.assertEqual(before["aliases"], after["aliases"])
+                 self.assertEqual(before["citation_context"], after["citation_context"])
++                sent_first = generate.call_args_list[0].args[0]["messages"][0]["content"]
++                sent_repair = generate.call_args_list[1].args[0]["messages"][0]["content"]
++                self.assertNotIn(REPAIR_INSTRUCTION, sent_first)
++                self.assertIn("Evidence non valida", sent_repair)
++                self.assertEqual(sent_repair.count(REPAIR_INSTRUCTION), 1)
++                with patch.object(run, "REVISION", "another-repair-policy"):
++                    for terminal in (True, False):
++                        if not terminal:
++                            (directory/"decision.json").unlink()
++                        with self.assertRaisesRegex(ValueError, "new episode label"):
++                            run.episode(directory, saved, {"id": "p0_t0", "prompt_variant": "base", "temperature": 0},
++                                        self.f.service, self.f.prepared, self.registry, 0.1, {"context": 8192})
+                 with patch("prototype.prompting.rendering.BASE_INSTRUCTION", "Changed"):
+                     with self.assertRaisesRegex(ValueError, "new episode label"):
+                         run.episode(directory, saved, {"id": "p0_t0", "prompt_variant": "base", "temperature": 0},
+--- before/docs/approfondimenti/compattazione_prompt.md
++++ after/docs/approfondimenti/compattazione_prompt.md
+@@ -1,7 +1,8 @@
+ # Prompt essenziale dell'assistente
+ 
+ Dal 18 settembre 2026 chat del prototipo, prove automatiche ed esportazione
+-usano la revisione `minimal-v3-20260918`. Il modello riceve JSON.
++usano la vista essenziale, ora alla revisione `minimal-v3-repair1-20260918`.
++Il modello riceve JSON.
+ TOON non è usato.
+ 
+ ## Che cosa vede il modello
+@@ -76,8 +77,24 @@
+ Ogni tentativo conserva `prompt.json` completo, `encoding.json` con
+ revisione e corrispondenze, richiesta effettiva e risposta originale.
+ La raccomandazione validata conserva sia gli alias sia gli ID originali risolti.
+-Gli errori rimandati al modello contengono soltanto codici e campi controllati:
+-non riportano contenuti arbitrari, QASM o hash provenienti da una risposta errata.
++Dalla revisione `minimal-v3-repair1-20260918`, gli errori rimandati al modello
++sono frasi brevi in `previous_validation_errors`, senza codici lunghi o copie
++della risposta precedente. Ogni tipo di errore compare una sola volta:
++
++- Dispositivo non ammesso: scegliere `selected_device` dagli ID di `compatible_hardware`.
++- Configurazione non ammessa: scegliere `config_id` da `configuration_catalog`,
++  rispettando i vincoli del dispositivo.
++- Evidence non valida: usare gli ID di `retrieved_labeled_examples`, senza
++  duplicati e con almeno un riferimento. Senza esempi storici usare `[]`.
++
++Una sola frase finale chiede di restituire l'intero JSON per il circuito corrente.
++Gli altri errori di formato ricevono un richiamo allo schema.
++Il programma reinvia il contesto ridotto completo, con gli stessi esempi e alias;
++il primo tentativo resta identico. Nei registri canonici rimangono i codici
++e i dettagli originali. Nessun valore arbitrario della risposta errata viene
++reinserito nel prompt.
++Le prove avviate con una revisione diversa non possono essere riprese con le
++nuove correzioni, anche se il testo del primo tentativo è uguale.
+ Nuove istruzioni richiedono un nuovo nome della prova; gli esiti precedenti
+ non vengono sovrascritti.
+ 
+--- before/docs/protocollo_sperimentale.md
++++ after/docs/protocollo_sperimentale.md
+@@ -1189,7 +1189,7 @@
+ 
+ ### Vista essenziale e citazioni locali — 18 settembre 2026
+ 
+-La revisione corrente è `minimal-v3-20260918`. Usa JSON, senza TOON.
++La vista introdotta con `minimal-v3-20260918` usa JSON, senza TOON.
+ Conserva cinque esempi, ordine del recupero, tutte le feature e valori originali.
+ Elimina dal testo LLM QASM, hash, manifest, metadati e ripetizioni delle evidenze.
+ Il catalogo hardware compare una volta; gli esempi ne indicano solo i nomi.
+@@ -1215,6 +1215,17 @@
+ Le misure su tre casi train del 18 settembre riguardano soltanto i token;
+ non costituiscono selezione sulla validation o prova di qualità.
+ Vedere la [guida del prompt essenziale](approfondimenti/compattazione_prompt.md).
++
++La revisione `minimal-v3-repair1-20260918` modifica solo le correzioni:
++una frase indica il campo errato e il catalogo o gli esempi dai quali scegliere.
++I messaggi di uno stesso tipo sono accorpati; una sola istruzione finale chiede
++il JSON completo per il circuito corrente. Non si copiano cataloghi, risposte
++errate o identificativi canonici. Senza RAG si chiede evidence vuota.
++Il primo prompt, gli esempi, le feature e il massimo di tre tentativi restano
++invariati. Una revisione diversa richiede una nuova etichetta anche per una
++prova interrotta. L'efficacia delle nuove correzioni richiede nuove inferenze;
++i fallimenti storici restano conservati.
++
+ 
+ ## Valutazione della selezione e confronto finale
+ 
+--- before/prototype/prompting/README.md
++++ after/prototype/prompting/README.md
+@@ -1,7 +1,7 @@
+ # Rappresentazione dei prompt
+ 
+ Questo componente separa i dati completi dell'esperimento dal testo inviato
+-al modello. La vista corrente è `minimal-v3-20260918`.
++al modello. La vista corrente è `minimal-v3-repair1-20260918`.
+ 
+ - `minimal.py`: selezione dei contenuti, alias E1...E5, contesto delle citazioni,
+   schema v3 e metadati esterni.
+@@ -19,3 +19,8 @@
+ 
+ Procedura, misure e limiti nella
+ [guida](../../docs/approfondimenti/compattazione_prompt.md).
++
++Le correzioni aggiungono una frase per dispositivo, configurazione o evidence
++non ammessi. Gli errori dello stesso tipo compaiono una sola volta.
++La richiesta di restituire il JSON completo compare una sola volta in fondo
++al messaggio. Il primo tentativo non riceve istruzioni di correzione.
