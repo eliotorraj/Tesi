@@ -132,3 +132,7 @@ llm_selection/GITHUB.md
 /artifacts/experiments/*/llm_selection/runtime/tectonic-cache/
 /artifacts/experiments/*/llm_selection/runtime/toon/node-v*/
 /artifacts/experiments/*/llm_selection/runtime/toon/node-v*.tar.xz
+
+# Vecchi pesi RL conservati fuori da Git; copie locali preservate.
+/artifacts/models/rl/*.zip
+/artifacts/checkpoints/rl/**/*.zip
