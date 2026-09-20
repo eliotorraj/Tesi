@@ -15,11 +15,14 @@
     "actual_laptop_memory_latency_measurement",
     "manual_review_remaining_132_scripts_and_partial_file",
     "test_release_adoption_of_local_llm_v2_and_no_rag_contract",
-    "MQT_and_frontier_prerequisites_before_Test"
+    "MQT_and_frontier_prerequisites_before_Test",
+    "graphify_full_update_after_large_relocation"
   ],
   "test_released": false,
   "budget_stop": "weekly_used_percent_must_remain_below_42",
   "delivery_branch": "riorganizzazione-prototipo",
   "main_preserved_at": "99ee834e8faa633df857e55dfbb6fbe7aa798c00",
-  "real_llm_calls": 0
+  "real_llm_calls": 0,
+  "weekly_used_percent_at_closure": 41,
+  "local_external_symlinks_preserved_and_excluded": 34
 }

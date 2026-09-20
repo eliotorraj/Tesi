@@ -1,0 +1,7 @@
+{
+  "command": "graphify update .",
+  "status": "interrupted_after_over_15_minutes",
+  "reason": "bounded maintenance step; large historical graph; stopped before completing session within user weekly budget",
+  "graph_updated": false,
+  "follow_up": "Rieseguire aggiornamento con perimetro operativo definito; non interpretare i vecchi source_file come percorsi correnti."
+}
