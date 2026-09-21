@@ -10,3 +10,7 @@ le versioni che hanno prodotto i risultati e ne documentiamo i limiti.
 
 L'aggiornamento del grafo e la prova reale del modello sono affidati all'utente.
 Questa attivita non apre il Test e non cambia la selezione Qwen a temperatura zero.
+
+## Esito Graphify
+
+L’aggiornamento eseguito dall’utente e riuscito: 5.770 nodi, 11.201 archi e 439 comunita. La successiva esportazione HTML leggeva un’analisi vecchia; il file obsoleto e stato archiviato e l’HTML rigenerato correttamente (439 comunita, 775 collegamenti). Il grafo JSON non e cambiato. Dettagli in [graphify_esito.json](graphify_esito.json). Non e stata eseguita inferenza Qwen.

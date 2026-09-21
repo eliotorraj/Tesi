@@ -39,10 +39,13 @@ Il comando è strutturale, senza richieste a modelli: aggiorna codice e struttur
 dei documenti supportati, ma non rifà l'analisi semantica dei testi e degli articoli.
 Quella richiede successivamente `/graphify --update` in una sessione dell'assistente.
 
-Dopo il successo, rigenerare la vista e controllare una ricerca:
+Il comando `update` rigenera gia la vista HTML. Non serve ripetere
+`graphify export html`: nella versione installata puo riutilizzare una vecchia
+analisi delle comunita. Il 21 settembre questo problema e stato corretto
+archiviando il file di analisi obsoleto, senza modificare `graph.json`.
+Dopo il successo, controllare una ricerca:
 
 ```bash
-graphify export html
 graphify query "Qwen facts retrieval compilation" --budget 1500
 ```
 

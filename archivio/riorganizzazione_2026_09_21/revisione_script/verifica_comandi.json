@@ -1,6 +1,6 @@
 {
   "guide": "prototipo/docs/comandi_verifica_manuale.md",
-  "guide_sha256": "abbf64febce6e034a31f55de9a2cf51fde8a38e06cea963c9a939d48e0073bd6",
+  "guide_sha256": "5e121d6834131385204dfe64ac1a85861724d900ca8f326b93e3371e5e65a329",
   "checks": [
     {
       "block": 1,
@@ -91,5 +91,6 @@
       "native_copy_present": true,
       "identical": true
     }
-  ]
+  ],
+  "graphify_followup": "user update succeeded; redundant export command removed from guide; stale sidecar archived"
 }

@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-21",
+  "user_update_succeeded": true,
+  "nodes": 5770,
+  "edges": 11201,
+  "communities": 439,
+  "problem": "export html reused stale .graphify_analysis.json with 625 communities and 18122 node IDs; only 107 IDs still existed",
+  "fix": "Archived stale analysis sidecar; exported HTML using communities in graph.json",
+  "graph_json_unchanged_sha256": "d64f3c0ffa8af91c488d714be1071256829bc88906962f94cb1a1a59f316f2b0",
+  "backup": ".workspace_archive/graphify-html-prima-correzione-20260921-121854",
+  "full_update_repeated": false,
+  "semantic_extraction_performed": false,
+  "qwen_inference_performed": false,
+  "obsolete_interruption_marker_archived": true
+}

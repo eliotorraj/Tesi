@@ -14,10 +14,11 @@
   "user_commands": "prototipo/docs/comandi_verifica_manuale.md",
   "user_owned_vscode_settings_preserved": true,
   "pending": [
-    "user_graphify_update",
     "user_real_Qwen_startup_and_technical_run",
     "future_fixes_of_documented_operational_defects_before_reuse_or_Test",
     "laptop_memory_and_latency_measurements",
     "official_v2_selection_and_prerequisites_in_Test_release"
-  ]
+  ],
+  "user_graphify_update_completed": true,
+  "graphify_html_repaired_without_rescan": true
 }
