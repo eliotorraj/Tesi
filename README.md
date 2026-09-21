@@ -16,12 +16,17 @@ Per capire esattamente il prossimo passo leggere la
 
 
 
-## Punti da completare prima del Test
+## Avviare un Test o addestrare MQT
 
-Il vecchio controllo di apertura consulta ancora la selezione v1. Occorre
-collegarlo alla selezione ufficiale v2, verificare la variante senza RAG,
-il modello di frontiera, i modelli MQT e tutti i requisiti del protocollo.
-Una dimostrazione del prototipo non sostituisce questi controlli.
+- [Test indipendenti](prototipo/test/README.md): quattro script, controlli per
+  metodo, ripresa e cartelle separate per risultati, grafici e LaTeX.
+- [Selettore ML sul portatile](prototipo/addestramento/mqt/README.md): aggiornamento
+  da GitHub, trasferimento dei cinque RL, addestramento e sincronizzazione.
+
+Il controllo operativo consulta la selezione **local-llm-v2**. MQT richiede
+il proprio selettore e sei prove tecniche; la sua indisponibilità non blocca
+LLM+RAG, LLM senza RAG o Random. Il Test non è stato eseguito durante lo sviluppo.
+Il [resoconto](prototipo/test/SVILUPPO.md) distingue prove sintetiche e limiti.
 
 ## Ripristino e provenienza
 

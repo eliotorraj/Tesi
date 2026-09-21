@@ -29,7 +29,7 @@ def save(path,value):
 def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-def prepare(qasm,allowed=()):
+def prepare(qasm,allowed=(),*,rag=True):
     """Controlla il QASM e i dispositivi, poi prepara cinque evidenze solo train."""
     started=time.perf_counter();catalog=load_catalog()
     hardware=MqtHardwareCatalog(catalog.supported_device_ids,configuration_catalog=catalog).snapshot()
@@ -38,11 +38,15 @@ def prepare(qasm,allowed=()):
     mask=HardwareMaskBuilder().filter(request,hardware)
     if not mask.available_device_ids:
         raise ValueError('Nessun dispositivo compatibile con il circuito e i vincoli.')
-    corpus=load_corpus();prepare_index(corpus)
-    examples=QdrantContextRetriever().retrieve(request,mask,limit=5)
+    examples=()
+    rag_started=time.perf_counter()
+    if rag:
+        corpus=load_corpus();prepare_index(corpus)
+        examples=QdrantContextRetriever().retrieve(request,mask,limit=5)
+    rag_seconds=time.perf_counter()-rag_started if rag else 0.0
     registry=StructuredEvidenceRegistryBuilder(configuration_catalog=catalog).build(examples)
     prompt=StructuredPromptBuilder(configuration_catalog=catalog).build(request,mask,examples,evidence_registry=registry)
-    return request,prompt.payload,{'seconds':time.perf_counter()-started,'records':[{'rag_id':x.record_id,'distance':x.distance} for x in examples]}
+    return request,prompt.payload,{'seconds':time.perf_counter()-started,'rag_seconds':rag_seconds,'records':[{'rag_id':x.record_id,'distance':x.distance} for x in examples]}
 
 class Http:
     """Collega il client al server locale e conserva richieste, risposte ed errori."""

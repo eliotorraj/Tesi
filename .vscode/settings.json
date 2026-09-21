@@ -4,6 +4,6 @@
     "**/full/global/qiskit_runs.jsonl": "default",
     "*.copilotmd": "vscode.markdown.preview.editor",
     "*.csv": "csv.editor",
-    "*.md": "vscode.markdown.editor"
+    "*.md": "default"
   }
 }

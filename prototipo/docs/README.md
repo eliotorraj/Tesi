@@ -8,3 +8,9 @@ I rapporti, i PDF scientifici e la storia dello sviluppo sono nell'
 la sua dimostrazione non esegue il confronto sperimentale finale.
 
 Vedere anche: [Comandi per Graphify e prova reale Qwen](comandi_verifica_manuale.md).
+
+## Procedure operative correnti
+
+- [Quattro Test indipendenti](../test/README.md).
+- [Addestramento del selettore ML](../addestramento/mqt/README.md).
+- [Modifiche e verifiche dello sviluppo](../test/SVILUPPO.md).

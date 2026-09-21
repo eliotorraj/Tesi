@@ -13,3 +13,16 @@ __pycache__/
 /prototipo/runtime/
 /prototipo/runs/
 /prototipo/output/
+
+# Nuovi dati operativi: conservarli e trasferirli separatamente da Git.
+/archivio/esperimento_v2/.venv-selettore/
+/prototipo/test/risultati/
+/prototipo/test/confronti/
+/prototipo/test/preparazione/
+/prototipo/test/prove_tecniche/
+/prototipo/addestramento/mqt/cache/
+/prototipo/addestramento/mqt/registri/
+/prototipo/addestramento/mqt/modelli/
+/prototipo/addestramento/mqt/training_set/
+/prototipo/addestramento/mqt/precedenti/
+/prototipo/addestramento/mqt/.training.lock

@@ -1,0 +1,50 @@
+{
+  "test_id": "test-indipendenti-v1",
+  "source_experiment_version": "2.0.0",
+  "study_id": "local-llm-v2",
+  "methods": [
+    "llm_rag",
+    "llm_senza_rag",
+    "mqt_predictor",
+    "random"
+  ],
+  "split": "test",
+  "circuits": 90,
+  "compilations_per_circuit": 1,
+  "qiskit_seed": 0,
+  "random_seed": 20260921,
+  "compilation_timeout_seconds": 100,
+  "llm_timeout_seconds": 3600,
+  "llm_max_completed_attempts": 3,
+  "transport_retries": 0,
+  "llm_profile": "desktop",
+  "response_contract": "4.0.0",
+  "no_rag_policy": "one capacity fact; no example references; existing v4 validation and final unverified-fact policy",
+  "oracle": "optional observed reference only; never a competitor",
+  "frontier_model": "excluded by amendment 2026-09-21",
+  "scoring": "expected_fidelity MQT 2.4.0, precision 10; single compilation, not validation median",
+  "primary_metrics": [
+    "successes",
+    "failures",
+    "retries",
+    "mean_score_successes",
+    "score_per_circuit",
+    "llm_tokens",
+    "total_seconds",
+    "compilation_seconds",
+    "llm_response_seconds"
+  ],
+  "analysis": {
+    "unit": "circuit",
+    "bootstrap_seed": 20260901,
+    "bootstrap_draws": 10000,
+    "confidence": 0.95,
+    "comparisons": [
+      "llm_rag vs llm_senza_rag",
+      "llm_rag vs mqt_predictor",
+      "llm_rag vs random"
+    ],
+    "quality_population": "common successful circuits; failures reported separately",
+    "confirmatory_tests": "none; descriptive paired intervals, no superiority claim from incomplete comparison"
+  }
+}

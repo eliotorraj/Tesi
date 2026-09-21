@@ -1,12 +1,12 @@
 # Protocollo sperimentale corrente
 
-Documento operativo consolidato il **20 settembre 2026**. L'esperimento sui
+Documento operativo aggiornato il **21 settembre 2026**. L'esperimento sui
 circuiti mantiene l'identità **2.0.0**, con MQT Predictor **2.4.0**. La selezione
 LLM ufficiale è **local-llm-v2**, con contratto di risposta **4.0.0**.
 Questi numeri indicano tre cose diverse. La selezione locale v1 è storica.
 
-Questa guida riunisce le regole già definite. Non avvia il Test e non cambia
-partizioni, punteggi, ipotesi o soglie. Il testo precedente, con la cronologia
+Questa guida conserva le regole della validation e introduce il Test indipendente
+delle sezioni 7–10. Non avvia il Test e non cambia le partizioni. Il testo precedente, con la cronologia
 degli emendamenti e tutti i vecchi comandi, è conservato integralmente in
 [archivio](../../archivio/esperimento_v2/docs/protocollo_sperimentale.md).
 Per percorrere le fasi nell'ordine leggere la [guida pratica](guida_passo_passo.md).
@@ -19,14 +19,12 @@ La misura è `expected_fidelity`, calcolata sui Target sintetici di MQT Bench.
 Non eseguiamo circuiti su un computer quantistico reale.
 
 L'unità statistica è il **circuito**, non una chiamata LLM o un seed.
-Le domande riguardano contributo del RAG, confronto con un modello di frontiera,
-MQT Predictor e metodi semplici, distanza dall'oracle, affidabilità, tempo,
-costo e differenze per famiglia o numero di qubit.
-
-Le ipotesi predefinite richiedono regret mediano inferiore a quello della
-variante senza RAG, del modello di frontiera, di MQT e delle baseline semplici.
-Per i primi due confronti richiedono anche successo non inferiore.
-Un risultato non significativo non dimostra equivalenza.
+Le domande correnti riguardano contributo del RAG, confronto con MQT Predictor
+e Random, affidabilità, qualità, tempi e token. Il riferimento osservato
+è facoltativo e secondario. Le ipotesi storiche con modello di frontiera,
+dieci baseline e oracle sono conservate nell'archivio; non sono il piano
+operativo del Test indipendente. Un risultato non significativo non dimostra
+equivalenza.
 
 ## 2. Dati e separazione
 
@@ -81,7 +79,7 @@ su fornitore, costo o latenza nelle richieste sperimentali.
 | `o3_sabre_basic` | 3 | sabre | basic |
 
 Le opzioni predefinite lasciano a Qiskit la scelta dell'algoritmo.
-Ogni coppia viene compilata con seed **0, 1, 2**. Limite per compilazione:
+Per il Dataset train/validation ogni coppia è stata compilata con seed **0, 1, 2**. Limite per compilazione:
 **100 secondi**, sei processi esterni e `num_processes=1` in Qiskit.
 Il timeout è terminale: non si cambia seed per ottenere un risultato favorevole.
 Train e validation hanno prodotto **87.120 tentativi: 82.621 successi e 4.499 timeout**.
@@ -184,109 +182,175 @@ Servono anche cinque prove minime RL e una prova completa `qcompile` riuscite.
 Un modello addestrato solo per una prova tecnica non dimostra qualità.
 Lo stato effettivo dei modelli va verificato dagli artefatti, non dedotto dai log.
 
-## 7. Condizioni obbligatorie prima di aprire il Test
+## 7. Preparazione al Test indipendente
 
-Devono risultare verificati: versioni esatte; cinque Target invariati;
-corpus e partizioni integri; catalogo e configurazione LLM congelati;
-piani validation/test coerenti; matrice validation completa dei tentativi;
-RAG solo train e indice coerente con la verifica sugli 88 validation a k=5;
-cinque modelli RL e classificatore a cinque classi; sei prove minime MQT;
-selezione ufficiale conclusa e tutti i sigilli integri.
+**Emendamento del 21 settembre 2026, prima della valutazione Test.**
+Il confronto comprende esattamente quattro metodi: **LLM + RAG, stesso LLM
+senza RAG, MQT Predictor e Random**. Il modello di frontiera e le dieci
+baseline Qiskit fisse sono esclusi dal nuovo piano. La loro verifica non
+è più un prerequisito. Le analisi storiche della validation restano immutate.
 
-**Problema operativo individuato il 20 settembre:** il vecchio
-`scripts/15_release_test_v2.py` richiama ancora `llm_selection.finalize`, cioè
-la selezione globale v1. Non è sufficiente che quello script restituisca esito
-positivo: occorre collegare esplicitamente il controllo alla selezione
-`local-llm-v2`, congelare i metodi finali con/senza RAG e il relativo contratto,
-verificare il modello di frontiera e aggiornare i piani prima dell'apertura.
-La nuova cartella dimostrativa non sostituisce queste verifiche sperimentali.
-Questa attività di preparazione al Test resta distinta dal riordino.
+Il problema del vecchio `scripts/15_release_test_v2.py` è risolto nel nuovo
+percorso operativo: `prototipo/test/strumenti/gates.py` consulta direttamente
+`studies/local-llm-v2/`, verifica studio, configurazione finale, selezione,
+sigilli dei modelli e impronte degli input e dei risultati della validation.
+Non usa `llm_selection.finalize` né il record globale v1. Lo script archiviato
+rimane una fonte storica; non è il comando di apertura del Test corrente.
 
-Il protocollo finale richiede la stessa configurazione del modello nei due
-metodi con/senza RAG. Il contratto v4 basato su fatti degli esempi necessita
-anche di una gestione esplicita del caso senza esempi: va definita e verificata
-prima di aprire il Test, senza scegliere la regola in base ai suoi risultati.
-Il modello di frontiera usa invece il suo prompt diretto distinto, con QASM,
-cinque dispositivi e dodici configurazioni, senza maschera applicativa o RAG.
+I controlli comuni verificano versioni pertinenti, cinque Target, corpus,
+partizioni, catalogo, fonte RAG train e selezione v2. Il piano corrente è
+`prototipo/test/piano.json`. Il primo `--esegui` congela il contratto con
+impronte di codice, piano, configurazione, fonte e RAG. Gli avvii successivi
+devono coincidere. Non si riutilizzano i vecchi piani con frontiera e oracle
+come concorrenti. La preparazione non richiede nuovi punteggi Test.
 
-## 8. Ordine obbligatorio del confronto sul Test
+**I requisiti MQT sono specifici di MQT.** La mancanza del classificatore non
+impedisce gli altri tre Test. Prima del Test MQT servono cinque RL conformi,
+un selettore a cinque classi addestrato sugli stessi RL e sul solo train,
+copie runtime identiche, cinque prove RL e una prova completa ML+RL.
+L'identità dei modelli viene registrata e verificata alla ripresa.
 
-1. Concludere i controlli precedenti, congelare impostazioni e piano di analisi,
-   quindi produrre il record di apertura. Il Test resta chiuso fino ad allora.
-2. Materializzare i circuiti Test nei manifest dei cinque dispositivi.
-3. Produrre, registrare e sigillare le decisioni di LLM+RAG, stesso LLM senza RAG
-   e modello di frontiera, **prima** di rendere disponibili gli score Qiskit Test.
-4. Eseguire `qcompile` tre volte per circuito, in processi nuovi.
-5. Produrre la matrice Qiskit Test con i tre seed e i limiti congelati.
-6. Ricostruire le viste e valutare tutti i metodi richiesti. Il RAG train resta
-   identico; validation e test non si aggiungono all'indice.
-7. Generare analisi, tabelle, figure e testo per la tesi da dati conservati.
+Per i due LLM si usano gli stessi pesi Qwen Q8_0, temperatura 0, parametri
+ufficiali e contesto desktop 60.000. All'avvio si verificano GGUF, dimensione,
+SHA-256 e modello dichiarato dal server. Il profilo laptop ridotto non
+appartiene alla valutazione finale. La prova tecnica senza/con RAG può
+essere eseguita su Bell tramite `--tecnico`.
 
-I metodi sono: LLM+RAG; stesso LLM senza RAG; modello di frontiera; MQT;
-Qiskit predefinito ai livelli 2 e 3 su ciascuno dei cinque dispositivi
-(**dieci baseline distinte**); scelta casuale congelata; oracle esaustivo.
-Il casuale estrae uniformemente una coppia compatibile per ripetizione,
-senza nuova estrazione dopo un fallimento. Non si sceglie a posteriori
-il dispositivo migliore delle baseline fisse.
-Il modello di frontiera ha una chiamata e restituisce solo coppia dispositivo/configurazione;
-nessuna correzione guidata. Retry di trasporto, se previsti, vanno congelati e contati.
+### Contratto senza RAG
 
-## 9. Metriche, mancanze e confronti
+Il modello non riceve esempi; non viene aperto il Dataset o l'indice durante
+la decisione. Restano caratteristiche del circuito, dispositivi e catalogo.
+Lo schema v4 resta lo stesso. L'istruzione aggiuntiva richiede esattamente
+un fatto `selected_device_has_enough_qubits`, senza `example_id`.
+Non sono inventate evidenze sostitutive. I fatti con riferimenti a esempi
+assenti risultano non verificati.
 
-Il valore primario per circuito è la mediana dei tre score, disponibile solo
-con tre successi. Per MQT gli indici 0,1,2 sono ripetizioni, non seed Qiskit
-controllati. Per il casuale possono rappresentare tre coppie diverse.
-L'oracle richiede l'intera matrice compatibile riuscita; un massimo parziale
-non viene chiamato oracle. Le parità esatte seguono l'ordine dispositivo/configurazione
-del catalogo; quasi parità rel_tol=1e-12, abs_tol=1e-15 sono segnalate.
+Restano tre tentativi completi, prima risposta accettabile definitiva e
+accettazione al terzo tentativo di una coppia conforme con fatti eventualmente
+non verificati, esplicitamente segnalata. L'ipotesi libera non è certificata.
+Nessuna regola viene scelta in base ai risultati Test.
 
-Regret assoluto = score oracle meno score metodo. Regret relativo = regret
-assoluto diviso score oracle, non disponibile con oracle zero.
-Non si tronca un regret negativo: va conservato e indagato.
-La metrica primaria rimane expected_fidelity; si conserva anche il log naturale
-quando calcolabile, indicando underflow e dati mancanti senza valori inventati.
-Il riferimento osservato usato per selezionare v2 non sostituisce automaticamente
-l'oracle nella valutazione confermativa del Test.
+## 8. Esecuzioni autonome
 
-Se una ripetizione fallisce, aggregato e regret primari sono null con motivo.
-Si conservano comunque tentativi riusciti, errori e timeout. Nessuna imputazione.
-Le baseline non applicabili per larghezza sono dichiarate ed escluse dal proprio
-denominatore di applicabilità, senza confonderle con fallimenti.
-Qualità sui successi, tasso di successo e numerosità comune vanno mostrati insieme.
+Ogni metodo ha un proprio script in `prototipo/test/`:
 
-Registrare successo per tentativo e tre-su-tre, tipi di errore, accuratezza di
-dispositivo/configurazione/coppia dove applicabile, tempi separati di recupero,
-scelta, chiamate, compilazioni, attesa e totale; chiamate fisiche, correzioni,
-token, costi e memoria quando misurabili. MQT non ha un config_id Qiskit.
-Il tempo della raccomandazione si conta una volta, non tre.
+| Metodo | Script | Risultati |
+| --- | --- | --- |
+| LLM + RAG | `llm_rag.py` | `risultati/llm_rag/` |
+| LLM senza RAG | `llm_senza_rag.py` | `risultati/llm_senza_rag/` |
+| MQT Predictor | `mqt_predictor.py` | `risultati/mqt_predictor/` |
+| Random | `casuale.py` | `risultati/random/` |
 
-Conservare run_id, circuito/hash/split, repetition_index, qiskit_seed,
-attempt_index, modelli/revisioni/precisione, prompt e risposte, evidenze,
-parametri, versioni, hardware e risorse. Distinguere misure, stime, riusi e dati
-mancanti. Nessun segreto. Un run terminale non viene rifatto per migliorare l'esito;
-una ripresa conserva causa e tentativi precedenti.
+`--verifica` controlla senza valutare. `--tecnico` usa circuiti sintetici e
+scrive in `prove_tecniche/`. `--esegui` apre soltanto il metodo scelto,
+esegue i medesimi 90 circuiti e permette la ripresa. Non esiste un esecutore
+che avvii i quattro metodi in sequenza. Gli avvii possono avvenire in giorni
+diversi. Condividere risorse simultaneamente può alterare la latenza; per i
+tempi comparabili evitare esecuzioni concorrenti sulla stessa macchina.
 
-## 10. Piano statistico finale
+**Una sola compilazione per circuito e metodo.** Il seed Qiskit è 0.
+Questa scelta sostituisce i tre seed del precedente piano Test, aderendo
+alle 90 compilazioni richieste per ciascun metodo. La validation mantiene
+la mediana storica dei tre seed. Per MQT si esegue una selezione supervisionata
+seguita da RL: le stesse due operazioni di qcompile 2.4.0, misurate separatamente.
+Il seed interno MQT non è controllato e non viene presentato come seed Qiskit.
 
-Il piano finale è distinto dalla selezione descrittiva. Seed **20260901**;
-**10.000** ricampionamenti del circuito con rimpiazzo, mantenendo appaiati i metodi;
-intervalli percentile al 95%. Riportare n totale/applicabile/completato/comune,
-media, mediana, deviazione standard campionaria (n-1), IQR con quantili lineari,
-famiglie e classi 1–10, 11–27, 28–56, 57–90 qubit. Gruppi con meno di cinque
-circuiti restano puramente descrittivi.
+Il timeout esterno è 100 secondi per processo, compreso il suo avvio.
+Qiskit usa `num_processes=1`; ogni metodo compila un circuito alla volta.
+Il fallimento è terminale per quel caso e non cambia configurazione o seed.
+Random estrae uniformemente una coppia compatibile; il seme deriva da
+20260921 e SHA-256 del circuito. Non estrae nuovamente dopo un fallimento.
 
-Confronti sul regret: Wilcoxon bilaterale appaiato, zero_method=pratt,
-alpha=0,05, algoritmo e libreria congelati. Correzione Holm per i 14 confronti
-primari: senza RAG, frontiera, MQT, casuale, dieci baseline fisse. Un confronto
-non eseguibile rimane nella famiglia con p convenzionale 1. L'oracle è riferimento.
-Completamento tre-su-tre: McNemar esatto, famiglia corretta separatamente con Holm.
-Latenza, token, costo, log-score e sottogruppi sono analisi secondarie.
+I due LLM compilano automaticamente la scelta: la conferma interattiva è
+saltata. Il limite della chiamata è 3.600 secondi; sono ammessi fino a tre
+tentativi completi per la conformità, senza retry automatici di trasporto.
+Questa politica del nuovo Test è distinta dai recuperi del supervisore
+storico della validation. Tutte le chiamate fisiche restano nei registri.
 
-Un confronto favorevole richiede insieme p corretto sotto0,05, direzione prevista,
-intervallo della differenza senza zero, denominatori/fallimenti mostrati e tasso
-di completamento osservato non inferiore sullo stesso insieme applicabile.
-Non si modifica la metrica o il sottoinsieme dopo il Test. Il contributo del RAG
-è sostenuto dal confronto con/senza RAG, non da una vittoria su altre baseline.
+La decisione Qiskit viene salvata prima della compilazione. Nessun metodo
+legge esiti, score o scelte dei concorrenti per decidere. Non si richiede
+più una matrice esaustiva globale prima della valutazione: la protezione
+dalla contaminazione è data dal contratto congelato e dagli input separati.
+L'utente non modifica prompt o regole dopo aver visto risultati parziali.
+
+## 9. Metriche e conservazione
+
+L'unità di confronto resta il circuito. Ogni metodo pubblica esiti per tutti
+i 90 casi, compresi fallimenti e interruzioni. Successi più fallimenti
+coincidono con i casi conclusi; quelli ancora da elaborare sono distinti.
+
+| Metrica primaria | Definizione |
+| --- | --- |
+| Successi | Compilazione terminata, circuito eseguibile sul Target, score finito |
+| Fallimenti | Errori, timeout o interruzioni terminali; cause distinte |
+| Retry | Chiamate LLM aggiuntive oltre la prima, per caso e totali; zero per compilazione e trasporto automatico |
+| Score per circuito | Expected fidelity MQT 2.4.0, arrotondamento a 10 decimali, una compilazione |
+| Score medio | Media sui successi, con denominatore; nessuna imputazione dei fallimenti |
+| Token LLM | Input completo tokenizzato e output del server, per chiamata e cumulativi, inclusi tentativi falliti quando misurabili |
+| Tempo totale | Dall'ingresso del circuito nel procedimento al suo esito, incluse preparazione, RAG, correzioni, processo e compilazione |
+| Tempo compilazione | Misurato dentro il processo intorno a transpile o rl_compile |
+| Tempo risposta LLM | Dall'invio della chiamata di generazione alla risposta completa; somma delle chiamate se ci sono correzioni |
+
+I tempi usano `perf_counter` e secondi. Il tempo del processo di compilazione
+è distinto dalla sola chiamata al compilatore. Se un processo muore senza
+misura interna, il tempo compilatore rimane null. Token ignoti restano null;
+si conservano anche somme parziali note. I token di input sono contati per
+intero anche con cache; i contatori di calcolo effettivo restano nelle risposte
+originali. Latenza e token non vengono confusi con costo monetario.
+
+**Metriche secondarie:** tempo RAG; tempo complessivo di preparazione e scelta;
+tempo selezione ML; chiamate fisiche; fatti non verificati; mediana dello
+score; cause di errore; profondità e dimensione del circuito compilato;
+log-score non arrotondato e indicazioni di arrotondamento a zero o underflow.
+Memoria ed energia non sono raccolte in questa versione e sono dichiarate
+mancanti. Nessuna stima viene presentata come misura.
+
+L'oracle non è un metodo. Può essere assente. Un eventuale riferimento è
+la migliore compilazione conosciuta nel preciso insieme di configurazioni,
+seed e tentativi osservati. Non è la migliore configurazione possibile
+in assoluto. La distanza dal riferimento è secondaria; vanno documentati
+copertura, provenienza e criterio del riferimento. Un massimo parziale
+non viene chiamato oracle esaustivo. Nessuno score di riferimento entra
+nel prompt del circuito che si sta valutando.
+
+I registri conservano circuito, SHA-256, split, metodo, configurazione,
+modello/revisione/precisione, prompt, evidenze, risposte, verifiche, tentativi,
+tempi, token, versione del codice, dipendenze, sistema operativo e risorse note.
+Sono salvati prima e durante l'esecuzione, non solo al termine.
+Non vengono salvati segreti.
+
+Una ripresa salta ogni esito già concluso. Un caso senza esito dopo un arresto
+improvviso viene conservato come interrotto, con qualità mancante; non viene
+ripetuto per ottenere un risultato favorevole. I casi successivi proseguono.
+I rapporti precedenti e i tentativi sfavorevoli rimangono disponibili.
+
+## 10. Analisi e documenti
+
+Ogni esecuzione produce il proprio riepilogo, tabella per circuito,
+grafico degli score e sorgenti LaTeX. Le cartelle `tabelle/`, `grafici/`
+e `latex/` sono distinte sotto `analisi/<impronta>/`.
+`latex/risultati.tex` è inseribile nella tesi; `latex/verifica.tex`
+è compilabile autonomamente con TeX Live e PGFPlots. Se pdflatex è presente
+si produce anche il PDF. Dati e versione del generatore identificano l'analisi.
+
+`prototipo/test/analizza.py` legge soltanto risultati già salvati.
+Non avvia metodi mancanti. Il confronto dichiara metodi disponibili,
+circuiti conclusi, successi, fallimenti e insieme comune. La differenza
+di score è calcolata sui successi comuni, mantenendo l'appaiamento per
+circuito. Non si confrontano soltanto medie con denominatori differenti.
+
+Il nuovo piano descrittivo confronta LLM+RAG con ciascuno degli altri tre
+metodi. Usa 10.000 ricampionamenti appaiati del circuito, seed 20260901
+e intervalli percentile al 95% della differenza media di score. Con meno
+di due circuiti comuni l'intervallo non viene stimato.
+Il vecchio piano di 14 test sul regret non si applica al nuovo insieme
+di metodi e all'oracle facoltativo. Non si dichiara superiorità statistica
+sulla base di queste sole analisi descrittive.
+
+Tutti i cambiamenti sono stabiliti prima del Test. L'esposizione storica
+dei due circuiti ricordata nella sezione 2 resta un limite dichiarato;
+non viene cancellata dall'emendamento. Un'eventuale analisi che li escluda
+deve essere secondaria, separata e dichiarata.
 
 ## 11. Dimostrazione e tracciabilità
 

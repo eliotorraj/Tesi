@@ -42,6 +42,8 @@ def messages(prompt, feedback=()):
     text = NOTE + "\n" + TOON_NOTE + "\n" + fence + "toon\n" + encode_view(view) + "\n" + fence + "\n"
     text += "fact_rules: " + json.dumps(RULES, separators=(",", ":"))
     text += "\nresponse_schema: " + json.dumps(schema, separators=(",", ":"))
+    if not view.get("retrieved_labeled_examples"):
+        text += "\nNo historical examples are supplied. Give exactly one fact: selected_device_has_enough_qubits, without example_id. Do not invent example references or historical support.\n"
     if feedback:
         text += "\nCorrect the previous response and return the whole JSON. You may keep an allowed pair.\n"
         text += json.dumps(list(feedback), ensure_ascii=False)

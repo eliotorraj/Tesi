@@ -62,5 +62,5 @@ Rules:
 - `prototipo/` contiene la dimostrazione autonoma Qwen con temperatura 0.
 - `archivio/esperimento_v2/` conserva l’intero ambiente sperimentale e il vecchio archivio, con percorsi relativi invariati. I suoi sorgenti congelati non vanno ottimizzati in-place.
 - Il protocollo corrente e la guida sono in `prototipo/docs/`; le copie interne all’archivio sono storiche.
-- Non aprire il Test: prima occorre collegare il controllo di apertura alla selezione ufficiale `local-llm-v2`, completare MQT e verificare tutte le condizioni.
+- Il Test corrente usa i quattro avvii in prototipo/test/: verificare il contratto local-llm-v2 e i requisiti del metodo scelto. I modelli e le sei prove MQT sono richiesti solo per MQT. Non avviare il Test durante le prove di sviluppo.
 

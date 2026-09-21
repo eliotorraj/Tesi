@@ -1,0 +1,11 @@
+{
+  "source": "archivio/esperimento_v2/scripts/04_train_device_selector.py",
+  "source_sha256": "18d9e21a376e86e8bfe22868107c95fc66866582233d1e7f5cd83cae2e5a3608",
+  "changes": [
+    "SCR-02: interrupted JSONL tail preserved and repaired; internal corruption rejected",
+    "SCR-03: consume queued messages before classifying worker exit",
+    "SCR-04: timeout in every record, cache identity and cache directory",
+    "outputs under prototipo/addestramento/mqt; previous model artifacts preserved"
+  ],
+  "archive_unchanged": true
+}

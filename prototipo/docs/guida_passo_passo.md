@@ -35,19 +35,18 @@ silenziosamente evidenze o diminuire il budget della risposta.
    Manhattan e cinque vicini. Nessun punteggio del circuito da decidere.
 4. **Validation locale:** consultare lo studio local-llm-v2 e il suo rapporto.
    Qwen a t=0 è la scelta finale; la selezione v1 rimane separata.
-5. **MQT:** verificare i cinque modelli RL, costruire/completare il Training set,
-   verificare classificatore e sei prove minime. Un avvio registrato non prova
-   il completamento del training.
-6. **Preparazione finale:** collegare il controllo pre-Test alla selezione v2;
-   definire esplicitamente la variante senza RAG con contratto coerente;
-   congelare modello di frontiera, piani, parametri e analisi statistica.
-7. **Apertura:** soltanto dopo tutti i controlli positivi produrre il record
-   che autorizza il Test. Il vecchio comando pre-Test usa ancora la selezione v1.
-8. **Decisioni:** prima generare e sigillare le tre scelte LLM sul Test.
-9. **Compilazioni:** poi qcompile e matrice Qiskit Test. Solo ora si valutano
-   qualità e regret. L'indice RAG train non cambia.
-10. **Analisi:** confronti appaiati, denominatori, fallimenti, statistiche,
-    figure e testo riproducibile per la tesi.
+5. **Preparare il Test:** seguire [la guida dei quattro metodi](../test/README.md).
+   Il controllo consulta local-llm-v2; il primo avvio ufficiale congela il
+   contratto. Non occorre una matrice esaustiva Test.
+6. **LLM e Random:** eseguire il controllo del metodo e una prova tecnica;
+   poi avviare singolarmente i 90 casi quando desiderato.
+7. **MQT:** completare [il selettore](../addestramento/mqt/README.md), verificare
+   i cinque RL, il classificatore e le sei prove tecniche. Questo passaggio
+   non blocca gli altri metodi.
+8. **Risultati:** ogni metodo salva i casi in test/risultati/<metodo>/ e il
+   proprio rapporto in analisi/. Tabelle, grafici e LaTeX hanno cartelle distinte.
+9. **Confronto:** analizza.py legge i risultati disponibili e dichiara quelli
+   mancanti. Non avvia altri metodi né ripete casi già conclusi.
 
 Il [protocollo](protocollo_sperimentale.md) specifica numeri, criteri e limiti.
 I comandi sperimentali storici vanno eseguiti dalla radice

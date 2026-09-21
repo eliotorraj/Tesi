@@ -1,6 +1,6 @@
 # Prototipo Qwen con esempi train
 
-Questa cartella funziona senza leggere `archivio/`. Riceve un circuito OpenQASM 2,
+La dimostrazione app.py funziona senza leggere archivio/. Riceve un circuito OpenQASM 2,
 recupera cinque esempi train, chiede a Qwen una coppia dispositivo/configurazione,
 controlla la risposta e, se richiesto, compila con Qiskit.
 
@@ -151,3 +151,13 @@ Se PowerShell rifiuta gli script locali non firmati, usare nella sola sessione
 non occorre cambiare la politica globale del computer.
 
 Vedere anche: [Comandi manuali verificati sul fisso](docs/comandi_verifica_manuale.md).
+
+## Test finale e addestramento
+
+Per il confronto sui 90 circuiti usare [test/README.md](test/README.md).
+Sono disponibili quattro avvii indipendenti con metriche e rapporti separati.
+Questa area sperimentale legge le fonti congelate in archivio e non coincide
+con le prove libere di app.py.
+
+Per addestrare il selettore MQT sul portatile leggere
+[addestramento/mqt/README.md](addestramento/mqt/README.md).
