@@ -41,6 +41,8 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+os.environ.setdefault("RAYON_NUM_THREADS", "1")
+os.environ.setdefault("QISKIT_PARALLEL", "FALSE")
 
 ACTIVE_ROOT = Path(__file__).resolve().parent
 ARCHIVE_ROOT = ACTIVE_ROOT.parents[2] / "archivio/esperimento_v2"
@@ -96,12 +98,13 @@ PROJECT_ROOT = ARCHIVE_ROOT
 CANONICAL_MODELS_DIR = ACTIVE_ROOT / "modelli"
 MQT_TRAINING_SET_V2 = ACTIVE_ROOT / "training_set/device_selector_expected_fidelity.json"
 ACTIVE_TIMEOUT = 100
-DEFAULT_CACHE_ROOT = ACTIVE_ROOT / "cache"
+DEFAULT_CACHE_ROOT = ACTIVE_ROOT / "cache/spawn_direct_v1"
 CANONICAL_RL_MODELS_DIR = CANONICAL_RL_MODEL_DIR_V2
 DEFAULT_LOG_ROOT = ACTIVE_ROOT / "registri"
 DEFAULT_WORKERS = 1
 ESTIMATED_RL_WORKER_GIB = 2.2
-WORKER_WATCHDOG_GRACE_SECONDS = 30
+WORKER_WATCHDOG_GRACE_SECONDS = 0
+EXECUTION_PROFILE = "spawn-direct-bqskit-v1"
 WORST_SCORE = -1.0
 RL_SUCCESS_STATUSES = {"success"}
 SUCCESS_STATUSES = RL_SUCCESS_STATUSES | {"success_fallback"}
@@ -257,7 +260,8 @@ def file_version(path: Path) -> tuple[int, int] | None:
 
 def output_changed(path: Path, previous_version: tuple[int, int] | None) -> bool:
     """Return whether a worker produced or replaced an output in this attempt."""
-    return file_version(path) != previous_version and is_valid_qasm(path)
+    current = file_version(path)
+    return current is not None and current != previous_version
 
 
 def ensure_training_circuits(path: Path) -> None:
@@ -496,7 +500,8 @@ def configure_shared_bqskit_runtime(server_port: int, seed: int) -> Any:
     from bqskit.compiler import Compiler
     from mqt.predictor.rl.actions import bqskit_actions as actions_module
 
-    original_compile = actions_module.bqskit_compile
+    # Never wrap a previous job's closure: its Compiler has been closed.
+    from bqskit import compile as original_compile
     shared_compiler = Compiler(ip="localhost", port=server_port)
 
     def shared_compile(*args: Any, **kwargs: Any) -> Any:
@@ -605,7 +610,15 @@ def validate_rl_compilation(
     }
 
 
-def _compile_job_process(
+def preserve_unverified_output(job: CompilationJob, previous_version: Any) -> None:
+    """Keep a late or interrupted artifact outside the reusable checkpoint path."""
+    if output_changed(job.output, previous_version):
+        destination = job.output.parent / "non_verificati"
+        destination.mkdir(parents=True, exist_ok=True)
+        job.output.rename(destination / f"{time.time_ns()}_{job.output.name}")
+
+
+def _compile_job_inline(
     job: CompilationJob,
     device: Any,
     predictor: Any,
@@ -616,10 +629,8 @@ def _compile_job_process(
     seed: int,
     model_sha256: str,
     target_sha256: str,
-    result_connection: Any,
-) -> None:
-    """Compile one job in a disposable process forked after PPO loading."""
-    _set_parent_death_signal()
+) -> dict[str, Any]:
+    """Compile inside the spawned model owner; the parent enforces the deadline."""
     started = time.monotonic()
     shared_compiler = None
     temp_output = job.output.with_name(f".{job.output.name}.{os.getpid()}.tmp")
@@ -714,14 +725,14 @@ def _compile_job_process(
             **validation,
         }
 
-    try:
-        result_connection.send(result)
-    except (BrokenPipeError, EOFError, OSError):
-        pass
-    finally:
-        result_connection.close()
-        if shared_compiler is not None:
+    if shared_compiler is not None:
+        from bqskit import compile as original_compile
+        from mqt.predictor.rl.actions import bqskit_actions
+        try:
             shared_compiler.close()
+        finally:
+            bqskit_actions.bqskit_compile = original_compile
+    return result
 
 
 def _compile_fallback_process(
@@ -776,110 +787,6 @@ def _compile_fallback_process(
         pass
     finally:
         result_connection.close()
-
-
-def _run_isolated_job(
-    job: CompilationJob,
-    device: Any,
-    predictor: Any,
-    cached_model: Any,
-    server_port: int,
-    mode: str,
-    timeout: int,
-    fallback_optimization_level: int,
-    seed: int,
-    model_sha256: str,
-    target_sha256: str,
-) -> dict[str, Any]:
-    """Run one compilation with a hard timeout without killing the PPO owner."""
-    if mode == "fallback":
-        process_context = get_context("forkserver")
-        receive_connection, send_connection = process_context.Pipe(duplex=False)
-        process = process_context.Process(
-            target=_compile_fallback_process,
-            args=(job, str(device.description), fallback_optimization_level, send_connection),
-            name=f"mqt-{mode}-{job.device_name}",
-        )
-    else:
-        process_context = get_context("fork")
-        receive_connection, send_connection = process_context.Pipe(duplex=False)
-        process = process_context.Process(
-            target=_compile_job_process,
-            args=(
-                job,
-                device,
-                predictor,
-                cached_model,
-                server_port,
-                mode,
-                fallback_optimization_level,
-                seed,
-                model_sha256,
-                target_sha256,
-                send_connection,
-            ),
-            name=f"mqt-{mode}-{job.device_name}",
-        )
-    started = time.monotonic()
-    previous_output_version = file_version(job.output)
-    process.start()
-    send_connection.close()
-    result: dict[str, Any] | None = None
-    deadline = started + timeout
-    try:
-        while time.monotonic() < deadline:
-            if receive_connection.poll(0.1):
-                try:
-                    result = receive_connection.recv()
-                except EOFError:
-                    result = None
-                break
-            if not process.is_alive():
-                break
-
-        if result is None and process.is_alive() and time.monotonic() >= deadline:
-            _terminate_worker_process(process)
-            unverified_output = output_changed(job.output, previous_output_version)
-            if unverified_output:
-                job.output.unlink(missing_ok=True)
-            result = {
-                "status": "timeout",
-                "mode": mode,
-                "error": (
-                    f"superato limite {mode} di {timeout}s"
-                    + ("; output non verificato rimosso" if unverified_output else "")
-                ),
-            }
-        elif result is None:
-            process.join(timeout=1)
-            if receive_connection.poll():
-                try:
-                    result = receive_connection.recv()
-                except EOFError:
-                    result = None
-            if result is None:
-                unverified_output = output_changed(job.output, previous_output_version)
-                if unverified_output:
-                    job.output.unlink(missing_ok=True)
-                result = {
-                    "status": "failed",
-                    "mode": mode,
-                    "error": (
-                        f"processo {mode} terminato con exit code {process.exitcode}"
-                        + ("; output non verificato rimosso" if unverified_output else "")
-                    ),
-                }
-    finally:
-        receive_connection.close()
-        if process.is_alive():
-            _terminate_worker_process(process)
-        process.join(timeout=1)
-        if process.pid is not None:
-            job.output.with_name(f".{job.output.name}.{process.pid}.tmp").unlink(missing_ok=True)
-
-    assert result is not None
-    result.setdefault("duration_seconds", round(time.monotonic() - started, 3))
-    return result
 
 
 def _compile_fallback_inline(
@@ -941,7 +848,7 @@ def device_worker(
     model_sha256: str,
     target_sha256: str,
 ) -> None:
-    """Keep one PPO resident and isolate each compilation in a forked child."""
+    """Load PPO and compile in one spawned worker; never fork native runtime state."""
     _set_parent_death_signal()
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("a", encoding="utf-8", buffering=1) as log_handle:
@@ -963,18 +870,17 @@ def device_worker(
 
             for job in jobs:
                 total_started = time.monotonic()
-                result_queue.put({"type": "started", "device": device_name, "pid": os.getpid(), "key": job.key})
+                result_queue.put({"type": "started", "device": device_name, "pid": os.getpid(), "key": job.key, "output_version": file_version(job.output)})
                 result_queue.put(
                     {"type": "phase", "device": device_name, "pid": os.getpid(), "key": job.key, "phase": "rl"}
                 )
-                rl_result = _run_isolated_job(
+                rl_result = _compile_job_inline(
                     job,
                     device,
                     predictor,
                     cached_model,
                     server_port,
                     "rl",
-                    timeout,
                     fallback_optimization_level,
                     seed,
                     model_sha256,
@@ -1335,6 +1241,8 @@ def compile_resumably(
             "seed": seed,
             "target_sha256": target_sha256_by_device[job.device_name],
             "error": error,
+            "duration_seconds": round(time.monotonic() - state.current_started_at, 3) if state.current_started_at is not None else None,
+            "execution_profile": EXECUTION_PROFILE,
         }
         append_manifest(manifest_path, record)
         processed_results += 1
@@ -1393,7 +1301,7 @@ def compile_resumably(
                         state.current_started_at = time.monotonic()
                         state.current_attempt = attempt
                         state.current_phase = "rl"
-                        state.current_output_version = file_version(job.output)
+                        state.current_output_version = message.get("output_version")
                         append_manifest(
                             manifest_path,
                             {
@@ -1419,6 +1327,10 @@ def compile_resumably(
                             print(f"Fallback Qiskit: {message['key']}")
                     elif message_type == "result":
                         job = state.current_job
+                        if job is not None and float(message.get("duration_seconds", 0)) > timeout:
+                            message["status"] = "timeout"
+                            message["error"] = f"risultato oltre il limite RL di {timeout}s"
+                            preserve_unverified_output(job, state.current_output_version)
                         if job is not None and state.current_attempt is not None:
                             status = str(message["status"])
                             record = {
@@ -1455,6 +1367,7 @@ def compile_resumably(
                             ):
                                 if field in message:
                                     record[field] = message[field]
+                            record["execution_profile"] = EXECUTION_PROFILE
                             record["timeout_seconds"] = timeout
                             if is_strict_rl_success(
                                 record,
@@ -1489,8 +1402,6 @@ def compile_resumably(
                         state.current_phase = None
                         state.current_output_version = None
 
-            if message is not None:
-                continue
             now = time.monotonic()
             finished_devices: list[str] = []
             for device_name, state in list(active.items()):
@@ -1512,12 +1423,12 @@ def compile_resumably(
                         state.current_output_version,
                     )
                     if unverified_output:
-                        state.current_job.output.unlink(missing_ok=True)
+                        preserve_unverified_output(state.current_job, state.current_output_version)
                     record_failure(
                         state,
-                        "worker_watchdog_timeout",
+                        "timeout",
                         f"worker senza risposta in fase {state.current_phase}"
-                        + ("; output non verificato rimosso" if unverified_output else ""),
+                        + ("; output non verificato conservato separatamente" if unverified_output else ""),
                     )
                     finished_devices.append(device_name)
                     continue
@@ -1547,12 +1458,12 @@ def compile_resumably(
                             state.current_output_version,
                         )
                         if unverified_output:
-                            state.current_job.output.unlink(missing_ok=True)
+                            preserve_unverified_output(state.current_job, state.current_output_version)
                         record_failure(
                             state,
                             "worker_crash",
                             f"worker terminato con exit code {state.process.exitcode}"
-                            + ("; output non verificato rimosso" if unverified_output else ""),
+                            + ("; output non verificato conservato separatamente" if unverified_output else ""),
                         )
                     elif not state.ready:
                         record_unavailable_device(
@@ -2317,6 +2228,9 @@ def main() -> int:
     all_jobs, source_paths = build_jobs(source_dir, compiled_dir, device_names, args.metric)
     compile_jobs = select_compile_jobs(all_jobs, args.limit_circuits)
     run_metadata: dict[str, Any] = {
+        "execution_profile": EXECUTION_PROFILE,
+        "num_workers": args.num_workers,
+        "thread_environment": {k: os.environ.get(k) for k in ("RAYON_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "QISKIT_PARALLEL")},
         "experiment_id": EXPERIMENT_ID,
         "protocol": PROTOCOL_ID if matches_frozen_protocol else None,
         "protocol_version": PROTOCOL_VERSION,
@@ -2343,7 +2257,7 @@ def main() -> int:
         "compatible_compilation_count": len(all_jobs),
     }
     run_metadata["trainer_sha256"] = file_sha256(Path(__file__))
-    identity = {k: run_metadata[k] for k in ("seed", "timeout_seconds", "rl_max_steps", "max_attempts", "trainer_sha256", "software", "targets", "rl_models", "source_manifest_sha256")}
+    identity = {k: run_metadata[k] for k in ("execution_profile", "num_workers", "thread_environment", "seed", "timeout_seconds", "rl_max_steps", "max_attempts", "trainer_sha256", "software", "targets", "rl_models", "source_manifest_sha256")}
     policy_path = cache_dir / "politica.json"
     if policy_path.exists() and json.loads(policy_path.read_text()) != identity:
         raise SystemExit("La cache appartiene a impostazioni diverse; usare una nuova --cache-dir.")

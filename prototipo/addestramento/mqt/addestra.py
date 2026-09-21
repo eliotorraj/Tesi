@@ -1,4 +1,7 @@
-"""Sincronizza i cinque modelli RL verificati e avvia il selettore."""
+"""Avvio ufficiale: verifica i cinque RL e addestra il selettore sui 422 train.
+
+Il motore usa worker spawn senza fork e connessioni BQSKit per circuito.
+"""
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parent))
@@ -32,6 +35,8 @@ def sync_rl(dry_run):
         shutil.copy2(source,target)
 
 if __name__=="__main__":
+    if "--help" in sys.argv or "-h" in sys.argv:
+        trainer.parse_args()
     dry="--dry-run" in sys.argv
     if dry:
         sync_rl(True)

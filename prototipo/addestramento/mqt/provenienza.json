@@ -5,7 +5,10 @@
     "SCR-02: interrupted JSONL tail preserved and repaired; internal corruption rejected",
     "SCR-03: consume queued messages before classifying worker exit",
     "SCR-04: timeout in every record, cache identity and cache directory",
-    "outputs under prototipo/addestramento/mqt; previous model artifacts preserved"
+    "outputs under prototipo/addestramento/mqt; previous model artifacts preserved",
+    "SCR-05: compilation in persistent spawn worker, no fork after model load; parent enforces deadline and restarts failed workers",
+    "SCR-06: fresh BQSKit connection per circuit using original compile function, without nested closed closures",
+    "New spawn_direct_v1 cache; worker/thread settings recorded; unverified late outputs retained separately"
   ],
   "archive_unchanged": true
 }

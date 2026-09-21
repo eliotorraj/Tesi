@@ -73,7 +73,7 @@ Tutto il nuovo lavoro è dentro questa cartella:
 
 | Percorso | Contenuto |
 | --- | --- |
-| `cache/expected_fidelity/timeout_100/` | Compilazioni, tentativi e stato riprendibile |
+| `cache/spawn_direct_v1/expected_fidelity/timeout_100/` | Compilazioni, tentativi e stato riprendibile |
 | `registri/` | Log dei processi |
 | `training_set/device_selector_expected_fidelity.json` | Training set leggibile da programma |
 | `modelli/` | Classificatore finale e metadati |
@@ -101,3 +101,40 @@ La prova di sviluppo ha verificato i difetti con dati sintetici.
 Non è stato eseguito un nuovo addestramento lungo. Nel clone desktop controllato
 mancava la copia canonica di ibm_heron_133; ciò non stabilisce lo stato dei
 modelli eventualmente presenti su altri computer.
+
+## Correzione dei processi del 21 settembre
+
+Usare sempre `addestra.py`, senza gli script diagnostici temporanei.
+Il modello viene caricato nel worker avviato con `spawn`. La compilazione
+avviene nello stesso processo, senza `fork`. Ogni circuito apre una nuova
+connessione BQSKit; quella precedente viene chiusa senza essere riutilizzata.
+Il processo principale interrompe e riavvia i worker che superano il timeout.
+Il caricamento iniziale ha un limite separato di 240 secondi.
+
+Il timeout ufficiale resta 100 secondi per coppia, con un massimo di tre tentativi.
+Non è una stima del tempo necessario a tutti i circuiti: la prova breve non basta
+per ottimizzarlo. Le vecchie prove e cache restano conservate. La nuova cache è
+`cache/spawn_direct_v1/expected_fidelity/timeout_100/` e registra anche il numero
+di worker e le impostazioni dei thread. Non mescolare configurazioni diverse.
+
+Sul portatile usare un worker RL e due worker per la ricerca dei parametri
+Random Forest. Senza `--limit-circuits` vengono verificati tutti i 422 train:
+nel manifest attuale corrispondono a 2002 coppie compatibili, non 2110.
+`addestra.py` compila, costruisce il Training set e addestra il selettore.
+Le prove `--compile-only` invece non producono un modello.
+
+Per avvio e ripresa, dalla radice del repository:
+
+```bash
+archivio/esperimento_v2/.venv-selettore/bin/python -u prototipo/addestramento/mqt/addestra.py --num-workers 1 --rf-workers 2 --timeout 100
+```
+
+Tenere il portatile alimentato e impedire la sospensione. Ripetere lo stesso
+comando per riprendere. I tentativi esauriti non vengono cancellati o azzerati:
+se impediscono la copertura, esaminare gli errori prima di cambiare impostazioni.
+
+Verifica tecnica del codice, senza training o accesso al Test:
+
+```bash
+archivio/esperimento_v2/.venv-selettore/bin/python prototipo/addestramento/mqt/verifiche/test_processi.py -v
+```
