@@ -44,3 +44,28 @@ Esito dei controlli: tre regressioni sui processi e tre sulla cache superate.
 Graphify: aggiornamento completo interrotto durante la scansione; anche il
 tentativo incrementale è stato interrotto dopo mancata risposta di WSL.
 Il completamento dell’aggiornamento del grafo non è confermato.
+
+## Deduplicazione del Training set ML
+
+Su richiesta dell'utente, il selettore ora usa i 396 contenuti QASM distinti
+presenti nei 422 file train. I 26 alias byte-identici vengono mappati al
+rappresentante scelto per nome file. La selezione avviene prima di compilare:
+sono richieste 1878 coppie compatibili. Non si eliminano file né si modifica
+il manifest congelato. I due realamprandom semanticamente equivalenti restano
+separati perché hanno byte diversi, coerentemente con il RAG.
+
+La motivazione è evitare che gli alias pesino più volte nella Random Forest
+e possano comparire in fold diversi della sua validazione incrociata.
+Non si sostiene che tutte le ridondanze semantiche siano state eliminate.
+I cinque RL esistenti restano invariati, compresa la provenienza sui 422 file.
+
+La cache sha256_396_spawn_v1 conserva la selezione e il suo hash. Mappa e numero
+di campioni sono inclusi nei metadati e nel Dataset esportato. I controlli di
+sincronizzazione e Test richiedono la nuova selezione; la provenienza del corpus
+originale resta source_circuit_count=422. Il modello viene addestrato e
+pubblicato solo con gli array corrispondenti ai rappresentanti richiesti.
+
+Verifiche: selezione deterministica, differenze di byte non eliminate,
+rifiuto di duplicati/alias/campioni mancanti negli array; sul corpus reale
+422 file, 396 hash, 26 alias e 1878 coppie. Nessun training completo o Test
+ufficiale avviato. Aggiornamento Graphify affidato all'utente su sua richiesta.

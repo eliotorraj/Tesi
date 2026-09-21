@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil
 import sys
 import motore_ml as trainer
+from deduplica import validate_selection_metadata
 from addestra import sync_rl
 from mqt_model_artifacts import validate_ml_classifier, validate_ml_training_metadata
 
@@ -14,6 +15,7 @@ def main():
         if errors:raise SystemExit(str(errors))
         metadata,errors=validate_ml_training_metadata(canonical.with_suffix(".metadata.json"),
             model_sha256=trainer.file_sha256(canonical))
+        errors.extend(validate_selection_metadata(metadata, trainer.TRAINING_CIRCUITS_V2))
         if errors:raise SystemExit(str(errors))
         for device in trainer.FROZEN_DEVICES:
             path=trainer.CANONICAL_RL_MODELS_DIR/f"model_expected_fidelity_{device}.zip"

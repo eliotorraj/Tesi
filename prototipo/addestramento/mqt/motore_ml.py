@@ -13,6 +13,7 @@ artifacts.
 from __future__ import annotations
 
 import argparse
+from deduplica import select_unique, validate_training_names
 import ctypes
 import json
 import os
@@ -98,7 +99,7 @@ PROJECT_ROOT = ARCHIVE_ROOT
 CANONICAL_MODELS_DIR = ACTIVE_ROOT / "modelli"
 MQT_TRAINING_SET_V2 = ACTIVE_ROOT / "training_set/device_selector_expected_fidelity.json"
 ACTIVE_TIMEOUT = 100
-DEFAULT_CACHE_ROOT = ACTIVE_ROOT / "cache/spawn_direct_v1"
+DEFAULT_CACHE_ROOT = ACTIVE_ROOT / "cache/sha256_396_spawn_v1"
 CANONICAL_RL_MODELS_DIR = CANONICAL_RL_MODEL_DIR_V2
 DEFAULT_LOG_ROOT = ACTIVE_ROOT / "registri"
 DEFAULT_WORKERS = 1
@@ -280,6 +281,7 @@ def build_jobs(
     compiled_dir: Path,
     device_names: list[str],
     metric: str,
+    selected_sources: dict[str, Path] | None = None,
 ) -> tuple[list[CompilationJob], dict[str, Path]]:
     """Build all compatible compilation jobs and retain source paths."""
     devices = {name: get_device(name) for name in device_names}
@@ -287,7 +289,9 @@ def build_jobs(
     jobs: list[CompilationJob] = []
 
     circuit_info: list[tuple[int, str, Path]] = []
-    for source in source_dir.glob("*.qasm"):
+    if selected_sources is None:
+        selected_sources, _ = select_unique(source_dir)
+    for source in selected_sources.values():
         circuit = QuantumCircuit.from_qasm_file(source)
         circuit_info.append((circuit.num_qubits, source.stem, source))
         source_paths[source.stem] = source
@@ -1755,6 +1759,11 @@ def export_dataset_json(
         "parallelism",
         "liveness",
     ]
+    groups = {r["representative"]: r for r in run_metadata["training_selection"]["groups"]}
+    if run_metadata.get("publication_status") != "exploratory-incomplete":
+        validate_training_names(names, groups)
+    elif len(set(map(str, names))) != len(names) or not set(map(str, names)) <= set(groups):
+        raise ValueError("Array esplorativi estranei alla selezione train")
     latest = latest_manifest_records(manifest_path)
     label_counts: Counter[str] = Counter()
     provenance_counts: Counter[str] = Counter()
@@ -1819,6 +1828,8 @@ def export_dataset_json(
                 "index": index,
                 "circuit": name,
                 "source_qasm": f"{name}.qasm",
+                "source_sha256": groups[name]["sha256"],
+                "source_aliases": groups[name]["aliases"],
                 "label_device": label,
                 "scores": score_by_device,
                 "features": dict(zip(feature_names, feature_values, strict=True)),
@@ -1855,9 +1866,14 @@ def train_selector_model(
     rf_workers: int,
     seed: int,
     expected_devices: list[str] | None,
+    expected_sources: list[str],
 ) -> None:
     """Select hyperparameters on a holdout, then refit on every sample."""
+    names = np.load(training_data_dir / f"names_list_{metric}.npy", allow_pickle=False)
+    validate_training_names(names, expected_sources)
     x, y = load_generated_training_arrays(metric, training_data_dir)
+    if len(x) != len(names):
+        raise ValueError("Numero di feature e nomi incoerente")
     label_counts = Counter(y)
     smallest_class = min(label_counts.values())
 
@@ -2225,7 +2241,8 @@ def main() -> int:
             )
 
 
-    all_jobs, source_paths = build_jobs(source_dir, compiled_dir, device_names, args.metric)
+    selected_sources, training_selection = select_unique(source_dir)
+    all_jobs, source_paths = build_jobs(source_dir, compiled_dir, device_names, args.metric, selected_sources)
     compile_jobs = select_compile_jobs(all_jobs, args.limit_circuits)
     run_metadata: dict[str, Any] = {
         "execution_profile": EXECUTION_PROFILE,
@@ -2251,18 +2268,26 @@ def main() -> int:
             }
             for name in device_names
         },
-        "source_circuit_count": len(source_paths),
+        "source_circuit_count": training_selection["source_circuit_count"],
+        "training_sample_count": len(source_paths),
+        "training_selection": training_selection,
         "source_manifest_sha256": training_partition["manifest_sha256"],
         "training_split": "train",
         "compatible_compilation_count": len(all_jobs),
     }
     run_metadata["trainer_sha256"] = file_sha256(Path(__file__))
-    identity = {k: run_metadata[k] for k in ("execution_profile", "num_workers", "thread_environment", "seed", "timeout_seconds", "rl_max_steps", "max_attempts", "trainer_sha256", "software", "targets", "rl_models", "source_manifest_sha256")}
+    identity = {k: run_metadata[k] for k in ("training_selection", "execution_profile", "num_workers", "thread_environment", "seed", "timeout_seconds", "rl_max_steps", "max_attempts", "trainer_sha256", "software", "targets", "rl_models", "source_manifest_sha256")}
     policy_path = cache_dir / "politica.json"
     if policy_path.exists() and json.loads(policy_path.read_text()) != identity:
         raise SystemExit("La cache appartiene a impostazioni diverse; usare una nuova --cache-dir.")
     if not args.dry_run and not policy_path.exists():
         atomic_json_write(policy_path, identity)
+    selection_path = cache_dir / "selezione_train.json"
+    if not args.dry_run:
+        if selection_path.exists() and json.loads(selection_path.read_text()) != training_selection:
+            raise SystemExit("Mappa alias diversa nella cache; usare una nuova directory")
+        if not selection_path.exists():
+            atomic_json_write(selection_path, training_selection)
     strict_before = strict_rl_success_keys(
         compile_jobs,
         manifest_path,
@@ -2274,7 +2299,8 @@ def main() -> int:
     valid_before = len(strict_before)
 
     per_device = Counter(job.device_name for job in all_jobs)
-    print(f"Circuiti sorgente: {len(source_paths)}")
+    print(f"Corpus verificato: {training_selection['source_circuit_count']} circuiti train")
+    print(f"Campioni ML unici: {len(source_paths)}; alias esclusi: {training_selection['alias_count']}")
     print(f"Compilazioni compatibili totali: {len(all_jobs)}")
     print("Per device: " + ", ".join(f"{name}={per_device[name]}" for name in sorted(per_device)))
     if args.limit_circuits:
@@ -2487,6 +2513,7 @@ def main() -> int:
         args.rf_workers,
         args.seed,
         device_names if production_ready else None,
+        [source.stem for source in selected_sources],
     )
     staged_dataset = staging_dir / dataset_json.name
     export_dataset_json(

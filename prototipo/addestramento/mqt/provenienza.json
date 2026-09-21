@@ -8,7 +8,8 @@
     "outputs under prototipo/addestramento/mqt; previous model artifacts preserved",
     "SCR-05: compilation in persistent spawn worker, no fork after model load; parent enforces deadline and restarts failed workers",
     "SCR-06: fresh BQSKit connection per circuit using original compile function, without nested closed closures",
-    "New spawn_direct_v1 cache; worker/thread settings recorded; unverified late outputs retained separately"
+    "New spawn_direct_v1 cache; worker/thread settings recorded; unverified late outputs retained separately",
+    "ML train-sha256-396-v1: 396 representatives from 422 frozen sources, 26 aliases mapped, 1878 compatible pairs, separate cache and selection checks before fit/export/sync/Test"
   ],
   "archive_unchanged": true
 }

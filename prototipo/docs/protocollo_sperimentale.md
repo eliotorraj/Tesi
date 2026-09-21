@@ -35,7 +35,20 @@ Test serve una sola volta per il confronto finale dopo tutti i controlli.
 **Dataset** indica gli esempi per RAG/LLM. **Training set** indica i dati
 circuito-dispositivo per il selettore supervisionato MQT.
 Il RAG usa **396 circuiti train distinti per SHA-256**: i 26 alias byte-identici
-non diventano nuovi esempi. I due realamprandom a 2 qubit semanticamente uguali
+non diventano nuovi esempi. Anche il selettore ML usa un solo campione per
+ciascuno degli stessi 396 hash train, con 1.878 coppie compatibili sui cinque
+dispositivi. Il corpus verificato resta quello dei 422 file originali. Per ogni
+hash il rappresentante è il nome file lessicograficamente minimo; una mappa
+conserva tutti i 26 alias. La deduplicazione precede compilazione, costruzione
+degli array, validazione incrociata interna e fit finale del selettore.
+Le cache precedenti non vengono mescolate a questa esecuzione.
+
+Questa revisione riguarda il selettore ML. I cinque modelli RL già addestrati
+sui 422 file restano invariati: non si afferma che l'intero addestramento RL
+sia stato deduplicato. La base di contenuti unici è condivisa con il RAG,
+ma le procedure e le informazioni usate dai metodi restano diverse.
+
+I due realamprandom a 2 qubit semanticamente uguali
 restano entrambi nel train; questa ridondanza è dichiarata.
 
 Validation e test non entrano in indice, trasformazione, esempi o evidenze.

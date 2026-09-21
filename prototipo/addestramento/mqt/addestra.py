@@ -1,4 +1,4 @@
-"""Avvio ufficiale: verifica i cinque RL e addestra il selettore sui 422 train.
+"""Avvio ufficiale: verifica i cinque RL e addestra il selettore sui 396 hash dei 422 train.
 
 Il motore usa worker spawn senza fork e connessioni BQSKit per circuito.
 """
@@ -41,6 +41,8 @@ if __name__=="__main__":
     if dry:
         sync_rl(True)
         trainer.verify_circuit_directory(trainer.TRAINING_CIRCUITS_V2, allowed_splits=("train",), manifest_path=trainer.SOURCE_MANIFEST_V2)
+        _, selection = trainer.select_unique(trainer.TRAINING_CIRCUITS_V2)
+        print(f"Train verificato: 422 sorgenti, {selection['unique_circuit_count']} campioni unici, 26 alias")
         # Il controllo completo del trainer richiede le copie runtime.
         missing=[d for d in trainer.FROZEN_DEVICES
                  if not (trainer.get_rl_model_dir()/f"model_expected_fidelity_{d}.zip").is_file()]

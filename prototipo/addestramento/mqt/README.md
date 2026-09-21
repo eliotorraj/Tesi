@@ -1,7 +1,9 @@
 # Addestrare il selettore ML sul portatile
 
 Usare **Ubuntu o WSL**, Python 3.12 e le versioni esatte dell'esperimento.
-Il selettore usa soltanto i 422 circuiti train. La parte costosa è compilare
+Il selettore usa i **396 circuiti train distinti per SHA-256**, ricavati dai
+422 file originali verificati. I 26 alias byte-identici non vengono contati
+come campioni aggiuntivi. La parte costosa è compilare
 ogni coppia circuito-dispositivo mediante i cinque modelli RL; poi viene
 addestrato il classificatore Random Forest.
 
@@ -73,7 +75,7 @@ Tutto il nuovo lavoro è dentro questa cartella:
 
 | Percorso | Contenuto |
 | --- | --- |
-| `cache/spawn_direct_v1/expected_fidelity/timeout_100/` | Compilazioni, tentativi e stato riprendibile |
+| `cache/sha256_396_spawn_v1/expected_fidelity/timeout_100/` | Compilazioni, tentativi e stato riprendibile |
 | `registri/` | Log dei processi |
 | `training_set/device_selector_expected_fidelity.json` | Training set leggibile da programma |
 | `modelli/` | Classificatore finale e metadati |
@@ -114,12 +116,12 @@ Il caricamento iniziale ha un limite separato di 240 secondi.
 Il timeout ufficiale resta 100 secondi per coppia, con un massimo di tre tentativi.
 Non è una stima del tempo necessario a tutti i circuiti: la prova breve non basta
 per ottimizzarlo. Le vecchie prove e cache restano conservate. La nuova cache è
-`cache/spawn_direct_v1/expected_fidelity/timeout_100/` e registra anche il numero
+`cache/sha256_396_spawn_v1/expected_fidelity/timeout_100/` e registra anche il numero
 di worker e le impostazioni dei thread. Non mescolare configurazioni diverse.
 
 Sul portatile usare un worker RL e due worker per la ricerca dei parametri
 Random Forest. Senza `--limit-circuits` vengono verificati tutti i 422 train:
-nel manifest attuale corrispondono a 2002 coppie compatibili, non 2110.
+poi si selezionano i 396 hash distinti, corrispondenti a **1878 coppie compatibili**.
 `addestra.py` compila, costruisce il Training set e addestra il selettore.
 Le prove `--compile-only` invece non producono un modello.
 
@@ -137,4 +139,27 @@ Verifica tecnica del codice, senza training o accesso al Test:
 
 ```bash
 archivio/esperimento_v2/.venv-selettore/bin/python prototipo/addestramento/mqt/verifiche/test_processi.py -v
+```
+
+## Selezione dei 396 campioni ML
+
+Non passare `--limit-circuits 396`: la deduplicazione è automatica e precede
+l'eventuale limite delle prove tecniche. Il rappresentante di ogni hash è il
+file con nome lessicograficamente minimo. Il confronto avviene sui byte QASM,
+non sulle feature o sull'equivalenza semantica.
+
+La nuova cache contiene `selezione_train.json`: 396 gruppi con hash,
+rappresentante e alias. La stessa mappa entra nel JSON del Training set e
+nei metadati del modello. `source_circuit_count=422` indica il corpus originale;
+`training_sample_count=396` indica i campioni richiesti per il selettore finale.
+La copertura completa è di 1878 compilazioni, prima della scelta del vincitore
+per ciascuno dei 396 campioni. Gli array vengono controllati prima del fit e
+dell'esportazione, per impedire l'uso accidentale dei vecchi 422 campioni.
+
+La sincronizzazione e il controllo MQT del Test rifiutano selettori privi della
+nuova mappa. Le vecchie cache e gli artefatti restano conservati. I modelli RL
+rimangono quelli già addestrati sui 422 file; questa modifica riguarda il ML.
+
+```bash
+archivio/esperimento_v2/.venv-selettore/bin/python prototipo/addestramento/mqt/verifiche/test_deduplica.py -v
 ```
