@@ -1,0 +1,95 @@
+{
+  "guide": "prototipo/docs/comandi_verifica_manuale.md",
+  "guide_sha256": "abbf64febce6e034a31f55de9a2cf51fde8a38e06cea963c9a939d48e0073bd6",
+  "checks": [
+    {
+      "block": 1,
+      "language": "bash",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "block": 2,
+      "language": "bash",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "block": 3,
+      "language": "bash",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "block": 4,
+      "language": "powershell",
+      "checker": "System.Management.Automation.Language.Parser.ParseFile (Windows)",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "block": 5,
+      "language": "powershell",
+      "checker": "System.Management.Automation.Language.Parser.ParseFile (Windows)",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "block": 6,
+      "language": "bash",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "block": 7,
+      "language": "powershell",
+      "checker": "System.Management.Automation.Language.Parser.ParseFile (Windows)",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "block": 8,
+      "language": "powershell",
+      "checker": "System.Management.Automation.Language.Parser.ParseFile (Windows)",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "block": 9,
+      "language": "powershell",
+      "checker": "System.Management.Automation.Language.Parser.ParseFile (Windows)",
+      "passed": true,
+      "errors": []
+    }
+  ],
+  "qwen_started": false,
+  "graph_updated": false,
+  "checks_executed_commands": false,
+  "native_controller_comparison": [
+    {
+      "file": "server-desktop.ps1",
+      "native_copy_present": true,
+      "identical": true
+    },
+    {
+      "file": "server-desktop-internal.ps1",
+      "native_copy_present": true,
+      "identical": true
+    },
+    {
+      "file": "verify-model.ps1",
+      "native_copy_present": true,
+      "identical": false
+    },
+    {
+      "file": "AmdSensors.cs",
+      "native_copy_present": true,
+      "identical": true
+    },
+    {
+      "file": "config.json",
+      "native_copy_present": true,
+      "identical": true
+    }
+  ]
+}

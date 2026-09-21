@@ -1,0 +1,1268 @@
+{
+  "review_date": "2026-09-21",
+  "scope": "scripts",
+  "coverage": {
+    "files": 23,
+    "lines": 8496,
+    "fully_read_files": 23,
+    "partially_read_files": 0,
+    "static_only_files": 0,
+    "ast_passed": 23,
+    "current_hashes_match": 23
+  },
+  "method": "Lettura integrale di tutti i 23 sorgenti assegnati; sette simulazioni isolate, senza addestramenti, compilazioni sperimentali o apertura del Test. Rilievi descrivono condizioni riproducibili, non affermano che abbiano alterato risultati storici.",
+  "findings": [
+    {
+      "id": "SCR-01",
+      "severity": "P2",
+      "title": "Ripresa automatica cerca i checkpoint in un percorso diverso da quello del trainer",
+      "locations": [
+        {
+          "file": "16_run_pipeline_v2.py",
+          "lines": [
+            141,
+            150
+          ]
+        },
+        {
+          "file": "03_train_rl_model.py",
+          "lines": [
+            448,
+            466
+          ]
+        }
+      ],
+      "condition": "Un addestramento produce checkpoint nel percorso fisso sul disco D e viene rilanciato attraverso la pipeline.",
+      "evidence": "latest_valid_checkpoint cerca in EXPERIMENT_ROOT/checkpoints/rl; il trainer scrive in /mnt/d/RL_Models_Tesi/MODELLI NUOVI/checkpoints/rl. Le cartelle archiviate checkpoints e checkpoints/rl non sono collegamenti simbolici.",
+      "impact": "La pipeline non trova il checkpoint e riparte senza --resume; il trainer può poi rifiutare la cartella già popolata.",
+      "recommendation": "Nella futura revisione usare una sola configurazione del percorso di checkpoint condivisa fra trainer e pipeline.",
+      "verification": "Lettura dei due flussi e controllo dei percorsi; nessun addestramento eseguito."
+    },
+    {
+      "id": "SCR-02",
+      "severity": "P2",
+      "title": "Una coda JSONL interrotta assorbe il record successivo",
+      "locations": [
+        {
+          "file": "04_train_device_selector.py",
+          "lines": [
+            160,
+            187
+          ]
+        }
+      ],
+      "condition": "Il processo si interrompe dopo avere scritto un frammento JSON privo del newline conclusivo.",
+      "evidence": "append_manifest aggiunge JSON al file senza controllare la coda; load_manifest ignora le righe non decodificabili.",
+      "impact": "Il successivo record completo si concatena al frammento e viene ignorato; si perdono risultato e conteggio dei tentativi, con possibili ripetizioni.",
+      "recommendation": "Conservare il frammento e ripristinare una separazione valida prima di appendere; segnalare la corruzione interna anziché ignorarla.",
+      "verification": "S02_jsonl_partial_tail: il record nuovo scompare da attempts e statuses."
+    },
+    {
+      "id": "SCR-03",
+      "severity": "P2",
+      "title": "Un risultato già in coda può essere sostituito da worker_crash",
+      "locations": [
+        {
+          "file": "04_train_device_selector.py",
+          "lines": [
+            1335,
+            1344
+          ]
+        },
+        {
+          "file": "04_train_device_selector.py",
+          "lines": [
+            1496,
+            1526
+          ]
+        }
+      ],
+      "condition": "Un worker termina quando la sua coda contiene ancora messaggi phase, result e done.",
+      "evidence": "Il supervisore consuma un messaggio per iterazione, poi rimuove il worker non più vivo prima di drenare i risultati rimanenti.",
+      "impact": "Può registrare worker_crash e consumare un tentativo pur avendo un risultato riuscito disponibile; il ramo output_changed può eliminare il nuovo output.",
+      "recommendation": "Drenare i messaggi del worker o richiedere un evento terminale prima di classificare la sua uscita come anomala.",
+      "verification": "S03_pending_worker_results: registrati running e worker_crash; result success e done restano in coda. Nessun processo reale avviato."
+    },
+    {
+      "id": "SCR-04",
+      "severity": "P2",
+      "title": "La provenienza dei tentativi non distingue il limite di tempo",
+      "locations": [
+        {
+          "file": "04_train_device_selector.py",
+          "lines": [
+            1043,
+            1060
+          ]
+        },
+        {
+          "file": "04_train_device_selector.py",
+          "lines": [
+            2261,
+            2286
+          ]
+        }
+      ],
+      "condition": "Si riutilizza un manifest fra esecuzioni con limiti diversi, consentiti per ml-canary.",
+      "evidence": "record_matches_run_configuration confronta versione, seed, passi, modello e target ma non timeout; i metadati finali descrivono il timeout richiesto dalla nuova esecuzione.",
+      "impact": "Un successo da 150 secondi ottenuto con limite 300 può essere riusato in una configurazione dichiarata a 100 secondi; il conteggio dei fallimenti non distingue le due politiche.",
+      "recommendation": "Registrare il timeout di ogni tentativo e includerlo nell’identità del risultato o dichiarare esplicitamente quello originario del risultato riusato.",
+      "verification": "S04_timeout_not_in_cache_key: configurazione accettata e nessun parametro timeout nel validatore."
+    },
+    {
+      "id": "SCR-05",
+      "severity": "P2",
+      "title": "La chiusura del figlio qcompile senza risposta non produce un esito persistito",
+      "locations": [
+        {
+          "file": "12_run_qcompile_v2.py",
+          "lines": [
+            159,
+            184
+          ]
+        },
+        {
+          "file": "12_run_qcompile_v2.py",
+          "lines": [
+            320,
+            342
+          ]
+        }
+      ],
+      "condition": "Il processo figlio chiude la pipe prima di inviare un risultato, per esempio dopo un arresto anomalo.",
+      "evidence": "poll può restituire true a EOF; recv solleva EOFError non gestito e il chiamante non costruisce il record terminale.",
+      "impact": "La chiamata può sparire dal registro e venire ripetuta alla ripresa senza documentare l’interruzione.",
+      "recommendation": "Gestire EOFError e gli errori di comunicazione registrando un esito di infrastruttura distinto con le informazioni disponibili.",
+      "verification": "S05_qcompile_eof: EOFError e nessun record terminale; nessun processo reale avviato."
+    },
+    {
+      "id": "SCR-06",
+      "severity": "P2",
+      "title": "Gli ingressi storici di validation e apertura Test non usano la selezione ufficiale local-llm-v2",
+      "locations": [
+        {
+          "file": "14_evaluate_methods_v2.py",
+          "lines": [
+            55,
+            59
+          ]
+        },
+        {
+          "file": "15_release_test_v2.py",
+          "lines": [
+            265,
+            283
+          ]
+        },
+        {
+          "file": "15_release_test_v2.py",
+          "lines": [
+            328,
+            330
+          ]
+        }
+      ],
+      "condition": "Si usa la selezione ufficiale local-llm-v2 con questi ingressi storici.",
+      "evidence": "La validation richiama llm_selection.evaluate.evaluate e ritorna subito; il rilascio importa verify_local_selection, FINAL e PROOF dal primo llm_selection.finalize, legato ai precedenti final_configuration.json, selection_complete.json e studio congelato.",
+      "impact": "Il controllo non certifica la selezione ufficiale v2. Il ramo validation ignora anche catalog e overwrite dell’ingresso storico.",
+      "recommendation": "Collegare esplicitamente valutazione e controllo di apertura allo studio ufficiale local-llm-v2 nella futura implementazione.",
+      "verification": "Lettura integrale degli ingressi e di llm_selection/finalize.py e evaluate.py. Limite già riconosciuto da AGENTS.md; il Test non è stato aperto."
+    },
+    {
+      "id": "SCR-07",
+      "severity": "P2",
+      "title": "Il controllo canary non lega il rapporto ai modelli correnti",
+      "locations": [
+        {
+          "file": "15_release_test_v2.py",
+          "lines": [
+            232,
+            259
+          ]
+        }
+      ],
+      "condition": "Un rapporto canary riuscito resta disponibile dopo la sostituzione di un modello con un altro formalmente valido.",
+      "evidence": "I modelli correnti sono validati separatamente; check_canary verifica successo, sei risultati, limiti e presenza di qcompile, senza confrontare hash degli artefatti né copertura distinta dei cinque dispositivi.",
+      "impact": "Un rapporto relativo a vecchi modelli può soddisfare il prerequisito sui nuovi modelli.",
+      "recommendation": "Confrontare hash, versioni, target, circuito train e copertura dei cinque dispositivi con la configurazione corrente.",
+      "verification": "S07_stale_canary_gate: rapporto con hash outdated accettato dal controllo estratto; nessun rilascio Test eseguito."
+    },
+    {
+      "id": "SCR-08",
+      "severity": "P2",
+      "title": "La ripartenza da zero può sovrascrivere il registro degli episodi",
+      "locations": [
+        {
+          "file": "03_train_rl_model.py",
+          "lines": [
+            456,
+            469
+          ]
+        },
+        {
+          "file": "03_train_rl_model.py",
+          "lines": [
+            507,
+            513
+          ]
+        }
+      ],
+      "condition": "Una corsa si interrompe prima del primo checkpoint valido e viene rilanciata con lo stesso nome senza --resume.",
+      "evidence": "La guardia consente la cartella contenente soltanto lo snapshot interrotto; il nuovo Monitor usa ancora monitor.csv. ResultsWriter di Stable-Baselines3, con override_existing predefinito, apre il file in modalità w.",
+      "impact": "Si perdono gli episodi del tentativo precedente; il nome dello snapshot diagnostico può essere riusato a una successiva interruzione.",
+      "recommendation": "Assegnare un identificativo e registri distinti a ogni avvio fisico, anche quando si riparte da zero.",
+      "verification": "S08_restart_overwrites_episode_log: guardia originale accettata e ResultsWriter installato sovrascrive un CSV sintetico. Nessun training."
+    },
+    {
+      "id": "SCR-09",
+      "severity": "P2",
+      "title": "Gli esiti canary vengono salvati soltanto alla fine e il rapporto viene sostituito",
+      "locations": [
+        {
+          "file": "07_validate_qcompile.py",
+          "lines": [
+            89,
+            98
+          ]
+        },
+        {
+          "file": "07_validate_qcompile.py",
+          "lines": [
+            495,
+            524
+          ]
+        }
+      ],
+      "condition": "La validazione si interrompe dopo alcuni controlli o viene ripetuta con il percorso predefinito.",
+      "evidence": "I risultati delle sei chiamate restano in memoria sino al salvataggio finale; la scrittura atomica sostituisce validation_report.json senza archiviare la versione precedente.",
+      "impact": "Un’interruzione perde gli esiti già completati; una ripetizione può cancellare evidenze di successo o fallimento precedenti.",
+      "recommendation": "Salvare ogni risultato sotto un identificativo di esecuzione immutabile e aggiornare separatamente il riferimento al rapporto corrente.",
+      "verification": "Lettura completa del flusso di raccolta e scrittura. Nessuna validazione con modelli eseguita."
+    },
+    {
+      "id": "SCR-10",
+      "severity": "P2",
+      "title": "La validazione degli artefatti non verifica tutti i legami di provenienza",
+      "locations": [
+        {
+          "file": "mqt_model_artifacts.py",
+          "lines": [
+            182,
+            231
+          ]
+        },
+        {
+          "file": "mqt_model_artifacts.py",
+          "lines": [
+            299,
+            335
+          ]
+        },
+        {
+          "file": "mqt_model_artifacts.py",
+          "lines": [
+            339,
+            412
+          ]
+        }
+      ],
+      "condition": "Gli artefatti hanno metadati formalmente conformi ma derivano da un manifest diverso o da politiche RL diverse da quelle correnti.",
+      "evidence": "Il validatore RL non confronta training_manifest_sha256; quello ML non lega source_manifest_sha256 e rl_models al manifest e ai cinque modelli correnti. validate_model_set non aggiunge questi confronti.",
+      "impact": "Un insieme formalmente pronto può combinare Training set o politiche non corrispondenti. Non si conclude che gli artefatti reali presenti siano errati.",
+      "recommendation": "Verificare gli hash del manifest congelato e delle cinque politiche usate per costruire le etichette prima di dichiarare pronto l’insieme.",
+      "verification": "S10_provenance_bindings: metadati sintetici con riferimenti differenti restituiscono zero errori. Nessun modello caricato."
+    }
+  ],
+  "files": [
+    {
+      "current_path": "archivio/esperimento_v2/scripts/01_check_install.py",
+      "sha256": "cefeeea2f13a854eb09844a5af9609308ca9799b862c73c52034a124b3d09658",
+      "lines": 250,
+      "manual_ranges": [
+        [
+          1,
+          250
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica ambiente Python e versioni, dispositivi congelati e corrispondenza tra modelli canonici e copie operative.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "importlib.metadata",
+        "mqt.bench.targets",
+        "mqt.predictor.ml.helper",
+        "mqt.predictor.rl.helper",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "pathlib",
+        "platform",
+        "sys"
+      ],
+      "invariants": [
+        "I modelli assenti diventano errore con --require-models; il controllo non prova la qualità della compilazione."
+      ],
+      "findings": [],
+      "portability": "Richiede Linux e Python 3.12; versioni e target sono vincoli del protocollo congelato.",
+      "optimization": "Condividere il controllo di prontezza ed evitare scansioni ripetute degli stessi ZIP mantenendo hash e verifiche.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/02_list_devices.py",
+      "sha256": "7d9c8f6852ad201fc4b01f5da6683e1d06b76d68c72d406dc133e2e2a7e74341",
+      "lines": 43,
+      "manual_ranges": [
+        [
+          1,
+          43
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Elenca i dispositivi disponibili e, se richiesto, ne mostra le caratteristiche.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "mqt.bench.targets"
+      ],
+      "invariants": [
+        "Lettura senza modifiche; un identificativo richiesto deve essere disponibile nel catalogo MQT."
+      ],
+      "findings": [],
+      "portability": "Non introduce percorsi assoluti; dipende dal catalogo della versione installata.",
+      "optimization": "Script piccolo: nessuna ottimizzazione sostanziale necessaria.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/03_train_rl_model.py",
+      "sha256": "1dfd4112c9d10141deb73ffcf920883f6d8e08a76712aab57151688cb79f1cc4",
+      "lines": 629,
+      "manual_ranges": [
+        [
+          1,
+          629
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Addestra una politica RL per dispositivo, conserva checkpoint dopo gli aggiornamenti e metadati di provenienza.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "bqskit.ir.circuit",
+        "bqskit.ir.gates.barrier",
+        "bqskit.ir.gates.measure",
+        "contextlib",
+        "dataclasses",
+        "datetime",
+        "gymnasium.spaces",
+        "importlib.metadata",
+        "json",
+        "mqt.bench.targets",
+        "mqt.predictor.rl",
+        "mqt.predictor.rl.actions",
+        "mqt.predictor.rl.helper",
+        "mqt.predictor.rl.predictorenv",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "os",
+        "pathlib",
+        "qiskit.transpiler.passes",
+        "re",
+        "sb3_contrib",
+        "sb3_contrib.common.maskable.policies",
+        "shutil",
+        "signal",
+        "stable_baselines3.common.callbacks",
+        "stable_baselines3.common.monitor",
+        "stable_baselines3.common.utils",
+        "sys",
+        "typing"
+      ],
+      "invariants": [
+        "Controlla split train e hash; PPO arrotonda i 100.000 passi richiesti a rollout completi da 2.048. La ripresa verifica modello, seed e configurazione, ma reimposta il seed e non equivale a una corsa continua bit per bit."
+      ],
+      "findings": [
+        "SCR-01",
+        "SCR-08"
+      ],
+      "portability": "Il percorso checkpoint sul disco D è specifico della macchina; SIGALRM e gestione dei processi richiedono Linux.",
+      "optimization": "In una revisione futura separare configurazione, ripresa e persistenza; conservare la distinzione tra checkpoint valido e snapshot interrotto.",
+      "verdict": "Rilievi verificati: SCR-01, SCR-08",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/04_train_device_selector.py",
+      "sha256": "18d9e21a376e86e8bfe22868107c95fc66866582233d1e7f5cd83cae2e5a3608",
+      "lines": 2546,
+      "manual_ranges": [
+        [
+          1,
+          2546
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Produce i risultati circuito-dispositivo riprendibili e addestra il selettore supervisionato usando il Training set train.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "bqskit.compiler",
+        "collections",
+        "ctypes",
+        "dataclasses",
+        "datetime",
+        "functools",
+        "importlib.metadata",
+        "joblib",
+        "json",
+        "mqt.bench.targets",
+        "mqt.predictor.ml",
+        "mqt.predictor.ml.helper",
+        "mqt.predictor.reward",
+        "mqt.predictor.rl.actions",
+        "mqt.predictor.rl.helper",
+        "mqt.predictor.rl.predictor",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "multiprocessing",
+        "numpy",
+        "os",
+        "pathlib",
+        "psutil",
+        "qiskit",
+        "qiskit.qasm2",
+        "queue",
+        "sb3_contrib.common.maskable.utils",
+        "shutil",
+        "signal",
+        "sklearn.ensemble",
+        "sklearn.model_selection",
+        "socket",
+        "subprocess",
+        "sys",
+        "time",
+        "traceback",
+        "typing",
+        "zipfile"
+      ],
+      "invariants": [
+        "La pubblicazione richiede copertura dei cinque dispositivi compatibili e score validi; il ramo attivo rifiuta fallback. La suddivisione interna sklearn riguarda il train, non il Test sperimentale."
+      ],
+      "findings": [
+        "SCR-02",
+        "SCR-03",
+        "SCR-04"
+      ],
+      "portability": "Assume strumenti e processi Linux; timeout e BQSKit dipendono dall’ambiente. Gli identificativi dei cinque dispositivi sono parte del protocollo.",
+      "optimization": "Separare supervisione, registrazione, costruzione etichette e addestramento; evitare avvio BQSKit quando non ci sono lavori. Tenere i modelli RL residenti evita caricamenti ripetuti.",
+      "verdict": "Rilievi verificati: SCR-02, SCR-03, SCR-04",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/05_sync_models.py",
+      "sha256": "22584e2caf5a5112803b61b9df8cf401e891e6cdb5a19a72d091d395061e60c5",
+      "lines": 253,
+      "manual_ranges": [
+        [
+          1,
+          253
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica e installa le copie operative dei modelli canonici con confronto degli hash.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "dataclasses",
+        "mqt.predictor.ml.helper",
+        "mqt.predictor.rl.helper",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "os",
+        "pathlib",
+        "shutil",
+        "typing"
+      ],
+      "invariants": [
+        "La cattura di modelli esterni è rifiutata; la sostituzione richiede opzione esplicita e la copia è atomica. Eredita i limiti di provenienza SCR-10."
+      ],
+      "findings": [],
+      "portability": "Usa percorsi restituiti dal pacchetto MQT e radice del progetto; legato alla struttura della versione installata.",
+      "optimization": "Riusare l’esito della validazione durante la stessa operazione per evitare letture duplicate dei grandi artefatti.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/06_prepare_experiment_v2.py",
+      "sha256": "ce10784d785d985454a5b9abed59c06bd179ec6e6b325e8a8b928063cd1ea316",
+      "lines": 202,
+      "manual_ranges": [
+        [
+          1,
+          202
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica il corpus e prepara le viste di train e validation della seconda versione dell’esperimento.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "mqt.bench.targets",
+        "mqt_predictor_protocol",
+        "os",
+        "pathlib",
+        "shutil",
+        "sys",
+        "typing"
+      ],
+      "invariants": [
+        "Controlla hash, versioni, target e sovrapposizioni semantiche dei 600 sorgenti. Il controllo di identità dei sorgenti Test non esegue compilazioni o valutazioni; non materializza la vista Test."
+      ],
+      "findings": [],
+      "portability": "Riferimenti logici congelati risolti tramite protocollo; i file già presenti con contenuto diverso vengono rifiutati.",
+      "optimization": "Centralizzare i piccoli scrittori atomici quando si crea una nuova versione, senza riscrivere i manifest storici.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/07_prepare_qiskit_dataset.py",
+      "sha256": "9b984afb2062bb85fe809c433849f5dfb01c3c22dbc340ef982f59c7fc213ed4",
+      "lines": 73,
+      "manual_ranges": [
+        [
+          1,
+          73
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Espone la preparazione del catalogo Qiskit tramite parametri di ambito, sorgente e dispositivi.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "sys"
+      ],
+      "invariants": [
+        "Le restrizioni sul Test e la consistenza del catalogo vengono applicate dalla libreria chiamata."
+      ],
+      "findings": [],
+      "portability": "Radice e percorsi dipendono dalla configurazione condivisa; il valore predefinito full è una scelta esplicita della vecchia procedura.",
+      "optimization": "Mantenere il comando sottile e conservare le regole comuni nella libreria.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/07_validate_qcompile.py",
+      "sha256": "49cce2f2a52c95f7c2b102edb96943f1abb302e84a8b2cc627db928ef3881e64",
+      "lines": 530,
+      "manual_ranges": [
+        [
+          1,
+          530
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Esegue cinque verifiche tecniche per dispositivo e una verifica completa qcompile su un circuito train.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "datetime",
+        "hashlib",
+        "importlib.metadata",
+        "json",
+        "math",
+        "mqt.bench.targets",
+        "mqt.predictor.ml.helper",
+        "mqt.predictor.qcompile",
+        "mqt.predictor.reward",
+        "mqt.predictor.rl",
+        "mqt.predictor.rl.helper",
+        "mqt.predictor.rl.predictor",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "multiprocessing",
+        "numpy",
+        "os",
+        "pathlib",
+        "qiskit",
+        "sb3_contrib.common.maskable.utils",
+        "signal",
+        "stable_baselines3.common.utils",
+        "sys",
+        "time",
+        "traceback",
+        "typing"
+      ],
+      "invariants": [
+        "Richiede modelli pronti, hash del sorgente, limite di 100 secondi ed esiti terminati, non troncati, eseguibili e con score finito. Un successo tecnico non dimostra qualità scientifica."
+      ],
+      "findings": [
+        "SCR-09"
+      ],
+      "portability": "Gestione gruppi di processi Linux; timeout fisso è parte della verifica congelata.",
+      "optimization": "Persistenza progressiva e identificativi distinti per le sei chiamate evitano la perdita di prove in caso di interruzione.",
+      "verdict": "Rilievi verificati: SCR-09",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/08_audit_rl_models.py",
+      "sha256": "8cc6de5851e26bc33d9dff24534c5158c996afd1f9968b7de6684b95cbc59e82",
+      "lines": 366,
+      "manual_ranges": [
+        [
+          1,
+          366
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Riepiloga integrità e provenienza dei modelli RL, andamento osservato e facoltativamente caricamento approfondito.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "collections",
+        "datetime",
+        "gc",
+        "importlib.metadata",
+        "json",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "os",
+        "pathlib",
+        "sb3_contrib",
+        "sys",
+        "tensorboard.backend.event_processing.event_accumulator",
+        "typing"
+      ],
+      "invariants": [
+        "Il tasso di successo usa le coppie osservate, non l’intero corpus; la soglia del 95% è un consiglio diagnostico. L’ultimo dato TensorBoard per tempo può appartenere a una corsa diversa dal modello corrente."
+      ],
+      "findings": [],
+      "portability": "Dipende dalla disposizione degli artefatti e dei registri; il caricamento profondo è opzionale.",
+      "optimization": "Esplicitare nel riepilogo l’identità della corsa TensorBoard e il denominatore; non trasformare euristiche diagnostiche in certificazioni.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/08_generate_qiskit_dataset.py",
+      "sha256": "296d60213ac4b19fcf7144f434a9d41bfb58166e7a70171a4b203ada58f6203a",
+      "lines": 143,
+      "manual_ranges": [
+        [
+          1,
+          143
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Avvia generazione e ripresa dei risultati Qiskit secondo catalogo e protocollo v2.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.generation",
+        "scripts.mqt_predictor_protocol",
+        "sys"
+      ],
+      "invariants": [
+        "L’ambito predefinito è train anche per la simulazione dei comandi; il Test richiede la guardia dedicata. Verifica argomenti numerici positivi."
+      ],
+      "findings": [],
+      "portability": "Delega versioni, percorsi e gestione dei processi ai moduli condivisi.",
+      "optimization": "Evitare duplicazione del calcolo del piano tra comando e libreria mantenendo un’unica fonte dei vincoli.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/09_build_qiskit_dataset_views.py",
+      "sha256": "6116f8b6450c316b5487531dea70de07bbb75d55b510d41449f176820e118a0e",
+      "lines": 55,
+      "manual_ranges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Costruisce le viste del Dataset dal catalogo e dai risultati disponibili.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.views",
+        "sys"
+      ],
+      "invariants": [
+        "Verifica dispositivo e top-k tra 1 e 3; la selezione delle evidenze train viene applicata dalla libreria."
+      ],
+      "findings": [],
+      "portability": "Non introduce un percorso assoluto specifico della macchina.",
+      "optimization": "Nessuna ottimizzazione significativa nel comando; mantenere il controllo dei dati nella libreria.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/10_aggregate_qiskit_dataset.py",
+      "sha256": "84b8c657d1979b1ded0784885a26f0b1e210d832fb9e4d313b26edb7ca49b0ef",
+      "lines": 70,
+      "manual_ranges": [
+        [
+          1,
+          70
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Aggrega risultati e riepiloghi del Dataset con verifica facoltativa senza scrittura.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "qiskit_dataset.aggregation",
+        "qiskit_dataset.catalog",
+        "sys"
+      ],
+      "invariants": [
+        "Limita top-k a 1–3 e distingue tramite --require-all una verifica completa da una verifica dei risultati disponibili."
+      ],
+      "findings": [],
+      "portability": "Dipende dal catalogo e dalle funzioni comuni di aggregazione.",
+      "optimization": "Comando già breve; evitare ulteriori livelli di astrazione privi di una regola condivisa concreta.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/11_freeze_method_plan_v2.py",
+      "sha256": "c74afa7b66a7db4ff3036806b74a4163f74ddf5af3d055b6b898bd417ecc4aba",
+      "lines": 147,
+      "manual_ranges": [
+        [
+          1,
+          147
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Congela il piano dei metodi e consente soltanto la migrazione storica prevista della politica dei tentativi.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "sys"
+      ],
+      "invariants": [
+        "Un piano identico non viene riscritto; differenze dopo apertura Test sono rifiutate. La migrazione da 300 secondi e 2 tentativi a 100 secondi e 6 conserva copia originale, hash e sorteggi."
+      ],
+      "findings": [],
+      "portability": "I numeri della migrazione identificano due protocolli precisi, non parametri arbitrari da rendere configurabili.",
+      "optimization": "Conservare la migrazione esplicita e la sua copia storica; non generalizzarla indebolendo i controlli.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/12_run_qcompile_v2.py",
+      "sha256": "c61f5766a7d5406d03381b2d417f7f12da7df074928a77922858306e969e0dac",
+      "lines": 368,
+      "manual_ranges": [
+        [
+          1,
+          368
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Esegue qcompile isolato, registra esiti per circuito e riprende quelli con provenienza compatibile.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "math",
+        "mqt.bench.targets",
+        "mqt.predictor.qcompile",
+        "mqt.predictor.reward",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "multiprocessing",
+        "os",
+        "pathlib",
+        "qiskit",
+        "qiskit_dataset.experiment_v2",
+        "signal",
+        "sys",
+        "time",
+        "traceback",
+        "typing"
+      ],
+      "invariants": [
+        "Il Test richiede rilascio. Ogni chiamata usa processo nuovo e limite 100 secondi; seed controllato assente è dichiarato come tale. Il riuso confronta circuito, modello, manifest, software e timeout."
+      ],
+      "findings": [
+        "SCR-05"
+      ],
+      "portability": "Gestione processi Linux e dipendenza dai modelli operativi MQT.",
+      "optimization": "Registrare anche l’avvio fisico prima della chiamata e ogni terminazione anomala per distinguere tentativi avviati da risultati completi.",
+      "verdict": "Rilievi verificati: SCR-05",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/13_import_llm_decisions_v2.py",
+      "sha256": "d75d7b551600eb71763f809b22e1f140268edf6816509eeb4be977a64ded99be",
+      "lines": 88,
+      "manual_ranges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Importa decisioni LLM esterne verificandole rispetto a piano e configurazione congelata.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "sys"
+      ],
+      "invariants": [
+        "Verifica piano, configurazione e decisioni prima di scrivere; non include gli score nella decisione. Rifiuta output diverso già presente e applica la guardia Test."
+      ],
+      "findings": [],
+      "portability": "Usa i percorsi condivisi del protocollo; il formato richiesto è quello dell’esperimento congelato.",
+      "optimization": "Mantenere validazione e scrittura nella libreria; nessuna ottimizzazione locale sostanziale.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/14_evaluate_methods_v2.py",
+      "sha256": "a09fabdd8443d31c0d025ecc8190665c682255d5c89f1b1961ee0b3aad931780",
+      "lines": 170,
+      "manual_ranges": [
+        [
+          1,
+          170
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Coordina valutazione dei metodi e costruzione dei riepiloghi dai risultati disponibili.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "llm_selection.evaluate",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_model_artifacts",
+        "scripts.mqt_predictor_protocol",
+        "sys"
+      ],
+      "invariants": [
+        "Per il Test verifica decisioni e qcompile prima di leggere la matrice degli score e conserva gli hash degli ingressi. Il ramo validation delega subito alla prima selezione locale: SCR-06."
+      ],
+      "findings": [
+        "SCR-06"
+      ],
+      "portability": "La compatibilità fra vecchia selezione e local-llm-v2 richiede un collegamento esplicito.",
+      "optimization": "Separare ingressi delle due generazioni o instradarli con un identificativo di studio verificato, evitando opzioni silenziosamente ignorate.",
+      "verdict": "Rilievi verificati: SCR-06",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/15_release_test_v2.py",
+      "sha256": "95889fe022e8ce6c22d6b6e886ac655e02ab68c9a5bd05722327927eb0583c47",
+      "lines": 366,
+      "manual_ranges": [
+        [
+          1,
+          366
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Controlla i prerequisiti per l’apertura Test e, solo su richiesta esplicita, conserva il relativo attestato.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "datetime",
+        "json",
+        "llm_selection.finalize",
+        "llm_selection.study",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.qdrant_context",
+        "prototype.quantum_assistant.adapters.rag_checks",
+        "prototype.quantum_assistant.adapters.rag_dataset",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.experiment_v2",
+        "sys",
+        "typing"
+      ],
+      "invariants": [
+        "La modalità predefinita verifica senza scrivere. Controlla corpus, modelli, RAG e selezione; rilegge gli attestati esistenti. Restano i limiti SCR-06, SCR-07 e quelli del validatore artefatti SCR-10."
+      ],
+      "findings": [
+        "SCR-06",
+        "SCR-07"
+      ],
+      "portability": "Usa percorsi dello studio storico; non rappresenta ancora il controllo completo della selezione ufficiale local-llm-v2.",
+      "optimization": "Definire un unico insieme di prerequisiti e legare ogni prova a hash e identità degli ingressi correnti prima di una futura apertura.",
+      "verdict": "Rilievi verificati: SCR-06, SCR-07",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/16_run_pipeline_v2.py",
+      "sha256": "babde2bb176a1ba494e9bf9ed1e5bfa86b337de4a554f65fa0e3f318d1e379c3",
+      "lines": 607,
+      "manual_ranges": [
+        [
+          1,
+          607
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Coordina preparazione, addestramento RL, selettore ML, sincronizzazione e verifiche tecniche con ripresa.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "pathlib",
+        "shlex",
+        "subprocess",
+        "sys",
+        "typing"
+      ],
+      "invariants": [
+        "Usa lo stesso interprete e verifica i codici di uscita; salta modelli già validi. La generazione Qiskit riguarda train e validation, non Test."
+      ],
+      "findings": [
+        "SCR-01"
+      ],
+      "portability": "La ricerca automatica dei checkpoint diverge dal trainer sul disco D: SCR-01. Le dipendenze operative restano quelle Linux del progetto.",
+      "optimization": "Verificare subito opzioni incompatibili con la validazione finale, incluso il timeout; condividere risoluzione dei percorsi e controlli di prontezza.",
+      "verdict": "Rilievi verificati: SCR-01",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/17_rag_v2.py",
+      "sha256": "919e4d052be4d554d6342c15b12c8f73572077486284f88d3ec5cd889c491398",
+      "lines": 58,
+      "manual_ranges": [
+        [
+          1,
+          58
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Espone preparazione, controllo e interrogazione delle evidenze RAG senza effettuare chiamate LLM.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.adapters.qdrant_context",
+        "prototype.quantum_assistant.adapters.rag_checks",
+        "prototype.quantum_assistant.adapters.rag_dataset",
+        "prototype.quantum_assistant.factory",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "sys"
+      ],
+      "invariants": [
+        "k deve essere non negativo e la query richiede QASM; prepare_prompt verifica identità e rifiuta sorgenti Test. UnconfiguredLLM impedisce l’uso implicito di un modello."
+      ],
+      "findings": [],
+      "portability": "La scelta del backend riguarda la query; archivi e catalogo sono quelli del protocollo condiviso.",
+      "optimization": "Conservare in un solo adattatore i controlli sul circuito e sulla separazione degli split.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/18_qdrant_dashboard.py",
+      "sha256": "b1a8f626a769d94cb0241ea2632f7b5d6cae9df3300ce89ad30fd6115b5d2898",
+      "lines": 123,
+      "manual_ranges": [
+        [
+          1,
+          123
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Prepara una copia delle evidenze in Qdrant locale per consultazione e verifica che equivalga alla sorgente.",
+      "dependencies": [
+        "__future__",
+        "contextlib",
+        "json",
+        "math",
+        "numpy",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.qdrant_context",
+        "prototype.quantum_assistant.adapters.rag_dataset",
+        "qdrant_client",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "sys"
+      ],
+      "invariants": [
+        "Non cancella una collezione esistente: la verifica. Confronta vettori float32 esatti, payload numerici con tolleranza dichiarata e hash dei file sorgente prima e dopo. Non cambia il backend RAG operativo."
+      ],
+      "findings": [],
+      "portability": "Endpoint fisso localhost:6333, adatto alla dimostrazione locale. Una collezione caricata solo in parte non viene completata dal ramo che trova la collezione già esistente.",
+      "optimization": "Per una nuova versione usare una collezione temporanea da promuovere dopo verifica; mantenere il rifiuto delle divergenze.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/mqt_model_artifacts.py",
+      "sha256": "8f81603019266932fd9333522e4429cd50c66d9e1ae4478be03afa2b85e80159",
+      "lines": 412,
+      "manual_ranges": [
+        [
+          1,
+          412
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica struttura, metadati e coerenza delle copie dei modelli RL e del selettore ML.",
+      "dependencies": [
+        "__future__",
+        "joblib",
+        "json",
+        "math",
+        "mqt.predictor.ml.helper",
+        "mqt.predictor.rl.helper",
+        "mqt_predictor_protocol",
+        "numpy",
+        "pathlib",
+        "re",
+        "typing",
+        "zipfile"
+      ],
+      "invariants": [
+        "Verifica ZIP senza caricare tensori, ma legge i membri per il CRC; il modello ML viene caricato per controllare predict, 49 caratteristiche e cinque classi. La validità formale non prova qualità; legami di provenienza incompleti in SCR-10."
+      ],
+      "findings": [
+        "SCR-10"
+      ],
+      "portability": "Strutture attese dipendono dalle versioni congelate di MQT, SB3 e joblib. I cinque dispositivi e le 49 caratteristiche sono vincoli scientifici.",
+      "optimization": "Evitare scansioni ZIP e hash ripetuti nella stessa operazione; verificare sempre l’identità dei file prima di riusare un esito.",
+      "verdict": "Rilievi verificati: SCR-10",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/mqt_predictor_protocol.py",
+      "sha256": "535c652d85290752c25f24ae59d0bdb0bddc8461f7ae4c4a436d9e6ace043d1f",
+      "lines": 750,
+      "manual_ranges": [
+        [
+          1,
+          750
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Raccoglie costanti, percorsi, verifica del corpus, identità semantica e controlli condivisi del protocollo.",
+      "dependencies": [
+        "__future__",
+        "collections",
+        "hashlib",
+        "importlib.metadata",
+        "json",
+        "math",
+        "pathlib",
+        "qiskit",
+        "qiskit.transpiler.passes",
+        "typing"
+      ],
+      "invariants": [
+        "Risolve riferimenti logici senza attraversamento di directory e preserva gli hash congelati. L’identità semantica esclude barriere e nomi dei registri, ma conserva operazioni, parametri, posizioni e fase globale."
+      ],
+      "findings": [],
+      "portability": "Le costanti fissano esperimento e versioni; la risoluzione dei riferimenti preserva i percorsi storici dopo lo spostamento in archivio.",
+      "optimization": "Rendere esplicito l’insieme completo dei prerequisiti richiesti dall’attestato Test oltre alla verifica dei file e delle condizioni RAG elencate, senza riscrivere attestati storici.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    },
+    {
+      "current_path": "archivio/esperimento_v2/scripts/report_local_validation_v2.py",
+      "sha256": "284b57a3b47718c1c343a06ec82583decf250ccb608f9869d28145d1a304c002",
+      "lines": 247,
+      "manual_ranges": [
+        [
+          1,
+          247
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Genera relazione e figure esplicative della validation locale v2 da uno studio già sigillato.",
+      "dependencies": [
+        "__future__",
+        "argparse",
+        "csv",
+        "hashlib",
+        "json",
+        "llm_selection.v2.settings",
+        "llm_selection.v2.study",
+        "matplotlib",
+        "matplotlib.pyplot",
+        "numpy",
+        "os",
+        "pathlib",
+        "shutil",
+        "statistics",
+        "subprocess",
+        "sys"
+      ],
+      "invariants": [
+        "Richiede 792 righe, nove configurazioni e 88 circuiti; non esegue inferenze. Verifica che gli hash delle sorgenti non cambino. I valori testuali fissi descrivono questo studio."
+      ],
+      "findings": [],
+      "portability": "Percorsi legati all’archivio; l’avvio diretto richiede che la radice del progetto sia disponibile per gli import. Non è stato riprodotto un errore di avvio.",
+      "optimization": "Per studi nuovi derivare tabelle e numeri descrittivi dai dati; sostituire assert con controlli espliciti per mantenere le verifiche anche con Python -O.",
+      "verdict": "Nessun difetto locale concreto rilevato nella lettura completa.",
+      "syntax": {
+        "checker": "ast.parse",
+        "passed": true
+      }
+    }
+  ],
+  "simulation_results": "scripts_simulations.json",
+  "simulation_reproducer": "scripts_reproductions.py",
+  "additional_dependencies_read": [
+    {
+      "path": "archivio/esperimento_v2/llm_selection/finalize.py",
+      "ranges": [
+        [
+          1,
+          87
+        ]
+      ],
+      "scope": "full"
+    },
+    {
+      "path": "archivio/esperimento_v2/llm_selection/evaluate.py",
+      "ranges": [
+        [
+          1,
+          230
+        ]
+      ],
+      "scope": "full"
+    },
+    {
+      "path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/rag_checks.py",
+      "ranges": [
+        [
+          41,
+          73
+        ]
+      ],
+      "scope": "focused"
+    },
+    {
+      "path": ".venv/lib/python3.12/site-packages/stable_baselines3/common/monitor.py",
+      "ranges": [
+        [
+          33,
+          64
+        ],
+        [
+          177,
+          203
+        ]
+      ],
+      "scope": "focused"
+    },
+    {
+      "path": "archivio/esperimento_v2/pyproject.toml",
+      "ranges": [
+        [
+          1,
+          29
+        ]
+      ],
+      "scope": "full"
+    }
+  ],
+  "source_branch": "riorganizzazione-prototipo",
+  "source_commit": "2772f2a6e70215eb66495afafb56a02278785fcd"
+}

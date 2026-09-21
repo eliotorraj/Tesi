@@ -149,3 +149,5 @@ stati fermati. Il dettaglio e in `docs/verifica_tecnica.json`.
 Se PowerShell rifiuta gli script locali non firmati, usare nella sola sessione
 `pwsh -NoProfile -ExecutionPolicy Bypass -File .\server-laptop.ps1 -ModelPath ...`;
 non occorre cambiare la politica globale del computer.
+
+Vedere anche: [Comandi manuali verificati sul fisso](docs/comandi_verifica_manuale.md).

@@ -1,0 +1,2309 @@
+{
+  "review_date": "2026-09-21",
+  "reference": "riorganizzazione-prototipo",
+  "reference_commit": "2772f2a6e70215eb66495afafb56a02278785fcd",
+  "status": "complete",
+  "scope_count": 72,
+  "files": [
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/AmdSensors.cs",
+      "sha256": "eceebdf6449e8c0c7be164448863023edd495a06e01c831932918547027d2127",
+      "lines": 76,
+      "manual_ranges": [
+        [
+          1,
+          76
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Legge i sensori AMD attraverso ADL; non eseguito nella revisione.",
+      "dependencies": [
+        "System",
+        "System.Collections.Generic",
+        "System.Runtime.InteropServices"
+      ],
+      "invariants": [
+        "Legge sensori ADL; non cambia driver o frequenze; libera i buffer in finally."
+      ],
+      "findings": [
+        {
+          "id": "LLM-01",
+          "severity": "P3",
+          "lines": [
+            30,
+            51
+          ],
+          "title": "Contesto ADL non distrutto se il costruttore fallisce",
+          "evidence": "Dopo ADL2_Main_Control_Create riuscito, le eccezioni di enumerazione escono dal costruttore senza chiamare Destroy; il finally libera soltanto buffer. L oggetto non viene consegnato al chiamante e non ha finalizzatore.",
+          "impact": "Perdita risorsa nativa nelle ripetute inizializzazioni fallite.",
+          "recommendation": "Nella versione futura distruggere context in catch del costruttore."
+        }
+      ],
+      "portability": "Richiede Windows e PowerShell; percorsi e interfacce del sistema sono espliciti. ADL AMD e driver compatibile sono necessari per i sensori; su WSL occorre il collegamento a Windows.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; rilievi puntuali documentati, sorgente storico conservato."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/__init__.py",
+      "sha256": "f428135966a373401492a335b11666453649ca665c4c39cb696a5df35c380402",
+      "lines": 1,
+      "manual_ranges": [
+        [
+          1,
+          1
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Selezione locale degli LLM e registri riproducibili per la tesi.",
+      "dependencies": [],
+      "invariants": [
+        "Modulo senza azioni all import."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/acquire.py",
+      "sha256": "dc174ddff715b54c1d0a491b8cd87008e0c20d8656663575ce4fc7113727861f",
+      "lines": 113,
+      "manual_ranges": [
+        [
+          1,
+          113
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Download riprendibile di pesi pubblici con revisioni e SHA-256 verificati.",
+      "dependencies": [
+        ".common",
+        "__future__",
+        "argparse",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "urllib.request"
+      ],
+      "invariants": [
+        "Verifica dimensione e SHA prima di pubblicare il GGUF; conserva coda interrotta prima di ripararla."
+      ],
+      "findings": [
+        {
+          "id": "LLM-02",
+          "severity": "P2",
+          "lines": [
+            51,
+            61
+          ],
+          "title": "File .part vuoto impedisce la ripresa",
+          "evidence": "Se .part esiste con zero byte, offset=0 e open usa xb sul file gia esistente: FileExistsError prima di scrivere.",
+          "impact": "Un interruzione subito dopo la creazione del file blocca tutti i tentativi successivi senza intervento manuale. Anche repair_tail su un parziale inferiore a 256 MiB lo tronca a zero e incontra lo stesso errore.",
+          "recommendation": "Gestire esplicitamente il parziale vuoto preservando le verifiche."
+        }
+      ],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; rilievi puntuali documentati, sorgente storico conservato."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/chat.py",
+      "sha256": "12a3076130508924df20e5868c048ab038e3a37eba52c6422941d46b16b83c8c",
+      "lines": 130,
+      "manual_ranges": [
+        [
+          1,
+          130
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Avvia una chat locale Qwen, Phi o Gemma, separata dalle prove sperimentali.",
+      "dependencies": [
+        ".common",
+        ".controller",
+        ".hardware",
+        ".provenance",
+        ".study",
+        "__future__",
+        "argparse",
+        "datetime",
+        "fcntl",
+        "pathlib",
+        "re",
+        "time"
+      ],
+      "invariants": [
+        "Profilo esplicito, etichette nuove, blocco esclusivo, stop nel finally; chat non automaticamente registrata."
+      ],
+      "findings": [],
+      "portability": "Orchestrazione storica WSL/Linux con server o verifica pesi Windows; dipendenze e cartelle dei runtime sono quelle congelate. Blocco fcntl e misure /proc/resource non sono direttamente portabili a Windows nativo.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/cli.py",
+      "sha256": "34df29235ac3636091514a2a83eac94d34b48c09635420c2ea06b24cdcb5747f",
+      "lines": 104,
+      "manual_ranges": [
+        [
+          1,
+          104
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Comandi manuali dell'esperimento. Nessun avvio implicito durante status/doctor.",
+      "dependencies": [
+        ".common",
+        ".evaluate",
+        ".finalize",
+        ".report",
+        ".study",
+        ".technical",
+        "__future__",
+        "argparse",
+        "importlib.util",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess"
+      ],
+      "invariants": [
+        "status e doctor non caricano modelli; stop cooperativo conserva gli episodi."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/compact_prompt.py",
+      "sha256": "8436348f17d4a391351213774280fa4fff8dd9ee75b0d212ca9c487ce97fc7fa",
+      "lines": 6,
+      "manual_ranges": [
+        [
+          1,
+          6
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Compatibilità degli import precedenti; implementazione in prototype.prompting.",
+      "dependencies": [
+        "prototype.prompting.compact"
+      ],
+      "invariants": [
+        "Solo riesportazione dell API storica."
+      ],
+      "findings": [],
+      "portability": "Compatibilità degli import: dipende dal pacchetto prototype.prompting congelato, senza accessi autonomi a sistema o rete.",
+      "optimization": "Il modulo di compatibilità è già minimo; rimuoverlo solo dopo censimento degli import in una copia attiva.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/complete_graph.py",
+      "sha256": "d64110bb6c04a56c3d1eb10131626e260fbe4789b6cc18b1f30a3726c77b01d5",
+      "lines": 26,
+      "manual_ranges": [
+        [
+          1,
+          26
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Prova esplorativa dei grafi; codifica comune in prototype.prompting.",
+      "dependencies": [
+        ".common",
+        "json",
+        "prototype.prompting.complete_graph",
+        "tokenizers"
+      ],
+      "invariants": [
+        "Conteggio con tokenizer ufficiale; esclude il template chat nativo."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/configuration.py",
+      "sha256": "c78f508702cba62c28acbc182840b6f214a831a071b75dea9746cb594f8dd8b4",
+      "lines": 31,
+      "manual_ranges": [
+        [
+          1,
+          31
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Griglia piccola comune; la selezione viene sigillata solo dopo le prove train.",
+      "dependencies": [
+        "copy",
+        "prototype.prompting.minimal",
+        "prototype.prompting.rendering"
+      ],
+      "invariants": [
+        "Griglia e budget comuni; deepcopy dei parametri prima della richiesta."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/evaluate.py",
+      "sha256": "f482e20dc83c70203842bbe928c00cfcd096ce6f5961dcb86c9a4034839be726",
+      "lines": 230,
+      "manual_ranges": [
+        [
+          1,
+          230
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Valuta la validation soltanto dopo i sigilli; riusa la matrice Qiskit.",
+      "dependencies": [
+        ".common",
+        ".server_state",
+        ".study",
+        "__future__",
+        "argparse",
+        "collections",
+        "csv",
+        "datetime",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "statistics"
+      ],
+      "invariants": [
+        "require_all_sealed precede la lettura score; regret sui soli casi comuni; dati mancanti espliciti."
+      ],
+      "findings": [],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/finalize.py",
+      "sha256": "f51fe73f1cdbc6a5dea1436c8643da3fb01b3f9032219d73516fb59a17a45466",
+      "lines": 87,
+      "manual_ranges": [
+        [
+          1,
+          87
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Fissa il vincitore locale senza configurare il modello di frontiera o aprire il test.",
+      "dependencies": [
+        ".common",
+        ".configuration",
+        ".study",
+        ".weights",
+        "pathlib",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol"
+      ],
+      "invariants": [
+        "Verifica sigilli prima del congelamento locale; test_released resta False."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/gpu_monitor.ps1",
+      "sha256": "b31802c0a651816164ebc8cd152a5ec07c03ee237aea339a8acfba3716b4155a",
+      "lines": 16,
+      "manual_ranges": [
+        [
+          1,
+          16
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Raccoglie misure della GPU Windows.",
+      "dependencies": [],
+      "invariants": [
+        "Campiona solo PID con percorso e ora di avvio coerenti; segnala campioni mancanti."
+      ],
+      "findings": [],
+      "portability": "Richiede Windows e PowerShell; percorsi e interfacce del sistema sono espliciti. ADL AMD e driver compatibile sono necessari per i sensori; su WSL occorre il collegamento a Windows.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/hardware.py",
+      "sha256": "dc0bb4faf9c98a2f75d32ce3f66a391de9e72e18d04e916c053c375f0c08eac7",
+      "lines": 38,
+      "manual_ranges": [
+        [
+          1,
+          38
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Limiti operativi richiesti per le prove; non sono specifiche del produttore.",
+      "dependencies": [],
+      "invariants": [
+        "Controlla ordine delle soglie termiche e dimensioni batch; limiti operativi distinti da specifiche hardware."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/inspect_server.ps1",
+      "sha256": "7799e3e019123da6ec19deed4beef22240796b4522ff79f55f126ae9e7025371",
+      "lines": 9,
+      "manual_ranges": [
+        [
+          1,
+          9
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Ispeziona il processo server Windows.",
+      "dependencies": [],
+      "invariants": [
+        "Ispezione read-only con identita PID/eseguibile/creazione."
+      ],
+      "findings": [],
+      "portability": "Richiede PowerShell/Windows e strumenti o percorsi storici. Queste assunzioni vanno rese configurabili solo in una copia attiva.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/inspect_tokenization.py",
+      "sha256": "6e45fc895817bb24a681cfe949d289a427a33e2b908214f1c00fa9d7d8822f2e",
+      "lines": 18,
+      "manual_ranges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Diagnostica del conteggio; usa esclusivamente un prompt tecnico train.",
+      "dependencies": [
+        ".common",
+        "json",
+        "tokenizers"
+      ],
+      "invariants": [
+        "Usa il singolo prompt tecnico train; conteggi escluso template nativo."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/minimal_audit.py",
+      "sha256": "480384d96d8d22538a343e3555fb37eb2e8da0d10666a7c708f06ade663a1409",
+      "lines": 161,
+      "manual_ranges": [
+        [
+          1,
+          161
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Confronto riproducibile train, senza inferenza: prepara file per llama-tokenize.",
+      "dependencies": [
+        ".common",
+        ".configuration",
+        "__future__",
+        "argparse",
+        "copy",
+        "hashlib",
+        "json",
+        "pathlib",
+        "prototype.prompting.legacy_rendering",
+        "prototype.prompting.minimal"
+      ],
+      "invariants": [
+        "Solo train; replay esatto del template e confronto IDs nativi prima di pubblicare misure."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/output_contract.py",
+      "sha256": "8ee502a5b3ecfdf07c0d09b00a396ab82545c9a7e02f6a522da823c3ae5312be",
+      "lines": 4,
+      "manual_ranges": [
+        [
+          1,
+          4
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Compatibilità delle istruzioni, centralizzate in prototype.prompting.",
+      "dependencies": [
+        "prototype.prompting.output_contract"
+      ],
+      "invariants": [
+        "Solo riesportazione delle regole del contratto."
+      ],
+      "findings": [],
+      "portability": "Compatibilità degli import: dipende dal pacchetto prototype.prompting congelato, senza accessi autonomi a sistema o rete.",
+      "optimization": "Il modulo di compatibilità è già minimo; rimuoverlo solo dopo censimento degli import in una copia attiva.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/plots.py",
+      "sha256": "71ac4be84f0c8501aa2b44cea516e2fbf69016e48c9f6dadb49be943fb445a7b",
+      "lines": 81,
+      "manual_ranges": [
+        [
+          1,
+          81
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Grafici eseguiti nel solo ambiente isolato di analisi.",
+      "dependencies": [
+        "argparse",
+        "json",
+        "matplotlib",
+        "matplotlib.pyplot",
+        "numpy",
+        "pathlib"
+      ],
+      "invariants": [
+        "Grafici dei dati conservati, denominatori dichiarati; nessuna sostituzione dei mancanti nei boxplot."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Rigenerare dati e figure da artefatti verificati; separare testo storico specifico dello studio dai conteggi derivabili. Evitare ricalcolo o ricompilazione se tutte le impronte coincidono.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/prepare.py",
+      "sha256": "6229e233c9e6418360058b5921fc9f9d94b39eb62756ba6426df63b6a4dfbc73",
+      "lines": 63,
+      "manual_ranges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Inventario e prompt train/validation; non legge punteggi di validation.",
+      "dependencies": [
+        ".common",
+        "__future__",
+        "json",
+        "pathlib",
+        "platform",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.adapters.rag_checks",
+        "prototype.quantum_assistant.factory",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "subprocess",
+        "sys"
+      ],
+      "invariants": [
+        "Prompt train/validation senza score; circuito esistente deve mantenere hash."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/probe_storage.ps1",
+      "sha256": "4952f9e7deb0bb8d25113bc8972dba8f944e098613341be6b17cb62e35a40a2a",
+      "lines": 18,
+      "manual_ranges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Controlla lo spazio e i percorsi dei dischi Windows.",
+      "dependencies": [],
+      "invariants": [
+        "Cartella nuova; 20 scritture durabili sintetiche e nessun modello."
+      ],
+      "findings": [],
+      "portability": "Richiede PowerShell/Windows e strumenti o percorsi storici. Queste assunzioni vanno rese configurabili solo in una copia attiva.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/probe_wire.py",
+      "sha256": "2ec52e1bdd9f51c7bc4b0c331f071158374ebf56861e0b403026f7dc24622bdd",
+      "lines": 24,
+      "manual_ranges": [
+        [
+          1,
+          24
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Misura una serializzazione candidata sui soli prompt tecnici, senza inferenza.",
+      "dependencies": [
+        ".common",
+        "json",
+        "prototype.prompting.wire",
+        "sys",
+        "tokenizers"
+      ],
+      "invariants": [
+        "Solo prompt train, token di testo senza template; nessuna inferenza."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/prompt_audit.py",
+      "sha256": "33655a81374a3b69f64a97b7092f65964c32f8aa6ed8a45545681093f4e37bf0",
+      "lines": 82,
+      "manual_ranges": [
+        [
+          1,
+          82
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica/esporta prompt senza inferenza. Non apre gli score di validation.",
+      "dependencies": [
+        ".common",
+        ".configuration",
+        ".run",
+        ".tokenization",
+        ".train_check",
+        "__future__",
+        "argparse",
+        "hashlib",
+        "prototype.prompting.legacy_rendering",
+        "prototype.prompting.minimal",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.factory",
+        "re",
+        "scripts.mqt_predictor_protocol"
+      ],
+      "invariants": [
+        "Verifica split, caratteristiche e esempi; registro progressivo; nessun test."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/prompt_report.py",
+      "sha256": "03e48fd61f0e21f56dac0da9c86ff4cf0cd99c9423743bb6887c1e444dc5a9ca",
+      "lines": 98,
+      "manual_ranges": [
+        [
+          1,
+          98
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Riepilogo riproducibile dei prompt e di una prova tecnica train, senza nuovi score.",
+      "dependencies": [
+        ".common",
+        ".evaluate",
+        "__future__",
+        "argparse",
+        "hashlib",
+        "pathlib",
+        "statistics"
+      ],
+      "invariants": [
+        "Verifica hash degli artefatti precedenti; eventuale episodio aggiunto deve essere train."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/recovery.py",
+      "sha256": "928bd7a6d4326cb8e0f06a233bd80dc88cb04b4931e4dfdfb47417468b4126bb",
+      "lines": 55,
+      "manual_ranges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Ispezione delle scritture interrotte; conserva sempre i file originali.",
+      "dependencies": [
+        ".common",
+        "json",
+        "pathlib",
+        "qiskit_dataset.experiment_v2"
+      ],
+      "invariants": [
+        "Legge solo prefisso JSONL valido e conserva originali; rifiuta sovrascrittura rapporto."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/render_pdf.py",
+      "sha256": "82c68e741a13b77ce427a03b389a5d620c3f2d427e774211dff144a020e35377",
+      "lines": 13,
+      "manual_ranges": [
+        [
+          1,
+          13
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Esporta tutte le pagine del PDF in PNG per il controllo visivo.",
+      "dependencies": [
+        "argparse",
+        "pathlib",
+        "pymupdf"
+      ],
+      "invariants": [
+        "Rende ogni pagina PDF; nessuna modifica documento sorgente."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Rigenerare dati e figure da artefatti verificati; separare testo storico specifico dello studio dai conteggi derivabili. Evitare ricalcolo o ricompilazione se tutte le impronte coincidono.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/report.py",
+      "sha256": "194b3b7b5ac3a3145a7df7898506a5f279c683fb1c1160c23217f6e2a2440e0f",
+      "lines": 171,
+      "manual_ranges": [
+        [
+          1,
+          171
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Figure e documento LaTeX generati dai dati congelati, senza numeri trascritti.",
+      "dependencies": [
+        ".common",
+        ".evaluate",
+        ".finalize",
+        ".technical",
+        "argparse",
+        "collections",
+        "json",
+        "os",
+        "random",
+        "statistics",
+        "subprocess"
+      ],
+      "invariants": [
+        "Verifica selezione; bootstrap per circuito e limiti descrittivi espliciti."
+      ],
+      "findings": [],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Rigenerare dati e figure da artefatti verificati; separare testo storico specifico dello studio dai conteggi derivabili. Evitare ricalcolo o ricompilazione se tutte le impronte coincidono.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/resource_probe.ps1",
+      "sha256": "93fe2d266840864ee37f3733f4b3e4cf8838312ef527dfeb31d1ccd20cf5832c",
+      "lines": 9,
+      "manual_ranges": [
+        [
+          1,
+          9
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Legge informazioni sulle risorse Windows.",
+      "dependencies": [
+        [
+          "AmdSensors.cs",
+          ""
+        ]
+      ],
+      "invariants": [
+        "Dispone sensori nel finally; restituisce disponibilita memoria in byte."
+      ],
+      "findings": [],
+      "portability": "Richiede Windows e PowerShell; percorsi e interfacce del sistema sono espliciti. ADL AMD e driver compatibile sono necessari per i sensori; su WSL occorre il collegamento a Windows.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/run.py",
+      "sha256": "aff1782683168974af786bfb0155e82f4936ca278cae62f37fde90116d51ec54",
+      "lines": 290,
+      "manual_ranges": [
+        [
+          1,
+          290
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Esecuzione riprendibile. Questo modulo non carica la matrice degli score.",
+      "dependencies": [
+        ".common",
+        ".configuration",
+        ".controller",
+        ".gateway",
+        ".provenance",
+        ".study",
+        ".train_check",
+        "__future__",
+        "argparse",
+        "copy",
+        "fcntl",
+        "hashlib",
+        "json",
+        "pathlib",
+        "prototype.prompting.compact",
+        "prototype.prompting.minimal",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.factory",
+        "prototype.quantum_assistant.schema_validation",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.experiment_v2",
+        "resource",
+        "scripts.mqt_predictor_protocol",
+        "time",
+        "uuid"
+      ],
+      "invariants": [
+        "Hash prompt/circuito/contesto verificati; prima risposta valida definitiva; nessuna ripetizione silenziosa di tentativi interrotti."
+      ],
+      "findings": [
+        {
+          "id": "LLM-03",
+          "severity": "P2",
+          "lines": [
+            88,
+            95
+          ],
+          "title": "Riutilizzo episodio terminale non controlla il budget richiesto",
+          "evidence": "Il ramo decision.json esistente verifica prompt e configurazione e restituisce subito. Il confronto timeout/max_attempts esiste solo nel ramo begin incompleto, righe 119-120.",
+          "impact": "Riusando un etichetta tecnica con timeout o numero tentativi diversi si ottiene il vecchio risultato senza errore; la nuova impostazione non viene provata.",
+          "recommendation": "Verificare budget anche prima del ritorno del risultato terminale.",
+          "scope": "Rilievo sul comando tecnico con --technical-timeout/--technical-max-attempts ammessi. Il resume intenzionale della stessa cella con budget identico resta corretto; validation congelata verifica separatamente i budget."
+        }
+      ],
+      "portability": "Orchestrazione storica WSL/Linux con server o verifica pesi Windows; dipendenze e cartelle dei runtime sono quelle congelate. Blocco fcntl e misure /proc/resource non sono direttamente portabili a Windows nativo.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; rilievi puntuali documentati, sorgente storico conservato."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/runtime_check.py",
+      "sha256": "6500a57b2047ce5c70737d6ac8e580b61b58a151696fac0c261691b045f7c2c1",
+      "lines": 12,
+      "manual_ranges": [
+        [
+          1,
+          12
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Inventario breve del runtime isolato, senza caricare i modelli.",
+      "dependencies": [
+        "importlib.metadata",
+        "importlib.util",
+        "json",
+        "sys"
+      ],
+      "invariants": [
+        "Inventario pacchetti senza caricare modelli."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/server_state.py",
+      "sha256": "f464e6983ff437df56e19a5fba4147723e01be16fdd4c483ca3a7c2405e1dedf",
+      "lines": 18,
+      "manual_ranges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Accerta un arresto senza inventare ora o codice di uscita.",
+      "dependencies": [
+        ".common",
+        ".controller",
+        "json",
+        "subprocess"
+      ],
+      "invariants": [
+        "Non inventa exit code/ora mancanti; verifica identita del processo se non esiste record di arresto."
+      ],
+      "findings": [],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/setup_toon.py",
+      "sha256": "b736abb396b7e3bb0458a5631e323d2e8855551f55535ebb4507d4bfd768c0d9",
+      "lines": 35,
+      "manual_ranges": [
+        [
+          1,
+          35
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Installa Node e TOON nelle cartelle del progetto, senza cambiare l'ambiente MQT.",
+      "dependencies": [
+        ".common",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "tarfile",
+        "urllib.request"
+      ],
+      "invariants": [
+        "Verifica archivio Node ed eseguibile; npm ci con script disabilitati."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/smoke_transport.py",
+      "sha256": "58af18987bb60f8103faec3774220a638d26391d8b44c38a72c91d1eec7cce12",
+      "lines": 16,
+      "manual_ranges": [
+        [
+          1,
+          16
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Prova tecnica sintetica del trasporto, distinta dai circuiti e dalla selezione.",
+      "dependencies": [
+        ".common",
+        ".gateway",
+        "sys"
+      ],
+      "invariants": [
+        "Richiesta sintetica separata da selezione scientifica; conserva audit e risposta."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/study.py",
+      "sha256": "2187b65e2a37a6df007141d03b67cda7890809db3981c4e4ba57e22dfa6126e4",
+      "lines": 202,
+      "manual_ranges": [
+        [
+          1,
+          202
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Congelamento locale e sigilli: nessuna lettura degli score in questo modulo.",
+      "dependencies": [
+        ".common",
+        ".configuration",
+        ".provenance",
+        ".weights",
+        "__future__",
+        "argparse",
+        "importlib.metadata",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.rag_dataset",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol"
+      ],
+      "invariants": [
+        "Sigilli per modello e studio; controlla file aggiunti, dipendenze e griglia completa prima degli score."
+      ],
+      "findings": [],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/technical.py",
+      "sha256": "94ab9fb651c014bdba51ef60ef82c74ccfcda7615c4204c245ba374c2f025b19",
+      "lines": 36,
+      "manual_ranges": [
+        [
+          1,
+          36
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Riepilogo delle prove train e degli arresti, senza score di validation.",
+      "dependencies": [
+        ".common",
+        "collections",
+        "pathlib"
+      ],
+      "invariants": [
+        "Distingue prove tecniche, validation e fase sconosciuta; conserva episodi interrotti."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/token_counts.py",
+      "sha256": "7a71b699f56b5bc245f69a67a199b6e8bd736cf45c6e54877803c4114543f416",
+      "lines": 24,
+      "manual_ranges": [
+        [
+          1,
+          24
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Conteggio preliminare dei prompt con i tokenizer ufficiali, senza tagli.",
+      "dependencies": [
+        ".common",
+        "json",
+        "pathlib",
+        "sys",
+        "tokenizers"
+      ],
+      "invariants": [
+        "Conteggi preliminari, esclude overhead template; nessuna inferenza."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/tokenization.py",
+      "sha256": "c82bd09ac082ce2f0e81eef95e2c728bf5e78a03140795c7a6f556d989555c2a",
+      "lines": 15,
+      "manual_ranges": [
+        [
+          1,
+          15
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Conta testi nel runtime separato dei tokenizer, senza cambiare uv.lock.",
+      "dependencies": [
+        "json",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tokenizers"
+      ],
+      "invariants": [
+        "Tokenizer isolato, subprocess con timeout e verifica codice di uscita."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/tokenize_files.ps1",
+      "sha256": "e2f19a7f23c163a09a8f5b83bba120521de656377e248013c54625480abf91af",
+      "lines": 21,
+      "manual_ranges": [
+        [
+          1,
+          21
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Conta i token dei file con il programma Windows.",
+      "dependencies": [],
+      "invariants": [
+        "Non sovrascrive token preesistenti, conserva stderr e controlla exit code."
+      ],
+      "findings": [],
+      "portability": "Richiede PowerShell/Windows e strumenti o percorsi storici. Queste assunzioni vanno rese configurabili solo in una copia attiva.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/toon_audit.py",
+      "sha256": "0995547c581cc68e3be0fb90f44fdac8b0cc44c9fc470029ca496f22354c8ebf",
+      "lines": 155,
+      "manual_ranges": [
+        [
+          1,
+          155
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Confronta tre rappresentazioni sui cinque train, senza chiamare i modelli.",
+      "dependencies": [
+        ".common",
+        ".configuration",
+        "__future__",
+        "argparse",
+        "copy",
+        "hashlib",
+        "json",
+        "pathlib",
+        "prototype.prompting.legacy_rendering",
+        "prototype.prompting.minimal",
+        "prototype.prompting.rendering",
+        "prototype.prompting.toon"
+      ],
+      "invariants": [
+        "Solo cinque train; verifica roundtrip e IDs nativi delle richieste archiviate; nuove inferenze zero."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Riutilizzare conteggi solo con hash identici di input, tokenizer, template e codec; non confondere conteggio del testo con richiesta nativa completa.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/toon_report.py",
+      "sha256": "94b3d44bdad76803da9290b00cd4b8d5c6cae025ae752902f6b2274d4887bef5",
+      "lines": 122,
+      "manual_ranges": [
+        [
+          1,
+          122
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Documento e figure dai conteggi TOON; eseguire nel runtime delle analisi.",
+      "dependencies": [
+        "argparse",
+        "html",
+        "json",
+        "matplotlib",
+        "matplotlib.pyplot",
+        "pathlib"
+      ],
+      "invariants": [
+        "Figure e relazione dai conteggi TOON; testo storico datato, nessuna inferenza."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Rigenerare dati e figure da artefatti verificati; separare testo storico specifico dello studio dai conteggi derivabili. Evitare ricalcolo o ricompilazione se tutte le impronte coincidono.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/train_check.py",
+      "sha256": "5d7115eac06516be70da20c3ae5f338878c996a17ae581b7c36673055c12c1f4",
+      "lines": 66,
+      "manual_ranges": [
+        [
+          1,
+          66
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Controllo tecnico train: identità del sorgente e uso delle prove recuperate.",
+      "dependencies": [
+        "json",
+        "qiskit_dataset.catalog"
+      ],
+      "invariants": [
+        "Identita del sorgente distinta da distanza zero; riferimenti non certificano causalita del testo libero."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/__init__.py",
+      "sha256": "bd9dca03dad8def8e905dd3aea950ec151b5bc788c7b2d79a12dd426ba0941b9",
+      "lines": 1,
+      "manual_ranges": [
+        [
+          1,
+          1
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Seconda selezione: contratto v4, studi indipendenti e ripresa durevole.",
+      "dependencies": [],
+      "invariants": [
+        "Modulo senza azioni all import."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/__main__.py",
+      "sha256": "4e9d2ff175c72d2bf367a888360e085eb5b535274e54f7c11947f05e28e86544",
+      "lines": 182,
+      "manual_ranges": [
+        [
+          1,
+          182
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Comandi per preparare, provare sul train e avviare uno studio esplicito.",
+      "dependencies": [
+        ".evaluate",
+        ".report",
+        ".settings",
+        ".study",
+        "__future__",
+        "argparse",
+        "datetime",
+        "fcntl",
+        "json",
+        "llm_selection.common",
+        "llm_selection.controller",
+        "llm_selection.hardware",
+        "llm_selection.provenance",
+        "llm_selection.study",
+        "scripts.mqt_predictor_protocol",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "invariants": [
+        "Controllo risorse con isteresi; ripresa tentativo interrotto distinta da correzione; blocco controller."
+      ],
+      "findings": [],
+      "portability": "Orchestrazione storica WSL/Linux con server o verifica pesi Windows; dipendenze e cartelle dei runtime sono quelle congelate. Blocco fcntl e misure /proc/resource non sono direttamente portabili a Windows nativo.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/evaluate.py",
+      "sha256": "436f11c7658605dd3a60270324e0aeaeeb6b0c6b7fed0a3468a1e76b162087c9",
+      "lines": 209,
+      "manual_ranges": [
+        [
+          1,
+          209
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Analisi post-sigillo: riferimento osservato sugli 88 circuiti.",
+      "dependencies": [
+        ".settings",
+        ".study",
+        "__future__",
+        "collections",
+        "llm_selection.common",
+        "llm_selection.evaluate",
+        "llm_selection.study",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "statistics"
+      ],
+      "invariants": [
+        "Score letti solo dopo require_sealed; riferimento osservato distinto da esaustivo, include costi delle chiamate interrotte."
+      ],
+      "findings": [],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/plots.py",
+      "sha256": "388a0c8fa823482f23477bd38012effa3031e5f5695815361acd97017afcae88",
+      "lines": 74,
+      "manual_ranges": [
+        [
+          1,
+          74
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Rigenera solo le sette figure della validation; non modifica sorgenti LaTeX o risultati.",
+      "dependencies": [
+        "argparse",
+        "json",
+        "matplotlib",
+        "matplotlib.pyplot",
+        "numpy",
+        "pathlib"
+      ],
+      "invariants": [
+        "Grafici fatti/costi/chiamate; mancanti non sostituiti con zero; osservato distinto da esaustivo."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Rigenerare dati e figure da artefatti verificati; separare testo storico specifico dello studio dai conteggi derivabili. Evitare ricalcolo o ricompilazione se tutte le impronte coincidono.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/report.py",
+      "sha256": "7494f63ea9bf171562669e89506969c896b50174a4af99fb79dd46e0b89f1060",
+      "lines": 146,
+      "manual_ranges": [
+        [
+          1,
+          146
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Rapporto tecnico o di validation, con sorgenti LaTeX e figure.",
+      "dependencies": [
+        ".evaluate",
+        ".settings",
+        ".study",
+        "__future__",
+        "collections",
+        "llm_selection.common",
+        "llm_selection.evaluate",
+        "llm_selection.report",
+        "os",
+        "subprocess"
+      ],
+      "invariants": [
+        "Rapporto tecnico distinto da validation; dichiara fallback sui fatti errati e adattamento dopo prima validation."
+      ],
+      "findings": [
+        {
+          "id": "LLM-06",
+          "severity": "P2",
+          "lines": [
+            28,
+            33
+          ],
+          "title": "Il rapporto v2 non verifica le impronte delle analisi lette",
+          "evidence": "Dopo require_sealed vengono letti direttamente analysis/episode_results.json e analysis/selection.json. Il sigillo delle decisioni non comprende la cartella analysis; le sue impronte sono registrate separatamente da v2/evaluate.py:205-208 in selection_complete.json, mai verificate qui.",
+          "impact": "Una modifica accidentale a una analisi dopo la selezione può entrare nel rapporto senza essere rilevata dai sigilli originali, rendendo rapporto e selezione finale incoerenti.",
+          "recommendation": "Nella copia attiva verificare selection_complete.json e le impronte delle analisi prima di generare il rapporto; mantenere gli artefatti storici."
+        }
+      ],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Rigenerare dati e figure da artefatti verificati; separare testo storico specifico dello studio dai conteggi derivabili. Evitare ricalcolo o ricompilazione se tutte le impronte coincidono.",
+      "verdict": "Lettura manuale integrale; rilievo sulla provenienza delle analisi documentato, sorgente storico conservato."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/settings.py",
+      "sha256": "23f913e3587b32c9ed2ae1a550c23803ca78e8b5130c559a7ddd9c4b9983f23e",
+      "lines": 43,
+      "manual_ranges": [
+        [
+          1,
+          43
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Regole esplicite della seconda validation.",
+      "dependencies": [
+        "copy",
+        "llm_selection.common",
+        "llm_selection.configuration",
+        "prototype.prompting.facts"
+      ],
+      "invariants": [
+        "Tre temperature, policy esplicita; nome local-llm-v1 vietato; deepcopy FIXED."
+      ],
+      "findings": [],
+      "portability": "Modulo storico: esecuzione dal pacchetto archivio/esperimento_v2; import relativi e dipendenze congelate da preservare. Non reso portabile in questa revisione.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/v2/study.py",
+      "sha256": "3b88b7b20c88c7820d01c4b9057502eacb7ec147dead9cbcd0ff02c72f256575",
+      "lines": 177,
+      "manual_ranges": [
+        [
+          1,
+          177
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Preparazione, congelamento e sigilli indipendenti per ogni studio.",
+      "dependencies": [
+        ".evaluate",
+        ".settings",
+        "__future__",
+        "ast",
+        "copy",
+        "llm_selection.common",
+        "llm_selection.provenance",
+        "llm_selection.study",
+        "llm_selection.weights",
+        "pathlib",
+        "scripts.mqt_predictor_protocol"
+      ],
+      "invariants": [
+        "Copia prompt per studio; tutti i casi tecnici devono riuscire; registra snapshot e sigilli indipendenti."
+      ],
+      "findings": [
+        {
+          "id": "LLM-04",
+          "severity": "P2",
+          "lines": [
+            162,
+            172
+          ],
+          "title": "Il sigillo v2 non rifiuta file aggiunti dopo il congelamento",
+          "evidence": "require_sealed verifica solo i percorsi seal.files; non confronta insieme effettivo dei file, a differenza di study.verify_model_seal v1. evaluate.py e episode_data leggono summary tramite glob, quindi un nuovo attempt_*/summary.json puo entrare nei costi/fatti senza essere sigillato.",
+          "impact": "Il rapporto puo incorporare dati non coperti dalle impronte della decisione sigillata.",
+          "recommendation": "Nella copia futura confrontare file effettivi con il sigillo e allineare tentativi alla decisione."
+        }
+      ],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; rilievi puntuali documentati, sorgente storico conservato."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/verify_weights.ps1",
+      "sha256": "2923c055b60485c05012ce3999e84deb114f61e07d8666a22a899b67d836979d",
+      "lines": 23,
+      "manual_ranges": [
+        [
+          1,
+          23
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Calcola l'impronta dei pesi tramite Windows.",
+      "dependencies": [],
+      "invariants": [
+        "Verifica Windows streaming: dimensione, SHA, codice uscita; file pesi solo letto."
+      ],
+      "findings": [],
+      "portability": "Richiede PowerShell/Windows e strumenti o percorsi storici. Queste assunzioni vanno rese configurabili solo in una copia attiva.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/weights.py",
+      "sha256": "d7422af44451c3e51d93a6705a8c7c09d35aba2c1693316da5be0eaede879146",
+      "lines": 19,
+      "manual_ranges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica i pesi sul percorso Windows senza leggerli nella cache WSL.",
+      "dependencies": [
+        ".common",
+        ".controller",
+        "json",
+        "pathlib",
+        "subprocess"
+      ],
+      "invariants": [
+        "Verifica risposta processo oltre al returncode; nessuna accettazione di hash incoerente."
+      ],
+      "findings": [],
+      "portability": "Richiede struttura degli artefatti e runtime storici, talvolta interazione WSL/Windows. Non trasferire percorsi fisici salvati senza verificare il riferimento e gli hash originali.",
+      "optimization": "Nessuna ottimizzazione in-place: conservare lo storico. In una copia attiva mantenere hash, tentativi falliti e controlli del contratto prima di ridurre costi o duplicazioni.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/llm_selection/wire.py",
+      "sha256": "3f28b59b239136fc9c5ccf53bf0a843ab52c9b4fcaa7e3b61001ece23e8986a2",
+      "lines": 4,
+      "manual_ranges": [
+        [
+          1,
+          4
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Compatibilità degli import precedenti della codifica tabellare.",
+      "dependencies": [
+        "prototype.prompting.wire"
+      ],
+      "invariants": [
+        "Compatibilita tramite sola riesportazione."
+      ],
+      "findings": [],
+      "portability": "Compatibilità degli import: dipende dal pacchetto prototype.prompting congelato, senza accessi autonomi a sistema o rete.",
+      "optimization": "Il modulo di compatibilità è già minimo; rimuoverlo solo dopo censimento degli import in una copia attiva.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_claim_evidence_validation.py",
+      "sha256": "d2fbbe896fbdff96b69143aa63c9dc9ad777fef396abefa8353692487d500c0d",
+      "lines": 1107,
+      "manual_ranges": [
+        [
+          1,
+          1107
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifiche automatiche: _StaticRetriever, _CountingRegistryBuilder, _RegistrySpyValidator, _FakeCompiler, ClaimEvidenceValidationTests.",
+      "dependencies": [
+        "__future__",
+        "collections.abc",
+        "copy",
+        "dataclasses",
+        "io",
+        "json",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.context",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.controller",
+        "prototype.quantum_assistant.factory",
+        "prototype.quantum_assistant.models",
+        "prototype.quantum_assistant.services",
+        "qiskit",
+        "qiskit.qasm2",
+        "tempfile",
+        "unittest"
+      ],
+      "invariants": [
+        "Test esplicitamente contratto storico v2: evidenze ignote/incoerenti, vincoli ruoli, ordini, dati malformati e conferma prima della compilazione."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_compact_prompt.py",
+      "sha256": "2f46a5537aa1e8cc0a90bc9e72ef258d28258378db3501c1c4ea6054e30865bd",
+      "lines": 165,
+      "manual_ranges": [
+        [
+          1,
+          165
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Controlli su dati invariati, fonti inventate, errori reali e ripresa.",
+      "dependencies": [
+        "copy",
+        "json",
+        "llm_selection",
+        "llm_selection.common",
+        "llm_selection.compact_prompt",
+        "llm_selection.configuration",
+        "llm_selection.provenance",
+        "llm_selection.run",
+        "llm_selection.train_check",
+        "pathlib",
+        "prototype.prompting",
+        "tempfile",
+        "test_claim_evidence_validation",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Roundtrip valori/QASM e alias; errori reali preservati nelle correzioni; fonti inventate e cicli rifiutati; provenienza codice."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_experiment_v2.py",
+      "sha256": "03532ed2dbbd56c0d13f45f9a80c75f8a4782a5ce3505542c65dbce8c60b59f7",
+      "lines": 657,
+      "manual_ranges": [
+        [
+          1,
+          657
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifiche automatiche: ExperimentV2Tests.",
+      "dependencies": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.experiment_v2",
+        "qiskit_dataset.generation",
+        "qiskit_dataset.views",
+        "scripts.mqt_predictor_protocol",
+        "tempfile",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Corpus congelato 422/88/90, duplicati semantici e leakage; gate test, budget, seed e contratto matrice verificati con casi sintetici."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_llm_chat.py",
+      "sha256": "598699ad0eda5ccbbcdbd655afaef45f13d6d6193a3503da6b7253f59cafafac",
+      "lines": 115,
+      "manual_ranges": [
+        [
+          1,
+          115
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Chat manuale: scelta modello, controlli e isolamento dei processi (avvii simulati).",
+      "dependencies": [
+        "contextlib",
+        "io",
+        "json",
+        "llm_selection",
+        "llm_selection.hardware",
+        "pathlib",
+        "tempfile",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Chat simulata: check senza scritture, modello selezionato, porta occupata, limiti e assenza fallback implicito."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_llm_output_validation.py",
+      "sha256": "6fc8937728a6f3f7eeecb952b51571e122f0865c45fbfe8b5d42d5e70e8f92d9",
+      "lines": 596,
+      "manual_ranges": [
+        [
+          1,
+          596
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifiche automatiche: _CountingRetriever, _FakeCompiler, LlmOutputValidationTests, BrokenValidator, MismatchedFilter.",
+      "dependencies": [
+        "__future__",
+        "dataclasses",
+        "io",
+        "json",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.controller",
+        "prototype.quantum_assistant.factory",
+        "prototype.quantum_assistant.models",
+        "prototype.quantum_assistant.services",
+        "qiskit",
+        "qiskit.qasm2",
+        "tempfile",
+        "unittest"
+      ],
+      "invariants": [
+        "Contratto storico v2: JSON stretto, tipi/proprieta, limiti feedback, maschera, retry esatto, infrastruttura e compilazione protetta."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_llm_selection.py",
+      "sha256": "a6f5b162caa0541a0b4541ee664498337dba27b519c21b5f59d79fe563f5c7d0",
+      "lines": 345,
+      "manual_ranges": [
+        [
+          1,
+          345
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifiche delle proprietà scientifiche e della ripresa, con soli dati sintetici.",
+      "dependencies": [
+        "dataclasses",
+        "json",
+        "llm_selection",
+        "llm_selection.common",
+        "llm_selection.complete_graph",
+        "llm_selection.configuration",
+        "llm_selection.controller",
+        "llm_selection.storage",
+        "llm_selection.wire",
+        "pathlib",
+        "qiskit_dataset",
+        "qiskit_dataset.experiment_v2",
+        "tempfile",
+        "types",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Test sintetici scelta sul comune, sigilli alterati, nessun score prima dei sigilli, ripresa no doppie chiamate, misure mancanti e file server immutabili."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_llm_selection_v2.py",
+      "sha256": "c0d81845be07d2e8c86c1201f35ed77b6f6d390ea657925b40d6237383d6bbdf",
+      "lines": 353,
+      "manual_ranges": [
+        [
+          1,
+          353
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Contratto v4, fallback, ripresa e confronto su riferimenti incompleti.",
+      "dependencies": [
+        "contextlib",
+        "copy",
+        "json",
+        "llm_selection.common",
+        "llm_selection.v2",
+        "llm_selection.v2.__main__",
+        "llm_selection.v2.evaluate",
+        "llm_selection.v2.settings",
+        "llm_selection.v2.study",
+        "pathlib",
+        "prototype.prompting",
+        "scripts.mqt_predictor_protocol",
+        "tempfile",
+        "types",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Contratto v4 con fatti 1-2 e ipotesi non certificata; fallback solo su coppia valida, ripresa trasporto, riferimenti osservati e report con dipendenze simulate."
+      ],
+      "findings": [
+        {
+          "id": "LLM-05",
+          "severity": "P3",
+          "lines": [
+            320,
+            324
+          ],
+          "title": "Avvio diretto salta la classe finale di test",
+          "evidence": "unittest.main() precede la definizione di TechnicalCodeReviewTests e termina il processo; unittest discovery importa invece la classe e la esegue.",
+          "impact": "Eseguendo questo file direttamente si omettono i due controlli finali del confronto codice tecnico.",
+          "recommendation": "Usare discovery; in copia futura porre unittest.main alla fine del file."
+        }
+      ],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Alcune fixture richiedono prompt tecnici train già preparati in OUTPUT/prompts/train; non basta installare Python.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; rilievi puntuali documentati, sorgente storico conservato."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_minimal_prompt.py",
+      "sha256": "843f97cb9bd97e00b241b8dbc918cacee0abcbcdc3fa5049ac7222d242514ca0",
+      "lines": 301,
+      "manual_ranges": [
+        [
+          1,
+          301
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica riduzione del prompt, citazioni locali e conservazione del contesto canonico.",
+      "dependencies": [
+        "copy",
+        "dataclasses",
+        "json",
+        "llm_selection",
+        "llm_selection.configuration",
+        "pathlib",
+        "prototype.prompting.minimal",
+        "prototype.prompting.rendering",
+        "prototype.quantum_assistant.adapters.context",
+        "prototype.quantum_assistant.models",
+        "prototype.quantum_assistant.services",
+        "re",
+        "tempfile",
+        "test_claim_evidence_validation",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Alias reversibili; QASM e hash restano nel contesto canonico; contesto incoerente rifiutato; testo libero non certificato; richiesta senza recupero conserva contratto."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_mqt_predictor_protocol.py",
+      "sha256": "f2268ccb4c6dc1c103515d8f9bafdf9d3947212fa1652769b142b6af83409deb",
+      "lines": 55,
+      "manual_ranges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica versione MQT, dispositivi e definizione delle caratteristiche congelate.",
+      "dependencies": [
+        "__future__",
+        "mqt.bench.targets",
+        "mqt_predictor_protocol",
+        "pathlib",
+        "sys",
+        "unittest"
+      ],
+      "invariants": [
+        "Versione 2.4.0, cinque dispositivi e 49 caratteristiche sono vincoli del protocollo corrente, distinti dal catalogo storico."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Richiede MQT Predictor 2.4.0 e dipendenze quantistiche; il confronto con API di altre versioni non è implicito.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_mqt_support_scripts.py",
+      "sha256": "d547f3bcc2df565047a5a53a093534197bfa22b0d3337ded97542ba62e898b7f",
+      "lines": 302,
+      "manual_ranges": [
+        [
+          1,
+          302
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica integrità e installazione controllata degli artefatti MQT e audit delle compilazioni.",
+      "dependencies": [
+        "__future__",
+        "importlib.util",
+        "joblib",
+        "json",
+        "mqt_model_artifacts",
+        "mqt_predictor_protocol",
+        "numpy",
+        "pathlib",
+        "sys",
+        "tempfile",
+        "types",
+        "unittest",
+        "zipfile"
+      ],
+      "invariants": [
+        "Archivi RL validi, schema del selettore, copie con hash e no sovrascrittura implicita; successo RL richiede terminazione e target eseguibile."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Richiede MQT Predictor 2.4.0 e dipendenze quantistiche; il confronto con API di altre versioni non è implicito.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_prototype_architecture.py",
+      "sha256": "49a144db6ed32cc23d25c1d0dc57111b7f5a16971c011c5a8ddb6e1f926f79d4",
+      "lines": 310,
+      "manual_ranges": [
+        [
+          1,
+          310
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica separazione dei componenti del prototipo e compilazione dopo conferma.",
+      "dependencies": [
+        "__future__",
+        "io",
+        "json",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.context",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.adapters.parsing",
+        "prototype.quantum_assistant.adapters.rag_dataset",
+        "prototype.quantum_assistant.factory",
+        "prototype.quantum_assistant.models",
+        "prototype.quantum_assistant.services",
+        "qiskit",
+        "qiskit.qasm2",
+        "tempfile",
+        "unittest"
+      ],
+      "invariants": [
+        "Recupero train, prompt senza score del nuovo circuito, adattatori iniettabili, conferma obbligatoria prima della compilazione, output e contesto coerenti."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_prototype_v2.py",
+      "sha256": "cefc17c1ed01d4725c853a0e25e5b2b9f37e294a1c89eb206abf93f9a14c1fa5",
+      "lines": 151,
+      "manual_ranges": [
+        [
+          1,
+          151
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica prototipo con manifest v2 e allineamento fra piano deciso e compilazione.",
+      "dependencies": [
+        "__future__",
+        "dataclasses",
+        "importlib.util",
+        "json",
+        "mqt.bench.targets",
+        "mqt.predictor.ml.helper",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.hardware",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.adapters.request",
+        "prototype.quantum_assistant.factory",
+        "prototype.quantum_assistant.models",
+        "qiskit",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.experiment_v2",
+        "scripts.mqt_predictor_protocol",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Catalogo e impronte coerenti; solo split train per recupero; subprocess separati verificano snapshot; compilazione rispetta la tupla selezionata."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_qdrant_dashboard.py",
+      "sha256": "6d529e2dbca6962bc9fae256257f1c0a0395cbd1869d5afd7a78f37850ee63c4",
+      "lines": 62,
+      "manual_ranges": [
+        [
+          1,
+          62
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica che la copia consultabile Qdrant riconosca modifiche reali ai dati sorgenti.",
+      "dependencies": [
+        "importlib.util",
+        "math",
+        "numpy",
+        "pathlib",
+        "qdrant_client",
+        "unittest"
+      ],
+      "invariants": [
+        "Impronte distinguono identità dei dati da metadati del file; modifiche effettive invalidano la copia consultabile."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_qdrant_retrieval.py",
+      "sha256": "1feff0270f6d15425e6ea3e9504de751ba7aa11c409e220f6b34c2a1b8dcc9d1",
+      "lines": 318,
+      "manual_ranges": [
+        [
+          1,
+          318
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica ricerca locale Qdrant, ordinamento, persistenza e integrità del recupero train.",
+      "dependencies": [
+        "__future__",
+        "contextlib",
+        "copy",
+        "dataclasses",
+        "json",
+        "math",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.qdrant_context",
+        "prototype.quantum_assistant.adapters.rag_checks",
+        "prototype.quantum_assistant.adapters.rag_dataset",
+        "prototype.quantum_assistant.adapters.rag_features",
+        "prototype.quantum_assistant.schema_validation",
+        "qdrant_client",
+        "qiskit_dataset.experiment_v2",
+        "random",
+        "scripts.mqt_predictor_protocol",
+        "tempfile",
+        "types",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Distanze confrontate con riferimento indipendente; tie-break riproducibile; vettori, payload e indici alterati rifiutati; Dataset esclusivamente train."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Usa Qdrant locale; DatasetContractTests possono essere saltati se il Dataset generato non è disponibile.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_qiskit_dataset.py",
+      "sha256": "e5eeb9649aeed5adebb617aa8aa7bb1de92163d0eb8f72532a080688f55af40b",
+      "lines": 733,
+      "manual_ranges": [
+        [
+          1,
+          733
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica cataloghi, suddivisione corpus, pianificazione Qiskit e aggregazione scientifica.",
+      "dependencies": [
+        "__future__",
+        "io",
+        "json",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.parsing",
+        "prototype.quantum_assistant.adapters.validation",
+        "prototype.quantum_assistant.models",
+        "qiskit",
+        "qiskit.qasm2",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.generation",
+        "qiskit_dataset.reporting",
+        "qiskit_dataset.views",
+        "unittest"
+      ],
+      "invariants": [
+        "600 circuiti, 574 hash unici, 26 duplicati; separazione split; 12 tuple; mediana su seed completi; recupero solo train; parità non causale e timeout descritti senza inventare causalità."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_qiskit_dataset_aggregation.py",
+      "sha256": "5d0cdcea86ae7eca7f19ab5ab3c8e4fd98915206879c8b97e05ab3289c0e23f8",
+      "lines": 156,
+      "manual_ranges": [
+        [
+          1,
+          156
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica aggregazione globale dello storico pilot e collegamenti fra claim e prove grezze.",
+      "dependencies": [
+        "__future__",
+        "json",
+        "qiskit_dataset.aggregation",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "unittest"
+      ],
+      "invariants": [
+        "Aggregazione write=False non muta mini Dataset; sei esempi train; sorgenti e impronte collegabili; claim riferiti a summary e osservazioni dei run riusciti."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Dipende dai mini Dataset pilot e dagli artefatti globali storici già presenti; non è una prova isolata su checkout privo di dati.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_qiskit_reporting.py",
+      "sha256": "52c81a4678bfbb2b9e1adb6c72811daa721b297da8c790a9d10624689f3af6ec",
+      "lines": 162,
+      "manual_ranges": [
+        [
+          1,
+          162
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica rapporti Qiskit e confronti tra dispositivi a condizioni esplicite.",
+      "dependencies": [
+        "__future__",
+        "csv",
+        "dataclasses",
+        "importlib.util",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "qiskit_dataset.reporting",
+        "qiskit_dataset.views",
+        "tempfile",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Tempi e worker derivano dai tentativi originali; cache distinta dall ultima invocazione; condizioni miste e timeout controfattuali restano espliciti; fonti non mutate."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_request_constraints.py",
+      "sha256": "454aeeb18f5a0a96e2e199c36b0946089675829b3df89b405a46a4bd9be4c3d5",
+      "lines": 714,
+      "manual_ranges": [
+        [
+          1,
+          714
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica richieste strutturate, catalogo immutabile e maschera dei vincoli hardware.",
+      "dependencies": [
+        "__future__",
+        "dataclasses",
+        "json",
+        "mqt.bench.targets",
+        "pathlib",
+        "prototype.quantum_assistant.adapters.hardware",
+        "prototype.quantum_assistant.adapters.llm",
+        "prototype.quantum_assistant.adapters.request",
+        "prototype.quantum_assistant.controller",
+        "prototype.quantum_assistant.errors",
+        "prototype.quantum_assistant.factory",
+        "prototype.quantum_assistant.models",
+        "prototype.quantum_assistant.schema_validation",
+        "prototype.quantum_assistant.services",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.generation",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "JSON stretto e QASM limitato; feature finite; snapshot e gate normalizzati; nessun recupero o LLM senza dispositivi ammessi; errori privati del target non esposti."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_run_pipeline_v2.py",
+      "sha256": "35861cede69ee84690b883d7a653170b511f235ec69b3c45b8862b818ddaf218",
+      "lines": 187,
+      "manual_ranges": [
+        [
+          1,
+          187
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica comandi di orchestrazione e ripresa dei checkpoint della pipeline v2.",
+      "dependencies": [
+        "__future__",
+        "importlib.util",
+        "pathlib",
+        "sys",
+        "tempfile",
+        "types",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Nessuna sovrascrittura o deriva target implicita; checkpoint allineati; canary su train; orchestratore non puo richiedere test; comandi simulati."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_toon_prompt.py",
+      "sha256": "1dc82b0f3431fdeaafd3bedc0a376afa90688321f81ca232e4a49ab5b12dc824",
+      "lines": 96,
+      "manual_ranges": [
+        [
+          1,
+          96
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica il codec TOON reale e la conservazione dei dati nel passaggio Python/Node.",
+      "dependencies": [
+        "copy",
+        "json",
+        "llm_selection.configuration",
+        "llm_selection.provenance",
+        "prototype.prompting.minimal",
+        "prototype.prompting.rendering",
+        "prototype.prompting.toon",
+        "test_minimal_prompt",
+        "unittest"
+      ],
+      "invariants": [
+        "Andata e ritorno conserva numeri, stringhe e archi diretti; perdita di precisione rifiutata; risposta JSON e provenienza encoder presenti; no inferenza."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Richiede Node, codec TOON 4.1.1 e dipendenze installate nella cartella dedicata.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_train_device_selector.py",
+      "sha256": "ec6cb03aa6c872281fe1708bc7eaa8d0f7b529bc5ccfb41ffd965b4c76c1bee6",
+      "lines": 400,
+      "manual_ranges": [
+        [
+          1,
+          400
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica selettore supervisionato e conservazione di fallimenti, copertura e provenienza RL.",
+      "dependencies": [
+        "__future__",
+        "importlib.util",
+        "json",
+        "numpy",
+        "pathlib",
+        "qiskit",
+        "qiskit.qasm2",
+        "sys",
+        "tempfile",
+        "types",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Solo successi RL stretti con QASM, modello e target coerenti; infrastruttura non consuma budget; copertura completa distinta dal caso parziale; score peggiore per candidati falliti."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Richiede MQT Predictor 2.4.0 e dipendenze quantistiche; il confronto con API di altre versioni non è implicito.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_train_rl_model.py",
+      "sha256": "122b20e3d72e0b4c3778e1dad533bc934724b4b8778c22d068675f9f5c10386f",
+      "lines": 343,
+      "manual_ranges": [
+        [
+          1,
+          343
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica spazio di osservazione Heron, ripresa PPO e limiti delle azioni di compilazione.",
+      "dependencies": [
+        "__future__",
+        "importlib.util",
+        "mqt.bench.targets",
+        "mqt.predictor.rl",
+        "mqt.predictor.rl.actions",
+        "numpy",
+        "pathlib",
+        "qiskit",
+        "stable_baselines3.common.preprocessing",
+        "sys",
+        "tempfile",
+        "time",
+        "torch",
+        "types",
+        "typing",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Spazi piccoli invariati; ampiezza Heron rappresentabile senza clipping; identità azioni preservata; VF2 locale; checkpoint solo dopo rollout; prova PPO minima non dimostra qualità."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Richiede MQT Predictor 2.4.0 e dipendenze quantistiche; il confronto con API di altre versioni non è implicito. Contiene una vera prova PPO minima (4+4 passi), compilazioni e timeout POSIX; non eseguita perché oltre le riproduzioni simulate richieste.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    },
+    {
+      "current_path": "archivio/esperimento_v2/tests/test_workspace_layout.py",
+      "sha256": "e596c9e6d15deb26e4d69f173cab04e9cd86c5d400cc1050d26f391ca526d69e",
+      "lines": 96,
+      "manual_ranges": [
+        [
+          1,
+          96
+        ]
+      ],
+      "manual_or_static": "manual_full",
+      "purpose": "Verifica separazione degli archivi e risoluzione dei riferimenti logici congelati.",
+      "dependencies": [
+        "__future__",
+        "importlib.util",
+        "json",
+        "pathlib",
+        "qiskit_dataset.catalog",
+        "qiskit_dataset.core",
+        "scripts",
+        "tempfile",
+        "unittest",
+        "unittest.mock"
+      ],
+      "invariants": [
+        "Manifest immutato e hash verificato; materializzazione ripetibile; traversal e fuga via collegamento simbolico rifiutati; default CLI indirizzato a v2."
+      ],
+      "findings": [],
+      "portability": "Test storici Python 3.12 con dipendenze fissate in uv.lock; import risolti dalla radice archivio/esperimento_v2 e directory tests. Nessuna esecuzione completa durante questa revisione. Il test di fuga tramite collegamento simbolico richiede un filesystem che supporti la creazione di symlink.",
+      "optimization": "In una copia attiva separare prove con soli oggetti simulati da prove di integrazione; conservare le condizioni scientifiche e i casi negativi esistenti.",
+      "verdict": "Lettura manuale integrale; nessun difetto aggiuntivo verificato nel perimetro letto; esecuzione completa non effettuata."
+    }
+  ],
+  "reproductions": [
+    {
+      "id": "LLM-02",
+      "method": "Funzione originale estratta via AST; risposta HTTP simulata, nessuna rete",
+      "observed": "FileExistsError con .part esistente di zero byte; destinazione non creata",
+      "confirmed": true
+    },
+    {
+      "id": "LLM-03",
+      "method": "Funzione originale estratta via AST; episodio terminale sintetico, nessuna inferenza",
+      "observed": "Budget originale 100s/3; chiamata 1s/1 restituisce lo stesso vecchio risultato, come la ripresa intenzionale 100s/3",
+      "confirmed": true
+    },
+    {
+      "id": "LLM-04",
+      "method": "require_sealed e verify_hashes originali estratti via AST; studio e verifica del congelamento simulati, file e hash reali in cartella temporanea",
+      "observed": "Aggiunta attempt_999/summary.json dopo i sigilli: require_sealed accetta ancora; hash dei file gia sigillati invariati",
+      "confirmed": true
+    }
+  ],
+  "scope_lines": 11278,
+  "coverage": {
+    "files_read_in_full": 72,
+    "files_expected": 72,
+    "lines_read": 11278,
+    "hashes_checked_after_reading": 72,
+    "empty_files": 0,
+    "source_changes": 0
+  },
+  "method": "Lettura integrale numerata di ogni sorgente, a blocchi per file lunghi; controllo manuale di flussi, errori, contratti, provenienza, dipendenze, separazione scientifica e portabilità. AST usato solo per elenco import e tre riproduzioni corte, non come sostituto della lettura.",
+  "limitations": [
+    "Nessun server LLM, esperimento, addestramento, apertura del Test o suite estesa eseguiti.",
+    "Tre riproduzioni isolate usano le funzioni originali estratte tramite AST con dipendenze simulate: verificano il ramo locale, non il sistema completo.",
+    "Nessuna verifica online di versioni o specifiche hardware: i commenti distinguono requisiti storici dalle API correnti.",
+    "Il grafo è gestito dal coordinatore; non aggiornato da questo sottocompito.",
+    "La riduzione da 11403 a 11278 righe rispetto all inventario deriva da llm_selection/v2/plots.py:74 righe effettive contro199 elencate."
+  ]
+}

@@ -35,3 +35,7 @@ l'ambiente congelato. Su questo PC `.venv` è un collegamento all'ambiente
 preservato nella radice; su un'altra macchina ricostruire da `uv.lock`
 solo dopo aver trasferito e protetto i modelli necessari.
 Non modificare gli script sigillati per ottimizzazioni cosmetiche.
+
+## 21 settembre: revisione completa degli script
+
+La [revisione del 21 settembre](riorganizzazione_2026_09_21/README.md) completa le 133 letture rimaste e porta la copertura a 147 script. Conserva difetti, prove circoscritte e priorità, senza cambiare i sorgenti congelati.

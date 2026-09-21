@@ -1,0 +1,1501 @@
+[
+  {
+    "path": "prototype/__init__.py",
+    "current_path": "archivio/esperimento_v2/prototype/__init__.py",
+    "sha256": "4056a7f00459bae311abefbb1aa5e4a4f2351d889be64e11a26e93d081b61811",
+    "current_sha256": "4056a7f00459bae311abefbb1aa5e4a4f2351d889be64e11a26e93d081b61811",
+    "lines": 1,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        1
+      ]
+    ],
+    "purpose": "Dichiara il pacchetto storico prototype.",
+    "dependencies": [],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Nessuna esecuzione o dipendenza introdotta dal file."
+    ],
+    "findings": [],
+    "portability": "Portabile; resta necessario il corretto percorso di importazione.",
+    "optimization": "Nessuna ottimizzazione utile.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/__init__.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/__init__.py",
+    "sha256": "0e18f00b16784733f8b22841dbcf9451a176ba0b4b13d1bbcbbb1f5ea60e025e",
+    "current_sha256": "0e18f00b16784733f8b22841dbcf9451a176ba0b4b13d1bbcbbb1f5ea60e025e",
+    "lines": 5,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        5
+      ]
+    ],
+    "purpose": "Espone i punti di ingresso per rappresentare i prompt.",
+    "dependencies": [
+      "minimal",
+      "rendering"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Le esportazioni rimandano ai convertitori senza riscrivere contenuti."
+    ],
+    "findings": [],
+    "portability": "Le dipendenze dei convertitori, in particolare Node, determinano la portabilità.",
+    "optimization": "Evitare di aggiungere importazioni di componenti costosi a questo ingresso.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/compact.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/compact.py",
+    "sha256": "744d3f7be7bfdeb49c256d9b5d018a64a09721d100cf4a0dee78d147ed6cb986",
+    "current_sha256": "744d3f7be7bfdeb49c256d9b5d018a64a09721d100cf4a0dee78d147ed6cb986",
+    "lines": 173,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        173
+      ]
+    ],
+    "purpose": "Codifica v2 senza perdita mediante alias, tabelle e dizionario delle ripetizioni.",
+    "dependencies": [
+      ".",
+      "__future__",
+      "collections",
+      "copy",
+      "hashlib",
+      "json",
+      "prototype.quantum_assistant.adapters.validation",
+      "prototype.quantum_assistant.schema_validation",
+      "re",
+      "wire"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Marcatori riservati rifiutati; ripristino canonico confrontato con originale; espansione limitata ai campi identificativi previsti."
+    ],
+    "findings": [],
+    "portability": "Python; non dipende da GPU o servizi. È una rappresentazione storica distinta dal contratto v4.",
+    "optimization": "Le scansioni e serializzazioni ricorsive possono essere riutilizzate; verificare sempre la medesima rappresentazione canonica.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/complete_graph.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/complete_graph.py",
+    "sha256": "82773d23ceaf6a7057d57df0554138544588de3b6f686b44af43440e6cc7661e",
+    "current_sha256": "82773d23ceaf6a7057d57df0554138544588de3b6f686b44af43440e6cc7661e",
+    "lines": 30,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "purpose": "Sostituisce l’elenco completo dei collegamenti con una descrizione reversibile.",
+    "dependencies": [
+      "copy",
+      "json"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Compressione soltanto se il grafo coincide esattamente con quello diretto completo; ripristino verificabile."
+    ],
+    "findings": [],
+    "portability": "Python e strutture JSON; nessun percorso di sistema.",
+    "optimization": "La costruzione della lista attesa richiede spazio quadratico; un controllo per cardinalità e insieme potrebbe evitare una seconda lista.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/facts.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/facts.py",
+    "sha256": "b82bc77517c51fd6e571f152a5adbf06ebab144cf96617d97630c17fa40ce937",
+    "current_sha256": "b82bc77517c51fd6e571f152a5adbf06ebab144cf96617d97630c17fa40ce937",
+    "lines": 132,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        132
+      ]
+    ],
+    "purpose": "Costruisce e verifica il contratto v4 con fatti controllabili e ipotesi testuale.",
+    "dependencies": [
+      "__future__",
+      "copy",
+      "json",
+      "minimal",
+      "prototype.quantum_assistant.schema_validation",
+      "re",
+      "time",
+      "toon"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Uno o due fatti; scelta limitata a dispositivo compatibile e configurazione ammessa; citazioni risolte negli esempi correnti; testo ipotetico esplicitamente non verificato; numeri non finiti rifiutati prima dello schema."
+    ],
+    "findings": [],
+    "portability": "Dipende dai modelli interni, dal catalogo e dalla rappresentazione minima. Il numero di tentativi e il ripiego sono responsabilità del chiamante.",
+    "optimization": "Conservare il controllo JSON preventivo: protegge anche dal rilievo PD-01.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/legacy_rendering.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/legacy_rendering.py",
+    "sha256": "0ad466e7174ef665640766910e34709ed0583f127584bd74d74fec5f49d6ddab",
+    "current_sha256": "0ad466e7174ef665640766910e34709ed0583f127584bd74d74fec5f49d6ddab",
+    "lines": 35,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        35
+      ]
+    ],
+    "purpose": "Rende i prompt storici v2 nei formati configurati.",
+    "dependencies": [
+      "compact",
+      "complete_graph",
+      "json",
+      "output_contract"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Mantiene esplicita la distinzione tra forma completa e compressa e i relativi metadati."
+    ],
+    "findings": [],
+    "portability": "Il formato TOON eredita i vincoli del runtime Node storico.",
+    "optimization": "Mantenere questa variante nell’archivio per riprodurre le prove precedenti.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/minimal.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/minimal.py",
+    "sha256": "2ba91963a32043b57e3bcfbbedaed21299ac5dd07932ece881f640b2948d1fd0",
+    "current_sha256": "2ba91963a32043b57e3bcfbbedaed21299ac5dd07932ece881f640b2948d1fd0",
+    "lines": 208,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        208
+      ]
+    ],
+    "purpose": "Riduce il prompt v3 e lega gli alias degli esempi alla richiesta e al registro.",
+    "dependencies": [
+      "__future__",
+      "copy",
+      "dataclasses",
+      "hashlib",
+      "json",
+      "prototype.quantum_assistant.schema_validation",
+      "re",
+      "toon"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Massimo cinque esempi distinti; impronte di QASM, vincoli, feature e registro; lista esplicita dei campi ammessi; score soltanto storici; schema delle citazioni coerente con il registro."
+    ],
+    "findings": [],
+    "portability": "Python; gli schemi devono restare disponibili nel percorso del progetto.",
+    "optimization": "Evitare copie ripetute del grafo completo; non eliminare dispositivi o vincoli per ridurre il prompt senza dichiararlo.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/output_contract.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/output_contract.py",
+    "sha256": "c13ba8d85eb35727f774194284111280626094c933dd2aaddb8b4159fcf3d4cd",
+    "current_sha256": "c13ba8d85eb35727f774194284111280626094c933dd2aaddb8b4159fcf3d4cd",
+    "lines": 23,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        23
+      ]
+    ],
+    "purpose": "Raccoglie istruzioni e metadati del contratto di uscita storico.",
+    "dependencies": [],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Versione e significato del contratto restano espliciti; non implementa la selezione sperimentale."
+    ],
+    "findings": [],
+    "portability": "Modulo di testo Python.",
+    "optimization": "Nessuna ottimizzazione necessaria.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/rendering.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/rendering.py",
+    "sha256": "cdebabb98ec7f65b1991edf73e866c3b3bce4c1023fd1874c9e7ccc1b24954e5",
+    "current_sha256": "cdebabb98ec7f65b1991edf73e866c3b3bce4c1023fd1874c9e7ccc1b24954e5",
+    "lines": 36,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        36
+      ]
+    ],
+    "purpose": "Rende il prompt minimo v3 come JSON o TOON e registra la trasformazione.",
+    "dependencies": [
+      "json",
+      "minimal",
+      "toon"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Formati espliciti e checklist opzionale; rifiuto della forma completa non prevista da questa versione."
+    ],
+    "findings": [],
+    "portability": "Per TOON richiede il runtime verificato da toon.py.",
+    "optimization": "Non confondere questo ingresso v3 con la costruzione facts v4 usata dallo studio ufficiale.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/toon.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/toon.py",
+    "sha256": "8141dea24b531cdc4e800b66ffc974d3c1827af4cab12347c5a3a2aca3245348",
+    "current_sha256": "8141dea24b531cdc4e800b66ffc974d3c1827af4cab12347c5a3a2aca3245348",
+    "lines": 113,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        113
+      ]
+    ],
+    "purpose": "Invoca il convertitore TOON Node e controlla il ripristino del contenuto.",
+    "dependencies": [
+      "__future__",
+      "copy",
+      "functools",
+      "hashlib",
+      "json",
+      "pathlib",
+      "subprocess"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Impronte del runtime verificate; scadenza della chiamata; uguaglianza dopo codifica e decodifica, comprese feature e ordine dei collegamenti."
+    ],
+    "findings": [],
+    "portability": "Percorso storico fissato a Node Linux x64: non funziona da solo su Windows nativo; il dimostratore ha un proprio adattamento.",
+    "optimization": "Primo calcolo dell’impronta del binario e processi Node per nuovi prompt incidono sul tempo; cache limitata e misure separate dalla latenza LLM.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/prompting/wire.py",
+    "current_path": "archivio/esperimento_v2/prototype/prompting/wire.py",
+    "sha256": "9c4f0ef09d7efdc0360eaf7c6774701a5469d3f3f6955eaedec1a6e82badf3ca",
+    "current_sha256": "9c4f0ef09d7efdc0360eaf7c6774701a5469d3f3f6955eaedec1a6e82badf3ca",
+    "lines": 36,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        36
+      ]
+    ],
+    "purpose": "Converte liste omogenee in tabelle JSON reversibili per il trasporto.",
+    "dependencies": [
+      "__future__",
+      "json"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Marcatori riservati protetti; colonne uniche e larghezze delle righe verificate; controllo di ripristino."
+    ],
+    "findings": [],
+    "portability": "Solo Python; formato interno, non parser generale di documenti non attendibili.",
+    "optimization": "Le serializzazioni ripetute potrebbero essere ridotte preservando il controllo di uguaglianza.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/__init__.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/__init__.py",
+    "sha256": "a3ef2a0db32c761feb64894a8f1b7a87cc0573be3408d5ee7b5c8c82e4624512",
+    "current_sha256": "a3ef2a0db32c761feb64894a8f1b7a87cc0573be3408d5ee7b5c8c82e4624512",
+    "lines": 93,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        93
+      ]
+    ],
+    "purpose": "Espone modelli, servizio e fabbrica del prototipo storico.",
+    "dependencies": [
+      "adapters.context",
+      "controller",
+      "errors",
+      "factory",
+      "models",
+      "services"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Esportazioni coerenti con modelli e adattatori letti."
+    ],
+    "findings": [],
+    "portability": "Importazioni eager trascinano Qdrant, Qiskit, MQT e schemi anche per usi limitati del pacchetto.",
+    "optimization": "Esportazioni leggere o differite ridurrebbero costo e accoppiamento; il dimostratore separato usa inizializzatori più piccoli.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/__init__.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/__init__.py",
+    "sha256": "43404058094847f91d547cf5f8348cd4adbb0bc1c021a2e0dd95b3ce1ee6f2c8",
+    "current_sha256": "43404058094847f91d547cf5f8348cd4adbb0bc1c021a2e0dd95b3ce1ee6f2c8",
+    "lines": 44,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        44
+      ]
+    ],
+    "purpose": "Espone gli adattatori disponibili.",
+    "dependencies": [
+      "compilation",
+      "context",
+      "explanations",
+      "hardware",
+      "llm",
+      "parsing",
+      "qdrant_context",
+      "rag_features",
+      "validation"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Gli adattatori concreti restano distinti dalle interfacce."
+    ],
+    "findings": [],
+    "portability": "Importazioni eager richiedono l’ambiente sperimentale completo.",
+    "optimization": "Ridurre gli import all’avvio in un futuro pacchetto riusabile.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/compilation.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/compilation.py",
+    "sha256": "6f9d20a575221abcd4f56bd5a211ca6196b32eb920295be7ecef0bf7e6534c1f",
+    "current_sha256": "6f9d20a575221abcd4f56bd5a211ca6196b32eb920295be7ecef0bf7e6534c1f",
+    "lines": 119,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        119
+      ]
+    ],
+    "purpose": "Compila la raccomandazione approvata con il Target Qiskit selezionato.",
+    "dependencies": [
+      "__future__",
+      "io",
+      "models",
+      "mqt.bench.targets",
+      "qiskit",
+      "qiskit.qasm2",
+      "qiskit.transpiler.passes",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Metrica e larghezza controllate; configurazione dal modello validato; GatesInBasis, CheckMap e porte sconosciute verificati prima di restituire QASM e statistiche."
+    ],
+    "findings": [],
+    "portability": "Richiede Qiskit e MQT Bench compatibili. Nessun timeout esterno della compilazione in questo adattatore.",
+    "optimization": "Separare il processo di compilazione per applicare un limite reale di tempo e memoria su ingressi grandi; non cambiare opzioni o seed del protocollo congelato.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/context.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/context.py",
+    "sha256": "89985147afdee737edddf18e5837a8b33cf8479a5e979faa8ccaf926a8d2b3c8",
+    "current_sha256": "89985147afdee737edddf18e5837a8b33cf8479a5e979faa8ccaf926a8d2b3c8",
+    "lines": 994,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        994
+      ]
+    ],
+    "purpose": "Costruisce registro delle evidenze e prompt dai risultati storici recuperati.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "json",
+      "math",
+      "models",
+      "pathlib",
+      "prototype.prompting.minimal",
+      "qdrant_context",
+      "qiskit_dataset.catalog",
+      "rag_dataset",
+      "schema_validation",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Rifiuta etichette parziali; controlla record, claim, evidenze, configurazioni e ranghi; mediana e riferimenti devono coincidere; esempi non etichettati non sostengono affermazioni storiche."
+    ],
+    "findings": [],
+    "portability": "Richiede catalogo e adattatori RAG, oltre agli schemi. StructuredPromptBuilder predefinito produce v3; v4 è costruito esplicitamente dal livello dello studio.",
+    "optimization": "I record sono piccoli e il recupero è limitato a cinque esempi; evitare refactoring del registro senza prove di equivalenza.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/explanations.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/explanations.py",
+    "sha256": "5b35c86d97080a7baf73368f77d5699ba252f9ce63a119f682ca45926baa2c49",
+    "current_sha256": "5b35c86d97080a7baf73368f77d5699ba252f9ce63a119f682ca45926baa2c49",
+    "lines": 289,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        289
+      ]
+    ],
+    "purpose": "Deriva spiegazioni da claim strutturati già validati.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "models"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Ogni riferimento deve essere risolvibile; testo costruito da valori verificati; caveat scientifici e provenienza mantenuti."
+    ],
+    "findings": [],
+    "portability": "Solo modelli Python; renderer del contratto v2, diverso dal testo ipotetico v4.",
+    "optimization": "Nessuna ottimizzazione prioritaria sul piccolo numero di claim.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/hardware.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/hardware.py",
+    "sha256": "0ccfb961ede66c9fd0742747587d33ef239447cd3dd95074de426e30f6818cab",
+    "current_sha256": "0ccfb961ede66c9fd0742747587d33ef239447cd3dd95074de426e30f6818cab",
+    "lines": 675,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        675
+      ]
+    ],
+    "purpose": "Costruisce l’istantanea hardware e applica vincoli di compatibilità.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "dataclasses",
+      "hashlib",
+      "importlib.metadata",
+      "json",
+      "models",
+      "mqt.bench.targets",
+      "qiskit_dataset.catalog",
+      "schema_validation",
+      "scripts.mqt_predictor_protocol",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Cinque definizioni note; versioni e impronte dei Target confrontate al catalogo; Target non disponibili esclusi; tutte le ragioni di incompatibilità registrate; istantanea legata alla richiesta."
+    ],
+    "findings": [],
+    "portability": "Richiede versioni MQT/Qiskit fissate e Target sintetici riproducibili; non descrive disponibilità o calibrazione live.",
+    "optimization": "Istantanea già memorizzata; mantenere distinti costo del suo caricamento e tempo della raccomandazione.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/llm.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/llm.py",
+    "sha256": "55f4d301a67d6a8da141ad9d36b1e9ff91ffccab4aa3ecc967b38f33376fb76a",
+    "current_sha256": "55f4d301a67d6a8da141ad9d36b1e9ff91ffccab4aa3ecc967b38f33376fb76a",
+    "lines": 34,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        34
+      ]
+    ],
+    "purpose": "Adatta una funzione a collegamento LLM e segnala la mancata configurazione.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "models"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Nessuna risposta inventata e nessuna chiamata implicita quando il collegamento manca."
+    ],
+    "findings": [],
+    "portability": "La funzione fornita dal chiamante decide trasporto e piattaforma.",
+    "optimization": "Modulo minimo; nessuna ottimizzazione necessaria.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/parsing.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/parsing.py",
+    "sha256": "cf4d2531ff0cb2c7623c090f5a97d96ca70799023dcaf217cbe3ece805a88724",
+    "current_sha256": "cf4d2531ff0cb2c7623c090f5a97d96ca70799023dcaf217cbe3ece805a88724",
+    "lines": 29,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        29
+      ]
+    ],
+    "purpose": "Mantiene il vecchio punto di importazione del parser.",
+    "dependencies": [
+      "hardware",
+      "request"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Riesporta le implementazioni correnti senza duplicarne la logica."
+    ],
+    "findings": [],
+    "portability": "Eredita requisiti Qiskit/MQT del parser.",
+    "optimization": "Conservare per compatibilità; nessuna ottimizzazione utile.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/rag_checks.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/rag_checks.py",
+    "sha256": "fa9332f868e5d2beea277cde6c0c49f25ba4150267c6bd8b1f43b44b190aee2d",
+    "current_sha256": "fa9332f868e5d2beea277cde6c0c49f25ba4150267c6bd8b1f43b44b190aee2d",
+    "lines": 140,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        140
+      ]
+    ],
+    "purpose": "Confronta tecnicamente il recupero della validation con una formula indipendente.",
+    "dependencies": [
+      "__future__",
+      "factory",
+      "hashlib",
+      "llm",
+      "math",
+      "pathlib",
+      "qdrant_context",
+      "qiskit_dataset.experiment_v2",
+      "rag_dataset",
+      "rag_features",
+      "scripts.mqt_predictor_protocol",
+      "sys",
+      "time",
+      "uuid"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Nessuna chiamata LLM né compilazione; confronto di identificativi ordinati e distanze; verifica di 88 richieste validation; esclusione per hash del Test dalla preparazione tecnica."
+    ],
+    "findings": [],
+    "portability": "Richiede corpus sigillato, Qdrant e ambiente sperimentale. Non è parte dell’avvio portabile e non è stato eseguito durante questa revisione.",
+    "optimization": "Il riferimento ricalcola divisori e vettori per ciascuna query: utile come controllo indipendente, evitabile nel percorso operativo.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/rag_features.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/rag_features.py",
+    "sha256": "43013abb3743f64802c07b07567bd35b2543bb10eb451e85f7cdd65de2b4e34b",
+    "current_sha256": "43013abb3743f64802c07b07567bd35b2543bb10eb451e85f7cdd65de2b4e34b",
+    "lines": 105,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        105
+      ]
+    ],
+    "purpose": "Trasforma 49 feature con log1p e divisori del solo train e misura la distanza Manhattan.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "dataclasses",
+      "math",
+      "qiskit_dataset.experiment_v2",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Ordine fissato; tipi, finitezza e domini verificati; divisori positivi; nessun clipping o normalizzazione L2; precisione canonica float64 e tolleranze Qdrant dichiarate."
+    ],
+    "findings": [],
+    "portability": "Solo Python. Il fit_train riceve feature senza etichette di split: il vincolo train è garantito dal caricatore chiamante.",
+    "optimization": "Per 396 righe il costo è modesto; qualunque vettorizzazione deve conservare ordinamento finale e tolleranze.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/request.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/request.py",
+    "sha256": "05b9530b069eae4cc27018b2e3080d66e5bf8e27b6e59c432d424ba3b2552d24",
+    "current_sha256": "05b9530b069eae4cc27018b2e3080d66e5bf8e27b6e59c432d424ba3b2552d24",
+    "lines": 509,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        509
+      ]
+    ],
+    "purpose": "Valida richiesta e vincoli, analizza QASM e ricava le 49 feature.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "errors",
+      "hashlib",
+      "math",
+      "models",
+      "mqt.predictor.ml.helper",
+      "pathlib",
+      "ports",
+      "qiskit",
+      "re",
+      "schema_validation",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Limiti di byte e lunghezza; include ammessi soltanto qelib1.inc; metrica unica; feature finite; normalizzazione vincoli e istantanea hardware."
+    ],
+    "findings": [
+      {
+        "id": "PD-08",
+        "severity": "P3",
+        "lines": [
+          210,
+          219
+        ],
+        "title": "La allowlist legacy viene resa insieme prima di controllare i tipi",
+        "evidence": "len(set(allowed_devices)) precede il controllo isinstance(device_id,str); un elemento lista/dizionario provoca TypeError prima di _raise_issue.",
+        "reproduction": "Evidenza statica: UiSubmission con allowed_devices=([],) raggiunge set(([],)) alla riga 213, che solleva TypeError: unhashable type: list. Non è stato eseguito un circuito né richiamata la versione legacy in questa revisione.",
+        "impact": "Difetto limitato al vecchio ingresso Python UiSubmission, non al normale ingresso JSON validato o al comando del dimostratore.",
+        "recommendation": "Controllare prima che gli elementi siano stringhe, poi unicità e formato."
+      }
+    ],
+    "portability": "Importa il calcolo delle feature MQT nell’ambiente storico; il dimostratore lo sostituisce con copia verificata. PD-01 può propagarsi dall’API JSON; il normale comando del dimostratore costruisce vincoli stringa.",
+    "optimization": "Controllare la larghezza prima dell’estrazione costosa: il limite sui byte non limita qubit o espansione delle porte.",
+    "verdict": "rilievi_confermati",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/adapters/validation.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/adapters/validation.py",
+    "sha256": "f563d44f95e6d454746af938f47b32367e495a58cdb1570c385617da1805465f",
+    "current_sha256": "f563d44f95e6d454746af938f47b32367e495a58cdb1570c385617da1805465f",
+    "lines": 999,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        999
+      ]
+    ],
+    "purpose": "Valida risposte v2 e v3 rispetto a richiesta, catalogo e registro delle evidenze.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "explanations",
+      "models",
+      "ports",
+      "prototype.prompting.minimal",
+      "qiskit_dataset.catalog",
+      "schema_validation",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Riferimenti e claim collegati integralmente; un solo uso per riferimento; configurazioni e dispositivi ammissibili; v3 verifica provenienza delle citazioni e dichiara il testo non verificato."
+    ],
+    "findings": [],
+    "portability": "Non è il verificatore facts v4. Eredita PD-01 nel percorso v3 senza controllo JSON preventivo.",
+    "optimization": "Feedback limitato a dodici errori; costo trascurabile per risposte piccole.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/controller.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/controller.py",
+    "sha256": "a377b30312e18ee7f4fd69ff7277b28f6f6275124898b64350f032b8c5c8d285",
+    "current_sha256": "a377b30312e18ee7f4fd69ff7277b28f6f6275124898b64350f032b8c5c8d285",
+    "lines": 75,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        75
+      ]
+    ],
+    "purpose": "Coordina la schermata e associa conferme di compilazione a raccomandazioni emesse.",
+    "dependencies": [
+      "__future__",
+      "dataclasses",
+      "models",
+      "ports",
+      "services",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Compilazione richiede richiesta memorizzata e conferma; risultati non fabbricati dalla schermata."
+    ],
+    "findings": [],
+    "portability": "Componente in memoria, senza persistenza o gestione di sessioni multiutente.",
+    "optimization": "Per un servizio duraturo introdurre scadenza e isolamento dei risultati conservati.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/errors.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/errors.py",
+    "sha256": "f73b2cac0f2796adf41db63f39695873f0bbfb61fde4d3407003c5abf4e95a3c",
+    "current_sha256": "f73b2cac0f2796adf41db63f39695873f0bbfb61fde4d3407003c5abf4e95a3c",
+    "lines": 30,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "purpose": "Definisce gli errori di dominio e i rispettivi esiti strutturati.",
+    "dependencies": [
+      "__future__",
+      "models"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Cause di richiesta non valida, assenza candidati e risposta non valida restano distinguibili."
+    ],
+    "findings": [],
+    "portability": "Solo Python e modelli interni.",
+    "optimization": "Nessuna ottimizzazione necessaria.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/factory.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/factory.py",
+    "sha256": "3623710b86cbb73327a5e90f4ded5f5e12bb3d74a66e6b49344ada40f568333f",
+    "current_sha256": "3623710b86cbb73327a5e90f4ded5f5e12bb3d74a66e6b49344ada40f568333f",
+    "lines": 68,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        68
+      ]
+    ],
+    "purpose": "Assembla parser, hardware, recupero, prompt, validatore e compilatore.",
+    "dependencies": [
+      "__future__",
+      "adapters.compilation",
+      "adapters.context",
+      "adapters.parsing",
+      "adapters.qdrant_context",
+      "adapters.rag_dataset",
+      "adapters.validation",
+      "collections.abc",
+      "pathlib",
+      "ports",
+      "qiskit_dataset.catalog",
+      "services"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Catalogo condiviso; recupero qdrant/reference/none esplicito; collegamento LLM iniettato; default storico non equivale automaticamente allo studio v4."
+    ],
+    "findings": [],
+    "portability": "La fabbrica storica richiede la disposizione archiviata dei dati; non è un avvio autonomo del dimostratore.",
+    "optimization": "Validare subito retrieval_limit<=5 per le rappresentazioni minime; attualmente il costruttore del prompt segnala il limite più tardi.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/models.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/models.py",
+    "sha256": "78e8e62c4152a151c0dce2636dab4293c715b5c133e2bd0ecb8ccb891490485d",
+    "current_sha256": "78e8e62c4152a151c0dce2636dab4293c715b5c133e2bd0ecb8ccb891490485d",
+    "lines": 1394,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        1394
+      ]
+    ],
+    "purpose": "Definisce richieste, istantanee, evidenze, raccomandazioni e risultati.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "dataclasses",
+      "enum",
+      "math",
+      "types",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Identificativi e riferimenti controllati; congelamento profondo di feature e payload delle evidenze; tuple normalizzate nei modelli storici; risultato valido richiede raccomandazione senza errori."
+    ],
+    "findings": [],
+    "portability": "Solo Python. Annotazioni e dataclass frozen non sostituiscono una validazione universale di oggetti costruiti a mano; parser e costruttori sono i confini previsti.",
+    "optimization": "Ricerca lineare di riferimenti adeguata ai piccoli registri; nessun indice aggiuntivo necessario.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/ports.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/ports.py",
+    "sha256": "61df7fb5f747a49a592b31ba450548668d6ce2180e9b840c543aff61afe8a440",
+    "current_sha256": "61df7fb5f747a49a592b31ba450548668d6ce2180e9b840c543aff61afe8a440",
+    "lines": 153,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        153
+      ]
+    ],
+    "purpose": "Definisce interfacce strutturali per parser, catalogo, recupero, LLM, validatore e compilatore.",
+    "dependencies": [
+      "__future__",
+      "models",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Tipi e responsabilità corrispondono ai componenti concreti; nessuna esecuzione LLM o compilazione implicita."
+    ],
+    "findings": [],
+    "portability": "Solo typing e modelli interni.",
+    "optimization": "Nessuna ottimizzazione necessaria.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/schema_validation.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/schema_validation.py",
+    "sha256": "0b3a19abb2adf03ee0a980c4b02fe47b11da446ffe895cf3c8f97e38587d1862",
+    "current_sha256": "0b3a19abb2adf03ee0a980c4b02fe47b11da446ffe895cf3c8f97e38587d1862",
+    "lines": 341,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        341
+      ]
+    ],
+    "purpose": "Implementa il sottoinsieme di JSON Schema usato dai contratti del progetto.",
+    "dependencies": [
+      "__future__",
+      "collections.abc",
+      "json",
+      "math",
+      "models",
+      "pathlib",
+      "re",
+      "typing",
+      "uuid"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Parole chiave ammesse esplicite; riferimenti soltanto locali; duplicati di chiave rifiutati; limiti di documento; PD-01 interrompe il percorso strutturato per alcuni numeri fuori dominio."
+    ],
+    "findings": [
+      {
+        "id": "PD-01",
+        "severity": "P2",
+        "lines": [
+          167,
+          181
+        ],
+        "related_lines": [
+          [
+            199,
+            225
+          ],
+          [
+            299,
+            311
+          ]
+        ],
+        "title": "Alcuni numeri JSON interrompono la validazione invece di produrre un errore strutturato",
+        "evidence": "parse_constant rifiuta NaN/Infinity letterali ma json.loads converte 1e999 in float inf. uniqueItems serializza con allow_nan=False prima di controllare il tipo degli elementi. _is_type(number) converte inoltre interi arbitrari in float senza intercettare OverflowError.",
+        "reproduction": "decode_json_object('{\"evidence\":[1e999]}') restituisce {\"evidence\":[inf]}; validate_instance({\"type\":\"array\",\"uniqueItems\":True,\"items\":{\"type\":\"string\"}}, value[\"evidence\"], error_code=\"TEST\") solleva ValueError: Out of range float values are not JSON compliant: inf. validate_instance({\"type\":\"number\"},10**1000,error_code=\"TEST\") solleva OverflowError: int too large to convert to float.",
+        "impact": "Richieste JSON malformate e risposte del contratto minimo v3 possono uscire dal percorso RequestValidationError/ValidationResult. facts.verify v4 effettua prima json.dumps(allow_nan=False), quindi la risposta LLM del dimostratore è protetta; il parser copiato conserva il limite per chiamate programmatiche.",
+        "recommendation": "Controllare ricorsivamente numeri finiti dopo il decode e gestire overflow; validare gli elementi prima di uniqueItems oppure trasformare anche tali errori in ValidationIssue. Non modificare qui gli originali."
+      }
+    ],
+    "portability": "Solo Python e schemi locali; deve essere distribuito con le risorse corrette.",
+    "optimization": "Validare i numeri finiti e gli elementi prima di serializzarli per uniqueItems; evitare conversioni float senza gestione dell’overflow.",
+    "verdict": "rilievi_confermati",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "prototype/quantum_assistant/services.py",
+    "current_path": "archivio/esperimento_v2/prototype/quantum_assistant/services.py",
+    "sha256": "7ecf7348bc0bc5bf961acbeb39f52f44c17a0d4fd9981f0f930d4b7eeae531c3",
+    "current_sha256": "7ecf7348bc0bc5bf961acbeb39f52f44c17a0d4fd9981f0f930d4b7eeae531c3",
+    "lines": 251,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        251
+      ]
+    ],
+    "purpose": "Orchestra preparazione, recupero, tentativi logici e compilazione dopo conferma.",
+    "dependencies": [
+      "__future__",
+      "adapters.context",
+      "adapters.request",
+      "dataclasses",
+      "models",
+      "ports",
+      "prototype.prompting.minimal"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Nessuna compilazione durante raccomandazione; numero tentativi limitato; esiti invalidi ritentati con feedback; conferma richiede identità di un risultato emesso dal servizio."
+    ],
+    "findings": [],
+    "portability": "Componenti iniettati; errori di trasporto propagati al chiamante. Il percorso facts v4 e il suo ripiego sono esterni a questa orchestrazione storica.",
+    "optimization": "La lista dei risultati emessi cresce senza scadenza; limitarla per impieghi continuativi.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/__init__.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/__init__.py",
+    "sha256": "db3cb07fe7ea99d2e35dca70468edba1d675deb66dd12cc4fb76d18be41d6289",
+    "current_sha256": "db3cb07fe7ea99d2e35dca70468edba1d675deb66dd12cc4fb76d18be41d6289",
+    "lines": 15,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        15
+      ]
+    ],
+    "purpose": "Espone funzioni e tipi comuni del Dataset Qiskit.",
+    "dependencies": [
+      "catalog"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Riesportazioni coerenti e prive di esecuzioni sperimentali automatiche."
+    ],
+    "findings": [],
+    "portability": "Richiede pacchetti del repository; dipendenze scientifiche caricate nelle funzioni dove previsto.",
+    "optimization": "Mantenere leggero l’ingresso del pacchetto.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/aggregation.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/aggregation.py",
+    "sha256": "ce7044b1a742a2496b0fdac572ae9b0dd0579daf1a34247277d37ad9af114471",
+    "current_sha256": "ce7044b1a742a2496b0fdac572ae9b0dd0579daf1a34247277d37ad9af114471",
+    "lines": 627,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        627
+      ]
+    ],
+    "purpose": "Unisce viste dei dispositivi e produce la vista globale e gli esempi train.",
+    "dependencies": [
+      "__future__",
+      "catalog",
+      "collections",
+      "core",
+      "json",
+      "pathlib",
+      "reporting",
+      "scripts.mqt_predictor_protocol",
+      "typing",
+      "views"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Circuiti condivisi confrontati e ricontrollati via hash; identità, split, cataloghi e collegamenti raw/aggregati verificati; RAG riservato al train; PD-04 riguarda il mancato ricalcolo numerico in questo controllo."
+    ],
+    "findings": [
+      {
+        "id": "PD-04",
+        "severity": "P2",
+        "lines": [
+          289,
+          355
+        ],
+        "related_lines": [
+          [
+            518,
+            522
+          ]
+        ],
+        "title": "Il controllo raw/aggregati non ricalcola mediana ed eleggibilità",
+        "evidence": "_validate_summary_run_links confronta run_ids, osservazioni e quattro conteggi, ma non ranking_score, score_statistics, complete o eligible_for_ranking, poi tali valori alimentano build_rag_examples.",
+        "reproduction": "Con un raw success score=0.5 e una sola osservazione identica, un aggregato con ranking_score=0.99 ed eligible_for_ranking=True supera _validate_summary_run_links senza eccezioni. Record interamente sintetici in memoria.",
+        "impact": "La verifica autonoma della vista globale non scopre un aggregato numericamente alterato o incoerente. La pipeline dispone però di ricostruzione separata in views.aggregate_runs, sigilli del corpus e controllo più forte in experiment_v2.validate_qiskit_matrix (righe 795–858), che ricalcola la mediana. Questo esempio non dimostra alterazioni delle etichette congelate né supera quei controlli aggiuntivi.",
+        "recommendation": "Riutilizzare un controllo numerico condiviso prima della costruzione globale del RAG, verificando anche statistiche ed eleggibilità rispetto ai raw."
+      }
+    ],
+    "portability": "Dipende dalla struttura di cartelle sperimentale e dai manifest. Non è necessario al caricatore compatto del dimostratore.",
+    "optimization": "Rilegge e serializza molti record e circuiti per dispositivo; riutilizzare identità già verificate solo con un contratto di cache esplicito.",
+    "verdict": "rilievi_confermati",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/catalog.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/catalog.py",
+    "sha256": "dd5b0994a36ef9f082a07670c346e6c6d8d410ccdc8f8ad6ebc9a313e137c6fa",
+    "current_sha256": "dd5b0994a36ef9f082a07670c346e6c6d8d410ccdc8f8ad6ebc9a313e137c6fa",
+    "lines": 289,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        289
+      ]
+    ],
+    "purpose": "Carica dodici configurazioni, tre seed, dispositivi e vincoli del protocollo.",
+    "dependencies": [
+      "__future__",
+      "dataclasses",
+      "json",
+      "pathlib",
+      "re",
+      "scripts.mqt_predictor_protocol",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Identificativi unici, seed interi distinti, default presente, versioni e impronte v2 richieste; oggetto frozen con mappe interne trattate come dati fidati."
+    ],
+    "findings": [],
+    "portability": "JSON locale e Python; catalogo storico deve restare accanto al proprio ambiente.",
+    "optimization": "by_id ricostruisce dodici elementi, costo irrilevante. Rafforzare domini di opzioni e timeout se il catalogo diventa ingresso esterno.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/core.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/core.py",
+    "sha256": "3abb6b19b68d39de8c9985308b64f460181e3af2ca9752bf80c58cedfeff9eca",
+    "current_sha256": "3abb6b19b68d39de8c9985308b64f460181e3af2ca9752bf80c58cedfeff9eca",
+    "lines": 801,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        801
+      ]
+    ],
+    "purpose": "Prepara corpus, split, copie di QASM, manifest e piano dei tentativi.",
+    "dependencies": [
+      "__future__",
+      "catalog",
+      "collections",
+      "hashlib",
+      "importlib",
+      "json",
+      "math",
+      "mqt.bench.targets",
+      "mqt.predictor.ml.helper",
+      "os",
+      "pathlib",
+      "qiskit",
+      "re",
+      "scripts.mqt_predictor_protocol",
+      "shutil",
+      "typing",
+      "zipfile"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Gruppi di famiglie fissi; duplicate alias registrate; controllo hash tra split; Test v2 richiede apertura esplicita; copia mai sovrascritta se incoerente; run_id include contratto di compilazione."
+    ],
+    "findings": [],
+    "portability": "Richiede corpus MQT, dipendenze fissate e percorsi dell’esperimento; il corpus sorgente originale deve essere conservato.",
+    "optimization": "Le feature possono essere estratte una volta e riusate soltanto dopo verifica di versione, sorgente e contratto; scritture JSONL oggi accumulano tutto in memoria.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/experiment_v2.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/experiment_v2.py",
+    "sha256": "aaa7e52ab6694e8f407470a9d39aad5eb216714e89abfc83a3ddb1c56792bdab",
+    "current_sha256": "aaa7e52ab6694e8f407470a9d39aad5eb216714e89abfc83a3ddb1c56792bdab",
+    "lines": 1333,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        1333
+      ]
+    ],
+    "purpose": "Valida piani e risultati dei metodi e costruisce il confronto con oracolo e regret.",
+    "dependencies": [
+      "__future__",
+      "catalog",
+      "collections",
+      "core",
+      "hashlib",
+      "json",
+      "math",
+      "mqt.bench.targets",
+      "os",
+      "pathlib",
+      "random",
+      "scripts.mqt_predictor_protocol",
+      "statistics",
+      "typing",
+      "views"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Universi ordinati e unici; estrazioni casuali prima degli score; matrice Qiskit completa e provenienza verificata; mediane ricalcolate dai raw; oracolo definito soltanto a matrice interamente riuscita; fallimenti e non applicabilità distinti."
+    ],
+    "findings": [
+      {
+        "id": "PD-06",
+        "severity": "P2",
+        "lines": [
+          1296,
+          1314
+        ],
+        "title": "Il riepilogo non dichiara quanti successi contribuiscono alla mediana del regret",
+        "evidence": "regrets esclude i successi con regret_absolute=None, mentre l’oggetto finale espone successes ma non len(regrets). Ciò avviene quando un metodo riesce e l’oracolo è incompleto.",
+        "reproduction": "summarize_results su due record success del medesimo metodo, con regret_absolute rispettivamente 0.0 e None, restituisce successes=2 e median_regret_absolute=0.0 senza un campo che indichi l’unico valore confrontabile. Record sintetici in memoria.",
+        "impact": "Il lettore del solo riepilogo non ricostruisce il denominatore della mediana. I record dettagliati conservano None, quindi l’informazione non è persa nel dato grezzo. Nessuna affermazione sul numero di casi mancanti delle prove correnti.",
+        "recommendation": "Aggiungere comparable_regret_count e missing_oracle_count nei riepiloghi futuri e mostrare il denominatore accanto alla statistica."
+      }
+    ],
+    "portability": "Moduli e artefatti dell’esperimento v2; alcune impronte provengono da costanti locali, quindi non è una libreria generica.",
+    "optimization": "Indicizzare per hash del circuito evita scansioni della matrice per ogni circuito; aggiungere il denominatore specifico del regret senza cambiare statistiche congelate.",
+    "verdict": "rilievi_confermati",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/generation.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/generation.py",
+    "sha256": "0220a36623138bb29969c45a65aadd4d57814011e51362c676680ccca8a5acd4",
+    "current_sha256": "0220a36623138bb29969c45a65aadd4d57814011e51362c676680ccca8a5acd4",
+    "lines": 1019,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        1019
+      ]
+    ],
+    "purpose": "Esegue compilazioni Qiskit, valida i Target e conserva risultati e cache per la ripresa.",
+    "dependencies": [
+      "__future__",
+      "catalog",
+      "collections",
+      "concurrent.futures",
+      "contextlib",
+      "core",
+      "functools",
+      "io",
+      "json",
+      "math",
+      "mqt.bench.targets",
+      "mqt.predictor.reward",
+      "multiprocessing",
+      "pathlib",
+      "qiskit",
+      "qiskit.qasm2",
+      "qiskit.transpiler.passes",
+      "re",
+      "scripts.mqt_predictor_protocol",
+      "signal",
+      "sys",
+      "time",
+      "traceback",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Versioni, Target, seed e politica v2 verificati; pool spawn con coda limitata; errori e timeout hanno fase e diagnostica; PD-02/03/05/09 descrivono i limiti di integrità, conservazione e portabilità."
+    ],
+    "findings": [
+      {
+        "id": "PD-02",
+        "severity": "P1",
+        "lines": [
+          498,
+          501
+        ],
+        "related_lines": [
+          [
+            835,
+            867
+          ]
+        ],
+        "title": "Il QASM eseguito non viene confrontato con l’impronta registrata nel piano",
+        "evidence": "execute_attempt apre direttamente source_path. La sorgente è verificata durante la preparazione, ma non di nuovo quando viene compilata; run_id e circuit.source_sha256 restano quelli del task.",
+        "reproduction": "Eseguito un solo Bell tecnico in TemporaryDirectory, con task.circuit.source_sha256=\"0\"*64, target ibm_falcon_27, optimization_level=2, seed_transpiler=7, num_processes=1, timeout=10s. Esito success e failure=null; record conserva 64 zeri, mentre SHA256 reale del file è 7d44e21c07f288034b521edb642e70a4664d05b87b182d9d3604593e45ceee0b. Nessun record del Dataset usato o scritto.",
+        "impact": "Una modifica fra preparazione ed esecuzione può associare score e circuito compilato a un’identità sorgente sbagliata; il controllo successivo dei soli metadati non la rileva. È un difetto latente, non prova di alterazione dei dati congelati. Il parser del nuovo dimostratore calcola l’hash dell’ingresso reale e non usa questo generatore.",
+        "recommendation": "Leggere i byte una sola volta, confrontarli al digest atteso e compilare il contenuto verificato. Un mismatch deve essere registrato come errore di sorgente."
+      },
+      {
+        "id": "PD-03",
+        "severity": "P2",
+        "lines": [
+          875,
+          889
+        ],
+        "related_lines": [
+          [
+            681,
+            695
+          ],
+          [
+            905,
+            912
+          ],
+          [
+            943,
+            949
+          ]
+        ],
+        "title": "La ripetizione di un run sostituisce l’esito precedente nella cache",
+        "evidence": "retry_failures e force rimettono in coda lo stesso run_id; _persist_record usa sempre lo stesso percorso e atomic_json_write lo sostituisce. Non esiste un identificativo distinto del tentativo fisico o un registro precedente.",
+        "reproduction": "In cache temporanea isolata, _persist_record del medesimo run_id prima con status timeout e poi success lascia un solo JSON, con status success. Esito precedente non più presente.",
+        "impact": "Le opzioni di ripetizione perdono errori, tempi e diagnostica del primo tentativo, impedendo di ricostruire tutti gli esiti. Non è stata invocata alcuna ripetizione sui risultati congelati.",
+        "recommendation": "Conservare ogni esecuzione fisica separatamente e mantenere un indice che indica il risultato scelto per la vista corrente, senza sovrascrivere gli esiti sfavorevoli."
+      },
+      {
+        "id": "PD-05",
+        "severity": "P2",
+        "lines": [
+          349,
+          369
+        ],
+        "related_lines": [
+          [
+            934,
+            938
+          ]
+        ],
+        "title": "Su Windows nativo il timeout dichiarato viene ignorato",
+        "evidence": "Quando signal non espone SIGALRM, _hard_timeout esegue yield senza limite. Il coordinatore attende FIRST_COMPLETED senza una scadenza esterna, quindi non compensa questa assenza.",
+        "reproduction": "Evidenza statica della diramazione not hasattr(signal,\"SIGALRM\") alla riga 352. Nessuna prova lunga o tentativo Windows è stato avviato.",
+        "impact": "L’esportazione diretta del generatore su Windows non conserva la politica temporale registrata. L’ambiente sperimentale Linux/WSL resta il contesto previsto; anche lì SIGALRM non è una garanzia di terminazione immediata durante chiamate native.",
+        "recommendation": "Rifiutare esplicitamente piattaforme senza supporto oppure eseguire ciascun tentativo in un processo sorvegliato dal padre. Non dichiarare equivalenza temporale senza misurarla."
+      },
+      {
+        "id": "PD-09",
+        "severity": "P2",
+        "lines": [
+          384,
+          399
+        ],
+        "related_lines": [
+          [
+            538,
+            542
+          ],
+          [
+            593,
+            601
+          ]
+        ],
+        "title": "Il controllo del Target intercetta il timeout e lo riclassifica come errore del circuito",
+        "evidence": "validate_compiled_circuit cattura Exception durante GatesInBasis e CheckMap. Anche AttemptTimeoutError generato da SIGALRM appartiene a questa classe: viene trasformato in validation_errors. execute_attempt riceve allora is_executable_on_target=False e genera TargetValidationError, registrando failure/target_invalid invece di timeout.",
+        "reproduction": "Con circuito e Target minimi in memoria, patch di qiskit.transpiler.passes.GatesInBasis per sollevare AttemptTimeoutError(\"synthetic deadline\"). validate_compiled_circuit restituisce basis_valid=null, connectivity_valid=true, validation_errors=[\"GatesInBasis:AttemptTimeoutError:synthetic deadline\"], is_executable_on_target=false, senza propagare la scadenza. Nessuna compilazione o attesa reale in questa riproduzione.",
+        "impact": "Una scadenza durante il controllo della base o della mappa viene classificata in modo errato nei registri. Non è stato cercato né affermato un caso concreto tra i risultati congelati.",
+        "recommendation": "Propagare esplicitamente AttemptTimeoutError prima degli except Exception generici, mantenendo la distinzione tra scadenza e Target realmente non valido."
+      }
+    ],
+    "portability": "La scadenza usa SIGALRM/ITIMER_REAL e non è applicata su Windows nativo; chiamate native lunghe possono differire il segnale anche su POSIX. Usare l’ambiente Linux previsto.",
+    "optimization": "Una futura versione dovrebbe usare un processo sorvegliato per tentativo, registri append-only e verifica della sorgente immediatamente prima del parse.",
+    "verdict": "rilievi_confermati",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/reporting.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/reporting.py",
+    "sha256": "a8a9eb3a641716b2b979edd691dccb83bdaf7983b8759cad8cc518d216180535",
+    "current_sha256": "a8a9eb3a641716b2b979edd691dccb83bdaf7983b8759cad8cc518d216180535",
+    "lines": 1099,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        1099
+      ]
+    ],
+    "purpose": "Genera riepiloghi, CSV e confronti dei dispositivi conservando fallimenti e censura dei tempi.",
+    "dependencies": [
+      "__future__",
+      "catalog",
+      "collections",
+      "core",
+      "csv",
+      "generation",
+      "io",
+      "json",
+      "math",
+      "pathlib",
+      "statistics",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Tempi dei soli successi dichiarati; conteggi attesi e osservati separati; politiche miste segnalate; intersezione dei circuiti resa esplicita; diagnosi di timeout distingue osservazioni e inferenze."
+    ],
+    "findings": [],
+    "portability": "Python e file locali; ricostruisce la diagnosi per record storici privi di campi nuovi.",
+    "optimization": "Il confronto rilegge dati e report di ogni dispositivo: riutilizzarli in memoria evita I/O ripetuto. I report riassumono, non sostituiscono una verifica di integrità.",
+    "verdict": "letto_integralmente_nessun_difetto_specifico_confermato",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  },
+  {
+    "path": "qiskit_dataset/views.py",
+    "current_path": "archivio/esperimento_v2/qiskit_dataset/views.py",
+    "sha256": "e9a923ce905134b072e35d86ce41b1629caeb1aeb353daedc4c6d120b66eda22",
+    "current_sha256": "e9a923ce905134b072e35d86ce41b1629caeb1aeb353daedc4c6d120b66eda22",
+    "lines": 1082,
+    "manual_or_static": "manual_full",
+    "manual_ranges": [
+      [
+        1,
+        1082
+      ]
+    ],
+    "purpose": "Riunisce i tre seed, ordina le configurazioni e costruisce etichette RAG train.",
+    "dependencies": [
+      "__future__",
+      "catalog",
+      "collections",
+      "core",
+      "json",
+      "math",
+      "pathlib",
+      "reporting",
+      "scripts.mqt_predictor_protocol",
+      "statistics",
+      "typing"
+    ],
+    "dependency_notes": "Importazioni confrontate durante la lettura integrale; i nomi relativi conservano la grafia del sorgente.",
+    "invariants": [
+      "Eleggibilità richiede tutti i seed riusciti; alias duplicati esclusi; mediana e osservazioni conservate; vincitore seguito da tre configurazioni del suo dispositivo; nessuno score del nuovo ingresso."
+    ],
+    "findings": [
+      {
+        "id": "PD-07",
+        "severity": "P3",
+        "lines": [
+          571,
+          580
+        ],
+        "related_lines": [
+          [
+            420,
+            426
+          ],
+          [
+            633,
+            641
+          ],
+          [
+            701,
+            710
+          ]
+        ],
+        "title": "Il testo delle parità usa un criterio diverso dall’ordinamento",
+        "evidence": "La scelta ordina lo score esatto; le liste tied_* usano math.isclose(rel_tol=1e-12,abs_tol=1e-15). Se un dispositivo successivo nel catalogo ha score appena maggiore ma entro tolleranza, vince per score, mentre selection_reason e testo sostengono che abbia vinto il tie-break del catalogo.",
+        "reproduction": "Evidenza aritmetica: con ordine [A,B], score A=0.5 e B=0.5000000000001, la chiave (-score,ordine) seleziona B; math.isclose considera entrambi pari e attiva il ramo tie_break_catalog_order. Non sono stati letti score sperimentali per cercare casi reali.",
+        "impact": "Possibile spiegazione inesatta della regola di scelta per score quasi uguali; non altera la scelta numerica già congelata.",
+        "recommendation": "Distinguere parità esatta, che attiva il tie-break, da equivalenza numerica entro tolleranza nel testo e nei metadati futuri."
+      }
+    ],
+    "portability": "Dipende dalla struttura dei manifest e dai cataloghi. Le etichette storiche devono restare congelate anche se si corregge il testo delle parità in seguito.",
+    "optimization": "Dimensioni attuali gestibili; mantenere ordine deterministico e separazione train/validation/test in ogni refactoring.",
+    "verdict": "rilievi_confermati",
+    "review_date": "2026-09-21",
+    "source_unchanged": true
+  }
+]

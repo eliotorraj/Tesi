@@ -1,0 +1,18 @@
+{
+  "manual_coverage": {
+    "files_expected": 147,
+    "files_reviewed": 147,
+    "current_lines": 34625,
+    "errors": [],
+    "passed": true,
+    "experiment_or_model_executed": false
+  },
+  "links_checked": 241,
+  "missing_links": [],
+  "frozen_sources_modified": false,
+  "vscode_user_change_preserved": true,
+  "new_findings": 25,
+  "previous_findings": 2,
+  "new_python_files_syntax": "passed",
+  "heavy_operations": "Qwen inference and Graphify update left to user"
+}

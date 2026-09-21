@@ -1,0 +1,24 @@
+# Il grafo descrive il codice e i documenti, non ogni copia degli esperimenti.
+# Nessun file viene cancellato: sono esclusioni solo per Graphify.
+/.codex/
+/.workspace_archive/
+/.venv/
+/graphify-out/
+/tesi/
+/build/
+**/__pycache__/
+**/node_modules/
+**/code_snapshots/
+**/runtime/
+**/runs/
+/prototipo/data/
+/prototipo/prototype/prompting/toon_runtime/vendor/
+/archivio/esperimento_v2/artifacts/
+/archivio/esperimento_v2/datasets/
+/archivio/esperimento_v2/archivio/protocollo_v1/datasets/
+/archivio/esperimento_v2/archivio/sviluppo/
+# Inventari macchina voluminosi; i relativi README e rapporti restano inclusi.
+/archivio/riorganizzazione_2026_09_20/git_move_inventory.json
+/archivio/riorganizzazione_2026_09_20/publication_inventory.json
+/archivio/riorganizzazione_2026_09_20/revisione_script/inventario_storico.json
+/archivio/riorganizzazione_2026_09_20/revisione_script/duplicati_storici.json

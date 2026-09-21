@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-21",
+  "delivery_branch": "riorganizzazione-prototipo",
+  "manual_review_complete": true,
+  "original_scripts": 147,
+  "newly_completed": 133,
+  "lines_reviewed_current": 34625,
+  "frozen_source_sha256_unchanged": true,
+  "reported_defects_all_fixed": false,
+  "historical_results_recomputed": false,
+  "experimental_test_opened": false,
+  "graphify_update_performed_by_assistant": false,
+  "qwen_inference_performed_by_assistant": false,
+  "user_commands": "prototipo/docs/comandi_verifica_manuale.md",
+  "user_owned_vscode_settings_preserved": true,
+  "pending": [
+    "user_graphify_update",
+    "user_real_Qwen_startup_and_technical_run",
+    "future_fixes_of_documented_operational_defects_before_reuse_or_Test",
+    "laptop_memory_and_latency_measurements",
+    "official_v2_selection_and_prerequisites_in_Test_release"
+  ]
+}

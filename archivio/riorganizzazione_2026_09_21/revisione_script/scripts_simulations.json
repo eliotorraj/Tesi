@@ -1,0 +1,56 @@
+{
+  "S02_jsonl_partial_tail": {
+    "raw": "{\"key\":\"interrotto\"{\"attempt\": 1, \"key\": \"nuovo|device\", \"status\": \"success\"}\n",
+    "attempts": {},
+    "statuses": {},
+    "new_record_lost": true
+  },
+  "S04_timeout_not_in_cache_key": {
+    "recorded_timeout": 300,
+    "recorded_duration": 150,
+    "requested_timeout_in_followup": 100,
+    "provenance_accepted": true,
+    "function_has_timeout_parameter": false
+  },
+  "S03_pending_worker_results": {
+    "persisted_statuses": [
+      "running",
+      "worker_crash"
+    ],
+    "unread_messages": [
+      {
+        "type": "result",
+        "key": "toy|device",
+        "status": "success"
+      },
+      {
+        "type": "done"
+      }
+    ],
+    "real_process_started": false
+  },
+  "S05_qcompile_eof": {
+    "exception": "EOFError",
+    "terminal_record_returned": false,
+    "real_process_started": false
+  },
+  "S07_stale_canary_gate": {
+    "accepted": true,
+    "canary_model_hash": "outdated",
+    "current_model_hash_compared": false,
+    "test_release_executed": false
+  },
+  "S08_restart_overwrites_episode_log": {
+    "restart_guard_accepted": true,
+    "old_episode_data_retained": false,
+    "actual_sb3_writer_only": true,
+    "training_executed": false
+  },
+  "S10_provenance_bindings": {
+    "rl_errors": [],
+    "ml_errors": [],
+    "nonmatching_manifest_accepted": true,
+    "nonmatching_rl_policy_reference_accepted": true,
+    "models_loaded": false
+  }
+}

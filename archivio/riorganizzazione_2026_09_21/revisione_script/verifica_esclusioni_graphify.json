@@ -1,0 +1,55 @@
+{
+  "method": "installed graphify.detect.ignored_predicate, no corpus scan or graph update",
+  "checks": [
+    {
+      "path": "prototipo/app.py",
+      "expected_excluded": false,
+      "observed_excluded": false
+    },
+    {
+      "path": "prototipo/docs/protocollo_sperimentale.md",
+      "expected_excluded": false,
+      "observed_excluded": false
+    },
+    {
+      "path": "archivio/esperimento_v2/scripts/03_train_rl_model.py",
+      "expected_excluded": false,
+      "observed_excluded": false
+    },
+    {
+      "path": "archivio/esperimento_v2/tests/test_llm_selection.py",
+      "expected_excluded": false,
+      "observed_excluded": false
+    },
+    {
+      "path": "archivio/esperimento_v2/knowledge/riassunto_kb_mqt_predictor.md",
+      "expected_excluded": false,
+      "observed_excluded": false
+    },
+    {
+      "path": "archivio/esperimento_v2/artifacts/experiments/x/code_snapshots/y/run.py",
+      "expected_excluded": true,
+      "observed_excluded": true
+    },
+    {
+      "path": "archivio/esperimento_v2/datasets/example.json",
+      "expected_excluded": true,
+      "observed_excluded": true
+    },
+    {
+      "path": "prototipo/runtime/node/include/node/node.h",
+      "expected_excluded": true,
+      "observed_excluded": true
+    },
+    {
+      "path": ".workspace_archive/old.py",
+      "expected_excluded": true,
+      "observed_excluded": true
+    },
+    {
+      "path": "prototipo/data/manifest.json",
+      "expected_excluded": true,
+      "observed_excluded": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Tesi — LLM e compilazione quantistica
 
-**Stato al 20 settembre 2026 — branch di lavoro `riorganizzazione-prototipo`:** validation ufficiale v2 conclusa; modello
+**Stato al 21 settembre 2026 — branch di lavoro `riorganizzazione-prototipo`:** validation ufficiale v2 conclusa; modello
 selezionato **Qwen3.5-4B Q8_0, temperatura 0**. Il Test resta chiuso.
 
 ## Le due aree del progetto
@@ -32,11 +32,12 @@ i pesi esterni e la tesi locale vanno trasferiti separatamente.
 La [documentazione del riordino](archivio/riorganizzazione_2026_09_20/README.md)
 conserva spostamenti, verifiche e limiti.
 
-## Limite della prima consegna
+## Stato delle verifiche
 
 Il recupero, i controlli e la compilazione sono verificati senza LLM. La prova
 reale Qwen non è conclusa: il controllore Windows è rimasto bloccato prima del
 server, senza chiamate al modello. Consultare gli [esiti tecnici](prototipo/docs/verifica_tecnica.json).
-Il portatile non è stato misurato. La revisione manuale degli script è ancora
-parziale. `main` conserva il salvataggio precedente al riordino fino alla
+Il portatile non è stato misurato. La [revisione manuale dei 147 script](archivio/riorganizzazione_2026_09_21/revisione_script/README.md) è completata: i difetti rilevati sono documentati e restano da correggere nella prossima versione operativa. `main` conserva il salvataggio precedente al riordino fino alla
 chiusura di questi controlli.
+
+I [comandi per aggiornare Graphify e provare Qwen](prototipo/docs/comandi_verifica_manuale.md) sono pronti per l’esecuzione manuale.
