@@ -1,25 +1,7 @@
-# Messaggi e risposte del modello
+# Prompt, TOON e risposta facts v4
 
-Questa cartella prepara le informazioni inviate al modello e controlla la
-sua proposta. L'ingresso usa TOON; la risposta usa JSON con contratto v4.
-Il testo distingue fatti verificabili e ipotesi libera sulla scelta.
+`minimal.py` costruisce la vista del circuito, dei Target e degli esempi train. `toon.py` la codifica tramite il codec ufficiale e controlla che la decodifica ricostruisca gli stessi dati. `facts.py` prepara le istruzioni, definisce lo schema v4 e verifica coppia e fatti dichiarati dal modello.
 
-| File o cartella | Funzione |
-| --- | --- |
-| [minimal.py](minimal.py) | Ricava la vista essenziale dai dati completi e assegna agli esempi gli alias E1–E5. Conserva anche lo schema v3 usato dal documento intermedio. |
-| [facts.py](facts.py) | Costruisce il messaggio corrente, applica lo schema v4 e verifica coppia e fatti dichiarati. |
-| [toon.py](toon.py) | Organizza caratteristiche e collegamenti in TOON; controlla che la decodifica ricostruisca esattamente la vista iniziale. |
-| [toon_runtime/](toon_runtime/README.md) | Contiene il collegamento all'encoder ufficiale e i file che ne fissano la versione. |
+La risposta contiene dispositivo, configurazione, uno o due fatti e un'ipotesi libera. Il comando può chiedere fino a tre risposte complete. Al terzo tentativo una coppia strutturalmente valida e ammessa può essere accettata con fatti non verificati, registrandolo. L'ipotesi libera non riceve una certificazione semantica.
 
-QASM, provenienza completa e registro delle evidenze restano nei dati locali.
-Il modello riceve caratteristiche del circuito, hardware compatibile,
-configurazioni ammesse e fino a cinque esempi train. I nomi dei dispositivi
-restano leggibili; E1–E5 identificano soltanto gli esempi nella richiesta.
-
-La revisione corrente è `facts-v4-toon3-20260919`. La gestione dei tentativi
-successivi è in [app.py](../../app.py). L'ipotesi scritta in linguaggio
-naturale non viene certificata dal verificatore.
-
-La [guida](../../docs/guida_passo_passo.md) descrive l'installazione.
-[Architettura e flusso](../../docs/architettura_e_flusso.md) spiega la
-trasformazione dei dati, le regole dei fatti e l'accettazione dopo le correzioni.
+`toon_runtime/` richiede Node.js 22 e installazione npm dal lock. Lo prepara `setup.sh` su Linux. La stessa preparazione Python/TOON serve sia al percorso CPU sia al client del fisso: il server llama.cpp è separato. Per il dettaglio leggere [architettura e flusso](../../docs/architettura_e_flusso.md).

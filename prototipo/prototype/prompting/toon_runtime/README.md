@@ -1,16 +1,7 @@
-# Encoder TOON
+# Codec TOON per il client
 
-Questa cartella permette ai moduli Python di usare l'encoder ufficiale
-`@toon-format/toon`, fissato alla versione **4.1.1**.
+`codec.mjs` collega Python al pacchetto ufficiale `@toon-format/toon` 4.1.1. `package.json` e `package-lock.json` fissano la dipendenza; `node-lock.json` conserva i riferimenti del runtime. `node_modules/` viene installata localmente e non è nel clone.
 
-| Contenuto | Funzione |
-| --- | --- |
-| [codec.mjs](codec.mjs) | Riceve una richiesta JSON da Python e restituisce il testo TOON e i dati decodificati, oppure decodifica un testo TOON. |
-| [package.json](package.json) e [package-lock.json](package-lock.json) | Fissano la dipendenza JavaScript e la sua installazione riproducibile. |
-| [node-lock.json](node-lock.json) | Conserva versione e riferimenti del runtime Node usato per predisporre l'encoder. |
-| `node_modules/` | Dipendenze installate localmente; non sono sorgenti da versionare. |
+Sono richiesti Node.js 22 e npm. Il setup Linux esegue `npm ci --ignore-scripts` e `app.py check` verifica un ciclo di codifica/decodifica. Node deve essere raggiungibile nel terminale del client, anche quando Qwen gira su un altro sistema operativo. In alternativa `PROTOTIPO_NODE` può indicare un eseguibile Node 22 Linux.
 
-[toon.py](../toon.py) richiede Node.js 22 e confronta i dati prima e dopo la
-codifica. Se i valori cambiano, la richiesta al modello viene fermata.
-L'installazione si esegue con le procedure generali della
-[guida](../../../docs/guida_passo_passo.md).
+Seguire la [guida del prototipo](../../../docs/guida_passo_passo.md). La codifica conserva tutte le caratteristiche previste; non è un modo per tagliare il prompt quando la RAM o il contesto sono insufficienti.

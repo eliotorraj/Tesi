@@ -1,130 +1,92 @@
-# Installazione, profili e registri
+# Installazione, server e profili
 
-Impostazioni ricavate dagli avviatori e dalla configurazione distribuiti. Aggiornamento: 25 settembre 2026.
+Per la sequenza completa usare la [guida passo passo](guida_passo_passo.md). Questo documento spiega quali impostazioni cambiano tra CPU, GPU Linux e fisso WSL/Windows.
 
-## Preparazione Windows
+## Componenti distinti
 
-Servono Python **3.12** (con launcher `py`) e Node.js **22**. Copiare tutta la
-cartella sul computer, inclusi `runtime/cpu/` e il GGUF se gia disponibili.
-Gli ambienti Python, gli indici e i registri non vanno copiati da Linux a Windows.
-Ricrearli con:
+Il **client Python** estrae caratteristiche, recupera il Dataset train, costruisce il prompt e compila con Qiskit. `setup.sh` prepara Python 3.12 e le versioni di `requirements.txt`, installa il codec TOON 4.1.1 con Node.js 22/npm e verifica l'indice. Può usare Python fornito da uv. Non installa Torch, CUDA o modelli MQT.
 
-```powershell
-cd C:\percorso\prototipo
-.\setup.ps1 -RuntimeProfile cpu
-# Se il runtime non e stato copiato:
-.\setup.ps1 -RuntimeProfile cpu -DownloadRuntime
+Il **server llama.cpp** carica Qwen e risponde via HTTP locale. Si compila separatamente per CPU o per il backend della GPU. `server.py` avvia un eseguibile Linux; gli script `.ps1` rimangono gli avviatori Windows. Non copiare `.venv` o un eseguibile compilato per un altro sistema operativo.
+
+I pesi distribuiti separatamente sono Qwen3.5-4B Q8_0, 4.482.403.488 byte, SHA-256 `10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1`. Revisioni e URL sono in `config.json`; il campo `local_path` conserva provenienza, mentre il percorso operativo è quello passato all'avviatore. La [guida](guida_passo_passo.md#a5-procurarsi-il-gguf-esatto) mostra il download.
+
+## Profili concordati fra server e client
+
+| Profilo | Uso | Contesto | Batch / microbatch | Accelerazione |
+| --- | --- | ---: | --- | --- |
+| `cpu` | Prima prova su Linux senza GPU | 16.384 | 128 / 64 | Nessuna; device `none`, zero strati GPU |
+| `gpu` | Prima prova con GPU Linux compatibile | 16.384 | 128 / 64 | Strati su GPU, selezionabili |
+| `desktop` | Fisso o macchina adeguata al contesto completo | 60.000 | 512 / 128 | GPU |
+| `laptop` | Nome accettato dal client per l'avviatore Windows CPU | 16.384 | 128 / 64 nel relativo `.ps1` | CPU |
+
+Tutti mantengono pesi Q8_0, temperatura 0, cache q8_0 e massimo 4.096 token di risposta. Scegliere lo stesso profilo nel server Linux e in `app.py run`. Il client non reimposta il contesto del server. Se input e budget di risposta eccedono il limite, interrompe prima della generazione senza tagliare esempi.
+
+`--transport native` collega al server Linux, anche se Linux è in WSL. `--transport windows` usa `curl.exe` da WSL verso il server Windows. `auto`, valore predefinito mantenuto per gli avvii esistenti, sceglie Windows in WSL e HTTP nativo altrove. Le guide specificano il trasporto per evitare ambiguità.
+
+## Memoria e tempi sulla CPU
+
+Occorrono almeno 16 GB installati per tentare la prova ridotta. Il controllo Linux legge `MemAvailable` da `/proc/meminfo`: richiede 9 GiB liberi prima dell'avvio CPU e arresta il proprio server dopo tre rilevazioni consecutive sotto 2 GiB. In WSL questi valori riguardano la macchina virtuale. Lo swap non viene conteggiato come RAM.
+
+I soli pesi occupano circa 4,18 GiB; cache, calcolo, client e sistema richiedono altro spazio. Il margine è prudenziale e non certifica che ogni richiesta entri in memoria. Anche un circuito piccolo può generare un prompt lungo per il catalogo e gli esempi. La guida limita esplicitamente i candidati a Falcon 27 per iniziare. Il profilo desktop a 60.000 token non è il percorso CPU proposto per 16 GB.
+
+Il timeout HTTP predefinito del client è 600 secondi; la prima prova CPU usa esplicitamente 3.600. La durata effettiva dipende dalla macchina e non è garantita. Una GPU compatibile è consigliata soprattutto per ridurre l'attesa nella lettura del prompt.
+
+## GPU su Linux
+
+La GPU deve essere visibile al backend di llama.cpp, con driver adeguati. I nomi AMD del fisso non vengono incorporati nell'avviatore Linux. Per AMD/Intel/NVIDIA compatibili si può usare **Vulkan**; con NVIDIA è disponibile anche **CUDA**. Questi backend e le istruzioni di compilazione sono documentati nel [progetto llama.cpp](https://github.com/ggml-org/llama.cpp/blob/b10930/docs/build.md).
+
+Per Vulkan, su Ubuntu/Debian, dopo i prerequisiti della guida:
+
+```bash
+sudo apt install libvulkan-dev glslc spirv-headers vulkan-tools
+vulkaninfo --summary
+cmake -S runtime/llama.cpp -B runtime/llama.cpp/build-vulkan \
+  -DCMAKE_BUILD_TYPE=Release -DGGML_VULKAN=ON
+cmake --build runtime/llama.cpp/build-vulkan --config Release --target llama-server -j 2
+.venv/bin/python -B server.py \
+  --bin runtime/llama.cpp/build-vulkan/bin/llama-server --list-devices
 ```
 
-Lo script installa le dipendenze CPU fissate in `requirements.txt`. Non installa
-Torch, CUDA, ROCm, OpenVINO o software NPU. Il server CPU non usa la GPU integrata
-ne la NPU. Il runtime e [llama.cpp b10930](https://github.com/ggml-org/llama.cpp/releases/tag/b10930).
-Il codec TOON ufficiale 4.1.1 viene installato da setup tramite npm ci, usando il package-lock.json distribuito. La sua licenza resta nel pacchetto installato.
-Per il desktop usare `-RuntimeProfile desktop`; questo profilo richiede il
-runtime Vulkan e PsSuspend gia verificato, e conserva i controlli termici AMD.
-`-DownloadRuntime` autorizza solo questi piccoli runtime, mai i pesi del modello.
+Prima occorre aver clonato llama.cpp come nel passo A4. I pacchetti di sviluppo non installano automaticamente un driver adatto a ogni scheda: se `vulkaninfo` mostra soltanto un renderer software, non si sta usando la GPU fisica. In WSL verificare anche il supporto del backend nella propria configurazione; sul fisso il percorso Windows già funzionante rimane disponibile.
 
-Il modello selezionato e `Qwen3.5-4B-Q8_0.gguf`, **4.482.403.488 byte**, SHA256:
-`10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1`.
-La [revisione GGUF precisa](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/tree/e87f176479d0855a907a41277aca2f8ee7a09523)
-e registrata anche in `config.json`. Copiare il file esistente sul laptop,
-per esempio in `runtime/models/Qwen3.5-4B-Q8_0.gguf`: non serve riscaricarlo.
-Il server ne verifica dimensione e SHA256 prima di avviarsi.
+L'elenco di llama.cpp mostra gli identificativi utilizzabili, per esempio `Vulkan0`. Sono esempi, non nomi universali: scegliere quello realmente restituito dalla propria macchina con `--device`. Per una prima prova GPU, da `prototipo/`:
 
-## Avvio e utilizzo
-
-In una finestra PowerShell, avviare uno dei due server:
-
-```powershell
-# Laptop Intel Ultra 7 155H, RAM 16 GB:
-.\server-laptop.ps1 -ModelPath C:\modelli\Qwen3.5-4B-Q8_0.gguf
-# Desktop AMD attuale:
-.\server-desktop.ps1 -ModelPath D:\modelli\Qwen3.5-4B-Q8_0.gguf
+```bash
+.venv/bin/python -B server.py \
+  --bin runtime/llama.cpp/build-vulkan/bin/llama-server \
+  --model runtime/models/Qwen3.5-4B-Q8_0.gguf --profile gpu
 ```
 
-Il processo di inferenza parte nascosto. Lasciare aperta la finestra del
-controllore; Ctrl+C termina il server che essa ha avviato. I registri server
-sono nella cartella stampata all'avvio (`-RunRoot` permette di sceglierla).
-In una seconda finestra, dopo che il server risponde:
+Nel secondo terminale:
 
-```powershell
-.\.venv\Scripts\python.exe app.py check
-.\.venv\Scripts\python.exe app.py run examples/bell.qasm --profile laptop --device ibm_falcon_27
-.\.venv\Scripts\python.exe app.py run examples/bell.qasm --profile laptop --device ibm_falcon_27 --compile
+```bash
+curl --fail http://127.0.0.1:8089/health
+.venv/bin/python -B app.py run examples/bell.qasm \
+  --profile gpu --transport native --timeout 3600 --device ibm_falcon_27 --compile
 ```
 
-L'esempio laptop limita esplicitamente il confronto a IBM Falcon 27; il budget
-di contesto della richiesta completa con cinque dispositivi non e garantito.
-Per il desktop sostituire `laptop` con `desktop` e omettere il vincolo se desiderato. `--device ibm_falcon_27`
-limita i candidati; l'opzione e ripetibile. La risposta riporta tutti i parametri
-proposti per `qiskit.compiler.transpile`. `--compile` applica la proposta con
-`seed_transpiler=0`, modificabile con `--seed-transpiler`.
-Il Bell incluso e un circuito tecnico creato appositamente, non appartiene
-alla valutazione sul test.
+L'avviatore richiede tutti gli strati sulla GPU; con memoria video insufficiente si può scegliere un numero inferiore con `--gpu-layers N`, trasferendo altro lavoro alla CPU e alla RAM. Non esiste una soglia VRAM garantita per tutte le GPU: verificare allocazioni e strati effettivamente caricati in `stderr.log`. Passare a `desktop` su entrambi i comandi solo con memoria sufficiente per il contesto maggiore.
 
-In WSL/Linux sono disponibili `setup.sh` e gli stessi comandi `app.py`.
-Per lo sviluppo locale e possibile usare `../.venv/bin/python app.py ...`;
-questa comodita non e una dipendenza del prototipo. In WSL, le chiamate al
-server Windows passano da `curl.exe`; su Windows nativo usano HTTP Python.
+Per CUDA occorrono driver NVIDIA e CUDA Toolkit compatibili; la guida non li installa automaticamente. Con questi prerequisiti usare una directory separata:
 
-## Profili e memoria
+```bash
+cmake -S runtime/llama.cpp -B runtime/llama.cpp/build-cuda \
+  -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON
+cmake --build runtime/llama.cpp/build-cuda --config Release --target llama-server -j 2
+```
 
-| Impostazione | Desktop GPU | Laptop CPU |
-| --- | --- | --- |
-| Pesi | Q8_0 | Q8_0 |
-| Temperatura | 0 | 0 |
-| Contesto totale | 60.000 token | 16.384 token |
-| Massimo output | 4.096 token | 4.096 token |
-| Cache KV | q8_0 | q8_0 |
-| Batch / microbatch | 512 / 128 | 128 / 64 |
-| Thread | 6 | 6, modificabili |
+Passare poi `runtime/llama.cpp/build-cuda/bin/llama-server` a `--bin`. `--list-devices` e `--device` funzionano attraverso il backend, senza nomi fissi di schede. L'avviatore registra versione, impronta dell'eseguibile, dispositivi esposti e argomenti. L'interfaccia è quella del [server llama.cpp b10930](https://github.com/ggml-org/llama.cpp/blob/b10930/tools/server/README.md).
 
-Il profilo laptop e una **prova tecnica diversa dal profilo sperimentale**.
-Non dimostra le stesse prestazioni o la stessa qualita osservata sul desktop.
-Il prompt conserva cinque esempi e tutte le caratteristiche: se input piu
-4.096 token supera il contesto, il programma si ferma prima della generazione.
-Non accorcia silenziosamente circuito o esempi. Circuiti con grandi Target
-possono quindi superare il profilo laptop.
+## Sensori e avviatori del fisso
 
-Budget prudenziale stimato, non misurato sul laptop: circa 4,18 GiB per i
-pesi, 1-3 GiB per cache e calcolo, 1-2 GiB per Python/Qiskit/Qdrant, oltre a
-Windows e alle altre applicazioni. Prima dell'avvio si richiedono 9 GiB liberi;
-il server viene fermato dopo tre campioni con meno di 2 GiB disponibili.
-Questi margini non garantiscono che ogni circuito entri nei 16 GB. Il contesto
-60.000 non e proposto come avvio CPU sicuro su quella macchina. I registri
-misurano memoria e tempi effettivi per correggere la stima dopo la prima prova.
+`server-desktop.ps1`, `server-desktop-internal.ps1`, `server-laptop.ps1`, `setup.ps1` e `verify-model.ps1` sono conservati. Il percorso desktop dipende da Windows, Vulkan, PsSuspend verificato e `AmdSensors.cs`; le soglie termiche sono quelle della macchina configurata. Non sono impostazioni da copiare indistintamente su un'altra scheda.
 
-## Dati, verifiche e limiti
+Il nuovo `server.py` Linux usa il rilevamento GPU del backend e controlla la RAM disponibile. **Non misura temperatura, consumo o memoria GPU e non implementa la pausa termica AMD.** Il log lo dichiara. Le protezioni del driver restano attive, ma non equivalgono al monitor applicativo del fisso. Per misure o pause termiche su altre GPU serve un adattatore appropriato ai sensori esposti dal sistema; non occorre modificare gli script personali per una prima prova Linux.
 
-`data/` contiene i 396 esempi train unici e i loro QASM, il manifest con le 422 sorgenti train,
-la trasformazione originale e il catalogo originale. Nessun risultato
-validation/test viene letto. I dati, gli schemi e i cataloghi hanno sigilli
-SHA256 controllati prima del recupero. I cinque Target sintetici vengono
-ricostruiti da MQT Bench e confrontati con le impronte originali.
+## Controlli e registri
 
-Il recupero usa Qdrant locale, 49 caratteristiche, trasformazione ricavata
-solo dal train e distanza Manhattan. Tutti i candidati filtrati vengono
-ordinati con distanza float64 e identificativo: stessa regola del congelato.
-L'indice derivato viene ricreato in `runtime/rag/` per il sistema corrente.
+`server.py --dry-run` con gli stessi argomenti dell'avvio verifica GGUF, eseguibile e margine RAM, poi mostra il comando senza caricare Qwen. `--list-devices` non richiede pesi. `/health` con `status: ok` conferma che il server è pronto; `app.py check` conferma soltanto client e dati.
 
-Il client contiene le sole funzioni di estrazione tratte da MQT Predictor
-2.4.0 sotto licenza MIT. Non carica ne addestra modelli MQT. Il catalogo runtime
-limita il controllo delle dipendenze allo stack realmente necessario;
-il catalogo originario resta in `data/catalog_original.json`. Questi
-adattamenti rendono il prototipo portabile, senza riscrivere l'esperimento.
+I log Linux sono in `runtime/server-runs/<id>/`: `launch.json`, `stdout.log`, `stderr.log`, `resources.jsonl` ed `exit.json`. Il controllore termina solo il processo che ha avviato. I `.ps1` stampano la propria destinazione Windows. I registri del client sono invece in `runs/`, con input, prompt, risposte, verifiche e compilazione.
 
-Ogni esecuzione crea una cartella nuova in `runs/`: input, provenienza, versioni,
-prompt, esempi recuperati, token, risposte grezze, controlli, errori e tempi.
-La compilazione facoltativa aggiunge `compiled.qasm` e i controlli di base e
-connettivita. Le nuove scelte non ricevono score di valutazione nel prompt.
-I risultati sono prove tecniche del prototipo, non risultati di generalizzazione.
-
-Vedere [guida passo passo](guida_passo_passo.md) e
-[protocollo sperimentale](protocollo_sperimentale.md).
-
-
-## Verifiche e risultati precedenti
-
-`app.py check` controlla Python, versioni richieste, Target, dati train e codec TOON. Non contatta il server e non esegue la batteria di sviluppo. La disponibilità del server si verifica con `/health`; gli avviatori controllano i pesi.
-
-Le verifiche complete sono in [archivio/valutazione/verifiche_prototipo](../../archivio/valutazione/verifiche_prototipo/README.md). I registri precedenti sono conservati in archivio; per lo stato degli esperimenti leggere il protocollo corrente.
+La prova CPU o GPU su un'altra macchina non garantisce risultati e tempi identici a una campagna scientifica. Per tali confronti conservare risorse, software, contesto e criteri nel [kit di riproducibilità](../../riproducibilita/README.md).

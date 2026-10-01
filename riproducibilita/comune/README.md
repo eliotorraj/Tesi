@@ -1,5 +1,13 @@
-# Componenti condivisi
+# Componenti condivisi del kit
 
-`settings.py` risolve i percorsi e protegge i contratti; `corpus.py` congela gli ingressi; `processi.py` isola le compilazioni; `llm.py` gestisce modelli e registri; `relazioni.py` genera report; `esporta.py` produce il nuovo prototipo; `controlli.py` verifica l’installazione.
+| Modulo | Responsabilità |
+| --- | --- |
+| `settings.py` | Risolve percorsi, configurazione, output e contratti. |
+| `corpus.py` | Verifica e congela i circuiti. |
+| `processi.py` | Isola i lavori e conserva timeout, errori e riprese. |
+| `llm.py` | Controlla identità del server, esegue decisioni e raccoglie misure. |
+| `relazioni.py` | Genera documenti e tabelle dai risultati salvati. |
+| `esporta.py` | Costruisce un prototipo autonomo con train e configurazione selezionata. |
+| `controlli.py` | Verifica l'installazione del kit. |
 
-`framework/` è la copia riutilizzabile dei moduli dell’assistente, adattata al kit. `scripts/` conserva gli aiutanti MQT derivati dal progetto originale. `template_export/` contiene il supporto minimo per i prototipi generati. Non sono collegamenti al prototipo esistente e non importano codice dall’archivio.
+`framework/` contiene i moduli dell'assistente usati dal kit; `scripts/` il supporto MQT; `template_export/` i componenti per i prototipi generati. Non sono collegamenti al prototipo distribuito o all'archivio. Il trasporto è `native` per server Linux e `windows` per il server del fisso raggiunto da WSL. Vedere la [mappa del flusso](../documentazione/mappa.md).

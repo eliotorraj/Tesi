@@ -1,24 +1,7 @@
-# Libreria dell'assistente
+# Strutture e operazioni del framework
 
-Questa cartella descrive le informazioni scambiate dal prototipo e raccoglie
-le operazioni che leggono il circuito, selezionano l'hardware compatibile,
-recuperano esempi e compilano la proposta. Il programma
-[app.py](../../app.py) coordina queste operazioni.
+`models.py` definisce richieste, Target, esempi, raccomandazioni e artefatti di compilazione. `ports.py` descrive le interfacce delle operazioni. `adapters/` contiene le implementazioni concrete. `schema_validation.py` controlla il sottoinsieme JSON Schema impiegato dai contratti distribuiti.
 
-| File o cartella | Funzione |
-| --- | --- |
-| [models.py](models.py) | Rappresenta richieste, circuiti, vincoli, cataloghi, maschere, evidenze, proposte e circuiti compilati. |
-| [ports.py](ports.py) | Descrive le interfacce Python dei componenti; contiene anche contratti conservati per compatibilità. |
-| [errors.py](errors.py) | Esprime gli errori della richiesta con codici, messaggi e posizione del campo. |
-| [schema_validation.py](schema_validation.py) | Legge JSON rigoroso e controlla il sottoinsieme JSON Schema usato nel progetto. |
-| [adapters/](adapters/README.md) | Implementa lettura QASM, catalogo hardware, recupero RAG e compilazione Qiskit. |
+L'esecuzione pubblica passa da `app.py` e usa RAG train, prompt TOON e facts v4. Le ulteriori interfacce Python non costituiscono comandi di avvio separati: partire dalla [mappa tecnica](../../docs/architettura_e_flusso.md) per capire quali vengono effettivamente chiamate.
 
-La costruzione dei messaggi e la verifica della risposta LLM corrente sono
-in [prompting/](../prompting/README.md). Il formato corrente della risposta
-è v4: coppia dispositivo-configurazione, fatti controllabili e ipotesi libera.
-Alcuni modelli interni conservano nomi o versioni storiche: non sostituiscono
-il contratto applicato da `app.py`.
-
-La descrizione tecnica completa è in
-[architettura e flusso](../../docs/architettura_e_flusso.md).
-[Torna ai componenti](../README.md).
+Questi moduli non avviano un addestramento MQT e non aprono il Test scientifico. Per nuove campagne usare [riproducibilita/](../../../riproducibilita/README.md).

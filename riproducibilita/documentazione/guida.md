@@ -1,10 +1,14 @@
-# Dal clone a una nuova esecuzione
+# Eseguire una nuova campagna su Linux
 
 ## 1. Preparare l'ambiente
 
-Il percorso sperimentale è pensato per Ubuntu/Linux o Ubuntu in WSL. Usa Python 3.12, `uv`, Node.js 22 con npm e un eseguibile `llama-server` di llama.cpp fornito dall'utente. Il normale prototipo mantiene i propri avviatori Windows; il kit sperimentale usa processi Linux.
+Questa guida serve a rigenerare dati, addestrare MQT, scegliere LLM e misurare i metodi. Per provare soltanto il framework già selezionato usare la [guida del prototipo](../../prototipo/docs/guida_passo_passo.md): comprende il nuovo utente Linux CPU e il fisso con GPU.
 
-Dalla radice della repository:
+Il kit richiede Linux/Ubuntu o Ubuntu in WSL, Python 3.12, `uv`, Node.js 22/npm e un eseguibile llama.cpp compatibile. Su un computer nuovo seguire i [prerequisiti Linux](../../prototipo/docs/guida_passo_passo.md#a2-installare-i-prerequisiti). Per compilare llama.cpp b10930 vedere la [procedura CPU](../../prototipo/docs/guida_passo_passo.md#a4-preparare-llamacpp-per-cpu) o i [backend GPU](../../prototipo/docs/installazione_e_runtime.md#gpu-su-linux). È ammessa una compilazione esterna al progetto: passarne il percorso con `--bin`. I comandi del kit non dipendono dal client del prototipo.
+
+Una GPU compatibile è consigliata per Qwen e gli altri LLM. **16 GB di RAM non garantiscono l'intera campagna**: compilazioni Qiskit, addestramento, inferenza e report hanno carichi diversi. I valori distribuiti, compreso contesto 60.000 e tre modelli Q8_0, non sono un profilo ridotto CPU. Prima di congelare la configurazione scegliere numero di processi, candidati, contesto e batch in base alle risorse.
+
+Dalla radice del clone, entrare nel kit e prepararlo:
 
 ```bash
 cd riproducibilita
@@ -13,9 +17,9 @@ bash setup.sh
 .venv/bin/python -B esperimento.py hardware
 ```
 
-Il setup usa `uv sync --frozen` e le versioni esatte di `uv.lock`, con MQT Predictor 2.4.0. Installa il codec TOON bloccato in `package-lock.json`. Non scarica GGUF, non addestra e non ricrea un ambiente già presente. Prima di ricostruire manualmente `.venv`, conservare i modelli MQT installati al suo interno oltre alle copie canoniche.
+**Tutti i comandi successivi partono da `riproducibilita/`.** `verifica` controlla l'ambiente; `hardware` mostra i Target quantistici e le impronte, non la GPU del PC. `setup.sh` usa `uv sync --frozen` con MQT Predictor 2.4.0 e installa TOON dal lock npm. Non scarica GGUF, non addestra e non ricrea una `.venv` già presente. Prima di ricostruirla conservare i modelli MQT installati e quelli canonici.
 
-Node.js deve essere nel PATH; in alternativa impostare `PROTOTIPO_NODE=/percorso/node`. Il runtime LLM storico è llama.cpp `b10930`, Windows Vulkan: una revisione o piattaforma diversa è una condizione nuova, da registrare. L'avviatore conserva versione, impronta e argomenti.
+Node 22 deve essere nel PATH; in alternativa `PROTOTIPO_NODE` indica il suo eseguibile. I pesi dei candidati si scaricano dagli URL di `modelli_llm/provenienza_originale.json`, rispettandone licenze e revisioni, o si forniscono autonomamente. Una prova con server simulato è disponibile con `.venv/bin/python -B verifiche/checks.py` e non richiede pesi.
 
 ## 2. Scegliere gli ingressi
 
@@ -25,7 +29,11 @@ Modificare `configurazioni/esperimento.json`, `configurazioni/catalogo.json` e `
 - Lasciare i QASM distribuiti oppure sostituire train, validation e test. Usare nomi univoci fra split.
 - Nel registro mantenere soltanto i modelli da provare. Indicare file, provenienza/revisione, precisione, temperature, contesto e budget. Per un nuovo GGUF sostituire anche l'hash atteso.
 - Scegliere `test_methods`. Se non si intende addestrare MQT, eliminare `mqt` prima del congelamento.
-- Impostare `execution_policy.workers` secondo la RAM disponibile. Per confrontare i tempi eseguire i metodi Test in sequenza.
+- Nel catalogo impostare `execution_policy.workers` secondo la RAM disponibile, per esempio 1 per una macchina limitata. Per confrontare i tempi eseguire i metodi Test in sequenza.
+
+Per una nuova prova **CPU** limitata si può mantenere solo Qwen nel registro, impostare `context: 16384`, `max_output_tokens: 4096`, `server.batch_size: 128`, `server.ubatch_size: 64` e `transport: "native"`. Ridurre la griglia delle temperature se non serve confrontarle tutte. Queste impostazioni vanno dichiarate prima della prova e non garantiscono che tutti i circuiti entrino nel contesto; un fallimento resta un esito. Per la prima verifica su un PC da 16 GB è preferibile il Bell del prototipo.
+
+Sul **fisso con server Windows**, il client del kit resta in WSL. Per il candidato Qwen impostare `transport: "windows"`, contesto 60.000 e il percorso GGUF leggibile da WSL, per esempio sotto `/mnt/d/`. Il server si avvia come nel [percorso personale](../../prototipo/docs/guida_passo_passo.md#percorso-b--elio-fisso-con-gpu-e-client-wsl). Gli avviatori Qwen non avviano automaticamente Phi e Gemma: per una griglia con più modelli occorrono server adeguati a ciascun candidato oppure il percorso Linux generico.
 
 I percorsi relativi degli ingressi sono risolti rispetto a `riproducibilita/`. Il campo `file` dei GGUF è relativo al registro LLM. Si possono usare percorsi assoluti. `--config` e `--output` precedono il sottocomando:
 
@@ -33,7 +41,14 @@ I percorsi relativi degli ingressi sono risolti rispetto a `riproducibilita/`. I
 .venv/bin/python -B esperimento.py --config /percorso/esperimento.json --output /disco/risultati prepara
 ```
 
-Ripetere gli stessi parametri nei comandi successivi. Gli esempi seguenti usano i percorsi predefiniti.
+Ripetere gli stessi parametri nei comandi successivi. Il server separato legge le stesse impostazioni attraverso le variabili `RIPRO_CONFIG` e `RIPRO_OUTPUT`, per esempio:
+
+```bash
+RIPRO_CONFIG=/percorso/esperimento.json RIPRO_OUTPUT=/disco/risultati \
+  .venv/bin/python -B modelli_llm/server.py qwen --bin /percorso/llama-server --gpu-layers 999
+```
+
+Gli esempi seguenti usano i percorsi predefiniti.
 
 ## 3. Congelare corpus e Target
 
@@ -97,10 +112,24 @@ Inserire i GGUF oppure indicarne i percorsi nel registro. Poi:
 Il comando richiede tutti i candidati, calcola le impronte e congela la griglia. In un terminale separato avviare il primo server:
 
 ```bash
-.venv/bin/python -B modelli_llm/server.py qwen --bin /percorso/llama-server
+.venv/bin/python -B modelli_llm/server.py qwen --bin /percorso/llama-server --gpu-layers 999
 ```
 
-Lasciare il terminale aperto; i log sono in `esecuzioni/<id>/servers/`. Nel terminale del progetto:
+Sostituire `/percorso/llama-server` con il proprio eseguibile Linux. `--gpu-layers 999` richiede l'accelerazione degli strati: controllare in `stderr.log` cosa il backend carica realmente. Per CPU usare `--gpu-layers 0`; contesto e batch restano quelli già dichiarati nel registro. Per scegliere una GPU, elencarla e usare il suo identificativo:
+
+```bash
+.venv/bin/python -B modelli_llm/server.py --bin /percorso/llama-server --list-devices
+```
+
+Aggiungere `--device ID` all'avvio se occorre scegliere tra più schede. Non ci sono nomi Radeon fissi né controlli termici AMD in questo avviatore. La compatibilità dipende da driver, backend e memoria disponibile.
+
+Lasciare il terminale aperto; i log sono in `esecuzioni/<id>/servers/`. In un secondo terminale, sempre dal kit, attendere il caricamento:
+
+```bash
+curl --fail http://127.0.0.1:8089/health
+```
+
+Per il server Windows usare `curl.exe`. Attendere `status: ok`, poi:
 
 ```bash
 .venv/bin/python -B esperimento.py validation esegui --modello qwen

@@ -4,6 +4,7 @@
 
 | Domanda | Punto di partenza | Collegamento |
 | --- | --- | --- |
+| Come si avvia Qwen o un altro LLM? | `modelli_llm/server.py` e `modelli.json` | Backend CPU/GPU, `--list-devices`, contesto e trasporto Linux/Windows. |
 | Come si preparano i circuiti? | `comune/corpus.py` | Caratteristiche in `dataset/qiskit_dataset/core.py`, integrità in `comune/scripts/mqt_predictor_protocol.py`. |
 | Quali dispositivi/configurazioni? | `configurazioni/catalogo.json` | Validazione in `catalog.py` e `mqt/gestione.py`. |
 | Come si addestra RL? | `mqt/addestra_rl.py` | Ambiente MQT, limiti delle azioni, checkpoint e metadati. |
@@ -39,3 +40,5 @@ Circuiti + catalogo + versioni
 ```
 
 Train costruisce modelli ed evidenze; validation sceglie impostazioni; Test misura scelte già fissate. Gli score validation e Test non entrano nel prompt della decisione sullo stesso circuito.
+
+La CPU/GPU del PC ospita il server LLM e non coincide con i Target quantistici. Le condizioni della prima prova sono nella [guida](guida.md); per usare il prototipo già selezionato su Linux CPU o sul fisso partire dalla [guida dedicata](../../prototipo/docs/guida_passo_passo.md). I file del kit sono autonomi rispetto a quel prototipo.

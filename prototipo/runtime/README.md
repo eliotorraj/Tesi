@@ -1,16 +1,14 @@
 # Componenti locali di esecuzione
 
-Questa cartella ospita programmi installati e dati ricostruibili. Su Git è distribuito solo questo README: i programmi e l'indice dipendono dal computer.
+Nel clone è presente questo README. Gli altri contenuti vengono preparati sul PC e restano esclusi da Git.
 
 | Sottocartella | Funzione |
 | --- | --- |
-| `cpu/` | llama.cpp b10930 per il server Windows su CPU. |
-| `desktop/` | llama.cpp b10930 con Vulkan per il desktop previsto dagli avviatori. |
-| `pstools/` | PsSuspend verificato, usato dal controllo termico desktop. |
-| `node/` | Eventuale copia locale di Node.js 22; in alternativa si usa Node nel PATH. |
-| `rag/` | Indice Qdrant e informazioni derivate dai dati train distribuiti. |
-| `models/` | Posizione facoltativa per i GGUF forniti separatamente; si può passare un percorso esterno. |
+| `llama.cpp/` | Sorgenti b10930 e compilazioni Linux CPU, Vulkan o CUDA, secondo la guida. |
+| `server-runs/` | Log e controlli RAM dell'avviatore Linux `server.py`. |
+| `models/` | Posizione facoltativa del GGUF; si può indicare un percorso esterno. |
+| `rag/` | Indice Qdrant derivato dal train, ricreato per il sistema corrente. |
+| `node/` | Eventuale runtime Node; in Linux normalmente si usa Node 22 nel PATH. |
+| `cpu/`, `desktop/`, `pstools/` | Runtime Windows conservati per gli avviatori `.ps1`. |
 
-`setup.ps1 -DownloadRuntime` può installare i runtime Windows. Non scarica i pesi. `app.py prepare` prepara il RAG. Non copiare ambienti Python e indici tra sistemi operativi diversi. Il codec TOON è installato nella propria cartella `prototype/prompting/toon_runtime/`, tramite il lock npm.
-
-Seguire la [guida](../docs/guida_passo_passo.md) e i [dettagli dei profili](../docs/installazione_e_runtime.md).
+`setup.sh` prepara il client, mentre la [guida](../docs/guida_passo_passo.md) mostra come compilare il server e procurarsi i pesi. `setup.ps1 -DownloadRuntime` riguarda i programmi Windows. Non copiare `.venv`, indici o eseguibili tra piattaforme incompatibili. I log del client sono nella distinta cartella `runs/`.

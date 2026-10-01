@@ -1,5 +1,5 @@
 # Utility di integrità
 
-`mqt_predictor_protocol.py` conserva identificativi, impronte dei Target e funzioni per calcolare e verificare gli hash. Catalogo e recupero RAG lo usano durante l'esecuzione.
+`mqt_predictor_protocol.py` fornisce identificativi, impronte dei Target e funzioni di verifica. Catalogo e RAG lo usano durante l'esecuzione Linux e nel client del fisso.
 
-Il nome deriva dal protocollo originale. Questo modulo non addestra MQT Predictor e non esegue Test. Gli strumenti sperimentali sono in [archivio/valutazione](../../archivio/valutazione/README.md).
+Questo modulo non richiede modelli MQT addestrati. L'addestramento RL e del selettore ML ha strumenti dedicati in [riproducibilita/mqt](../../riproducibilita/mqt/README.md).

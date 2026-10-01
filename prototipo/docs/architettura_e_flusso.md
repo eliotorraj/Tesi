@@ -1,6 +1,7 @@
 # Architettura e flusso del prototipo
 
-Stato del codice verificato il **25 settembre 2026**.
+Il percorso descritto comprende il client Linux e il collegamento al server del fisso.
+Per nuove campagne si usa il kit autonomo `riproducibilita/`.
 Questo documento descrive il comportamento dei sorgenti distribuiti in
 `prototipo/`. Per avviare il programma usare la
 [guida passo passo](guida_passo_passo.md). Le regole di confronto tra metodi
@@ -243,8 +244,9 @@ quest'ultimo usa esplicitamente lo schema v4 di `facts.py`.
 ## 7. Chiamata al modello e disponibilità del contesto
 
 Il client di [app.py](../app.py) accetta un server HTTP su `127.0.0.1` o
-`localhost`. In WSL usa `curl.exe` per raggiungere il server Windows; negli
-altri ambienti usa `urllib`. Conserva le richieste e le risposte delle tre
+`localhost`. `--transport native` usa HTTP Python verso il server Linux;
+`--transport windows` usa `curl.exe` da WSL verso Windows. Il valore `auto`
+mantiene la scelta Windows in WSL e nativa altrove. Conserva richieste e risposte delle tre
 operazioni di ogni tentativo:
 
 1. `/apply-template` applica il modello di conversazione del server con
@@ -254,7 +256,8 @@ operazioni di ogni tentativo:
    4096 token di uscita, usando gli altri parametri fissati in
    [config.json](../config.json).
 
-Il profilo desktop prevede 60.000 token di contesto; il profilo laptop 16.384.
+Il profilo `desktop` prevede 60.000 token; `cpu`, `gpu` e il nome compatibile
+`laptop` ne prevedono 16.384. Il profilo del client deve coincidere con il server.
 Prima della generazione il programma verifica `token_ingresso + 4096 ≤ contesto`.
 Se non c'è spazio termina senza eliminare esempi e senza generare.
 Il client usa una risposta non trasmessa a frammenti (`stream=False`), anche
@@ -329,9 +332,9 @@ sui fatti, non una certificazione dell'ipotesi o della qualità prevista.
 Con `--compile`, anche una proposta accettata con fatti non verificati può
 passare alla compilazione, perché la coppia è stata comunque controllata.
 
-Le procedure sperimentali archiviate possono applicare politiche aggiuntive
-di registrazione e ripresa. Non vanno attribuite automaticamente al comando
-`app.py run`.
+Il [kit sperimentale](../../riproducibilita/README.md) conserva contratti e
+registri per validation e Test. Le sue procedure non vanno attribuite
+automaticamente al comando dimostrativo `app.py run`.
 
 ## 10. Risoluzione della scelta e compilazione
 
@@ -385,4 +388,14 @@ circuito. Una compilazione riuscita dimostra che quella procedura ha prodotto
 un circuito conforme ai controlli sul Target, non che superi gli altri metodi.
 Le conclusioni comparative richiedono il
 [protocollo sperimentale](protocollo_sperimentale.md) e i dati conservati in
-[archivio/](../../archivio/README.md).
+[nuove esecuzioni](../../riproducibilita/README.md).
+
+## 12. Client e server Linux
+
+`setup.sh` prepara il client senza cambiare i dati train. `server.py` carica il GGUF
+verificato usando un eseguibile llama.cpp Linux e la CPU o un dispositivo
+restituito dal backend. Non importa sensori AMD e non richiede Windows.
+I registri server sono in `runtime/server-runs/`; quelli delle decisioni sono
+in `runs/`. Il percorso personale del fisso conserva gli avviatori `.ps1`
+e usa esplicitamente `--transport windows`. La [guida del runtime](installazione_e_runtime.md)
+definisce margini RAM, contesti e limiti delle misure disponibili.

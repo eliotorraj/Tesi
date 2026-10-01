@@ -1,12 +1,12 @@
-# Documentazione corrente
+# Documentazione del prototipo
 
-Questa cartella spiega come usare il framework e come funziona. Contiene anche l'unico protocollo sperimentale corrente. I README delle altre cartelle ne descrivono la funzione generale; qui si trovano le procedure e i dettagli.
+Per iniziare scegliere nella [guida passo passo](guida_passo_passo.md) il percorso Linux CPU oppure il percorso del fisso WSL/Windows. La guida include prerequisiti, server, pesi, prima prova e problemi comuni.
 
-| Documento | Contenuto |
+| Documento | Quando leggerlo |
 | --- | --- |
-| [Guida passo passo](guida_passo_passo.md) | Preparazione, avvio, primo circuito e lettura del risultato. |
-| [Protocollo sperimentale](protocollo_sperimentale.md) | Partizioni, validation, Test, criteri, misure e stato documentato. |
-| [Architettura e flusso](architettura_e_flusso.md) | Parsing, caratteristiche, mascheramento, RAG, input LLM, risposta e compilazione. |
-| [Installazione e runtime](installazione_e_runtime.md) | Dipendenze, profili desktop/CPU, pesi, limiti e registri. |
+| [Guida passo passo](guida_passo_passo.md) | Per arrivare dal clone al primo circuito compilato. |
+| [Installazione e runtime](installazione_e_runtime.md) | Per scegliere CPU/GPU, contesto, collegamento HTTP e log; include GPU Linux generiche. |
+| [Architettura e flusso](architettura_e_flusso.md) | Per seguire QASM, caratteristiche, recupero, prompt, risposta e compilazione. |
+| [Protocollo sperimentale](protocollo_sperimentale.md) | Per distinguere uso del prototipo, validation e Test e conoscere le regole scientifiche correnti. |
 
-Resoconti, verifiche pregresse e comandi legati a una singola macchina sono nell'[archivio](../../archivio/valutazione/README.md). Le copie storiche del protocollo restano fonti datate, non istruzioni operative correnti.
+Le nuove campagne e l'esportazione di altri prototipi hanno una [guida dedicata](../../riproducibilita/documentazione/guida.md). I risultati conclusi e la cronologia sono nell'archivio. Gli avviatori `.ps1` restano documentati nel percorso personale del fisso.

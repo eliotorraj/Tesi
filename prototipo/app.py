@@ -17,7 +17,7 @@ from prototype.prompting.toon import node_path
 
 ROOT=Path(__file__).resolve().parent
 CONFIG=json.loads((ROOT/'config.json').read_text())
-PROFILES={'desktop':60000,'laptop':16384}
+PROFILES={'desktop':60000,'cpu':16384,'gpu':16384,'laptop':16384}
 
 def save(path,value):
     """Crea un registro nuovo; rifiuta di sovrascrivere un tentativo precedente."""
@@ -56,7 +56,10 @@ class LlmTransportError(RuntimeError):
 
 class Http:
     """Collega il client al server locale e conserva richieste, risposte ed errori."""
-    def __init__(self,url,timeout=600):
+    def __init__(self,url,timeout=600,transport="auto"):
+        if transport not in ("auto","native","windows"):
+            raise ValueError("Trasporto HTTP non valido")
+        self.transport=("windows" if "microsoft" in platform.release().lower() else "native") if transport=="auto" else transport
         if not url.startswith(('http://127.0.0.1:','http://localhost:')):
             raise ValueError('Il prototipo richiede un server locale su localhost.')
         self.url=url.rstrip('/');self.timeout=timeout
@@ -65,7 +68,7 @@ class Http:
         save(directory/'request.json',payload)
         started=time.perf_counter()
         try:
-            if 'microsoft' in platform.release().lower():
+            if self.transport == 'windows':
                 source=subprocess.check_output(['wslpath','-w',str(directory/'request.json')],text=True).strip()
                 curl=shutil.which('curl.exe')
                 if not curl:raise RuntimeError('curl.exe Windows non disponibile nel PATH WSL.')
@@ -154,6 +157,7 @@ def main():
     run=sub.add_parser('run',help='Raccomanda ed eventualmente compila un QASM')
     run.add_argument('qasm',type=Path);run.add_argument('--profile',choices=PROFILES,default='desktop')
     run.add_argument('--url',default='http://127.0.0.1:8089');run.add_argument('--timeout',type=int,default=600)
+    run.add_argument('--transport',choices=('auto','native','windows'),default='auto',help='native per server Linux; windows per server Windows da WSL; auto mantiene la scelta per sistema')
     run.add_argument('--compile',action='store_true');run.add_argument('--seed-transpiler',type=int,default=0)
     run.add_argument('--device',action='append',default=[],help='Limita i dispositivi ammessi; ripetibile')
     args=ap.parse_args()
@@ -165,10 +169,10 @@ def main():
     started=time.perf_counter()
     try:
         source=args.qasm.read_text(encoding='utf-8');(directory/'input.qasm').write_text(source,encoding='utf-8')
-        save(directory/'begin.json',{'at':stamp(),'kind':'technical_prototype','split':'user_input_not_experimental_test','profile':args.profile,'context':PROFILES[args.profile],'config':CONFIG,'input_sha256':hashlib.sha256(source.encode()).hexdigest(),'compile_requested':args.compile,'seed_transpiler':args.seed_transpiler,'python':sys.version,'platform':platform.platform(),'packages':{n:version(n) for n in ['qiskit','mqt.bench','numpy','networkx','qdrant-client','portalocker']},'code_sha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in ROOT.rglob('*.py') if not any(x in p.parts for x in ['runtime','_source','.venv'])},'measurements_missing':['process_memory','host_power'],'node_path':str(node_path()),'node_sha256':hashlib.sha256(node_path().read_bytes()).hexdigest()})
+        save(directory/'begin.json',{'at':stamp(),'kind':'technical_prototype','split':'user_input_not_experimental_test','profile':args.profile,'transport_requested':args.transport,'transport':Http(args.url,args.timeout,args.transport).transport,'context':PROFILES[args.profile],'config':CONFIG,'input_sha256':hashlib.sha256(source.encode()).hexdigest(),'compile_requested':args.compile,'seed_transpiler':args.seed_transpiler,'python':sys.version,'platform':platform.platform(),'packages':{n:version(n) for n in ['qiskit','mqt.bench','numpy','networkx','qdrant-client','portalocker']},'code_sha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in ROOT.rglob('*.py') if not any(x in p.parts for x in ['runtime','_source','.venv'])},'measurements_missing':['process_memory','host_power'],'node_path':str(node_path()),'node_sha256':hashlib.sha256(node_path().read_bytes()).hexdigest()})
         request,prompt,retrieval=prepare(source,args.device)
         save(directory/'prompt.json',prompt);save(directory/'retrieval.json',retrieval);save(directory/'encoding.json',audit(prompt))
-        decision=decide(prompt,directory,Http(args.url,args.timeout),PROFILES[args.profile])
+        decision=decide(prompt,directory,Http(args.url,args.timeout,args.transport),PROFILES[args.profile])
         selected=decision['canonical_response'];configuration=load_catalog().by_id[selected['config_id']]
         decision['transpile']={'target_device':selected['selected_device'],**configuration.transpile_kwargs(),'seed_transpiler':args.seed_transpiler}
         save(directory/'decision.json',decision)

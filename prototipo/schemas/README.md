@@ -1,5 +1,5 @@
-# Schemi dei dati
+# Contratti JSON
 
-Questi file JSON descrivono la forma ammessa per richieste, catalogo hardware, risultato del filtro, esempi RAG e raccomandazioni. Permettono ai moduli di rifiutare dati incompleti o non conformi.
+Gli schemi descrivono richieste, evidenze e risposte ammesse. Il comando pubblico usa `llm_recommendation_v4.schema.json` tramite `prototype/prompting/facts.py`; altri schemi sono necessari alle strutture intermedie del framework.
 
-La risposta inviata da Qwen usa il contratto v4 in `llm_recommendation_v4.schema.json`. Gli schemi precedenti restano necessari ai componenti condivisi e ai controlli interni; la loro presenza non indica che siano il contratto LLM corrente. Il [documento tecnico](../docs/architettura_e_flusso.md) distingue i passaggi.
+Un JSON sintatticamente valido non basta: si controllano anche appartenenza al catalogo, compatibilità del dispositivo e fatti rispetto al prompt. Le impronte dei contratti fanno parte dell'integrità del pacchetto. Per il significato dei controlli leggere [architettura e flusso](../docs/architettura_e_flusso.md).

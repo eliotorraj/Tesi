@@ -1,15 +1,7 @@
-# Dati necessari al recupero degli esempi
+# Dati train necessari al RAG
 
-Questa cartella rende autonomo il RAG del prototipo. Contiene solo dati train, con le informazioni necessarie a verificarne origine e integrità. Non contiene risultati validation o Test e non è il Training set del selettore MQT.
+Il clone contiene 396 esempi train unici, i QASM corrispondenti, la trasformazione numerica e il manifest delle 422 sorgenti train, inclusi gli alias. `rag_examples.jsonl` fornisce gli esempi; `transform.json` fissa la scala ricavata solo dal train; `catalog_original.json` conserva il catalogo di provenienza. I sigilli permettono di riconoscere dati alterati.
 
-| Elemento | Contenuto |
-| --- | --- |
-| `rag_examples.jsonl` | 396 esempi train unici con scelte e compilazioni precedenti. |
-| `circuits/train/` | I 396 circuiti OpenQASM 2 corrispondenti agli esempi. |
-| `train_manifest.json` | Le 422 sorgenti train originarie, inclusi gli alias con lo stesso contenuto. |
-| `transform.json` | Trasformazione delle 49 caratteristiche, derivata soltanto dal train. |
-| `catalog_original.json` | Catalogo originale per la provenienza. |
-| `seal.json` | Impronte dei dati, dei cataloghi e degli schemi controllati dal programma. |
-| `pstools_verified.json` | Impronta del programma PsSuspend usato dall'avviatore desktop Windows. |
+Il prototipo costruisce l'indice Qdrant locale sotto `runtime/rag/` durante `app.py prepare` o il setup. Validation e Test non vengono letti per decidere sul circuito nuovo. Il file `pstools_verified.json` serve esclusivamente al runtime Windows del fisso.
 
-L'indice Qdrant non è una fonte: viene ricreato in `runtime/rag/`. Non modificare i file sigillati per aggirare un controllo. Il [documento tecnico](../docs/architettura_e_flusso.md) spiega estrazione, trasformazione e recupero.
+Questi dati sono ingressi già selezionati. Per sostituire corpus, rigenerare Dataset e scegliere un altro modello partire da [riproducibilita/](../../riproducibilita/README.md). Non aggiornare un hash soltanto per far accettare file diversi.

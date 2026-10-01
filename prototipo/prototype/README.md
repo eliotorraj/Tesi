@@ -1,22 +1,7 @@
-# Componenti del prototipo
+# Moduli dell'assistente
 
-Questa cartella contiene le regole e i componenti Python usati dal programma
-[app.py](../app.py). Trasforma un circuito in una richiesta controllata,
-recupera esempi dal Dataset train e verifica la proposta del modello.
-La compilazione facoltativa è eseguita da Qiskit.
+`quantum_assistant/` contiene strutture dati e operazioni: lettura OpenQASM 2, 49 caratteristiche, maschera dei Target, recupero degli esempi, controllo della risposta e compilazione Qiskit. `prompting/` prepara il testo TOON e il contratto facts v4 realmente usato dal comando pubblico.
 
-| Cartella | Funzione |
-| --- | --- |
-| [quantum_assistant/](quantum_assistant/README.md) | Strutture dati, lettura del circuito, vincoli hardware, recupero delle evidenze e compilazione. |
-| [prompting/](prompting/README.md) | Preparazione del testo per il modello, codifica TOON e controllo della risposta v4. |
+Il punto d'ingresso è `app.py` nella cartella superiore. Il server Qwen è un processo separato, avviato con `server.py` su Linux oppure con gli script PowerShell del fisso. L'hardware che esegue l'LLM non modifica i Target quantistici del catalogo.
 
-Il coordinamento delle fasi e il collegamento al server locale sono in
-[app.py](../app.py), fuori da questa libreria. I dati distribuiti, i cataloghi
-e gli schemi sono nelle cartelle sorelle `data/`, `configs/` e `schemas/`.
-I moduli mantengono anche alcune strutture compatibili con le versioni
-precedenti; il percorso effettivamente usato è quello descritto in
-[architettura e flusso](../docs/architettura_e_flusso.md).
-
-Per usare il programma partire dalla
-[guida passo passo](../docs/guida_passo_passo.md).
-Le cartelle `__pycache__/`, quando presenti, sono generate da Python.
+Per navigare i collegamenti tra moduli leggere [architettura e flusso](../docs/architettura_e_flusso.md). Per avviare una prova leggere la [guida](../docs/guida_passo_passo.md).

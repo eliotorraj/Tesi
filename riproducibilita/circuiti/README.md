@@ -1,5 +1,7 @@
-# Circuiti sostituibili
+# Circuiti di ingresso
 
-`train/`, `validation/` e `test/` contengono 422, 88 e 90 OpenQASM 2 originali. Si possono sostituire prima di creare una nuova esecuzione. I nomi devono essere univoci fra split; stessi contenuti o sequenze di istruzioni non possono comparire in split diversi. Gli alias train restano nel manifest ma non aggiungono esempi RAG né campioni ML.
+`train/`, `validation/` e `test/` contengono rispettivamente 422, 88 e 90 file OpenQASM 2. Per un nuovo esperimento si possono sostituire prima di `prepara`, oppure indicare una nuova radice `corpus` nella configurazione. Ogni radice deve avere questi tre split con i QASM direttamente al loro interno.
 
-`manifest_originale.json` è la provenienza del corpus iniziale: non va aggiornato per i nuovi ingressi. `esterni/qasmbench/` contiene cinquanta circuiti opzionali con licenza e manifest. Le copie congelate sono generate sotto `esecuzioni/<id>/`. La partizione scientifica è responsabilità di chi prepara il corpus: i controlli non dimostrano disgiunzione delle famiglie.
+Usare nomi univoci tra split. Il programma rifiuta sovrapposizioni byte-identiche o di istruzioni; questi controlli non provano indipendenza algoritmica. I 422 train hanno 396 contenuti distinti: gli alias restano nel manifest, senza aggiungere esempi RAG o campioni ML.
+
+`manifest_originale.json` conserva la provenienza dei circuiti distribuiti: non va riscritto per quelli personali. Le copie della nuova esecuzione finiscono in `esecuzioni/<id>/circuits/`. I [QASMBench](esterni/qasmbench/README.md) sono ingressi opzionali separati. Una prova CPU limitata si esegue più facilmente con il Bell del prototipo; ridurre un corpus scientifico costituisce una nuova condizione, da dichiarare.
