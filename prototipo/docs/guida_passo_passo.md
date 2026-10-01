@@ -5,7 +5,7 @@ Il prototipo legge un circuito OpenQASM 2, recupera esempi train, chiede a **Qwe
 Scegliere il percorso prima di iniziare:
 
 - **Nuovo utente Linux senza GPU:** seguire il percorso A, dall'inizio alla fine. I comandi di installazione sono per Ubuntu 24.04 o Debian/Ubuntu compatibile; sulle altre distribuzioni cambiano i pacchetti di sistema.
-- **Elio sul fisso con Radeon RX 6750 XT:** seguire il percorso B. Il client resta in Ubuntu/WSL; il server continua a usare gli avviatori PowerShell e la GPU Windows già predisposti.
+- **(Per me :) ) sul fisso con Radeon RX 6750 XT:** seguire il percorso B. Il client resta in Ubuntu/WSL; il server continua a usare gli avviatori PowerShell e la GPU Windows già predisposti.
 - **Utente Linux con un'altra GPU:** preparare prima il client come nel percorso A, poi usare la variante GPU del [documento sul runtime](installazione_e_runtime.md#gpu-su-linux). Non usare gli script AMD del fisso come avviatori generici.
 
 Una GPU compatibile è consigliata per far girare Qwen. La CPU permette di tentare una prima prova, ma l'elaborazione del prompt può essere molto lenta. **16 GB di RAM installata sono il minimo indicativo, non una garanzia:** servono almeno 9 GiB disponibili a Linux prima dell'avvio CPU e ulteriore margine durante la prova. In WSL conta la RAM assegnata alla distribuzione, non tutta quella del PC. Circuiti o richieste troppo grandi possono non essere eseguibili su questa macchina.
@@ -138,7 +138,7 @@ Il circuito Bell è incluso nel clone. Il filtro Falcon 27 mantiene piccola la p
 
 `--transport native` usa HTTP Linux anche in WSL. L'opzione `--device` del client sceglie un **dispositivo quantistico sintetico**, non la GPU del PC. Senza `--compile` si ottiene soltanto la raccomandazione. Per il proprio circuito sostituire `examples/bell.qasm` con un file OpenQASM 2; rimuovere o ripetere il filtro solo dopo la prima prova.
 
-## Percorso B — Elio, fisso con GPU e client WSL
+## Percorso B — Per me, fisso con GPU e client WSL
 
 Questo percorso mantiene il server Windows Vulkan e i controlli AMD dei file `.ps1`. La GPU rilevata sul fisso è **AMD Radeon RX 6750 XT**. Gli script e `AmdSensors.cs` restano disponibili. Il client della repository continua a girare in Linux/WSL.
 
