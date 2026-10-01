@@ -1,0 +1,9 @@
+{
+  "prototipo/test/strumenti/common.py": "35e1a7b0f2365d7b185db8de31454dc335b702e557a16ebaff3e053d92b847f3",
+  "prototipo/test/strumenti/gates.py": "524a6395c7cbda781f4ac6eedc28d58851585be0b8809dd8009c417c1bd7addc",
+  "prototipo/test/strumenti/runner.py": "d0cec7472470be8a8dad85a623daea33108ea2b746d4a16e5a38b4f1b06bd13b",
+  "prototipo/test/strumenti/worker.py": "2bc8584b7423d84fe528b73aafa478da868d754ddf06299b04f78f7e8b688d35",
+  "prototipo/test/strumenti/report.py": "c3e5f312d45ad628198e7139c16e1e6086c440fd5087d652b2fcb36a9769f7e6",
+  "prototipo/test/strumenti/score.py": "08f917fe053f0f3c6eed072faec425b1ddc2c97194c47bd61b14384d928902ed",
+  "prototipo/test/strumenti/mqt_gate.py": "66e6c5d604f3baa6bcf15c0b67d72d58828dab52d5f29d96c312eace93a56102"
+}

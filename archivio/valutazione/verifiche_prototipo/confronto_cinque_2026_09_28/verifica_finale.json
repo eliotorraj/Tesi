@@ -1,0 +1,69 @@
+{
+  "output": "archivio/valutazione/test/report_generati/confronto_cinque_sistemi/21aa899c01f8ca21",
+  "pdf_sha256": "88c4dd39e8fff3b3fad2c1372e0077b2f1c5cf9b7ab5b7636ac857005677c794",
+  "pages": 46,
+  "baseline_unchanged": true,
+  "baseline_files_checked": 175,
+  "output_files_checked": 83,
+  "chart_groups": {
+    "total_seconds": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "compilation_process_seconds": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "llm_response_seconds": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "distribuzione_score": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "esiti": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "retries": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "score": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "compilation_seconds": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "total_tokens": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    },
+    "soglia_score_080": {
+      "panels": 5,
+      "centered_fifth": true,
+      "new_method": true
+    }
+  },
+  "tests_passed": 29,
+  "layout_warnings": [],
+  "pages_changed_after_full_visual_review": [
+    "pagina-19.png",
+    "pagina-46.png"
+  ],
+  "all_sources_verified": true,
+  "graph_updated": false,
+  "test_executed": false
+}

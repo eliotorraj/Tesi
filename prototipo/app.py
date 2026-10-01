@@ -29,8 +29,10 @@ def save(path,value):
 def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-def prepare(qasm,allowed=(),*,rag=True):
-    """Controlla il QASM e i dispositivi, poi prepara cinque evidenze solo train."""
+def prepare(qasm,allowed=(),*,rag=True,rag_limit=5):
+    """Prepara evidenze solo train; il percorso standard mantiene cinque esempi."""
+    if type(rag_limit) is not int or rag_limit not in (1, 5, 10):
+        raise ValueError("Numero di esempi supportato: 1, 5 o 10.")
     started=time.perf_counter();catalog=load_catalog()
     hardware=MqtHardwareCatalog(catalog.supported_device_ids,configuration_catalog=catalog).snapshot()
     parsed=QasmRequestParser().parse(UiSubmission(request_id=str(uuid4()),user_text='',qasm2=qasm,allowed_devices=tuple(allowed)))
@@ -42,11 +44,15 @@ def prepare(qasm,allowed=(),*,rag=True):
     rag_started=time.perf_counter()
     if rag:
         corpus=load_corpus();prepare_index(corpus)
-        examples=QdrantContextRetriever().retrieve(request,mask,limit=5)
+        examples=QdrantContextRetriever().retrieve(request,mask,limit=rag_limit)
     rag_seconds=time.perf_counter()-rag_started if rag else 0.0
     registry=StructuredEvidenceRegistryBuilder(configuration_catalog=catalog).build(examples)
-    prompt=StructuredPromptBuilder(configuration_catalog=catalog).build(request,mask,examples,evidence_registry=registry)
+    prompt=StructuredPromptBuilder(configuration_catalog=catalog,max_examples=max(5,rag_limit)).build(request,mask,examples,evidence_registry=registry)
     return request,prompt.payload,{'seconds':time.perf_counter()-started,'rag_seconds':rag_seconds,'records':[{'rag_id':x.record_id,'distance':x.distance} for x in examples]}
+
+class LlmTransportError(RuntimeError):
+    """Il server non ha restituito una risposta utilizzabile: fermare l'esecuzione."""
+
 
 class Http:
     """Collega il client al server locale e conserva richieste, risposte ed errori."""
@@ -81,14 +87,16 @@ class Http:
             for name,data in [('response_partial.bin',getattr(exc,'output',None) or getattr(exc,'partial',None)),('stderr_partial.txt',getattr(exc,'stderr',None))]:
                 if data is not None:(directory/name).write_bytes(data if isinstance(data,bytes) else str(data).encode())
             save(directory/'failure.json',{'type':type(exc).__name__,'message':str(exc),'seconds':time.perf_counter()-started,'completed_logical_attempt':False})
+            if isinstance(exc, Exception):
+                raise LlmTransportError(f'{endpoint}: {exc}') from exc
             raise
 
-def decide(prompt,directory,http,context):
+def decide(prompt,directory,http,context,*,max_examples=5):
     """Controlla i token e applica i tre tentativi del contratto ufficiale v4."""
     feedback=[]
     for attempt in range(1,4):
         folder=Path(directory)/f'attempt_{attempt}';folder.mkdir()
-        chat={'messages':messages(prompt,feedback),'chat_template_kwargs':{'enable_thinking':False},'reasoning_effort':'none'}
+        chat={'messages':messages(prompt,feedback,max_examples=max_examples),'chat_template_kwargs':{'enable_thinking':False},'reasoning_effort':'none'}
         formatted=http('/apply-template',chat,folder/'template')
         tokenized=http('/tokenize',{'content':formatted['prompt'],'add_special':False,'parse_special':True},folder/'tokenize')
         count=len(tokenized['tokens']);save(folder/'context.json',{'input_tokens':count,'output_budget':4096,'context':context})
@@ -96,11 +104,11 @@ def decide(prompt,directory,http,context):
             raise ValueError(f'Contesto insufficiente: {count}+4096 > {context}. Nessuna generazione; nessun esempio eliminato.')
         excluded={'stream_options','max_tokens','chat_template_kwargs','reasoning_effort','reasoning_format'}
         payload={k:v for k,v in CONFIG['fixed'].items() if k not in excluded}
-        payload.update(temperature=0.0,stream=False,prompt=formatted['prompt'],json_schema=response_schema(),n_predict=4096,return_tokens=True)
+        payload.update(temperature=0.0,stream=False,prompt=formatted['prompt'],json_schema=response_schema(max_examples=max_examples),n_predict=4096,return_tokens=True)
         response=http('/completion',payload,folder/'call')
         if response.get('truncated') or response.get('stop_type')=='limit' or response.get('stop') is False:
             raise RuntimeError('Risposta incompleta o contesto troncato; vedere il registro.')
-        checked=verify(response.get('content',''),prompt)
+        checked=verify(response.get('content',''),prompt,max_examples=max_examples)
         checked.update(attempt=attempt,input_tokens=count,timings=response.get('timings'),tokens_predicted=response.get('tokens_predicted'))
         save(folder/'validation.json',checked)
         eligible=checked['schema_valid'] and checked['selection_valid']
@@ -116,12 +124,33 @@ def compile_decision(request,decision,seed):
     recommendation=Recommendation(selected_device=canonical['selected_device'],figure_of_merit='expected_fidelity',qiskit_plan=QiskitCompilationPlan(optimization_level=config.optimization_level,seed_transpiler=seed,layout_method=config.layout_method,routing_method=config.routing_method),explanation=canonical['hypothesis'],evidence=(),schema_version='4.0.0',config_id=config.config_id)
     return QiskitDeterministicCompiler().compile(request,recommendation)
 
+def check_installation():
+    """Verifica i componenti necessari all'uso senza avviare prove sperimentali."""
+    from prototype.prompting.toon import encode_view, decode_view, metadata
+    if sys.version_info[:2] != (3, 12):
+        raise RuntimeError("Richiesto Python 3.12.")
+    expected = dict(line.strip().split("==") for line in (ROOT / "requirements.txt").read_text().splitlines() if "==" in line)
+    packages = {name: version(name) for name in expected}
+    if packages != expected:
+        raise RuntimeError("Dipendenze diverse da requirements.txt: " + str(packages))
+    catalog = load_catalog()
+    MqtHardwareCatalog(catalog.supported_device_ids, configuration_catalog=catalog).snapshot()
+    corpus = load_corpus()
+    probe = {"installation_check": [1, 2, 3]}
+    if decode_view(encode_view(probe)) != probe:
+        raise RuntimeError("Il codec TOON non conserva i valori.")
+    return {"status": "ready", "python": platform.python_version(), "packages": packages,
+            "train_records": len(corpus.records), "devices": list(catalog.supported_device_ids),
+            "toon": metadata(), "llm_server_checked": False,
+            "note": "Verifica locale; disponibilita del server e pesi controllata dagli avviatori."}
+
+
 def main():
     """Separa preparazione, controlli e nuova prova; conserva anche ogni errore."""
     ap=argparse.ArgumentParser(description=__doc__)
     sub=ap.add_subparsers(dest='command',required=True)
     sub.add_parser('prepare',help='Verifica train e costruisce Qdrant locale')
-    check=sub.add_parser('check',help='Prove offline tecniche e confronto feature train')
+    sub.add_parser('check',help='Verifica ambiente, dati train, Target e codec TOON senza inferenza')
     run=sub.add_parser('run',help='Raccomanda ed eventualmente compila un QASM')
     run.add_argument('qasm',type=Path);run.add_argument('--profile',choices=PROFILES,default='desktop')
     run.add_argument('--url',default='http://127.0.0.1:8089');run.add_argument('--timeout',type=int,default=600)
@@ -131,8 +160,7 @@ def main():
     if args.command=='prepare':
         print(json.dumps(prepare_index(load_corpus()),indent=2));return
     if args.command=='check':
-        from checks import check
-        print(json.dumps(check(),indent=2));return
+        print(json.dumps(check_installation(),indent=2));return
     directory=ROOT/'runs'/(datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid4().hex[:8]);directory.mkdir(parents=True)
     started=time.perf_counter()
     try:

@@ -1,0 +1,35 @@
+{
+  "at": "2026-09-29T08:33:59.103477+00:00",
+  "unit_tests": 18,
+  "unit_test_exit_code": 0,
+  "command": ".venv/bin/python -m unittest discover -s archivio/valutazione/test/verifiche -p test_dag_wl.py -v",
+  "checks": [
+    "directed and port-aware WL",
+    "parallel edges",
+    "wire renaming",
+    "index integrity",
+    "unchanged base prompt",
+    "full tokenized graph summary",
+    "synthetic 88-case CLI resume and freeze",
+    "missing scores preserved",
+    "test gate without frozen selection"
+  ],
+  "real_validation_input_check": {
+    "circuits": 88,
+    "pairs": 5016,
+    "circuits_with_reference": 88,
+    "incomplete_matrices": 70
+  },
+  "real_validation_executed": false,
+  "real_test_executed": false,
+  "graph_updated": false,
+  "files": {
+    "archivio/valutazione/test/llm_rag_dag_wl.py": "6bbf206d15e10cf910d41f95cd9c3fc1d33b3fafa8399ca9cedc35b0c5ae6704",
+    "archivio/valutazione/test/llm_rag_dag_wl_sintesi.py": "061ae87ebb9b00900171d9bb605e4ee2436b35e00fae0ca479eb82f3760cf427",
+    "archivio/valutazione/test/strumenti/dag_wl_core.py": "c720ad134794e95ad2d8ad877562ed38dba780f34113a55b153003521cf10ff2",
+    "archivio/valutazione/test/strumenti/dag_wl_campaign.py": "dfdcd7966975857393d01ee45dbd8b3f94d399d3bb77269d1ea489a8cacefd20",
+    "archivio/valutazione/test/strumenti/dag_wl_validation.py": "ad823848d78c530d4805e77c96449b223654d208e4bf7449e9cb352199b3e554",
+    "archivio/valutazione/test/verifiche/test_dag_wl.py": "002f38274004ec6fac62de98c3eafefb891ec31a08151d96ed02a0bcf3ed126f",
+    "archivio/valutazione/validation_dag_wl/valida.py": "1245c80fc813c2009f8a0f1d9f4f3d9582caa4b2bf3d9554667f13a9fca82d30"
+  }
+}

@@ -1,0 +1,29 @@
+# Indicizzare sorgenti, documentazione e fonti, senza librerie installate o copie duplicate.
+.venv/
+.venv-*/
+__pycache__/
+node_modules/
+site-packages/
+**/runtime/
+**/code_snapshots/
+**/importazioni/
+/archivio/workspace_locale/
+/archivio/riorganizzazione_2026_09_25/prima/
+/tesi/build/
+# Registri generati: restano nei dati originali e nei rapporti, non sono sorgenti.
+**/qiskit_dataset_cache/
+**/attempt_*/
+**/report_generati/
+**/technical_episodes/
+**/servers/
+**/risultati/*/circuiti/
+
+# Kit: sorgenti, senza nuovi artefatti e copie degli ingressi.
+/riproducibilita/esecuzioni/
+/riproducibilita/esportazioni/
+/riproducibilita/mqt/artefatti/
+/riproducibilita/dataset/artefatti/
+/riproducibilita/validation/risultati/
+/riproducibilita/test/risultati/
+/riproducibilita/circuiti/
+/archivio/riorganizzazione_2026_10_01/

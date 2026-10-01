@@ -1,0 +1,19 @@
+{
+  "at": "2026-09-29T14:08:53.606936+00:00",
+  "source": "archivio/esperimento_v2/datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/global/qiskit_configuration_aggregates.jsonl",
+  "source_sha256": "daac624ead9099626794b9e58913d4ddb0dbd69e7f754bc384c75260e71ab197",
+  "aggregate_counts": {
+    "train": 24024,
+    "validation": 5016
+  },
+  "circuit_counts": {
+    "train": 422,
+    "validation": 88
+  },
+  "validation_with_observed_reference": 88,
+  "validation_with_complete_matrix": 18,
+  "current_validation_criterion": "best median across compatible pairs with all three seeds successful",
+  "current_test_matrix_in_this_source": 0,
+  "new_test_criterion": "maximum successful seed score, then maximum across compatible device/configuration pairs",
+  "existing_test_reports": "individual system scores; no exhaustive current Test reference in this matrix"
+}

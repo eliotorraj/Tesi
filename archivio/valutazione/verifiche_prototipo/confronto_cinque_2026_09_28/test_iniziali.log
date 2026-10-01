@@ -1,0 +1,31 @@
+test_different_evaluation_criteria_are_rejected (test_fonti.SourceTests.test_different_evaluation_criteria_are_rejected) ... ok
+test_explicit_alternative_location (test_fonti.SourceTests.test_explicit_alternative_location) ... ok
+test_explicit_missing_location_fails_without_fallback (test_fonti.SourceTests.test_explicit_missing_location_fails_without_fallback) ... ok
+test_original_supported_when_no_external_result (test_fonti.SourceTests.test_original_supported_when_no_external_result) ... ok
+test_result_contract_still_verified (test_fonti.SourceTests.test_result_contract_still_verified) ... ok
+test_separate_mqt_selected_once_with_own_contract (test_fonti.SourceTests.test_separate_mqt_selected_once_with_own_contract) ... ok
+test_unfrozen_plan_or_undeclared_exploration_rejected (test_fonti.SourceTests.test_unfrozen_plan_or_undeclared_exploration_rejected) ... ok
+test_rejects_changed_outcome (test_recupero_random.RandomReportTests.test_rejects_changed_outcome) ... ok
+test_rejects_incorrect_summary (test_recupero_random.RandomReportTests.test_rejects_incorrect_summary) ... ok
+test_rejects_wrong_seed_and_repeated_example (test_recupero_random.RandomReportTests.test_rejects_wrong_seed_and_repeated_example) ... ok
+test_valid_extension_and_original_loader_remains_strict (test_recupero_random.RandomReportTests.test_valid_extension_and_original_loader_remains_strict) ... ok
+test_equal_weight_for_circuits_not_episodes (test_report.AggregationTests.test_equal_weight_for_circuits_not_episodes) ... ok
+test_future_mqt_added_without_changing_existing_pair (test_report.AggregationTests.test_future_mqt_added_without_changing_existing_pair) ... ok
+test_interrupted_is_terminal_failure (test_report.AggregationTests.test_interrupted_is_terminal_failure) ... ok
+test_mixed_replicates_keep_failures_and_partial_coverage (test_report.AggregationTests.test_mixed_replicates_keep_failures_and_partial_coverage) ... ok
+test_non_llm_does_not_get_fake_zero_token_or_retry_metrics (test_report.AggregationTests.test_non_llm_does_not_get_fake_zero_token_or_retry_metrics) ... ok
+test_paired_interval_preserves_identity_and_excludes_failure (test_report.AggregationTests.test_paired_interval_preserves_identity_and_excludes_failure) ... ok
+test_tex_escapes_all_special_characters (test_report.AggregationTests.test_tex_escapes_all_special_characters) ... ok
+test_timeout_is_failure_and_not_zero_score_or_internal_time (test_report.AggregationTests.test_timeout_is_failure_and_not_zero_score_or_internal_time) ... ok
+test_zero_score_and_zero_retry_are_real_measurements (test_report.AggregationTests.test_zero_score_and_zero_retry_are_real_measurements) ... ok
+test_different_contract_rejected (test_report.IngestionTests.test_different_contract_rejected) ... ok
+test_mqt_ingestion_is_read_only (test_report.IngestionTests.test_mqt_ingestion_is_read_only) ... ok
+test_replicates_allowed_but_nested_summary_rejected (test_report.IngestionTests.test_replicates_allowed_but_nested_summary_rejected) ... ok
+test_wrong_split_hash_invalid_score_and_measurement_rejected (test_report.IngestionTests.test_wrong_split_hash_invalid_score_and_measurement_rejected) ... ok
+test_cutoff_is_inclusive_and_denominator_keeps_failures_and_pending (test_soglia.ThresholdTests.test_cutoff_is_inclusive_and_denominator_keeps_failures_and_pending) ... ok
+test_fractional_replica_mean_is_not_rounded_to_an_integer (test_soglia.ThresholdTests.test_fractional_replica_mean_is_not_rounded_to_an_integer) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.055s
+
+OK

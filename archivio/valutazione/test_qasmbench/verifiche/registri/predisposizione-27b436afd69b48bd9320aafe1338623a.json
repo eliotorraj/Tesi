@@ -1,0 +1,153 @@
+{
+  "at": "2026-09-30T07:48:51.317628+00:00",
+  "kind": "development_preparation",
+  "external_test_started": false,
+  "manifest_sha256": "04ade5a7a666c401d590f60480446bf78e046044adbc7f710e6a353e115517f1",
+  "counts": {
+    "small": 30,
+    "medium": 15,
+    "large": 5
+  },
+  "checks": [
+    {
+      "source": "preparazione/verifiche/llm_rag-7e6c27ca92814eb08112c1a95a49c225.json",
+      "sha256": "cb7e5829b1b96232e835785923fb189f1aabfc9ad8751b60de23ba7e13f327db",
+      "record": {
+        "method": "llm_rag",
+        "at": "2026-09-30T07:35:25.934463+00:00",
+        "ready": true,
+        "checks": {
+          "corpus": {
+            "ok": true,
+            "details": {
+              "source_sha256": "04ade5a7a666c401d590f60480446bf78e046044adbc7f710e6a353e115517f1",
+              "counts": {
+                "small": 30,
+                "medium": 15,
+                "large": 5
+              },
+              "revision": "357b942396d5c2b7cbc1c229c585a6ef5ccaebac"
+            }
+          },
+          "software_targets": {
+            "ok": true,
+            "details": {
+              "versions": {
+                "qiskit": "2.5.0",
+                "mqt.bench": "2.2.3",
+                "numpy": "2.5.1",
+                "networkx": "3.6.1",
+                "qdrant-client": "1.19.0",
+                "portalocker": "3.2.0"
+              },
+              "targets": {
+                "ibm_falcon_27": "b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104",
+                "ibm_heron_133": "2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3",
+                "ibm_falcon_127": "5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd",
+                "ibm_heron_156": "207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003",
+                "quantinuum_h2_56": "ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee"
+              }
+            }
+          },
+          "local_llm_v2": {
+            "ok": true,
+            "details": {
+              "study_id": "local-llm-v2",
+              "winner": "qwen/p0_t0",
+              "verified_files": 31307,
+              "final_sha256": "3c14683280887913a075b79cb5f1ffe263504bd6a912b0406fdc2d399c1ade67"
+            }
+          },
+          "rag_train_integrity": {
+            "ok": true,
+            "details": {
+              "records": 396,
+              "files": 408
+            }
+          },
+          "method_plan": {
+            "ok": true
+          }
+        }
+      }
+    },
+    {
+      "source": "preparazione/verifiche/mqt_predictor-02d9f81f49d7453bb2120eb0ac7a1951.json",
+      "sha256": "4c76dd537a8cfa5c3929f23930d114d15cd8ca75be986a7edf05dba9d03be3d1",
+      "record": {
+        "method": "mqt_predictor",
+        "at": "2026-09-30T07:42:21.368363+00:00",
+        "ready": false,
+        "checks": {
+          "corpus": {
+            "ok": true,
+            "details": {
+              "source_sha256": "04ade5a7a666c401d590f60480446bf78e046044adbc7f710e6a353e115517f1",
+              "counts": {
+                "small": 30,
+                "medium": 15,
+                "large": 5
+              },
+              "revision": "357b942396d5c2b7cbc1c229c585a6ef5ccaebac"
+            }
+          },
+          "software_targets": {
+            "ok": true,
+            "details": {
+              "versions": {
+                "qiskit": "2.5.0",
+                "mqt.bench": "2.2.3",
+                "numpy": "2.5.1",
+                "networkx": "3.6.1",
+                "qdrant-client": "1.19.0",
+                "portalocker": "3.2.0"
+              },
+              "targets": {
+                "ibm_falcon_27": "b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104",
+                "ibm_heron_133": "2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3",
+                "ibm_falcon_127": "5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd",
+                "ibm_heron_156": "207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003",
+                "quantinuum_h2_56": "ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee"
+              }
+            }
+          },
+          "mqt_models": {
+            "ok": false,
+            "details": {
+              "models": {},
+              "errors": [
+                "Selettore ML mancante: /home/elio/Tesi-mqt-2.4-v2/archivio/esperimento_v2/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/models/ml/trained_clf_expected_fidelity.joblib",
+                "Selettore ML mancante: /home/elio/Tesi-mqt-2.4-v2/.venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/trained_model/trained_clf_expected_fidelity.joblib"
+              ],
+              "rl_validation": "not_run_missing_selector"
+            }
+          },
+          "method_plan": {
+            "ok": true
+          }
+        }
+      }
+    }
+  ],
+  "technical_tests": {
+    "passed": 8,
+    "synthetic_bell": "success",
+    "external_circuits_evaluated": 0
+  },
+  "earlier_checks": [
+    {
+      "kind": "preflight",
+      "methods": [
+        "llm_rag",
+        "mqt_predictor"
+      ],
+      "status": "external_timeout",
+      "timeout_seconds": 120
+    },
+    {
+      "kind": "mqt_artifact_verification",
+      "status": "cancelled",
+      "reason": "Missing expected ML selector established while scanning large RL archives"
+    }
+  ]
+}

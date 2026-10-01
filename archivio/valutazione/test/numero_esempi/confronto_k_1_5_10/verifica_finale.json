@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-28T22:10:39.404119+00:00",
+  "pages": 17,
+  "source_files_verified": 3849,
+  "circuits_per_variant": 90,
+  "final_outcomes": 270,
+  "validated_responses_including_corrections": 389,
+  "csv_aggregates_checked": true,
+  "same_sources_and_nested_retrieval": true,
+  "previous_reference_report_unchanged": true,
+  "graph_updated": false,
+  "compilation": "Due passaggi pdflatex in WSL, nessun avviso di impaginazione.",
+  "native_compiler": "Unable to find standard directories for platform",
+  "visual_review": "Tutte le 17 pagine controllate, più esame ingrandito di tabelle e grafici corretti.",
+  "artifacts_sha256": {
+    "confronto_k.pdf": "cb86456a4befb27a25299df1e46d58800b5cb32d96e2d72b6b01524e1a36d642",
+    "confronto_k.tex": "f9118909dfc483a9453c483f15c9272149e3d3b28ffc9bbf7e2b3aa60cb56de6",
+    "dati.json": "96752a14c0dcd853b9aaed37e877af9e53561777c6e3cec41693a62081abbc7c",
+    "provenienza.json": "8ed41680e0d27d77e0d0ea3079559fff93ceb76022c0738ddd5f17333a9babf3",
+    "tabelle/circuiti.csv": "fea18ba6ccb41fa572f8dbcf370cc0ece8dbf23a3c5f1269f04c0114c5c57300",
+    "genera_report.py": "86ab56044eab43e431e47c7a2171c7fe3e489b5f6cde3da0aad161a28c738ff6",
+    "impaginazione.py": "5bdad99afd97a1b29c0d5010c1a2d4146d6530360ac8341c6322c11b703563f2"
+  }
+}

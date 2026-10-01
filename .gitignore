@@ -6,25 +6,84 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 /.codex/
-/.workspace_archive/
 /graphify-out/
 /tesi/
 # Le esclusioni dei dati sperimentali sono conservate nell'archivio.
-/prototipo/runtime/
+/prototipo/runtime/*
+!/prototipo/runtime/README.md
 /prototipo/runs/
 /prototipo/output/
 
 # Nuovi dati operativi: conservarli e trasferirli separatamente da Git.
 /archivio/esperimento_v2/.venv-selettore/
-/prototipo/test/risultati/
-/prototipo/test/confronti/
-/prototipo/test/preparazione/
-/prototipo/test/prove_tecniche/
-/prototipo/addestramento/mqt/cache/
-/prototipo/addestramento/mqt/registri/
-/prototipo/addestramento/mqt/modelli/
-/prototipo/addestramento/mqt/training_set/
-/prototipo/addestramento/mqt/precedenti/
-/prototipo/addestramento/mqt/.training.lock
+/archivio/valutazione/test/risultati/
+/archivio/valutazione/test/confronti/
+/archivio/valutazione/test/preparazione/
+/archivio/valutazione/test/prove_tecniche/
+/archivio/valutazione/addestramento/mqt/cache/
+/archivio/valutazione/addestramento/mqt/registri/
+/archivio/valutazione/addestramento/mqt/modelli/
+/archivio/valutazione/addestramento/mqt/training_set/
+/archivio/valutazione/addestramento/mqt/precedenti/
+/archivio/valutazione/addestramento/mqt/.training.lock
 
-/prototipo/addestramento/mqt/prove_tecniche/
+/archivio/valutazione/addestramento/mqt/prove_tecniche/
+
+# Report derivati dai registri Test: conservare separatamente con i dati.
+/archivio/valutazione/test/report_generati/
+
+# Prova MQT esplorativa: artefatti conservati su disco, separati dal codice.
+/archivio/valutazione/test_mqt_esplorativo/runtime/
+/archivio/valutazione/test_mqt_esplorativo/risultati/
+/archivio/valutazione/test_mqt_esplorativo/preparazione/
+/archivio/valutazione/test_mqt_esplorativo/prove_tecniche/
+/archivio/valutazione/test_mqt_esplorativo/verifiche/*.log
+/archivio/valutazione/addestramento/mqt/importazioni/
+
+# Prove pregresse e nuovi controlli tecnici: dati locali, README versionati.
+/archivio/valutazione/prove_prototipo/*
+!/archivio/valutazione/prove_prototipo/README.md
+/archivio/valutazione/verifiche_prototipo/runtime/
+/archivio/valutazione/verifiche_prototipo/risultati/
+/archivio/workspace_locale/*
+!/archivio/workspace_locale/README.md
+
+
+# Riorganizzazione del repository: conservare separatamente i dati locali e i file di configurazione.
+/archivio/riorganizzazione_2026_09_20/
+/archivio/riorganizzazione_2026_09_21/
+/archivio/riorganizzazione_2026_09_25/
+
+
+# Riproduzione: sorgenti e ingressi, non pesi e nuove esecuzioni.
+node_modules/
+/riproducibilita/modelli_llm/**/*.gguf
+/riproducibilita/modelli_llm/**/*.safetensors
+/riproducibilita/modelli_llm/**/*.bin
+/riproducibilita/modelli_llm/**/*.pt
+/riproducibilita/modelli_llm/**/*.pth
+/riproducibilita/esecuzioni/*
+!/riproducibilita/esecuzioni/README.md
+/riproducibilita/esportazioni/*
+!/riproducibilita/esportazioni/README.md
+/riproducibilita/mqt/artefatti/*
+!/riproducibilita/mqt/artefatti/README.md
+/riproducibilita/dataset/artefatti/*
+!/riproducibilita/dataset/artefatti/README.md
+/riproducibilita/validation/risultati/*
+!/riproducibilita/validation/risultati/README.md
+/riproducibilita/test/risultati/*
+!/riproducibilita/test/risultati/README.md
+/archivio/riorganizzazione_2026_10_01/*
+!/archivio/riorganizzazione_2026_10_01/README.md
+!/archivio/riorganizzazione_2026_10_01/verifiche.json
+
+# Campagne storiche successive: il codice resta versionato, gli output restano locali.
+/archivio/valutazione/**/esecuzioni/
+/archivio/valutazione/**/risultati/
+/archivio/valutazione/**/runtime/
+/archivio/valutazione/**/preparazione/
+/archivio/valutazione/**/prove_tecniche/
+/archivio/valutazione/**/generati/
+/archivio/valutazione/**/indice/
+/archivio/valutazione/**/__pycache__/

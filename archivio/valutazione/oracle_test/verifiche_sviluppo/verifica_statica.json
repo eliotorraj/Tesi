@@ -1,0 +1,26 @@
+{
+  "ready": true,
+  "output": "/home/elio/oracoli_mqt_test/test_max3_v1",
+  "plan": {
+    "circuits": 90,
+    "devices": 5,
+    "configurations": 12,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "matrix_cells": 16200,
+    "compilations": 15336,
+    "incompatible_cells": 864,
+    "compilations_by_device": {
+      "ibm_falcon_27": 2592,
+      "ibm_heron_133": 3240,
+      "ibm_falcon_127": 3240,
+      "ibm_heron_156": 3240,
+      "quantinuum_h2_56": 3024
+    }
+  },
+  "label": "MAX dei seed 0,1,2; massimo fra tutte le coppie compatibili",
+  "identity_sha256": "eef622905a8338a21e339bf5ab33afd7bcb3ae0dca5ecffb04739044422ac0cd"
+}

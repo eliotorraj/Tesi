@@ -1,0 +1,39 @@
+test_dead_worker_and_timeout_never_succeed (test_indipendenti.TestProtocol.test_dead_worker_and_timeout_never_succeed) ... ok
+test_immutable_write (test_indipendenti.TestProtocol.test_immutable_write) ... ok
+test_interruption_is_retained_not_rerun (test_indipendenti.TestProtocol.test_interruption_is_retained_not_rerun) ... ok
+test_mqt_worker_accepts_target_from_selector (test_indipendenti.TestProtocol.test_mqt_worker_accepts_target_from_selector) ... /home/elio/Tesi-mqt-2.4-v2/.venv/lib/python3.12/site-packages/stevedore/extension.py:340: DeprecationWarning: Since backends now support running jobs that contain both fractional gates and dynamic circuit, IBMFractionalTranslationPlugin is deprecated as of qiskit-ibm-runtime 0.42.0 and will be removed no sooner than 3 months after the release date. Use IBMDynamicFractionalTranslationPlugin instead.
+  obj = plugin(*invoke_args, **invoke_kwds)
+ok
+test_ninety_cases_and_resume_without_other_methods (test_indipendenti.TestProtocol.test_ninety_cases_and_resume_without_other_methods) ... ok
+test_no_rag_has_no_examples_and_capacity_fact (test_indipendenti.TestProtocol.test_no_rag_has_no_examples_and_capacity_fact) ... ok
+test_quality_uses_only_successes_and_reports_missing (test_indipendenti.TestProtocol.test_quality_uses_only_successes_and_reports_missing) ... ok
+test_random_real_compilation_without_rag (test_indipendenti.TestProtocol.test_random_real_compilation_without_rag) ... ok
+test_score_matches_installed_mqt (test_indipendenti.TestProtocol.test_score_matches_installed_mqt) ... /home/elio/Tesi-mqt-2.4-v2/.venv/lib/python3.12/site-packages/stevedore/extension.py:340: DeprecationWarning: Since backends now support running jobs that contain both fractional gates and dynamic circuit, IBMFractionalTranslationPlugin is deprecated as of qiskit-ibm-runtime 0.42.0 and will be removed no sooner than 3 months after the release date. Use IBMDynamicFractionalTranslationPlugin instead.
+  obj = plugin(*invoke_args, **invoke_kwds)
+ok
+test_tokens_and_retries_include_failed_call (test_indipendenti.TestProtocol.test_tokens_and_retries_include_failed_call) ... ok
+test_internal_corruption_rejected (test_indipendenti.TestTrainer.test_internal_corruption_rejected) ... ok
+test_partial_tail_kept_and_next_record_read (test_indipendenti.TestTrainer.test_partial_tail_kept_and_next_record_read) ... ok
+test_timeout_part_of_identity (test_indipendenti.TestTrainer.test_timeout_part_of_identity) ... ok
+test_changed_code_cannot_resume_or_rewrite_frozen_contract (test_percorsi.PercorsiTest.test_changed_code_cannot_resume_or_rewrite_frozen_contract) ... ok
+test_hash_keys_preserve_legacy_identity_across_locations (test_percorsi.PercorsiTest.test_hash_keys_preserve_legacy_identity_across_locations) ... ok
+test_runtime_and_experimental_paths_are_separate (test_percorsi.PercorsiTest.test_runtime_and_experimental_paths_are_separate) ... ok
+test_bell_prompt_preserves_aliases_and_validator_without_qdrant (test_recupero_random.RandomRetrievalTests.test_bell_prompt_preserves_aliases_and_validator_without_qdrant) ... ok
+test_cli_ninety_synthetic_cases_resume_in_separate_area (test_recupero_random.RandomRetrievalTests.test_cli_ninety_synthetic_cases_resume_in_separate_area) ... ok
+test_contract_refuses_mixed_resume_and_preserves_bytes (test_recupero_random.RandomRetrievalTests.test_contract_refuses_mixed_resume_and_preserves_bytes) ... ok
+test_reproducible_distinct_and_order_independent (test_recupero_random.RandomRetrievalTests.test_reproducible_distinct_and_order_independent) ... ok
+test_runner_uses_injected_preparation_and_keeps_logs (test_recupero_random.RandomRetrievalTests.test_runner_uses_injected_preparation_and_keeps_logs) ... ok
+test_same_eligibility_and_no_distance (test_recupero_random.RandomRetrievalTests.test_same_eligibility_and_no_distance) ... ok
+test_desktop_context_and_padding_are_recorded (test_server.TestServer.test_desktop_context_and_padding_are_recorded) ... ok
+test_other_contexts_and_invalid_types_are_rejected (test_server.TestServer.test_other_contexts_and_invalid_types_are_rejected) ... ok
+test_wrong_served_model_is_rejected_even_with_padding (test_server.TestServer.test_wrong_served_model_is_rejected_even_with_padding) ... ok
+test_wrong_supplied_model_is_rejected (test_server.TestServer.test_wrong_supplied_model_is_rejected) ... ok
+test_cli_stops_after_one_case_and_resume_skips_it (test_trasporto.TestTrasporto.test_cli_stops_after_one_case_and_resume_skips_it) ... ok
+test_evaluate_saves_failure_before_stopping (test_trasporto.TestTrasporto.test_evaluate_saves_failure_before_stopping) ... ok
+test_native_connection_failure_is_preserved (test_trasporto.TestTrasporto.test_native_connection_failure_is_preserved) ... ok
+test_wsl_reset_preserves_curl_details (test_trasporto.TestTrasporto.test_wsl_reset_preserves_curl_details) ... ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 32.918s
+
+OK

@@ -1,0 +1,363 @@
+{
+  "kind": "static_development_check",
+  "at": "2026-09-30T07:26:49.151509+00:00",
+  "records": [
+    {
+      "file": "circuiti/large/adder_n28/adder_n28.qasm",
+      "sha256": "18ffaae6478e1b9ab873e12035cb3071d826e27d4f51d1c77ec6685206b3a3cf",
+      "ok": true,
+      "qubits": 28,
+      "operations": 116
+    },
+    {
+      "file": "circuiti/large/bv_n140/bv_n140.qasm",
+      "sha256": "100b4d69fc11f00dfc27c09e2ccd5661fe6b7183c9e3eb685a78bc2659344ca5",
+      "ok": true,
+      "qubits": 140,
+      "operations": 491
+    },
+    {
+      "file": "circuiti/large/ising_n98/ising_n98.qasm",
+      "sha256": "a5df0fa957b250a59561348cf0d3b30f01626634b33cfbaea09d32f770a5f8af",
+      "ok": true,
+      "qubits": 98,
+      "operations": 1170
+    },
+    {
+      "file": "circuiti/large/qft_n63/qft_n63.qasm",
+      "sha256": "6fad7f3a11b4f50b10a467b076521d22891505bb759f63146be84e74225417ba",
+      "ok": true,
+      "qubits": 63,
+      "operations": 9891
+    },
+    {
+      "file": "circuiti/large/qugan_n111/qugan_n111.qasm",
+      "sha256": "949bc69389fd910b0ca274a878632ccc7bfd312623ee9d1eb466f054ec1a9bde",
+      "ok": true,
+      "qubits": 111,
+      "operations": 438
+    },
+    {
+      "file": "circuiti/medium/bigadder_n18/bigadder_n18.qasm",
+      "sha256": "097ac44672d0bb9696cd77e561bc094a661f45fa84762373df840efddac4d094",
+      "ok": true,
+      "qubits": 18,
+      "operations": 21
+    },
+    {
+      "file": "circuiti/medium/bv_n14/bv_n14.qasm",
+      "sha256": "c98cf8b70ed55423525f55bebe8293fd69a97a33472d83cbf5d39693b6ed5e14",
+      "ok": true,
+      "qubits": 14,
+      "operations": 54
+    },
+    {
+      "file": "circuiti/medium/cat_state_n22/cat_state_n22.qasm",
+      "sha256": "a7b6a6a5c83397281250f255ce303f34e90c65d3990ef5b3ecc96fc685083c1e",
+      "ok": true,
+      "qubits": 22,
+      "operations": 44
+    },
+    {
+      "file": "circuiti/medium/dnn_n16/dnn_n16.qasm",
+      "sha256": "c194be8740c380fc9679ebcca2515ac52215aea1c58dc5cfc507679a88c64d79",
+      "ok": true,
+      "qubits": 16,
+      "operations": 2032
+    },
+    {
+      "file": "circuiti/medium/ghz_state_n23/ghz_state_n23.qasm",
+      "sha256": "27e77c753e2993b3b4785872ec83d434dfac62cc526f4ee574347e6f5c8986ff",
+      "ok": true,
+      "qubits": 23,
+      "operations": 46
+    },
+    {
+      "file": "circuiti/medium/ising_n26/ising_n26.qasm",
+      "sha256": "ac0dc5f6af55575ad454ce16f78820fa7e1aa16b027a6ab8e49af82b276054ba",
+      "ok": true,
+      "qubits": 26,
+      "operations": 306
+    },
+    {
+      "file": "circuiti/medium/multiplier_n15/multiplier_n15.qasm",
+      "sha256": "e8ad585e5be09f96dd60f7495bd649562c6c05f8bf5d8a416b85a9d834e7eab8",
+      "ok": true,
+      "qubits": 15,
+      "operations": 73
+    },
+    {
+      "file": "circuiti/medium/multiply_n13/multiply_n13.qasm",
+      "sha256": "6d00a50a97f2224ddbb993ed3d82b1928cc1397997fc0347296d7fc42d731755",
+      "ok": true,
+      "qubits": 13,
+      "operations": 18
+    },
+    {
+      "file": "circuiti/medium/qec9xz_n17/qec9xz_n17.qasm",
+      "sha256": "27399092d22b16052641827cf12c87f524342ec308d8a2f6589a2d9f815682d3",
+      "ok": true,
+      "qubits": 17,
+      "operations": 61
+    },
+    {
+      "file": "circuiti/medium/qft_n18/qft_n18.qasm",
+      "sha256": "5ed6ee804a7067160294d7db81859886788ae56e853286e7307e9c74d5c35ab3",
+      "ok": true,
+      "qubits": 18,
+      "operations": 801
+    },
+    {
+      "file": "circuiti/medium/qram_n20/qram_n20.qasm",
+      "sha256": "2b22f2a0a013cb91c5b59063b04e33998a1e24bbd5300a085b01edadd9ac763d",
+      "ok": true,
+      "qubits": 20,
+      "operations": 45
+    },
+    {
+      "file": "circuiti/medium/sat_n11/sat_n11.qasm",
+      "sha256": "a876bce6261e0c6b2eff07cca8606a6937fe37ba46d8b1c28cc735d9c8fa325e",
+      "ok": true,
+      "qubits": 11,
+      "operations": 95
+    },
+    {
+      "file": "circuiti/medium/square_root_n18/square_root_n18.qasm",
+      "sha256": "601bbadb967001504c15a00bc6740e7b91f4f125343af0bb2c3166f51515b650",
+      "ok": false,
+      "error": "ValueError",
+      "message": "operazioni dinamiche"
+    },
+    {
+      "file": "circuiti/medium/swap_test_n25/swap_test_n25.qasm",
+      "sha256": "45649f6f4af12870b87c8088d97e286fff709b34e38f6363fef79c35a6bda1f0",
+      "ok": true,
+      "qubits": 25,
+      "operations": 39
+    },
+    {
+      "file": "circuiti/medium/wstate_n27/wstate_n27.qasm",
+      "sha256": "ecd71063a3bf7e3a7a7440130c932f734aa13c6e368521e82a23f59572071a84",
+      "ok": true,
+      "qubits": 27,
+      "operations": 132
+    },
+    {
+      "file": "circuiti/small/adder_n10/adder_n10.qasm",
+      "sha256": "89af975627593648e7aca6ac6cb936d2c872093c1eedcaa1b2ab4fa14b602624",
+      "ok": true,
+      "qubits": 10,
+      "operations": 19
+    },
+    {
+      "file": "circuiti/small/adder_n4/adder_n4.qasm",
+      "sha256": "30f0be9eb50d37ab2de7c87676e32ff7c66bc67eff32dfeafa0cf69951d92438",
+      "ok": true,
+      "qubits": 4,
+      "operations": 27
+    },
+    {
+      "file": "circuiti/small/basis_change_n3/basis_change_n3.qasm",
+      "sha256": "2d998840327e516c71142442f6d9c2924962a8fad2e12e70a2c90d53a78be851",
+      "ok": true,
+      "qubits": 3,
+      "operations": 36
+    },
+    {
+      "file": "circuiti/small/basis_trotter_n4/basis_trotter_n4.qasm",
+      "sha256": "9ead0e7d5f41cb6675c19457d4e414b77cf90c78cea3e0412bcccdc3f9f73dd5",
+      "ok": true,
+      "qubits": 4,
+      "operations": 1510
+    },
+    {
+      "file": "circuiti/small/bell_n4/bell_n4.qasm",
+      "sha256": "1f3a1115385d87f6a444189776e521d6bba1d300f96454e85cb58bb3e297bf81",
+      "ok": true,
+      "qubits": 4,
+      "operations": 37
+    },
+    {
+      "file": "circuiti/small/cat_state_n4/cat_state_n4.qasm",
+      "sha256": "caa882935bb73087db2edbee2aa77133965bdda3aec9687166f9e96b9a2ef8ff",
+      "ok": true,
+      "qubits": 4,
+      "operations": 8
+    },
+    {
+      "file": "circuiti/small/deutsch_n2/deutsch_n2.qasm",
+      "sha256": "56a7b3389495fb497df1a331abb7d4f64ac57d397aaa1c1169d0ac33a10889cd",
+      "ok": true,
+      "qubits": 2,
+      "operations": 7
+    },
+    {
+      "file": "circuiti/small/dnn_n2/dnn_n2.qasm",
+      "sha256": "ce0359edb654e5dd1f54035e07cec177d2f50ae1ecd45b651ba71637854b7921",
+      "ok": true,
+      "qubits": 2,
+      "operations": 228
+    },
+    {
+      "file": "circuiti/small/dnn_n8/dnn_n8.qasm",
+      "sha256": "7f1f342a59a7a9159a2f0fa619b8a64170a159158ae838eaa75b13212cf2a161",
+      "ok": true,
+      "qubits": 8,
+      "operations": 1016
+    },
+    {
+      "file": "circuiti/small/fredkin_n3/fredkin_n3.qasm",
+      "sha256": "5ede0e9d4cdc723afcdb515f16f984bf47cf53423e12fcafc10ee03bd9577996",
+      "ok": true,
+      "qubits": 3,
+      "operations": 22
+    },
+    {
+      "file": "circuiti/small/grover_n2/grover_n2.qasm",
+      "sha256": "afd134759fa0eefb9f84a88d3e9f156cd54e83b10177d02c33bb6f519c08b813",
+      "ok": true,
+      "qubits": 2,
+      "operations": 18
+    },
+    {
+      "file": "circuiti/small/hhl_n7/hhl_n7.qasm",
+      "sha256": "8d7754418a92a0f8e28010f1430d7bc4e9db4b08f4f364473bd5290ee6fc8b94",
+      "ok": true,
+      "qubits": 7,
+      "operations": 696
+    },
+    {
+      "file": "circuiti/small/hs4_n4/hs4_n4.qasm",
+      "sha256": "f362ca9ffd7f045f517dfe4d67350794ac998f4eb427586a804eed9379340f63",
+      "ok": true,
+      "qubits": 4,
+      "operations": 32
+    },
+    {
+      "file": "circuiti/small/inverseqft_n4/inverseqft_n4.qasm",
+      "sha256": "2b950bb566ea547918adcea27b13defb3ad31fb10bf3b4ccb25d51e91b5527b1",
+      "ok": false,
+      "error": "ValueError",
+      "message": "operazioni dinamiche"
+    },
+    {
+      "file": "circuiti/small/ising_n10/ising_n10.qasm",
+      "sha256": "c10edc4a40eadf4d610aa012524e9eed4bdd1a02fc9d939cccae8ad4ed942f67",
+      "ok": true,
+      "qubits": 10,
+      "operations": 490
+    },
+    {
+      "file": "circuiti/small/iswap_n2/iswap_n2.qasm",
+      "sha256": "0c6d4dffaeb32c5758511cb51d5f89bcb6c97f3f60c1f5e3cbbeabb53c53ed50",
+      "ok": true,
+      "qubits": 2,
+      "operations": 11
+    },
+    {
+      "file": "circuiti/small/lpn_n5/lpn_n5.qasm",
+      "sha256": "4216e9b4fdf9f22e6ae4f92a67aac8c634209093db4e3f0290f5413165b4de87",
+      "ok": true,
+      "qubits": 5,
+      "operations": 16
+    },
+    {
+      "file": "circuiti/small/pea_n5/pea_n5.qasm",
+      "sha256": "0ab8129a30be0350c68704b5fcd91f2dfb4c868303c5ad761af411f277f91660",
+      "ok": true,
+      "qubits": 5,
+      "operations": 33
+    },
+    {
+      "file": "circuiti/small/qaoa_n3/qaoa_n3.qasm",
+      "sha256": "4dc17a12b187cc3cf02962cf023a36de4cc48ed3923343ab9ef84e3daf89f5c7",
+      "ok": true,
+      "qubits": 3,
+      "operations": 18
+    },
+    {
+      "file": "circuiti/small/qaoa_n6/qaoa_n6.qasm",
+      "sha256": "fde5eff21c334ef02430bbfa8ea38f9287625cab3ffbd45d92d79590ee27dcc9",
+      "ok": true,
+      "qubits": 6,
+      "operations": 276
+    },
+    {
+      "file": "circuiti/small/qec_en_n5/qec_en_n5.qasm",
+      "sha256": "d7b95967326b65050c5e645c180f2361f8cb3513dae7936de0e0cf53a63fec58",
+      "ok": true,
+      "qubits": 5,
+      "operations": 30
+    },
+    {
+      "file": "circuiti/small/qft_n4/qft_n4.qasm",
+      "sha256": "62c6c8c7ddd95ac2b5367420b9925dbf82d6fb45725f089f01619a639621ad60",
+      "ok": true,
+      "qubits": 4,
+      "operations": 16
+    },
+    {
+      "file": "circuiti/small/qpe_n9/qpe_n9.qasm",
+      "sha256": "b341d904913f8a41f22fee387a7939ec9b43873e5f2efeb739d57317ef2b4523",
+      "ok": true,
+      "qubits": 9,
+      "operations": 39
+    },
+    {
+      "file": "circuiti/small/qrng_n4/qrng_n4.qasm",
+      "sha256": "627d604f685cebe71f4d079cea6a9266a8d6a136279b6199b32cbc010079a184",
+      "ok": true,
+      "qubits": 4,
+      "operations": 8
+    },
+    {
+      "file": "circuiti/small/quantumwalks_n2/quantumwalks_n2.qasm",
+      "sha256": "dea93828107b2b17f6381ed75cb8d985bc8790be74a7378179b441932a84e80b",
+      "ok": true,
+      "qubits": 2,
+      "operations": 13
+    },
+    {
+      "file": "circuiti/small/simon_n6/simon_n6.qasm",
+      "sha256": "756eee6bf939d1b5879da3ff1bae66cfd2599b9b96515f336ecde6f9ca512fc9",
+      "ok": true,
+      "qubits": 6,
+      "operations": 22
+    },
+    {
+      "file": "circuiti/small/toffoli_n3/toffoli_n3.qasm",
+      "sha256": "3cd72f83491b25a3c7c94fa826f85fe13f1af28079268b2c34e144299380968f",
+      "ok": true,
+      "qubits": 3,
+      "operations": 21
+    },
+    {
+      "file": "circuiti/small/variational_n4/variational_n4.qasm",
+      "sha256": "df4ced794da7fd4ca56eb2b02bce53ee77207bec77286cb4626115c6a9b6357d",
+      "ok": true,
+      "qubits": 4,
+      "operations": 58
+    },
+    {
+      "file": "circuiti/small/vqe_n4/vqe_n4.qasm",
+      "sha256": "f6777e4fdd8eadcbc8a85a5135e797a96d3b91b3f494593a5b8c9fdcd37530c6",
+      "ok": true,
+      "qubits": 4,
+      "operations": 93
+    },
+    {
+      "file": "circuiti/small/vqe_uccsd_n4/vqe_uccsd_n4.qasm",
+      "sha256": "be59c8aa33b7cc3b997187e09c24e5f59223cfe79a0c38016d3615d828fed1dd",
+      "ok": false,
+      "error": "QASM2ParseError",
+      "message": "\"vqe_uccsd_n4.qasm:225,8: 'q' is not defined in this scope\""
+    },
+    {
+      "file": "circuiti/small/wstate_n3/wstate_n3.qasm",
+      "sha256": "9077432a88fea0f3da2c3b24558333c1a329261b20836ba82b253418d8c7b0dd",
+      "ok": true,
+      "qubits": 3,
+      "operations": 9
+    }
+  ]
+}

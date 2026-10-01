@@ -1,0 +1,14 @@
+{
+  "reference_tex_sha256": "f36285e61bd0ff37f85aebd1845a5841f481d7d8b9e3e26be92ba01f307632f9",
+  "generated_tex_sha256": "f36285e61bd0ff37f85aebd1845a5841f481d7d8b9e3e26be92ba01f307632f9",
+  "exact_byte_match": true,
+  "reference_lines": 445,
+  "generated_lines": 445,
+  "generator_before_sha256": "6f592d5b938773cbbdc974e226def5ec841f187e83afc8622c955eda7db603cc",
+  "generator_after_sha256": "517d553ad287954474266c8fcc3d081167db3cc21c5102042f1759305d5cc6cd",
+  "circuits": 50,
+  "results": 100,
+  "paired_successes": 48,
+  "source_files_verified": 2249,
+  "method": "Rigenerazione dai registri QASMBench; confronto byte per byte con il LaTeX modificato dall’utente."
+}

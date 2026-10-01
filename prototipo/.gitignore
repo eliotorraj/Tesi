@@ -1,5 +1,6 @@
 .venv/
-runtime/
+runtime/*
+!runtime/README.md
 runs/
 __pycache__/
 *.pyc

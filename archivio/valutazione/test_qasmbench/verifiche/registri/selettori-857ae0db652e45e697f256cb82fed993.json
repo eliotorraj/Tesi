@@ -1,0 +1,36 @@
+[
+  {
+    "path": "/home/elio/Tesi/.venv/lib/python3.12/site-packages/mqt/predictor/ml/training_data/trained_model/trained_clf_expected_fidelity.joblib",
+    "exists": true,
+    "size_bytes": 672369,
+    "sha256": "2481a764db5c4f0740788f3b852febea88595cbb37a27aeda95f467861fcaf16",
+    "metadata_exists": false,
+    "classifier": "RandomForestClassifier",
+    "features": 49,
+    "classes": [
+      "ibm_falcon_127",
+      "ibm_falcon_27",
+      "quantinuum_h2_56"
+    ],
+    "warnings": [
+      "Trying to unpickle estimator DecisionTreeClassifier from version 1.7.1 when using version 1.9.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:\nhttps://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations",
+      "Trying to unpickle estimator RandomForestClassifier from version 1.7.1 when using version 1.9.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:\nhttps://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations"
+    ]
+  },
+  {
+    "path": "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test_mqt_esplorativo/runtime/trained_clf_expected_fidelity.joblib",
+    "exists": true,
+    "size_bytes": 1785065,
+    "sha256": "681da87b3d373d27edd9bbabd7424d2b9eb16bf0d18794147fdcdbbe4faa4189",
+    "metadata_exists": true,
+    "classifier": "RandomForestClassifier",
+    "features": 49,
+    "classes": [
+      "ibm_falcon_127",
+      "ibm_heron_133",
+      "ibm_heron_156",
+      "quantinuum_h2_56"
+    ],
+    "warnings": []
+  }
+]

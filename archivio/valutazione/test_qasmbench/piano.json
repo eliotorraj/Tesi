@@ -1,0 +1,69 @@
+{
+  "test_id": "qasmbench-independent-v1",
+  "source_experiment_version": "2.0.0",
+  "study_id": "local-llm-v2",
+  "methods": [
+    "llm_rag",
+    "mqt_predictor"
+  ],
+  "split": "external_test",
+  "circuits": 50,
+  "compilations_per_circuit": 1,
+  "qiskit_seed": 0,
+  "mqt_sampling_seed": 0,
+  "random_seed": 20260921,
+  "compilation_timeout_seconds": 100,
+  "llm_timeout_seconds": 3600,
+  "llm_max_completed_attempts": 3,
+  "transport_retries": 0,
+  "llm_profile": "desktop",
+  "response_contract": "4.0.0",
+  "oracle": "optional observed reference only; never a competitor",
+  "scoring": "expected_fidelity MQT 2.4.0, precision 10; single compilation, not validation median",
+  "primary_metrics": [
+    "successes",
+    "failures",
+    "retries",
+    "mean_score_successes",
+    "score_per_circuit",
+    "llm_tokens",
+    "total_seconds",
+    "compilation_seconds",
+    "llm_response_seconds"
+  ],
+  "analysis": {
+    "unit": "circuit",
+    "bootstrap_seed": 20260901,
+    "bootstrap_draws": 10000,
+    "confidence": 0.95,
+    "comparisons": [
+      "llm_rag vs mqt_predictor"
+    ],
+    "quality_population": "common successful circuits; failures reported separately",
+    "confirmatory_tests": "none; descriptive paired intervals, no superiority claim from incomplete comparison"
+  },
+  "manifest_sha256": "04ade5a7a666c401d590f60480446bf78e046044adbc7f710e6a353e115517f1",
+  "group_counts": {
+    "small": 30,
+    "medium": 15,
+    "large": 5
+  },
+  "independence": "External source, static purposive selection; no byte-identical MQT corpus overlap; semantic/pretraining overlap not excluded.",
+  "exploratory": {
+    "publication_status": "additional-independent-test",
+    "training_samples": 384,
+    "expected_training_samples": 396,
+    "excluded_samples": 12,
+    "successful_compilations": 1853,
+    "required_compilations": 1878,
+    "collection_profile": "adaptive-100-then-300-v1",
+    "waived_requirements": [
+      "396 training samples",
+      "ML frozen-protocol conformity declarations"
+    ],
+    "model_sha256": "681da87b3d373d27edd9bbabd7424d2b9eb16bf0d18794147fdcdbbe4faa4189",
+    "selection_authorized": "User selected current exploratory 384-sample classifier on 2026-09-30",
+    "metadata_sha256": "2872a29f34023dcb9572ef660898a831a9b28f6efa8fa28adc349d903cdfc9d7"
+  },
+  "mqt_selector": "runtime/trained_clf_expected_fidelity.joblib"
+}

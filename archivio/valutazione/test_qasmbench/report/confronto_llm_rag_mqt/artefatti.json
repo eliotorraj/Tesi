@@ -1,0 +1,13 @@
+{
+  "note": "Impronte dei generatori e del sorgente; il PDF viene aggiunto da compila.py.",
+  "sha256": {
+    "genera_report.py": "6f592d5b938773cbbdc974e226def5ec841f187e83afc8622c955eda7db603cc",
+    "dati.py": "ecd6a23d17abd54361754dd04aa8408e1b39e176819e1e629ba75890ffacc233",
+    "confronto_qasmbench.tex": "79e1f2e8667fc37ae42b4354d7740f76cbf5a08c6457c0c8e04f2602fbf69b97",
+    "compila.py": "f1c35c968d14f20fd75c4e1b45a73401cd6b82e46cdd6440c3dfa423d034c442",
+    "confronto_qasmbench.pdf": "065080abecc205bb3279bcd787f1a1a762e84f2b84fde7a1c3ba55d7df4c6303"
+  },
+  "inputs": 2249,
+  "compiler": "pdfTeX 3.141592653-2.6-1.40.28 (TeX Live 2025/Debian)",
+  "visual_validation": {"status": "complete", "pages_inspected": 12, "method": "Anteprime PNG a 100 dpi e testo estratto; nessun taglio o sovrapposizione rilevato.", "latex_warnings": 0}
+}

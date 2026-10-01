@@ -1,0 +1,8 @@
+{
+  "at": "2026-09-30T07:55:21.266974+00:00",
+  "kind": "synthetic_selector_check",
+  "source": "Bell synthetic; not external test",
+  "status": "success",
+  "device": "ibm_falcon_127",
+  "model_sha256": "681da87b3d373d27edd9bbabd7424d2b9eb16bf0d18794147fdcdbbe4faa4189"
+}

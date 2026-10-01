@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tesi.local/schemas/method_decision_v2.schema.json",
+  "title": "Frozen LLM method decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "protocol_version",
+    "method_id",
+    "method_config_sha256",
+    "split",
+    "circuit_id",
+    "source_sha256",
+    "status",
+    "selected_device_id",
+    "selected_config_id",
+    "attempt_count",
+    "raw_response_sha256",
+    "timings_seconds",
+    "usage",
+    "failure"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "experiment_id": {
+      "const": "qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2"
+    },
+    "protocol_version": {"const": "2.0.0"},
+    "method_id": {"enum": ["llm_rag", "llm_no_rag", "frontier_llm"]},
+    "method_config_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "split": {"enum": ["validation", "test"]},
+    "circuit_id": {"type": "string", "minLength": 1},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "status": {"enum": ["success", "failure", "timeout"]},
+    "selected_device_id": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "ibm_falcon_27",
+        "ibm_heron_133",
+        "ibm_falcon_127",
+        "ibm_heron_156",
+        "quantinuum_h2_56"
+      ]
+    },
+    "selected_config_id": {"type": ["string", "null"]},
+    "attempt_count": {"type": "integer", "minimum": 1, "maximum": 3},
+    "raw_response_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "timings_seconds": {"type": "object"},
+    "usage": {"type": ["object", "null"]},
+    "failure": {"type": ["object", "null"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "success"}}},
+      "then": {
+        "properties": {
+          "selected_device_id": {"type": "string"},
+          "selected_config_id": {"type": "string"},
+          "failure": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "selected_device_id": {"type": "null"},
+          "selected_config_id": {"type": "null"},
+          "failure": {"type": "object"}
+        }
+      }
+    }
+  ]
+}

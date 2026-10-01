@@ -1,0 +1,269 @@
+{
+  "A": {
+    "nodes": [
+      {
+        "label": [
+          "in",
+          "q"
+        ]
+      },
+      {
+        "label": [
+          "op",
+          "h",
+          1,
+          0,
+          null,
+          []
+        ],
+        "name": "h",
+        "parameters": [],
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "label": [
+          "in",
+          "q"
+        ]
+      },
+      {
+        "label": [
+          "op",
+          "cx",
+          2,
+          0,
+          1,
+          []
+        ],
+        "name": "cx",
+        "parameters": [],
+        "qubits": [
+          0,
+          1
+        ]
+      },
+      {
+        "label": [
+          "op",
+          "z",
+          1,
+          0,
+          null,
+          []
+        ],
+        "name": "z",
+        "parameters": [],
+        "qubits": [
+          1
+        ]
+      },
+      {
+        "label": [
+          "out",
+          "q"
+        ]
+      },
+      {
+        "label": [
+          "out",
+          "q"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1,
+        [
+          "q",
+          "boundary",
+          "q0"
+        ]
+      ],
+      [
+        1,
+        3,
+        [
+          "q",
+          "q0",
+          "q0"
+        ]
+      ],
+      [
+        2,
+        3,
+        [
+          "q",
+          "boundary",
+          "q1"
+        ]
+      ],
+      [
+        3,
+        4,
+        [
+          "q",
+          "q1",
+          "q0"
+        ]
+      ],
+      [
+        3,
+        5,
+        [
+          "q",
+          "q0",
+          "boundary"
+        ]
+      ],
+      [
+        4,
+        6,
+        [
+          "q",
+          "q0",
+          "boundary"
+        ]
+      ]
+    ],
+    "num_qubits": 2,
+    "num_clbits": 0
+  },
+  "B": {
+    "nodes": [
+      {
+        "label": [
+          "in",
+          "q"
+        ]
+      },
+      {
+        "label": [
+          "op",
+          "h",
+          1,
+          0,
+          null,
+          []
+        ],
+        "name": "h",
+        "parameters": [],
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "label": [
+          "in",
+          "q"
+        ]
+      },
+      {
+        "label": [
+          "op",
+          "z",
+          1,
+          0,
+          null,
+          []
+        ],
+        "name": "z",
+        "parameters": [],
+        "qubits": [
+          1
+        ]
+      },
+      {
+        "label": [
+          "op",
+          "cx",
+          2,
+          0,
+          1,
+          []
+        ],
+        "name": "cx",
+        "parameters": [],
+        "qubits": [
+          0,
+          1
+        ]
+      },
+      {
+        "label": [
+          "out",
+          "q"
+        ]
+      },
+      {
+        "label": [
+          "out",
+          "q"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1,
+        [
+          "q",
+          "boundary",
+          "q0"
+        ]
+      ],
+      [
+        1,
+        4,
+        [
+          "q",
+          "q0",
+          "q0"
+        ]
+      ],
+      [
+        2,
+        3,
+        [
+          "q",
+          "boundary",
+          "q0"
+        ]
+      ],
+      [
+        3,
+        4,
+        [
+          "q",
+          "q0",
+          "q1"
+        ]
+      ],
+      [
+        4,
+        5,
+        [
+          "q",
+          "q0",
+          "boundary"
+        ]
+      ],
+      [
+        4,
+        6,
+        [
+          "q",
+          "q1",
+          "boundary"
+        ]
+      ]
+    ],
+    "num_qubits": 2,
+    "num_clbits": 0
+  },
+  "equal_initial_counts": true,
+  "similarity_h1": 0.7777777777777778,
+  "similarity_h2": 0.6
+}

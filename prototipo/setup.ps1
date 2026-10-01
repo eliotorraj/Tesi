@@ -10,6 +10,10 @@ if($nodeVersion -notlike "v22.*"){throw "Richiesto Node.js 22; rilevato $nodeVer
 if(-not(Test-Path -LiteralPath ".venv\Scripts\python.exe")){& py -3.12 -m venv .venv;if($LASTEXITCODE -ne 0){throw "Creazione ambiente fallita"}}
 & .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 if($LASTEXITCODE -ne 0){throw "Installazione dipendenze fallita"}
+# Il clone contiene il lock del codec, non node_modules.
+if(-not(Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw "Installare npm insieme a Node.js 22."}
+& npm.cmd ci --ignore-scripts --no-audit --no-fund --prefix (Join-Path $PSScriptRoot "prototype\prompting\toon_runtime")
+if($LASTEXITCODE -ne 0){throw "Installazione del codec TOON fallita"}
 $destination=Join-Path $PSScriptRoot "runtime\$RuntimeProfile"
 if(-not(Test-Path -LiteralPath (Join-Path $destination "llama-server.exe"))){
  if(-not $DownloadRuntime){throw "Runtime assente. Ripetere con -DownloadRuntime, oppure copiare runtime dalla cartella gia preparata."}

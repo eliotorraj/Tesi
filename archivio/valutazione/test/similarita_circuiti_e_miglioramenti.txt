@@ -1,0 +1,139 @@
+SIMILARITÀ TRA CIRCUITI E POSSIBILI MIGLIORAMENTI DI LLM E RAG
+27 settembre 2026 - proposta di lavoro, non risultati sperimentali
+
+1. Che cosa vogliamo misurare
+
+Due circuiti sono utili come esempi reciproci se rispondono in modo simile alle
+stesse scelte di compilazione. Non basta che implementino la stessa funzione
+quantistica o abbiano lo stesso numero di qubit. Ci interessa, per esempio,
+se le medesime coppie dispositivo/configurazione producono buona fedeltà stimata,
+pochi costi aggiuntivi di instradamento e compilazioni riuscite.
+
+Questa è una definizione operativa proposta per il progetto. Deve specificare
+Target, versione del compilatore, configurazioni, seed e metrica. La similarità
+non è quindi una proprietà assoluta dei soli circuiti. Due circuiti equivalenti
+possono essere scritti in modi diversi e offrire opportunità diverse al compilatore.
+Anche grafi simili possono comportarsi diversamente se cambiano gate,
+rumore, collegamenti hardware o passaggi di ottimizzazione.
+
+Nel progetto il recupero attuale usa 49 caratteristiche, trasformate e scalate sul
+solo train, e distanza Manhattan. Alcune caratteristiche sono già strutturali:
+program_communication, critical_depth, entanglement_ratio, parallelism e liveness.
+Non partiamo quindi da una descrizione priva di topologia. Tuttavia questi numeri
+aggregati non conservano tutta la sequenza e le dipendenze tra i gate.
+
+2. Due rappresentazioni complementari
+
+DAG delle operazioni. I nodi descrivono le operazioni di gate; gli archi descrivono il loro
+ordine lungo i fili e le dipendenze. La documentazione ufficiale Qiskit distingue
+DAGCircuit da DAGDependency: quest'ultimo rappresenta dipendenze legate alla mancata
+commutazione. Non sono rappresentazioni intercambiabili. Tra i due cambia quindi la rappresentazione
+della sequenza di gate: DAGCircuit conserva l'ordine dei gate (non significa che sia impossibile scambiarne l'ordine), DAGDependency invece
+rappresenta il grafo usando gli archi solo quando un certo ordinamento è necessario.[1]
+Ad esempio prendiamo questo circuito:
+q₀ ── H ── Rz(30°) ── Rz(60°) ── H ──
+
+Il grafo delle dipendenze DAGCircuit è questo:
+Ingresso q₀
+     │
+     ▼
+   A: H
+     │
+     ▼
+ B: Rz(30°)
+     │
+     ▼
+ C: Rz(60°)
+     │
+     ▼
+   D: H
+     │
+     ▼
+ Uscita q₀
+
+Il grafo delle dipendenze DAGDependency è questo:
+             A: H
+            /    \
+           ▼      ▼
+   B: Rz(30°)    C: Rz(60°)
+           \      /
+            ▼    ▼
+             D: H
+
+Significa che A deve essere per forza fatto prima di B e C, poi si può scegliere qualsiasi ordine per fare B e C, e poi prima di fare D devono essere stati completati sia B che C.
+
+Sono due rappresentazioni complementari, non è dimostrata una performance migliore in generale di una delle due.
+
+Proposta: Si può iniziare dal DAGCircuit prima del posizionamento sull'hardware ed etichettare
+i nodi con tipo di gate, numero di qubit coinvolti e parametri rilevanti. Conservare
+direzione, molteplicità e ruolo degli archi.
+
+Grafo delle interazioni: I nodi sono i qubit; un arco unisce qubit che interagiscono.
+Un peso può contare le interazioni. Questa rappresentazione descrive la richiesta
+di connettività, ma non tiene conto dell'ordine temporale. Il lavoro di Bandić, Almudever e Feld
+mostra correlazioni tra proprietà dei grafi delle interazioni e prestazioni del
+mapping su differenti configurazioni hardware. È una motivazione pertinente al
+nostro obiettivo; non dimostra che una specifica distanza migliorerà il nostro RAG. [2]
+
+Usando queste due rappresentazioni e iniettando questa informazione aggiuntiva nel prompt dell'LLM, potremmo avere un aumento dlele prestazioni (ovviamente da verificare).
+
+3. Metriche candidate
+
+A. Kernel Weisfeiler-Lehman (WL) normalizzato - proposta principale sui DAG
+WL confronta distribuzioni di strutture locali ottenute aggiornando le etichette
+dei nodi in base ai vicini. Il lavoro originale descrive kernel efficienti per grafi
+etichettati; il costo della costruzione delle caratteristiche cresce linearmente con
+archi e numero di iterazioni. Non è uno studio sulla compilazione quantistica. [3]
+La normalizzazione riduce il predominio della dimensione;
+però due circuiti con uguali proporzioni e dimensioni molto diverse possono sembrare
+vicini. Per questo terrei anche larghezza, profondità e numero assoluto di gate.
+
+È una distanza tra rappresentazioni, non una prova d'isomorfismo o equivalenza.
+WL può assegnare la stessa rappresentazione a grafi diversi.
+
+B. Distanza di modifica del grafo (Graph Edit Distance, GED)
+Misura il costo minimo di inserzioni, cancellazioni e sostituzioni di nodi e archi.
+NetworkX documenta costi personalizzabili e un limite di tempo; la soluzione esatta
+è onerosa perché il problema è NP-hard. [4]
+
+Proposta: usarla solo su piccoli DAG o per riordinare una breve lista preliminare.
+
+C. Rappresentazione appresa da esempi di compilazione
+Un Graph Transformer è stato usato per predire la fedeltà a partire da grafi con
+informazioni sui gate e sul rumore. Il lavoro dimostra una possibilità di
+apprendimento in quel contesto; non dimostra direttamente la bontà del recupero
+di esempi per il nostro LLM. [5]
+
+Proposta: apprendere una rappresentazione in cui siano vicini i circuiti
+con profili di compilazione simili. Nel nostro caso ci sono 396 circuiti train
+distinti: una rete complessa avrebbe un rischio concreto di adattarsi troppo a quei
+casi.
+
+4. Idee anche per LLM senza RAG e per la risposta
+
+Fornire caratteristiche strutturali più informative sui circuiti e descrizioni concise degli effetti delle configurazioni potrebbe aiutare l'LLM nella scelta.
+Aggiungiere quindi una rappresentazione del grafo delle interazioni del circuito può essere una proposta sensata.
+Il grafo delle interazioni aggiunge un punto di vista utile sul routing.
+
+
+[1] IBM Quantum, Qiskit: DAG Circuits. Documentazione software corrente.
+https://quantum.cloud.ibm.com/docs/en/api/qiskit/dagcircuit
+
+[2] M. Bandić, C. G. Almudever, S. Feld.
+Interaction graph-based characterization of quantum benchmarks for improving
+quantum circuit mapping techniques. Quantum Machine Intelligence 5, 40 (2023);
+versione arXiv v3 del 2024.
+https://arxiv.org/abs/2212.06640v3
+https://doi.org/10.1007/s42484-023-00124-1
+
+[3] N. Shervashidze et al., Weisfeiler-Lehman Graph Kernels.
+Journal of Machine Learning Research 12(77), 2539-2561 (2011).
+https://jmlr.org/papers/v12/shervashidze11a.html
+
+[4] NetworkX, Similarity Measures e graph_edit_distance. Documentazione ufficiale.
+https://networkx.org/documentation/stable/reference/algorithms/similarity.html
+https://networkx.org/documentation/networkx-3.1/reference/algorithms/generated/networkx.algorithms.similarity.graph_edit_distance.html
+
+[5] H. Wang et al., Graph Transformer for Quantum Circuit Reliability Prediction,
+ICCAD 2022. Copia del lavoro sul sito del gruppo MIT.
+https://qmlsys.mit.edu/wp-content/uploads/2022/09/ICCAD2022_Transformer.pdf

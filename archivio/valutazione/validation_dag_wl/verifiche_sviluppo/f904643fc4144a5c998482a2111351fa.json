@@ -1,0 +1,25 @@
+{
+  "at": "2026-09-29T08:32:02.426296+00:00",
+  "kind": "development_train_representation_check",
+  "records": 396,
+  "max_nodes": 4326,
+  "seconds": 4.591730119999738,
+  "representation": {
+    "revision": "dag-wl-v1",
+    "dag": "qiskit.DAGCircuit",
+    "decomposition": "none; original parsed QASM operations",
+    "nodes": "quantum/classical inputs, outputs, original operations including barriers",
+    "labels": "operation name, arity, control state, numeric parameters binned at pi/8",
+    "parameters": "nearest integer bin, ties away from zero; no periodic wrapping",
+    "edges": "directed multiset, quantum/classical type, local source/target operand positions",
+    "symmetric_barrier_ports": true,
+    "wire_names_in_labels": false,
+    "kernel": "normalized sum of WL count inner products for rounds 0..h",
+    "max_h": 3,
+    "k": 5,
+    "tie_break": "rag_id ascending",
+    "summary": "dag-summary-v1; at most 8 operation-to-operation transitions"
+  },
+  "validation_ranking_executed": false,
+  "test_executed": false
+}

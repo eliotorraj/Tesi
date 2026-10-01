@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hardware_mask_result.schema.json",
+  "title": "Hardware mask result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_snapshot_id",
+    "ordered_device_ids",
+    "mask",
+    "eligible_device_ids",
+    "excluded_devices",
+    "effective_min_qubits",
+    "normalized_constraints"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "catalog_snapshot_id": {
+      "type": "string",
+      "pattern": "^(hardware_catalog_[0-9a-f]{64}|ad_hoc_catalog)$"
+    },
+    "ordered_device_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "mask": {
+      "type": "array",
+      "items": {"type": "boolean"}
+    },
+    "eligible_device_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "excluded_devices": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["device_id", "reason_codes"],
+        "properties": {
+          "device_id": {"type": "string", "minLength": 1},
+          "reason_codes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "PROVIDER_NOT_ALLOWED",
+                "DEVICE_NOT_ALLOWED",
+                "INSUFFICIENT_QUBITS_FOR_CIRCUIT",
+                "BELOW_USER_MIN_QUBITS",
+                "ABOVE_USER_MAX_QUBITS",
+                "MISSING_REQUIRED_NATIVE_GATE",
+                "FIGURE_OF_MERIT_NOT_SUPPORTED",
+                "TARGET_NOT_AVAILABLE"
+              ]
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "actual_provider_id": {"type": "string", "minLength": 1},
+              "allowed_provider_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {"type": "string", "minLength": 1}
+              },
+              "allowed_device_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {"type": "string", "minLength": 1}
+              },
+              "circuit_num_qubits": {"type": "integer", "minimum": 1},
+              "device_num_qubits": {"type": "integer", "minimum": 1},
+              "requested_min_qubits": {"type": "integer", "minimum": 1},
+              "requested_max_qubits": {"type": "integer", "minimum": 1},
+              "missing_native_gate_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {"type": "string", "minLength": 1}
+              },
+              "figure_of_merit_id": {"type": "string", "minLength": 1},
+              "supported_figure_of_merit_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {"type": "string", "minLength": 1}
+              },
+              "target_unavailability_code": {
+                "const": "TARGET_LOAD_FAILED"
+              },
+              "target_load_error_type": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "effective_min_qubits": {"type": "integer", "minimum": 1},
+    "normalized_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allowed_provider_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+        },
+        "allowed_device_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+        },
+        "device_qubits": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "min": {"type": "integer", "minimum": 1},
+            "max": {"type": "integer", "minimum": 1}
+          }
+        },
+        "required_native_gate_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+        }
+      }
+    }
+  }
+}

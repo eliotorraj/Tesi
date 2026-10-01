@@ -1,0 +1,12 @@
+Compilazione del confronto a cinque sistemi
+Traceback (most recent call last):
+  File "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report/genera_confronto_cinque.py", line 131, in <module>
+    main()
+  File "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report/genera_confronto_cinque.py", line 127, in main
+    print(build(args.baseline,args.riepilogo,args.output))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report/genera_confronto_cinque.py", line 97, in build
+    compile_document(dest,"Confronto di cinque sistemi sul Test",body)
+  File "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report/impaginazione.py", line 158, in compile_document
+    raise RuntimeError('Errore LaTeX: '+str(latex/'compilazione_latex.log'))
+RuntimeError: Errore LaTeX: /home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report_generati/confronto_cinque_sistemi/b75e2750e0e060ae/confronto/latex/compilazione_latex.log

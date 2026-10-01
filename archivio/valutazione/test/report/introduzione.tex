@@ -1,0 +1,39 @@
+\section{Introduzione al Test}
+Il Test valuta la capacità di scegliere un dispositivo e una procedura di
+compilazione per un circuito quantistico mai usato per scegliere le impostazioni
+del sistema. Confrontiamo quattro soluzioni: LLM + RAG, lo stesso LLM senza
+esempi (LLM no RAG), MQT Predictor e una scelta casuale, indicata come Random.
+L'obiettivo è capire se gli esempi di compilazioni precedenti aiutano il modello
+linguistico a prendere decisioni migliori e quale costo comporta questo aiuto.
+
+La valutazione riguarda 90 circuiti riservati al Test. Gli altri 510 circuiti
+del corpus sono stati destinati al train (422) e alla validation (88).
+Il train fornisce gli esempi e i dati di apprendimento; la validation ha guidato
+la scelta della configurazione LLM. Nel Test le impostazioni sono già fissate.
+Per ciascun circuito e sistema è prevista una sola compilazione.
+
+Osserviamo tre aspetti complementari. Il primo è la \textbf{qualità}, espressa
+dallo score \emph{expected fidelity}: un valore fra 0 e 1 che stima la fedeltà
+del circuito compilato, dove un valore maggiore è migliore. Il secondo è la
+\textbf{riuscita}: quanti circuiti arrivano a una compilazione valida e quanti
+terminano con un errore o oltre il tempo disponibile. Il terzo è il
+\textbf{costo di esecuzione}: tempo totale, tempo del compilatore e, per gli
+LLM, tempo di risposta, token utilizzati e richieste di correzione.
+Queste misure vanno lette insieme: uno score elevato sui soli casi riusciti
+non descrive da solo l'utilità di un sistema.
+
+Prima del Test, l'aspettativa di lavoro era che LLM + RAG ottenesse score
+migliori di LLM no RAG e Random, grazie agli esempi pertinenti. Ci si aspettava
+inoltre che MQT Predictor, essendo progettato e addestrato per questo compito,
+offrisse il risultato complessivamente migliore, anche nei tempi.
+Non era stato anticipato un costo temporale di RAG vicino al doppio di quello
+del modello senza esempi. Queste aspettative, qui esplicitate dall'autore
+nella revisione del report, sono una chiave di lettura dei risultati;
+non costituiscono ipotesi statistiche preregistrate.
+
+La qualità è stimata con proprietà sintetiche dei dispositivi, usando la stessa
+metrica di MQT Predictor 2.4.0 per tutti i metodi. Non si tratta di esecuzioni
+su un computer quantistico reale. Nelle pagine seguenti descriviamo prima
+le impostazioni dei quattro sistemi, poi i risultati in tabelle e grafici,
+e infine le conclusioni. L'appendice conserva i valori di ogni circuito.
+

@@ -1,15 +1,51 @@
 # Protocollo sperimentale corrente
 
-Documento operativo aggiornato il **21 settembre 2026**. L'esperimento sui
+Documento operativo aggiornato il **25 settembre 2026**. L'esperimento sui
 circuiti mantiene l'identità **2.0.0**, con MQT Predictor **2.4.0**. La selezione
 LLM ufficiale è **local-llm-v2**, con contratto di risposta **4.0.0**.
 Questi numeri indicano tre cose diverse. La selezione locale v1 è storica.
 
-Questa guida conserva le regole della validation e introduce il Test indipendente
-delle sezioni 7–10. Non avvia il Test e non cambia le partizioni. Il testo precedente, con la cronologia
-degli emendamenti e tutti i vecchi comandi, è conservato integralmente in
+Questa guida conserva le regole della validation e del Test indipendente.
+L'aggiornamento del 25 settembre documenta lo stato delle esecuzioni e la
+riorganizzazione delle cartelle. Non cambia partizioni, prompt, criteri di
+selezione o risultati e non avvia nuove prove. Il testo storico, con la
+cronologia degli emendamenti, resta in
 [archivio](../../archivio/esperimento_v2/docs/protocollo_sperimentale.md).
-Per percorrere le fasi nell'ordine leggere la [guida pratica](guida_passo_passo.md).
+Per provare il framework leggere la [guida pratica](guida_passo_passo.md).
+
+## Stato verificato al 25 settembre 2026
+
+La validation `local-llm-v2` è conclusa. Il Test è **già stato aperto**:
+non è corretto descriverlo ancora come un insieme mai valutato. Nei registri
+locali sono presenti queste esecuzioni:
+
+| Area | Metodo | Avvio registrato, UTC | Esiti salvati / casi previsti |
+| --- | --- | --- | --- |
+| Test ufficiale | LLM + RAG | 21 settembre 2026 | 90 / 90 |
+| Test ufficiale | LLM senza RAG | 21 settembre 2026 | 90 / 90 |
+| Test ufficiale | Random | 21 settembre 2026 | 90 / 90 |
+| Test ufficiale | MQT Predictor | Nessun registro locale presente | Non disponibile |
+| Prova MQT esplorativa separata | MQT Predictor | 24 settembre 2026 | 90 / 90 |
+
+Le fonti sono i file `risultati/<metodo>/esecuzione.json` e la presenza dei
+90 file `circuiti/<id>/esito.json` nelle rispettive aree. **Un esito salvato
+non implica un successo**: comprende anche errori, timeout e interruzioni.
+Questo controllo dello stato non ricalcola né interpreta gli score.
+L'assenza del registro MQT ufficiale riguarda questo clone; non certifica
+lo stato di altri computer.
+
+Gli strumenti e i registri del confronto ufficiale sono in
+[`archivio/valutazione/test/`](../../archivio/valutazione/test/README.md).
+La prova MQT separata è in
+[`archivio/valutazione/test_mqt_esplorativo/`](../../archivio/valutazione/test_mqt_esplorativo/README.md).
+Il suo selettore incompleto non sostituisce quello richiesto dal confronto
+ufficiale. Le deroghe sono descritte nella sezione 7.
+
+I contratti, i piani e i registri già salvati conservano le impronte e i
+percorsi originali. Lo spostamento delle cartelle non riscrive queste prove
+né rende le nuove revisioni identiche al codice usato nelle esecuzioni.
+Una divergenza delle impronte deve restare visibile; non si rigenera il
+contratto per aggirare il controllo o ripetere casi già conclusi.
 
 ## 1. Domanda della tesi e unità di confronto
 
@@ -35,9 +71,12 @@ Test serve una sola volta per il confronto finale dopo tutti i controlli.
 **Dataset** indica gli esempi per RAG/LLM. **Training set** indica i dati
 circuito-dispositivo per il selettore supervisionato MQT.
 Il RAG usa **396 circuiti train distinti per SHA-256**: i 26 alias byte-identici
-non diventano nuovi esempi. Anche il selettore ML usa un solo campione per
+non diventano nuovi esempi. Il Training set previsto per il selettore ML usa
+un solo campione per
 ciascuno degli stessi 396 hash train, con 1.878 coppie compatibili sui cinque
-dispositivi. Il corpus verificato resta quello dei 422 file originali. Per ogni
+dispositivi. Sono i requisiti della raccolta completa, distinti dalla copertura
+effettiva del selettore esplorativo descritto nella sezione 7.
+Il corpus verificato resta quello dei 422 file originali. Per ogni
 hash il rappresentante è il nome file lessicograficamente minimo; una mappa
 conserva tutti i 26 alias. La deduplicazione precede compilazione, costruzione
 degli array, validazione incrociata interna e fit finale del selettore.
@@ -187,7 +226,9 @@ seed 20260913, intervalli al 95% e denominatori dichiarati.
 ## 6. MQT Predictor prima del confronto finale
 
 MQT 2.4.0 richiede cinque politiche RL, una per dispositivo, e un classificatore
-supervisionato che scelga tra tutti e cinque. Non basta installare il pacchetto.
+supervisionato. Le classi del classificatore corrispondono ai dispositivi
+effettivamente vincitori nel Training set: non devono essere necessariamente
+tutte e cinque. Non basta installare il pacchetto.
 Target di addestramento RL: 100.000 passi; contatore atteso a fine rollout:
 100.352. Il Training set conserva le prove circuito-dispositivo; l'etichetta
 supervisionata finale è il dispositivo migliore fra quelli valutati.
@@ -195,7 +236,7 @@ Servono anche cinque prove minime RL e una prova completa `qcompile` riuscite.
 Un modello addestrato solo per una prova tecnica non dimostra qualità.
 Lo stato effettivo dei modelli va verificato dagli artefatti, non dedotto dai log.
 
-## 7. Preparazione al Test indipendente
+## 7. Regole del Test indipendente
 
 **Emendamento del 21 settembre 2026, prima della valutazione Test.**
 Il confronto comprende esattamente quattro metodi: **LLM + RAG, stesso LLM
@@ -204,7 +245,7 @@ baseline Qiskit fisse sono esclusi dal nuovo piano. La loro verifica non
 è più un prerequisito. Le analisi storiche della validation restano immutate.
 
 Il problema del vecchio `scripts/15_release_test_v2.py` è risolto nel nuovo
-percorso operativo: `prototipo/test/strumenti/gates.py` consulta direttamente
+percorso operativo: `archivio/valutazione/test/strumenti/gates.py` consulta direttamente
 `studies/local-llm-v2/`, verifica studio, configurazione finale, selezione,
 sigilli dei modelli e impronte degli input e dei risultati della validation.
 Non usa `llm_selection.finalize` né il record globale v1. Lo script archiviato
@@ -212,14 +253,15 @@ rimane una fonte storica; non è il comando di apertura del Test corrente.
 
 I controlli comuni verificano versioni pertinenti, cinque Target, corpus,
 partizioni, catalogo, fonte RAG train e selezione v2. Il piano corrente è
-`prototipo/test/piano.json`. Il primo `--esegui` congela il contratto con
+`archivio/valutazione/test/piano.json`. Il primo `--esegui` congela il contratto con
 impronte di codice, piano, configurazione, fonte e RAG. Gli avvii successivi
 devono coincidere. Non si riutilizzano i vecchi piani con frontiera e oracle
 come concorrenti. La preparazione non richiede nuovi punteggi Test.
 
 **I requisiti MQT sono specifici di MQT.** La mancanza del classificatore non
 impedisce gli altri tre Test. Prima del Test MQT servono cinque RL conformi,
-un selettore a cinque classi addestrato sugli stessi RL e sul solo train,
+un selettore addestrato sugli stessi RL e sul solo train, con le classi effettivamente
+osservate tra i dispositivi vincitori (un sottoinsieme non vuoto dei cinque ammessi),
 copie runtime identiche, cinque prove RL e una prova completa ML+RL.
 L'identità dei modelli viene registrata e verificata alla ripresa.
 
@@ -228,6 +270,35 @@ ufficiali e contesto desktop 60.000. All'avvio si verificano GGUF, dimensione,
 SHA-256 e modello dichiarato dal server. Il profilo laptop ridotto non
 appartiene alla valutazione finale. La prova tecnica senza/con RAG può
 essere eseguita su Bell tramite `--tecnico`.
+
+### Prova MQT esplorativa del 24 settembre
+
+Il [piano separato](../../archivio/valutazione/test_mqt_esplorativo/piano.json)
+identifica la prova `mqt-esplorativo-384-v1`. Usa un selettore addestrato su
+**384 dei 396 campioni train previsti**, con 12 esclusioni. La raccolta ha
+**1.853 compilazioni riuscite sulle 1.878 coppie previste** e combina tentativi
+con limite di 100 secondi e recuperi a 300 secondi, nel profilo
+`adaptive-100-then-300-v1`. Non si presenta questa raccolta come conforme
+alla completezza e al protocollo congelato del selettore ufficiale.
+
+Il selettore ha quattro classi osservate. Falcon 27 resta fra i cinque modelli
+RL, ma non ha etichette vincenti. Questo non richiede classi artificiali:
+il requisito corretto ammette un sottoinsieme non vuoto dei cinque dispositivi.
+La voce storica `all five classes` tra le deroghe del piano conserva la
+formulazione iniziale; non introduce una regola diversa per il Test ufficiale.
+
+La prova mantiene i medesimi 90 circuiti Test, una compilazione per circuito,
+Target, metrica e timeout di valutazione di 100 secondi. I 300 secondi
+riguardano la raccolta train, non il Test. Restano i controlli di provenienza,
+versioni, hash e identità dei cinque RL. Il classificatore viene caricato
+dal runtime locale della prova, separato da quello ufficiale.
+
+Il [resoconto della prova](../../archivio/valutazione/test_mqt_esplorativo/SVILUPPO.md)
+conserva la correzione tecnica del tipo passato a `rl_compile`: un Target,
+non il suo nome. Sono conservate sia le prime sei prove Bell fallite sia
+le sei successive riuscite. La modifica non dimostra qualità sul Test.
+I risultati esplorativi rimangono separati, con il proprio contratto, anche
+quando compaiono in un rapporto descrittivo insieme agli altri tre metodi.
 
 ### Contratto senza RAG
 
@@ -245,7 +316,8 @@ Nessuna regola viene scelta in base ai risultati Test.
 
 ## 8. Esecuzioni autonome
 
-Ogni metodo ha un proprio script in `prototipo/test/`:
+Ogni metodo ha un proprio script nell'area sperimentale
+`archivio/valutazione/test/`, separata dall'avvio del prototipo:
 
 | Metodo | Script | Risultati |
 | --- | --- | --- |
@@ -346,8 +418,21 @@ e `latex/` sono distinte sotto `analisi/<impronta>/`.
 è compilabile autonomamente con TeX Live e PGFPlots. Se pdflatex è presente
 si produce anche il PDF. Dati e versione del generatore identificano l'analisi.
 
-`prototipo/test/analizza.py` legge soltanto risultati già salvati.
-Non avvia metodi mancanti. Il confronto dichiara metodi disponibili,
+`archivio/valutazione/test/analizza.py` legge soltanto risultati già salvati.
+Non avvia metodi mancanti. Il generatore completo in
+[`archivio/valutazione/test/report/`](../../archivio/valutazione/test/report/README.md)
+produce inoltre rapporti per sistema e un confronto, con copie dei sorgenti
+del generatore e impronte di provenienza. Gli output sono in `report_generati/`.
+
+Se è presente l'area MQT esplorativa, il generatore completo la seleziona al
+posto dell'eventuale registro MQT ufficiale; le due esecuzioni non vengono
+sommate. La dicitura **MQT Predictor (espl.)** e i limiti del suo Training set
+accompagnano tabelle e grafici. Il rapporto così ottenuto non certifica il
+completamento dei quattro metodi conformi al contratto originale.
+La soglia grafica di score **0,8** è una scelta descrittiva successiva al Test;
+non è un criterio usato per scegliere il modello o per dichiarare successo.
+
+Il confronto dichiara metodi disponibili,
 circuiti conclusi, successi, fallimenti e insieme comune. La differenza
 di score è calcolata sui successi comuni, mantenendo l'appaiamento per
 circuito. Non si confrontano soltanto medie con denominatori differenti.
@@ -360,15 +445,29 @@ Il vecchio piano di 14 test sul regret non si applica al nuovo insieme
 di metodi e all'oracle facoltativo. Non si dichiara superiorità statistica
 sulla base di queste sole analisi descrittive.
 
-Tutti i cambiamenti sono stabiliti prima del Test. L'esposizione storica
-dei due circuiti ricordata nella sezione 2 resta un limite dichiarato;
+Le regole del confronto indipendente sono quelle dell'emendamento del
+21 settembre, precedente al primo avvio registrato. La prova MQT esplorativa
+e le successive scelte di presentazione sono dichiarate separatamente e
+non diventano retroattivamente regole stabilite prima del Test.
+L'esposizione storica dei due circuiti ricordata nella sezione 2 resta un
+limite dichiarato;
 non viene cancellata dall'emendamento. Un'eventuale analisi che li escluda
 deve essere secondaria, separata e dichiarata.
 
 ## 11. Dimostrazione e tracciabilità
 
-`prototipo/` è una dimostrazione autonoma del modello selezionato. Il profilo
-portatile modifica le risorse e il contesto: non è una replica della validation.
+`prototipo/` contiene il framework eseguibile dall'ingresso del circuito alla
+compilazione, con configurazione, dati train necessari al RAG, dipendenze e
+documentazione corrente. Gli strumenti di validation, Test, addestramento,
+correzione e analisi sono conservati in `archivio/`.
+
+`archivio/esperimento_v2/` mantiene il corpus e l'ambiente congelato senza
+modifiche ai riferimenti logici. `archivio/valutazione/` raccoglie il Test
+indipendente, la prova MQT esplorativa, l'addestramento operativo e le prove
+successive del prototipo. I README spiegano lo scopo delle cartelle; questa
+cartella `prototipo/docs/` conserva protocollo, guida e documenti tecnici.
+Il profilo portatile modifica le risorse e il contesto: non è una replica
+della validation.
 Una prova su un nuovo circuito tecnico non apre il Test e non prova qualità generale.
 L'archivio conserva codice, dati, tentativi sfavorevoli, sigilli, rapporti LaTeX,
 figure e procedure originali. Le copie congelate non vengono ottimizzate in-place.

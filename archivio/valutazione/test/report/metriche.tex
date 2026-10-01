@@ -1,0 +1,69 @@
+\subsection{Esiti, costi e unità statistica}
+Un successo è un episodio terminato con un circuito compilato, eseguibile sul
+Target, e score finito. I controlli del procedimento conservato verificano queste
+condizioni prima di pubblicare \texttt{success}. Qualsiasi esito terminale senza
+compilazione valida è un fallimento, indipendentemente dalla causa: errore,
+timeout o interruzione. I circuiti ancora senza esito sono pendenti e non diventano
+fallimenti. Il numero di successi e fallimenti è un conteggio, non una media.
+
+L'unità statistica è il circuito. Se sono conservati più episodi indipendenti
+dello stesso circuito e metodo, si calcola prima la media delle misure note del
+circuito e poi la media fra circuiti, con un peso uguale per ciascuno. I tentativi
+di correzione dello stesso episodio non sono repliche. Lo score del circuito è
+la media dei soli episodi riusciti: gli episodi falliti restano nei conteggi,
+senza assegnare loro zero. La somma dei costi riguarda invece tutti gli episodi
+misurati. Il piano corrente prevede un episodio per circuito; la capacità del
+generatore di leggere più episodi non autorizza nuove ripetizioni del Test.
+
+\paragraph{Retry e token.}
+Un retry è una chiamata LLM aggiuntiva oltre la prima nello stesso episodio:
+\(r=\max(0,N_{\mathrm{chiamate}}-1)\). Il costo in token somma ingresso e uscita
+di tutte le chiamate, comprese le correzioni e i tentativi falliti quando
+misurabili. L'ingresso è il prompt completo tokenizzato, anche quando il server
+riusa una cache; l'uscita è il conteggio restituito dal server. Un token ignoto
+non vale zero. Le somme parziali note dei token sono conservate separatamente.
+Token, retry e risposta LLM non si applicano a Random e MQT Predictor.
+
+\paragraph{Tempi.}
+Il tempo totale decorre dall'ingresso del circuito nella procedura fino all'esito
+misurato: include lettura e preparazione, recupero RAG, chiamate, correzioni,
+avvio del processo, compilazione e controlli. Il cronometro si ferma prima del
+riepilogo finale dei token e della scrittura di \texttt{esito.json}; non include
+avvio del server, controlli preliminari di tutta l'esecuzione o generazione di
+questo rapporto. La somma di questi tempi è un costo cumulativo, non il tempo
+trascorso sul calendario fra due avvii o sessioni.
+
+Il tempo interno di compilazione misura soltanto \texttt{transpile} o
+\texttt{rl\_compile}. Il tempo del processo comprende anche importazioni, avvio,
+controlli e salvataggi. Se il processo termina per timeout senza pubblicare la
+misura interna, quella durata resta mancante: il limite di 100 s non viene
+sostituito al tempo del compilatore. La risposta LLM misura l'intervallo fra
+invio della generazione e ricezione della risposta completa; con più chiamate
+si riporta la loro somma. Si tratta della latenza osservata dal client, non del
+solo calcolo dei token. Tutti i tempi sono in secondi, misurati con
+\texttt{perf\_counter}.
+
+\paragraph{Copertura.}
+Il simbolo -- indica misura mancante o non applicabile; le didascalie distinguono
+i casi. Ogni media dichiara quanti circuiti hanno almeno una misura e ogni
+riepilogo dichiara gli episodi misurati sul totale pertinente. Una media basata
+su misure parziali resta tale; i file leggibili da programma indicano anche
+quanti episodi mancano per ogni circuito. Non si eliminano gli esiti sfavorevoli.
+
+\subsection{Confronto di qualità}
+La media descrittiva di un metodo usa i suoi successi. Per confrontare due metodi
+si usano soltanto i circuiti con uno score disponibile per entrambi, mantenendo
+l'appaiamento per identificativo e SHA-256. I fallimenti restano visibili nella
+tabella di affidabilità; il confronto sui successi comuni è condizionato alla
+riuscita e non li sostituisce. Con episodi ripetuti, un circuito misto entra con
+la media dei suoi successi e i fallimenti restano dichiarati.
+
+Per ogni confronto con LLM + RAG si calcola
+\(\Delta_c=s_{c,\mathrm{RAG}}-s_{c,\mathrm{altro}}\).
+Il piano descrittivo usa 10000 ricampionamenti appaiati con reinserimento dei
+circuiti, seed 20260901 e intervallo percentile al 95\% della differenza media.
+Con meno di due circuiti comuni l'intervallo non viene stimato. Non si eseguono
+test confermativi né si applica il precedente piano sul regret della validation.
+L'intervallo descrive la variabilità fra i circuiti osservati: non comprende la
+variabilità di nuove esecuzioni, hardware diversi o altre scelte di Random.
+Non si dichiara superiorità statistica sulla base di queste sole analisi.

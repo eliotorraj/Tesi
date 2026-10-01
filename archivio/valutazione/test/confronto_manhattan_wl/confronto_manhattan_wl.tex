@@ -1,0 +1,609 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}\usepackage[italian]{babel}
+\usepackage{lmodern,booktabs,tabularx,longtable,array,amsmath,xcolor,pgfplots,xurl,hyperref,fancyvrb}
+\usepackage[expansion=false]{microtype}
+\usetikzlibrary{arrows.meta,positioning}
+\pgfplotsset{compat=1.18}
+\definecolor{kuno}{HTML}{167D9A}\definecolor{kcinque}{HTML}{D47A17}\definecolor{kdieci}{HTML}{7656A3}
+\hypersetup{hidelinks}\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{3em}
+\begin{document}
+
+{\LARGE\bfseries Recuperare esempi dalla struttura dei circuiti}\par
+{\Large RAG Manhattan, RAG WL e RAG WL con sintesi}\par\medskip
+\section{L'idea: dalla distanza fra caratteristiche alle dipendenze}
+Un buon esempio storico dovrebbe aiutare a scegliere dispositivo e configurazione
+per il circuito corrente. Il recupero classico confronta 49 caratteristiche numeriche,
+trasformate usando il train, con la distanza Manhattan.
+La nuova idea è rappresentare le dipendenze fra le operazioni e confrontare i grafi.
+La nostra ipotesi è che circuiti con strutture simili possano richiedere scelte di
+compilazione simili.
+
+Qiskit rappresenta il circuito come \texttt{DAGCircuit}, un grafo diretto senza
+cicli: le operazioni sono nodi e i fili collegano operazioni successive.
+Una porta su due qubit è un solo nodo con due fili in ingresso e in uscita
+\cite{qiskit}. Il DAG rappresenta precedenze; non è il grafo di connessione del dispositivo.
+
+\subsection{Un esempio concreto: stesse porte, ordine diverso}
+In A la porta Z segue CX sul secondo qubit; in B la precede.
+I due circuiti hanno due qubit e le stesse tre porte, ma il loro DAG cambia.
+I nodi $I_i$ e $O_i$ sono ingressi e uscite. I colori servono soltanto a leggere il disegno.
+\begin{minipage}{.49\linewidth}\centering\textbf{A: Z dopo CX}\par\medskip\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]\draw (0,0)--(4.2,0);\draw (0,-.8)--(4.2,-.8);\node[left] at (0,0){$q_0$};\node[left] at (0,-.8){$q_1$};\node[draw,fill=white,minimum size=.45cm] at (1.2,0){H};\draw (2.5,0)--(2.5,-.8);\fill (2.5,0) circle (2.5pt);\draw (2.5,-.8) circle (5pt);\draw (2.5,-1)--(2.5,-.6);\node[draw,fill=white,minimum size=.45cm] at (3.5,-.8){Z};\end{tikzpicture}\par\medskip\begin{tikzpicture}[x=.85cm,y=.8cm,>=Stealth,n/.style={draw,rounded corners,fill=white,minimum size=.5cm,font=\small}]\node[n] (i0) at (0,1){$I_0$};\node[n] (i1) at (0,-1){$I_1$};\node[n,fill=kuno!15] (h) at (1.3,1){H};\node[n,fill=kcinque!20] (c) at (2.7,0){CX};\node[n] (o0) at (5.1,1){$O_0$};\node[n] (o1) at (5.1,-1){$O_1$};\node[n,fill=kdieci!15] (z) at (3.8,-1){Z};\draw[->] (i0)--(h);\draw[->] (h)--(c);\draw[->] (c)--(o0);\draw[->] (i1)--(c);\draw[->] (c)--(z);\draw[->] (z)--(o1);\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\textbf{B: Z prima di CX}\par\medskip\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]\draw (0,0)--(4.2,0);\draw (0,-.8)--(4.2,-.8);\node[left] at (0,0){$q_0$};\node[left] at (0,-.8){$q_1$};\node[draw,fill=white,minimum size=.45cm] at (1.2,0){H};\draw (2.5,0)--(2.5,-.8);\fill (2.5,0) circle (2.5pt);\draw (2.5,-.8) circle (5pt);\draw (2.5,-1)--(2.5,-.6);\node[draw,fill=white,minimum size=.45cm] at (1.2,-.8){Z};\end{tikzpicture}\par\medskip\begin{tikzpicture}[x=.85cm,y=.8cm,>=Stealth,n/.style={draw,rounded corners,fill=white,minimum size=.5cm,font=\small}]\node[n] (i0) at (0,1){$I_0$};\node[n] (i1) at (0,-1){$I_1$};\node[n,fill=kuno!15] (h) at (1.3,1){H};\node[n,fill=kcinque!20] (c) at (2.7,0){CX};\node[n] (o0) at (5.1,1){$O_0$};\node[n] (o1) at (5.1,-1){$O_1$};\node[n,fill=kdieci!15] (z) at (1.3,-1){Z};\draw[->] (i0)--(h);\draw[->] (h)--(c);\draw[->] (c)--(o0);\draw[->] (i1)--(z);\draw[->] (z)--(c);\draw[->] (c)--(o1);\end{tikzpicture}\end{minipage}\hfill\par\medskip
+Nel codice si conservano anche misura, barriere e fili classici. Le frecce
+rispettano il verso del circuito. Non si decompongono le porte originali del QASM:
+anche il modo in cui il circuito è scritto può quindi influire sulla somiglianza.
+
+\clearpage\section{WL, spiegato attraverso i due grafi}
+Weisfeiler--Lehman (WL) costruisce descrizioni locali sempre più ampie:
+ogni nodo parte da un'etichetta e, a ogni giro, la aggiorna usando le etichette
+dei vicini. Si contano poi le etichette ottenute per confrontare i grafi
+\cite{wl}. La versione usata qui è un adattamento diretto e con archi etichettati.
+
+\textbf{Giro 0.} H, CX e Z sono riconosciute dal tipo di operazione.
+Nei due piccoli grafi il conteggio iniziale è uguale.
+
+\textbf{Giro 1.} Ogni nodo guarda separatamente chi lo precede e chi lo segue.
+Il nodo CX di A vede Z fra i successori; quello di B la vede fra i predecessori.
+Le sue nuove etichette sono diverse. Anche Z cambia contesto.
+H vede invece ingresso e CX in entrambi i grafi: la sua etichetta resta uguale fra A e B.
+
+\textbf{Giro 2.} H riceve ora la diversa etichetta del vicino CX.
+La differenza si propaga quindi anche a H. I giri successivi raccolgono
+informazione a distanza crescente; non aggiungono operazioni al circuito.
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Nodo & Giro 0, A/B & Giro 1, A/B & Giro 2, A/B\\\midrule
+H & uguale & uguale & diversa\\
+CX & uguale & diversa & diversa\\
+Z & uguale & diversa & diversa\\
+\bottomrule\end{tabularx}\endgroup\par
+\subsection{Che cosa calcola la nostra implementazione}
+Le etichette iniziali contengono nome della porta, numero di operandi,
+stato dei controlli e parametri numerici raggruppati in intervalli di $\pi/8$.
+I nomi assoluti dei qubit non entrano nelle etichette. Gli archi conservano
+tipo quantistico/classico e posizione locale dell'operando: per CX si distinguono
+controllo e bersaglio. Le porte delle barriere sono trattate simmetricamente.
+Archi ripetuti non vengono eliminati.
+
+Una nuova etichetta riassume quella precedente e i due insiemi con molteplicità
+di vicini entranti e uscenti, includendo le etichette degli archi.
+Le stesse descrizioni ricevono gli stessi identificativi anche in grafi diversi.
+Se $\phi_r(G)$ conta le etichette al giro $r$, la similarità è:
+\[
+s_h(G,H)=
+\frac{\sum_{r=0}^{h}\langle\phi_r(G),\phi_r(H)\rangle}
+{\sqrt{\sum_{r=0}^{h}\|\phi_r(G)\|^2}
+ \sqrt{\sum_{r=0}^{h}\|\phi_r(H)\|^2}}.
+\]
+Si recuperano i cinque esempi train compatibili con similarità maggiore;
+le parità sono ordinate per identificativo RAG. Nei Test si usa $h=24$:
+il confronto combina il giro iniziale e 24 aggiornamenti.
+La normalizzazione attenua l'effetto della dimensione, ma non lo elimina.
+
+\textbf{Limite della misura.} Similarità alta non significa equivalenza
+quantistica, stessa fedeltà o stessa scelta ottimale. WL può non distinguere
+alcuni grafi diversi. Il risultato dipende da etichette, parametri raggruppati,
+porte originali e profondità scelta. Queste sono decisioni della nostra
+implementazione, non conclusioni del lavoro teorico citato.
+
+\clearpage\section{Validation e confronto controllato}
+Prima dei nuovi Test è stato scelto il numero di giri usando gli 88
+circuiti di validation, separati dai 90 circuiti Test.
+La ricerca è stata estesa prima a 6 e poi a 30 giri, dopo aver osservato
+i risultati precedenti. Si tratta quindi di una selezione adattiva sugli stessi 88 casi.
+
+La validation non chiamava l'LLM. Recuperava esempi e valutava la coppia al primo
+posto del primo esempio sui risultati di compilazione già archiviati del circuito
+di validation. Lo score era la mediana dei semi 0, 1 e 2, per coppie con tre successi.
+Il \emph{regret} era la differenza dal migliore score osservato disponibile.
+In 70 casi le matrici erano incomplete: il riferimento non è un ottimo globale certo.
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Metodo & Score medio & Regret medio & Confronto (s)\\\midrule
+Manhattan & 0,778026 & 0,013637 & 0,008\\
+$h=1$ & 0,750871 & 0,040792 & 0,006\\
+$h=6$ & 0,769118 & 0,022545 & 0,035\\
+$h=23$ & 0,784247 & 0,007416 & 0,206\\
+$h=24$ & 0,784251 & 0,007412 & 0,216\\
+$h=27$ & 0,784251 & 0,007412 & 0,253\\
+$h=30$ & 0,775943 & 0,015720 & 0,285\\
+\bottomrule\end{tabularx}\endgroup\par
+\begin{center}\begin{tikzpicture}\begin{axis}[width=.91\linewidth,height=5cm,xmin=1,xmax=30,xlabel={Giri WL},ylabel={Score medio, validation},grid=major,legend pos=south east]\addplot[thick,kcinque,mark=*,mark size=1.3pt] coordinates {(1,0.75087133657) (2,0.743240360731) (3,0.761123805326) (4,0.761123805326) (5,0.763153208372) (6,0.769117504476) (7,0.769117504476) (8,0.777419010589) (9,0.777330096918) (10,0.777330096918) (11,0.777448244715) (12,0.777496701317) (13,0.777496701317) (14,0.777496701317) (15,0.777496701317) (16,0.777576440918) (17,0.780136912202) (18,0.782142401861) (19,0.782143631161) (20,0.782998372284) (21,0.782998372284) (22,0.783877809886) (23,0.784247390652) (24,0.784251054082) (25,0.784251054082) (26,0.784251054082) (27,0.784251054082) (28,0.775977073269) (29,0.775937806531) (30,0.77594313981)};\addlegendentry{WL}\addplot[kuno,dashed,domain=1:30]{0.7780260949454545};\addlegendentry{Manhattan}\addplot[only marks,kdieci,mark=*,mark size=3pt] coordinates {(24,0.7842510540818182)};\addlegendentry{Scelto $h=24$}\end{axis}\end{tikzpicture}\end{center}È stato fissato $h=24$: è il primo valore del minimo regret condiviso con
+25--27, con score identici circuito per circuito. Il vantaggio medio su 23 è
+soltanto 0,00000366. Non si attribuisce significato statistico a questa differenza.
+Fra i valori a pari merito, 24 richiede meno tempo e ha un indicatore secondario
+leggermente migliore sui cinque esempi. La scelta è stata congelata prima dei nuovi Test.
+
+\subsection{Tre sistemi, una sola quantità di esempi}
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{l l X}\toprule
+Sistema & Recupero & Informazioni nel prompt\\\midrule
+Manhattan (M) & 49 caratteristiche & Prompt classico, cinque esempi\\
+WL (W) & DAG, $h=24$ & Prompt classico, cinque esempi\\
+WL + sintesi (S) & DAG, $h=24$ & Prompt classico e sintesi dei sei grafi\\
+\bottomrule\end{tabularx}\endgroup\par
+W e S hanno recuperato gli stessi cinque record, nello stesso ordine e
+con le stesse similarità in tutti i 90 casi. Il Dataset train resta immutato:
+la sintesi è aggiunta dinamicamente al circuito corrente e agli esempi E1--E5.
+Il formato della risposta e le regole sui fatti sono comuni.
+\clearpage\section{Un campo reale aggiunto al prompt}
+Il caso è \nolinkurl{groundstate_medium_indep_qiskit_12}. Il seguente estratto proviene dal blocco TOON realmente inviato al modello, verificato rispetto a \texttt{prompt.json}. Sono omesse le altre statistiche e le sintesi di E1--E5.\par\begin{Verbatim}[fontsize=\small,frame=single]
+dag_summaries:
+  current_circuit:
+    representation: dag-summary-v1
+    num_qubits: 12
+    num_clbits: 12
+    operation_nodes_including_barriers: 181
+    wire_edges: 360
+    dependency_layers_including_barriers: 38
+    max_operations_in_same_dependency_layer: 12
+    operations:
+      barrier: 1
+      cz: 132
+      measure: 12
+      u2: 36
+    two_qubit_interaction_pairs: 66
+    max_distinct_neighbors_from_two_qubit_operations: 11
+    two_qubit_interaction_count_max: 2
+\end{Verbatim}
+\texttt{two\_qubit\_interaction\_pairs: 66} significa che nel circuito
+corrente 66 coppie distinte di qubit sono coinvolte in porte a due qubit.
+Con 12 qubit sono tutte le coppie possibili. È una proprietà del sorgente,
+non una misura della fedeltà futura.
+\texttt{dependency\_layers\_including\_barriers} conta livelli di dipendenza
+includendo le barriere; non esprime una durata fisica e può differire dalla
+profondità riportata dal prompt classico.
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrr}\toprule
+Campo & Circuito corrente & Esempio E1\\\midrule
+Qubit & 12 & 11\\
+Operazioni, incluse barriere & 181 & 221\\
+Livelli di dipendenza & 38 & 47\\
+Coppie di interazione & 66 & 55\\
+\bottomrule\end{tabularx}\endgroup\par
+\small Il campo \texttt{dag\_summaries.examples[0].example\_id = E1} collega la sintesi al primo record recuperato: \nolinkurl{rag_497759815b8465488f3dc27c31337084379c41c0d309cd8334f71e8d2151952b}. Il collegamento è stato controllato con l'indice separato. Il blocco completo contiene anche le otto transizioni dirette più frequenti.\normalsize\par I numeri sono calcolati dal programma; non sono una descrizione inventata
+dall'LLM. Il modello può usarli nella spiegazione libera, ma il verificatore dei
+fatti non è stato ampliato con nuove affermazioni sul grafo.
+\clearpage\section{Risultati sui 90 circuiti Test}
+Tutti i sistemi usano Qwen3.5-4B Q8\_0, lo stesso file di pesi,
+temperatura 0, seme 20260913 e massimo 4.096 token di risposta.
+Contesto richiesto: 60.000 token; pensiero esteso disattivato.
+Restano invariati cinque Target sintetici, dodici configurazioni Qiskit,
+seme di compilazione 0, un processo e limite esterno di 100 secondi.
+I record confrontati sono tutti e soli i 90 Test, con gli stessi sorgenti.
+
+Lo score è l'\emph{expected fidelity}, fra 0 e 1: maggiore è migliore.
+È una stima sul Target sintetico, non una misura su hardware quantistico reale.
+Il denominatore delle medie dello score è qui sempre 90, perché tutte le
+compilazioni sono riuscite.
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Misura & Manhattan & WL & WL + sintesi\\\midrule
+Compilazioni riuscite & 90/90 & 90/90 & 90/90\\
+Fallimenti & 0 & 0 & 0\\
+Score medio & 0,798379 & 0,798353 & 0,778973\\
+Score mediano & 0,921379 & 0,921379 & 0,921379\\
+Score almeno 0,8 & 70/90 & 70/90 & 70/90\\
+Tempo totale medio (s) & 27,49 & 33,22 & 58,33\\
+Token totali, somma & 1\,480\,707 & 1\,904\,137 & 3\,020\,401\\
+\bottomrule\end{tabularx}\endgroup\par
+\subsection{Confronti appaiati}\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrrrr}\toprule
+Differenza & Media score & Meglio & Pari & Peggio & Stessa coppia\\\midrule
+WL meno Manhattan & -0,000026 & 14 & 65 & 11 & 46/90\\
+WL + sintesi meno Manhattan & -0,019406 & 15 & 60 & 15 & 42/90\\
+WL + sintesi meno WL & -0,019380 & 1 & 84 & 5 & 84/90\\
+\bottomrule\end{tabularx}\endgroup\par
+La parità usa $|\Delta|\leq10^{-12}$. La coppia è dispositivo/configurazione; score uguali non implicano scelte uguali. Le medie non sono percentuali di circuiti migliorati.\par\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrrr}\toprule
+Qubit & Casi & Manhattan & WL & WL + sintesi\\\midrule
+Fino a 5 & 22 & 0,986430 & 0,986225 & 0,986500\\
+Da 6 a 16 & 50 & 0,902571 & 0,902614 & 0,902614\\
+Oltre 16 & 18 & 0,279117 & 0,279117 & 0,181878\\
+\bottomrule\end{tabularx}\endgroup\par
+Le fasce riprendono il report precedente e sono descrittive.
+Il numero di qubit da solo non definisce la difficoltà. Tutti i casi,
+anche quelli con score basso, entrano nelle tabelle e nei grafici.
+\clearpage\section{Dove cambiano gli score}
+60 circuiti hanno lo stesso score nei tre sistemi. La tabella mostra i 12 casi con maggiore escursione fra massimo e minimo, ordinati senza privilegiare una variante. L'appendice comprende tutti i 90 casi.\par\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Circuito & Manhattan & WL & WL + sintesi\\\midrule
+\nolinkurl{qpeexact_indep_qiskit_30} & 0,520294 & 0,520294 & 0,043532\\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 0,374131 & 0,374131 & 0,006078\\
+\nolinkurl{qpeexact_indep_qiskit_40} & 0,374131 & 0,374131 & 0,006102\\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 0,269473 & 0,269473 & 0,000752\\
+\nolinkurl{qpeexact_indep_qiskit_50} & 0,269473 & 0,269473 & 0,000752\\
+\nolinkurl{qpeexact_indep_tket_6} & 0,946078 & 0,970512 & 0,970512\\
+\nolinkurl{routing_indep_tket_6} & 0,981658 & 0,966993 & 0,966993\\
+\nolinkurl{routing_indep_qiskit_6} & 0,981658 & 0,967051 & 0,967051\\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 0,955010 & 0,969085 & 0,969085\\
+\nolinkurl{tsp_indep_tket_4} & 0,983920 & 0,970017 & 0,970017\\
+\nolinkurl{tsp_indep_qiskit_4} & 0,983920 & 0,970105 & 0,970105\\
+\nolinkurl{qpeexact_indep_qiskit_6} & 0,959307 & 0,970687 & 0,970687\\
+\bottomrule\end{tabularx}\endgroup\par
+Nei cinque peggioramenti di S rispetto a W cambiano i dispositivi:
+da Quantinuum H2 a IBM Falcon 127 nei casi QPE a 30--40 qubit,
+e a IBM Heron 156 nei due casi a 50 qubit. Per esempio,
+\texttt{qpeexact\_indep\_qiskit\_30} passa da 0,520294 a 0,043532.
+È un cambiamento osservato nella scelta, non la prova che una singola
+statistica della sintesi ne sia la causa.
+\subsection{Quanto cambia il recupero}Manhattan e WL hanno in media 1,64 esempi comuni su cinque. In 2 casi su 90 coincidono tutti i record e il loro ordine. Fra W e S il recupero coincide sempre: le differenze di risposta sono osservate con gli stessi esempi storici, ma con informazioni aggiuntive sul grafo.\par\subsection{Cambiamenti nella coppia scelta}WL rispetto a Manhattan: 44 coppie diverse su 90.\par WL + sintesi rispetto a Manhattan: 48 coppie diverse su 90.\par WL + sintesi rispetto a WL: 6 coppie diverse su 90.\par 
+\clearpage\section{Tempi: distinguere le componenti}
+Tutte le celle riportano media / mediana in secondi, su 90 misure. Non si sommano le righe: alcune componenti sono incluse in altre.\par\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Misura & Manhattan & WL & WL + sintesi\\\midrule
+Totale del caso & 27,49 / 26,09 & 33,22 / 27,95 & 58,33 / 60,66\\
+Preparazione e scelta & 25,06 / 24,52 & 26,69 / 21,87 & 52,61 / 54,30\\
+RAG e controlli & 3,88 / 3,85 & 0,32 / 0,22 & 0,32 / 0,22\\
+Risposte LLM, cumulative & 20,27 / 20,06 & 21,71 / 21,00 & 51,24 / 53,06\\
+Compilazione interna & 1,79 / 0,71 & 5,64 / 0,83 & 5,12 / 0,75\\
+Processo di compilazione & 2,40 / 1,32 & 6,52 / 1,40 & 5,71 / 1,44\\
+\bottomrule\end{tabularx}\endgroup\par
+Il totale copre l'intero caso. Preparazione e scelta comprende recupero,
+costruzione del prompt, tokenizzazione, risposte e controlli.
+Il tempo LLM somma le attese delle risposte, incluse le correzioni.
+La misura interna riguarda il compilatore; quella di processo include anche
+avvio e controlli.
+
+Il massimo WL, 297,36 secondi in \texttt{qpeexact\_indep\_qiskit\_15},
+comprende 295,98 secondi di preparazione/scelta ma soltanto 24,65 secondi
+di risposte LLM. Le fasi dettagliate non spiegano tutta l'attesa:
+non se ne attribuisce la causa a WL. Il caso resta incluso nella media.
+
+\subsection{Il costo dell'indice WL è separato}
+Nel sistema Manhattan i controlli e il caricamento dell'indice fanno parte
+della misura RAG per circuito. Nei nuovi sistemi l'indice WL è verificato/caricato
+una volta per sessione e riutilizzato. Il suo costo è conservato separatamente
+e non è incluso nel totale dei singoli casi. Il confronto diretto dei tempi
+RAG non isola quindi la velocità dei due algoritmi.
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrr}\toprule
+Misura & WL & WL + sintesi\\\midrule
+Preparazione indice registrata (s) & 41,37 & 42,20\\
+Quota per 90 casi (s), calcolata & 0,46 & 0,47\\
+Totale medio + quota indice (s) & 33,68 & 58,80\\
+\bottomrule\end{tabularx}\endgroup\par
+La quota è una ripartizione calcolata, non una nuova misura.
+Non ricostruisce eventuali costi storici di costruzione dell'indice.
+Le campagne non sono repliche intercalate: carico del computer, cache e avvio
+del server possono influire sui tempi. Non è stata raccolta la memoria,
+quindi non si può confrontarne il consumo.
+\clearpage\section{Token, chiamate e correttezza dei fatti}
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Misura & Manhattan & WL & WL + sintesi\\\midrule
+Primo ingresso, media token & 11\,643,5 & 11\,715,7 & 13\,691,9\\
+Ingresso, somma token & 1\,460\,430 & 1\,878\,285 & 2\,985\,981\\
+Uscita, somma token & 20\,277 & 25\,852 & 34\,420\\
+Totale, somma token & 1\,480\,707 & 1\,904\,137 & 3\,020\,401\\
+Totale per circuito, media & 16\,452,3 & 21\,157,1 & 33\,560,0\\
+Chiamate, somma & 126 & 161 & 217\\
+Correzioni, somma & 36 & 71 & 127\\
+Casi con correzioni & 19/90 & 38/90 & 74/90\\
+Tutti i fatti validi al primo tentativo & 71/90 & 52/90 & 16/90\\
+Tutti i fatti validi nella risposta finale & 73/90 & 57/90 & 37/90\\
+Fatti finali validi / dichiarati & 163/180 & 147/180 & 126/180\\
+\bottomrule\end{tabularx}\endgroup\par
+I token totali includono ingresso e uscita di tutte le chiamate.
+L'ingresso conta anche token serviti dalla cache: non è una misura dei soli token
+ricalcolati né del costo monetario.
+Il primo ingresso separa la lunghezza iniziale del prompt dal costo delle correzioni.
+Le regole consentono al massimo tre risposte per circuito.
+\par\medskip\begingroup\small\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Tipo: validi / dichiarati & Manhattan & WL & WL + sintesi\\\midrule
+Stesso dispositivo dell'esempio & 88/88 & 90/90 & 83/84\\
+Coppia fra i risultati mostrati & 5/5 & 10/10 & 31/31\\
+Stesso numero di qubit & 2/2 & 0/0 & 12/12\\
+Capacità del dispositivo & 68/85 & 47/80 & 0/53\\
+\bottomrule\end{tabularx}\endgroup\par
+I fatti non validi sono 17, 33 e 54. In 17, 33 e 53 casi,
+rispettivamente, la capacità del dispositivo viene associata a un esempio,
+mentre la regola richiede il catalogo hardware e nessun riferimento E1--E5.
+Questo errore di supporto non significa che il dispositivo abbia pochi qubit.
+Nella variante S resta anche un riferimento storico sbagliato:
+in \texttt{qpeexact\_indep\_qiskit\_30} viene dichiarato lo stesso dispositivo
+di E4, che riporta Quantinuum H2, mentre la scelta è IBM Falcon 127.
+
+Sono verifiche automatiche dei fatti strutturati rispetto ai record citati
+e al catalogo hardware. Una risposta finale può contenere fatti non validi
+pur proponendo una coppia ammessa: dopo il terzo tentativo il protocollo lo consente.
+La riuscita della compilazione non certifica la spiegazione.
+
+\textbf{Le ipotesi in prosa non sono verificate semanticamente e non vanno
+prese come affermazioni vere.} Anche le deduzioni libere dalla sintesi del
+grafo restano ipotesi. I fatti storici validi descrivono l'esempio citato,
+non garantiscono lo score del circuito corrente.
+\clearpage\section{Score e tempo totale per circuito}
+Stessi 90 circuiti e stesso ordine in tutti i pannelli. La scala dello score è 0--1. Le differenze di costo sono misure delle campagne conservate.\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\textbf{Score}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\textbf{Tempo totale (s)}\end{minipage}\par
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Score},xmin=0,xmax=91,ymin=0,ymax=1,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,0.7963772008) (2,0.7963772008) (3,0.9788591374) (4,0.968253564) (5,0.9218353887) (6,0.9032343267) (7,0.8879093206) (8,0.8714043421) (9,0.853872124) (10,0.8300875325) (11,0.809586095) (12,0.9987599534) (13,0.9960947806) (14,0.5202940694) (15,0.9869487051) (16,0.3741311339) (17,0.9720658176) (18,0.2694733993) (19,0.9593073443) (20,1.13956e-05) (21,0.9616082099) (22,2.8783e-06) (23,0.9465992541) (24,0.934906771) (25,0.9209232096) (26,0.9022052109) (27,0.8868444525) (28,0.86994159) (29,0.8522598056) (30,0.8281722146) (31,0.9987599534) (32,0.9958784484) (33,0.5674551344) (34,0.9868581315) (35,0.4398748201) (36,0.9691548425) (37,0.3415929475) (38,0.9460784319) (39,2.73505e-05) (40,0.9612044132) (41,0.9460882208) (42,0.9342899269) (43,0.9189065362) (44,0.9032072297) (45,0.8864178847) (46,0.8685836016) (47,0.8497804839) (48,0.8300875325) (49,0.809586095) (50,0.9993011566) (51,0.993187968) (52,0.5194357059) (53,0.980527915) (54,0.3741311339) (55,0.9710851394) (56,0.2694733993) (57,0.9550100512) (58,1.13715e-05) (59,0.9585242347) (60,2.865e-06) (61,0.9465992541) (62,0.9333643936) (63,0.918024796) (64,0.9022322778) (65,0.88522201) (66,0.8671515989) (67,0.848099558) (68,0.8282716028) (69,0.9993011566) (70,0.993187968) (71,0.5666719493) (72,0.9812192516) (73,0.4399012138) (74,0.9685123249) (75,0.3415826997) (76,0.9688528397) (77,2.72864e-05) (78,0.9581792229) (79,0.9461449886) (80,0.9326646222) (81,0.9398337239) (82,0.9978340951) (83,0.9816579456) (84,0.9398337239) (85,0.9978340951) (86,0.9816579456) (87,0.983919958) (88,0.9247191115) (89,0.983919958) (90,0.9248023412)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Tempo totale (s)},xmin=0,xmax=91,ymin=0,ymax=321.152847424,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,37.293857385) (2,26.692865467) (3,23.942920675) (4,25.402071147) (5,25.832498996) (6,26.62713302) (7,26.098175433) (8,33.599829946) (9,26.385749042) (10,26.960792112) (11,26.469163992) (12,26.515086764) (13,24.333858769) (14,31.726877038) (15,31.476895091) (16,41.728811637) (17,23.998177625) (18,34.167557649) (19,24.364944851) (20,29.426487201) (21,24.969036817) (22,22.99859116) (23,25.598447383) (24,25.752067341) (25,25.915182829) (26,26.428009243) (27,26.638358968) (28,26.804337423) (29,26.805379995) (30,26.643904381) (31,30.423976261) (32,30.729794405) (33,39.629774567) (34,24.592263754) (35,32.946661351) (36,24.302564582) (37,27.655849977) (38,24.802479411) (39,23.455976251) (40,26.220985358) (41,37.686924005) (42,25.827961988) (43,33.306270597) (44,26.328648603) (45,31.801104075) (46,26.217353827) (47,26.183704784) (48,26.257955187) (49,26.055269116) (50,26.087168633) (51,23.203638836) (52,25.124420596) (53,23.436319097) (54,41.53950543) (55,23.783946546) (56,33.886709569) (57,24.104551174) (58,29.449017773) (59,24.572601038) (60,22.643482136) (61,25.289295174) (62,26.338161315) (63,26.082743985) (64,25.975644928) (65,26.173463512) (66,25.938833632) (67,25.987878354) (68,25.887809463) (69,29.713853589) (70,23.208786107) (71,39.364907208) (72,23.460983596) (73,31.972248632) (74,23.476943956) (75,26.877945646) (76,30.314038944) (77,22.421086347) (78,24.790174942) (79,37.335785039) (80,25.939834712) (81,24.1594477) (82,23.234337462) (83,23.886918909) (84,23.762919489) (85,23.342283834) (86,23.942252565) (87,30.106119448) (88,25.40293995) (89,30.07494234) (90,25.509949582)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Score},xmin=0,xmax=91,ymin=0,ymax=1,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,0.7963772008) (2,0.7963772008) (3,0.9749510267) (4,0.9748925305) (5,0.9218353887) (6,0.9032343267) (7,0.8879093206) (8,0.8714043421) (9,0.853872124) (10,0.8300875325) (11,0.809586095) (12,0.9987599534) (13,0.9960947806) (14,0.5202940694) (15,0.9867685434) (16,0.3741311339) (17,0.9782345802) (18,0.2694733993) (19,0.9706868019) (20,1.13956e-05) (21,0.9616082099) (22,2.8783e-06) (23,0.9465992541) (24,0.934906771) (25,0.9209232096) (26,0.9022052109) (27,0.8868444525) (28,0.86994159) (29,0.8523109435) (30,0.8281473695) (31,0.9987599534) (32,0.9960947806) (33,0.5674551344) (34,0.9868581315) (35,0.4398748201) (36,0.9781465418) (37,0.3415929475) (38,0.9705120914) (39,2.73505e-05) (40,0.9612044132) (41,0.9460882208) (42,0.9342899269) (43,0.9189065362) (44,0.9032072297) (45,0.8864178847) (46,0.8685836016) (47,0.8497804839) (48,0.8300875325) (49,0.809586095) (50,0.9993011566) (51,0.993187968) (52,0.5194357059) (53,0.980527915) (54,0.3741311339) (55,0.9782345802) (56,0.2694733993) (57,0.9690853958) (58,1.13715e-05) (59,0.9585242347) (60,2.865e-06) (61,0.9465992541) (62,0.9333643936) (63,0.918024796) (64,0.9022864142) (65,0.88522201) (66,0.8671515989) (67,0.848099558) (68,0.8282964517) (69,0.9993011566) (70,0.993187968) (71,0.5666719493) (72,0.9812192516) (73,0.4399012138) (74,0.9781465418) (75,0.3415826997) (76,0.9688819062) (77,2.72864e-05) (78,0.9581792229) (79,0.9461449886) (80,0.9326646222) (81,0.9305395104) (82,0.9920759249) (83,0.9670513541) (84,0.9305395104) (85,0.9920759249) (86,0.9669933319) (87,0.9701045558) (88,0.9247468539) (89,0.970017249) (90,0.9248023412)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Tempo totale (s)},xmin=0,xmax=91,ymin=0,ymax=321.152847424,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,23.211727168) (2,22.224861065) (3,21.868563709) (4,21.646871534) (5,28.527155902) (6,21.885703719) (7,21.914258104) (8,27.952399433) (9,88.060572283) (10,297.363747615) (11,27.546287236) (12,20.297826039) (13,24.013488195) (14,44.412765551) (15,25.849306177) (16,34.288679587) (17,43.806998937) (18,31.347321688) (19,27.948873963) (20,24.981989845) (21,58.798571114) (22,26.583975324) (23,38.825267149) (24,21.364315697) (25,34.878227296) (26,37.60679352) (27,44.852624322) (28,38.741072832) (29,38.917301907) (30,42.742694616) (31,20.235846207) (32,19.581116863) (33,34.7183839) (34,26.471305727) (35,28.857978869) (36,33.703371898) (37,24.206434485) (38,28.393388465) (39,22.957665692) (40,29.315666228) (41,34.031987801) (42,21.74921428) (43,27.565811686) (44,22.134010477) (45,21.919354859) (46,29.169494309) (47,27.341381407) (48,28.682824911) (49,30.077860545) (50,22.869855413) (51,28.706710082) (52,49.211420021) (53,19.548487288) (54,34.431988883) (55,26.731728555) (56,32.396633015) (57,28.932140542) (58,25.249141652) (59,32.615334051) (60,26.443804984) (61,40.145033648) (62,27.850875384) (63,37.851711083) (64,37.840852682) (65,45.633008145) (66,40.337151052) (67,41.605072994) (68,42.608662064) (69,20.309491991) (70,25.885096697) (71,36.108150611) (72,26.033991507) (73,28.680882092) (74,33.807963904) (75,23.97019651) (76,29.002355408) (77,23.030431302) (78,31.34795526) (79,32.926111835) (80,27.989738722) (81,21.970783649) (82,22.869162524) (83,23.123182326) (84,23.947755038) (85,24.154975108) (86,23.082921046) (87,22.745319815) (88,25.472144998) (89,21.950934871) (90,26.543367143)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Score},xmin=0,xmax=91,ymin=0,ymax=1,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,0.7963772008) (2,0.7963772008) (3,0.9749510267) (4,0.9748925305) (5,0.9218353887) (6,0.9032343267) (7,0.8879093206) (8,0.8714043421) (9,0.853872124) (10,0.8300875325) (11,0.809586095) (12,0.9987599534) (13,0.9960947806) (14,0.0435319136) (15,0.9928297161) (16,0.0061016048) (17,0.9782345802) (18,0.000752128) (19,0.9706868019) (20,1.13956e-05) (21,0.9616082099) (22,2.8783e-06) (23,0.9465992541) (24,0.934906771) (25,0.9209232096) (26,0.9022052109) (27,0.8868444525) (28,0.86994159) (29,0.8523109435) (30,0.8281473695) (31,0.9987599534) (32,0.9960947806) (33,0.5674551344) (34,0.9868581315) (35,0.4398748201) (36,0.9781465418) (37,0.3415929475) (38,0.9705120914) (39,2.73505e-05) (40,0.9612044132) (41,0.9460882208) (42,0.9342899269) (43,0.9189065362) (44,0.9032072297) (45,0.8864178847) (46,0.8685836016) (47,0.8497804839) (48,0.8300875325) (49,0.809586095) (50,0.9993011566) (51,0.993187968) (52,0.5194357059) (53,0.980527915) (54,0.0060775772) (55,0.9782345802) (56,0.0007520923) (57,0.9690853958) (58,1.13715e-05) (59,0.9585242347) (60,2.865e-06) (61,0.9465992541) (62,0.9333643936) (63,0.918024796) (64,0.9022864142) (65,0.88522201) (66,0.8671515989) (67,0.848099558) (68,0.8282964517) (69,0.9993011566) (70,0.993187968) (71,0.5666719493) (72,0.9812192516) (73,0.4399012138) (74,0.9781465418) (75,0.3415826997) (76,0.9688819062) (77,2.72864e-05) (78,0.9581792229) (79,0.9461449886) (80,0.9326646222) (81,0.9305395104) (82,0.9920759249) (83,0.9670513541) (84,0.9305395104) (85,0.9920759249) (86,0.9669933319) (87,0.9701045558) (88,0.9247468539) (89,0.970017249) (90,0.9248023412)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Tempo totale (s)},xmin=0,xmax=91,ymin=0,ymax=321.152847424,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,54.482480364) (2,122.181429357) (3,52.801829257) (4,52.901537595) (5,55.230922289) (6,56.51693371) (7,56.110469) (8,27.025603333) (9,57.903433794) (10,56.609579341) (11,57.264474385) (12,27.041204967) (13,54.875714596) (14,85.072607793) (15,56.521522251) (16,86.300089679) (17,27.839423065) (18,60.824766603) (19,36.872307023) (20,53.118597174) (21,36.460713826) (22,52.512206217) (23,67.756172227) (24,51.693739906) (25,76.528455088) (26,72.404357585) (27,42.778488585) (28,69.144106875) (29,69.437034907) (30,72.843099398) (31,47.264204038) (32,54.47350115) (33,74.632783045) (34,75.138536145) (35,66.82749785) (36,61.418367001) (37,28.320199087) (38,61.045247802) (39,48.077730748) (40,69.760886282) (41,68.752922136) (42,57.397430235) (43,62.998194021) (44,61.497704232) (45,64.346471949) (46,29.3899983) (47,64.51381625) (48,60.847465725) (49,60.620877371) (50,29.257015267) (51,57.592320555) (52,75.855008528) (53,49.777416086) (54,87.48546632) (55,27.980243524) (56,60.202101447) (57,38.029451339) (58,50.343218503) (59,38.751191824) (60,51.978129606) (61,66.509041429) (62,55.036239239) (63,80.913792788) (64,73.27158877) (65,70.255358103) (66,71.732654614) (67,71.766430288) (68,71.848660914) (69,48.387698601) (70,52.885564795) (71,73.075515248) (72,73.601928998) (73,66.355800667) (74,61.613097076) (75,28.183906966) (76,33.555847309) (77,47.034922827) (78,70.591056962) (79,67.436570706) (80,56.174028974) (81,63.261958001) (82,63.446967402) (83,65.803654215) (84,65.767835335) (85,64.336914415) (86,63.793979375) (87,65.120725757) (88,32.142484671) (89,60.696519591) (90,31.821327592)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+{\small Ogni punto è un circuito. Le scale sono comuni fra i tre sistemi per ciascuna colonna. L'indice segue l'ordine alfabetico dell'appendice.}\par
+\clearpage\section{Compilazione: tempo interno e tempo di processo}
+Il processo comprende anche avvio e controlli. Scelte diverse possono produrre compilazioni diverse; questi tempi non misurano soltanto il recupero.\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\textbf{Interno (s)}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\textbf{Processo (s)}\end{minipage}\par
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Interno (s)},xmin=0,xmax=91,ymin=0,ymax=23.5622241079,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,3.922640659) (2,0.839350798) (3,0.704650295) (4,1.677011078) (5,0.791847192) (6,0.758758105) (7,0.760190821) (8,0.854736007) (9,0.760667876) (10,0.839264829) (11,0.87341901) (12,0.372901418) (13,0.39130278) (14,0.835156678) (15,0.455017552) (16,11.123879789) (17,0.438046585) (18,3.992816369) (19,0.389255322) (20,0.742676311) (21,0.588738031) (22,0.75873826) (23,0.660385077) (24,0.661746613) (25,0.708187767) (26,0.779520224) (27,0.813602318) (28,0.791457626) (29,0.769515303) (30,0.853716702) (31,0.446747279) (32,0.452384097) (33,15.311303502) (34,0.410945147) (35,8.631899994) (36,0.412091785) (37,3.229851281) (38,0.438458315) (39,0.685709958) (40,0.549240367) (41,12.785060631) (42,0.685094066) (43,0.785916277) (44,0.722293332) (45,0.7471962) (46,0.787339827) (47,0.774333215) (48,0.826239066) (49,0.815642041) (50,0.356769574) (51,0.378517963) (52,0.806398947) (53,0.374873435) (54,11.197072114) (55,0.377840675) (56,3.892399163) (57,0.404577311) (58,0.695298135) (59,0.590385022) (60,0.606412145) (61,0.620889709) (62,0.6700452) (63,0.722605405) (64,0.718877942) (65,0.724870291) (66,0.762113231) (67,0.780275634) (68,0.791631924) (69,0.366162182) (70,0.361158623) (71,15.462561265) (72,0.374007577) (73,8.241070083) (74,0.363201573) (75,2.994376085) (76,0.547132362) (77,0.564779021) (78,0.586448429) (79,12.583917409) (80,0.663703777) (81,0.363733963) (82,0.354350109) (83,0.362079183) (84,0.36329809) (85,0.351774119) (86,0.358650226) (87,0.363907455) (88,0.42176091) (89,0.361723543) (90,0.404460231)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Processo (s)},xmin=0,xmax=91,ymin=0,ymax=32.4225945785,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,4.885685761) (2,1.659521529) (3,1.282250252) (4,2.301105579) (5,1.471374067) (6,1.455597359) (7,1.369369523) (8,1.470533895) (9,1.423044216) (10,1.575938353) (11,1.57490393) (12,0.916212008) (13,0.966407988) (14,1.486469053) (15,1.088906473) (16,11.773682812) (17,1.016825996) (18,4.686838189) (19,0.966365444) (20,1.521421253) (21,1.216717385) (22,1.671647984) (23,1.267143012) (24,1.267045854) (25,1.379876618) (26,1.424187301) (27,1.587290097) (28,1.541962412) (29,1.417431509) (30,1.574150875) (31,1.016758029) (32,1.069883417) (33,15.97662214) (34,1.016520703) (35,9.301401044) (36,0.96634796) (37,3.894526215) (38,1.06676315) (39,1.607741503) (40,1.117932412) (41,13.314986264) (42,1.333060071) (43,1.373571417) (44,1.268001615) (45,1.317339015) (46,1.483243599) (47,1.438953967) (48,1.474348682) (49,1.452791231) (50,0.917369287) (51,0.916983953) (52,1.476209951) (53,0.917188358) (54,11.809573294) (55,0.916933908) (56,4.479935268) (57,0.966761433) (58,1.429243141) (59,1.117190522) (60,1.425462852) (61,1.166925713) (62,1.322894953) (63,1.267954081) (64,1.317775811) (65,1.319489687) (66,1.37124201) (67,1.377580568) (68,1.392144877) (69,0.920358031) (70,0.872836608) (71,16.014169358) (72,0.866763552) (73,8.843930167) (74,0.866896567) (75,3.593396306) (76,1.117599604) (77,1.221601018) (78,1.117282932) (79,13.121580165) (80,1.236784011) (81,0.86676491) (82,0.866749023) (83,0.867361244) (84,0.866943051) (85,0.866202103) (86,0.867456829) (87,0.967356232) (88,0.968188908) (89,0.866387036) (90,0.966870659)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Interno (s)},xmin=0,xmax=91,ymin=0,ymax=23.5622241079,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,1.064282421) (2,0.759213074) (3,0.509845316) (4,0.488491761001) (5,0.643272638) (6,0.718219985) (7,0.731508082) (8,0.737545917) (9,0.724941909) (10,0.828559585) (11,0.834691448) (12,0.3654882) (13,0.918340422) (14,18.660127331) (15,0.37208801) (16,10.757221016) (17,0.540752758) (18,3.910770216) (19,7.553661866) (20,0.604407773) (21,8.564747635) (22,0.650067356) (23,12.373570239) (24,0.657347698001) (25,13.707525445) (26,16.933980753) (27,17.403796185) (28,18.005233766) (29,17.980254595) (30,21.816874174) (31,0.385060676001) (32,0.394082772) (33,14.223796201) (34,0.372069683001) (35,8.128881848) (36,7.151692939) (37,3.098598661) (38,7.825591624) (39,0.58780359) (40,8.421919241) (41,13.325936348) (42,0.646263727) (43,0.693651065001) (44,0.712100141) (45,0.759733842999) (46,0.827150170999) (47,0.789523219) (48,0.811082268001) (49,0.869045568001) (50,0.382228203) (51,0.386064172) (52,20.146554682) (53,0.392428898) (54,10.762679415) (55,0.512013011001) (56,3.850364959) (57,8.630319488) (58,0.575240439) (59,10.638695233) (60,0.620455549999) (61,12.39675241) (62,0.651545737001) (63,15.558969777) (64,16.923791591) (65,18.312540367) (66,19.422188608) (67,20.935183577) (68,21.695622484) (69,0.368557207999) (70,0.377284398) (71,15.442130093) (72,0.388045697999) (73,8.06314567) (74,7.076407195) (75,2.946545091) (76,8.657001696) (77,0.561894921999) (78,10.622622671) (79,12.350704075) (80,0.656127185001) (81,0.403679911) (82,0.381288723) (83,0.413520738) (84,0.402277860001) (85,0.368135885001) (86,0.415577567001) (87,0.416179922) (88,2.042107614) (89,0.416027171001) (90,2.054258775)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Processo (s)},xmin=0,xmax=91,ymin=0,ymax=32.4225945785,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,1.618314907) (2,1.317970911) (3,1.117189972) (4,1.066675809) (5,1.166853099) (6,1.267485943) (7,1.267521576) (8,1.267803068) (9,30.020920906) (10,1.370739747) (11,1.367764048) (12,0.866907017) (13,1.920629777) (14,19.207506097) (15,0.865971585999) (16,11.316153652) (17,1.11717966) (18,4.477025615) (19,8.082286638) (20,1.371458346) (21,9.137191904) (22,1.37143602) (23,12.89411623) (24,1.169331238) (25,14.248951812) (26,17.498789825) (27,17.954805922) (28,18.556148265) (29,18.506318925) (30,22.365035388) (31,0.917763309999) (32,0.917895756002) (33,14.796144215) (34,0.866801582) (35,8.748386005) (36,7.681840091) (37,3.727352262) (38,8.387102251) (39,1.267846653) (40,8.989528953) (41,13.908032219) (42,1.167388495) (43,1.217605906) (44,1.217721842) (45,1.370799499) (46,1.418675793) (47,1.317538909) (48,1.368537849) (49,1.420062597) (50,0.916923876001) (51,0.866907299) (52,20.717552017) (53,0.91725694) (54,11.339689511) (55,1.017005172) (56,4.428281319) (57,9.133696515) (58,1.270234939) (59,11.141461451) (60,1.317234432) (61,12.944576554) (62,1.169415015) (63,16.100749359) (64,17.453409712) (65,18.857149855) (66,19.958780221) (67,21.459815079) (68,22.213679632) (69,0.866963968001) (70,0.867076503) (71,16.025068399) (72,0.916644268) (73,8.634466187) (74,7.631357603) (75,3.522114456) (76,9.184769687) (77,1.217231361) (78,11.167072306) (79,12.877744207) (80,1.169351895) (81,0.917097457001) (82,0.916338053001) (83,0.9671748) (84,0.916852508999) (85,0.916513781998) (86,0.966648767) (87,0.966811833001) (88,2.574946549) (89,0.966749540999) (90,2.570402987)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Interno (s)},xmin=0,xmax=91,ymin=0,ymax=23.5622241079,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,0.804964392) (2,0.778606111) (3,0.551556151999) (4,0.712528378001) (5,0.651449839001) (6,0.71074013) (7,0.729027349) (8,0.731515193) (9,0.719643861999) (10,0.810217123) (11,0.839713851999) (12,0.361801404) (13,0.642878991001) (14,0.659584409999) (15,0.381282012) (16,0.685244439999) (17,0.521032781) (18,0.766809164001) (19,7.513661342) (20,0.783095909001) (21,8.347954526) (22,0.643988656) (23,12.326161889) (24,0.638348318) (25,13.821343888) (26,17.025862226) (27,17.285320811) (28,17.893352851) (29,18.190090012) (30,21.520854758) (31,0.371833027999) (32,0.371721040001) (33,14.213028291) (34,0.383491442999) (35,8.104984656) (36,7.023975093) (37,2.935622536) (38,7.54150892) (39,0.573613241) (40,8.534495941) (41,12.324920769) (42,0.641732647999) (43,0.697972665001) (44,0.716663328001) (45,0.744760119002) (46,0.764829275) (47,0.787309178999) (48,0.804275007) (49,0.824551832) (50,0.369873264) (51,0.596405945) (52,19.775915886) (53,0.389340248001) (54,0.659195029) (55,0.523219254999) (56,0.515411649001) (57,8.677526699) (58,0.562940289999) (59,10.584378733) (60,0.617495637) (61,12.385853959) (62,0.652132432) (63,15.609239871) (64,16.981326059) (65,18.174622976) (66,19.434140196) (67,20.559079716) (68,21.715595269) (69,0.372746886) (70,0.381502666) (71,15.797136897) (72,0.382328865) (73,8.081485132) (74,7.009830433) (75,2.947722697) (76,8.670707875) (77,0.58450108) (78,10.544162947) (79,12.376685177) (80,0.653357945001) (81,0.409919289001) (82,0.385567465999) (83,0.409189979) (84,0.407106445999) (85,0.380796985) (86,0.407652815) (87,0.656014037) (88,2.026833771) (89,0.661505905) (90,2.061909531)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Processo (s)},xmin=0,xmax=91,ymin=0,ymax=32.4225945785,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,1.369038662) (2,1.317684152) (3,1.066986629) (4,1.269509681) (5,1.167829676) (6,1.268164215) (7,1.26742164) (8,1.267981575) (9,1.267330462) (10,1.367815588) (11,1.418060668) (12,0.866944156) (13,1.519358615) (14,1.56887521) (15,0.866090455) (16,1.618341519) (17,1.068189546) (18,1.771038515) (19,8.04865863) (20,1.769422102) (21,8.883529887) (22,1.372373786) (23,12.843284527) (24,1.167602105) (25,14.346912448) (26,17.55516815) (27,17.802035735) (28,18.406735103) (29,18.706090562) (30,22.06185967) (31,0.867159688001) (32,0.866516374001) (33,14.745514063) (34,0.866693495) (35,8.684324812) (36,7.532307981) (37,3.525202205) (38,8.082434176) (39,1.218814324) (40,9.085599394) (41,12.841358256) (42,1.167560215) (43,1.217459604) (44,1.267373176) (45,1.268666341) (46,1.318943635) (47,1.317431132) (48,1.31769578) (49,1.367503265) (50,0.866384137) (51,1.468669722) (52,20.656841758) (53,0.916738516) (54,1.619580447) (55,1.067905019) (56,1.169478976) (57,9.184680599) (58,1.26808493) (59,11.140515432) (60,1.774116918) (61,12.941530646) (62,1.169178322) (63,16.154601118) (64,17.503782447) (65,18.705227253) (66,19.960745546) (67,21.112980681) (68,22.261532901) (69,0.866864170999) (70,0.866457906999) (71,16.349719279) (72,0.916818542) (73,8.633624071) (74,7.529902444) (75,3.522039543) (76,9.184109946) (77,1.270057518) (78,11.087411794) (79,12.892463609) (80,1.217039937) (81,0.966699936) (82,0.916741628998) (83,0.966359119) (84,0.917157386) (85,0.916444404002) (86,0.916600607999) (87,1.519215991) (88,2.570591183) (89,1.519154526) (90,2.570307875)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+{\small Ogni punto è un circuito. Le scale sono comuni fra i tre sistemi per ciascuna colonna. L'indice segue l'ordine alfabetico dell'appendice.}\par
+\clearpage\section{Token e tempo delle risposte LLM}
+Entrambe le colonne includono tutte le chiamate dello stesso caso. Un punto elevato può riflettere anche le richieste di correzione.\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\textbf{Token totali}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\textbf{Risposte LLM (s)}\end{minipage}\par
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Token totali},xmin=0,xmax=91,ymin=0,ymax=48007.08,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,12344) (2,12331) (3,11271) (4,11450) (5,12150) (6,12407) (7,12401) (8,37514) (9,12419) (10,12457) (11,12450) (12,22248) (13,11222) (14,36131) (15,34623) (16,34862) (17,11430) (18,34903) (19,11688) (20,32566) (21,11701) (22,10779) (23,12165) (24,12167) (25,12152) (26,12329) (27,12477) (28,12468) (29,12454) (30,12344) (31,33472) (32,33904) (33,11691) (34,11460) (35,11681) (36,11432) (37,11690) (38,11690) (39,10800) (40,11703) (41,12209) (42,12319) (43,37513) (44,12407) (45,37496) (46,12454) (47,12454) (48,12457) (49,12450) (50,22248) (51,11124) (52,11896) (53,11417) (54,34862) (55,11430) (56,34903) (57,11458) (58,32566) (59,11687) (60,10779) (61,12165) (62,12365) (63,12350) (64,12329) (65,12352) (66,12341) (67,12341) (68,12344) (69,33472) (70,11126) (71,11685) (72,11416) (73,11681) (74,11432) (75,11690) (76,34929) (77,10800) (78,11968) (79,12209) (80,12317) (81,11612) (82,11195) (83,11517) (84,11612) (85,11195) (86,11517) (87,34249) (88,12347) (89,34249) (90,12347)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Risposte LLM (s)},xmin=0,xmax=91,ymin=0,ymax=128.987287411,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,20.602634473) (2,20.085839981) (3,17.951784088) (4,18.462882314) (5,19.704088242) (6,20.296144889) (7,20.196412489) (8,26.580204587) (9,20.230536579) (10,20.574737945) (11,20.311662466) (12,20.674507626) (13,18.727900989) (14,24.685241054) (15,24.888542936) (16,24.618583058) (17,18.395355351) (18,24.217884013) (19,18.600985982) (20,22.85835172) (21,18.850340693) (22,16.975232696) (23,19.69088383) (24,19.716109987) (25,19.7359921) (26,20.113933982) (27,20.385895601) (28,20.402272246) (29,20.575702705) (30,20.152032731) (31,23.809556776) (32,24.280200747) (33,18.898574825) (34,18.368015263) (35,18.745056261) (36,18.471912431) (37,18.899110868) (38,18.710235494) (39,17.272970849) (40,19.688654221) (41,19.802878608) (42,19.993365475) (43,26.725382534) (44,20.211477454) (45,25.38195862) (46,20.290031055) (47,20.326723699) (48,20.296250733) (49,20.295892009) (50,20.587031036) (51,17.842763534) (52,19.162408245) (53,18.180909214) (54,24.670308733) (55,18.190897439) (56,24.185730623) (57,18.568648054) (58,22.995227218) (59,18.91000678) (60,16.949445056) (61,19.65283967) (62,20.201968099) (63,20.268203976) (64,20.081386432) (65,20.231992065) (66,20.075859331) (67,20.099900072) (68,20.087193501) (69,23.678153156) (70,17.834826598) (71,18.816727998) (72,18.175938001) (73,18.678450136) (74,18.209799084) (75,18.833163106) (76,24.235369197) (77,17.189952992) (78,19.290097366) (79,19.799073366) (80,20.046028604) (81,18.601205185) (82,17.774295489) (83,18.599053728) (84,18.580321851) (85,17.783026223) (86,18.563434837) (87,24.193403172) (88,20.106094905) (89,24.178653842) (90,20.113471842)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Token totali},xmin=0,xmax=91,ymin=0,ymax=48007.08,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,12343) (2,12331) (3,12325) (4,12329) (5,37254) (6,12340) (7,12253) (8,36325) (9,36334) (10,36250) (11,36247) (12,11665) (13,22606) (14,34933) (15,33941) (16,23274) (17,35437) (18,35005) (19,11932) (20,32559) (21,12081) (22,32654) (23,35398) (24,12070) (25,12230) (26,12099) (27,36620) (28,12126) (29,12125) (30,12111) (31,11669) (32,11242) (33,11687) (34,34602) (35,11681) (36,35457) (37,11690) (38,11934) (39,21688) (40,12089) (41,11954) (42,12219) (43,37186) (44,12340) (45,12238) (46,36225) (47,36235) (48,36250) (49,36247) (50,11665) (51,33897) (52,34985) (53,11211) (54,23274) (55,35437) (56,35005) (57,11945) (58,32559) (59,12075) (60,32654) (61,35398) (62,36372) (63,12226) (64,12099) (65,36578) (66,12108) (67,12108) (68,12111) (69,11669) (70,33866) (71,11691) (72,34468) (73,11681) (74,35457) (75,11690) (76,11946) (77,21688) (78,12084) (79,11954) (80,36812) (81,12434) (82,12359) (83,12429) (84,12432) (85,12359) (86,12429) (87,12357) (88,12222) (89,12356) (90,12217)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Risposte LLM (s)},xmin=0,xmax=91,ymin=0,ymax=128.987287411,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,20.2329365) (2,19.931332972) (3,19.925484583) (4,19.927914417) (5,25.939082984) (6,19.947600797) (7,19.765417867) (8,25.25123523) (9,25.44910776) (10,24.647326989) (11,24.712979458) (12,18.685614951) (13,21.125387362) (14,23.380169035) (15,23.685315253) (16,21.41699953) (17,24.564173401) (18,24.541537022) (19,19.070689448) (20,21.902807811) (21,19.470198659) (22,22.946573199) (23,24.767630054) (24,19.339614829) (25,19.783358426) (26,19.442057952) (27,25.466324499) (28,19.478415134) (29,19.469856217) (30,19.465450392) (31,18.745046086) (32,17.840733492) (33,18.705057728) (34,24.421472591) (35,18.698023359) (36,24.833247858) (37,18.796110847) (38,19.166163033) (39,20.016836344) (40,19.508790216) (41,19.256132074) (42,19.671098848) (43,25.120635563) (44,20.040133563) (45,19.879916904) (46,26.209571618) (47,24.687575605) (48,25.852950671) (49,27.305674726) (50,21.15078501) (51,26.661989885) (52,26.70542135) (53,17.829181775) (54,21.489930053) (55,24.579485396) (56,25.750424149) (57,19.205479718) (58,21.983883599) (59,20.652253604) (60,22.949114418) (61,25.983733174) (62,25.467550273) (63,20.869566739) (64,19.482558792) (65,25.491181051) (66,19.480282308) (67,19.450876585) (68,19.456869354) (69,18.664233561) (70,23.86622762) (71,18.870676536) (72,23.937949192) (73,18.636946797) (74,24.859672694) (75,18.785978409) (76,19.225225981) (77,20.029061514) (78,19.564291972) (79,19.221438098) (80,25.615428968) (81,20.184138188) (82,21.165951608) (83,21.295249352) (84,22.335236636) (85,22.448272388) (86,21.271487727) (87,21.127521887) (88,21.980793517) (89,20.108160071) (90,23.223397569)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Token totali},xmin=0,xmax=91,ymin=0,ymax=48007.08,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,42829) (2,42852) (3,42723) (4,42745) (5,43128) (6,43284) (7,28636) (8,14084) (9,42453) (10,28269) (11,28243) (12,13429) (13,39362) (14,41233) (15,39406) (16,41236) (17,13560) (18,41183) (19,13777) (20,38380) (21,13930) (22,38445) (23,27264) (24,27960) (25,43123) (26,42772) (27,14216) (28,28544) (29,28542) (30,28518) (31,27055) (32,39391) (33,41533) (34,40054) (35,41572) (36,40926) (37,13780) (38,27647) (39,25534) (40,42160) (41,41925) (42,42895) (43,43119) (44,43230) (45,43057) (46,14063) (47,42405) (48,28269) (49,28243) (50,13429) (51,39305) (52,27372) (53,39314) (54,41236) (55,13560) (56,41183) (57,13810) (58,38380) (59,13926) (60,38445) (61,27264) (62,41953) (63,43111) (64,42772) (65,28492) (66,28508) (67,28508) (68,28518) (69,27055) (70,39363) (71,41546) (72,40002) (73,41572) (74,40926) (75,13780) (76,13817) (77,25534) (78,42132) (79,41925) (80,42800) (81,44451) (82,44199) (83,44412) (84,44448) (85,44151) (86,44408) (87,42839) (88,14069) (89,42833) (90,14069)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Risposte LLM (s)},xmin=0,xmax=91,ymin=0,ymax=128.987287411,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,50.446418206) (2,119.432673529) (3,50.337043534) (4,50.454187668) (5,52.819370591) (6,53.705808966) (7,53.75900787) (8,25.040517481) (9,55.097288185) (10,54.105950766) (11,54.642371225) (12,25.281695007) (13,52.140533205) (14,81.429162803) (15,54.133126609) (16,82.54502391) (17,25.90694861) (18,56.755364534) (19,27.742747586) (20,49.305376167) (21,26.717427534) (22,48.893029078) (23,53.848870218) (24,49.422252912) (25,60.903333888) (26,53.360363012) (27,24.04575121) (28,49.603811547) (29,49.582776149) (30,49.614923202) (31,45.393619411) (32,52.409699017) (33,57.954545838) (34,73.067938008) (35,56.086853797) (36,52.690782397) (37,23.05762647) (38,51.905950801) (39,45.195938064) (40,59.23801239) (41,54.681632969) (42,54.783631908) (43,60.520346003) (44,58.744918515) (45,61.77565085) (46,27.150547378) (47,61.841671568) (48,58.361277662) (49,58.075423636) (50,27.59429301) (51,54.758936855) (52,53.524240427) (53,47.408781864) (54,83.804932724) (55,26.020210805) (56,56.704641943) (57,27.990671223) (58,47.236977123) (59,26.730860843) (60,47.907688265) (61,52.515130872) (62,52.625635285) (63,63.282041675) (64,54.47335543) (65,50.445788131) (66,50.646334587) (67,49.485025227) (68,48.396653812) (69,46.474114751) (70,50.585907035) (71,55.115071756) (72,71.291106185) (73,55.864459142) (74,52.660767313) (75,23.076097283) (76,23.538105384) (77,44.098766444) (78,58.038226141) (79,53.296220402) (80,53.487054703) (81,60.555306352) (82,61.138974247) (83,63.601726348) (84,63.522657391) (85,61.959503164) (86,61.623439084) (87,61.738388406) (88,28.593677531) (89,57.771386272) (90,28.32093826)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+{\small Ogni punto è un circuito. Le scale sono comuni fra i tre sistemi per ciascuna colonna. L'indice segue l'ordine alfabetico dell'appendice.}\par
+\clearpage\section{Correzioni e recupero}
+Zero, uno e due indicano il numero di risposte aggiuntive. La colonna RAG esclude la preparazione per sessione dell'indice WL, riportata separatamente.\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\textbf{Correzioni}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\textbf{RAG e controlli (s)}\end{minipage}\par
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={Correzioni},xmin=0,xmax=91,ymin=0,ymax=2.25,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0) (8,2) (9,0) (10,0) (11,0) (12,1) (13,0) (14,2) (15,2) (16,2) (17,0) (18,2) (19,0) (20,2) (21,0) (22,0) (23,0) (24,0) (25,0) (26,0) (27,0) (28,0) (29,0) (30,0) (31,2) (32,2) (33,0) (34,0) (35,0) (36,0) (37,0) (38,0) (39,0) (40,0) (41,0) (42,0) (43,2) (44,0) (45,2) (46,0) (47,0) (48,0) (49,0) (50,1) (51,0) (52,0) (53,0) (54,2) (55,0) (56,2) (57,0) (58,2) (59,0) (60,0) (61,0) (62,0) (63,0) (64,0) (65,0) (66,0) (67,0) (68,0) (69,2) (70,0) (71,0) (72,0) (73,0) (74,0) (75,0) (76,2) (77,0) (78,0) (79,0) (80,0) (81,0) (82,0) (83,0) (84,0) (85,0) (86,0) (87,2) (88,0) (89,2) (90,0)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={Manhattan},xlabel={Indice circuito},ylabel={RAG e controlli (s)},xmin=0,xmax=91,ymin=0,ymax=5.30694885132,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kuno,fill=kuno] coordinates {(1,4.913841529) (2,3.882469182) (3,3.900136144) (4,3.864895078) (5,3.706517288) (6,3.952680648) (7,3.737654403) (8,3.894018349) (9,3.916939445) (10,3.879780378) (11,3.832255764) (12,3.89055678) (13,3.805798479) (14,3.939005373) (15,3.859613164) (16,3.914532966) (17,3.961773743) (18,3.902857459) (19,4.128751072) (20,3.702800142) (21,4.005124567) (22,3.605764033) (23,3.954785673) (24,4.006011502) (25,4.0824847) (26,4.102250902) (27,3.968488296) (28,4.043654309) (29,4.14949022) (30,4.04440754) (31,3.954963579) (32,4.020027858) (33,4.028946948) (34,4.352447311) (35,4.128631526) (36,4.159681952) (37,4.142168533) (38,4.131541474) (39,3.748085003) (40,4.274017586) (41,3.860597961) (42,3.850044193) (43,4.012184024) (44,3.933199269) (45,3.824729795) (46,3.823134792) (47,3.650502363) (48,3.782296403) (49,3.745383359) (50,3.738565927) (51,3.814839164) (52,3.808142028) (53,3.725369265) (54,3.747047319) (55,3.911792035) (56,3.870026554) (57,3.843790313) (58,3.573931097) (59,3.893399049) (60,3.552596152) (61,3.766034533) (62,3.889158167) (63,3.941048943) (64,3.871923207) (65,3.81799901) (66,3.769944533) (67,3.773227776) (68,3.677560273) (69,3.76431988) (70,3.761200458) (71,3.823421768) (72,3.829749427) (73,3.790984292) (74,3.818389429) (75,3.688200926) (76,3.782628678) (77,3.356076903) (78,3.71487029) (79,3.801381636) (80,3.998938586) (81,3.847581335) (82,3.818195911) (83,3.794091331) (84,3.780351528) (85,4.036941514) (86,3.924326703) (87,3.729160892) (88,3.744411298) (89,3.776652594) (90,3.742232082)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={Correzioni},xmin=0,xmax=91,ymin=0,ymax=2.25,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,0) (2,0) (3,0) (4,0) (5,2) (6,0) (7,0) (8,2) (9,2) (10,2) (11,2) (12,0) (13,1) (14,2) (15,2) (16,1) (17,2) (18,2) (19,0) (20,2) (21,0) (22,2) (23,2) (24,0) (25,0) (26,0) (27,2) (28,0) (29,0) (30,0) (31,0) (32,0) (33,0) (34,2) (35,0) (36,2) (37,0) (38,0) (39,1) (40,0) (41,0) (42,0) (43,2) (44,0) (45,0) (46,2) (47,2) (48,2) (49,2) (50,0) (51,2) (52,2) (53,0) (54,1) (55,2) (56,2) (57,0) (58,2) (59,0) (60,2) (61,2) (62,2) (63,0) (64,0) (65,2) (66,0) (67,0) (68,0) (69,0) (70,2) (71,0) (72,2) (73,0) (74,2) (75,0) (76,0) (77,1) (78,0) (79,0) (80,2) (81,0) (82,0) (83,0) (84,0) (85,0) (86,0) (87,0) (88,0) (89,0) (90,0)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL},xlabel={Indice circuito},ylabel={RAG e controlli (s)},xmin=0,xmax=91,ymin=0,ymax=5.30694885132,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kcinque,fill=kcinque] coordinates {(1,0.276369561) (2,0.30320108) (3,0.173094684) (4,0.18183178) (5,0.207840402) (6,0.230893874) (7,0.23133402) (8,0.248914844) (9,0.260473111) (10,0.277697982) (11,0.299868931999) (12,0.122272396) (13,0.132910287) (14,0.527661066) (15,0.138223902) (16,0.68252954) (17,0.154721135) (18,1.13936048) (19,0.165230300001) (20,0.633626276) (21,0.177570745) (22,1.018937514) (23,0.189525532) (24,0.197832657001) (25,0.206774877) (26,0.217845852001) (27,0.229232450001) (28,0.241631276) (29,0.255634041001) (30,0.265910651) (31,0.124550753999) (32,0.13724036) (33,0.517877253) (34,0.140189068001) (35,0.898849699) (36,0.156727423) (37,0.924829312) (38,0.166207766) (39,0.894268204) (40,0.174100752) (41,0.192458095) (42,0.208831028998) (43,0.214499664) (44,0.221395813) (45,0.231735858999) (46,0.260612472001) (47,0.272362427999) (48,0.272181875) (49,0.279789652999) (50,0.129138826) (51,0.137324243) (52,0.717079919001) (53,0.149120453001) (54,0.699712361) (55,0.156116701) (56,0.922873256) (57,0.165557382001) (58,0.638003841001) (59,0.177758166001) (60,0.794407869998) (61,0.190415683001) (62,0.201919286999) (63,0.213863444) (64,0.223605333002) (65,0.231530155001) (66,0.245612015999) (67,0.254596590001) (68,0.269315374) (69,0.12554947) (70,0.133314582001) (71,0.504937049) (72,0.144633631) (73,0.711742332) (74,0.155129562001) (75,0.939788318001) (76,0.166931677) (77,0.85254562) (78,0.178497375) (79,0.188950975999) (80,0.200428311) (81,0.222094930999) (82,0.134455719) (83,0.177450681) (84,0.222107059999) (85,0.134363575999) (86,0.174655107001) (87,0.174955574001) (88,0.231784146999) (89,0.175873234) (90,0.230970675)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+\noindent\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={Correzioni},xmin=0,xmax=91,ymin=0,ymax=2.25,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,2) (2,2) (3,2) (4,2) (5,2) (6,2) (7,1) (8,0) (9,2) (10,1) (11,1) (12,0) (13,2) (14,2) (15,2) (16,2) (17,0) (18,2) (19,0) (20,2) (21,0) (22,2) (23,1) (24,1) (25,2) (26,2) (27,0) (28,1) (29,1) (30,1) (31,1) (32,2) (33,2) (34,2) (35,2) (36,2) (37,0) (38,1) (39,1) (40,2) (41,2) (42,2) (43,2) (44,2) (45,2) (46,0) (47,2) (48,1) (49,1) (50,0) (51,2) (52,1) (53,2) (54,2) (55,0) (56,2) (57,0) (58,2) (59,0) (60,2) (61,1) (62,2) (63,2) (64,2) (65,1) (66,1) (67,1) (68,1) (69,1) (70,2) (71,2) (72,2) (73,2) (74,2) (75,0) (76,0) (77,1) (78,2) (79,2) (80,2) (81,2) (82,2) (83,2) (84,2) (85,2) (86,2) (87,2) (88,0) (89,2) (90,0)};\end{axis}\end{tikzpicture}\end{minipage}\hfill\begin{minipage}{.49\linewidth}\centering\begin{tikzpicture}\begin{axis}[width=.95\linewidth,height=4.65cm,title={WL + sintesi},xlabel={Indice circuito},ylabel={RAG e controlli (s)},xmin=0,xmax=91,ymin=0,ymax=5.30694885132,xtick={1,15,30,45,60,75,90},grid=major,scaled y ticks=false,tick label style={font=\scriptsize},label style={font=\small},title style={font=\bfseries},]
+\addplot[only marks,mark=*,mark size=1.1pt,color=kdieci,fill=kdieci] coordinates {(1,0.272969255) (2,0.309771407001) (3,0.16270223) (4,0.173040350999) (5,0.212540245) (6,0.224436724) (7,0.231381267) (8,0.242282561001) (9,0.253797768999) (10,0.270548053999) (11,0.279147355001) (12,0.12826528) (13,0.133846191999) (14,0.506732145001) (15,0.140016781001) (16,0.697146954) (17,0.152744022) (18,0.948146266001) (19,0.171793324) (20,0.628510019) (21,0.178844783999) (22,1.001191697) (23,0.189499044) (24,0.200793062) (25,0.211085614999) (26,0.218452864001) (27,0.230553703001) (28,0.241051394001) (29,0.25415905) (30,0.269636887) (31,0.123387763) (32,0.133488766) (33,0.516749693001) (34,0.142251309) (35,0.898096804) (36,0.153369147001) (37,1.143914998) (38,0.165137711001) (39,0.855235621) (40,0.178192707001) (41,0.196837514) (42,0.199609808) (43,0.211605376) (44,0.221115794) (45,0.231245556) (46,0.242511866001) (47,0.253291804) (48,0.270018157) (49,0.475564553) (50,0.123728443999) (51,0.132318525) (52,0.521313321) (53,0.141754578999) (54,0.697780135) (55,0.153919581) (56,1.141730741) (57,0.164536036) (58,0.635294635) (59,0.17769178) (60,1.036016826) (61,0.189622633001) (62,0.201707689999) (63,0.210627293) (64,0.220369234999) (65,0.23273324) (66,0.244686151) (67,0.256604507) (68,0.269998147) (69,0.124207725999) (70,0.132221663) (71,0.502467348) (72,0.142097908001) (73,0.727067004) (74,0.153961911001) (75,0.981911928) (76,0.165129454999) (77,0.882901543) (78,0.177743259999) (79,0.195793982) (80,0.201544841) (81,0.229227691001) (82,0.138921025) (83,0.180485017001) (84,0.226392022001) (85,0.139618519999) (86,0.180952895) (87,0.179213187001) (88,0.233273188) (89,0.179004046999) (90,0.235924311999)};\end{axis}\end{tikzpicture}\end{minipage}\par\medskip
+{\small Ogni punto è un circuito. Le scale sono comuni fra i tre sistemi per ciascuna colonna. L'indice segue l'ordine alfabetico dell'appendice.}\par
+\clearpage\section{Distribuzione degli score e differenze appaiate}
+La cumulativa mostra la quota di circuiti con score non superiore all'ascissa. Nei pannelli sotto ogni punto è una differenza sullo stesso circuito; zero è una parità.\par\begin{center}\begin{tikzpicture}\begin{axis}[width=.92\linewidth,height=5cm,xmin=0,xmax=1,ymin=0,ymax=1,xlabel={Score},ylabel={Quota cumulativa},grid=major,legend pos=north west]\addplot[const plot,thick,kuno,solid] coordinates {(0,0) (2.865e-06,0.0111111111111) (2.8783e-06,0.0222222222222) (1.13715e-05,0.0333333333333) (1.13956e-05,0.0444444444444) (2.72864e-05,0.0555555555556) (2.73505e-05,0.0666666666667) (0.2694733993,0.0777777777778) (0.2694733993,0.0888888888889) (0.3415826997,0.1) (0.3415929475,0.111111111111) (0.3741311339,0.122222222222) (0.3741311339,0.133333333333) (0.4398748201,0.144444444444) (0.4399012138,0.155555555556) (0.5194357059,0.166666666667) (0.5202940694,0.177777777778) (0.5666719493,0.188888888889) (0.5674551344,0.2) (0.7963772008,0.211111111111) (0.7963772008,0.222222222222) (0.809586095,0.233333333333) (0.809586095,0.244444444444) (0.8281722146,0.255555555556) (0.8282716028,0.266666666667) (0.8300875325,0.277777777778) (0.8300875325,0.288888888889) (0.848099558,0.3) (0.8497804839,0.311111111111) (0.8522598056,0.322222222222) (0.853872124,0.333333333333) (0.8671515989,0.344444444444) (0.8685836016,0.355555555556) (0.86994159,0.366666666667) (0.8714043421,0.377777777778) (0.88522201,0.388888888889) (0.8864178847,0.4) (0.8868444525,0.411111111111) (0.8879093206,0.422222222222) (0.9022052109,0.433333333333) (0.9022322778,0.444444444444) (0.9032072297,0.455555555556) (0.9032343267,0.466666666667) (0.918024796,0.477777777778) (0.9189065362,0.488888888889) (0.9209232096,0.5) (0.9218353887,0.511111111111) (0.9247191115,0.522222222222) (0.9248023412,0.533333333333) (0.9326646222,0.544444444444) (0.9333643936,0.555555555556) (0.9342899269,0.566666666667) (0.934906771,0.577777777778) (0.9398337239,0.588888888889) (0.9398337239,0.6) (0.9460784319,0.611111111111) (0.9460882208,0.622222222222) (0.9461449886,0.633333333333) (0.9465992541,0.644444444444) (0.9465992541,0.655555555556) (0.9550100512,0.666666666667) (0.9581792229,0.677777777778) (0.9585242347,0.688888888889) (0.9593073443,0.7) (0.9612044132,0.711111111111) (0.9616082099,0.722222222222) (0.968253564,0.733333333333) (0.9685123249,0.744444444444) (0.9688528397,0.755555555556) (0.9691548425,0.766666666667) (0.9710851394,0.777777777778) (0.9720658176,0.788888888889) (0.9788591374,0.8) (0.980527915,0.811111111111) (0.9812192516,0.822222222222) (0.9816579456,0.833333333333) (0.9816579456,0.844444444444) (0.983919958,0.855555555556) (0.983919958,0.866666666667) (0.9868581315,0.877777777778) (0.9869487051,0.888888888889) (0.993187968,0.9) (0.993187968,0.911111111111) (0.9958784484,0.922222222222) (0.9960947806,0.933333333333) (0.9978340951,0.944444444444) (0.9978340951,0.955555555556) (0.9987599534,0.966666666667) (0.9987599534,0.977777777778) (0.9993011566,0.988888888889) (0.9993011566,1) (1,1)};\addlegendentry{Manhattan}\addplot[const plot,thick,kcinque,dashed] coordinates {(0,0) (2.865e-06,0.0111111111111) (2.8783e-06,0.0222222222222) (1.13715e-05,0.0333333333333) (1.13956e-05,0.0444444444444) (2.72864e-05,0.0555555555556) (2.73505e-05,0.0666666666667) (0.2694733993,0.0777777777778) (0.2694733993,0.0888888888889) (0.3415826997,0.1) (0.3415929475,0.111111111111) (0.3741311339,0.122222222222) (0.3741311339,0.133333333333) (0.4398748201,0.144444444444) (0.4399012138,0.155555555556) (0.5194357059,0.166666666667) (0.5202940694,0.177777777778) (0.5666719493,0.188888888889) (0.5674551344,0.2) (0.7963772008,0.211111111111) (0.7963772008,0.222222222222) (0.809586095,0.233333333333) (0.809586095,0.244444444444) (0.8281473695,0.255555555556) (0.8282964517,0.266666666667) (0.8300875325,0.277777777778) (0.8300875325,0.288888888889) (0.848099558,0.3) (0.8497804839,0.311111111111) (0.8523109435,0.322222222222) (0.853872124,0.333333333333) (0.8671515989,0.344444444444) (0.8685836016,0.355555555556) (0.86994159,0.366666666667) (0.8714043421,0.377777777778) (0.88522201,0.388888888889) (0.8864178847,0.4) (0.8868444525,0.411111111111) (0.8879093206,0.422222222222) (0.9022052109,0.433333333333) (0.9022864142,0.444444444444) (0.9032072297,0.455555555556) (0.9032343267,0.466666666667) (0.918024796,0.477777777778) (0.9189065362,0.488888888889) (0.9209232096,0.5) (0.9218353887,0.511111111111) (0.9247468539,0.522222222222) (0.9248023412,0.533333333333) (0.9305395104,0.544444444444) (0.9305395104,0.555555555556) (0.9326646222,0.566666666667) (0.9333643936,0.577777777778) (0.9342899269,0.588888888889) (0.934906771,0.6) (0.9460882208,0.611111111111) (0.9461449886,0.622222222222) (0.9465992541,0.633333333333) (0.9465992541,0.644444444444) (0.9581792229,0.655555555556) (0.9585242347,0.666666666667) (0.9612044132,0.677777777778) (0.9616082099,0.688888888889) (0.9669933319,0.7) (0.9670513541,0.711111111111) (0.9688819062,0.722222222222) (0.9690853958,0.733333333333) (0.970017249,0.744444444444) (0.9701045558,0.755555555556) (0.9705120914,0.766666666667) (0.9706868019,0.777777777778) (0.9748925305,0.788888888889) (0.9749510267,0.8) (0.9781465418,0.811111111111) (0.9781465418,0.822222222222) (0.9782345802,0.833333333333) (0.9782345802,0.844444444444) (0.980527915,0.855555555556) (0.9812192516,0.866666666667) (0.9867685434,0.877777777778) (0.9868581315,0.888888888889) (0.9920759249,0.9) (0.9920759249,0.911111111111) (0.993187968,0.922222222222) (0.993187968,0.933333333333) (0.9960947806,0.944444444444) (0.9960947806,0.955555555556) (0.9987599534,0.966666666667) (0.9987599534,0.977777777778) (0.9993011566,0.988888888889) (0.9993011566,1) (1,1)};\addlegendentry{WL}\addplot[const plot,thick,kdieci,dotted] coordinates {(0,0) (2.865e-06,0.0111111111111) (2.8783e-06,0.0222222222222) (1.13715e-05,0.0333333333333) (1.13956e-05,0.0444444444444) (2.72864e-05,0.0555555555556) (2.73505e-05,0.0666666666667) (0.0007520923,0.0777777777778) (0.000752128,0.0888888888889) (0.0060775772,0.1) (0.0061016048,0.111111111111) (0.0435319136,0.122222222222) (0.3415826997,0.133333333333) (0.3415929475,0.144444444444) (0.4398748201,0.155555555556) (0.4399012138,0.166666666667) (0.5194357059,0.177777777778) (0.5666719493,0.188888888889) (0.5674551344,0.2) (0.7963772008,0.211111111111) (0.7963772008,0.222222222222) (0.809586095,0.233333333333) (0.809586095,0.244444444444) (0.8281473695,0.255555555556) (0.8282964517,0.266666666667) (0.8300875325,0.277777777778) (0.8300875325,0.288888888889) (0.848099558,0.3) (0.8497804839,0.311111111111) (0.8523109435,0.322222222222) (0.853872124,0.333333333333) (0.8671515989,0.344444444444) (0.8685836016,0.355555555556) (0.86994159,0.366666666667) (0.8714043421,0.377777777778) (0.88522201,0.388888888889) (0.8864178847,0.4) (0.8868444525,0.411111111111) (0.8879093206,0.422222222222) (0.9022052109,0.433333333333) (0.9022864142,0.444444444444) (0.9032072297,0.455555555556) (0.9032343267,0.466666666667) (0.918024796,0.477777777778) (0.9189065362,0.488888888889) (0.9209232096,0.5) (0.9218353887,0.511111111111) (0.9247468539,0.522222222222) (0.9248023412,0.533333333333) (0.9305395104,0.544444444444) (0.9305395104,0.555555555556) (0.9326646222,0.566666666667) (0.9333643936,0.577777777778) (0.9342899269,0.588888888889) (0.934906771,0.6) (0.9460882208,0.611111111111) (0.9461449886,0.622222222222) (0.9465992541,0.633333333333) (0.9465992541,0.644444444444) (0.9581792229,0.655555555556) (0.9585242347,0.666666666667) (0.9612044132,0.677777777778) (0.9616082099,0.688888888889) (0.9669933319,0.7) (0.9670513541,0.711111111111) (0.9688819062,0.722222222222) (0.9690853958,0.733333333333) (0.970017249,0.744444444444) (0.9701045558,0.755555555556) (0.9705120914,0.766666666667) (0.9706868019,0.777777777778) (0.9748925305,0.788888888889) (0.9749510267,0.8) (0.9781465418,0.811111111111) (0.9781465418,0.822222222222) (0.9782345802,0.833333333333) (0.9782345802,0.844444444444) (0.980527915,0.855555555556) (0.9812192516,0.866666666667) (0.9868581315,0.877777777778) (0.9920759249,0.888888888889) (0.9920759249,0.9) (0.9928297161,0.911111111111) (0.993187968,0.922222222222) (0.993187968,0.933333333333) (0.9960947806,0.944444444444) (0.9960947806,0.955555555556) (0.9987599534,0.966666666667) (0.9987599534,0.977777777778) (0.9993011566,0.988888888889) (0.9993011566,1) (1,1)};\addlegendentry{WL + sintesi}\end{axis}\end{tikzpicture}\end{center}\begin{center}\begin{tikzpicture}\begin{axis}[width=.92\linewidth,height=4.8cm,title={WL meno Manhattan},xlabel={Indice circuito},ylabel={Differenza score},xmin=0,xmax=91,ymin=-0.49676215580000005,ymax=0.0444336595000001,grid=major]\addplot[gray,dashed,domain=0:91]{0};\addplot[only marks,mark size=1.5pt,kcinque] coordinates {(1,0) (2,0) (3,-0.0039081107) (4,0.0066389665) (5,0) (6,0) (7,0) (8,0) (9,0) (10,0) (11,0) (12,0) (13,0) (14,0) (15,-0.0001801617) (16,0) (17,0.0061687626) (18,0) (19,0.0113794576) (20,0) (21,0) (22,0) (23,0) (24,0) (25,0) (26,0) (27,0) (28,0) (29,5.11379e-05) (30,-2.48451e-05) (31,0) (32,0.0002163322) (33,0) (34,0) (35,0) (36,0.0089916993) (37,0) (38,0.0244336595) (39,0) (40,0) (41,0) (42,0) (43,0) (44,0) (45,0) (46,0) (47,0) (48,0) (49,0) (50,0) (51,0) (52,0) (53,0) (54,0) (55,0.0071494408) (56,0) (57,0.0140753446) (58,0) (59,0) (60,0) (61,0) (62,0) (63,0) (64,5.41364e-05) (65,0) (66,0) (67,0) (68,2.48489e-05) (69,0) (70,0) (71,0) (72,0) (73,0) (74,0.0096342169) (75,0) (76,2.90665e-05) (77,0) (78,0) (79,0) (80,0) (81,-0.0092942135) (82,-0.0057581702) (83,-0.0146065915) (84,-0.0092942135) (85,-0.0057581702) (86,-0.0146646137) (87,-0.0138154022) (88,2.77424e-05) (89,-0.013902709) (90,0)};\end{axis}\end{tikzpicture}\end{center}\begin{center}\begin{tikzpicture}\begin{axis}[width=.92\linewidth,height=4.8cm,title={WL + sintesi meno Manhattan},xlabel={Indice circuito},ylabel={Differenza score},xmin=0,xmax=91,ymin=-0.49676215580000005,ymax=0.0444336595000001,grid=major]\addplot[gray,dashed,domain=0:91]{0};\addplot[only marks,mark size=1.5pt,kdieci] coordinates {(1,0) (2,0) (3,-0.0039081107) (4,0.0066389665) (5,0) (6,0) (7,0) (8,0) (9,0) (10,0) (11,0) (12,0) (13,0) (14,-0.4767621558) (15,0.005881011) (16,-0.3680295291) (17,0.0061687626) (18,-0.2687212713) (19,0.0113794576) (20,0) (21,0) (22,0) (23,0) (24,0) (25,0) (26,0) (27,0) (28,0) (29,5.11379e-05) (30,-2.48451e-05) (31,0) (32,0.0002163322) (33,0) (34,0) (35,0) (36,0.0089916993) (37,0) (38,0.0244336595) (39,0) (40,0) (41,0) (42,0) (43,0) (44,0) (45,0) (46,0) (47,0) (48,0) (49,0) (50,0) (51,0) (52,0) (53,0) (54,-0.3680535567) (55,0.0071494408) (56,-0.268721307) (57,0.0140753446) (58,0) (59,0) (60,0) (61,0) (62,0) (63,0) (64,5.41364e-05) (65,0) (66,0) (67,0) (68,2.48489e-05) (69,0) (70,0) (71,0) (72,0) (73,0) (74,0.0096342169) (75,0) (76,2.90665e-05) (77,0) (78,0) (79,0) (80,0) (81,-0.0092942135) (82,-0.0057581702) (83,-0.0146065915) (84,-0.0092942135) (85,-0.0057581702) (86,-0.0146646137) (87,-0.0138154022) (88,2.77424e-05) (89,-0.013902709) (90,0)};\end{axis}\end{tikzpicture}\end{center}
+\clearpage\section{Conclusioni e limiti del confronto}
+\subsection{Che cosa mostrano questi Test}WL rispetto a Manhattan: differenza media di score -0,000026, con 14 miglioramenti, 65 parità e 11 peggioramenti su 90.\par WL + sintesi rispetto a Manhattan: differenza media di score -0,019406, con 15 miglioramenti, 60 parità e 15 peggioramenti su 90.\par WL + sintesi rispetto a WL: differenza media di score -0,019380, con 1 miglioramenti, 84 parità e 5 peggioramenti su 90.\par L'aggiunta della sintesi, rispetto al solo WL, cambia il primo ingresso medio di 16,87\% e i token complessivi di 58,62\%. Il tempo totale medio osservato cambia di 75,61\%.\par Il solo WL è quasi indistinguibile da Manhattan nella media:
+la differenza è $-0,0000259$. La sintesi perde invece circa 0,01938
+rispetto a WL, cioè 1,938 punti sulla scala dello score espressa in percentuale.
+I cinque peggioramenti riguardano QPE a 30, 40 e 50 qubit.
+Nella fascia oltre 16 qubit la media scende da 0,279117 a 0,181878;
+la soglia di 0,8 resta però 70/90 perché quei casi erano già sotto soglia.
+Per questo la sola copertura della soglia nasconderebbe il peggioramento.
+
+La validation riguardava un criterio di trasferimento della scelta storica,
+non la risposta del modello. Un recupero migliore secondo quel criterio
+non obbliga l'LLM a scegliere meglio. Il confronto W--S mantiene invece identici
+i record recuperati e consente di osservare l'effetto dell'informazione aggiunta
+sulle risposte, sui token e sulle correzioni.
+Il maggiore score medio osservato appartiene a Manhattan. La sintesi non migliora lo score medio rispetto al solo recupero WL in questo campione. Questa è una conclusione descrittiva delle esecuzioni conservate,
+non una prova che lo stesso ordinamento valga per altri modelli o circuiti.
+
+\subsection{Limiti e provenienza}
+La base Manhattan è la prova storica del 21 settembre; le due prove WL sono
+del 29 settembre. Pesi, parametri di generazione e sorgenti coincidono,
+ma revisioni del codice, data e gestione dell'indice differiscono.
+Non sono state fatte repliche intercalate o misure di memoria.
+Le medie non costituiscono un test statistico di superiorità.
+
+La scelta di $h$ usa esclusivamente la validation; la progettazione della nuova
+campagna avviene però dopo l'analisi dei Test precedenti sugli stessi 90 circuiti.
+Non si tratta dunque di un nuovo campione di conferma mai osservato.
+Circuiti della stessa famiglia possono inoltre essere correlati.
+
+Il report è ricostruito dai registri di ogni circuito, non trascritto dalle
+sole medie. Sono stati controllati identificativi e hash dei sorgenti, contratti,
+modello, parametri delle chiamate, recuperi, token, sintesi realmente inviate e
+verifiche dei fatti. Nessuna nuova inferenza o compilazione quantistica è stata eseguita.
+Gli script, le tabelle complete e gli hash delle fonti sono conservati accanto al PDF.
+
+\subsection{Riproducibilità}
+\texttt{genera\_report.py} legge i registri e produce \texttt{dati.json},
+\texttt{provenienza.json} e \texttt{tabelle/circuiti.csv}.
+\texttt{impaginazione.py} genera questo sorgente autonomo, con grafici vettoriali
+incorporati. L'opzione \texttt{--output} del primo script permette di creare
+una nuova cartella senza sovrascrivere un'analisi precedente.
+
+\clearpage\section{Appendice: tutti i circuiti e i tre score}
+L'indice è quello dei grafici. Il CSV contiene anche tutte le misure di tempo, token e fatti, senza arrotondamenti di presentazione.\par\begingroup\small\renewcommand{\arraystretch}{1.1}\setlength{\tabcolsep}{4pt}\begin{longtable}{r p{8.2cm} r r r}\toprule N & Circuito & Manhattan & WL & WL + sintesi\\\midrule\endfirsthead\toprule N & Circuito & Manhattan & WL & WL + sintesi\\\midrule\endhead1 & \nolinkurl{groundstate_medium_indep_qiskit_12} & 0,796377 & 0,796377 & 0,796377\\ 
+2 & \nolinkurl{groundstate_medium_indep_tket_12} & 0,796377 & 0,796377 & 0,796377\\ 
+3 & \nolinkurl{groundstate_small_indep_qiskit_4} & 0,978859 & 0,974951 & 0,974951\\ 
+4 & \nolinkurl{groundstate_small_indep_tket_4} & 0,968254 & 0,974893 & 0,974893\\ 
+5 & \nolinkurl{qpeexact_indep_qiskit_10} & 0,921835 & 0,921835 & 0,921835\\ 
+6 & \nolinkurl{qpeexact_indep_qiskit_11} & 0,903234 & 0,903234 & 0,903234\\ 
+7 & \nolinkurl{qpeexact_indep_qiskit_12} & 0,887909 & 0,887909 & 0,887909\\ 
+8 & \nolinkurl{qpeexact_indep_qiskit_13} & 0,871404 & 0,871404 & 0,871404\\ 
+9 & \nolinkurl{qpeexact_indep_qiskit_14} & 0,853872 & 0,853872 & 0,853872\\ 
+10 & \nolinkurl{qpeexact_indep_qiskit_15} & 0,830088 & 0,830088 & 0,830088\\ 
+11 & \nolinkurl{qpeexact_indep_qiskit_16} & 0,809586 & 0,809586 & 0,809586\\ 
+12 & \nolinkurl{qpeexact_indep_qiskit_2} & 0,998760 & 0,998760 & 0,998760\\ 
+13 & \nolinkurl{qpeexact_indep_qiskit_3} & 0,996095 & 0,996095 & 0,996095\\ 
+14 & \nolinkurl{qpeexact_indep_qiskit_30} & 0,520294 & 0,520294 & 0,043532\\ 
+15 & \nolinkurl{qpeexact_indep_qiskit_4} & 0,986949 & 0,986769 & 0,992830\\ 
+16 & \nolinkurl{qpeexact_indep_qiskit_40} & 0,374131 & 0,374131 & 0,006102\\ 
+17 & \nolinkurl{qpeexact_indep_qiskit_5} & 0,972066 & 0,978235 & 0,978235\\ 
+18 & \nolinkurl{qpeexact_indep_qiskit_50} & 0,269473 & 0,269473 & 0,000752\\ 
+19 & \nolinkurl{qpeexact_indep_qiskit_6} & 0,959307 & 0,970687 & 0,970687\\ 
+20 & \nolinkurl{qpeexact_indep_qiskit_60} & 0,000011 & 0,000011 & 0,000011\\ 
+21 & \nolinkurl{qpeexact_indep_qiskit_7} & 0,961608 & 0,961608 & 0,961608\\ 
+22 & \nolinkurl{qpeexact_indep_qiskit_70} & 0,000003 & 0,000003 & 0,000003\\ 
+23 & \nolinkurl{qpeexact_indep_qiskit_8} & 0,946599 & 0,946599 & 0,946599\\ 
+24 & \nolinkurl{qpeexact_indep_qiskit_9} & 0,934907 & 0,934907 & 0,934907\\ 
+25 & \nolinkurl{qpeexact_indep_tket_10} & 0,920923 & 0,920923 & 0,920923\\ 
+26 & \nolinkurl{qpeexact_indep_tket_11} & 0,902205 & 0,902205 & 0,902205\\ 
+27 & \nolinkurl{qpeexact_indep_tket_12} & 0,886844 & 0,886844 & 0,886844\\ 
+28 & \nolinkurl{qpeexact_indep_tket_13} & 0,869942 & 0,869942 & 0,869942\\ 
+29 & \nolinkurl{qpeexact_indep_tket_14} & 0,852260 & 0,852311 & 0,852311\\ 
+30 & \nolinkurl{qpeexact_indep_tket_15} & 0,828172 & 0,828147 & 0,828147\\ 
+31 & \nolinkurl{qpeexact_indep_tket_2} & 0,998760 & 0,998760 & 0,998760\\ 
+32 & \nolinkurl{qpeexact_indep_tket_3} & 0,995878 & 0,996095 & 0,996095\\ 
+33 & \nolinkurl{qpeexact_indep_tket_30} & 0,567455 & 0,567455 & 0,567455\\ 
+34 & \nolinkurl{qpeexact_indep_tket_4} & 0,986858 & 0,986858 & 0,986858\\ 
+35 & \nolinkurl{qpeexact_indep_tket_40} & 0,439875 & 0,439875 & 0,439875\\ 
+36 & \nolinkurl{qpeexact_indep_tket_5} & 0,969155 & 0,978147 & 0,978147\\ 
+37 & \nolinkurl{qpeexact_indep_tket_50} & 0,341593 & 0,341593 & 0,341593\\ 
+38 & \nolinkurl{qpeexact_indep_tket_6} & 0,946078 & 0,970512 & 0,970512\\ 
+39 & \nolinkurl{qpeexact_indep_tket_60} & 0,000027 & 0,000027 & 0,000027\\ 
+40 & \nolinkurl{qpeexact_indep_tket_7} & 0,961204 & 0,961204 & 0,961204\\ 
+41 & \nolinkurl{qpeexact_indep_tket_8} & 0,946088 & 0,946088 & 0,946088\\ 
+42 & \nolinkurl{qpeexact_indep_tket_9} & 0,934290 & 0,934290 & 0,934290\\ 
+43 & \nolinkurl{qpeinexact_indep_qiskit_10} & 0,918907 & 0,918907 & 0,918907\\ 
+44 & \nolinkurl{qpeinexact_indep_qiskit_11} & 0,903207 & 0,903207 & 0,903207\\ 
+45 & \nolinkurl{qpeinexact_indep_qiskit_12} & 0,886418 & 0,886418 & 0,886418\\ 
+\pagebreak[4]
+46 & \nolinkurl{qpeinexact_indep_qiskit_13} & 0,868584 & 0,868584 & 0,868584\\ 
+47 & \nolinkurl{qpeinexact_indep_qiskit_14} & 0,849780 & 0,849780 & 0,849780\\ 
+48 & \nolinkurl{qpeinexact_indep_qiskit_15} & 0,830088 & 0,830088 & 0,830088\\ 
+49 & \nolinkurl{qpeinexact_indep_qiskit_16} & 0,809586 & 0,809586 & 0,809586\\ 
+50 & \nolinkurl{qpeinexact_indep_qiskit_2} & 0,999301 & 0,999301 & 0,999301\\ 
+51 & \nolinkurl{qpeinexact_indep_qiskit_3} & 0,993188 & 0,993188 & 0,993188\\ 
+52 & \nolinkurl{qpeinexact_indep_qiskit_30} & 0,519436 & 0,519436 & 0,519436\\ 
+53 & \nolinkurl{qpeinexact_indep_qiskit_4} & 0,980528 & 0,980528 & 0,980528\\ 
+54 & \nolinkurl{qpeinexact_indep_qiskit_40} & 0,374131 & 0,374131 & 0,006078\\ 
+55 & \nolinkurl{qpeinexact_indep_qiskit_5} & 0,971085 & 0,978235 & 0,978235\\ 
+56 & \nolinkurl{qpeinexact_indep_qiskit_50} & 0,269473 & 0,269473 & 0,000752\\ 
+57 & \nolinkurl{qpeinexact_indep_qiskit_6} & 0,955010 & 0,969085 & 0,969085\\ 
+58 & \nolinkurl{qpeinexact_indep_qiskit_60} & 0,000011 & 0,000011 & 0,000011\\ 
+59 & \nolinkurl{qpeinexact_indep_qiskit_7} & 0,958524 & 0,958524 & 0,958524\\ 
+60 & \nolinkurl{qpeinexact_indep_qiskit_70} & 0,000003 & 0,000003 & 0,000003\\ 
+61 & \nolinkurl{qpeinexact_indep_qiskit_8} & 0,946599 & 0,946599 & 0,946599\\ 
+62 & \nolinkurl{qpeinexact_indep_qiskit_9} & 0,933364 & 0,933364 & 0,933364\\ 
+63 & \nolinkurl{qpeinexact_indep_tket_10} & 0,918025 & 0,918025 & 0,918025\\ 
+64 & \nolinkurl{qpeinexact_indep_tket_11} & 0,902232 & 0,902286 & 0,902286\\ 
+65 & \nolinkurl{qpeinexact_indep_tket_12} & 0,885222 & 0,885222 & 0,885222\\ 
+66 & \nolinkurl{qpeinexact_indep_tket_13} & 0,867152 & 0,867152 & 0,867152\\ 
+67 & \nolinkurl{qpeinexact_indep_tket_14} & 0,848100 & 0,848100 & 0,848100\\ 
+68 & \nolinkurl{qpeinexact_indep_tket_15} & 0,828272 & 0,828296 & 0,828296\\ 
+69 & \nolinkurl{qpeinexact_indep_tket_2} & 0,999301 & 0,999301 & 0,999301\\ 
+70 & \nolinkurl{qpeinexact_indep_tket_3} & 0,993188 & 0,993188 & 0,993188\\ 
+71 & \nolinkurl{qpeinexact_indep_tket_30} & 0,566672 & 0,566672 & 0,566672\\ 
+72 & \nolinkurl{qpeinexact_indep_tket_4} & 0,981219 & 0,981219 & 0,981219\\ 
+73 & \nolinkurl{qpeinexact_indep_tket_40} & 0,439901 & 0,439901 & 0,439901\\ 
+74 & \nolinkurl{qpeinexact_indep_tket_5} & 0,968512 & 0,978147 & 0,978147\\ 
+75 & \nolinkurl{qpeinexact_indep_tket_50} & 0,341583 & 0,341583 & 0,341583\\ 
+76 & \nolinkurl{qpeinexact_indep_tket_6} & 0,968853 & 0,968882 & 0,968882\\ 
+77 & \nolinkurl{qpeinexact_indep_tket_60} & 0,000027 & 0,000027 & 0,000027\\ 
+78 & \nolinkurl{qpeinexact_indep_tket_7} & 0,958179 & 0,958179 & 0,958179\\ 
+79 & \nolinkurl{qpeinexact_indep_tket_8} & 0,946145 & 0,946145 & 0,946145\\ 
+80 & \nolinkurl{qpeinexact_indep_tket_9} & 0,932665 & 0,932665 & 0,932665\\ 
+81 & \nolinkurl{routing_indep_qiskit_12} & 0,939834 & 0,930540 & 0,930540\\ 
+82 & \nolinkurl{routing_indep_qiskit_2} & 0,997834 & 0,992076 & 0,992076\\ 
+83 & \nolinkurl{routing_indep_qiskit_6} & 0,981658 & 0,967051 & 0,967051\\ 
+84 & \nolinkurl{routing_indep_tket_12} & 0,939834 & 0,930540 & 0,930540\\ 
+85 & \nolinkurl{routing_indep_tket_2} & 0,997834 & 0,992076 & 0,992076\\ 
+86 & \nolinkurl{routing_indep_tket_6} & 0,981658 & 0,966993 & 0,966993\\ 
+87 & \nolinkurl{tsp_indep_qiskit_4} & 0,983920 & 0,970105 & 0,970105\\ 
+88 & \nolinkurl{tsp_indep_qiskit_9} & 0,924719 & 0,924747 & 0,924747\\ 
+89 & \nolinkurl{tsp_indep_tket_4} & 0,983920 & 0,970017 & 0,970017\\ 
+90 & \nolinkurl{tsp_indep_tket_9} & 0,924802 & 0,924802 & 0,924802\\ 
+\bottomrule\end{longtable}\endgroup
+\clearpage\section{Appendice: costi per circuito}
+Ogni cella riporta tempo totale in secondi / token complessivi / correzioni. I tempi WL escludono il costo per sessione dell'indice. L'indice del circuito rimanda alla tabella precedente.\par\begingroup\small\renewcommand{\arraystretch}{1.1}\setlength{\tabcolsep}{6pt}\begin{longtable}{r r r r}\toprule N & Manhattan: s / token / corr. & WL: s / token / corr. & WL + sintesi: s / token / corr.\\\midrule\endfirsthead\toprule N & Manhattan: s / token / corr. & WL: s / token / corr. & WL + sintesi: s / token / corr.\\\midrule\endhead1 & 37,29 / 12\,344 / 0 & 23,21 / 12\,343 / 0 & 54,48 / 42\,829 / 2\\ 
+2 & 26,69 / 12\,331 / 0 & 22,22 / 12\,331 / 0 & 122,18 / 42\,852 / 2\\ 
+3 & 23,94 / 11\,271 / 0 & 21,87 / 12\,325 / 0 & 52,80 / 42\,723 / 2\\ 
+4 & 25,40 / 11\,450 / 0 & 21,65 / 12\,329 / 0 & 52,90 / 42\,745 / 2\\ 
+5 & 25,83 / 12\,150 / 0 & 28,53 / 37\,254 / 2 & 55,23 / 43\,128 / 2\\ 
+6 & 26,63 / 12\,407 / 0 & 21,89 / 12\,340 / 0 & 56,52 / 43\,284 / 2\\ 
+7 & 26,10 / 12\,401 / 0 & 21,91 / 12\,253 / 0 & 56,11 / 28\,636 / 1\\ 
+8 & 33,60 / 37\,514 / 2 & 27,95 / 36\,325 / 2 & 27,03 / 14\,084 / 0\\ 
+9 & 26,39 / 12\,419 / 0 & 88,06 / 36\,334 / 2 & 57,90 / 42\,453 / 2\\ 
+10 & 26,96 / 12\,457 / 0 & 297,36 / 36\,250 / 2 & 56,61 / 28\,269 / 1\\ 
+11 & 26,47 / 12\,450 / 0 & 27,55 / 36\,247 / 2 & 57,26 / 28\,243 / 1\\ 
+12 & 26,52 / 22\,248 / 1 & 20,30 / 11\,665 / 0 & 27,04 / 13\,429 / 0\\ 
+13 & 24,33 / 11\,222 / 0 & 24,01 / 22\,606 / 1 & 54,88 / 39\,362 / 2\\ 
+14 & 31,73 / 36\,131 / 2 & 44,41 / 34\,933 / 2 & 85,07 / 41\,233 / 2\\ 
+15 & 31,48 / 34\,623 / 2 & 25,85 / 33\,941 / 2 & 56,52 / 39\,406 / 2\\ 
+16 & 41,73 / 34\,862 / 2 & 34,29 / 23\,274 / 1 & 86,30 / 41\,236 / 2\\ 
+17 & 24,00 / 11\,430 / 0 & 43,81 / 35\,437 / 2 & 27,84 / 13\,560 / 0\\ 
+18 & 34,17 / 34\,903 / 2 & 31,35 / 35\,005 / 2 & 60,82 / 41\,183 / 2\\ 
+19 & 24,36 / 11\,688 / 0 & 27,95 / 11\,932 / 0 & 36,87 / 13\,777 / 0\\ 
+20 & 29,43 / 32\,566 / 2 & 24,98 / 32\,559 / 2 & 53,12 / 38\,380 / 2\\ 
+21 & 24,97 / 11\,701 / 0 & 58,80 / 12\,081 / 0 & 36,46 / 13\,930 / 0\\ 
+22 & 23,00 / 10\,779 / 0 & 26,58 / 32\,654 / 2 & 52,51 / 38\,445 / 2\\ 
+23 & 25,60 / 12\,165 / 0 & 38,83 / 35\,398 / 2 & 67,76 / 27\,264 / 1\\ 
+24 & 25,75 / 12\,167 / 0 & 21,36 / 12\,070 / 0 & 51,69 / 27\,960 / 1\\ 
+25 & 25,92 / 12\,152 / 0 & 34,88 / 12\,230 / 0 & 76,53 / 43\,123 / 2\\ 
+26 & 26,43 / 12\,329 / 0 & 37,61 / 12\,099 / 0 & 72,40 / 42\,772 / 2\\ 
+27 & 26,64 / 12\,477 / 0 & 44,85 / 36\,620 / 2 & 42,78 / 14\,216 / 0\\ 
+28 & 26,80 / 12\,468 / 0 & 38,74 / 12\,126 / 0 & 69,14 / 28\,544 / 1\\ 
+29 & 26,81 / 12\,454 / 0 & 38,92 / 12\,125 / 0 & 69,44 / 28\,542 / 1\\ 
+30 & 26,64 / 12\,344 / 0 & 42,74 / 12\,111 / 0 & 72,84 / 28\,518 / 1\\ 
+31 & 30,42 / 33\,472 / 2 & 20,24 / 11\,669 / 0 & 47,26 / 27\,055 / 1\\ 
+32 & 30,73 / 33\,904 / 2 & 19,58 / 11\,242 / 0 & 54,47 / 39\,391 / 2\\ 
+33 & 39,63 / 11\,691 / 0 & 34,72 / 11\,687 / 0 & 74,63 / 41\,533 / 2\\ 
+34 & 24,59 / 11\,460 / 0 & 26,47 / 34\,602 / 2 & 75,14 / 40\,054 / 2\\ 
+35 & 32,95 / 11\,681 / 0 & 28,86 / 11\,681 / 0 & 66,83 / 41\,572 / 2\\ 
+36 & 24,30 / 11\,432 / 0 & 33,70 / 35\,457 / 2 & 61,42 / 40\,926 / 2\\ 
+37 & 27,66 / 11\,690 / 0 & 24,21 / 11\,690 / 0 & 28,32 / 13\,780 / 0\\ 
+38 & 24,80 / 11\,690 / 0 & 28,39 / 11\,934 / 0 & 61,05 / 27\,647 / 1\\ 
+39 & 23,46 / 10\,800 / 0 & 22,96 / 21\,688 / 1 & 48,08 / 25\,534 / 1\\ 
+40 & 26,22 / 11\,703 / 0 & 29,32 / 12\,089 / 0 & 69,76 / 42\,160 / 2\\ 
+41 & 37,69 / 12\,209 / 0 & 34,03 / 11\,954 / 0 & 68,75 / 41\,925 / 2\\ 
+42 & 25,83 / 12\,319 / 0 & 21,75 / 12\,219 / 0 & 57,40 / 42\,895 / 2\\ 
+43 & 33,31 / 37\,513 / 2 & 27,57 / 37\,186 / 2 & 63,00 / 43\,119 / 2\\ 
+44 & 26,33 / 12\,407 / 0 & 22,13 / 12\,340 / 0 & 61,50 / 43\,230 / 2\\ 
+45 & 31,80 / 37\,496 / 2 & 21,92 / 12\,238 / 0 & 64,35 / 43\,057 / 2\\ 
+\pagebreak[4]
+46 & 26,22 / 12\,454 / 0 & 29,17 / 36\,225 / 2 & 29,39 / 14\,063 / 0\\ 
+47 & 26,18 / 12\,454 / 0 & 27,34 / 36\,235 / 2 & 64,51 / 42\,405 / 2\\ 
+48 & 26,26 / 12\,457 / 0 & 28,68 / 36\,250 / 2 & 60,85 / 28\,269 / 1\\ 
+49 & 26,06 / 12\,450 / 0 & 30,08 / 36\,247 / 2 & 60,62 / 28\,243 / 1\\ 
+50 & 26,09 / 22\,248 / 1 & 22,87 / 11\,665 / 0 & 29,26 / 13\,429 / 0\\ 
+51 & 23,20 / 11\,124 / 0 & 28,71 / 33\,897 / 2 & 57,59 / 39\,305 / 2\\ 
+52 & 25,12 / 11\,896 / 0 & 49,21 / 34\,985 / 2 & 75,86 / 27\,372 / 1\\ 
+53 & 23,44 / 11\,417 / 0 & 19,55 / 11\,211 / 0 & 49,78 / 39\,314 / 2\\ 
+54 & 41,54 / 34\,862 / 2 & 34,43 / 23\,274 / 1 & 87,49 / 41\,236 / 2\\ 
+55 & 23,78 / 11\,430 / 0 & 26,73 / 35\,437 / 2 & 27,98 / 13\,560 / 0\\ 
+56 & 33,89 / 34\,903 / 2 & 32,40 / 35\,005 / 2 & 60,20 / 41\,183 / 2\\ 
+57 & 24,10 / 11\,458 / 0 & 28,93 / 11\,945 / 0 & 38,03 / 13\,810 / 0\\ 
+58 & 29,45 / 32\,566 / 2 & 25,25 / 32\,559 / 2 & 50,34 / 38\,380 / 2\\ 
+59 & 24,57 / 11\,687 / 0 & 32,62 / 12\,075 / 0 & 38,75 / 13\,926 / 0\\ 
+60 & 22,64 / 10\,779 / 0 & 26,44 / 32\,654 / 2 & 51,98 / 38\,445 / 2\\ 
+61 & 25,29 / 12\,165 / 0 & 40,15 / 35\,398 / 2 & 66,51 / 27\,264 / 1\\ 
+62 & 26,34 / 12\,365 / 0 & 27,85 / 36\,372 / 2 & 55,04 / 41\,953 / 2\\ 
+63 & 26,08 / 12\,350 / 0 & 37,85 / 12\,226 / 0 & 80,91 / 43\,111 / 2\\ 
+64 & 25,98 / 12\,329 / 0 & 37,84 / 12\,099 / 0 & 73,27 / 42\,772 / 2\\ 
+65 & 26,17 / 12\,352 / 0 & 45,63 / 36\,578 / 2 & 70,26 / 28\,492 / 1\\ 
+66 & 25,94 / 12\,341 / 0 & 40,34 / 12\,108 / 0 & 71,73 / 28\,508 / 1\\ 
+67 & 25,99 / 12\,341 / 0 & 41,61 / 12\,108 / 0 & 71,77 / 28\,508 / 1\\ 
+68 & 25,89 / 12\,344 / 0 & 42,61 / 12\,111 / 0 & 71,85 / 28\,518 / 1\\ 
+69 & 29,71 / 33\,472 / 2 & 20,31 / 11\,669 / 0 & 48,39 / 27\,055 / 1\\ 
+70 & 23,21 / 11\,126 / 0 & 25,89 / 33\,866 / 2 & 52,89 / 39\,363 / 2\\ 
+71 & 39,36 / 11\,685 / 0 & 36,11 / 11\,691 / 0 & 73,08 / 41\,546 / 2\\ 
+72 & 23,46 / 11\,416 / 0 & 26,03 / 34\,468 / 2 & 73,60 / 40\,002 / 2\\ 
+73 & 31,97 / 11\,681 / 0 & 28,68 / 11\,681 / 0 & 66,36 / 41\,572 / 2\\ 
+74 & 23,48 / 11\,432 / 0 & 33,81 / 35\,457 / 2 & 61,61 / 40\,926 / 2\\ 
+75 & 26,88 / 11\,690 / 0 & 23,97 / 11\,690 / 0 & 28,18 / 13\,780 / 0\\ 
+76 & 30,31 / 34\,929 / 2 & 29,00 / 11\,946 / 0 & 33,56 / 13\,817 / 0\\ 
+77 & 22,42 / 10\,800 / 0 & 23,03 / 21\,688 / 1 & 47,03 / 25\,534 / 1\\ 
+78 & 24,79 / 11\,968 / 0 & 31,35 / 12\,084 / 0 & 70,59 / 42\,132 / 2\\ 
+79 & 37,34 / 12\,209 / 0 & 32,93 / 11\,954 / 0 & 67,44 / 41\,925 / 2\\ 
+80 & 25,94 / 12\,317 / 0 & 27,99 / 36\,812 / 2 & 56,17 / 42\,800 / 2\\ 
+81 & 24,16 / 11\,612 / 0 & 21,97 / 12\,434 / 0 & 63,26 / 44\,451 / 2\\ 
+82 & 23,23 / 11\,195 / 0 & 22,87 / 12\,359 / 0 & 63,45 / 44\,199 / 2\\ 
+83 & 23,89 / 11\,517 / 0 & 23,12 / 12\,429 / 0 & 65,80 / 44\,412 / 2\\ 
+84 & 23,76 / 11\,612 / 0 & 23,95 / 12\,432 / 0 & 65,77 / 44\,448 / 2\\ 
+85 & 23,34 / 11\,195 / 0 & 24,15 / 12\,359 / 0 & 64,34 / 44\,151 / 2\\ 
+86 & 23,94 / 11\,517 / 0 & 23,08 / 12\,429 / 0 & 63,79 / 44\,408 / 2\\ 
+87 & 30,11 / 34\,249 / 2 & 22,75 / 12\,357 / 0 & 65,12 / 42\,839 / 2\\ 
+88 & 25,40 / 12\,347 / 0 & 25,47 / 12\,222 / 0 & 32,14 / 14\,069 / 0\\ 
+89 & 30,07 / 34\,249 / 2 & 21,95 / 12\,356 / 0 & 60,70 / 42\,833 / 2\\ 
+90 & 25,51 / 12\,347 / 0 & 26,54 / 12\,217 / 0 & 31,82 / 14\,069 / 0\\ 
+\bottomrule\end{longtable}\endgroup
+\begin{thebibliography}{9}
+\bibitem{wl} N. Shervashidze, P. Schweitzer, E. J. van Leeuwen, K. Mehlhorn,
+K. M. Borgwardt. \emph{Weisfeiler--Lehman Graph Kernels}. JMLR 12, 2011, 2539--2561.
+\url{https://jmlr.org/papers/v12/shervashidze11a.html}.
+\bibitem{qiskit} IBM Quantum. \emph{DAGCircuit}, documentazione ufficiale Qiskit,
+consultata il 29 settembre 2026. La descrizione del report segue il codice
+locale Qiskit 2.5.0.
+\url{https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.dagcircuit.DAGCircuit}.
+\end{thebibliography}
+\end{document}

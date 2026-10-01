@@ -1,0 +1,25 @@
+{
+  "source_files_unchanged": 5330,
+  "cases": 270,
+  "attempts": 504,
+  "graph_summary_present_in_final_call_prompts_only_for_S": true,
+  "toy_dags_checked_with_actual_implementation": true,
+  "latex_overfull_or_undefined": false,
+  "artifact_sha256": {
+    "README.md": "cd03ed50b0e26c665eb459c6e8fa4aea0813f8765834bacab238b3391ae6eaa5",
+    "confronto_manhattan_wl.pdf": "6b930550dc78825760cba56bfb66eaa318e42c50e61761bc989e63514db9594a",
+    "genera_report.py": "8349753105f32e81688852430988d4d167fe785495715f966ecac057bcf8fb95",
+    "verifica_report.py": "ce5f4cecfc4b3b1a68311809b48c3335abdb7b8127ed0eba74d1b6cb244ea2f9",
+    "confronto_manhattan_wl.tex": "e0675e834540af8ff07f3635accb69fdfc812d3b99abd07389387f976e76faa9",
+    "impaginazione.py": "27cfb4fe848b814871c2f9212190c369b39afc3a4c7c9cf545cc9dfe48ade0a6"
+  },
+  "checks": {
+    "same_90_circuits_and_sources": true,
+    "same_wl_retrieval_all_90": true,
+    "summary_present_in_actual_messages": true,
+    "same_live_model_view": true,
+    "same_gguf_and_generation_parameters": true,
+    "tokens_recomputed": true,
+    "facts_revalidated": true
+  }
+}

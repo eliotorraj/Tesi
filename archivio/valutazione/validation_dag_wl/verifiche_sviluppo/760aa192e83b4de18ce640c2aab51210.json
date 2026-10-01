@@ -1,0 +1,8 @@
+{
+  "at": "2026-09-29T08:54:30.380992+00:00",
+  "kind": "h30_extension_regression",
+  "old_files_unchanged": 1521,
+  "train_sample_rounds_0_to_6_preserved": 6,
+  "validation_executed": false,
+  "test_executed": false
+}

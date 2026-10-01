@@ -1,0 +1,8 @@
+{
+  "at": "2026-09-29T08:47:06.389467+00:00",
+  "kind": "h6_extension_regression",
+  "old_run_files_unchanged": 764,
+  "train_graphs_summaries_and_rounds_0_to_3_identical": 396,
+  "new_max_h": 6,
+  "validation_executed": false
+}

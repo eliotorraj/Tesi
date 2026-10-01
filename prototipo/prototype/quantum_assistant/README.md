@@ -1,39 +1,24 @@
 # Libreria dell'assistente
 
-Questa cartella coordina il percorso dalla richiesta dell'utente alla
-compilazione. Tiene separate le regole del sistema dalle implementazioni di
-Qdrant, del modello linguistico e di Qiskit.
+Questa cartella descrive le informazioni scambiate dal prototipo e raccoglie
+le operazioni che leggono il circuito, selezionano l'hardware compatibile,
+recuperano esempi e compilano la proposta. Il programma
+[app.py](../../app.py) coordina queste operazioni.
 
-La [guida del prototipo](../README.md) descrive il funzionamento generale e
-le possibilità di dimostrazione.
-
-## File
-
-| File | A cosa serve |
+| File o cartella | Funzione |
 | --- | --- |
-| [__init__.py](__init__.py) | Espone le classi pubbliche della libreria. |
-| [models.py](models.py) | Definisce le strutture dati: circuito, vincoli, catalogo, esempi, evidenze, proposta e compilazione. |
-| [ports.py](ports.py) | Definisce le operazioni richieste ai componenti sostituibili, come recupero, LLM e compilatore. |
-| [services.py](services.py) | Coordina preparazione, recupero, proposta, eventuali correzioni e compilazione confermata. |
-| [controller.py](controller.py) | Espone operazioni adatte a una futura interfaccia e conserva le proposte validate per la compilazione. |
-| [factory.py](factory.py) | Costruisce il servizio con i componenti locali, il catalogo v2 e il collegamento LLM fornito dal chiamante. |
-| [errors.py](errors.py) | Rappresenta gli errori della richiesta con codici e campi riconoscibili. |
-| [schema_validation.py](schema_validation.py) | Controlla i documenti JSON usando le regole degli schemi del progetto. |
-| [adapters/](adapters/README.md) | Contiene le implementazioni concrete di tutti i collegamenti. |
+| [models.py](models.py) | Rappresenta richieste, circuiti, vincoli, cataloghi, maschere, evidenze, proposte e circuiti compilati. |
+| [ports.py](ports.py) | Descrive le interfacce Python dei componenti; contiene anche contratti conservati per compatibilità. |
+| [errors.py](errors.py) | Esprime gli errori della richiesta con codici, messaggi e posizione del campo. |
+| [schema_validation.py](schema_validation.py) | Legge JSON rigoroso e controlla il sottoinsieme JSON Schema usato nel progetto. |
+| [adapters/](adapters/README.md) | Implementa lettura QASM, catalogo hardware, recupero RAG e compilazione Qiskit. |
 
-## Confini utili da ricordare
+La costruzione dei messaggi e la verifica della risposta LLM corrente sono
+in [prompting/](../prompting/README.md). Il formato corrente della risposta
+è v4: coppia dispositivo-configurazione, fatti controllabili e ipotesi libera.
+Alcuni modelli interni conservano nomi o versioni storiche: non sostituiscono
+il contratto applicato da `app.py`.
 
-Il servizio decide **quando** eseguire ogni fase. Gli adattatori stabiliscono
-**come** leggere il circuito, recuperare esempi o compilare.
-Il controller conserva le raccomandazioni controllate: la compilazione
-non riceve una proposta liberamente modificabile dal chiamante.
-
-Gli schemi di richiesta, catalogo, maschera hardware e risposta LLM si trovano
-in [schemas/](../../schemas/README.md). I controlli automatici sono descritti in
-[tests/](../../tests/README.md).
-
-La factory permette recupero con Qdrant, confronto locale esaustivo oppure
-assenza deliberata di recupero. Il modello linguistico resta un componente
-esplicito da configurare; non viene scelto automaticamente dalla libreria.
-
-Le cartelle `__pycache__/`, quando presenti, sono generate da Python.
+La descrizione tecnica completa è in
+[architettura e flusso](../../docs/architettura_e_flusso.md).
+[Torna ai componenti](../README.md).

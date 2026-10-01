@@ -1,0 +1,21 @@
+{
+  "checked_output_files": 42,
+  "changed_outputs": [],
+  "pdf": "archivio/valutazione/test/report_generati/09ccc501601d9f34/sistemi/llm_recupero_random/latex/verifica.pdf",
+  "pdf_sha256": "4d48a14fda801aeecd7e94b653a78fca587c3346f87d79f10a3df303a89d2c7c",
+  "pages": 9,
+  "unchanged_visually_checked_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "layout_warnings": [],
+  "tests_passed": 26,
+  "graph_updated": false,
+  "historical_manifest_note": "Il manifest storico 30dd5b4f737c058e non coincide con 16 file della sua sezione confronto. Nessun file di quella cartella \u00e8 stato scritto dal nuovo generatore; non si certifica quel manifest storico."
+}

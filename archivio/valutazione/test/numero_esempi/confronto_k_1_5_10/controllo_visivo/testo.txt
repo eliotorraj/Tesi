@@ -1,0 +1,882 @@
+ANALISI DEI REGISTRI CONSERVATI | 29 settembre 2026
+
+Quanti esempi servono al RAG?
+Confronto fra k = 1, k = 5 e k = 10
+
+
+1     Domanda, impostazioni e risultato principale
+Confrontiamo lo stesso LLM con uno, cinque e dieci esempi train recuperati per somiglianza. Vogliamo capire
+quanto il numero di esempi incida sulla qualità della scelta, sui token e sui tempi. Ogni variante è stata applicata
+agli stessi 90 circuiti Test.
+Nel campione osservato, aumentare gli esempi cambia pochissimo lo score, ma aumenta token,
+attesa e richieste di correzione. La riuscita è 90/90 in tutte le varianti. I risultati non dimostrano che un solo
+esempio sia sempre sufficiente.
+
+ Misura                                                                                    k=1        k=5        k = 10
+ Compilazioni riuscite                                                                     90/90      90/90       90/90
+ Fallimenti                                                                                    0           0           0
+ Score medio                                                                            0,798143   0,798379    0,798290
+ Score mediano                                                                          0,921379   0,921379    0,921379
+ Score almeno 0,8                                                                          70/90      70/90       70/90
+ Tempo totale medio (s)                                                                    21,00       27,49       37,98
+ Token complessivi, somma                                                                888 083   1 480 707   2 511 611
+ Correzioni, somma                                                                             6          36          77
+
+
+1.1    Che cosa resta uguale
+Il modello è Qwen3.5-4B, pesi Q8_0 e temperatura 0. I registri confermano lo stesso GGUF e gli stessi parametri
+delle chiamate: seme 20260913, top_p=0,95, top_k=40 e min_p=0. Il contesto richiesto è 60.000 token e il limite
+di risposta è 4.096. Il pensiero esteso è disattivato. Sono consentiti al massimo tre tentativi.
+Il recupero usa gli stessi 396 circuiti train distinti, 49 caratteristiche, trasformazione calcolata sul train, distanza
+Manhattan e ricerca esatta. Filtri e ordinamento delle parità sono invariati. È stato verificato su tutti i 90 casi
+che l’esempio di k = 1 sia il primo di k = 5 e k = 10, e che i primi cinque di k = 10 coincidano con quelli della
+prova classica.
+La compilazione usa lo stesso catalogo di dodici configurazioni Qiskit, cinque Target sintetici, seme 0, un solo
+processo e limite esterno di 100 secondi. Lo score è expected fidelity, fra 0 e 1: maggiore è migliore. Non misura
+un’esecuzione su hardware quantistico reale.
+
+
+1.2    Che cosa cambia, oltre alla quantità di esempi
+Con dieci esempi il contratto ammette anche E6–E10 e la nota sulle colonne del prompt viene adeguata. Restano
+uno o due fatti nella risposta e le stesse regole di verifica. Il contenuto è inviato in TOON; la risposta è JSON.
+La prova k = 5 è iniziata il 21 settembre 2026; le prove k = 1 e k = 10 il 28 settembre, dopo la lettura del Test.
+Il confronto è quindi descrittivo e riusa la prova classica, con revisioni di codice e date diverse. Non è una nuova
+conferma indipendente né una selezione fatta sulla validation.
+
+
+
+
+                                                           1
+2     Tempi, token e correzioni
+I tempi sono in secondi. Le medie e le mediane seguenti hanno tutte 90 misure per variante. Non sono stati
+imputati valori mancanti.
+
+ Tempo: media / mediana                                                           k=1                k=5           k = 10
+ Totale                                                                   21,00 / 19,88    27,49 / 26,09    37,98 / 37,54
+ Preparazione e scelta                                                    18,77 / 18,53    25,06 / 24,52    35,76 / 35,81
+ Recupero e controlli RAG                                                   3,64 / 3,67      3,88 / 3,85      3,63 / 3,66
+ Risposte LLM, cumulative                                                 14,59 / 14,29    20,27 / 20,06    31,36 / 31,59
+ Compilazione interna                                                       1,67 / 0,65      1,79 / 0,71      1,67 / 0,65
+ Processo di compilazione                                                   2,22 / 1,22      2,40 / 1,32      2,21 / 1,22
+
+Le componenti non vanno sommate fra loro. Preparazione e scelta comprende RAG, costruzione del prompt,
+tokenizzazione, risposte e controlli. Il tempo RAG include caricamento e verifica dell’indice, non soltanto la ricerca.
+Il processo di compilazione include anche avvio e controlli, mentre la misura interna riguarda il compilatore. Il
+totale copre l’intero caso.
+
+
+2.1    Volume di testo e richieste al modello
+I token complessivi sommano ingresso e uscita di tutte le chiamate, comprese le correzioni. L’ingresso conta anche
+i token serviti dalla cache. Non è un costo monetario né una misura dei soli token ricalcolati dal server.
+ Misura                                                                                     k=1          k=5       k = 10
+
+ Ingresso del primo tentativo, media                                                       9 095,1    11 643,5    14 776,5
+ Token in ingresso, somma                                                                  873 376   1 460 430   2 484 309
+ Token in uscita, somma                                                                     14 707      20 277      27 302
+ Token complessivi, somma                                                                  888 083   1 480 707   2 511 611
+ Token complessivi per circuito, media                                                     9 867,6    16 452,3    27 906,8
+ Chiamate, somma                                                                                96         126         167
+ Correzioni, somma                                                                               6          36          77
+ Circuiti con almeno una correzione                                                           4/90      19/90       39/90
+ Risposte con tutti i fatti validi al primo tentativo                                       86/90       71/90       51/90
+ Risposte finali con tutti i fatti validi                                                   88/90       73/90       52/90
+ Fatti finali validi                                                                      178/180     163/180     142/180
+
+
+2.2    Variazioni rispetto a cinque esempi
+
+ Variante                                                          Token totali   Tempo totale medio       ∆ score medio
+ k=1                                                                   -40,02%                 -23,59%       -0,00023541
+ k = 10                                                                 69,62%                  38,19%       -0,00008928
+
+Il primo ingresso cresce con il numero di esempi. Il costo complessivo cresce ulteriormente perché aumentano le
+correzioni. Il confronto dei primi tentativi separa il volume iniziale del prompt dalla successiva ripetizione delle
+chiamate. I tempi osservati includono anche effetti di cache e condizioni del computer non controllati da repliche.
+
+
+
+
+                                                          2
+3     Differenze sugli stessi circuiti
+Tutte le varianti riescono sugli stessi 90 circuiti: qui i denominatori coincidono. La differenza è lo score della prima
+variante meno quello della seconda. Una parità significa |∆| ≤ 10−12 sui valori conservati; non è un test statistico
+di equivalenza.
+
+ Confronto                                                            Media ∆     Meglio    Pari     Peggio     Stessa coppia
+ k = 1 meno k = 5                                                  -0,00023541         1     85           4            85/90
+ k = 10 meno k = 5                                                 -0,00008928         3     84           3            84/90
+ k = 10 meno k = 1                                                  0,00014613         5     83           2            83/90
+
+81 circuiti su 90 hanno esattamente lo stesso score in tutte e tre le prove. Le mediane delle differenze
+sono sempre zero.
+
+
+3.1      Tutti i casi con score diverso fra le tre varianti
+I casi sono ordinati per escursione fra score massimo e minimo. Sono mostrati tutti, senza selezionare soltanto i
+miglioramenti.
+
+ Circuito                                                                              k=1              k=5           k = 10
+ qpeinexact_indep_tket_6                                                          0,94772631       0,96885284     0,96885284
+ qpeexact_indep_qiskit_6                                                          0,95930734       0,95930734     0,95272900
+ qpeexact_indep_tket_6                                                            0,94607843       0,94607843     0,94426169
+ qpeexact_indep_qiskit_3                                                          0,99587845       0,99609478     0,99587845
+ qpeinexact_indep_qiskit_3                                                        0,99318797       0,99318797     0,99338394
+ qpeinexact_indep_tket_3                                                          0,99318797       0,99318797     0,99338394
+ qpeexact_indep_tket_4                                                            0,98704206       0,98685813     0,98704206
+ qpeexact_indep_tket_60                                                           0,00001319       0,00002735     0,00002735
+ qpeinexact_indep_tket_60                                                         0,00001316       0,00002729     0,00002729
+
+
+3.2      Lettura per numero di qubit
+
+ Qubit                                                               Casi   Media k = 1     Media k = 5       Media k = 10
+ Fino a 5                                                              22        0,986429          0,986430         0,986447
+ Da 6 a 16                                                             50        0,902148          0,902571         0,902403
+ Oltre 16                                                              18        0,279115          0,279117         0,279117
+
+Le fasce riprendono il confronto di riferimento. Non definiscono da sole la difficoltà del circuito. Anche sopra 16
+qubit non emerge un vantaggio di dieci esempi su cinque: in quella fascia i loro score coincidono. Questi dati
+non sostengono l’idea che aggiungere esempi migliori automaticamente i casi più grandi. Riguardano però questo
+recupero e questo modello.
+
+
+
+
+                                                           3
+4     Riuscita, soglia e qualità per circuito
+La riuscita e la soglia hanno come denominatore tutti i 90 circuiti. I tre valori di k hanno le stesse coperture; i
+grafici degli score mostrano quanto siano simili anche i risultati individuali.
+
+                                                 Compilazioni valide        Score almeno 0,8
+                                100   90                          90                                   90
+
+
+
+               Circuiti su 90
+                                 80        70                          70                                   70
+                                 60
+                                 40
+                                 20
+                                  0
+                                      k=1                         k=5                                  k = 10
+
+                                                               k=1
+                1
+              0.8
+
+
+      Score
+              0.6
+              0.4
+              0.2
+                0
+                                1           15   30               45                 60           75             90
+                                                           Indice circuito
+
+
+                                                               k=5
+                1
+              0.8
+
+
+      Score
+              0.6
+              0.4
+              0.2
+                0
+                                1           15   30               45                 60           75             90
+                                                           Indice circuito
+
+
+                                                              k = 10
+                1
+              0.8
+
+
+      Score
+              0.6
+              0.4
+              0.2
+                0
+                                1           15   30               45                 60           75             90
+                                                           Indice circuito
+
+
+Stesso ordine alfabetico e stessa scala 0–1. Lo score mediano è 0,921379 per tutte le varianti.
+
+
+
+
+                                                              4
+5                      Tempi: intero percorso e compilazione interna
+Il costo totale aumenta con k. Il lavoro interno del compilatore resta mediamente vicino a 1,7 secondi: le scelte
+cambiano soltanto in pochi casi. I picchi del totale possono dipendere dalle correzioni o dalla compilazione e vanno
+letti insieme agli altri registri.
+
+                                     Tempo totale (s)                                                         Compilazione interna (s)
+                                             k=1                                                                          k=1
+
+
+
+
+                                                                          Compilazione interna (s)
+                       60
+                                                                                                     15
+
+
+
+
+    Tempo totale (s)
+                       40
+                                                                                                     10
+
+
+                       20                                                                             5
+
+
+                        0                                                                             0
+                            1   15      30     45      60   75   90                                       1    15    30     45      60   75   90
+                                         Indice circuito                                                              Indice circuito
+
+                                             k=5                                                                          k=5
+
+
+
+
+                                                                          Compilazione interna (s)
+                       60
+                                                                                                     15
+
+
+
+
+    Tempo totale (s)
+                       40
+                                                                                                     10
+
+
+                       20                                                                             5
+
+
+                        0                                                                             0
+                            1   15      30     45      60   75   90                                       1    15    30     45      60   75   90
+                                         Indice circuito                                                              Indice circuito
+
+                                             k = 10                                                                       k = 10
+
+
+
+
+                                                                          Compilazione interna (s)
+                       60
+                                                                                                     15
+
+
+
+
+    Tempo totale (s)
+                       40
+                                                                                                     10
+
+
+                       20                                                                             5
+
+
+                        0                                                                             0
+                            1   15      30     45      60   75   90                                       1    15    30     45      60   75   90
+                                         Indice circuito                                                              Indice circuito
+
+Ogni punto è un circuito. Le scale sono comuni fra i tre valori di k per ciascuna colonna. L’indice segue l’ordine alfabetico
+dell’appendice.
+
+
+
+
+                                                                      5
+6                               Tempi: processo di compilazione e risposte LLM
+La colonna sinistra comprende avvio, compilazione e controlli. A destra si sommano tutte le attese delle risposte
+LLM dello stesso circuito. L’aumento più evidente riguarda questa seconda componente.
+
+                                         Processo compilazione (s)                                                  Risposte LLM (s)
+                                                      k=1                                                                   k=1
+
+
+
+
+    Processo compilazione (s)
+                                                                                                      40
+
+
+
+
+                                                                                   Risposte LLM (s)
+                                15
+
+                                                                                                      30
+                                10
+                                                                                                      20
+
+                                 5
+                                                                                                      10
+
+                                 0                                                                     0
+                                     1     15   30      45      60   75   90                               1   15      30     45      60   75   90
+                                                  Indice circuito                                                       Indice circuito
+
+                                                      k=5                                                                   k=5
+
+
+
+
+    Processo compilazione (s)
+                                                                                                      40
+
+
+
+
+                                                                                   Risposte LLM (s)
+                                15
+
+                                                                                                      30
+                                10
+                                                                                                      20
+
+                                 5
+                                                                                                      10
+
+                                 0                                                                     0
+                                     1     15   30      45      60   75   90                               1   15      30     45      60   75   90
+                                                  Indice circuito                                                       Indice circuito
+
+                                                     k = 10                                                                 k = 10
+
+
+
+
+    Processo compilazione (s)
+                                                                                                      40
+
+
+
+
+                                                                                   Risposte LLM (s)
+                                15
+
+                                                                                                      30
+                                10
+                                                                                                      20
+
+                                 5
+                                                                                                      10
+
+                                 0                                                                     0
+                                     1     15   30      45      60   75   90                               1   15      30     45      60   75   90
+                                                  Indice circuito                                                       Indice circuito
+
+Ogni punto è un circuito. Le scale sono comuni fra i tre valori di k per ciascuna colonna. L’indice segue l’ordine alfabetico
+dell’appendice.
+
+
+
+
+                                                                               6
+7                  Token e richieste di correzione
+Ogni correzione richiede un’altra risposta completa. I token includono ingresso e uscita di tutte le chiamate. I
+livelli 0, 1 e 2 indicano rispettivamente una, due o tre risposte. Le scale comuni rendono visibile l’aumento di costo
+con dieci esempi.
+
+                                     Token totali                                                  Correzioni
+                                            k=1                                                         k=1
+
+                                                                                      2
+                   40,000
+
+
+
+    Token totali                                                         Correzioni
+                                                                                      1
+                   20,000
+
+
+
+                       0                                                              0
+                            1   15     30     45      60   75   90                        1   15   30     45      60   75   90
+                                        Indice circuito                                             Indice circuito
+
+                                            k=5                                                         k=5
+
+                                                                                      2
+                   40,000
+
+
+
+    Token totali                                                         Correzioni
+                                                                                      1
+                   20,000
+
+
+
+                       0                                                              0
+                            1   15     30     45      60   75   90                        1   15   30     45      60   75   90
+                                        Indice circuito                                             Indice circuito
+
+                                            k = 10                                                      k = 10
+
+                                                                                      2
+                   40,000
+
+
+
+    Token totali                                                         Correzioni
+                                                                                      1
+                   20,000
+
+
+
+                       0                                                              0
+                            1   15     30     45      60   75   90                        1   15   30     45      60   75   90
+                                        Indice circuito                                             Indice circuito
+
+Ogni punto è un circuito. Le scale sono comuni fra i tre valori di k per ciascuna colonna. L’indice segue l’ordine alfabetico
+dell’appendice.
+
+
+
+
+                                                                     7
+8                     Preparazione, recupero e scelta
+Il recupero è misurato insieme ai controlli della fonte e dell’indice. La sua media è vicina a 3,6–3,9 secondi nelle
+tre campagne. La scelta comprende anche tokenizzazione e chiamate LLM: la crescita del costo non coincide con
+una ricerca dei vicini dieci volte più lenta.
+
+                                   RAG e controlli (s)                                                        Preparazione e scelta (s)
+                                            k=1                                                                            k=1
+
+
+
+
+                                                                         Preparazione e scelta (s)
+    RAG e controlli (s)
+                                                                                                     40
+                          4
+
+
+
+                          2                                                                          20
+
+
+
+
+                          0                                                                           0
+                              1   15   30     45      60   75   90                                        1    15    30      45      60   75   90
+                                        Indice circuito                                                                Indice circuito
+
+                                            k=5                                                                            k=5
+
+
+
+
+                                                                         Preparazione e scelta (s)
+    RAG e controlli (s)
+                                                                                                     40
+                          4
+
+
+
+                          2                                                                          20
+
+
+
+
+                          0                                                                           0
+                              1   15   30     45      60   75   90                                        1    15    30      45      60   75   90
+                                        Indice circuito                                                                Indice circuito
+
+                                            k = 10                                                                        k = 10
+
+
+
+
+                                                                         Preparazione e scelta (s)
+    RAG e controlli (s)
+                                                                                                     40
+                          4
+
+
+
+                          2                                                                          20
+
+
+
+
+                          0                                                                           0
+                              1   15   30     45      60   75   90                                        1    15    30      45      60   75   90
+                                        Indice circuito                                                                Indice circuito
+
+Ogni punto è un circuito. Le scale sono comuni fra i tre valori di k per ciascuna colonna. L’indice segue l’ordine alfabetico
+dell’appendice.
+
+
+
+
+                                                                     8
+9    Distribuzioni e differenze rispetto a cinque esempi
+La distribuzione cumulativa indica la quota di circuiti con score non superiore al valore in ascissa. Le curve si
+sovrappongono quasi interamente. I pannelli inferiori ingrandiscono le differenze rispetto a k = 5: qui zero significa
+lo stesso score, non un dato mancante.
+
+                               1
+                                                k=1
+                              0.8               k=5
+
+
+
+
+     Quota cumulativa
+                                                k = 10
+                              0.6
+
+                              0.4
+
+                              0.2
+
+                               0
+                                    0           0.1        0.2   0.3        0.4           0.5       0.6        0.7   0.8    0.9    1
+                                                                                         Score
+
+                                                                              k = 1 meno k = 5
+                                        ·10−2
+
+
+
+
+        Differenza di score
+                               0
+
+                              −1
+
+                              −2
+                                    1                 15               30              45                 60           75         90
+                                                                                  Indice circuito
+
+                                                                             k = 10 meno k = 5
+                                        ·10−2
+
+
+
+
+        Differenza di score
+                               0
+
+                              −1
+
+                              −2
+                                    1                 15               30              45                 60           75         90
+                                                                                  Indice circuito
+
+
+
+
+                                                                                     9
+10          Perché aumentano i costi e che cosa dicono i fatti
+
+10.1         Ingresso iniziale e costo complessivo
+A sinistra, il numero medio di token in ingresso al primo tentativo. A destra, il totale medio per circuito, che
+comprende uscita e correzioni. Le scale sono diverse perché descrivono misure diverse.
+                        Ingresso iniziale medio                                Totale medio per circuito
+
+                                                                     30,000
+          15,000
+
+
+
+  Token                                                      Token
+          10,000                                                     20,000
+
+
+           5,000                                                     10,000
+
+
+              0                                                          0
+                   k=1             k=5       k = 10                           k=1        k=5          k = 10
+
+
+10.2         Contenuto e validità dei fatti finali
+
+ Tipo: validi / dichiarati                                                                  k=1     k=5     k = 10
+
+ Stesso dispositivo dell’esempio                                                            90/90   88/88   88/88
+ Coppia fra i risultati mostrati                                                              0/0     5/5   35/35
+ Stesso numero di qubit                                                                       0/0     2/2     0/0
+ Capacità del dispositivo                                                                   88/90   68/85   19/57
+
+La coppia dispositivo/configurazione viene citata più spesso con dieci esempi: 35 fatti finali, contro 5 con cinque
+esempi e nessuno con uno. Questi fatti storici risultano tutti sostenuti dai record indicati. La maggiore ricchezza
+dei riferimenti non si traduce qui in un aumento apprezzabile dello score sul circuito corrente.
+I fatti non validi sono 2, 17 e 38. Riguardano sempre la capacità del dispositivo con un riferimento a un esempio,
+mentre la regola richiede il catalogo hardware senza example_id. La capacità è comunque sufficiente. Non sono
+quindi 2, 17 e 38 scelte hardware impossibili.
+Il programma richiede la correzione; al terzo tentativo può accettare una coppia ammessa con fatti ancora non
+verificati. Questa regola spiega come tutte le compilazioni possano riuscire anche quando alcune risposte hanno
+fatti non validi.
+Le ipotesi in prosa non sono verificate semanticamente e non vanno considerate affermazioni vere.
+La correttezza dei fatti strutturati non certifica la spiegazione libera né la qualità della scelta futura.
+
+
+
+
+                                                        10
+11     Conclusioni e limiti
+
+11.1     Lettura del confronto
+In queste esecuzioni, k = 1 offre il compromesso osservato più favorevole fra qualità e costo. Rispetto a k = 5,
+lo score medio è inferiore di 0,00023541 su una scala 0–1; i token complessivi diminuiscono del 40,02% e il tempo
+totale medio del 23,59%.
+Passare da cinque a dieci esempi aumenta i token del 69,62% e il tempo totale medio del 38,19%, senza un
+miglioramento medio dello score. Le correzioni passano da 36 a 77 e le risposte finali con fatti non validi da 17 a
+38.
+Il risultato è coerente con l’idea che il primo vicino contenga già buona parte dell’informazione utile per questo mo-
+dello e questo catalogo. È una interpretazione, non una proprietà dimostrata del RAG in generale. Aggiungere
+esempi può introdurre altri riferimenti senza migliorare la decisione.
+Il caso più diverso è qpeinexact_indep_tket_6: cinque o dieci esempi migliorano lo score di circa 0,02113 rispetto
+a uno. Questo caso resta visibile e impedisce di descrivere le tre varianti come identiche su ogni circuito. Le piccole
+differenze delle medie non sono percentuali relative: per esempio, 0,000235 di score equivale a circa 0,0235 punti
+percentuali della scala 0–1.
+
+
+11.2     Che cosa non possiamo concludere
+Le varianti a uno e dieci esempi sono state decise dopo aver osservato il Test. Questo report non cambia retroat-
+tivamente la configurazione scelta sulla validation. Per scegliere un valore operativo con evidenza più generale
+servirebbe una conferma su dati nuovi o una procedura di selezione dedicata.
+Ogni circuito è valutato una volta per variante. Le famiglie del corpus sono correlate e non ci sono repliche per
+misurare la variabilità temporale. Le date, le revisioni del codice e lo stato della cache differiscono. I parametri
+delle chiamate e il modello coincidono, ma i tempi non isolano perfettamente l’effetto causale di k. Non sono
+misurati energia o picco di memoria; non presentiamo test di significatività né equivalenza statistica.
+
+
+11.3     Fonti e ricostruzione
+Sono stati controllati i 270 esiti e le 389 risposte complete, comprese le correzioni. Sono stati verificati hash dei
+circuiti e contratti, identità del modello, parametri reali delle chiamate, vista del circuito, contenuto degli esempi
+train, ordine dei recuperi, token e fatti. Nessuna nuova inferenza o compilazione quantistica è stata eseguita per
+creare questo report.
+I risultati provengono da test/risultati/llm_rag per k = 5 e dalle campagne test/numero_esempi/k_1 e
+test/numero_esempi/k_10. Tutti i percorsi sono relativi ad archivio/valutazione. Il documento riprende dal
+confronto a cinque sistemi le misure di riuscita, soglia 0,8, score, tempi, token, correzioni, distribuzioni e confronti
+appaiati.
+La cartella conserva dati.json, provenienza.json, tabelle/circuiti.csv, il generatore e questo sorgente
+LaTeX autonomo. L’appendice rende individuabile ogni punto dei grafici. I rapporti precedenti e i registri
+sperimentali non sono stati modificati.
+
+
+
+
+                                                          11
+     A     Valori per circuito: score e tempo totale
+     Tutti i casi sono riusciti. I tempi sono in secondi; i valori completi restano nel CSV. L’indice è comune a tutti i grafici.
+
+                                       Indice   Circuito                             Qubit    Score 1    Score 5   Score 10   Tempo 1   Tempo 5   Tempo 10
+
+                                           1    groundstate_medium_indep_qiskit_12      12   0,796377   0,796377   0,796377     20,49     37,29      34,20
+                                           2    groundstate_medium_indep_tket_12        12   0,796377   0,796377   0,796377     19,90     26,69      33,50
+                                           3    groundstate_small_indep_qiskit_4         4   0,978859   0,978859   0,978859     19,14     23,94      34,87
+                                           4    groundstate_small_indep_tket_4           4   0,968254   0,968254   0,968254     18,98     25,40      31,03
+                                           5    qpeexact_indep_qiskit_10                10   0,921835   0,921835   0,921835     19,83     25,83      40,03
+                                           6    qpeexact_indep_qiskit_11                11   0,903234   0,903234   0,903234     19,97     26,63      42,02
+                                           7    qpeexact_indep_qiskit_12                12   0,887909   0,887909   0,887909     19,95     26,10      43,63
+                                           8    qpeexact_indep_qiskit_13                13   0,871404   0,871404   0,871404     19,89     33,60      42,40
+                                           9    qpeexact_indep_qiskit_14                14   0,853872   0,853872   0,853872     19,93     26,39      38,84
+                                          10    qpeexact_indep_qiskit_15                15   0,830088   0,830088   0,830088     20,08     26,96      43,63
+                                          11    qpeexact_indep_qiskit_16                16   0,809586   0,809586   0,809586     20,04     26,47      43,48
+                                          12    qpeexact_indep_qiskit_2                  2   0,998760   0,998760   0,998760     18,89     26,52      31,41
+                                          13    qpeexact_indep_qiskit_3                  3   0,995878   0,996095   0,995878     19,00     24,33      37,35
+                                          14    qpeexact_indep_qiskit_30                30   0,520294   0,520294   0,520294     19,23     31,73      42,47
+                                          15    qpeexact_indep_qiskit_4                  4   0,986949   0,986949   0,986949     19,10     31,48      32,31
+                                          16    qpeexact_indep_qiskit_40                40   0,374131   0,374131   0,374131     29,10     41,73      44,49
+12                                        17    qpeexact_indep_qiskit_5                  5   0,972066   0,972066   0,972066     19,09     24,00      35,43
+                                          18    qpeexact_indep_qiskit_50                50   0,269473   0,269473   0,269473     23,19     34,17      43,16
+                                          19    qpeexact_indep_qiskit_6                  6   0,959307   0,959307   0,952729     19,55     24,36      30,13
+                                          20    qpeexact_indep_qiskit_60                60   0,000011   0,000011   0,000011     18,36     29,43      29,60
+                                          21    qpeexact_indep_qiskit_7                  7   0,961608   0,961608   0,961608     19,67     24,97      34,86
+                                          22    qpeexact_indep_qiskit_70                70   0,000003   0,000003   0,000003     18,52     23,00      29,63
+                                          23    qpeexact_indep_qiskit_8                  8   0,946599   0,946599   0,946599     19,73     25,60      40,74
+                                          24    qpeexact_indep_qiskit_9                  9   0,934907   0,934907   0,934907     19,85     25,75      42,83
+                                          25    qpeexact_indep_tket_10                  10   0,920923   0,920923   0,920923     19,95     25,92      37,81
+                                          26    qpeexact_indep_tket_11                  11   0,902205   0,902205   0,902205     19,93     26,43      35,79
+                                          27    qpeexact_indep_tket_12                  12   0,886844   0,886844   0,886844     19,98     26,64      38,46
+                                          28    qpeexact_indep_tket_13                  13   0,869942   0,869942   0,869942     20,04     26,80      38,05
+                                          29    qpeexact_indep_tket_14                  14   0,852260   0,852260   0,852260     46,64     26,81      37,65
+                                          30    qpeexact_indep_tket_15                  15   0,828172   0,828172   0,828172     19,95     26,64      39,23
+                                          31    qpeexact_indep_tket_2                    2   0,998760   0,998760   0,998760     18,92     30,42      30,05
+                                          32    qpeexact_indep_tket_3                    3   0,995878   0,995878   0,995878     19,06     30,73      31,64
+                                          33    qpeexact_indep_tket_30                  30   0,567455   0,567455   0,567455     32,14     39,63      51,55
+                                          34    qpeexact_indep_tket_4                    4   0,987042   0,986858   0,987042     19,12     24,59      28,59
+                                          35    qpeexact_indep_tket_40                  40   0,439875   0,439875   0,439875     26,00     32,95      47,31
+                                          36    qpeexact_indep_tket_5                    5   0,969155   0,969155   0,969155     19,11     24,30      37,47
+                                          37    qpeexact_indep_tket_50                  50   0,341593   0,341593   0,341593     20,84     27,66      40,80
+                                          38    qpeexact_indep_tket_6                    6   0,946078   0,946078   0,944262     19,12     24,80      30,15
+     Indice   Circuito                     Qubit    Score 1    Score 5   Score 10   Tempo 1   Tempo 5   Tempo 10
+
+        39    qpeexact_indep_tket_60          60   0,000013   0,000027   0,000027     18,20     23,46      36,85
+        40    qpeexact_indep_tket_7            7   0,961204   0,961204   0,961204     19,67     26,22      33,63
+        41    qpeexact_indep_tket_8            8   0,946088   0,946088   0,946088     31,36     37,69      56,87
+        42    qpeexact_indep_tket_9            9   0,934290   0,934290   0,934290     19,81     25,83      34,13
+        43    qpeinexact_indep_qiskit_10      10   0,918907   0,918907   0,918907     19,88     33,31      37,01
+        44    qpeinexact_indep_qiskit_11      11   0,903207   0,903207   0,903207     19,93     26,33      43,31
+        45    qpeinexact_indep_qiskit_12      12   0,886418   0,886418   0,886418     20,02     31,80      43,38
+        46    qpeinexact_indep_qiskit_13      13   0,868584   0,868584   0,868584     20,04     26,22      44,71
+        47    qpeinexact_indep_qiskit_14      14   0,849780   0,849780   0,849780     20,01     26,18      44,53
+        48    qpeinexact_indep_qiskit_15      15   0,830088   0,830088   0,830088     20,07     26,26      44,23
+        49    qpeinexact_indep_qiskit_16      16   0,809586   0,809586   0,809586     20,07     26,06      46,87
+        50    qpeinexact_indep_qiskit_2        2   0,999301   0,999301   0,999301     18,90     26,09      33,65
+        51    qpeinexact_indep_qiskit_3        3   0,993188   0,993188   0,993384     19,08     23,20      39,55
+        52    qpeinexact_indep_qiskit_30      30   0,519436   0,519436   0,519436     19,35     25,12      37,14
+        53    qpeinexact_indep_qiskit_4        4   0,980528   0,980528   0,980528     19,20     23,44      38,23
+        54    qpeinexact_indep_qiskit_40      40   0,374131   0,374131   0,374131     29,26     41,54      46,79
+        55    qpeinexact_indep_qiskit_5        5   0,971085   0,971085   0,971085     19,08     23,78      36,48
+        56    qpeinexact_indep_qiskit_50      50   0,269473   0,269473   0,269473     22,27     33,89      43,05
+        57    qpeinexact_indep_qiskit_6        6   0,955010   0,955010   0,955010     19,21     24,10      36,70
+        58    qpeinexact_indep_qiskit_60      60   0,000011   0,000011   0,000011     18,37     29,45      31,69
+13      59    qpeinexact_indep_qiskit_7        7   0,958524   0,958524   0,958524     19,72     24,57      34,13
+        60    qpeinexact_indep_qiskit_70      70   0,000003   0,000003   0,000003     18,56     22,64      31,86
+        61    qpeinexact_indep_qiskit_8        8   0,946599   0,946599   0,946599     19,73     25,29      40,85
+        62    qpeinexact_indep_qiskit_9        9   0,933364   0,933364   0,933364     19,79     26,34      44,22
+        63    qpeinexact_indep_tket_10        10   0,918025   0,918025   0,918025     20,00     26,08      37,99
+        64    qpeinexact_indep_tket_11        11   0,902232   0,902232   0,902232     19,87     25,98      38,88
+        65    qpeinexact_indep_tket_12        12   0,885222   0,885222   0,885222     19,94     26,17      36,99
+        66    qpeinexact_indep_tket_13        13   0,867152   0,867152   0,867152     20,05     25,94      39,19
+        67    qpeinexact_indep_tket_14        14   0,848100   0,848100   0,848100     20,07     25,99      38,42
+        68    qpeinexact_indep_tket_15        15   0,828272   0,828272   0,828272     20,17     25,89      37,06
+        69    qpeinexact_indep_tket_2          2   0,999301   0,999301   0,999301     18,93     29,71      31,30
+        70    qpeinexact_indep_tket_3          3   0,993188   0,993188   0,993384     19,02     23,21      39,34
+        71    qpeinexact_indep_tket_30        30   0,566672   0,566672   0,566672     33,30     39,36      51,49
+        72    qpeinexact_indep_tket_4          4   0,981219   0,981219   0,981219     19,10     23,46      29,64
+        73    qpeinexact_indep_tket_40        40   0,439901   0,439901   0,439901     26,06     31,97      47,53
+        74    qpeinexact_indep_tket_5          5   0,968512   0,968512   0,968512     19,13     23,48      37,62
+        75    qpeinexact_indep_tket_50        50   0,341583   0,341583   0,341583     20,88     26,88      41,84
+        76    qpeinexact_indep_tket_6          6   0,947726   0,968853   0,968853     19,14     30,31      39,30
+        77    qpeinexact_indep_tket_60        60   0,000013   0,000027   0,000027     18,28     22,42      37,88
+        78    qpeinexact_indep_tket_7          7   0,958179   0,958179   0,958179     19,94     24,79      33,46
+        79    qpeinexact_indep_tket_8          8   0,946145   0,946145   0,946145     31,39     37,34      54,76
+        80    qpeinexact_indep_tket_9          9   0,932665   0,932665   0,932665     19,88     25,94      34,54
+        81    routing_indep_qiskit_12         12   0,939834   0,939834   0,939834     19,32     24,16      31,96
+     Indice   Circuito                 Qubit    Score 1    Score 5   Score 10   Tempo 1   Tempo 5   Tempo 10
+
+        82    routing_indep_qiskit_2       2   0,997834   0,997834   0,997834     24,88     23,23      31,68
+        83    routing_indep_qiskit_6       6   0,981658   0,981658   0,981658     19,31     23,89      31,27
+        84    routing_indep_tket_12       12   0,939834   0,939834   0,939834     19,25     23,76      32,19
+        85    routing_indep_tket_2         2   0,997834   0,997834   0,997834     24,83     23,34      29,49
+        86    routing_indep_tket_6         6   0,981658   0,981658   0,981658     19,32     23,94      32,23
+        87    tsp_indep_qiskit_4           4   0,983920   0,983920   0,983920     22,01     30,11      31,12
+        88    tsp_indep_qiskit_9           9   0,924719   0,924719   0,924719     20,69     25,40      36,50
+        89    tsp_indep_tket_4             4   0,983920   0,983920   0,983920     22,01     30,07      34,35
+        90    tsp_indep_tket_9             9   0,924802   0,924802   0,924802     19,61     25,51      34,15
+
+
+
+
+14
+     B     Valori per circuito: token, correzioni e fatti
+     Token: somma di ingresso e uscita su tutti i tentativi. C: correzioni. V: tutti i fatti finali validi (sì/no); non indica la riuscita della compilazione.
+
+                                            Indice   Circuito                             Token 1   Token 5   Token 10   C1 C5    C10   V1   V5   V10
+
+                                                1    groundstate_medium_indep_qiskit_12     9 451    12 344     15 971    0   0     0   sì   sì   sì
+                                                2    groundstate_medium_indep_tket_12       9 439    12 331     15 959    0   0     0   sì   sì   sì
+                                                3    groundstate_small_indep_qiskit_4       9 211    11 271     41 638    0   0     2   sì   sì   no
+                                                4    groundstate_small_indep_tket_4         9 190    11 450     14 820    0   0     0   sì   sì   sì
+                                                5    qpeexact_indep_qiskit_10               9 440    12 150     46 488    0   0     2   sì   sì   no
+                                                6    qpeexact_indep_qiskit_11               9 456    12 407     48 620    0   0     2   sì   sì   no
+                                                7    qpeexact_indep_qiskit_12               9 484    12 401     47 954    0   0     2   sì   sì   no
+                                                8    qpeexact_indep_qiskit_13               9 468    37 514     47 864    0   2     2   sì   no   no
+                                                9    qpeexact_indep_qiskit_14               9 467    12 419     32 303    0   0     1   sì   sì   sì
+                                               10    qpeexact_indep_qiskit_15               9 470    12 457     48 697    0   0     2   sì   sì   no
+                                               11    qpeexact_indep_qiskit_16               9 456    12 450     48 700    0   0     2   sì   sì   no
+                                               12    qpeexact_indep_qiskit_2                9 114    22 248     13 667    0   1     0   sì   sì   sì
+                                               13    qpeexact_indep_qiskit_3                9 184    11 222     41 558    0   0     2   sì   sì   no
+                                               14    qpeexact_indep_qiskit_30               9 037    36 131     46 830    0   2     2   sì   no   no
+                                               15    qpeexact_indep_qiskit_4                9 225    34 623     14 007    0   2     0   sì   no   sì
+                                               16    qpeexact_indep_qiskit_40               8 925    34 862     14 792    0   2     0   sì   no   sì
+15                                             17    qpeexact_indep_qiskit_5                9 187    11 430     42 826    0   0     2   sì   sì   no
+                                               18    qpeexact_indep_qiskit_50               8 926    34 903     43 264    0   2     2   sì   no   no
+                                               19    qpeexact_indep_qiskit_6                9 215    11 688     14 203    0   0     0   sì   sì   sì
+                                               20    qpeexact_indep_qiskit_60               8 742    32 566     13 379    0   2     0   sì   no   sì
+                                               21    qpeexact_indep_qiskit_7                9 444    11 701     14 704    0   0     0   sì   sì   sì
+                                               22    qpeexact_indep_qiskit_70               8 742    10 779     13 380    0   0     0   sì   sì   sì
+                                               23    qpeexact_indep_qiskit_8                9 432    12 165     45 663    0   0     2   sì   sì   no
+                                               24    qpeexact_indep_qiskit_9                9 449    12 167     46 436    0   0     2   sì   sì   no
+                                               25    qpeexact_indep_tket_10                 9 442    12 152     15 879    0   0     0   sì   sì   sì
+                                               26    qpeexact_indep_tket_11                 9 439    12 329     15 898    0   0     0   sì   sì   sì
+                                               27    qpeexact_indep_tket_12                 9 486    12 477     16 044    0   0     0   sì   sì   sì
+                                               28    qpeexact_indep_tket_13                 9 487    12 468     16 055    0   0     0   sì   sì   sì
+                                               29    qpeexact_indep_tket_14                 9 486    12 454     16 143    0   0     0   sì   sì   sì
+                                               30    qpeexact_indep_tket_15                 9 472    12 344     16 061    0   0     0   sì   sì   sì
+                                               31    qpeexact_indep_tket_2                  9 116    33 472     13 664    0   2     0   sì   no   sì
+                                               32    qpeexact_indep_tket_3                  9 186    33 904     13 769    0   2     0   sì   no   sì
+                                               33    qpeexact_indep_tket_30                 8 891    11 691     15 429    0   0     0   sì   sì   sì
+                                               34    qpeexact_indep_tket_4                  9 227    11 460     13 995    0   0     0   sì   sì   sì
+                                               35    qpeexact_indep_tket_40                 8 892    11 681     44 979    0   0     2   sì   sì   no
+                                               36    qpeexact_indep_tket_5                  9 189    11 432     43 517    0   0     2   sì   sì   no
+                                               37    qpeexact_indep_tket_50                 8 889    11 690     44 309    0   0     2   sì   sì   no
+                                               38    qpeexact_indep_tket_6                  9 217    11 690     14 205    0   0     0   sì   sì   sì
+     Indice   Circuito                     Token 1   Token 5   Token 10   C1 C5    C10   V1   V5   V10
+
+        39    qpeexact_indep_tket_60         8 724    10 800     40 292    0   0     2   sì   sì   no
+        40    qpeexact_indep_tket_7          9 446    11 703     14 706    0   0     0   sì   sì   sì
+        41    qpeexact_indep_tket_8          9 346    12 209     47 275    0   0     2   sì   sì   no
+        42    qpeexact_indep_tket_9          9 451    12 319     15 788    0   0     0   sì   sì   sì
+        43    qpeinexact_indep_qiskit_10     9 437    37 513     15 936    0   2     0   sì   no   sì
+        44    qpeinexact_indep_qiskit_11     9 456    12 407     48 620    0   0     2   sì   sì   no
+        45    qpeinexact_indep_qiskit_12     9 469    37 496     48 611    0   2     2   sì   no   no
+        46    qpeinexact_indep_qiskit_13     9 464    12 454     48 616    0   0     2   sì   sì   no
+        47    qpeinexact_indep_qiskit_14     9 467    12 454     48 665    0   0     2   sì   sì   no
+        48    qpeinexact_indep_qiskit_15     9 470    12 457     48 697    0   0     2   sì   sì   no
+        49    qpeinexact_indep_qiskit_16     9 456    12 450     48 700    0   0     2   sì   sì   no
+        50    qpeinexact_indep_qiskit_2      9 114    22 248     13 667    0   1     0   sì   sì   sì
+        51    qpeinexact_indep_qiskit_3      9 155    11 124     41 859    0   0     2   sì   sì   no
+        52    qpeinexact_indep_qiskit_30     9 031    11 896     15 571    0   0     0   sì   sì   sì
+        53    qpeinexact_indep_qiskit_4      9 167    11 417     42 670    0   0     2   sì   sì   no
+        54    qpeinexact_indep_qiskit_40     8 925    34 862     14 792    0   2     0   sì   no   sì
+        55    qpeinexact_indep_qiskit_5      9 187    11 430     42 826    0   0     2   sì   sì   no
+        56    qpeinexact_indep_qiskit_50     8 926    34 903     43 264    0   2     2   sì   no   no
+        57    qpeinexact_indep_qiskit_6      9 203    11 458     42 888    0   0     2   sì   sì   no
+        58    qpeinexact_indep_qiskit_60     8 742    32 566     13 379    0   2     0   sì   no   sì
+16      59    qpeinexact_indep_qiskit_7      9 453    11 687     14 431    0   0     0   sì   sì   sì
+        60    qpeinexact_indep_qiskit_70     8 742    10 779     13 380    0   0     0   sì   sì   sì
+        61    qpeinexact_indep_qiskit_8      9 432    12 165     45 663    0   0     2   sì   sì   no
+        62    qpeinexact_indep_qiskit_9      9 418    12 365     47 207    0   0     2   sì   sì   no
+        63    qpeinexact_indep_tket_10       9 469    12 350     15 917    0   0     0   sì   sì   sì
+        64    qpeinexact_indep_tket_11       9 439    12 329     15 898    0   0     0   sì   sì   sì
+        65    qpeinexact_indep_tket_12       9 469    12 352     15 928    0   0     0   sì   sì   sì
+        66    qpeinexact_indep_tket_13       9 469    12 341     15 925    0   0     0   sì   sì   sì
+        67    qpeinexact_indep_tket_14       9 469    12 341     15 958    0   0     0   sì   sì   sì
+        68    qpeinexact_indep_tket_15       9 472    12 344     16 061    0   0     0   sì   sì   sì
+        69    qpeinexact_indep_tket_2        9 116    33 472     13 664    0   2     0   sì   no   sì
+        70    qpeinexact_indep_tket_3        9 157    11 126     41 853    0   0     2   sì   sì   no
+        71    qpeinexact_indep_tket_30       8 886    11 685     15 423    0   0     0   sì   sì   sì
+        72    qpeinexact_indep_tket_4        9 169    11 416     14 420    0   0     0   sì   sì   sì
+        73    qpeinexact_indep_tket_40       8 892    11 681     44 979    0   0     2   sì   sì   no
+        74    qpeinexact_indep_tket_5        9 189    11 432     43 517    0   0     2   sì   sì   no
+        75    qpeinexact_indep_tket_50       8 889    11 690     44 309    0   0     2   sì   sì   no
+        76    qpeinexact_indep_tket_6        9 205    34 929     44 590    0   2     2   sì   no   no
+        77    qpeinexact_indep_tket_60       8 724    10 800     40 292    0   0     2   sì   sì   no
+        78    qpeinexact_indep_tket_7        9 451    11 968     14 948    0   0     0   sì   sì   sì
+        79    qpeinexact_indep_tket_8        9 346    12 209     47 275    0   0     2   sì   sì   no
+        80    qpeinexact_indep_tket_9        9 450    12 317     15 897    0   0     0   sì   sì   sì
+        81    routing_indep_qiskit_12        9 292    11 612     14 459    0   0     0   sì   sì   sì
+     Indice   Circuito                 Token 1   Token 5   Token 10   C1 C5    C10   V1   V5   V10
+
+        82    routing_indep_qiskit_2    27 675    11 195     13 816    2   0     0   no   sì   sì
+        83    routing_indep_qiskit_6     9 288    11 517     14 178    0   0     0   sì   sì   sì
+        84    routing_indep_tket_12      9 292    11 612     14 459    0   0     0   sì   sì   sì
+        85    routing_indep_tket_2      27 675    11 195     13 816    2   0     0   no   sì   sì
+        86    routing_indep_tket_6       9 288    11 517     14 178    0   0     0   sì   sì   sì
+        87    tsp_indep_qiskit_4        18 571    34 249     13 952    1   2     0   sì   no   sì
+        88    tsp_indep_qiskit_9         9 458    12 347     15 387    0   0     0   sì   sì   sì
+        89    tsp_indep_tket_4          18 571    34 249     13 952    1   2     0   sì   no   sì
+        90    tsp_indep_tket_9           9 458    12 347     15 387    0   0     0   sì   sì   sì
+
+
+
+
+17
+

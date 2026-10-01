@@ -1,0 +1,8 @@
+{
+  "archivio/valutazione/test/strumenti/common.py": "da207c5e7cc54f6208d234b5aa9fc180e92604fa33665eee0bc0364c09ae804c",
+  "archivio/valutazione/test/strumenti/runner.py": "08c3ad77efc5500cb4ebc1ff7185e8c31650a9467a36c612276c47372bf84cf9",
+  "archivio/valutazione/test/strumenti/gates.py": "7815062aa86848a16934b86bb04910fd18c07fb149f39784a5d2f3373ec4d4e6",
+  "archivio/valutazione/test/strumenti/mqt_gate.py": "c502c9d7b3b49b97a832598ff2ed7bf537a424cd2f47be0e5324f0f1b426e97c",
+  "archivio/valutazione/test/strumenti/score.py": "08f917fe053f0f3c6eed072faec425b1ddc2c97194c47bd61b14384d928902ed",
+  "archivio/valutazione/test/strumenti/worker.py": "46a5a25e9e0996be015aad05f49c16f28431d1878f22dfc8ea101ad19ae92964"
+}

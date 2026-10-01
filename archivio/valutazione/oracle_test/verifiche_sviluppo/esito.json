@@ -1,0 +1,39 @@
+{
+  "at": "2026-09-29T14:08:53.760248+00:00",
+  "unit_tests": 14,
+  "unit_tests_success": true,
+  "real_quantum_compilations": 0,
+  "default_output_created": false,
+  "static_plan": {
+    "ready": true,
+    "output": "/home/elio/oracoli_mqt_test/test_max3_v1",
+    "plan": {
+      "circuits": 90,
+      "devices": 5,
+      "configurations": 12,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "matrix_cells": 16200,
+      "compilations": 15336,
+      "incompatible_cells": 864,
+      "compilations_by_device": {
+        "ibm_falcon_27": 2592,
+        "ibm_heron_133": 3240,
+        "ibm_falcon_127": 3240,
+        "ibm_heron_156": 3240,
+        "quantinuum_h2_56": 3024
+      }
+    },
+    "label": "MAX dei seed 0,1,2; massimo fra tutte le coppie compatibili",
+    "identity_sha256": "eef622905a8338a21e339bf5ab33afd7bcb3ae0dca5ecffb04739044422ac0cd"
+  },
+  "source_sha256": {
+    "oracle_core.py": "70b5f4c2b243f5892a12f342269d660bdb231de1bc172744757cc70a8889c834",
+    "oracle_worker.py": "96a4fbcacdf8fe73b48965f9141d7c01834a163e7674721a564d31eb37a25a09",
+    "genera_oracle_test.py": "644fc73ab0146b47b2fd34f2582a64ed61bd4b9a40fb9ac3dfcc503d78e07860",
+    "test_oracle.py": "937f7ce161637c0e493b87e07d8a0fa94012ce33d323289aa84f5a489170d58b"
+  }
+}

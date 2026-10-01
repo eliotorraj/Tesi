@@ -1,0 +1,44 @@
+{
+  "qwen": {
+    "model_key": "qwen",
+    "base_repository": "Qwen/Qwen3.5-4B",
+    "base_revision_observed": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+    "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "filename": "Qwen3.5-4B-Q8_0.gguf",
+    "gguf_sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1",
+    "size_bytes": 4482403488,
+    "weight_precision": "Q8_0",
+    "downloaded_at": "2026-09-13T16:31:34.344925+00:00",
+    "base_revision_of_conversion": "not independently established",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q8_0.gguf"
+  },
+  "phi": {
+    "model_key": "phi",
+    "base_repository": "microsoft/Phi-4-mini-instruct",
+    "base_revision_observed": "cfbefacb99257ffa30c83adab238a50856ac3083",
+    "gguf_repository": "unsloth/Phi-4-mini-instruct-GGUF",
+    "gguf_revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+    "filename": "Phi-4-mini-instruct.Q8_0.gguf",
+    "gguf_sha256": "26188c6050d525376a88b04514c236c5e28a36730f1e936f2a00314212b7ba42",
+    "size_bytes": 4084611040,
+    "weight_precision": "Q8_0",
+    "downloaded_at": "2026-09-13T11:48:35.236410+00:00",
+    "base_revision_of_conversion": "not independently established",
+    "url": "https://huggingface.co/unsloth/Phi-4-mini-instruct-GGUF/resolve/78eb92a46fc37e6b524df991ed9aca9bc6aa7b80/Phi-4-mini-instruct.Q8_0.gguf"
+  },
+  "gemma": {
+    "model_key": "gemma",
+    "base_repository": "google/gemma-4-E4B-it",
+    "base_revision_observed": "ee0ef6023621cff504d758262d4e04895a5af4a2",
+    "gguf_repository": "ggml-org/gemma-4-E4B-it-GGUF",
+    "gguf_revision": "b8093469224f83f5c38f691eb906c380e9e63114",
+    "filename": "gemma-4-E4B-it-Q8_0.gguf",
+    "gguf_sha256": "34be82b17b4942d389b9b527170c4b058027abdd32531fda063d3d97dd8ce80a",
+    "size_bytes": 8031242688,
+    "weight_precision": "Q8_0",
+    "downloaded_at": "2026-09-13T16:33:42.292370+00:00",
+    "base_revision_of_conversion": "not independently established",
+    "url": "https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF/resolve/b8093469224f83f5c38f691eb906c380e9e63114/gemma-4-E4B-it-Q8_0.gguf"
+  }
+}

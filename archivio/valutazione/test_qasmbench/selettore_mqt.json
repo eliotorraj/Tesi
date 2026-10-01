@@ -1,0 +1,14 @@
+{
+  "source": "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test_mqt_esplorativo/runtime/trained_clf_expected_fidelity.joblib",
+  "model_sha256": "681da87b3d373d27edd9bbabd7424d2b9eb16bf0d18794147fdcdbbe4faa4189",
+  "metadata_sha256": "2872a29f34023dcb9572ef660898a831a9b28f6efa8fa28adc349d903cdfc9d7",
+  "gate_source": "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test_mqt_esplorativo/strumenti/mqt_gate.py",
+  "gate_source_sha256": "1600478c729873b865a5de19358197e976abbbe2605d192e0d95cbb4a001b166",
+  "training_samples": 384,
+  "expected_training_samples": 396,
+  "excluded_samples": 12,
+  "successful_compilations": 1853,
+  "required_compilations": 1878,
+  "publication_status": "additional-independent-test",
+  "authorized_on": "2026-09-30"
+}

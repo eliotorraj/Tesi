@@ -1,0 +1,85 @@
+{
+  "models": [
+    {
+      "id": "qwen",
+      "file": "qwen/modello.gguf",
+      "url": "http://127.0.0.1:8089",
+      "context": 60000,
+      "max_output_tokens": 4096,
+      "temperatures": [
+        0.0,
+        0.4,
+        0.7
+      ],
+      "precision": "Q8_0",
+      "source": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q8_0.gguf",
+      "sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1",
+      "base_repository": "Qwen/Qwen3.5-4B",
+      "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+      "transport": "native",
+      "timeout": 3600,
+      "server": {
+        "cache_type_k": "q8_0",
+        "cache_type_v": "q8_0",
+        "batch_size": 512,
+        "ubatch_size": 128,
+        "parallel": 1,
+        "historical_runtime": "llama.cpp b10930, Windows Vulkan"
+      }
+    },
+    {
+      "id": "phi",
+      "file": "phi/modello.gguf",
+      "url": "http://127.0.0.1:8089",
+      "context": 60000,
+      "max_output_tokens": 4096,
+      "temperatures": [
+        0.0,
+        0.4,
+        0.7
+      ],
+      "precision": "Q8_0",
+      "source": "https://huggingface.co/unsloth/Phi-4-mini-instruct-GGUF/resolve/78eb92a46fc37e6b524df991ed9aca9bc6aa7b80/Phi-4-mini-instruct.Q8_0.gguf",
+      "sha256": "26188c6050d525376a88b04514c236c5e28a36730f1e936f2a00314212b7ba42",
+      "base_repository": "microsoft/Phi-4-mini-instruct",
+      "revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+      "transport": "native",
+      "timeout": 3600,
+      "server": {
+        "cache_type_k": "q8_0",
+        "cache_type_v": "q8_0",
+        "batch_size": 512,
+        "ubatch_size": 128,
+        "parallel": 1,
+        "historical_runtime": "llama.cpp b10930, Windows Vulkan"
+      }
+    },
+    {
+      "id": "gemma",
+      "file": "gemma/modello.gguf",
+      "url": "http://127.0.0.1:8089",
+      "context": 60000,
+      "max_output_tokens": 4096,
+      "temperatures": [
+        0.0,
+        0.4,
+        0.7
+      ],
+      "precision": "Q8_0",
+      "source": "https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF/resolve/b8093469224f83f5c38f691eb906c380e9e63114/gemma-4-E4B-it-Q8_0.gguf",
+      "sha256": "34be82b17b4942d389b9b527170c4b058027abdd32531fda063d3d97dd8ce80a",
+      "base_repository": "google/gemma-4-E4B-it",
+      "revision": "b8093469224f83f5c38f691eb906c380e9e63114",
+      "transport": "native",
+      "timeout": 3600,
+      "server": {
+        "cache_type_k": "q8_0",
+        "cache_type_v": "q8_0",
+        "batch_size": 512,
+        "ubatch_size": 128,
+        "parallel": 1,
+        "historical_runtime": "llama.cpp b10930, Windows Vulkan"
+      }
+    }
+  ]
+}

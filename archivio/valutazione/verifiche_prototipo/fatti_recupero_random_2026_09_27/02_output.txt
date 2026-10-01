@@ -1,0 +1,57 @@
+{
+  "method": "llm_recupero_random",
+  "at": "2026-09-27T18:20:23.383586+00:00",
+  "ready": true,
+  "checks": {
+    "local_llm_v2": {
+      "ok": true,
+      "details": {
+        "study_id": "local-llm-v2",
+        "winner": "qwen/p0_t0",
+        "verified_files": 31307,
+        "final_sha256": "3c14683280887913a075b79cb5f1ffe263504bd6a912b0406fdc2d399c1ade67"
+      }
+    },
+    "corpus": {
+      "ok": true,
+      "details": {
+        "source_sha256": "c599eab17b6f64528067016e3d175cbfed597334f779ef8e515cf8787a788f53",
+        "counts": {
+          "test": 90,
+          "train": 422,
+          "validation": 88
+        }
+      }
+    },
+    "software_targets": {
+      "ok": true,
+      "details": {
+        "versions": {
+          "qiskit": "2.5.0",
+          "mqt.bench": "2.2.3",
+          "numpy": "2.5.1",
+          "networkx": "3.6.1",
+          "qdrant-client": "1.19.0",
+          "portalocker": "3.2.0"
+        },
+        "targets": {
+          "ibm_falcon_27": "b9120f471bd90ef5aae03606ebc1e421478cd50f7b65ff4fb115f64c5148c104",
+          "ibm_heron_133": "2de960a68a2d3c77d1c8284fc2f89c2ec26a565994024c6ea329e7a5b7bf2df3",
+          "ibm_falcon_127": "5b91130482b02e3029bf550d88ec2cf732b52f023137c0f1ec7e059facb1debd",
+          "ibm_heron_156": "207fcb68d097a924aa681ca5d4545d2f5eed04f9783a91021dffb59bcff43003",
+          "quantinuum_h2_56": "ceb17d2f893cad6d8f78572def3c73dee3b7f3c2cc55dcb4feddc9e292e2aeee"
+        }
+      }
+    },
+    "rag_train_integrity": {
+      "ok": true,
+      "details": {
+        "records": 396,
+        "files": 408
+      }
+    },
+    "method_plan": {
+      "ok": true
+    }
+  }
+}

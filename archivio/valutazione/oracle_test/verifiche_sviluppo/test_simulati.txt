@@ -1,0 +1,21 @@
+Conclusi 6/6: {'timeout': 3, 'incompatible': 3}
+Conclusi 6/6: {'success': 3, 'incompatible': 3}
+test_atomic_publication_never_replaces (__main__.OracleTests.test_atomic_publication_never_replaces) ... ok
+test_bad_result_rejected (__main__.OracleTests.test_bad_result_rejected) ... ok
+test_contract_change_refused (__main__.OracleTests.test_contract_change_refused) ... ok
+test_global_max_across_pairs (__main__.OracleTests.test_global_max_across_pairs) ... ok
+test_hard_watchdog_timeout_preserves_late_file (__main__.OracleTests.test_hard_watchdog_timeout_preserves_late_file) ... ok
+test_max_not_median_and_ties (__main__.OracleTests.test_max_not_median_and_ties) ... ok
+test_no_results_null_and_zero_is_a_valid_score (__main__.OracleTests.test_no_results_null_and_zero_is_a_valid_score) ... ok
+test_output_inside_repo_or_symlink_rejected (__main__.OracleTests.test_output_inside_repo_or_symlink_rejected) ... ok
+test_partial_seed_does_not_discard_good_scores (__main__.OracleTests.test_partial_seed_does_not_discard_good_scores) ... ok
+test_real_process_watchdog_without_quantum_compilation (__main__.OracleTests.test_real_process_watchdog_without_quantum_compilation) ... ok
+test_resume_interruption_is_terminal (__main__.OracleTests.test_resume_interruption_is_terminal) ... ok
+test_resume_recovers_completed_result_and_detects_tampering (__main__.OracleTests.test_resume_recovers_completed_result_and_detects_tampering) ... ok
+test_supervisor_mock_and_resume_no_repeated_attempts (__main__.OracleTests.test_supervisor_mock_and_resume_no_repeated_attempts) ... ok
+test_worker_passes_each_seed_and_fixed_options_without_compiling (__main__.OracleTests.test_worker_passes_each_seed_and_fixed_options_without_compiling) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.833s
+
+OK

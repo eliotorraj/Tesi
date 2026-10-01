@@ -1,0 +1,22 @@
+Title:           LLM + RAG e MQT Predictor: ulteriore test indipendente QASMBench
+Subject:         Analisi dei registri del 30 settembre 2026
+Keywords:        
+Author:          Progetto Tesi MQT
+Creator:         LaTeX with hyperref
+Producer:        pdfTeX-1.40.28
+CreationDate:    Wed Sep 30 11:27:16 2026 CEST
+ModDate:         Wed Sep 30 11:27:16 2026 CEST
+Custom Metadata: yes
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           12
+Encrypted:       no
+Page size:       595.276 x 841.89 pts (A4)
+Page rot:        0
+File size:       325705 bytes
+Optimized:       no
+PDF version:     1.7
