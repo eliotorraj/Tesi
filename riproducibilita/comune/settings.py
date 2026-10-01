@@ -10,7 +10,7 @@ if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", EXPERIMENT_ID):
 def input_path(value):
     p=Path(value).expanduser()
     return p.resolve() if p.is_absolute() else (KIT/p).resolve()
-OUTPUT = Path(os.environ.get("RIPRO_OUTPUT", KIT)).resolve()
+OUTPUT = input_path(os.environ.get("RIPRO_OUTPUT", CONFIG.get("output", ".")))
 WORK = OUTPUT/"esecuzioni"/EXPERIMENT_ID
 DATASET = OUTPUT/"dataset/artefatti"/EXPERIMENT_ID
 MQT = OUTPUT/"mqt/artefatti"/EXPERIMENT_ID
@@ -46,7 +46,7 @@ def same_or_save(path,value):
         if read(path)!=value:raise ValueError("Contenuto diverso: "+str(path)+"; usare un nuovo experiment_id")
     else:save(path,value)
 def model_registry():
-    values=read(REGISTRY_PATH)["models"]
+    values=[m for m in read(REGISTRY_PATH)["models"] if m.get("enabled",True)]
     ids=[m["id"] for m in values]
     if not values or len(ids)!=len(set(ids)):raise ValueError("Elenco modelli vuoto o ID duplicati")
     for m in values:
@@ -58,7 +58,7 @@ def code_identity():
     excluded={"artefatti","risultati","esecuzioni","node_modules","__pycache__",".venv","modelli_llm","circuiti","esportazioni"}
     result={}
     for folder,dirs,files in os.walk(KIT):
-        dirs[:]=sorted(d for d in dirs if d not in excluded)
+        dirs[:]=sorted(d for d in dirs if d not in excluded and (Path(folder)/d) != KIT/"configurazioni/esperimenti")
         for name in sorted(files):
             p=Path(folder)/name
             if p.suffix in (".py",".mjs",".json",".lock",".toml",".sh"):

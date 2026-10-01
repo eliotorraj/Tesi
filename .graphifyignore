@@ -27,3 +27,6 @@ site-packages/
 /riproducibilita/test/risultati/
 /riproducibilita/circuiti/
 /archivio/riorganizzazione_2026_10_01/
+
+# Configurazioni personali e revisioni dei comandi.
+/riproducibilita/configurazioni/esperimenti/

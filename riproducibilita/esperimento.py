@@ -8,12 +8,21 @@ import sys
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--config',type=Path,help='Configurazione JSON; ingressi relativi alla cartella riproducibilita')
+    selection=parser.add_mutually_exclusive_group()
+    selection.add_argument('--config',type=Path,help='Configurazione JSON; ingressi relativi alla cartella riproducibilita')
+    selection.add_argument('--esperimento',help='Nome creato con configura.py nuovo')
     parser.add_argument('--output',type=Path,help='Radice degli artefatti; predefinita: riproducibilita')
     commands=parser.add_subparsers(dest='command',required=True)
-    commands.add_parser('prepara',help='Verifica e congela corpus, Target, configurazione e codice')
+    commands.add_parser('prepara',
+        help='Controlla e salva gli ingressi e le impostazioni di riferimento della prova',
+        description='Controlla versioni, circuiti e Target; salva copie dei QASM, manifest, catalogo e impronte sotto esecuzioni/NOME nella radice risultati. La scrittura del contratto blocca le modifiche della configurazione nominata. Dataset, addestramento e valutazione si eseguono con le fasi successive.',
+        epilog='Esempio: python esperimento.py --esperimento mia-prova prepara. Per cambiare condizioni dopo la preparazione: python configura.py duplica mia-prova nuova-prova.')
     commands.add_parser('hardware',help='Mostra i Target sintetici e le loro impronte')
     commands.add_parser('verifica',help='Controlla installazione e sorgenti; nessuna inferenza')
+    commands.add_parser('stato',help='Mostra artefatti presenti e prossimo passaggio, senza eseguire prove')
+    server=commands.add_parser('server',help='Avvia o controlla il server LLM con le impostazioni dell’esperimento')
+    from comune.opzioni_server import add_arguments
+    add_arguments(server)
     d=commands.add_parser('dataset',help='Genera la matrice Qiskit e il Dataset RAG dal solo train')
     d.add_argument('--split',action='append',choices=['train','validation'])
     d.add_argument('--aggrega',action='store_true',help='Rilegge i tentativi già conservati')
@@ -29,14 +38,27 @@ def main():
     e=commands.add_parser('esporta',help='Crea un nuovo prototipo autonomo dal Dataset e dal modello selezionato')
     e.add_argument('destinazione',type=Path)
     a=parser.parse_args()
-    if a.config:os.environ['RIPRO_CONFIG']=str(a.config.resolve())
+    if a.esperimento:
+        from comune.configuratore import config_path, load
+        load(a.esperimento)
+        os.environ['RIPRO_CONFIG']=str(config_path(a.esperimento))
+    elif a.config:os.environ['RIPRO_CONFIG']=str(a.config.resolve())
     if a.output:os.environ['RIPRO_OUTPUT']=str(a.output.resolve())
     sys.dont_write_bytecode=True
     import bootstrap
     import settings as s
     if a.command=='prepara':
         from corpus import prepare
-        result=prepare()
+        from comune.configuratore import preparation_guard
+        with preparation_guard(s.CONFIG_PATH,s.CONFIG,s.WORK):
+            result=prepare()
+    elif a.command=='stato':
+        from stato import show
+        show()
+        return
+    elif a.command=='server':
+        from modelli_llm.server import main as serve
+        raise SystemExit(serve(args=a))
     elif a.command=='hardware':
         from gestione import hardware
         result=hardware()
@@ -79,6 +101,6 @@ def main():
 
 if __name__=='__main__':
     try:main()
-    except (ValueError,FileNotFoundError,KeyError) as exc:
+    except (ValueError,OSError,KeyError) as exc:
         print(f'Errore: {exc}',file=sys.stderr)
         raise SystemExit(2)

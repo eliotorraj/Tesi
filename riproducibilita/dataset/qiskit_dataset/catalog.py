@@ -223,7 +223,7 @@ def _validate_catalog(catalog: ConfigurationCatalog) -> None:
     """Controlla che il catalogo rispetti il protocollo sperimentale."""
     if not catalog.configurations:
         raise ValueError(
-            "Il catalogo deve contenere esattamente 12 configurazioni, "
+            "Il catalogo deve contenere almeno una configurazione, "
             f"non {len(catalog.configurations)}."
         )
     identifiers = [

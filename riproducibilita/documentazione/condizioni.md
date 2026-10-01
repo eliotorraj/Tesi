@@ -12,6 +12,12 @@ Il catalogo contiene cinque Target sintetici MQT Bench 2.2.3, dodici configurazi
 
 `modelli_llm/provenienza_originale.json` identifica repository, revisioni, file e SHA-256 dei GGUF Q8_0 di Qwen, Phi e Gemma. Non attesta indipendentemente la revisione base di ciascuna conversione. Il riferimento software è llama.cpp b10930. Il registro distribuito richiede contesto 60.000, cache q8_0, batch 512 e micro-batch 128. Linux CPU, Vulkan/CUDA e il server Windows del fisso sono condizioni di esecuzione da distinguere. Pesi e programmi sono forniti separatamente, rispettandone le licenze.
 
+## Configurazioni nominate
+
+`configura.py nuovo` crea impostazioni separate dai riferimenti distribuiti. Per impostazione iniziale seleziona Qwen e tre sistemi Test senza MQT; il profilo `cpu` riduce contesto, batch, processi e strati GPU. Queste sono condizioni nuove, visibili nel riepilogo e nelle revisioni, e non riproducono automaticamente la campagna di riferimento. Circuiti, Target, configurazioni e temperature si riducono solo con scelte esplicite.
+
+Il configuratore accetta il sottoinsieme di Target e opzioni previsto dagli schemi; non certifica l'eseguibilità di un GGUF arbitrario o la capacità della macchina. Dopo la preparazione si modifica un esperimento soltanto duplicandone le impostazioni con un altro nome, senza riscrivere i risultati precedenti.
+
 ## Risorse e condizioni da dichiarare
 
 Gli avviatori del kit mantengono facts v4 e tre tentativi completi, ma non riproducono il supervisore Windows con sensori termici e recupero automatico delle interruzioni della validation storica. Qui un'interruzione o un errore di trasporto resta un esito conservato, senza rigenerazioni silenziose. Dichiarare questa differenza confrontando costi e fallimenti con gli esiti precedenti.

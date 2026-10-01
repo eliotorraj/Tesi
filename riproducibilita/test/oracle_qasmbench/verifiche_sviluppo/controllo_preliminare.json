@@ -1,0 +1,26 @@
+{
+  "ready": true,
+  "output": "/home/elio/oracoli_qasmbench_test/qasmbench50_max3_v1",
+  "plan": {
+    "circuits": 50,
+    "devices": 5,
+    "configurations": 12,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "matrix_cells": 9000,
+    "compilations": 8604,
+    "incompatible_cells": 396,
+    "compilations_by_device": {
+      "ibm_falcon_27": 1620,
+      "ibm_heron_133": 1764,
+      "ibm_falcon_127": 1764,
+      "ibm_heron_156": 1800,
+      "quantinuum_h2_56": 1656
+    }
+  },
+  "label": "MAX dei seed 0,1,2; massimo fra tutte le coppie compatibili",
+  "identity_sha256": "c24448816cbba397931918336da9c5aec0200a8908bfe53f45d2325ef0f807ab"
+}

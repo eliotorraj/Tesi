@@ -1,7 +1,16 @@
-# Impostazioni da decidere prima della prova
+# Impostazioni dell'esperimento
 
-`esperimento.json` sceglie identificativo, corpus, catalogo, registro LLM, griglie e metodi. `catalogo.json` definisce Target quantistici, impronte, configurazioni Qiskit, seed e limiti dei processi. `generazione_llm.json` definisce prompt e parametri comuni della generazione.
+Il punto di ingresso consigliato è `configura.py`, dalla cartella `riproducibilita/`. Crea un esperimento con un nome e cambia le impostazioni tramite comandi controllati, senza editare schemi JSON:
 
-Il PC che esegue Qwen si configura nel registro `modelli_llm/modelli.json` e negli argomenti del server, non cambiando i Target IBM/Quantinuum. Su Linux CPU partire da un candidato e valutare contesto 16.384, batch 128 e microbatch 64; sono condizioni ridotte da dichiarare, non una promessa che la campagna completa entri in 16 GB. Ridurre `execution_policy.workers` del catalogo se la RAM richiede meno compilazioni parallele.
+```bash
+python configura.py nuovo mia-prova --profilo cpu
+python configura.py sistemi mia-prova llm_rag llm_senza_rag random
+python configura.py dispositivi mia-prova ibm_falcon_27
+python configura.py mostra mia-prova
+```
 
-Cambiare tutto prima di `prepara`; per modifiche successive usare un nuovo `experiment_id`. `esperimento.py hardware` mostra i Target disponibili e le loro impronte, non rileva la GPU del PC. Aggiungere un nuovo Target richiede anche il codice per costruirlo. Percorsi e sequenza sono nella [guida](../documentazione/guida.md).
+[esperimenti/](esperimenti/README.md) conserva configurazioni nominate e revisioni. `esperimento.json` e `catalogo.json` qui alla radice restano i valori distribuiti, usati anche dall'interfaccia tradizionale. `generazione_llm.json` contiene prompt e parametri comuni di basso livello; modificarlo richiede una scelta avanzata prima delle campagne.
+
+Il catalogo descrive Target quantistici, configurazioni Qiskit, seed e processi. CPU e GPU del PC si impostano invece con `risorse` e `modello`. I due profili `cpu` e `gpu` scelgono dove eseguire il LLM e partono dalle stesse altre impostazioni. Contesto, batch e processi si regolano separatamente; il fisso usa anch’esso `gpu`. La disponibilità e la memoria della scheda vanno verificate sul computer utilizzato.
+
+Dopo `prepara` le modifiche sono bloccate; `configura.py duplica ORIGINE NUOVO_NOME` conserva le impostazioni e separa i nuovi risultati. Leggi il [ricettario](../documentazione/configurazione.md) per tutti i comandi e la [guida](../documentazione/guida.md) per la sequenza completa.

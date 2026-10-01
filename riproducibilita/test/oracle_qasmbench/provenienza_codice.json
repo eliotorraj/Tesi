@@ -1,0 +1,13 @@
+{
+  "sources": {
+    "archivio/valutazione/oracle_test/oracle_core.py": "70b5f4c2b243f5892a12f342269d660bdb231de1bc172744757cc70a8889c834",
+    "archivio/valutazione/oracle_test/oracle_worker.py": "96a4fbcacdf8fe73b48965f9141d7c01834a163e7674721a564d31eb37a25a09",
+    "archivio/valutazione/oracle_test/genera_oracle_test.py": "644fc73ab0146b47b2fd34f2582a64ed61bd4b9a40fb9ac3dfcc503d78e07860",
+    "archivio/valutazione/oracle_test/test_oracle.py": "937f7ce161637c0e493b87e07d8a0fa94012ce33d323289aa84f5a489170d58b",
+    "prototipo/configs/qiskit_dataset_configurations_v2.json": "6677a3838d9d0721095e7838313451eb5039601f357a19ec2fb7d0a2dbd2dc5f",
+    "archivio/valutazione/oracle_test/confronto_llm_rag_k5/impagina.py": "08bf5b37e63368ab84dff33176201db9c5470e57e3b584992c2aea070f346a5f",
+    "archivio/valutazione/oracle_test/confronto_llm_rag_k5/analizza.py": "1d220699fe80796b601d3e79b4878b95497f6e70168437e2412120b05ad9b91a",
+    "archivio/valutazione/oracle_test/confronto_llm_rag_k5/risultati/confronto_oracle_rag5.tex": "0e6f4c0ac5e503c6817a85ed6a1edc1537628f5a55a51c054808dcfe99a9f53b"
+  },
+  "purpose": "Adattamento separato QASMBench50; nessuna esecuzione oracle alla preparazione."
+}

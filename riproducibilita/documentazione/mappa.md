@@ -1,9 +1,12 @@
 # Mappa del funzionamento
 
+`configura.py` offre i comandi di personalizzazione; `comune/configuratore.py` valida e conserva le revisioni, `configuratore_cli.py` interpreta le opzioni e `configuratore_info.py` mostra riepiloghi e controlli.
+
 `esperimento.py` sceglie la fase e importa il modulo necessario. `bootstrap.py` prepara gli import. `comune/settings.py` risolve configurazione e percorsi: è il primo punto da leggere per capire dove finiscono ingressi e risultati.
 
 | Domanda | Punto di partenza | Collegamento |
 | --- | --- | --- |
+| Come si vede cosa manca? | `comune/stato.py` | Artefatti, integrità e passaggio successivo; non avvia esperimenti. |
 | Come si avvia Qwen o un altro LLM? | `modelli_llm/server.py` e `modelli.json` | Backend CPU/GPU, `--list-devices`, contesto e trasporto Linux/Windows. |
 | Come si preparano i circuiti? | `comune/corpus.py` | Caratteristiche in `dataset/qiskit_dataset/core.py`, integrità in `comune/scripts/mqt_predictor_protocol.py`. |
 | Quali dispositivi/configurazioni? | `configurazioni/catalogo.json` | Validazione in `catalog.py` e `mqt/gestione.py`. |
@@ -19,6 +22,8 @@
 | Come si esporta? | `comune/esporta.py` | Framework autonomo con solo train, catalogo e scelta congelata. |
 
 ```text
+configura.py: esperimento nominato
+             |
 Circuiti + catalogo + versioni
              |
            prepara

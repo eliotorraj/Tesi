@@ -1,9 +1,8 @@
-# Documentazione delle nuove esecuzioni
+# Come orientarsi nel kit
 
-1. [Guida operativa](guida.md): ambiente Linux, scelta delle risorse e fasi nell'ordine di esecuzione.
-2. [Condizioni](condizioni.md): limiti, differenze rilevanti e dati da conservare.
-3. [Mappa](mappa.md): responsabilità dei moduli e destinazioni degli artefatti.
+- [Guida](guida.md): percorso Linux completo, dalla configurazione iniziale all'esportazione, con indicazioni CPU/GPU e fisso.
+- [Configurazione](configurazione.md): ricettario dei comandi per catalogo, circuiti, modelli, sistemi Test e risorse, senza editare JSON.
+- [Mappa](mappa.md): moduli da leggere per capire il funzionamento.
+- [Condizioni](condizioni.md): limiti, differenze operative e conservazione delle evidenze.
 
-Per provare soltanto il framework selezionato usare la [guida del prototipo](../../prototipo/docs/guida_passo_passo.md), con percorsi separati per Linux CPU e fisso WSL/Windows. La campagna completa del kit richiede una valutazione delle risorse più ampia del minimo indicativo di 16 GB.
-
-Le regole scientifiche sono nel [protocollo corrente](../../prototipo/docs/protocollo_sperimentale.md). I risultati delle nuove esecuzioni hanno un proprio identificativo; il contenuto dell'archivio non è un prerequisito operativo.
+La [guida del prototipo](../../prototipo/docs/guida_passo_passo.md) serve invece a provare il sistema già selezionato. Il kit costruisce nuove esecuzioni e mantiene train, validation e Test separati.

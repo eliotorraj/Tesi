@@ -1,185 +1,297 @@
-# Eseguire una nuova campagna su Linux
+# Dalla prima configurazione al proprio prototipo
 
-## 1. Preparare l'ambiente
+Questa guida accompagna una nuova esecuzione su Linux, dalla scelta degli ingressi al Test. Le impostazioni si cambiano con `configura.py`: il programma scrive i JSON, controlla i valori e conserva le revisioni.
 
-Questa guida serve a rigenerare dati, addestrare MQT, scegliere LLM e misurare i metodi. Per provare soltanto il framework già selezionato usare la [guida del prototipo](../../prototipo/docs/guida_passo_passo.md): comprende il nuovo utente Linux CPU e il fisso con GPU.
+Se vuoi soltanto provare il sistema già selezionato, parti dalla [guida del prototipo](../../prototipo/docs/guida_passo_passo.md). Questo kit serve invece a generare un nuovo Dataset, scegliere le impostazioni sulla validation e costruire un altro prototipo. Circuiti nuovi, pesi GGUF, driver ed eseguibile llama.cpp devono essere forniti da chi usa il kit.
 
-Il kit richiede Linux/Ubuntu o Ubuntu in WSL, Python 3.12, `uv`, Node.js 22/npm e un eseguibile llama.cpp compatibile. Su un computer nuovo seguire i [prerequisiti Linux](../../prototipo/docs/guida_passo_passo.md#a2-installare-i-prerequisiti). Per compilare llama.cpp b10930 vedere la [procedura CPU](../../prototipo/docs/guida_passo_passo.md#a4-preparare-llamacpp-per-cpu) o i [backend GPU](../../prototipo/docs/installazione_e_runtime.md#gpu-su-linux). È ammessa una compilazione esterna al progetto: passarne il percorso con `--bin`. I comandi del kit non dipendono dal client del prototipo.
+Il percorso principale usa un esperimento chiamato `prova-cpu`, con Qwen e tre sistemi Test. È un punto di partenza ridotto per imparare i comandi. I limiti sono espliciti: una GPU adeguata è consigliata e 16 GB di RAM non garantiscono che tutti i circuiti, modelli e contesti possano essere elaborati. Una compilazione con un solo Target e una sola configurazione non è un confronto significativo fra scelte alternative. Quando il percorso funziona, duplica l'esperimento e amplia il catalogo.
 
-Una GPU compatibile è consigliata per Qwen e gli altri LLM. **16 GB di RAM non garantiscono l'intera campagna**: compilazioni Qiskit, addestramento, inferenza e report hanno carichi diversi. I valori distribuiti, compreso contesto 60.000 e tre modelli Q8_0, non sono un profilo ridotto CPU. Prima di congelare la configurazione scegliere numero di processi, candidati, contesto e batch in base alle risorse.
+## Come leggere i comandi della guida
 
-Dalla radice del clone, entrare nel kit e prepararlo:
+I due programmi principali sono file Python nella cartella `riproducibilita/`: **`configura.py`** serve a scegliere e modificare le impostazioni; **`esperimento.py`** serve a eseguire le fasi della prova. Dopo il nome dello script si specificano l'azione da svolgere e gli eventuali parametri.
+
+Per esempio, al punto 5 eseguiremo questo comando, dopo avere installato l'ambiente e scelto gli ingressi:
+
+```bash
+python esperimento.py --esperimento prova-cpu prepara
+```
+
+| Parte del comando | Significato |
+| --- | --- |
+| `python` | Avvia l'interprete Python dell'ambiente attivato. |
+| `esperimento.py` | È lo script da eseguire, presente nella cartella del kit. |
+| `--esperimento prova-cpu` | Indica quale configurazione nominata usare. |
+| `prepara` | È il sottocomando, cioè l'azione richiesta allo script. |
+
+**`prepara` è quindi un comando di `esperimento.py`.** Controlla gli ingressi e salva circuiti, catalogo e impostazioni di riferimento per quella prova. Nella guida chiamiamo questa operazione «congelamento»: la prova viene associata a condizioni precise, così i passaggi successivi possono accorgersi se vengono cambiate. Per provare condizioni diverse si usa un altro nome, anche duplicando la configurazione.
+
+Quando trovi scritto «prima di `prepara`», significa **prima di eseguire quel comando nel terminale**. La configurazione con `configura.py` viene prima; generazione del Dataset, addestramento e valutazione vengono dopo. Puoi vedere le azioni disponibili con `python esperimento.py --help` e leggere la spiegazione della preparazione con `python esperimento.py prepara --help`.
+
+## 1. Installare e controllare l'ambiente Linux
+
+Servono Linux/Ubuntu o Ubuntu in WSL, Python 3.12, `uv`, Node.js 22/npm e un eseguibile llama.cpp compatibile. Per installarli consulta i [prerequisiti Linux](../../prototipo/docs/guida_passo_passo.md#a2-installare-i-prerequisiti) e la [compilazione CPU di llama.cpp b10930](../../prototipo/docs/guida_passo_passo.md#a4-preparare-llamacpp-per-cpu); per GPU consulta i [backend Linux](../../prototipo/docs/installazione_e_runtime.md#gpu-su-linux).
+
+Dalla radice del clone:
 
 ```bash
 cd riproducibilita
 bash setup.sh
-.venv/bin/python -B esperimento.py verifica
-.venv/bin/python -B esperimento.py hardware
+source .venv/bin/activate
+python esperimento.py verifica
 ```
 
-**Tutti i comandi successivi partono da `riproducibilita/`.** `verifica` controlla l'ambiente; `hardware` mostra i Target quantistici e le impronte, non la GPU del PC. `setup.sh` usa `uv sync --frozen` con MQT Predictor 2.4.0 e installa TOON dal lock npm. Non scarica GGUF, non addestra e non ricrea una `.venv` già presente. Prima di ricostruirla conservare i modelli MQT installati e quelli canonici.
+**Da qui tutti i comandi partono da `riproducibilita/`, con l'ambiente attivato.** In un nuovo terminale bisogna entrare di nuovo nel kit e ripetere `source .venv/bin/activate`. Se preferisci non attivarlo, sostituisci `python` con `.venv/bin/python`.
 
-Node 22 deve essere nel PATH; in alternativa `PROTOTIPO_NODE` indica il suo eseguibile. I pesi dei candidati si scaricano dagli URL di `modelli_llm/provenienza_originale.json`, rispettandone licenze e revisioni, o si forniscono autonomamente. Una prova con server simulato è disponibile con `.venv/bin/python -B verifiche/checks.py` e non richiede pesi.
+`setup.sh` usa il lock delle dipendenze, con MQT Predictor 2.4.0, e installa TOON dal lock npm. Non scarica pesi, non addestra e non ricrea un ambiente esistente. Prima di ricostruire una `.venv` conserva i modelli MQT canonici e quelli installati nel pacchetto. Node deve essere nel PATH; `PROTOTIPO_NODE` permette di indicare il suo eseguibile.
 
-## 2. Scegliere gli ingressi
-
-Modificare `configurazioni/esperimento.json`, `configurazioni/catalogo.json` e `modelli_llm/modelli.json` prima di `prepara`.
-
-- Assegnare un `experiment_id` nuovo, per esempio `mio-corpus-01`.
-- Lasciare i QASM distribuiti oppure sostituire train, validation e test. Usare nomi univoci fra split.
-- Nel registro mantenere soltanto i modelli da provare. Indicare file, provenienza/revisione, precisione, temperature, contesto e budget. Per un nuovo GGUF sostituire anche l'hash atteso.
-- Scegliere `test_methods`. Se non si intende addestrare MQT, eliminare `mqt` prima del congelamento.
-- Nel catalogo impostare `execution_policy.workers` secondo la RAM disponibile, per esempio 1 per una macchina limitata. Per confrontare i tempi eseguire i metodi Test in sequenza.
-
-Per una nuova prova **CPU** limitata si può mantenere solo Qwen nel registro, impostare `context: 16384`, `max_output_tokens: 4096`, `server.batch_size: 128`, `server.ubatch_size: 64` e `transport: "native"`. Ridurre la griglia delle temperature se non serve confrontarle tutte. Queste impostazioni vanno dichiarate prima della prova e non garantiscono che tutti i circuiti entrino nel contesto; un fallimento resta un esito. Per la prima verifica su un PC da 16 GB è preferibile il Bell del prototipo.
-
-Sul **fisso con server Windows**, il client del kit resta in WSL. Per il candidato Qwen impostare `transport: "windows"`, contesto 60.000 e il percorso GGUF leggibile da WSL, per esempio sotto `/mnt/d/`. Il server si avvia come nel [percorso personale](../../prototipo/docs/guida_passo_passo.md#percorso-b--elio-fisso-con-gpu-e-client-wsl). Gli avviatori Qwen non avviano automaticamente Phi e Gemma: per una griglia con più modelli occorrono server adeguati a ciascun candidato oppure il percorso Linux generico.
-
-I percorsi relativi degli ingressi sono risolti rispetto a `riproducibilita/`. Il campo `file` dei GGUF è relativo al registro LLM. Si possono usare percorsi assoluti. `--config` e `--output` precedono il sottocomando:
+## 2. Creare una configurazione con un nome
 
 ```bash
-.venv/bin/python -B esperimento.py --config /percorso/esperimento.json --output /disco/risultati prepara
+python configura.py nuovo prova-cpu --profilo cpu --modelli qwen \
+  --sistemi llm_rag llm_senza_rag random
+python configura.py mostra prova-cpu
 ```
 
-Ripetere gli stessi parametri nei comandi successivi. Il server separato legge le stesse impostazioni attraverso le variabili `RIPRO_CONFIG` e `RIPRO_OUTPUT`, per esempio:
+Il comando crea `configurazioni/esperimenti/prova-cpu/` e lascia intatti i valori distribuiti. Puoi tenere più esperimenti contemporaneamente. `mostra` spiega quali modelli sono attivi, dove si cercano i file, dove finiranno i risultati e quante compilazioni prevede al massimo la griglia.
+
+Il profilo CPU imposta contesto 16.384, risposta massima 4.096 token, batch 128, microbatch 64, zero strati GPU e un processo Qiskit. Non riduce da solo circuiti, Target, configurazioni o temperature. Per questo primo percorso riduciamo esplicitamente la griglia:
 
 ```bash
-RIPRO_CONFIG=/percorso/esperimento.json RIPRO_OUTPUT=/disco/risultati \
-  .venv/bin/python -B modelli_llm/server.py qwen --bin /percorso/llama-server --gpu-layers 999
+python configura.py dispositivi prova-cpu ibm_falcon_27
+python configura.py compilazioni prova-cpu o2_default_default
+python configura.py parametri prova-cpu --temperature 0
 ```
 
-Gli esempi seguenti usano i percorsi predefiniti.
+Restano i tre seed di compilazione richiesti dal protocollo. Con il corpus distribuito si ottengono al massimo 1.530 compilazioni train/validation prima dei filtri di compatibilità: anche una griglia ridotta non è una prova istantanea. Per imparare con pochi circuiti puoi fornire un corpus più piccolo nel passaggio seguente.
 
-## 3. Congelare corpus e Target
+### Se usi una GPU o il fisso
+
+Ci sono **due profili**, che scelgono dove eseguire il LLM:
+
+| Profilo | Dove si eseguono i calcoli del LLM | Dove vengono mantenuti i pesi |
+| --- | --- | --- |
+| `cpu` | CPU | RAM del computer |
+| `gpu` | GPU per gli strati trasferiti, con CPU di supporto | VRAM della scheda per gli strati trasferiti; resta necessario usare anche RAM |
+
+Con `gpu` il server richiede di trasferire tutti gli strati possibili sulla scheda (`gpu_layers=999`). Il numero 999 è un modo per richiedere tutti gli strati, non il numero effettivo di strati del modello. Questa impostazione non garantisce che qualsiasi GGUF entri nella VRAM. Se la memoria non basta, il caricamento può fallire: puoi scegliere un modello più piccolo o impostare esplicitamente meno strati GPU. In quest'ultimo caso parte del modello resta sulla CPU e usa la RAM. La memoria serve anche al contesto e alle strutture di lavoro, oltre che ai pesi.
+
+I due profili partono dalle **stesse altre impostazioni**: contesto 16.384 token, risposta massima 4.096, batch 128, microbatch 64 e un processo Qiskit. Contesto e parallelismo si regolano separatamente con `modello --contesto` e `risorse --processi`, prima di `prepara`. I processi Qiskit riguardano CPU e RAM per le compilazioni del Dataset; non indicano quante richieste LLM vengono eseguite in parallelo.
+
+Per un nuovo computer con GPU:
 
 ```bash
-.venv/bin/python -B esperimento.py prepara
+python configura.py nuovo prova-gpu --profilo gpu
 ```
 
-Il comando verifica versioni e Target, estrae 49 caratteristiche, controlla duplicati fra split e crea copie sotto `esecuzioni/<id>/circuits/`. Produce manifest, catalogo e impronte. Gli ingressi distribuiti sono 422 train, 88 validation e 90 test; i 422 train corrispondono a 396 contenuti distinti. Un corpus nuovo può avere altre dimensioni.
-
-Una modifica di codice, configurazione o copie congelate blocca la ripresa: usare un nuovo identificativo e conservare la precedente esecuzione. `manifest_originale.json` è un riferimento di provenienza, non va riscritto quando si cambiano gli ingressi.
-
-## 4. Preparare MQT, se previsto
-
-Addestrare una politica per ciascun dispositivo nel catalogo:
+Anche il fisso usa il profilo `gpu`. Se vuoi assegnargli il contesto esteso e il parallelismo del riferimento, dichiarali esplicitamente:
 
 ```bash
-.venv/bin/python -B esperimento.py mqt rl --device ibm_falcon_27
-.venv/bin/python -B esperimento.py mqt rl --device ibm_heron_133
-.venv/bin/python -B esperimento.py mqt rl --device ibm_falcon_127
-.venv/bin/python -B esperimento.py mqt rl --device ibm_heron_156
-.venv/bin/python -B esperimento.py mqt rl --device quantinuum_h2_56
+python configura.py nuovo prova-fisso --profilo gpu
+python configura.py modello prova-fisso qwen --contesto 60000
+python configura.py risorse prova-fisso --processi 6 --batch 512 --microbatch 128
 ```
 
-Sono addestramenti reali, potenzialmente lunghi. I 100.000 passi richiesti diventano normalmente 100.352 al completamento del rollout PPO. Checkpoint, modelli e metadati vanno in `mqt/artefatti/<id>/`. Un modello addestrato per pochi passi controlla la meccanica, non la qualità della compilazione.
+Questi valori non vengono scelti automaticamente dal tipo di computer o dal modello di scheda. Prima di usarli verifica che le risorse siano adeguate. Nei passaggi successivi sostituisci `prova-cpu` con il nome scelto.
 
-Dopo tutte le politiche:
+Tutti i profili partono dal trasporto Linux `native`. Se sul fisso mantieni il server Windows e il client WSL, indica per Qwen il percorso WSL del GGUF e il trasporto:
 
 ```bash
-.venv/bin/python -B esperimento.py mqt selettore --dry-run
-.venv/bin/python -B esperimento.py mqt selettore --compile-only --num-workers 1
-.venv/bin/python -B esperimento.py mqt selettore --finalize-only --num-workers 1
-.venv/bin/python -B esperimento.py mqt verifica
-.venv/bin/python -B esperimento.py test tecnico-mqt
+python configura.py modello prova-fisso qwen \
+  --file /mnt/d/percorso/Qwen3.5-4B-Q8_0.gguf --trasporto windows
 ```
 
-La prima fase raccoglie compilazioni circuito/dispositivo. La seconda genera Training set e array, seleziona gli iperparametri e addestra il classificatore. Conservare gli stessi parametri operativi fra le fasi. In alternativa `mqt selettore --num-workers 1` svolge entrambe. La prova finale usa un Bell sintetico, una volta per politica e una volta per selettore+RL, senza leggere Test.
+Avvia poi Qwen con gli script del [percorso personale](../../prototipo/docs/guida_passo_passo.md#percorso-b--elio-fisso-con-gpu-e-client-wsl). I `.ps1` e i sensori del fisso restano disponibili. Questi avviatori sono specifici del loro modello: per altri LLM serve un avvio coerente con il candidato. `esperimento.py server` avvia eseguibili Linux; il suo `--controlla` può verificare anche il server Windows attraverso `curl.exe`.
 
-Le opzioni complete sono visibili con `esperimento.py mqt rl -- --help` e `esperimento.py mqt selettore -- --help`. Non usare bypass o sovrascritture per mescolare esperimenti. L'installazione dei modelli richiede la `.venv` interna al kit e protegge il vecchio ambiente della repository.
+## 3. Decidere quali circuiti usare
 
-## 5. Generare Dataset e matrice validation
+Puoi mantenere il corpus distribuito: 422 train, 88 validation e 90 test. In questo caso non serve alcun comando. I 422 train contengono 396 contenuti byte-distinti; il kit conserva anche gli alias.
+
+Per usare i tuoi circuiti, prepara una directory con tre sottocartelle e collegala:
 
 ```bash
-.venv/bin/python -B esperimento.py dataset
+python configura.py circuiti prova-cpu --cartella "$HOME/circuiti-prova" --crea
 ```
 
-Si compilano train e validation sulle coppie compatibili, le configurazioni e i tre seed. Si conservano anche errori, timeout e QASM compilati. Le mediane si calcolano sulle configurazioni con tutti e tre i seed riusciti; gli esempi RAG e la normalizzazione provengono solo da train.
+`--crea` crea soltanto `train/`, `validation/` e `test/` se mancano. Metti i QASM direttamente nelle rispettive cartelle, poi controlla il riepilogo. Il programma non scarica circuiti, non decide come dividerli e non cambia quelli distribuiti. I nomi devono essere univoci fra split e ciascuno split deve contenere almeno un circuito.
 
-I tentativi sono in `dataset/artefatti/<id>/`; il pacchetto train da leggere nelle decisioni è in `esecuzioni/<id>/data/`. Nessun risultato Test entra nel Dataset. Per separare il lavoro usare `dataset --split train` e `dataset --split validation`. Il sigillo viene creato quando entrambi hanno tutti i tentativi registrati, inclusi i fallimenti. `dataset --aggrega` rilegge i registri senza compilare.
+Non mettere lo stesso circuito in train e test con nomi diversi. `prepara` verifica contenuto e sequenza delle istruzioni, ma non può dimostrare ogni possibile equivalenza quantistica o indipendenza fra famiglie. I cinquanta QASMBench in `circuiti/esterni/` restano un corpus separato: se vuoi usarli, copia gli ingressi desiderati nella tua nuova suddivisione, conservando la provenienza.
 
-Una ripresa avvia soltanto i tentativi mai iniziati. I lavori interrotti senza esito diventano terminali: non si cancellano risultati sfavorevoli per riprovare sotto lo stesso identificativo.
+## 4. Collegare il GGUF e llama.cpp
 
-
-## 6. Selezionare LLM e temperatura
-
-Inserire i GGUF oppure indicarne i percorsi nel registro. Poi:
+Per conoscere le fonti dei modelli di riferimento:
 
 ```bash
-.venv/bin/python -B esperimento.py validation congela
+python configura.py disponibili modelli
 ```
 
-Il comando richiede tutti i candidati, calcola le impronte e congela la griglia. In un terminale separato avviare il primo server:
+Scarica autonomamente il GGUF della revisione indicata, rispettandone la licenza. Puoi metterlo in `modelli_llm/qwen/modello.gguf` oppure collegare un file già presente, anche su un altro disco:
 
 ```bash
-.venv/bin/python -B modelli_llm/server.py qwen --bin /percorso/llama-server --gpu-layers 999
+python configura.py modello prova-cpu qwen --file /percorso/Qwen3.5-4B-Q8_0.gguf
+python configura.py risorse prova-cpu --server-bin /percorso/llama-server --threads 6
 ```
 
-Sostituire `/percorso/llama-server` con il proprio eseguibile Linux. `--gpu-layers 999` richiede l'accelerazione degli strati: controllare in `stderr.log` cosa il backend carica realmente. Per CPU usare `--gpu-layers 0`; contesto e batch restano quelli già dichiarati nel registro. Per scegliere una GPU, elencarla e usare il suo identificativo:
+Sostituisci i percorsi con quelli reali. Per `qwen`, `phi` e `gemma` resta l'impronta del GGUF di riferimento: cambiare percorso non autorizza silenziosamente pesi diversi. Se vuoi un'altra quantizzazione o un altro LLM, usa `aggiungi-modello`, descritto nel [ricettario di configurazione](configurazione.md#registrare-un-altro-llm).
+
+Con GPU puoi vedere i dispositivi realmente esposti dal tuo eseguibile senza caricare il modello:
 
 ```bash
-.venv/bin/python -B modelli_llm/server.py --bin /percorso/llama-server --list-devices
+python esperimento.py --esperimento prova-gpu server qwen --list-devices
+python configura.py risorse prova-gpu --device ID_RESTITUITO_DAL_COMANDO
 ```
 
-Aggiungere `--device ID` all'avvio se occorre scegliere tra più schede. Non ci sono nomi Radeon fissi né controlli termici AMD in questo avviatore. La compatibilità dipende da driver, backend e memoria disponibile.
+Il numero `999` chiede di trasferire tutti gli strati disponibili; non dimostra che siano stati caricati sulla GPU. Controlla il registro del server. Non serve sostituire nel codice il nome della Radeon con quello di un'altra scheda.
 
-Lasciare il terminale aperto; i log sono in `esecuzioni/<id>/servers/`. In un secondo terminale, sempre dal kit, attendere il caricamento:
+## 5. Controllare le scelte e preparare l'esperimento
+
+Se vuoi salvare gli output altrove, stabiliscilo adesso. Il percorso rimarrà associato all'esperimento:
 
 ```bash
-curl --fail http://127.0.0.1:8089/health
+python configura.py risorse prova-cpu --risultati /percorso/risultati
 ```
 
-Per il server Windows usare `curl.exe`. Attendere `status: ok`, poi:
+Altrimenti gli output restano nelle aree del kit, separati per nome. Rileggi le scelte e verifica gli ingressi:
 
 ```bash
-.venv/bin/python -B esperimento.py validation esegui --modello qwen
+python configura.py mostra prova-cpu
+python configura.py verifica prova-cpu
 ```
 
-Fermare il server con Ctrl+C, avviare il candidato successivo e ripetere il comando con il suo identificativo. Il programma verifica GGUF e contesto del server. Con server su Windows e client WSL usare `transport: "windows"` nel registro e un avvio Windows equivalente; il trasporto predefinito `native` usa il server Linux/WSL.
+`verifica` controlla split, nomi, duplicati byte-identici, presenza dei candidati e impronte GGUF; segnala anche gli eseguibili mancanti. Non avvia inferenza e non congela nulla. Per file grandi il calcolo SHA-256 richiede tempo. La verifica non certifica che la memoria sia sufficiente né che un GGUF arbitrario sia compatibile con llama.cpp.
 
-Dopo tutti i candidati:
+Quando gli ingressi sono pronti:
 
 ```bash
-.venv/bin/python -B esperimento.py validation seleziona
-.venv/bin/python -B esperimento.py validation report
+python esperimento.py --esperimento prova-cpu prepara
+python esperimento.py --esperimento prova-cpu stato
 ```
 
-Le decisioni sono sigillate prima della valutazione sugli score. Il criterio predefinito privilegia maggiore copertura di scelte valide e compilabili, minore regret mediano sui circuiti comuni, meno correzioni e chiamate, tempi/token se completi e ordine lessicografico. Il riferimento è la migliore mediana osservata fra le coppie eleggibili, non un ottimo teorico. I report comprendono candidati scartati e denominatori.
+Il primo comando richiama la funzione `prepare()` di [comune/corpus.py](../comune/corpus.py). Controlla le versioni installate, i Target e la separazione fra train, validation e test; legge i QASM ed estrae 49 caratteristiche. Salva poi, sotto `esecuzioni/prova-cpu/` nella radice risultati scelta:
 
-## 7. Valutare le varianti WL, se previste
+- `circuits/`: copie dei circuiti assegnati alla prova;
+- `manifest.json`: elenco dei circuiti con caratteristiche, provenienza, split e impronte;
+- `catalogo.json`: dispositivi quantistici e configurazioni Qiskit della prova;
+- `contratto.json` e `ingressi_sigillati.json`: impostazioni e impronte con cui i passaggi successivi controllano l'integrità.
 
-Prima di `llm_wl` e `llm_wl_sintesi` eseguire:
+Questa è la preparazione degli ingressi. Le compilazioni che generano il Dataset e gli addestramenti si eseguono con i comandi dei punti successivi. **Da quando viene scritto il contratto, la configurazione non si modifica con il configuratore**, anche se una fase successiva della preparazione incontra un errore. Il comando `stato` aiuta a vedere se la preparazione è completa. Per cambiare una scelta:
 
 ```bash
-.venv/bin/python -B esperimento.py validation wl
+python configura.py duplica prova-cpu prova-cpu-02
+python configura.py parametri prova-cpu-02 --temperature 0 0.4 0.7
 ```
 
-Si confrontano le profondità in `wl_iterations`. Si registrano i recuperi dai DAG dei QASM e dal train; soltanto dopo si valutano le coppie recuperate sulla matrice validation. Questa è una selezione del recupero, senza inferenza LLM né Test. I cinque esempi e l'eventuale sintesi del DAG alimentano poi il rispettivo metodo Test.
+La copia eredita le impostazioni e i percorsi degli ingressi, senza copiare risultati o riusare un addestramento come nuovo. Anche se eredita la stessa radice di output, le sottocartelle useranno il nuovo nome. Conserva l'ambiente e i sorgenti per riprendere una prova: cambiare il codice dopo il congelamento può rendere incompatibile la ripresa.
 
-## 8. Congelare ed eseguire Test
+`stato` resta consultabile in qualunque momento. Mostra gli artefatti presenti, conta gli esiti Test e suggerisce il passaggio successivo. Un file presente non è da solo una certificazione di successo: le singole fasi eseguono i controlli d'integrità.
 
-Avviare il server del modello selezionato. Se MQT è previsto, completarne i modelli e le prove Bell. Poi:
+## 6. Preparare MQT soltanto se incluso nei sistemi Test
+
+Il percorso `prova-cpu` non include `mqt`, quindi passa al punto 7. Per prevederlo in un'altra campagna, aggiungilo con `configura.py sistemi` **prima di `prepara`**. Il comando sostituisce l'intero elenco, per esempio:
 
 ```bash
-.venv/bin/python -B esperimento.py test congela
-.venv/bin/python -B esperimento.py test esegui --metodo llm_rag
-.venv/bin/python -B esperimento.py test esegui --metodo llm_senza_rag
-.venv/bin/python -B esperimento.py test esegui --metodo random
-.venv/bin/python -B esperimento.py test esegui --metodo llm_recupero_random
-.venv/bin/python -B esperimento.py test esegui --metodo mqt
-.venv/bin/python -B esperimento.py test analizza
+python configura.py sistemi altra-prova llm_rag llm_senza_rag random mqt
 ```
 
-Lanciare soltanto i metodi dichiarati in `test_methods`. Ogni circuito ha un esito: successo, timeout e fallimento restano tutti registrati. Per gli LLM si conservano prompt, evidenze, richieste, risposte, correzioni e token misurabili. Gli score mancanti non diventano zero; i confronti appaiati indicano i circuiti comuni.
-
-`test oracle` è facoltativo e produce una griglia di riferimento separata, mai letta dai decisori. Dichiara se tutte le compilazioni sono riuscite. Costa molte più compilazioni di un metodo singolo.
-
-I report sono sotto `test/risultati/<id>/report/`; ciascuna versione è legata alle impronte dei registri. Il `report.tex` autonomo si compila dalla propria directory con `pdflatex -halt-on-error report.tex`. Serve una distribuzione LaTeX con PGFPlots; il report validation include una figura generata dai dati. JSON e CSV si producono anche senza un compilatore LaTeX.
-
-## 9. Esportare il proprio prototipo
+L'installazione di MQT da sola non fornisce politiche RL addestrate e selettore. Dopo `prepara`, addestra una politica per **ogni** dispositivo selezionato; il riepilogo o `hardware` mostrano quali:
 
 ```bash
-.venv/bin/python -B esperimento.py esporta /percorso/nuovo-prototipo
+python esperimento.py --esperimento altra-prova hardware
+python esperimento.py --esperimento altra-prova mqt rl --device ibm_falcon_27
 ```
 
-La destinazione deve essere nuova. Si copiano framework, Dataset train, catalogo e configurazione selezionata, senza GGUF né score validation/Test. La nuova cartella ha README e setup propri e funziona senza il kit. La temperatura selezionata è mantenuta anche quando diversa da zero. `prototipo/` già presente nella repository rimane invariato.
+Ripeti l'ultimo comando per gli altri Target del tuo catalogo. Sono addestramenti reali, potenzialmente lunghi. I 100.000 passi richiesti diventano normalmente 100.352 al completamento del rollout PPO. Checkpoint e modelli vanno in `mqt/artefatti/<nome>/`. Pochi passi possono controllare la meccanica, ma non dimostrano qualità della compilazione.
+
+Completate le politiche:
+
+```bash
+python esperimento.py --esperimento altra-prova mqt selettore --dry-run
+python esperimento.py --esperimento altra-prova mqt selettore --compile-only --num-workers 1
+python esperimento.py --esperimento altra-prova mqt selettore --finalize-only --num-workers 1
+python esperimento.py --esperimento altra-prova mqt verifica
+python esperimento.py --esperimento altra-prova test tecnico-mqt
+```
+
+La raccolta produce compilazioni circuito/dispositivo; la finalizzazione costruisce Training set e array, sceglie gli iperparametri e addestra il selettore. Mantieni gli stessi parametri fra le due fasi. `mqt selettore --num-workers 1` può svolgerle entrambe. La prova tecnica usa un Bell sintetico senza leggere Test.
+
+Le opzioni dei trainer sono in `mqt rl -- --help` e `mqt selettore -- --help`. Gli addestramenti devono usare la `.venv` del kit; sono protetti da modifiche accidentali all'ambiente della vecchia repository. I processi del trainer si impostano con `--num-workers`: `configura.py risorse --processi` riguarda la generazione Qiskit del Dataset.
+
+## 7. Generare Dataset e matrice validation
+
+```bash
+python esperimento.py --esperimento prova-cpu dataset
+```
+
+Il comando compila train e validation sulle coppie compatibili, le configurazioni e i tre seed. Conserva errori, timeout e QASM compilati. Le mediane richiedono tre seed riusciti per quella configurazione. Gli esempi RAG e la normalizzazione provengono soltanto da train.
+
+I tentativi sono in `dataset/artefatti/<nome>/`; il pacchetto train usato nelle decisioni è in `esecuzioni/<nome>/data/`. Questi percorsi partono dalla radice di output scelta. Per separare il lavoro usa `dataset --split train` e `dataset --split validation`. Il sigillo si crea quando entrambi hanno tutti i tentativi registrati, compresi i fallimenti. `dataset --aggrega` ricostruisce gli aggregati senza compilare.
+
+Una ripresa avvia soltanto i tentativi mai iniziati. Le esecuzioni interrotte senza esito diventano terminali: il sistema non elimina fallimenti per riprovare con lo stesso nome.
+
+## 8. Eseguire la validation e scegliere il candidato
+
+```bash
+python esperimento.py --esperimento prova-cpu validation congela
+python esperimento.py --esperimento prova-cpu server qwen
+```
+
+Il primo comando verifica tutti i GGUF attivi e congela la griglia. Il secondo avvia il server con percorso, contesto, batch, thread e strati GPU già salvati. In `prova-cpu` gli strati GPU sono zero; non occorre aggiungere l'opzione a ogni avvio. Il terminale rimane occupato e i registri sono in `esecuzioni/<nome>/servers/`.
+
+Apri un secondo terminale, entra nel kit e attiva la stessa `.venv`. Attendi che il modello sia caricato, poi controlla:
+
+```bash
+python esperimento.py --esperimento prova-cpu server qwen --controlla
+python esperimento.py --esperimento prova-cpu validation esegui --modello qwen
+```
+
+`--controlla` verifica l'identità del GGUF e il contesto esposto dal server, senza inviare un prompt. Se il server si sta ancora caricando, attendi e ripeti il controllo. Se non parte, consulta soprattutto `stderr.log` della sua cartella di registri.
+
+Con più LLM: termina il server corrente con Ctrl+C, avvia quello successivo e ripeti `validation esegui --modello ID`. Il comando prova tutte le temperature configurate per quell'ID. La porta predefinita è condivisa: avvia un candidato per volta.
+
+Dopo aver eseguito **tutti i candidati attivi**:
+
+```bash
+python esperimento.py --esperimento prova-cpu validation seleziona
+python esperimento.py --esperimento prova-cpu validation report
+python esperimento.py --esperimento prova-cpu stato
+```
+
+Le decisioni sono sigillate prima di leggerne gli score. Il criterio predefinito privilegia copertura, minore regret mediano sui circuiti comuni, meno correzioni/chiamate, tempi e token quando completi, infine ordine lessicografico. Il riferimento è la migliore mediana osservata fra coppie eleggibili, non un ottimo teorico. Sono conservati anche candidati scartati e denominatori. Con un solo candidato non si confrontano alternative, ma restano le misure sulla validation.
+
+Se hai incluso `llm_wl` o `llm_wl_sintesi`, prima del Test esegui anche:
+
+```bash
+python esperimento.py --esperimento prova-cpu validation wl
+```
+
+Questa fase seleziona la profondità del recupero strutturale usando train e validation, senza inferenza LLM e senza Test.
+
+## 9. Congelare ed eseguire Test
+
+Avvia il server del modello selezionato. Per MQT devono essere pronti anche modelli e prove tecniche; per WL serve la selezione del recupero. Il percorso iniziale include questi tre sistemi:
+
+```bash
+python esperimento.py --esperimento prova-cpu test congela
+python esperimento.py --esperimento prova-cpu test esegui --metodo llm_rag
+python esperimento.py --esperimento prova-cpu test esegui --metodo llm_senza_rag
+python esperimento.py --esperimento prova-cpu test esegui --metodo random
+python esperimento.py --esperimento prova-cpu test analizza
+```
+
+Esegui soltanto i sistemi che hai dichiarato, preferibilmente in sequenza per confrontare i tempi. Le varianti disponibili sono descritte da `configura.py disponibili sistemi`. Il kit richiede la selezione sulla validation prima di congelare Test, anche se l'elenco contiene soltanto Random o MQT.
+
+Ogni circuito conserva un esito; errori, timeout e interruzioni non vengono nascosti. Per gli LLM si registrano prompt, evidenze, richieste, risposte, correzioni e token misurabili. Gli score mancanti non diventano zero e i confronti appaiati indicano i circuiti comuni.
+
+`test oracle` è facoltativo: genera una griglia di riferimento separata, mai letta dai decisori. Può costare molte più compilazioni di un sistema singolo. Non è necessario per completare questo percorso.
+
+I report sono in `test/risultati/<nome>/report/`. JSON e CSV non richiedono LaTeX. Il `report.tex` autonomo si compila dalla sua cartella con `pdflatex -halt-on-error report.tex`; serve una distribuzione LaTeX con PGFPlots. Il report validation include anche una figura generata dai dati.
+
+## 10. Esportare e ritrovare il lavoro
+
+```bash
+python esperimento.py --esperimento prova-cpu esporta /percorso/nuovo-prototipo
+python configura.py elenca
+```
+
+La destinazione dell'esportazione deve essere nuova. Riceve framework, Dataset train, catalogo e configurazione selezionata, senza pesi GGUF né score validation/Test. Ha README e setup propri e funziona senza il kit. La temperatura scelta viene conservata. `prototipo/` distribuito nella repository rimane autonomo.
+
+Conserva configurazioni, revisioni, codice, lock, tutte le cartelle dei risultati e i pesi o fonti verificabili. Il kit non fa commit né push: gli output e i pesi restano locali. Per modificare catalogo, modelli, griglie e risorse consulta il [ricettario](configurazione.md). Per capire i moduli leggi la [mappa](mappa.md); per interpretare scientificamente il confronto leggi le [condizioni](condizioni.md).

@@ -4,6 +4,19 @@ Questa è l'area operativa Linux per nuove esecuzioni: si scelgono circuiti e mo
 
 Per **provare subito il prototipo selezionato**, anche su un PC Linux senza GPU, partire dalla [guida del prototipo](../prototipo/docs/guida_passo_passo.md). Per **rifare le fasi o scegliere altri modelli**, seguire la [guida di questa area](documentazione/guida.md). Sono obiettivi diversi: i 16 GB indicativi per la prova CPU non garantiscono le risorse per tutta la campagna.
 
+Per configurare senza modificare JSON, da questa cartella e dopo il setup:
+
+```bash
+source .venv/bin/activate
+python configura.py nuovo prova-cpu --profilo cpu
+python configura.py mostra prova-cpu
+python configura.py disponibili sistemi
+```
+
+`configura.py` permette di scegliere circuiti, LLM, sistemi Test, Target, opzioni Qiskit e risorse. `nuovo` parte da Qwen e tre sistemi senza MQT; tutti i Target e le configurazioni restano disponibili finché non li riduci. Prima di eseguire una campagna completa segui la [guida](documentazione/guida.md); per una modifica specifica consulta il [ricettario dei comandi](documentazione/configurazione.md). `esperimento.py --esperimento NOME stato` aiuta a ritrovare il punto raggiunto.
+
+I nomi `nuovo`, `mostra`, `prepara` e `dataset` sono azioni dei rispettivi script. Per esempio, `python esperimento.py --esperimento prova-cpu prepara` controlla gli ingressi e conserva copie dei circuiti, catalogo e impostazioni della prova. È il passaggio che fissa le condizioni prima di generare il Dataset o addestrare; la guida indica quando eseguirlo e come iniziare una prova diversa.
+
 Una GPU compatibile è consigliata per l'inferenza. Il kit usa un eseguibile llama.cpp Linux configurabile, senza dipendere dalla Radeon del fisso. Il fisso può continuare a usare il proprio server Windows da WSL con trasporto esplicito. Le differenze di hardware e contesto vanno dichiarate prima delle prove.
 
 | Cartella | Funzione |
@@ -21,7 +34,7 @@ Una GPU compatibile è consigliata per l'inferenza. Il kit usa un eseguibile lla
 | [esecuzioni/](esecuzioni/README.md) | Ingressi congelati, contratti e registri per identificativo. |
 | [esportazioni/](esportazioni/README.md) | Nuovi prototipi autonomi, generati su richiesta. |
 
-`setup.sh`, `pyproject.toml`, `uv.lock` e `.python-version` preparano l'ambiente dedicato. `esperimento.py --help` elenca le fasi. Tutti i risultati sono separati per `experiment_id`; i segnaposto sono nel clone, mentre pesi, ambienti e dati generati devono essere conservati separatamente da Git.
+`setup.sh`, `pyproject.toml`, `uv.lock` e `.python-version` preparano l'ambiente dedicato. `configura.py --help` elenca le modifiche disponibili; `esperimento.py --help` elenca le fasi. Le configurazioni nominate sono in `configurazioni/esperimenti/`; dopo la preparazione si duplicano per iniziare una prova diversa. Tutti i risultati sono separati per `experiment_id`; i segnaposto sono nel clone, mentre pesi, ambienti e dati generati devono essere conservati separatamente da Git.
 
 **Dataset** significa esempi per RAG/LLM. **Training set** significa dati circuito/dispositivo per MQT. Non è implementato il fine-tuning degli LLM. `esporta` costruisce un altro prototipo con train e configurazione selezionata, senza sovrascrivere quello distribuito.
 

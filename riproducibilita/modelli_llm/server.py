@@ -7,30 +7,44 @@ import argparse,subprocess,shutil
 from urllib.parse import urlparse
 from uuid import uuid4
 import settings as s
-from llm import freeze_models
+from llm import verify_server
+from comune.opzioni_server import add_arguments
 
 
-def main():
+def main(argv=None,args=None):
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('modello',nargs='?');parser.add_argument('--bin',default='llama-server')
-    parser.add_argument('--device',help='Identificativo GPU restituito dal backend llama.cpp')
-    parser.add_argument('--list-devices',action='store_true')
-    parser.add_argument('--gpu-layers',type=int,default=999)
-    parser.add_argument('--threads',type=int,default=6)
-    a=parser.parse_args()
-    executable=shutil.which(a.bin) or str(Path(a.bin).resolve())
+    add_arguments(parser)
+    a=args if args is not None else parser.parse_args(argv)
+    if a.controlla and a.list_devices:parser.error('Scegliere --controlla oppure --list-devices')
+    models=s.model_registry()
+    if a.modello and a.modello not in models:raise ValueError('Candidato non selezionato: '+a.modello)
+    model=models[a.modello] if a.modello else {}
+    server=model.get('server',{})
+    binary=a.bin or server.get('binary','llama-server')
+    executable=shutil.which(binary)
+    if a.controlla:
+        if not model:parser.error('--controlla richiede un ID modello')
+        observed=s.sha(model['path'])
+        if model.get('sha256') and model['sha256']!=observed:raise ValueError('GGUF diverso dal registro')
+        verify_server({**model,'sha256':observed})
+        print('Server pronto: modello e contesto corrispondono a',a.modello)
+        return 0
+    if not executable:raise ValueError('llama-server non trovato o non eseguibile: '+binary+'; usare configura.py risorse NOME --server-bin PERCORSO')
     if a.list_devices:return subprocess.run([executable,'--list-devices']).returncode
     if not a.modello:parser.error('Specificare ID del modello oppure --list-devices')
+    if model.get('transport','native')=='windows':
+        raise ValueError('Questo avviatore esegue server Linux. Per il trasporto Windows avviare il server con gli script del fisso, poi usare server '+a.modello+' --controlla')
+    a.threads=a.threads if a.threads is not None else server.get('threads',6)
+    a.gpu_layers=a.gpu_layers if a.gpu_layers is not None else server.get('gpu_layers',999)
+    a.device=a.device if a.device is not None else server.get('device')
     if a.threads<1 or a.gpu_layers<0:parser.error('Thread positivi e strati GPU non negativi richiesti')
     if a.gpu_layers==0 and a.device not in (None,'none'):parser.error('CPU richiede device none')
-    model=s.model_registry()[a.modello];path=Path(model['path'])
+    path=Path(model['path'])
     if not path.is_file():raise ValueError('GGUF mancante: '+str(path))
     if model.get('sha256') and s.sha(path)!=model['sha256']:raise ValueError('GGUF diverso dal registro')
-    executable=shutil.which(a.bin) or str(Path(a.bin).resolve())
     revision=subprocess.run([executable,'--version'],capture_output=True,text=True,check=True)
     url=urlparse(model['url'])
     if url.hostname not in ('localhost','127.0.0.1') or not url.port:raise ValueError('Specificare localhost e porta')
-    server=model.get('server',{})
     command=[executable,'--model',str(path),'--ctx-size',str(model['context']),'--host','127.0.0.1','--port',str(url.port),
         '--parallel','1','--jinja','--n-gpu-layers',str(a.gpu_layers),'--threads',str(a.threads),
         '--threads-batch',str(a.threads),'--flash-attn','on','--no-context-shift','--cache-ram','0',
@@ -54,4 +68,8 @@ def main():
             except subprocess.TimeoutExpired:proc.kill();code=proc.wait()
         s.save(folder/'fine.json',{'returncode':code})
     return code
-if __name__=='__main__':raise SystemExit(main())
+if __name__=='__main__':
+    try:raise SystemExit(main())
+    except (ValueError,OSError,KeyError) as exc:
+        print('Errore:',exc,file=sys.stderr)
+        raise SystemExit(2)

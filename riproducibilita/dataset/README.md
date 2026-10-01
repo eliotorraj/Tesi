@@ -5,3 +5,5 @@
 Dopo setup e `prepara`, da `riproducibilita/` eseguire `.venv/bin/python -B esperimento.py dataset`. La procedura conserva successi, errori e timeout. Le mediane eleggibili richiedono i tre seed riusciti. Soltanto train entra negli esempi e nella trasformazione RAG; la matrice validation serve al valutatore dopo le decisioni.
 
 Il pacchetto train sigillato è in `esecuzioni/<id>/data/`. `--split train`, `--split validation` e `--aggrega` permettono di separare le fasi. La generazione usa CPU e RAM per Qiskit, non il server Qwen. Il parallelismo va fissato prima della prova in base alla memoria. Questo Dataset è distinto dal Training set MQT.
+
+Con le configurazioni nominate usa `python esperimento.py --esperimento NOME dataset`. Target, configurazioni Qiskit e processi si scelgono prima di `prepara` con `configura.py dispositivi`, `compilazioni` e `risorse`; gli schemi descrivono i formati, non sono i file da editare per personalizzare una prova.
