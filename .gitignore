@@ -88,3 +88,4 @@ node_modules/
 /archivio/valutazione/**/indice/
 /archivio/valutazione/**/__pycache__/
 !archivio/valutazione/oracle_test/confronto_llm_rag_k5/risultati
+/tesi.zip
