@@ -1,0 +1,1844 @@
+{
+  "available_methods": [
+    "llm_rag",
+    "llm_senza_rag",
+    "mqt_predictor",
+    "random",
+    "llm_recupero_random"
+  ],
+  "exploratory_methods": [
+    "mqt_predictor",
+    "llm_recupero_random"
+  ],
+  "missing_methods": [],
+  "pairs": {
+    "llm_senza_rag": {
+      "circuit_ids": [
+        "groundstate_medium_indep_qiskit_12",
+        "groundstate_medium_indep_tket_12",
+        "groundstate_small_indep_qiskit_4",
+        "groundstate_small_indep_tket_4",
+        "qpeexact_indep_qiskit_10",
+        "qpeexact_indep_qiskit_11",
+        "qpeexact_indep_qiskit_12",
+        "qpeexact_indep_qiskit_13",
+        "qpeexact_indep_qiskit_14",
+        "qpeexact_indep_qiskit_15",
+        "qpeexact_indep_qiskit_16",
+        "qpeexact_indep_qiskit_2",
+        "qpeexact_indep_qiskit_3",
+        "qpeexact_indep_qiskit_30",
+        "qpeexact_indep_qiskit_4",
+        "qpeexact_indep_qiskit_40",
+        "qpeexact_indep_qiskit_5",
+        "qpeexact_indep_qiskit_50",
+        "qpeexact_indep_qiskit_6",
+        "qpeexact_indep_qiskit_60",
+        "qpeexact_indep_qiskit_7",
+        "qpeexact_indep_qiskit_70",
+        "qpeexact_indep_qiskit_8",
+        "qpeexact_indep_qiskit_9",
+        "qpeexact_indep_tket_10",
+        "qpeexact_indep_tket_11",
+        "qpeexact_indep_tket_12",
+        "qpeexact_indep_tket_13",
+        "qpeexact_indep_tket_14",
+        "qpeexact_indep_tket_15",
+        "qpeexact_indep_tket_2",
+        "qpeexact_indep_tket_3",
+        "qpeexact_indep_tket_30",
+        "qpeexact_indep_tket_4",
+        "qpeexact_indep_tket_40",
+        "qpeexact_indep_tket_5",
+        "qpeexact_indep_tket_50",
+        "qpeexact_indep_tket_6",
+        "qpeexact_indep_tket_60",
+        "qpeexact_indep_tket_7",
+        "qpeexact_indep_tket_8",
+        "qpeexact_indep_tket_9",
+        "qpeinexact_indep_qiskit_10",
+        "qpeinexact_indep_qiskit_11",
+        "qpeinexact_indep_qiskit_12",
+        "qpeinexact_indep_qiskit_13",
+        "qpeinexact_indep_qiskit_14",
+        "qpeinexact_indep_qiskit_15",
+        "qpeinexact_indep_qiskit_16",
+        "qpeinexact_indep_qiskit_2",
+        "qpeinexact_indep_qiskit_3",
+        "qpeinexact_indep_qiskit_30",
+        "qpeinexact_indep_qiskit_4",
+        "qpeinexact_indep_qiskit_40",
+        "qpeinexact_indep_qiskit_5",
+        "qpeinexact_indep_qiskit_50",
+        "qpeinexact_indep_qiskit_6",
+        "qpeinexact_indep_qiskit_60",
+        "qpeinexact_indep_qiskit_7",
+        "qpeinexact_indep_qiskit_70",
+        "qpeinexact_indep_qiskit_8",
+        "qpeinexact_indep_qiskit_9",
+        "qpeinexact_indep_tket_10",
+        "qpeinexact_indep_tket_11",
+        "qpeinexact_indep_tket_12",
+        "qpeinexact_indep_tket_13",
+        "qpeinexact_indep_tket_14",
+        "qpeinexact_indep_tket_15",
+        "qpeinexact_indep_tket_2",
+        "qpeinexact_indep_tket_3",
+        "qpeinexact_indep_tket_30",
+        "qpeinexact_indep_tket_4",
+        "qpeinexact_indep_tket_40",
+        "qpeinexact_indep_tket_5",
+        "qpeinexact_indep_tket_50",
+        "qpeinexact_indep_tket_6",
+        "qpeinexact_indep_tket_60",
+        "qpeinexact_indep_tket_7",
+        "qpeinexact_indep_tket_8",
+        "qpeinexact_indep_tket_9",
+        "routing_indep_qiskit_12",
+        "routing_indep_qiskit_2",
+        "routing_indep_qiskit_6",
+        "routing_indep_tket_12",
+        "routing_indep_tket_2",
+        "routing_indep_tket_6",
+        "tsp_indep_qiskit_4",
+        "tsp_indep_qiskit_9",
+        "tsp_indep_tket_4",
+        "tsp_indep_tket_9"
+      ],
+      "n": 90,
+      "mean_left": 0.79837881407,
+      "mean_right": 0.6347778020322222,
+      "mean_difference": 0.16360101203777777,
+      "median_difference": 0.0925117586,
+      "paired_bootstrap_95": [
+        0.12600289207455553,
+        0.20143030875111112
+      ],
+      "wins": 71,
+      "ties": 10,
+      "losses": 9,
+      "differences": [
+        {
+          "circuit_id": "groundstate_medium_indep_qiskit_12",
+          "difference": 0.2857397411
+        },
+        {
+          "circuit_id": "groundstate_medium_indep_tket_12",
+          "difference": 0.2868531595
+        },
+        {
+          "circuit_id": "groundstate_small_indep_qiskit_4",
+          "difference": 0.014433506699999987
+        },
+        {
+          "circuit_id": "groundstate_small_indep_tket_4",
+          "difference": 0.004005104899999945
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_10",
+          "difference": 0.15414617090000005
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_11",
+          "difference": 0.1715491886
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_12",
+          "difference": 0.1760623482
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_13",
+          "difference": 0.2704902482
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_14",
+          "difference": 0.4878564345
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_15",
+          "difference": 0.4807153986
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_16",
+          "difference": 0.5580646869
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_3",
+          "difference": 0.0001413102999999749
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_30",
+          "difference": 0.47676215580000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_4",
+          "difference": 1.2453999999939569e-05
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_40",
+          "difference": 0.36802952910000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_5",
+          "difference": 0.024443023599999947
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_50",
+          "difference": 0.26901192900000004
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_6",
+          "difference": 0.023198593699999992
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_60",
+          "difference": -1.68751e-05
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_7",
+          "difference": 0.06230338729999996
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_70",
+          "difference": 1.0659999999999996e-07
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_8",
+          "difference": 0.09844705809999998
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_9",
+          "difference": 0.11201501380000001
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_10",
+          "difference": 0.10825287029999997
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_11",
+          "difference": 0.1860981489000001
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_12",
+          "difference": 0.23693148109999995
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_13",
+          "difference": 0.49126283550000005
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_14",
+          "difference": 0.4865713125
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_15",
+          "difference": 0.47436990090000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_3",
+          "difference": -0.00017270890000009587
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_30",
+          "difference": 0.5072723094999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_4",
+          "difference": 0.00428164419999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_40",
+          "difference": 0.4324182211
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_5",
+          "difference": 0.014377089999999981
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_50",
+          "difference": 0.34086713750000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_6",
+          "difference": 0.030550705399999933
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_60",
+          "difference": -8.740000000000191e-08
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_7",
+          "difference": 0.04351561430000006
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_8",
+          "difference": 0.07670457359999994
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_9",
+          "difference": 0.09402894949999996
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_10",
+          "difference": 0.1297318732999999
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_11",
+          "difference": 0.17305968900000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_12",
+          "difference": 0.19279277690000007
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_13",
+          "difference": 0.28449842840000006
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_14",
+          "difference": 0.32485072830000006
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_15",
+          "difference": 0.481979815
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_16",
+          "difference": 0.5589881336
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_3",
+          "difference": -0.00019596750000006047
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_30",
+          "difference": 0.453994717
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_4",
+          "difference": 0.005948448000000051
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_40",
+          "difference": 0.3680535567
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_5",
+          "difference": 0.020227398399999985
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_50",
+          "difference": 0.26901201230000005
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_6",
+          "difference": 0.038166065400000004
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_60",
+          "difference": -1.6875399999999998e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_7",
+          "difference": 0.06022491380000006
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_70",
+          "difference": 9.680000000000007e-08
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_8",
+          "difference": 0.10209762560000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_9",
+          "difference": 0.10999385090000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_10",
+          "difference": 0.12408171609999996
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_11",
+          "difference": 0.1875599858
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_12",
+          "difference": 0.21700428900000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_13",
+          "difference": 0.24851038960000005
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_14",
+          "difference": 0.49431075630000004
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_15",
+          "difference": 0.47554813760000003
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_3",
+          "difference": -0.00019596750000006047
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_30",
+          "difference": 0.5233876105999999
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_4",
+          "difference": 0.006639784600000032
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_40",
+          "difference": 0.43243671260000005
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_5",
+          "difference": 0.01124513320000009
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_50",
+          "difference": 0.34085815059999997
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_6",
+          "difference": 0.032139215399999976
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_60",
+          "difference": -5.229999999999948e-08
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_7",
+          "difference": 0.07519656870000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_8",
+          "difference": 0.07493211229999996
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_9",
+          "difference": 0.09099456770000003
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_12",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_6",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_tket_12",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_tket_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_tket_6",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_4",
+          "difference": 0.002288572799999944
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_9",
+          "difference": -0.02008919939999998
+        },
+        {
+          "circuit_id": "tsp_indep_tket_4",
+          "difference": 0.002288572799999944
+        },
+        {
+          "circuit_id": "tsp_indep_tket_9",
+          "difference": -0.020046931899999954
+        }
+      ],
+      "exploratory": false
+    },
+    "mqt_predictor": {
+      "circuit_ids": [
+        "groundstate_medium_indep_qiskit_12",
+        "groundstate_medium_indep_tket_12",
+        "groundstate_small_indep_qiskit_4",
+        "groundstate_small_indep_tket_4",
+        "qpeexact_indep_qiskit_10",
+        "qpeexact_indep_qiskit_12",
+        "qpeexact_indep_qiskit_14",
+        "qpeexact_indep_qiskit_15",
+        "qpeexact_indep_qiskit_2",
+        "qpeexact_indep_qiskit_3",
+        "qpeexact_indep_qiskit_30",
+        "qpeexact_indep_qiskit_4",
+        "qpeexact_indep_qiskit_40",
+        "qpeexact_indep_qiskit_5",
+        "qpeexact_indep_qiskit_6",
+        "qpeexact_indep_qiskit_60",
+        "qpeexact_indep_qiskit_7",
+        "qpeexact_indep_qiskit_70",
+        "qpeexact_indep_qiskit_8",
+        "qpeexact_indep_qiskit_9",
+        "qpeexact_indep_tket_10",
+        "qpeexact_indep_tket_12",
+        "qpeexact_indep_tket_14",
+        "qpeexact_indep_tket_15",
+        "qpeexact_indep_tket_2",
+        "qpeexact_indep_tket_3",
+        "qpeexact_indep_tket_4",
+        "qpeexact_indep_tket_40",
+        "qpeexact_indep_tket_5",
+        "qpeexact_indep_tket_6",
+        "qpeexact_indep_tket_60",
+        "qpeexact_indep_tket_7",
+        "qpeexact_indep_tket_8",
+        "qpeexact_indep_tket_9",
+        "qpeinexact_indep_qiskit_10",
+        "qpeinexact_indep_qiskit_11",
+        "qpeinexact_indep_qiskit_12",
+        "qpeinexact_indep_qiskit_14",
+        "qpeinexact_indep_qiskit_15",
+        "qpeinexact_indep_qiskit_16",
+        "qpeinexact_indep_qiskit_3",
+        "qpeinexact_indep_qiskit_30",
+        "qpeinexact_indep_qiskit_4",
+        "qpeinexact_indep_qiskit_40",
+        "qpeinexact_indep_qiskit_5",
+        "qpeinexact_indep_qiskit_50",
+        "qpeinexact_indep_qiskit_6",
+        "qpeinexact_indep_qiskit_60",
+        "qpeinexact_indep_qiskit_7",
+        "qpeinexact_indep_qiskit_70",
+        "qpeinexact_indep_qiskit_8",
+        "qpeinexact_indep_qiskit_9",
+        "qpeinexact_indep_tket_10",
+        "qpeinexact_indep_tket_12",
+        "qpeinexact_indep_tket_14",
+        "qpeinexact_indep_tket_3",
+        "qpeinexact_indep_tket_30",
+        "qpeinexact_indep_tket_4",
+        "qpeinexact_indep_tket_40",
+        "qpeinexact_indep_tket_5",
+        "qpeinexact_indep_tket_50",
+        "qpeinexact_indep_tket_6",
+        "qpeinexact_indep_tket_60",
+        "qpeinexact_indep_tket_7",
+        "qpeinexact_indep_tket_8",
+        "routing_indep_qiskit_12",
+        "routing_indep_qiskit_2",
+        "routing_indep_qiskit_6",
+        "routing_indep_tket_12",
+        "routing_indep_tket_2",
+        "routing_indep_tket_6",
+        "tsp_indep_qiskit_4",
+        "tsp_indep_qiskit_9",
+        "tsp_indep_tket_4",
+        "tsp_indep_tket_9"
+      ],
+      "n": 75,
+      "mean_left": 0.7989559227186667,
+      "mean_right": 0.8756377674426666,
+      "mean_difference": -0.07668184472400001,
+      "median_difference": -0.017661417300000037,
+      "paired_bootstrap_95": [
+        -0.10785042251646666,
+        -0.04918664045063334
+      ],
+      "wins": 17,
+      "ties": 0,
+      "losses": 58,
+      "differences": [
+        {
+          "circuit_id": "groundstate_medium_indep_qiskit_12",
+          "difference": 0.02344410320000001
+        },
+        {
+          "circuit_id": "groundstate_medium_indep_tket_12",
+          "difference": 0.02344410320000001
+        },
+        {
+          "circuit_id": "groundstate_small_indep_qiskit_4",
+          "difference": 0.008432247499999934
+        },
+        {
+          "circuit_id": "groundstate_small_indep_tket_4",
+          "difference": -0.003922766500000008
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_10",
+          "difference": -0.03700839049999993
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_12",
+          "difference": -0.05750108179999991
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_14",
+          "difference": -0.08672577329999998
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_15",
+          "difference": -0.10221753170000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_2",
+          "difference": 0.0049692925
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_3",
+          "difference": 0.004742031699999982
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_30",
+          "difference": -0.3398140556
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_4",
+          "difference": -0.004649362400000023
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_40",
+          "difference": -0.45082564489999993
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_5",
+          "difference": -0.006992998299999997
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_6",
+          "difference": -0.01813625360000004
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_60",
+          "difference": -0.0917443162
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_7",
+          "difference": -0.00896425710000004
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_70",
+          "difference": -0.2385414116
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_8",
+          "difference": -0.018887787099999942
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_9",
+          "difference": -0.025521490100000044
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_10",
+          "difference": -0.036195121100000005
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_12",
+          "difference": -0.060270291899999995
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_14",
+          "difference": -0.0832693792
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_15",
+          "difference": -0.0991088255
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_2",
+          "difference": 0.005916446099999972
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_3",
+          "difference": 0.0086591104999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_4",
+          "difference": -0.0015541490999999574
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_40",
+          "difference": -0.38236404749999997
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_5",
+          "difference": -0.011668975200000098
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_6",
+          "difference": -0.031365166000000055
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_60",
+          "difference": -0.209239822
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_7",
+          "difference": -0.011117756799999934
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_8",
+          "difference": -0.017661417300000037
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_9",
+          "difference": -0.02786974980000001
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_10",
+          "difference": -0.03993724300000001
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_11",
+          "difference": -0.04889616969999999
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_12",
+          "difference": -0.06411476689999995
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_14",
+          "difference": -0.08743522949999993
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_15",
+          "difference": -0.10221753170000003
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_16",
+          "difference": -0.12118088390000004
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_3",
+          "difference": 0.0018352190999999518
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_30",
+          "difference": -0.3344980193
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_4",
+          "difference": -0.007239607599999975
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_40",
+          "difference": -0.447859281
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_5",
+          "difference": -0.011506862000000062
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_50",
+          "difference": -0.5111533008
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_6",
+          "difference": -0.02067462759999994
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_60",
+          "difference": 1.1220699999999999e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_7",
+          "difference": -0.013797935299999953
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_70",
+          "difference": -0.212464818
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_8",
+          "difference": -0.01715038400000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_9",
+          "difference": -0.02361037789999998
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_10",
+          "difference": -0.03909353469999999
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_12",
+          "difference": -0.0653106416
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_14",
+          "difference": -0.09249833929999995
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_3",
+          "difference": 0.0059686300999999276
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_30",
+          "difference": -0.29498673880000004
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_4",
+          "difference": -0.006548270999999994
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_40",
+          "difference": -0.3791335037
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_5",
+          "difference": -0.015851047799999907
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_50",
+          "difference": -0.4411545722
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_6",
+          "difference": -0.0050760852000000245
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_60",
+          "difference": 2.52842e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_7",
+          "difference": -0.01414294709999997
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_8",
+          "difference": -0.01760464950000007
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_12",
+          "difference": 0.012691767600000015
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_2",
+          "difference": -0.0010149234999999868
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_6",
+          "difference": 0.017908307499999943
+        },
+        {
+          "circuit_id": "routing_indep_tket_12",
+          "difference": 0.012691767600000015
+        },
+        {
+          "circuit_id": "routing_indep_tket_2",
+          "difference": -0.0010149234999999868
+        },
+        {
+          "circuit_id": "routing_indep_tket_6",
+          "difference": 0.017908307499999943
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_4",
+          "difference": 0.0038941826999999707
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_9",
+          "difference": -0.0036763751000000733
+        },
+        {
+          "circuit_id": "tsp_indep_tket_4",
+          "difference": 0.0038941826999999707
+        },
+        {
+          "circuit_id": "tsp_indep_tket_9",
+          "difference": -0.0035931453999999974
+        }
+      ],
+      "exploratory": true
+    },
+    "random": {
+      "circuit_ids": [
+        "groundstate_small_indep_qiskit_4",
+        "groundstate_small_indep_tket_4",
+        "qpeexact_indep_qiskit_10",
+        "qpeexact_indep_qiskit_12",
+        "qpeexact_indep_qiskit_13",
+        "qpeexact_indep_qiskit_14",
+        "qpeexact_indep_qiskit_15",
+        "qpeexact_indep_qiskit_16",
+        "qpeexact_indep_qiskit_2",
+        "qpeexact_indep_qiskit_3",
+        "qpeexact_indep_qiskit_4",
+        "qpeexact_indep_qiskit_40",
+        "qpeexact_indep_qiskit_5",
+        "qpeexact_indep_qiskit_50",
+        "qpeexact_indep_qiskit_6",
+        "qpeexact_indep_qiskit_60",
+        "qpeexact_indep_qiskit_7",
+        "qpeexact_indep_qiskit_70",
+        "qpeexact_indep_qiskit_8",
+        "qpeexact_indep_qiskit_9",
+        "qpeexact_indep_tket_10",
+        "qpeexact_indep_tket_11",
+        "qpeexact_indep_tket_12",
+        "qpeexact_indep_tket_13",
+        "qpeexact_indep_tket_14",
+        "qpeexact_indep_tket_15",
+        "qpeexact_indep_tket_2",
+        "qpeexact_indep_tket_3",
+        "qpeexact_indep_tket_30",
+        "qpeexact_indep_tket_4",
+        "qpeexact_indep_tket_40",
+        "qpeexact_indep_tket_5",
+        "qpeexact_indep_tket_6",
+        "qpeexact_indep_tket_7",
+        "qpeexact_indep_tket_8",
+        "qpeexact_indep_tket_9",
+        "qpeinexact_indep_qiskit_10",
+        "qpeinexact_indep_qiskit_11",
+        "qpeinexact_indep_qiskit_12",
+        "qpeinexact_indep_qiskit_13",
+        "qpeinexact_indep_qiskit_15",
+        "qpeinexact_indep_qiskit_16",
+        "qpeinexact_indep_qiskit_2",
+        "qpeinexact_indep_qiskit_3",
+        "qpeinexact_indep_qiskit_30",
+        "qpeinexact_indep_qiskit_4",
+        "qpeinexact_indep_qiskit_5",
+        "qpeinexact_indep_qiskit_6",
+        "qpeinexact_indep_qiskit_60",
+        "qpeinexact_indep_qiskit_7",
+        "qpeinexact_indep_qiskit_70",
+        "qpeinexact_indep_qiskit_8",
+        "qpeinexact_indep_qiskit_9",
+        "qpeinexact_indep_tket_10",
+        "qpeinexact_indep_tket_12",
+        "qpeinexact_indep_tket_13",
+        "qpeinexact_indep_tket_14",
+        "qpeinexact_indep_tket_15",
+        "qpeinexact_indep_tket_2",
+        "qpeinexact_indep_tket_3",
+        "qpeinexact_indep_tket_30",
+        "qpeinexact_indep_tket_4",
+        "qpeinexact_indep_tket_40",
+        "qpeinexact_indep_tket_5",
+        "qpeinexact_indep_tket_50",
+        "qpeinexact_indep_tket_6",
+        "qpeinexact_indep_tket_60",
+        "qpeinexact_indep_tket_7",
+        "qpeinexact_indep_tket_8",
+        "qpeinexact_indep_tket_9",
+        "routing_indep_qiskit_12",
+        "routing_indep_qiskit_2",
+        "routing_indep_qiskit_6",
+        "routing_indep_tket_12",
+        "routing_indep_tket_2",
+        "routing_indep_tket_6",
+        "tsp_indep_qiskit_4",
+        "tsp_indep_qiskit_9",
+        "tsp_indep_tket_4",
+        "tsp_indep_tket_9"
+      ],
+      "n": 80,
+      "mean_left": 0.82625716094625,
+      "mean_right": 0.68266412515625,
+      "mean_difference": 0.14359303579,
+      "median_difference": 0.04399603899999999,
+      "paired_bootstrap_95": [
+        0.10405176452581251,
+        0.1862827197750625
+      ],
+      "wins": 65,
+      "ties": 10,
+      "losses": 5,
+      "differences": [
+        {
+          "circuit_id": "groundstate_small_indep_qiskit_4",
+          "difference": 0.05036726349999998
+        },
+        {
+          "circuit_id": "groundstate_small_indep_tket_4",
+          "difference": 0.003979190199999927
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_10",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_12",
+          "difference": 0.4186566152
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_13",
+          "difference": 0.6017802931999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_14",
+          "difference": 0.5775109769
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_15",
+          "difference": 0.4381796249
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_16",
+          "difference": 0.5374500422999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_2",
+          "difference": 0.00545694419999998
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_3",
+          "difference": 0.0032381756000000594
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_4",
+          "difference": 1.2453999999939569e-05
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_40",
+          "difference": 0.37394304300000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_5",
+          "difference": 0.03268147850000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_50",
+          "difference": 0.2693485766
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_6",
+          "difference": -0.011379457600000031
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_60",
+          "difference": 1.13956e-05
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_7",
+          "difference": 0.14907844399999992
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_70",
+          "difference": 2.5971e-06
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_8",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_9",
+          "difference": 0.2865492492999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_10",
+          "difference": 0.20699008789999995
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_11",
+          "difference": 0.1860981489000001
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_12",
+          "difference": 0.22335881960000004
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_13",
+          "difference": 0.4923247318
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_14",
+          "difference": 0.4213680705
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_15",
+          "difference": 0.7520376649
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_2",
+          "difference": -0.0006606191999999345
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_3",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_30",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_4",
+          "difference": 0.030965751600000035
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_40",
+          "difference": 0.4392843318
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_5",
+          "difference": 0.055504126599999926
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_6",
+          "difference": 0.027687409100000004
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_7",
+          "difference": 0.07807917710000001
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_8",
+          "difference": 0.11846236180000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_9",
+          "difference": 0.13026613799999998
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_10",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_11",
+          "difference": 0.20994260760000005
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_12",
+          "difference": 0.17098245760000008
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_13",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_15",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_16",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_2",
+          "difference": 0.01088053769999997
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_3",
+          "difference": 0.015823250999999927
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_30",
+          "difference": 0.5103730441
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_4",
+          "difference": -0.00540186389999997
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_5",
+          "difference": -0.007149440800000018
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_6",
+          "difference": 0.057354571000000076
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_60",
+          "difference": 9.3768e-06
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_7",
+          "difference": 0.20586017099999998
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_70",
+          "difference": 2.865e-06
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_8",
+          "difference": 0.114731052
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_9",
+          "difference": 0.14390108680000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_10",
+          "difference": 0.13077639070000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_12",
+          "difference": 0.26632315539999996
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_13",
+          "difference": 0.2718010971
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_14",
+          "difference": 0.494345699
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_15",
+          "difference": 0.4741504254
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_2",
+          "difference": 0.002102910700000016
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_3",
+          "difference": 0.027095348799999974
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_30",
+          "difference": 5.099899999994051e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_4",
+          "difference": 0.039298137600000005
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_40",
+          "difference": 0.43930372980000004
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_5",
+          "difference": 0.013258305600000075
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_50",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_6",
+          "difference": 0.12893016840000004
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_60",
+          "difference": 2.72864e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_7",
+          "difference": 0.14041610150000006
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_8",
+          "difference": 0.19360717189999999
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_9",
+          "difference": 0.25893317290000006
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_12",
+          "difference": 0.13666556629999993
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_2",
+          "difference": 0.0057581702000000234
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_6",
+          "difference": 0.00959692209999996
+        },
+        {
+          "circuit_id": "routing_indep_tket_12",
+          "difference": 0.04768371959999995
+        },
+        {
+          "circuit_id": "routing_indep_tket_2",
+          "difference": 0.011921558900000018
+        },
+        {
+          "circuit_id": "routing_indep_tket_6",
+          "difference": 0.020238890100000018
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_4",
+          "difference": 0.013815402199999993
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_9",
+          "difference": -0.004908647599999982
+        },
+        {
+          "circuit_id": "tsp_indep_tket_4",
+          "difference": 0.04030835840000002
+        },
+        {
+          "circuit_id": "tsp_indep_tket_9",
+          "difference": 0.0
+        }
+      ],
+      "exploratory": false
+    },
+    "llm_recupero_random": {
+      "circuit_ids": [
+        "groundstate_medium_indep_qiskit_12",
+        "groundstate_medium_indep_tket_12",
+        "groundstate_small_indep_qiskit_4",
+        "groundstate_small_indep_tket_4",
+        "qpeexact_indep_qiskit_10",
+        "qpeexact_indep_qiskit_11",
+        "qpeexact_indep_qiskit_12",
+        "qpeexact_indep_qiskit_13",
+        "qpeexact_indep_qiskit_14",
+        "qpeexact_indep_qiskit_15",
+        "qpeexact_indep_qiskit_16",
+        "qpeexact_indep_qiskit_2",
+        "qpeexact_indep_qiskit_3",
+        "qpeexact_indep_qiskit_30",
+        "qpeexact_indep_qiskit_4",
+        "qpeexact_indep_qiskit_40",
+        "qpeexact_indep_qiskit_5",
+        "qpeexact_indep_qiskit_50",
+        "qpeexact_indep_qiskit_6",
+        "qpeexact_indep_qiskit_60",
+        "qpeexact_indep_qiskit_7",
+        "qpeexact_indep_qiskit_70",
+        "qpeexact_indep_qiskit_8",
+        "qpeexact_indep_qiskit_9",
+        "qpeexact_indep_tket_10",
+        "qpeexact_indep_tket_11",
+        "qpeexact_indep_tket_12",
+        "qpeexact_indep_tket_13",
+        "qpeexact_indep_tket_14",
+        "qpeexact_indep_tket_15",
+        "qpeexact_indep_tket_2",
+        "qpeexact_indep_tket_3",
+        "qpeexact_indep_tket_30",
+        "qpeexact_indep_tket_4",
+        "qpeexact_indep_tket_40",
+        "qpeexact_indep_tket_5",
+        "qpeexact_indep_tket_50",
+        "qpeexact_indep_tket_6",
+        "qpeexact_indep_tket_60",
+        "qpeexact_indep_tket_7",
+        "qpeexact_indep_tket_8",
+        "qpeexact_indep_tket_9",
+        "qpeinexact_indep_qiskit_10",
+        "qpeinexact_indep_qiskit_11",
+        "qpeinexact_indep_qiskit_12",
+        "qpeinexact_indep_qiskit_13",
+        "qpeinexact_indep_qiskit_14",
+        "qpeinexact_indep_qiskit_15",
+        "qpeinexact_indep_qiskit_16",
+        "qpeinexact_indep_qiskit_2",
+        "qpeinexact_indep_qiskit_3",
+        "qpeinexact_indep_qiskit_30",
+        "qpeinexact_indep_qiskit_4",
+        "qpeinexact_indep_qiskit_40",
+        "qpeinexact_indep_qiskit_5",
+        "qpeinexact_indep_qiskit_50",
+        "qpeinexact_indep_qiskit_6",
+        "qpeinexact_indep_qiskit_60",
+        "qpeinexact_indep_qiskit_7",
+        "qpeinexact_indep_qiskit_70",
+        "qpeinexact_indep_qiskit_8",
+        "qpeinexact_indep_qiskit_9",
+        "qpeinexact_indep_tket_10",
+        "qpeinexact_indep_tket_11",
+        "qpeinexact_indep_tket_12",
+        "qpeinexact_indep_tket_13",
+        "qpeinexact_indep_tket_14",
+        "qpeinexact_indep_tket_15",
+        "qpeinexact_indep_tket_2",
+        "qpeinexact_indep_tket_3",
+        "qpeinexact_indep_tket_30",
+        "qpeinexact_indep_tket_4",
+        "qpeinexact_indep_tket_40",
+        "qpeinexact_indep_tket_5",
+        "qpeinexact_indep_tket_50",
+        "qpeinexact_indep_tket_6",
+        "qpeinexact_indep_tket_60",
+        "qpeinexact_indep_tket_7",
+        "qpeinexact_indep_tket_8",
+        "qpeinexact_indep_tket_9",
+        "routing_indep_qiskit_12",
+        "routing_indep_qiskit_2",
+        "routing_indep_qiskit_6",
+        "routing_indep_tket_12",
+        "routing_indep_tket_2",
+        "routing_indep_tket_6",
+        "tsp_indep_qiskit_4",
+        "tsp_indep_qiskit_9",
+        "tsp_indep_tket_4",
+        "tsp_indep_tket_9"
+      ],
+      "n": 90,
+      "mean_left": 0.79837881407,
+      "mean_right": 0.7518119794288889,
+      "mean_difference": 0.0465668346411111,
+      "median_difference": 0.0,
+      "paired_bootstrap_95": [
+        0.02571046842591667,
+        0.07024382719666665
+      ],
+      "wins": 38,
+      "ties": 40,
+      "losses": 12,
+      "differences": [
+        {
+          "circuit_id": "groundstate_medium_indep_qiskit_12",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "groundstate_medium_indep_tket_12",
+          "difference": 0.19977592179999992
+        },
+        {
+          "circuit_id": "groundstate_small_indep_qiskit_4",
+          "difference": 0.003908110699999967
+        },
+        {
+          "circuit_id": "groundstate_small_indep_tket_4",
+          "difference": -0.006638966500000065
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_10",
+          "difference": 0.15332028890000005
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_11",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_12",
+          "difference": 0.1965096232000001
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_13",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_14",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_15",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_16",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_2",
+          "difference": 0.001937150299999968
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_3",
+          "difference": -0.0014948304999999884
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_30",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_4",
+          "difference": -0.00215322419999997
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_40",
+          "difference": 0.3637831315
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_5",
+          "difference": -0.0061687625999999884
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_50",
+          "difference": 0.26831887000000004
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_6",
+          "difference": 0.023198593699999992
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_60",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_7",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_70",
+          "difference": -1.0218800000000001e-05
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_8",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_qiskit_9",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_10",
+          "difference": 0.11910932529999996
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_11",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_12",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_13",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_14",
+          "difference": 0.3382605914
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_15",
+          "difference": 2.484510000000384e-05
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_2",
+          "difference": -0.0006606191999999345
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_3",
+          "difference": 0.002103500099999933
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_30",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_4",
+          "difference": 0.00428164419999999
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_40",
+          "difference": 0.43497442000000003
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_5",
+          "difference": -0.0089916993000001
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_50",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_6",
+          "difference": 0.030550705399999933
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_60",
+          "difference": -0.0001315593
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_7",
+          "difference": 0.043425603800000045
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_8",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeexact_indep_tket_9",
+          "difference": 0.07667647030000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_10",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_11",
+          "difference": 0.10623682069999996
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_12",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_13",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_14",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_15",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_16",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_2",
+          "difference": 0.002478353499999919
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_3",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_30",
+          "difference": 0.453994717
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_4",
+          "difference": 0.005948448000000051
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_40",
+          "difference": 0.3692672515
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_5",
+          "difference": 0.019299629099999938
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_50",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_6",
+          "difference": 0.028796032200000043
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_60",
+          "difference": -1.6875399999999998e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_7",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_70",
+          "difference": 9.680000000000007e-08
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_8",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_qiskit_9",
+          "difference": 0.07165096160000006
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_10",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_11",
+          "difference": 0.13862025070000006
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_12",
+          "difference": 0.16736642540000002
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_13",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_14",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_15",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_2",
+          "difference": 0.0009471402999999823
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_3",
+          "difference": -0.00019596750000006047
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_30",
+          "difference": 5.099899999994051e-05
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_4",
+          "difference": -0.004680949399999967
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_40",
+          "difference": 0.4258402343
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_5",
+          "difference": -0.0029415801999999047
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_50",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_6",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_60",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_7",
+          "difference": 0.11731999280000005
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_8",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "qpeinexact_indep_tket_9",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_12",
+          "difference": 0.009294213499999926
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_2",
+          "difference": 0.0057581702000000234
+        },
+        {
+          "circuit_id": "routing_indep_qiskit_6",
+          "difference": 0.014606591499999988
+        },
+        {
+          "circuit_id": "routing_indep_tket_12",
+          "difference": 0.011361271800000017
+        },
+        {
+          "circuit_id": "routing_indep_tket_2",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "routing_indep_tket_6",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_4",
+          "difference": 0.013815402199999993
+        },
+        {
+          "circuit_id": "tsp_indep_qiskit_9",
+          "difference": 0.0
+        },
+        {
+          "circuit_id": "tsp_indep_tket_4",
+          "difference": 0.002288572799999944
+        },
+        {
+          "circuit_id": "tsp_indep_tket_9",
+          "difference": 0.0
+        }
+      ],
+      "exploratory": true
+    }
+  },
+  "all_common_successes": [
+    "groundstate_small_indep_qiskit_4",
+    "groundstate_small_indep_tket_4",
+    "qpeexact_indep_qiskit_10",
+    "qpeexact_indep_qiskit_12",
+    "qpeexact_indep_qiskit_14",
+    "qpeexact_indep_qiskit_15",
+    "qpeexact_indep_qiskit_2",
+    "qpeexact_indep_qiskit_3",
+    "qpeexact_indep_qiskit_4",
+    "qpeexact_indep_qiskit_40",
+    "qpeexact_indep_qiskit_5",
+    "qpeexact_indep_qiskit_6",
+    "qpeexact_indep_qiskit_60",
+    "qpeexact_indep_qiskit_7",
+    "qpeexact_indep_qiskit_70",
+    "qpeexact_indep_qiskit_8",
+    "qpeexact_indep_qiskit_9",
+    "qpeexact_indep_tket_10",
+    "qpeexact_indep_tket_12",
+    "qpeexact_indep_tket_14",
+    "qpeexact_indep_tket_15",
+    "qpeexact_indep_tket_2",
+    "qpeexact_indep_tket_3",
+    "qpeexact_indep_tket_4",
+    "qpeexact_indep_tket_40",
+    "qpeexact_indep_tket_5",
+    "qpeexact_indep_tket_6",
+    "qpeexact_indep_tket_7",
+    "qpeexact_indep_tket_8",
+    "qpeexact_indep_tket_9",
+    "qpeinexact_indep_qiskit_10",
+    "qpeinexact_indep_qiskit_11",
+    "qpeinexact_indep_qiskit_12",
+    "qpeinexact_indep_qiskit_15",
+    "qpeinexact_indep_qiskit_16",
+    "qpeinexact_indep_qiskit_3",
+    "qpeinexact_indep_qiskit_30",
+    "qpeinexact_indep_qiskit_4",
+    "qpeinexact_indep_qiskit_5",
+    "qpeinexact_indep_qiskit_6",
+    "qpeinexact_indep_qiskit_60",
+    "qpeinexact_indep_qiskit_7",
+    "qpeinexact_indep_qiskit_70",
+    "qpeinexact_indep_qiskit_8",
+    "qpeinexact_indep_qiskit_9",
+    "qpeinexact_indep_tket_10",
+    "qpeinexact_indep_tket_12",
+    "qpeinexact_indep_tket_14",
+    "qpeinexact_indep_tket_3",
+    "qpeinexact_indep_tket_30",
+    "qpeinexact_indep_tket_4",
+    "qpeinexact_indep_tket_40",
+    "qpeinexact_indep_tket_5",
+    "qpeinexact_indep_tket_50",
+    "qpeinexact_indep_tket_6",
+    "qpeinexact_indep_tket_60",
+    "qpeinexact_indep_tket_7",
+    "qpeinexact_indep_tket_8",
+    "routing_indep_qiskit_12",
+    "routing_indep_qiskit_2",
+    "routing_indep_qiskit_6",
+    "routing_indep_tket_12",
+    "routing_indep_tket_2",
+    "routing_indep_tket_6",
+    "tsp_indep_qiskit_4",
+    "tsp_indep_qiskit_9",
+    "tsp_indep_tket_4",
+    "tsp_indep_tket_9"
+  ],
+  "all_common_means": {
+    "llm_rag": 0.8281651965485294,
+    "llm_senza_rag": 0.7012373756088235,
+    "mqt_predictor": 0.8899670328985294,
+    "random": 0.704892065275,
+    "llm_recupero_random": 0.7809337422955882
+  }
+}

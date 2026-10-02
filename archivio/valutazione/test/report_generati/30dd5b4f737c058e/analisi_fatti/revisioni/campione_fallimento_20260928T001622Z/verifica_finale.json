@@ -1,0 +1,12 @@
+{
+  "pdf_sha256": "1cb59b77bb8eddbec20ee17a4056e054d274d33d3649f1e751d9b632790a09cb",
+  "tex_sha256": "9e85554e99a68d3f6600dd894c84fd8e3639045616a9c68412ba614f75e938b5",
+  "audit_sha256": "f73ab07df89c9f5938afe8a28d3001afa5ba4bad8fb4fc5fbb2f3bf191701a9f",
+  "original_pdf_unchanged": true,
+  "all_audit_source_hashes_match": true,
+  "compilation": "pdflatex WSL succeeded; no Overfull warnings",
+  "visual_review": "All 5 final rendered pages inspected",
+  "native_compiler": "environment error; subsequent result unknown",
+  "test_real_circuits_executed": false,
+  "graphify_updated": false
+}

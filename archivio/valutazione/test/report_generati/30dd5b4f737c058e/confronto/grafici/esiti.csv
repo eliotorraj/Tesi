@@ -1,0 +1,13 @@
+method,status,count
+llm_rag,Riusciti,90
+llm_rag,Falliti,0
+llm_rag,Pendenti,0
+llm_senza_rag,Riusciti,90
+llm_senza_rag,Falliti,0
+llm_senza_rag,Pendenti,0
+mqt_predictor,Riusciti,75
+mqt_predictor,Falliti,15
+mqt_predictor,Pendenti,0
+random,Riusciti,80
+random,Falliti,10
+random,Pendenti,0

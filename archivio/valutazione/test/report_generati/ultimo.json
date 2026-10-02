@@ -1,0 +1,10 @@
+{
+  "directory": "/home/elio/Tesi-mqt-2.4-v2/prototipo/test/report_generati/30dd5b4f737c058e",
+  "comparison_pdf": "/home/elio/Tesi-mqt-2.4-v2/prototipo/test/report_generati/30dd5b4f737c058e/confronto/latex/verifica.pdf",
+  "system_pdfs": {
+    "llm_rag": "/home/elio/Tesi-mqt-2.4-v2/prototipo/test/report_generati/30dd5b4f737c058e/sistemi/llm_rag/latex/verifica.pdf",
+    "llm_senza_rag": "/home/elio/Tesi-mqt-2.4-v2/prototipo/test/report_generati/30dd5b4f737c058e/sistemi/llm_senza_rag/latex/verifica.pdf",
+    "mqt_predictor": "/home/elio/Tesi-mqt-2.4-v2/prototipo/test/report_generati/30dd5b4f737c058e/sistemi/mqt_predictor/latex/verifica.pdf",
+    "random": "/home/elio/Tesi-mqt-2.4-v2/prototipo/test/report_generati/30dd5b4f737c058e/sistemi/random/latex/verifica.pdf"
+  }
+}

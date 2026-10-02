@@ -1,0 +1,407 @@
+\providecommand{\TestReportPath}{../}
+\section{Risultati di LLM + RAG}
+Sono conclusi 90 dei 90 circuiti previsti. I 90 episodi conservati comprendono 90 successi e 0 fallimenti; 0 circuiti restano pendenti. I circuiti con almeno un successo sono 90; quelli con almeno un fallimento sono 0.
+
+Un successo indica una compilazione valida, non la correttezza del testo libero prodotto dal modello. Lo score è riportato sui successi; tempi e costi includono anche i fallimenti quando misurati.
+
+\subsection{Riepilogo delle misure}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Misura & Media & Mediana & Somma nota & Circuiti & Episodi \\
+\midrule
+Expected fidelity & 0,798379 & 0,921379 & -- & 90/90 & 90/90 \\
+Tempo totale (s) & 27,49 & 26,09 & 2\,473,83 & 90/90 & 90/90 \\
+Compilazione interna (s) & 1,79 & 0,71 & 160,69 & 90/90 & 90/90 \\
+Processo di compilazione (s) & 2,40 & 1,32 & 216,40 & 90/90 & 90/90 \\
+Preparazione e scelta (s) & 25,06 & 24,52 & 2\,254,98 & 90/90 & 90/90 \\
+Retry LLM & 0,40 & 0,00 & 36 & 90/90 & 90/90 \\
+Chiamate LLM & 1,40 & 1,00 & 126 & 90/90 & 90/90 \\
+Token in ingresso & 16\,227,00 & 12\,167,50 & 1\,460\,430 & 90/90 & 90/90 \\
+Token in uscita & 225,30 & 157,00 & 20\,277 & 90/90 & 90/90 \\
+Token totali & 16\,452,30 & 12\,324,00 & 1\,480\,707 & 90/90 & 90/90 \\
+Risposta LLM cumulativa (s) & 20,27 & 20,06 & 1\,823,95 & 90/90 & 90/90 \\
+Recupero RAG (s) & 3,88 & 3,85 & 349,28 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Le medie e le mediane sono calcolate sulle medie per circuito disponibili. La somma nota riguarda gli episodi. Le ultime due colonne indicano circuiti ed episodi con misura, sui rispettivi denominatori. Per lo score il denominatore degli episodi è il numero di successi.
+
+Tutti gli episodi conservati hanno prodotto una compilazione valida.
+
+Episodi con almeno un retry: 19/90. Episodi accettati con fatti non verificati: 17/90. I retry correggono la risposta; non ripetono la compilazione.
+
+Distribuzione dei retry per episodio: 0 retry: 71 episodi, 1 retry: 2 episodi, 2 retry: 17 episodi.
+
+Somma parziale nota dei token in ingresso: 1\,460\,430, con contatore disponibile in 90 episodi. Somma parziale nota dei token in uscita: 20\,277, con contatore disponibile in 90 episodi. Questi contatori non sostituiscono i totali completi se manca una misura.
+
+Score arrotondati a zero: 0; indicatori di underflow: 0.
+\subsection{Andamento sui circuiti}
+I grafici seguono l’ordine alfabetico dei circuiti nelle tabelle. Un punto indica la media disponibile per un circuito; le misure mancanti non sono zeri.
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/score.tex}
+\caption{Score di ogni circuito riuscito. Un punto assente non viene sostituito con zero. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/total_seconds.tex}
+\caption{Tempo totale per circuito, inclusi preparazione ed eventuali tentativi falliti. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/compilation_seconds.tex}
+\caption{Tempo interno del compilatore. I timeout senza misura interna restano assenti. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/compilation_process_seconds.tex}
+\caption{Tempo del processo di compilazione: comprende avvio e controlli; rende visibili i timeout. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/total_tokens.tex}
+\caption{Token di ingresso e uscita cumulativi di tutte le chiamate dell’episodio. Con più episodi si usa la media per circuito.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/llm_response_seconds.tex}
+\caption{Latenza cumulativa delle chiamate LLM per circuito. Con più episodi si usa la media per circuito.}
+\end{figure}
+\FloatBarrier\clearpage
+\subsection{Dati di ogni circuito}
+Gli identificativi sono ordinati lessicograficamente secondo il manifest Test. Sono riportati episodi conclusi, successi e fallimenti. Lo score è la media dei soli successi, con dieci decimali.
+\begingroup\scriptsize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrr}
+\toprule
+Circuito & Episodi & Successi & Fallimenti & Score \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & Episodi & Successi & Fallimenti & Score \\
+\midrule\endhead
+\midrule\multicolumn{5}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+groundstate\_medium\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,7963772008 \\
+groundstate\_medium\_indep\_tket\_12 & 1 & 1 & 0 & 0,7963772008 \\
+groundstate\_small\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9788591374 \\
+groundstate\_small\_indep\_tket\_4 & 1 & 1 & 0 & 0,9682535640 \\
+qpeexact\_indep\_qiskit\_10 & 1 & 1 & 0 & 0,9218353887 \\
+qpeexact\_indep\_qiskit\_11 & 1 & 1 & 0 & 0,9032343267 \\
+qpeexact\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,8879093206 \\
+qpeexact\_indep\_qiskit\_13 & 1 & 1 & 0 & 0,8714043421 \\
+qpeexact\_indep\_qiskit\_14 & 1 & 1 & 0 & 0,8538721240 \\
+qpeexact\_indep\_qiskit\_15 & 1 & 1 & 0 & 0,8300875325 \\
+qpeexact\_indep\_qiskit\_16 & 1 & 1 & 0 & 0,8095860950 \\
+qpeexact\_indep\_qiskit\_2 & 1 & 1 & 0 & 0,9987599534 \\
+qpeexact\_indep\_qiskit\_3 & 1 & 1 & 0 & 0,9960947806 \\
+qpeexact\_indep\_qiskit\_30 & 1 & 1 & 0 & 0,5202940694 \\
+qpeexact\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9869487051 \\
+qpeexact\_indep\_qiskit\_40 & 1 & 1 & 0 & 0,3741311339 \\
+qpeexact\_indep\_qiskit\_5 & 1 & 1 & 0 & 0,9720658176 \\
+qpeexact\_indep\_qiskit\_50 & 1 & 1 & 0 & 0,2694733993 \\
+qpeexact\_indep\_qiskit\_6 & 1 & 1 & 0 & 0,9593073443 \\
+qpeexact\_indep\_qiskit\_60 & 1 & 1 & 0 & 0,0000113956 \\
+qpeexact\_indep\_qiskit\_7 & 1 & 1 & 0 & 0,9616082099 \\
+qpeexact\_indep\_qiskit\_70 & 1 & 1 & 0 & 0,0000028783 \\
+qpeexact\_indep\_qiskit\_8 & 1 & 1 & 0 & 0,9465992541 \\
+qpeexact\_indep\_qiskit\_9 & 1 & 1 & 0 & 0,9349067710 \\
+qpeexact\_indep\_tket\_10 & 1 & 1 & 0 & 0,9209232096 \\
+qpeexact\_indep\_tket\_11 & 1 & 1 & 0 & 0,9022052109 \\
+qpeexact\_indep\_tket\_12 & 1 & 1 & 0 & 0,8868444525 \\
+qpeexact\_indep\_tket\_13 & 1 & 1 & 0 & 0,8699415900 \\
+qpeexact\_indep\_tket\_14 & 1 & 1 & 0 & 0,8522598056 \\
+qpeexact\_indep\_tket\_15 & 1 & 1 & 0 & 0,8281722146 \\
+qpeexact\_indep\_tket\_2 & 1 & 1 & 0 & 0,9987599534 \\
+qpeexact\_indep\_tket\_3 & 1 & 1 & 0 & 0,9958784484 \\
+qpeexact\_indep\_tket\_30 & 1 & 1 & 0 & 0,5674551344 \\
+qpeexact\_indep\_tket\_4 & 1 & 1 & 0 & 0,9868581315 \\
+qpeexact\_indep\_tket\_40 & 1 & 1 & 0 & 0,4398748201 \\
+qpeexact\_indep\_tket\_5 & 1 & 1 & 0 & 0,9691548425 \\
+qpeexact\_indep\_tket\_50 & 1 & 1 & 0 & 0,3415929475 \\
+qpeexact\_indep\_tket\_6 & 1 & 1 & 0 & 0,9460784319 \\
+qpeexact\_indep\_tket\_60 & 1 & 1 & 0 & 0,0000273505 \\
+qpeexact\_indep\_tket\_7 & 1 & 1 & 0 & 0,9612044132 \\
+qpeexact\_indep\_tket\_8 & 1 & 1 & 0 & 0,9460882208 \\
+qpeexact\_indep\_tket\_9 & 1 & 1 & 0 & 0,9342899269 \\
+qpeinexact\_indep\_qiskit\_10 & 1 & 1 & 0 & 0,9189065362 \\
+qpeinexact\_indep\_qiskit\_11 & 1 & 1 & 0 & 0,9032072297 \\
+qpeinexact\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,8864178847 \\
+qpeinexact\_indep\_qiskit\_13 & 1 & 1 & 0 & 0,8685836016 \\
+qpeinexact\_indep\_qiskit\_14 & 1 & 1 & 0 & 0,8497804839 \\
+qpeinexact\_indep\_qiskit\_15 & 1 & 1 & 0 & 0,8300875325 \\
+qpeinexact\_indep\_qiskit\_16 & 1 & 1 & 0 & 0,8095860950 \\
+qpeinexact\_indep\_qiskit\_2 & 1 & 1 & 0 & 0,9993011566 \\
+qpeinexact\_indep\_qiskit\_3 & 1 & 1 & 0 & 0,9931879680 \\
+qpeinexact\_indep\_qiskit\_30 & 1 & 1 & 0 & 0,5194357059 \\
+qpeinexact\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9805279150 \\
+qpeinexact\_indep\_qiskit\_40 & 1 & 1 & 0 & 0,3741311339 \\
+qpeinexact\_indep\_qiskit\_5 & 1 & 1 & 0 & 0,9710851394 \\
+qpeinexact\_indep\_qiskit\_50 & 1 & 1 & 0 & 0,2694733993 \\
+qpeinexact\_indep\_qiskit\_6 & 1 & 1 & 0 & 0,9550100512 \\
+qpeinexact\_indep\_qiskit\_60 & 1 & 1 & 0 & 0,0000113715 \\
+qpeinexact\_indep\_qiskit\_7 & 1 & 1 & 0 & 0,9585242347 \\
+qpeinexact\_indep\_qiskit\_70 & 1 & 1 & 0 & 0,0000028650 \\
+qpeinexact\_indep\_qiskit\_8 & 1 & 1 & 0 & 0,9465992541 \\
+qpeinexact\_indep\_qiskit\_9 & 1 & 1 & 0 & 0,9333643936 \\
+qpeinexact\_indep\_tket\_10 & 1 & 1 & 0 & 0,9180247960 \\
+qpeinexact\_indep\_tket\_11 & 1 & 1 & 0 & 0,9022322778 \\
+qpeinexact\_indep\_tket\_12 & 1 & 1 & 0 & 0,8852220100 \\
+qpeinexact\_indep\_tket\_13 & 1 & 1 & 0 & 0,8671515989 \\
+qpeinexact\_indep\_tket\_14 & 1 & 1 & 0 & 0,8480995580 \\
+qpeinexact\_indep\_tket\_15 & 1 & 1 & 0 & 0,8282716028 \\
+qpeinexact\_indep\_tket\_2 & 1 & 1 & 0 & 0,9993011566 \\
+qpeinexact\_indep\_tket\_3 & 1 & 1 & 0 & 0,9931879680 \\
+qpeinexact\_indep\_tket\_30 & 1 & 1 & 0 & 0,5666719493 \\
+qpeinexact\_indep\_tket\_4 & 1 & 1 & 0 & 0,9812192516 \\
+qpeinexact\_indep\_tket\_40 & 1 & 1 & 0 & 0,4399012138 \\
+qpeinexact\_indep\_tket\_5 & 1 & 1 & 0 & 0,9685123249 \\
+qpeinexact\_indep\_tket\_50 & 1 & 1 & 0 & 0,3415826997 \\
+qpeinexact\_indep\_tket\_6 & 1 & 1 & 0 & 0,9688528397 \\
+qpeinexact\_indep\_tket\_60 & 1 & 1 & 0 & 0,0000272864 \\
+qpeinexact\_indep\_tket\_7 & 1 & 1 & 0 & 0,9581792229 \\
+qpeinexact\_indep\_tket\_8 & 1 & 1 & 0 & 0,9461449886 \\
+qpeinexact\_indep\_tket\_9 & 1 & 1 & 0 & 0,9326646222 \\
+routing\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,9398337239 \\
+routing\_indep\_qiskit\_2 & 1 & 1 & 0 & 0,9978340951 \\
+routing\_indep\_qiskit\_6 & 1 & 1 & 0 & 0,9816579456 \\
+routing\_indep\_tket\_12 & 1 & 1 & 0 & 0,9398337239 \\
+routing\_indep\_tket\_2 & 1 & 1 & 0 & 0,9978340951 \\
+routing\_indep\_tket\_6 & 1 & 1 & 0 & 0,9816579456 \\
+tsp\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9839199580 \\
+tsp\_indep\_qiskit\_9 & 1 & 1 & 0 & 0,9247191115 \\
+tsp\_indep\_tket\_4 & 1 & 1 & 0 & 0,9839199580 \\
+tsp\_indep\_tket\_9 & 1 & 1 & 0 & 0,9248023412 \\
+\end{longtable}
+\endgroup
+\subsection{Tempi per circuito}
+Tutti i valori sono medie in secondi. -- indica una misura interna non disponibile, un caso pendente o una misura non applicabile.
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrr}
+\toprule
+Circuito & Totale & Compilatore & Processo & Risposta LLM \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & Totale & Compilatore & Processo & Risposta LLM \\
+\midrule\endhead
+\midrule\multicolumn{5}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+groundstate\_medium\_indep\_qiskit\_12 & 37,29 & 3,92 & 4,89 & 20,60 \\
+groundstate\_medium\_indep\_tket\_12 & 26,69 & 0,84 & 1,66 & 20,09 \\
+groundstate\_small\_indep\_qiskit\_4 & 23,94 & 0,70 & 1,28 & 17,95 \\
+groundstate\_small\_indep\_tket\_4 & 25,40 & 1,68 & 2,30 & 18,46 \\
+qpeexact\_indep\_qiskit\_10 & 25,83 & 0,79 & 1,47 & 19,70 \\
+qpeexact\_indep\_qiskit\_11 & 26,63 & 0,76 & 1,46 & 20,30 \\
+qpeexact\_indep\_qiskit\_12 & 26,10 & 0,76 & 1,37 & 20,20 \\
+qpeexact\_indep\_qiskit\_13 & 33,60 & 0,85 & 1,47 & 26,58 \\
+qpeexact\_indep\_qiskit\_14 & 26,39 & 0,76 & 1,42 & 20,23 \\
+qpeexact\_indep\_qiskit\_15 & 26,96 & 0,84 & 1,58 & 20,57 \\
+qpeexact\_indep\_qiskit\_16 & 26,47 & 0,87 & 1,57 & 20,31 \\
+qpeexact\_indep\_qiskit\_2 & 26,52 & 0,37 & 0,92 & 20,67 \\
+qpeexact\_indep\_qiskit\_3 & 24,33 & 0,39 & 0,97 & 18,73 \\
+qpeexact\_indep\_qiskit\_30 & 31,73 & 0,84 & 1,49 & 24,69 \\
+qpeexact\_indep\_qiskit\_4 & 31,48 & 0,46 & 1,09 & 24,89 \\
+qpeexact\_indep\_qiskit\_40 & 41,73 & 11,12 & 11,77 & 24,62 \\
+qpeexact\_indep\_qiskit\_5 & 24,00 & 0,44 & 1,02 & 18,40 \\
+qpeexact\_indep\_qiskit\_50 & 34,17 & 3,99 & 4,69 & 24,22 \\
+qpeexact\_indep\_qiskit\_6 & 24,36 & 0,39 & 0,97 & 18,60 \\
+qpeexact\_indep\_qiskit\_60 & 29,43 & 0,74 & 1,52 & 22,86 \\
+qpeexact\_indep\_qiskit\_7 & 24,97 & 0,59 & 1,22 & 18,85 \\
+qpeexact\_indep\_qiskit\_70 & 23,00 & 0,76 & 1,67 & 16,98 \\
+qpeexact\_indep\_qiskit\_8 & 25,60 & 0,66 & 1,27 & 19,69 \\
+qpeexact\_indep\_qiskit\_9 & 25,75 & 0,66 & 1,27 & 19,72 \\
+qpeexact\_indep\_tket\_10 & 25,92 & 0,71 & 1,38 & 19,74 \\
+qpeexact\_indep\_tket\_11 & 26,43 & 0,78 & 1,42 & 20,11 \\
+qpeexact\_indep\_tket\_12 & 26,64 & 0,81 & 1,59 & 20,39 \\
+qpeexact\_indep\_tket\_13 & 26,80 & 0,79 & 1,54 & 20,40 \\
+qpeexact\_indep\_tket\_14 & 26,81 & 0,77 & 1,42 & 20,58 \\
+qpeexact\_indep\_tket\_15 & 26,64 & 0,85 & 1,57 & 20,15 \\
+qpeexact\_indep\_tket\_2 & 30,42 & 0,45 & 1,02 & 23,81 \\
+qpeexact\_indep\_tket\_3 & 30,73 & 0,45 & 1,07 & 24,28 \\
+qpeexact\_indep\_tket\_30 & 39,63 & 15,31 & 15,98 & 18,90 \\
+qpeexact\_indep\_tket\_4 & 24,59 & 0,41 & 1,02 & 18,37 \\
+qpeexact\_indep\_tket\_40 & 32,95 & 8,63 & 9,30 & 18,75 \\
+qpeexact\_indep\_tket\_5 & 24,30 & 0,41 & 0,97 & 18,47 \\
+qpeexact\_indep\_tket\_50 & 27,66 & 3,23 & 3,89 & 18,90 \\
+qpeexact\_indep\_tket\_6 & 24,80 & 0,44 & 1,07 & 18,71 \\
+qpeexact\_indep\_tket\_60 & 23,46 & 0,69 & 1,61 & 17,27 \\
+qpeexact\_indep\_tket\_7 & 26,22 & 0,55 & 1,12 & 19,69 \\
+qpeexact\_indep\_tket\_8 & 37,69 & 12,79 & 13,31 & 19,80 \\
+qpeexact\_indep\_tket\_9 & 25,83 & 0,69 & 1,33 & 19,99 \\
+qpeinexact\_indep\_qiskit\_10 & 33,31 & 0,79 & 1,37 & 26,73 \\
+qpeinexact\_indep\_qiskit\_11 & 26,33 & 0,72 & 1,27 & 20,21 \\
+qpeinexact\_indep\_qiskit\_12 & 31,80 & 0,75 & 1,32 & 25,38 \\
+qpeinexact\_indep\_qiskit\_13 & 26,22 & 0,79 & 1,48 & 20,29 \\
+qpeinexact\_indep\_qiskit\_14 & 26,18 & 0,77 & 1,44 & 20,33 \\
+qpeinexact\_indep\_qiskit\_15 & 26,26 & 0,83 & 1,47 & 20,30 \\
+qpeinexact\_indep\_qiskit\_16 & 26,06 & 0,82 & 1,45 & 20,30 \\
+qpeinexact\_indep\_qiskit\_2 & 26,09 & 0,36 & 0,92 & 20,59 \\
+qpeinexact\_indep\_qiskit\_3 & 23,20 & 0,38 & 0,92 & 17,84 \\
+qpeinexact\_indep\_qiskit\_30 & 25,12 & 0,81 & 1,48 & 19,16 \\
+qpeinexact\_indep\_qiskit\_4 & 23,44 & 0,37 & 0,92 & 18,18 \\
+qpeinexact\_indep\_qiskit\_40 & 41,54 & 11,20 & 11,81 & 24,67 \\
+qpeinexact\_indep\_qiskit\_5 & 23,78 & 0,38 & 0,92 & 18,19 \\
+qpeinexact\_indep\_qiskit\_50 & 33,89 & 3,89 & 4,48 & 24,19 \\
+qpeinexact\_indep\_qiskit\_6 & 24,10 & 0,40 & 0,97 & 18,57 \\
+qpeinexact\_indep\_qiskit\_60 & 29,45 & 0,70 & 1,43 & 23,00 \\
+qpeinexact\_indep\_qiskit\_7 & 24,57 & 0,59 & 1,12 & 18,91 \\
+qpeinexact\_indep\_qiskit\_70 & 22,64 & 0,61 & 1,43 & 16,95 \\
+qpeinexact\_indep\_qiskit\_8 & 25,29 & 0,62 & 1,17 & 19,65 \\
+qpeinexact\_indep\_qiskit\_9 & 26,34 & 0,67 & 1,32 & 20,20 \\
+qpeinexact\_indep\_tket\_10 & 26,08 & 0,72 & 1,27 & 20,27 \\
+qpeinexact\_indep\_tket\_11 & 25,98 & 0,72 & 1,32 & 20,08 \\
+qpeinexact\_indep\_tket\_12 & 26,17 & 0,72 & 1,32 & 20,23 \\
+qpeinexact\_indep\_tket\_13 & 25,94 & 0,76 & 1,37 & 20,08 \\
+qpeinexact\_indep\_tket\_14 & 25,99 & 0,78 & 1,38 & 20,10 \\
+qpeinexact\_indep\_tket\_15 & 25,89 & 0,79 & 1,39 & 20,09 \\
+qpeinexact\_indep\_tket\_2 & 29,71 & 0,37 & 0,92 & 23,68 \\
+qpeinexact\_indep\_tket\_3 & 23,21 & 0,36 & 0,87 & 17,83 \\
+qpeinexact\_indep\_tket\_30 & 39,36 & 15,46 & 16,01 & 18,82 \\
+qpeinexact\_indep\_tket\_4 & 23,46 & 0,37 & 0,87 & 18,18 \\
+qpeinexact\_indep\_tket\_40 & 31,97 & 8,24 & 8,84 & 18,68 \\
+qpeinexact\_indep\_tket\_5 & 23,48 & 0,36 & 0,87 & 18,21 \\
+qpeinexact\_indep\_tket\_50 & 26,88 & 2,99 & 3,59 & 18,83 \\
+qpeinexact\_indep\_tket\_6 & 30,31 & 0,55 & 1,12 & 24,24 \\
+qpeinexact\_indep\_tket\_60 & 22,42 & 0,56 & 1,22 & 17,19 \\
+qpeinexact\_indep\_tket\_7 & 24,79 & 0,59 & 1,12 & 19,29 \\
+qpeinexact\_indep\_tket\_8 & 37,34 & 12,58 & 13,12 & 19,80 \\
+qpeinexact\_indep\_tket\_9 & 25,94 & 0,66 & 1,24 & 20,05 \\
+routing\_indep\_qiskit\_12 & 24,16 & 0,36 & 0,87 & 18,60 \\
+routing\_indep\_qiskit\_2 & 23,23 & 0,35 & 0,87 & 17,77 \\
+routing\_indep\_qiskit\_6 & 23,89 & 0,36 & 0,87 & 18,60 \\
+routing\_indep\_tket\_12 & 23,76 & 0,36 & 0,87 & 18,58 \\
+routing\_indep\_tket\_2 & 23,34 & 0,35 & 0,87 & 17,78 \\
+routing\_indep\_tket\_6 & 23,94 & 0,36 & 0,87 & 18,56 \\
+tsp\_indep\_qiskit\_4 & 30,11 & 0,36 & 0,97 & 24,19 \\
+tsp\_indep\_qiskit\_9 & 25,40 & 0,42 & 0,97 & 20,11 \\
+tsp\_indep\_tket\_4 & 30,07 & 0,36 & 0,87 & 24,18 \\
+tsp\_indep\_tket\_9 & 25,51 & 0,40 & 0,97 & 20,11 \\
+\end{longtable}
+\endgroup
+\subsection{Token e retry per circuito}
+I costi comprendono tutti i tentativi dell’episodio. In presenza di repliche i valori sono medie, non somme.
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrrr}
+\toprule
+Circuito & Ingresso & Uscita & Totali & Correzioni & Chiamate \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & Ingresso & Uscita & Totali & Correzioni & Chiamate \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+groundstate\_medium\_indep\_qiskit\_12 & 12\,186 & 158 & 12\,344 & 0 & 1 \\
+groundstate\_medium\_indep\_tket\_12 & 12\,174 & 157 & 12\,331 & 0 & 1 \\
+groundstate\_small\_indep\_qiskit\_4 & 11\,115 & 156 & 11\,271 & 0 & 1 \\
+groundstate\_small\_indep\_tket\_4 & 11\,287 & 163 & 11\,450 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_10 & 11\,993 & 157 & 12\,150 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_11 & 12\,250 & 157 & 12\,407 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_12 & 12\,245 & 156 & 12\,401 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_13 & 37\,005 & 509 & 37\,514 & 2 & 3 \\
+qpeexact\_indep\_qiskit\_14 & 12\,262 & 157 & 12\,419 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_15 & 12\,300 & 157 & 12\,457 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_16 & 12\,293 & 157 & 12\,450 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_2 & 21\,934 & 314 & 22\,248 & 1 & 2 \\
+qpeexact\_indep\_qiskit\_3 & 11\,054 & 168 & 11\,222 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_30 & 35\,691 & 440 & 36\,131 & 2 & 3 \\
+qpeexact\_indep\_qiskit\_4 & 34\,110 & 513 & 34\,623 & 2 & 3 \\
+qpeexact\_indep\_qiskit\_40 & 34\,362 & 500 & 34\,862 & 2 & 3 \\
+qpeexact\_indep\_qiskit\_5 & 11\,273 & 157 & 11\,430 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_50 & 34\,434 & 469 & 34\,903 & 2 & 3 \\
+qpeexact\_indep\_qiskit\_6 & 11\,545 & 143 & 11\,688 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_60 & 32\,082 & 484 & 32\,566 & 2 & 3 \\
+qpeexact\_indep\_qiskit\_7 & 11\,544 & 157 & 11\,701 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_70 & 10\,622 & 157 & 10\,779 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_8 & 12\,009 & 156 & 12\,165 & 0 & 1 \\
+qpeexact\_indep\_qiskit\_9 & 12\,010 & 157 & 12\,167 & 0 & 1 \\
+qpeexact\_indep\_tket\_10 & 11\,995 & 157 & 12\,152 & 0 & 1 \\
+qpeexact\_indep\_tket\_11 & 12\,173 & 156 & 12\,329 & 0 & 1 \\
+qpeexact\_indep\_tket\_12 & 12\,320 & 157 & 12\,477 & 0 & 1 \\
+qpeexact\_indep\_tket\_13 & 12\,311 & 157 & 12\,468 & 0 & 1 \\
+qpeexact\_indep\_tket\_14 & 12\,280 & 174 & 12\,454 & 0 & 1 \\
+qpeexact\_indep\_tket\_15 & 12\,187 & 157 & 12\,344 & 0 & 1 \\
+qpeexact\_indep\_tket\_2 & 32\,961 & 511 & 33\,472 & 2 & 3 \\
+qpeexact\_indep\_tket\_3 & 33\,384 & 520 & 33\,904 & 2 & 3 \\
+qpeexact\_indep\_tket\_30 & 11\,526 & 165 & 11\,691 & 0 & 1 \\
+qpeexact\_indep\_tket\_4 & 11\,300 & 160 & 11\,460 & 0 & 1 \\
+qpeexact\_indep\_tket\_40 & 11\,524 & 157 & 11\,681 & 0 & 1 \\
+qpeexact\_indep\_tket\_5 & 11\,275 & 157 & 11\,432 & 0 & 1 \\
+qpeexact\_indep\_tket\_50 & 11\,525 & 165 & 11\,690 & 0 & 1 \\
+qpeexact\_indep\_tket\_6 & 11\,547 & 143 & 11\,690 & 0 & 1 \\
+qpeexact\_indep\_tket\_60 & 10\,630 & 170 & 10\,800 & 0 & 1 \\
+qpeexact\_indep\_tket\_7 & 11\,546 & 157 & 11\,703 & 0 & 1 \\
+qpeexact\_indep\_tket\_8 & 12\,052 & 157 & 12\,209 & 0 & 1 \\
+qpeexact\_indep\_tket\_9 & 12\,162 & 157 & 12\,319 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_10 & 36\,996 & 517 & 37\,513 & 2 & 3 \\
+qpeinexact\_indep\_qiskit\_11 & 12\,250 & 157 & 12\,407 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_12 & 37\,059 & 437 & 37\,496 & 2 & 3 \\
+qpeinexact\_indep\_qiskit\_13 & 12\,297 & 157 & 12\,454 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_14 & 12\,297 & 157 & 12\,454 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_15 & 12\,300 & 157 & 12\,457 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_16 & 12\,293 & 157 & 12\,450 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_2 & 21\,934 & 314 & 22\,248 & 1 & 2 \\
+qpeinexact\_indep\_qiskit\_3 & 10\,953 & 171 & 11\,124 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_30 & 11\,739 & 157 & 11\,896 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_4 & 11\,259 & 158 & 11\,417 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_40 & 34\,362 & 500 & 34\,862 & 2 & 3 \\
+qpeinexact\_indep\_qiskit\_5 & 11\,273 & 157 & 11\,430 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_50 & 34\,434 & 469 & 34\,903 & 2 & 3 \\
+qpeinexact\_indep\_qiskit\_6 & 11\,289 & 169 & 11\,458 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_60 & 32\,082 & 484 & 32\,566 & 2 & 3 \\
+qpeinexact\_indep\_qiskit\_7 & 11\,530 & 157 & 11\,687 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_70 & 10\,622 & 157 & 10\,779 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_8 & 12\,009 & 156 & 12\,165 & 0 & 1 \\
+qpeinexact\_indep\_qiskit\_9 & 12\,208 & 157 & 12\,365 & 0 & 1 \\
+qpeinexact\_indep\_tket\_10 & 12\,185 & 165 & 12\,350 & 0 & 1 \\
+qpeinexact\_indep\_tket\_11 & 12\,173 & 156 & 12\,329 & 0 & 1 \\
+qpeinexact\_indep\_tket\_12 & 12\,186 & 166 & 12\,352 & 0 & 1 \\
+qpeinexact\_indep\_tket\_13 & 12\,184 & 157 & 12\,341 & 0 & 1 \\
+qpeinexact\_indep\_tket\_14 & 12\,184 & 157 & 12\,341 & 0 & 1 \\
+qpeinexact\_indep\_tket\_15 & 12\,187 & 157 & 12\,344 & 0 & 1 \\
+qpeinexact\_indep\_tket\_2 & 32\,961 & 511 & 33\,472 & 2 & 3 \\
+qpeinexact\_indep\_tket\_3 & 10\,955 & 171 & 11\,126 & 0 & 1 \\
+qpeinexact\_indep\_tket\_30 & 11\,520 & 165 & 11\,685 & 0 & 1 \\
+qpeinexact\_indep\_tket\_4 & 11\,258 & 158 & 11\,416 & 0 & 1 \\
+qpeinexact\_indep\_tket\_40 & 11\,524 & 157 & 11\,681 & 0 & 1 \\
+qpeinexact\_indep\_tket\_5 & 11\,275 & 157 & 11\,432 & 0 & 1 \\
+qpeinexact\_indep\_tket\_50 & 11\,525 & 165 & 11\,690 & 0 & 1 \\
+qpeinexact\_indep\_tket\_6 & 34\,446 & 483 & 34\,929 & 2 & 3 \\
+qpeinexact\_indep\_tket\_60 & 10\,630 & 170 & 10\,800 & 0 & 1 \\
+qpeinexact\_indep\_tket\_7 & 11\,811 & 157 & 11\,968 & 0 & 1 \\
+qpeinexact\_indep\_tket\_8 & 12\,052 & 157 & 12\,209 & 0 & 1 \\
+qpeinexact\_indep\_tket\_9 & 12\,154 & 163 & 12\,317 & 0 & 1 \\
+routing\_indep\_qiskit\_12 & 11\,455 & 157 & 11\,612 & 0 & 1 \\
+routing\_indep\_qiskit\_2 & 11\,038 & 157 & 11\,195 & 0 & 1 \\
+routing\_indep\_qiskit\_6 & 11\,346 & 171 & 11\,517 & 0 & 1 \\
+routing\_indep\_tket\_12 & 11\,455 & 157 & 11\,612 & 0 & 1 \\
+routing\_indep\_tket\_2 & 11\,038 & 157 & 11\,195 & 0 & 1 \\
+routing\_indep\_tket\_6 & 11\,346 & 171 & 11\,517 & 0 & 1 \\
+tsp\_indep\_qiskit\_4 & 33\,750 & 499 & 34\,249 & 2 & 3 \\
+tsp\_indep\_qiskit\_9 & 12\,189 & 158 & 12\,347 & 0 & 1 \\
+tsp\_indep\_tket\_4 & 33\,750 & 499 & 34\,249 & 2 & 3 \\
+tsp\_indep\_tket\_9 & 12\,189 & 158 & 12\,347 & 0 & 1 \\
+\end{longtable}
+\endgroup
+\begin{samepage}\subsection{Definizioni e limiti}
+Il tempo totale comprende il procedimento dal circuito all’esito misurato. La risposta LLM somma le latenze delle chiamate; il tempo interno di compilazione è distinto dal tempo del processo. Le misure mancanti non sono zeri. La media sui successi non dimostra superiorità rispetto a un altro sistema. La qualità è stimata su Target sintetici. Un solo episodio non misura la variabilità fra esecuzioni. Il confronto completo documenta procedura, appaiamento e limiti comuni.
+\par\end{samepage}
+\FloatBarrier\section{Provenienza e riproduzione}
+Identità dell’analisi: \nolinkurl{30dd5b4f737c058eac3105aaa9c7e3dc342fe1553c3ee879eadea73a7c2ff5b3}.
+
+Il file \texttt{provenienza.json} conserva le impronte di input, manifest, contratto, configurazione, protocollo e generatore. La cartella \texttt{generatore/} contiene una copia dei sorgenti usati. Le tabelle CSV mantengono i valori numerici non formattati e i denominatori; i grafici derivano dagli stessi dati. Il documento autonomo e il frammento inseribile nella tesi sono nella cartella \texttt{latex/}.
+
+Per aggiornare tutti i report, dalla radice del progetto:
+\begin{quote}\small\ttfamily .venv/bin/python prototipo/test/report/genera.py\end{quote}
+Il comando legge gli esiti già presenti, verifica contratto, split e impronte dei circuiti e legge MQT dall’area esplorativa quando presente, mantenendone distinta la provenienza. Non avvia il Test e non chiama modelli. Le vecchie analisi e gli esiti originali vengono conservati.
+

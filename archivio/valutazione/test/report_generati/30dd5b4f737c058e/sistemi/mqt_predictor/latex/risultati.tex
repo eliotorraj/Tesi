@@ -1,0 +1,279 @@
+\providecommand{\TestReportPath}{../}
+\section{Risultati di MQT Predictor (espl.)}
+\paragraph{MQT: prova esplorativa separata.} I risultati MQT provengono da \nolinkurl{/home/elio/Tesi-mqt-2.4-v2/prototipo/test_mqt_esplorativo}. Il confronto che comprende MQT è esplorativo e non completa la valutazione conforme al contratto originale. Il selettore usa 384 dei 396 campioni train previsti, con 12 esclusi e 1\,853 compilazioni riuscite su 1\,878 coppie. Il profilo di raccolta dichiarato è adaptive-100-then-300-v1. La raccolta train comprende tentativi a 100 secondi e recuperi a 300 secondi. Le classi derivano dai dispositivi vincitori osservati; non vengono aggiunte classi artificiali. Restano gli stessi circuiti Test, la metrica e il limite di 100 secondi per la valutazione. Le deroghe di addestramento e il contratto separato restano nella provenienza; i confronti fra gli altri tre sistemi mantengono il piano originale.
+
+Sono conclusi 90 dei 90 circuiti previsti. I 90 episodi conservati comprendono 75 successi e 15 fallimenti; 0 circuiti restano pendenti. I circuiti con almeno un successo sono 75; quelli con almeno un fallimento sono 15.
+
+Un successo indica una compilazione valida, non la correttezza del testo libero prodotto dal modello. Lo score è riportato sui successi; tempi e costi includono anche i fallimenti quando misurati.
+
+\subsection{Riepilogo delle misure}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Misura & Media & Mediana & Somma nota & Circuiti & Episodi \\
+\midrule
+Expected fidelity & 0,875638 & 0,958844 & -- & 75/90 & 75/75 \\
+Tempo totale (s) & 35,36 & 18,37 & 3\,182,77 & 90/90 & 90/90 \\
+Compilazione interna (s) & 17,76 & 13,09 & 1\,331,82 & 75/90 & 75/90 \\
+Processo di compilazione (s) & 35,35 & 18,35 & 3\,181,83 & 90/90 & 90/90 \\
+Preparazione e scelta (s) & 0,24 & 0,27 & 17,87 & 75/90 & 75/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Le medie e le mediane sono calcolate sulle medie per circuito disponibili. La somma nota riguarda gli episodi. Le ultime due colonne indicano circuiti ed episodi con misura, sui rispettivi denominatori. Per lo score il denominatore degli episodi è il numero di successi.
+
+Cause dei fallimenti: process\_timeout (15).
+
+Score arrotondati a zero: 0; indicatori di underflow: 0.
+\subsection{Andamento sui circuiti}
+I grafici seguono l’ordine alfabetico dei circuiti nelle tabelle. Un punto indica la media disponibile per un circuito; le misure mancanti non sono zeri.
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/score.tex}
+\caption{Score di ogni circuito riuscito. Un punto assente non viene sostituito con zero. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/total_seconds.tex}
+\caption{Tempo totale per circuito, inclusi preparazione ed eventuali tentativi falliti. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/compilation_seconds.tex}
+\caption{Tempo interno del compilatore. I timeout senza misura interna restano assenti. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/compilation_process_seconds.tex}
+\caption{Tempo del processo di compilazione: comprende avvio e controlli; rende visibili i timeout. I circuiti seguono lo stesso ordine alfabetico delle tabelle.}
+\end{figure}
+\FloatBarrier\clearpage
+\subsection{Dati di ogni circuito}
+Gli identificativi sono ordinati lessicograficamente secondo il manifest Test. Sono riportati episodi conclusi, successi e fallimenti. Lo score è la media dei soli successi, con dieci decimali.
+\begingroup\scriptsize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrr}
+\toprule
+Circuito & Episodi & Successi & Fallimenti & Score \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & Episodi & Successi & Fallimenti & Score \\
+\midrule\endhead
+\midrule\multicolumn{5}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+groundstate\_medium\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,7729330976 \\
+groundstate\_medium\_indep\_tket\_12 & 1 & 1 & 0 & 0,7729330976 \\
+groundstate\_small\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9704268899 \\
+groundstate\_small\_indep\_tket\_4 & 1 & 1 & 0 & 0,9721763305 \\
+qpeexact\_indep\_qiskit\_10 & 1 & 1 & 0 & 0,9588437792 \\
+qpeexact\_indep\_qiskit\_11 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,9454104024 \\
+qpeexact\_indep\_qiskit\_13 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_qiskit\_14 & 1 & 1 & 0 & 0,9405978973 \\
+qpeexact\_indep\_qiskit\_15 & 1 & 1 & 0 & 0,9323050642 \\
+qpeexact\_indep\_qiskit\_16 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_qiskit\_2 & 1 & 1 & 0 & 0,9937906609 \\
+qpeexact\_indep\_qiskit\_3 & 1 & 1 & 0 & 0,9913527489 \\
+qpeexact\_indep\_qiskit\_30 & 1 & 1 & 0 & 0,8601081250 \\
+qpeexact\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9915980675 \\
+qpeexact\_indep\_qiskit\_40 & 1 & 1 & 0 & 0,8249567788 \\
+qpeexact\_indep\_qiskit\_5 & 1 & 1 & 0 & 0,9790588159 \\
+qpeexact\_indep\_qiskit\_50 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_qiskit\_6 & 1 & 1 & 0 & 0,9774435979 \\
+qpeexact\_indep\_qiskit\_60 & 1 & 1 & 0 & 0,0917557118 \\
+qpeexact\_indep\_qiskit\_7 & 1 & 1 & 0 & 0,9705724670 \\
+qpeexact\_indep\_qiskit\_70 & 1 & 1 & 0 & 0,2385442899 \\
+qpeexact\_indep\_qiskit\_8 & 1 & 1 & 0 & 0,9654870412 \\
+qpeexact\_indep\_qiskit\_9 & 1 & 1 & 0 & 0,9604282611 \\
+qpeexact\_indep\_tket\_10 & 1 & 1 & 0 & 0,9571183307 \\
+qpeexact\_indep\_tket\_11 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_tket\_12 & 1 & 1 & 0 & 0,9471147444 \\
+qpeexact\_indep\_tket\_13 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_tket\_14 & 1 & 1 & 0 & 0,9355291848 \\
+qpeexact\_indep\_tket\_15 & 1 & 1 & 0 & 0,9272810401 \\
+qpeexact\_indep\_tket\_2 & 1 & 1 & 0 & 0,9928435073 \\
+qpeexact\_indep\_tket\_3 & 1 & 1 & 0 & 0,9872193379 \\
+qpeexact\_indep\_tket\_30 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_tket\_4 & 1 & 1 & 0 & 0,9884122806 \\
+qpeexact\_indep\_tket\_40 & 1 & 1 & 0 & 0,8222388676 \\
+qpeexact\_indep\_tket\_5 & 1 & 1 & 0 & 0,9808238177 \\
+qpeexact\_indep\_tket\_50 & 1 & 0 & 1 & -- \\
+qpeexact\_indep\_tket\_6 & 1 & 1 & 0 & 0,9774435979 \\
+qpeexact\_indep\_tket\_60 & 1 & 1 & 0 & 0,2092671725 \\
+qpeexact\_indep\_tket\_7 & 1 & 1 & 0 & 0,9723221700 \\
+qpeexact\_indep\_tket\_8 & 1 & 1 & 0 & 0,9637496381 \\
+qpeexact\_indep\_tket\_9 & 1 & 1 & 0 & 0,9621596767 \\
+qpeinexact\_indep\_qiskit\_10 & 1 & 1 & 0 & 0,9588437792 \\
+qpeinexact\_indep\_qiskit\_11 & 1 & 1 & 0 & 0,9521033994 \\
+qpeinexact\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,9505326516 \\
+qpeinexact\_indep\_qiskit\_13 & 1 & 0 & 1 & -- \\
+qpeinexact\_indep\_qiskit\_14 & 1 & 1 & 0 & 0,9372157134 \\
+qpeinexact\_indep\_qiskit\_15 & 1 & 1 & 0 & 0,9323050642 \\
+qpeinexact\_indep\_qiskit\_16 & 1 & 1 & 0 & 0,9307669789 \\
+qpeinexact\_indep\_qiskit\_2 & 1 & 0 & 1 & -- \\
+qpeinexact\_indep\_qiskit\_3 & 1 & 1 & 0 & 0,9913527489 \\
+qpeinexact\_indep\_qiskit\_30 & 1 & 1 & 0 & 0,8539337252 \\
+qpeinexact\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9877675226 \\
+qpeinexact\_indep\_qiskit\_40 & 1 & 1 & 0 & 0,8219904149 \\
+qpeinexact\_indep\_qiskit\_5 & 1 & 1 & 0 & 0,9825920014 \\
+qpeinexact\_indep\_qiskit\_50 & 1 & 1 & 0 & 0,7806267001 \\
+qpeinexact\_indep\_qiskit\_6 & 1 & 1 & 0 & 0,9756846788 \\
+qpeinexact\_indep\_qiskit\_60 & 1 & 1 & 0 & 0,0000001508 \\
+qpeinexact\_indep\_qiskit\_7 & 1 & 1 & 0 & 0,9723221700 \\
+qpeinexact\_indep\_qiskit\_70 & 1 & 1 & 0 & 0,2124676830 \\
+qpeinexact\_indep\_qiskit\_8 & 1 & 1 & 0 & 0,9637496381 \\
+qpeinexact\_indep\_qiskit\_9 & 1 & 1 & 0 & 0,9569747715 \\
+qpeinexact\_indep\_tket\_10 & 1 & 1 & 0 & 0,9571183307 \\
+qpeinexact\_indep\_tket\_11 & 1 & 0 & 1 & -- \\
+qpeinexact\_indep\_tket\_12 & 1 & 1 & 0 & 0,9505326516 \\
+qpeinexact\_indep\_tket\_13 & 1 & 0 & 1 & -- \\
+qpeinexact\_indep\_tket\_14 & 1 & 1 & 0 & 0,9405978973 \\
+qpeinexact\_indep\_tket\_15 & 1 & 0 & 1 & -- \\
+qpeinexact\_indep\_tket\_2 & 1 & 0 & 1 & -- \\
+qpeinexact\_indep\_tket\_3 & 1 & 1 & 0 & 0,9872193379 \\
+qpeinexact\_indep\_tket\_30 & 1 & 1 & 0 & 0,8616586881 \\
+qpeinexact\_indep\_tket\_4 & 1 & 1 & 0 & 0,9877675226 \\
+qpeinexact\_indep\_tket\_40 & 1 & 1 & 0 & 0,8190347175 \\
+qpeinexact\_indep\_tket\_5 & 1 & 1 & 0 & 0,9843633727 \\
+qpeinexact\_indep\_tket\_50 & 1 & 1 & 0 & 0,7827372719 \\
+qpeinexact\_indep\_tket\_6 & 1 & 1 & 0 & 0,9739289249 \\
+qpeinexact\_indep\_tket\_60 & 1 & 1 & 0 & 0,0000020022 \\
+qpeinexact\_indep\_tket\_7 & 1 & 1 & 0 & 0,9723221700 \\
+qpeinexact\_indep\_tket\_8 & 1 & 1 & 0 & 0,9637496381 \\
+qpeinexact\_indep\_tket\_9 & 1 & 0 & 1 & -- \\
+routing\_indep\_qiskit\_12 & 1 & 1 & 0 & 0,9271419563 \\
+routing\_indep\_qiskit\_2 & 1 & 1 & 0 & 0,9988490186 \\
+routing\_indep\_qiskit\_6 & 1 & 1 & 0 & 0,9637496381 \\
+routing\_indep\_tket\_12 & 1 & 1 & 0 & 0,9271419563 \\
+routing\_indep\_tket\_2 & 1 & 1 & 0 & 0,9988490186 \\
+routing\_indep\_tket\_6 & 1 & 1 & 0 & 0,9637496381 \\
+tsp\_indep\_qiskit\_4 & 1 & 1 & 0 & 0,9800257753 \\
+tsp\_indep\_qiskit\_9 & 1 & 1 & 0 & 0,9283954866 \\
+tsp\_indep\_tket\_4 & 1 & 1 & 0 & 0,9800257753 \\
+tsp\_indep\_tket\_9 & 1 & 1 & 0 & 0,9283954866 \\
+\end{longtable}
+\endgroup
+\subsection{Tempi per circuito}
+Tutti i valori sono medie in secondi. -- indica una misura interna non disponibile, un caso pendente o una misura non applicabile.
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrr}
+\toprule
+Circuito & Totale & Compilatore & Processo \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & Totale & Compilatore & Processo \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+groundstate\_medium\_indep\_qiskit\_12 & 39,28 & 29,05 & 39,25 \\
+groundstate\_medium\_indep\_tket\_12 & 34,71 & 28,40 & 34,69 \\
+groundstate\_small\_indep\_qiskit\_4 & 15,48 & 10,58 & 15,46 \\
+groundstate\_small\_indep\_tket\_4 & 16,89 & 12,30 & 16,87 \\
+qpeexact\_indep\_qiskit\_10 & 15,14 & 10,71 & 15,12 \\
+qpeexact\_indep\_qiskit\_11 & 100,18 & -- & 100,16 \\
+qpeexact\_indep\_qiskit\_12 & 18,04 & 13,47 & 18,03 \\
+qpeexact\_indep\_qiskit\_13 & 100,17 & -- & 100,16 \\
+qpeexact\_indep\_qiskit\_14 & 18,53 & 14,00 & 18,52 \\
+qpeexact\_indep\_qiskit\_15 & 18,48 & 13,96 & 18,47 \\
+qpeexact\_indep\_qiskit\_16 & 100,17 & -- & 100,16 \\
+qpeexact\_indep\_qiskit\_2 & 15,22 & 11,05 & 15,21 \\
+qpeexact\_indep\_qiskit\_3 & 16,63 & 12,48 & 16,61 \\
+qpeexact\_indep\_qiskit\_30 & 25,35 & 20,92 & 25,34 \\
+qpeexact\_indep\_qiskit\_4 & 17,38 & 13,20 & 17,37 \\
+qpeexact\_indep\_qiskit\_40 & 36,38 & 31,89 & 36,37 \\
+qpeexact\_indep\_qiskit\_5 & 17,07 & 12,45 & 17,07 \\
+qpeexact\_indep\_qiskit\_50 & 100,18 & -- & 100,17 \\
+qpeexact\_indep\_qiskit\_6 & 15,26 & 10,67 & 15,26 \\
+qpeexact\_indep\_qiskit\_60 & 52,96 & 48,58 & 52,95 \\
+qpeexact\_indep\_qiskit\_7 & 15,87 & 10,56 & 15,86 \\
+qpeexact\_indep\_qiskit\_70 & 55,70 & 51,38 & 55,69 \\
+qpeexact\_indep\_qiskit\_8 & 15,92 & 11,34 & 15,91 \\
+qpeexact\_indep\_qiskit\_9 & 18,78 & 14,25 & 18,77 \\
+qpeexact\_indep\_tket\_10 & 15,17 & 10,57 & 15,16 \\
+qpeexact\_indep\_tket\_11 & 100,17 & -- & 100,16 \\
+qpeexact\_indep\_tket\_12 & 17,37 & 12,82 & 17,36 \\
+qpeexact\_indep\_tket\_13 & 100,17 & -- & 100,16 \\
+qpeexact\_indep\_tket\_14 & 18,54 & 13,97 & 18,53 \\
+qpeexact\_indep\_tket\_15 & 19,78 & 15,14 & 19,77 \\
+qpeexact\_indep\_tket\_2 & 14,87 & 10,74 & 14,86 \\
+qpeexact\_indep\_tket\_3 & 16,98 & 12,83 & 16,97 \\
+qpeexact\_indep\_tket\_30 & 100,21 & -- & 100,17 \\
+qpeexact\_indep\_tket\_4 & 17,38 & 12,41 & 17,37 \\
+qpeexact\_indep\_tket\_40 & 48,66 & 44,27 & 48,65 \\
+qpeexact\_indep\_tket\_5 & 17,64 & 13,09 & 17,63 \\
+qpeexact\_indep\_tket\_50 & 100,17 & -- & 100,16 \\
+qpeexact\_indep\_tket\_6 & 17,43 & 12,87 & 17,42 \\
+qpeexact\_indep\_tket\_60 & 63,14 & 58,68 & 63,13 \\
+qpeexact\_indep\_tket\_7 & 14,96 & 10,29 & 14,96 \\
+qpeexact\_indep\_tket\_8 & 16,07 & 11,47 & 16,06 \\
+qpeexact\_indep\_tket\_9 & 19,60 & 15,01 & 19,59 \\
+qpeinexact\_indep\_qiskit\_10 & 15,12 & 10,49 & 15,11 \\
+qpeinexact\_indep\_qiskit\_11 & 15,52 & 11,15 & 15,51 \\
+qpeinexact\_indep\_qiskit\_12 & 19,59 & 15,15 & 19,58 \\
+qpeinexact\_indep\_qiskit\_13 & 100,17 & -- & 100,16 \\
+qpeinexact\_indep\_qiskit\_14 & 18,33 & 13,73 & 18,33 \\
+qpeinexact\_indep\_qiskit\_15 & 18,42 & 13,98 & 18,37 \\
+qpeinexact\_indep\_qiskit\_16 & 21,78 & 17,36 & 21,77 \\
+qpeinexact\_indep\_qiskit\_2 & 100,17 & -- & 100,16 \\
+qpeinexact\_indep\_qiskit\_3 & 17,43 & 13,29 & 17,42 \\
+qpeinexact\_indep\_qiskit\_30 & 27,85 & 23,27 & 27,84 \\
+qpeinexact\_indep\_qiskit\_4 & 17,32 & 12,10 & 17,32 \\
+qpeinexact\_indep\_qiskit\_40 & 30,40 & 25,86 & 30,39 \\
+qpeinexact\_indep\_qiskit\_5 & 17,03 & 12,31 & 17,02 \\
+qpeinexact\_indep\_qiskit\_50 & 58,43 & 53,95 & 58,42 \\
+qpeinexact\_indep\_qiskit\_6 & 17,32 & 12,78 & 17,32 \\
+qpeinexact\_indep\_qiskit\_60 & 20,58 & 16,14 & 20,57 \\
+qpeinexact\_indep\_qiskit\_7 & 14,77 & 10,15 & 14,76 \\
+qpeinexact\_indep\_qiskit\_70 & 55,38 & 51,04 & 55,36 \\
+qpeinexact\_indep\_qiskit\_8 & 15,92 & 11,26 & 15,91 \\
+qpeinexact\_indep\_qiskit\_9 & 15,08 & 10,62 & 15,07 \\
+qpeinexact\_indep\_tket\_10 & 15,37 & 10,71 & 15,36 \\
+qpeinexact\_indep\_tket\_11 & 100,17 & -- & 100,16 \\
+qpeinexact\_indep\_tket\_12 & 20,15 & 15,81 & 20,14 \\
+qpeinexact\_indep\_tket\_13 & 100,17 & -- & 100,16 \\
+qpeinexact\_indep\_tket\_14 & 18,83 & 14,24 & 18,82 \\
+qpeinexact\_indep\_tket\_15 & 100,17 & -- & 100,16 \\
+qpeinexact\_indep\_tket\_2 & 100,17 & -- & 100,16 \\
+qpeinexact\_indep\_tket\_3 & 17,58 & 13,38 & 17,57 \\
+qpeinexact\_indep\_tket\_30 & 32,96 & 28,50 & 32,95 \\
+qpeinexact\_indep\_tket\_4 & 17,23 & 11,97 & 17,22 \\
+qpeinexact\_indep\_tket\_40 & 38,73 & 34,32 & 38,72 \\
+qpeinexact\_indep\_tket\_5 & 17,28 & 12,71 & 17,27 \\
+qpeinexact\_indep\_tket\_50 & 52,38 & 47,83 & 52,37 \\
+qpeinexact\_indep\_tket\_6 & 15,58 & 11,01 & 15,57 \\
+qpeinexact\_indep\_tket\_60 & 22,04 & 16,61 & 22,02 \\
+qpeinexact\_indep\_tket\_7 & 16,62 & 10,60 & 16,61 \\
+qpeinexact\_indep\_tket\_8 & 16,23 & 11,68 & 16,22 \\
+qpeinexact\_indep\_tket\_9 & 100,17 & -- & 100,16 \\
+routing\_indep\_qiskit\_12 & 19,68 & 15,28 & 19,67 \\
+routing\_indep\_qiskit\_2 & 15,12 & 10,91 & 15,11 \\
+routing\_indep\_qiskit\_6 & 15,13 & 10,47 & 15,12 \\
+routing\_indep\_tket\_12 & 19,24 & 14,84 & 19,22 \\
+routing\_indep\_tket\_2 & 14,23 & 10,02 & 14,22 \\
+routing\_indep\_tket\_6 & 15,02 & 10,39 & 15,01 \\
+tsp\_indep\_qiskit\_4 & 17,58 & 13,34 & 17,57 \\
+tsp\_indep\_qiskit\_9 & 16,47 & 12,01 & 16,46 \\
+tsp\_indep\_tket\_4 & 17,37 & 13,16 & 17,37 \\
+tsp\_indep\_tket\_9 & 16,44 & 12,01 & 16,43 \\
+\end{longtable}
+\endgroup
+\begin{samepage}\subsection{Definizioni e limiti}
+Il tempo totale comprende il procedimento dal circuito all’esito misurato. La risposta LLM somma le latenze delle chiamate; il tempo interno di compilazione è distinto dal tempo del processo. Le misure mancanti non sono zeri. La media sui successi non dimostra superiorità rispetto a un altro sistema. La qualità è stimata su Target sintetici. Un solo episodio non misura la variabilità fra esecuzioni. Il confronto completo documenta procedura, appaiamento e limiti comuni.
+\par\end{samepage}
+\FloatBarrier\section{Provenienza e riproduzione}
+Identità dell’analisi: \nolinkurl{30dd5b4f737c058eac3105aaa9c7e3dc342fe1553c3ee879eadea73a7c2ff5b3}.
+
+Il file \texttt{provenienza.json} conserva le impronte di input, manifest, contratto, configurazione, protocollo e generatore. La cartella \texttt{generatore/} contiene una copia dei sorgenti usati. Le tabelle CSV mantengono i valori numerici non formattati e i denominatori; i grafici derivano dagli stessi dati. Il documento autonomo e il frammento inseribile nella tesi sono nella cartella \texttt{latex/}.
+
+Per aggiornare tutti i report, dalla radice del progetto:
+\begin{quote}\small\ttfamily .venv/bin/python prototipo/test/report/genera.py\end{quote}
+Il comando legge gli esiti già presenti, verifica contratto, split e impronte dei circuiti e legge MQT dall’area esplorativa quando presente, mantenendone distinta la provenienza. Non avvia il Test e non chiama modelli. Le vecchie analisi e gli esiti originali vengono conservati.
+

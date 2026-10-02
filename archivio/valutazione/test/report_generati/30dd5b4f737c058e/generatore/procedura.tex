@@ -1,0 +1,91 @@
+\section{Sistemi e impostazioni prima del Test}
+Tutti i sistemi ricevono gli stessi circuiti e operano nello stesso insieme
+di cinque dispositivi: IBM Falcon 27, IBM Falcon 127, IBM Heron 133,
+IBM Heron 156 e Quantinuum H2-56. Si usano le proprietà sintetiche congelate
+di MQT Bench. Una scelta è ammessa solo se il dispositivo può ospitare
+il circuito. Il processo di compilazione ha un limite di 100 secondi,
+che comprende anche il suo avvio. Un fallimento conclude quel caso:
+non si cerca una nuova configurazione per migliorarne l'esito.
+
+Per i due LLM e per Random, la compilazione usa Qiskit con seme 0 e un solo
+processo. La scelta è limitata a un catalogo di dodici configurazioni.
+Le opzioni combinano livelli di ottimizzazione 2 e 3 con diverse modalità
+di disposizione dei qubit e instradamento delle operazioni.
+Il catalogo è lo stesso per i tre sistemi.
+
+\subsection{LLM + RAG}
+Questo sistema usa Qwen3.5-4B con pesi Q8\_0 e temperatura 0, nella
+configurazione scelta sulla validation. Riceve le caratteristiche del circuito,
+i dispositivi compatibili, le dodici configurazioni Qiskit e cinque esempi
+recuperati dal solo train. L'assunzione è che circuiti con caratteristiche
+simili possano fornire indicazioni utili sulla compilazione.
+
+Il recupero confronta 49 caratteristiche numeriche con distanza Manhattan.
+La trasformazione e la scala delle caratteristiche sono ricavate solo dal
+train. L'indice usa 396 circuiti distinti per contenuto: i 26 duplicati
+fra i 422 file train non diventano esempi aggiuntivi.
+Il Dataset del RAG contiene compilazioni Qiskit già valutate; non contiene
+i punteggi dei circuiti Test. Al modello viene fornita una rappresentazione
+compatta delle informazioni, senza il codice QASM completo.
+
+La risposta deve indicare una coppia dispositivo/configurazione e uno o due
+fatti verificabili. Sono consentite al massimo tre risposte complete,
+quindi due richieste di correzione. La prima scelta accettabile diventa
+definitiva e viene compilata una sola volta. All'ultimo tentativo una coppia
+ammessa può essere accettata anche se i fatti non sono tutti verificati:
+questa condizione viene registrata. La spiegazione libera non è certificata.
+
+Il limite di risposta è 4096 token e quello di attesa è 3600 secondi per
+chiamata. Il contesto richiesto è 60000 token, la cache usa Q8\_0,
+i gruppi di elaborazione sono 512 e 128 token e tutti gli strati del modello
+sono richiesti sulla GPU. Il pensiero esteso è disattivato.
+Il seme è 20260913; i parametri di generazione sono
+\texttt{top\_p}=0,95, \texttt{top\_k}=40, \texttt{min\_p}=0,
+penalità di ripetizione 1 e penalità di presenza e frequenza 0.
+Non sono previste ripetizioni automatiche per problemi di trasporto.
+
+\subsection{LLM no RAG}
+Si usa lo stesso Qwen3.5-4B, con gli stessi pesi e tutti i parametri appena
+descritti: temperatura 0, massimo 4096 token, contesto 60000 e lo stesso seme.
+Restano disponibili caratteristiche del circuito, dispositivi compatibili
+e dodici configurazioni, ma non vengono recuperati esempi.
+Questo sistema permette di osservare quanto cambia la scelta quando
+il modello dispone soltanto delle informazioni sul caso corrente.
+
+La risposta deve riportare un solo fatto sulla capacità in qubit del
+dispositivo scelto. Restano il massimo di tre tentativi, i controlli sulla
+coppia e la stessa regola di accettazione finale dei fatti.
+Il confronto con RAG comprende quindi sia gli esempi sia la diversa verifica
+dei fatti richiesti; non isola esclusivamente l'effetto della loro presenza.
+
+\subsection{MQT Predictor}
+MQT Predictor 2.4.0 combina due componenti. Un classificatore supervisionato
+sceglie il dispositivo; una politica di apprendimento per rinforzo (RL)
+specifica del dispositivo decide i passaggi di compilazione.
+Usiamo l'architettura ML seguita da RL descritta nel lavoro del 2025.
+Il Training set per il selettore e il Dataset del RAG sono quindi risorse
+diverse, costruite per scopi diversi.
+
+Le cinque politiche RL sono state preparate prima del Test, con un obiettivo
+di 100000 passi di addestramento per dispositivo (100352 al completamento
+dei gruppi di aggiornamento). Ottimizzano la metrica di fedeltà attesa.
+Il Test esegue una sola selezione e una sola compilazione RL per circuito,
+con limite esterno di 100 secondi. Il seme interno di MQT non è controllato.
+MQT può costruire una sequenza di passaggi e non è vincolato alle dodici
+configurazioni Qiskit degli altri sistemi.
+
+%%MQT_DETAILS%%
+
+\subsection{Random}
+Random estrae con probabilità uniforme una coppia fra tutte quelle compatibili
+di dispositivo e configurazione Qiskit. Il seme deriva da 20260921 e
+dall'impronta del circuito, così da conservare la scelta effettuata.
+La coppia estratta viene compilata una sola volta, con seme Qiskit 0
+e limite di 100 secondi. Un fallimento non provoca una nuova estrazione.
+
+Random non usa esempi, modelli linguistici o addestramento.
+Fornisce un riferimento semplice: permette di capire quanto la scelta
+ragionata migliori rispetto a una scelta casuale nello stesso catalogo.
+Una sola estrazione per circuito, tuttavia, non misura tutte le possibili
+prestazioni del metodo casuale.
+

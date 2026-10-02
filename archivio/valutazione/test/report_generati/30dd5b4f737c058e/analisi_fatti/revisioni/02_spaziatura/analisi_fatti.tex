@@ -1,0 +1,217 @@
+
+\documentclass[a4paper,10pt]{article}
+\usepackage[margin=1.85cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{lmodern,booktabs,tabularx,xcolor,listings,tikz,hyperref}
+\usetikzlibrary{arrows.meta,positioning}
+\definecolor{ink}{HTML}{163047}
+\definecolor{pale}{HTML}{EEF4F7}
+\definecolor{warn}{HTML}{934618}
+\lstset{basicstyle=\ttfamily\fontsize{7.8}{9.1}\selectfont,breaklines=true,
+breakatwhitespace=false,columns=fullflexible,keepspaces=true,showstringspaces=false,
+backgroundcolor=\color{pale},frame=single,rulecolor=\color{pale},
+xleftmargin=4pt,xrightmargin=4pt,aboveskip=6pt,belowskip=6pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}
+\newcommand{\tagline}[1]{{\small\color{ink}\textbf{#1}}\par}
+\begin{document}
+\tagline{INTEGRAZIONE AL CONFRONTO SUL TEST | 27 settembre 2026}
+{\LARGE\bfseries Qualità e correttezza\\dei fatti verificabili}\par
+Analisi dei registri delle 90 decisioni LLM + RAG e delle 90 decisioni LLM senza RAG già raccolte.
+Questo documento integra il confronto esistente senza modificarlo e senza eseguire nuovi Test.
+\section*{Che cosa è verificato}
+La risposta JSON separa \texttt{facts} da \texttt{hypothesis}. I fatti sono asserzioni scelte da quattro
+tipi predefiniti: il programma confronta campi precisi con i dati disponibili. Non valuta la verità di un testo libero.
+
+\textbf{E1, \ldots, E5 identificano gli esempi recuperati, non i fatti.}
+Ogni fatto con riferimento indica un alias locale. La posizione dell'esempio nel prompt lo collega
+a un record train preciso. E1 può quindi indicare circuiti diversi in richieste diverse.
+\begin{center}
+\begin{tikzpicture}[node distance=5mm,every node/.style={draw=ink,rounded corners,
+align=center,font=\small,fill=pale,minimum height=13mm},>=Latex]
+\node(a){Fatto nel JSON\\\texttt{example\_id: Ei}};
+\node(b)[right=of a]{Alias Ei\\nel prompt};
+\node(c)[right=of b]{Record train\\\texttt{rag\_id}};
+\node(d)[right=of c]{Campo del record\\confrontato};
+\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\draw[->,thick](c)--(d);
+\end{tikzpicture}\end{center}
+\section*{Risultati su tutti i casi}
+
+\begin{tabularx}{\linewidth}{Xrr}\toprule Misura & LLM + RAG & Senza RAG\\\midrule
+Risposte finali con tutti i fatti validi & 73/90 & 90/90\\
+Risposte finali con almeno un fatto non valido & 17/90 & 0/90\\
+Fatti validi nelle risposte finali & 163/180 & 90/90\\
+Risposte valide già al primo tentativo & 71/90 & 90/90\\
+Risposte complete, incluse le correzioni & 126 & 90\\
+\bottomrule\end{tabularx}
+Nel RAG, 95 fatti finali riferiti agli esempi risultano tutti coerenti con i campi citati. I 17 fatti non validi sono sempre fatti sulla capacità del dispositivo con un riferimento Ei non consentito. La capacità risulta comunque sufficiente; l'errore è nell'attribuzione dell'evidenza. Dopo tre tentativi queste scelte sono state accettate dalla regola prevista, conservando lo stato di mancata verifica.
+\textbf{Il 90/90 senza RAG riguarda solo la capacità in qubit.} È un controllo più semplice: non dimostra spiegazioni migliori né prestazioni di compilazione superiori.
+\textbf{Le ipotesi non sono verificate sul piano dei contenuti e non vanno prese come affermazioni vere.} I controlli di formato, lunghezza o scelta ammessa non certificano ciò che il testo sostiene.
+\newpage
+\tagline{CAMPIONE 1 / 3 | selezione illustrativa}
+\section*{Due fatti sostenuti dallo stesso esempio}
+\textbf{Circuito Test:} \texttt{groundstate\_small\_indep\_tket\_4}. Risposta finale, tentativo 1.
+\textbf{JSON originale dell'LLM.} Valori integrali; sola impaginazione modificata.
+\begin{lstlisting}
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o2_dense_sabre",
+  "facts": [
+    {
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1"
+    }
+  ],
+  "hypothesis": "This pair is selected because the device and configuration appear together as top performers in the historical record for a similar four-qubit circuit. The hypothesis suggests that applying this specific setup to the current circuit may yield comparable results, though no performance guarantee exists for this new instance."
+}
+\end{lstlisting}
+
+\textbf{Collegamento all'evidenza train}
+\begin{center}\begin{tikzpicture}[>=Latex,every node/.style={draw=ink,fill=pale,rounded corners,font=\small,align=center}]\node(a){\texttt{example\_id: E1}};\node(b)[right=8mm of a]{E1 nel prompt};\node(c)[right=8mm of b]{\texttt{qaoa\_indep\_qiskit\_4}\\esempio train};\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\end{tikzpicture}\end{center}
+{\footnotesize Record completo: \texttt{rag\_41b126cd2f33c412dbe984b3b8ce1bb72143184b5521243a890e29f7b64b74b5}}\par
+\textbf{Estratto del record (prima riga della graduatoria)}
+\begin{lstlisting}
+{
+  "id": "E1",
+  "num_qubits": 4,
+  "selected_device": "ibm_falcon_127",
+  "top_configurations": [
+    {
+      "rank": 1,
+      "device_id": "ibm_falcon_127",
+      "config_id": "o2_dense_sabre",
+      "median_score": 0.9822170185,
+      "tied_score_config_ids": [
+        "o2_dense_sabre",
+        "o3_dense_sabre"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Esito del controllo.} Il dispositivo scelto coincide con quello selezionato nel record. Anche la coppia Falcon 127 / o2\_dense\_sabre compare nella graduatoria mostrata, al primo posto. È presente una parità con o3\_dense\_sabre: il fatto non certifica un vincitore unico. Il valore 0,9822170185 è la mediana storica di QAOA, non una misura del circuito groundstate corrente.
+{\color{warn}\textbf{Limite dell'ipotesi.}} L'ipotesi propone che il risultato si trasferisca al circuito nuovo. Questo passaggio non è verificato.
+{\small Stati registrati, in ordine: \texttt{verified, verified}. Stato della risposta: \texttt{success}.}
+\newpage
+\tagline{CAMPIONE 2 / 3 | selezione illustrativa}
+\section*{Coppia storica e uguaglianza dei qubit}
+\textbf{Circuito Test:} \texttt{qpeexact\_indep\_qiskit\_2}. Risposta finale, tentativo 2.
+\textbf{JSON originale dell'LLM.} Valori integrali; sola impaginazione modificata.
+\begin{lstlisting}
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o2_default_default",
+  "facts": [
+    {
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E1"
+    }
+  ],
+  "hypothesis": "This pair is selected because it matches the top-performing configuration for a similar 2-qubit circuit on the same hardware, and the qubit count is identical to the reference example."
+}
+\end{lstlisting}
+
+\textbf{Collegamento all'evidenza train}
+\begin{center}\begin{tikzpicture}[>=Latex,every node/.style={draw=ink,fill=pale,rounded corners,font=\small,align=center}]\node(a){\texttt{example\_id: E1}};\node(b)[right=8mm of a]{E1 nel prompt};\node(c)[right=8mm of b]{\texttt{dj\_indep\_qiskit\_2}\\esempio train};\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\end{tikzpicture}\end{center}
+{\footnotesize Record completo: \texttt{rag\_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd}}\par
+\textbf{Estratto del record (prima riga della graduatoria)}
+\begin{lstlisting}
+{
+  "id": "E1",
+  "num_qubits": 2,
+  "selected_device": "ibm_falcon_127",
+  "top_configurations": [
+    {
+      "rank": 1,
+      "device_id": "ibm_falcon_127",
+      "config_id": "o2_default_default",
+      "median_score": 0.9994380656,
+      "tied_score_config_ids": [
+        "o2_default_default",
+        "o3_default_default"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Esito del controllo.} La coppia scelta è presente nelle righe mostrate del record Deutsch--Jozsa. Il circuito corrente e l'esempio hanno entrambi 2 qubit: il secondo fatto è quindi vero. L'uguaglianza del numero di qubit non prova che topologia, sequenza delle porte o risposta alla compilazione siano simili.
+{\color{warn}\textbf{Limite dell'ipotesi.}} La formulazione \emph{similar 2-qubit circuit} è una valutazione libera. Il validatore controlla l'uguaglianza 2 = 2, non la similarità strutturale né il trasferimento delle prestazioni.
+{\small Stati registrati, in ordine: \texttt{verified, verified}. Stato della risposta: \texttt{success}.}
+\newpage
+\tagline{CAMPIONE 3 / 3 | selezione illustrativa}
+\section*{Un riferimento valido e uno attribuito male}
+\textbf{Circuito Test:} \texttt{qpeexact\_indep\_tket\_3}. Risposta finale, tentativo 3.
+\textbf{JSON originale dell'LLM.} Valori integrali; sola impaginazione modificata.
+\begin{lstlisting}
+{
+  "selected_device": "ibm_heron_156",
+  "config_id": "o2_default_default",
+  "facts": [
+    {
+      "assertion": "selected_device_matches_example",
+      "example_id": "E4"
+    },
+    {
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E4"
+    }
+  ],
+  "hypothesis": "This pair is selected because the device matches the historical choice for the current circuit's depth and qubit count, and the device possesses sufficient qubits to run the circuit. The hypothesis is a proposal, not a verified fact: do not claim that performance on the current circuit is known or guaranteed. Historical results belong only to their original circuits."
+}
+\end{lstlisting}
+
+\textbf{Collegamento all'evidenza train}
+\begin{center}\begin{tikzpicture}[>=Latex,every node/.style={draw=ink,fill=pale,rounded corners,font=\small,align=center}]\node(a){\texttt{example\_id: E4}};\node(b)[right=8mm of a]{E4 nel prompt};\node(c)[right=8mm of b]{\texttt{dj\_indep\_tket\_3}\\esempio train};\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\end{tikzpicture}\end{center}
+{\footnotesize Record completo: \texttt{rag\_56dbc07e02c1c10142733c72ce3d55de44f530383dd57d771f2b8957abf393c1}}\par
+\textbf{Estratto del record (prima riga della graduatoria)}
+\begin{lstlisting}
+{
+  "id": "E4",
+  "num_qubits": 3,
+  "selected_device": "ibm_heron_156",
+  "top_configurations": [
+    {
+      "rank": 1,
+      "device_id": "ibm_heron_156",
+      "config_id": "o3_default_default",
+      "median_score": 0.9977017929,
+      "tied_score_config_ids": [
+        "o3_default_default"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Esito del controllo.} Il primo fatto è valido: E4 seleziona Heron 156, come la risposta. Il secondo è non valido per il contratto: la capacità deve essere confrontata con il catalogo hardware, senza \texttt{example\_id}. In questo caso 156 qubit sono sufficienti per i 3 qubit richiesti, ma E4 non è la fonte ammessa per questa asserzione. Non correggiamo il JSON originale.
+{\color{warn}\textbf{Limite dell'ipotesi.}} Il testo ripete anche istruzioni ricevute nel prompt. Questa ripetizione riduce la qualità espositiva; non aggiunge evidenza. Profondità e qubit citati nella prosa non sono certificati dal solo fatto sul dispositivo.
+{\small Stati registrati, in ordine: \texttt{verified, unsupported}. Stato della risposta: \texttt{accepted\_with\_unverified\_facts}.}
+\newpage\tagline{PORTATA DEI RISULTATI E RIPRODUCIBILITÀ}
+\section*{Correttezza dei fatti e qualità della spiegazione}
+\begin{tabularx}{\linewidth}{Xrr}\toprule Tipo di fatto finale RAG & Validi & Totali\\\midrule
+Stesso dispositivo dell'esempio & 88 & 88\\
+Coppia tra le configurazioni mostrate & 5 & 5\\
+Stesso numero di qubit & 2 & 2\\
+Capacità in qubit sufficiente & 68 & 85\\
+\bottomrule\end{tabularx}
+Il sistema rende controllabile una parte limitata della motivazione. La maggior parte dei fatti storici riguarda solo il dispositivo: 88 asserzioni. Soltanto 5 riguardano esplicitamente la coppia dispositivo/configurazione. Le 2 uguaglianze dei qubit descrivono la dimensione, senza dimostrare una somiglianza di comportamento.
+\textbf{Fatto corretto non significa scelta ottima.} La presenza di una coppia nelle prime righe vale per quel circuito, quei Target sintetici e quella procedura. La regola sulla coppia accetta le righe mostrate e le parità dichiarate; non implica sempre primo posto né superiorità sul circuito corrente. La capacità in qubit è solo una condizione necessaria.
+\textbf{Ipotesi: nessuna verifica semantica.} Il sistema non confronta la prosa con esperimenti, conoscenze esterne o una prova logica. Non certifica promesse di qualità, spiegazioni causali, similarità dei circuiti o bontà della configurazione. Anche una risposta con tutti i fatti validi mantiene \texttt{explanation\_fully\_verified=false}. Le tre osservazioni sulla prosa nelle pagine precedenti sono un commento qualitativo manuale, non una misura automatica né una valutazione sistematica di tutte le 90 ipotesi.
+\section*{Come è stata svolta l'analisi}
+Abbiamo riletto tutti i JSON delle risposte e dei controlli, compresi i tentativi scartati. Il JSON del tentativo finale coincide con la decisione conservata. Le mappe Ei, le impronte della vista e il contenuto degli esempi sono stati confrontati con prompt, registri e Dataset train verificato. Le quattro regole sono state riapplicate, anche con confronti espliciti separati dagli esiti salvati. I risultati coincidono con i controlli registrati.
+Le 126 risposte RAG contengono complessivamente 252 fatti: 199 validi e 53 non validi. Questo denominatore include le correzioni e non va confuso con i 180 fatti finali. I campioni sono scelti per illustrare tre casi diversi; i conteggi complessivi provengono dall'intero insieme dei 90 circuiti.
+\section*{Fonti locali e ricostruzione}
+{\small\raggedright Generatore: \texttt{archivio/valutazione/test/report/analizza\_fatti.py}. Dati: \texttt{test/risultati/llm\_rag} e \texttt{llm\_senza\_rag}. Per ogni circuito: \texttt{prompt.json}, \texttt{encoding.json}, \texttt{decision\_validation.json}, \texttt{decision.json} e \texttt{attempt\_*/call/response\_raw.json}.\par}
+Il file \texttt{audit\_fatti.json} conserva conteggi, controlli su tutti i tentativi, i tre JSON completi, esempi train integrali e impronte SHA-256 delle fonti. La rianalisi non ripete le compilazioni storiche: la correttezza qui riguarda la coerenza con i dati forniti, non una verifica fisica della fedeltà.
+\end{document}

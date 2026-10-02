@@ -1,0 +1,85 @@
+{
+  "method": "random",
+  "expected_circuits": 90,
+  "completed_circuits": 90,
+  "pending": 0,
+  "episodes": 90,
+  "successes": 80,
+  "failures": 10,
+  "circuits_all_success": 80,
+  "circuits_with_success": 80,
+  "circuits_with_failure": 10,
+  "failure_causes": {
+    "process_timeout": 10
+  },
+  "accepted_with_unverified_facts": 0,
+  "rounded_to_zero": 3,
+  "underflow": 0,
+  "metrics": {
+    "score": {
+      "n": 80,
+      "mean": 0.68266412515625,
+      "median": 0.81514644365,
+      "minimum": 0.0,
+      "maximum": 0.9994205726,
+      "std": 0.33726556835153315,
+      "sum_known": 54.6131300125,
+      "measured_episodes": 80,
+      "missing_episodes": 0,
+      "missing_circuits": 10,
+      "partially_measured_circuits": 0
+    },
+    "total_seconds": {
+      "n": 90,
+      "mean": 12.486051050011145,
+      "median": 1.233806950999906,
+      "minimum": 1.0523183980003523,
+      "maximum": 100.49903212000027,
+      "std": 31.251511317379737,
+      "sum_known": 1123.7445945010031,
+      "measured_episodes": 90,
+      "missing_episodes": 0,
+      "missing_circuits": 0,
+      "partially_measured_circuits": 0
+    },
+    "compilation_seconds": {
+      "n": 80,
+      "mean": 0.6695132359875174,
+      "median": 0.3829219969998121,
+      "minimum": 0.3501107399997636,
+      "maximum": 8.48329523700022,
+      "std": 1.1777830403887528,
+      "sum_known": 53.56105887900139,
+      "measured_episodes": 80,
+      "missing_episodes": 10,
+      "missing_circuits": 10,
+      "partially_measured_circuits": 0
+    },
+    "compilation_process_seconds": {
+      "n": 90,
+      "mean": 12.204858629633357,
+      "median": 0.9504449260000456,
+      "minimum": 0.8166353260003234,
+      "maximum": 100.03914649299986,
+      "std": 31.242835863339543,
+      "sum_known": 1098.4372766670022,
+      "measured_episodes": 90,
+      "missing_episodes": 0,
+      "missing_circuits": 0,
+      "partially_measured_circuits": 0
+    },
+    "choice_seconds": {
+      "n": 90,
+      "mean": 0.2609414596444165,
+      "median": 0.2559464980001849,
+      "minimum": 0.22033158000022013,
+      "maximum": 0.3918677179999577,
+      "std": 0.03449613679181142,
+      "sum_known": 23.484731367997483,
+      "measured_episodes": 90,
+      "missing_episodes": 0,
+      "missing_circuits": 0,
+      "partially_measured_circuits": 0
+    }
+  }
+}

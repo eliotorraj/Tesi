@@ -1,0 +1,1782 @@
+\providecommand{\TestReportPath}{../}
+\section{Introduzione al Test}
+Il Test valuta la capacità di scegliere un dispositivo e una configurazione della funzione di compilazione
+di Qiskit, dato un circuito quantistico nuovo. Confrontiamo cinque soluzioni: LLM + RAG, lo stesso LLM senza
+esempi (LLM no RAG), MQT Predictor, una scelta casuale, indicata come Random e LLM + Random RAG: lo stesso LLM riceve
+cinque esempi train estratti a caso, anziché recuperati per somiglianza.
+L'obiettivo è capire se gli esempi di compilazioni precedenti aiutano il modello
+linguistico a prendere decisioni migliori e quale costo comporta questo aiuto.
+
+La valutazione riguarda 90 circuiti riservati al Test. Gli altri 510 circuiti
+del corpus sono stati destinati al train (422) e alla validation (88).
+Il train fornisce gli esempi e i dati di apprendimento; la validation ha guidato
+la scelta della configurazione LLM. Le impostazioni dei cinque sistemi originali erano già fissate.
+Per ciascun circuito e sistema è prevista una sola compilazione.
+
+Osserviamo tre aspetti complementari. Il primo è la \textbf{qualità}, espressa
+dallo score \emph{expected fidelity}: un valore fra 0 e 1 che stima la fedeltà
+del circuito compilato, dove un valore maggiore è migliore. Il secondo è la
+\textbf{riuscita}: quanti circuiti arrivano a una compilazione valida e quanti
+terminano con un errore o oltre il tempo disponibile. Il terzo è il
+\textbf{costo di esecuzione}: tempo totale, tempo del compilatore e, per gli
+LLM, tempo di risposta, token utilizzati e richieste di correzione.
+Queste misure vanno lette insieme: uno score elevato sui soli casi riusciti
+non descrive da solo l'utilità di un sistema.
+
+Prima del Test, l'aspettativa di lavoro era che LLM + RAG ottenesse score
+migliori di LLM no RAG e Random, grazie agli esempi pertinenti. Ci si aspettava
+inoltre che MQT Predictor, essendo progettato e addestrato per questo compito,
+offrisse il risultato complessivamente migliore, anche nei tempi.
+Non era stato anticipato un costo temporale di RAG vicino al doppio di quello
+del modello senza esempi.
+
+La qualità del circuito compilatoè stimata con proprietà sintetiche dei dispositivi, usando la stessa
+metrica di MQT Predictor 2.4.0 per tutti e 5 i metodi. Non si tratta di esecuzioni
+su un computer quantistico reale. Nelle pagine seguenti descriviamo prima
+le impostazioni dei cinque sistemi, poi i risultati in tabelle e grafici,
+e infine le conclusioni. L'appendice conserva i valori di ogni circuito.
+
+\clearpage
+\section{Sistemi e impostazioni delle prove}
+Tutti i sistemi ricevono gli stessi circuiti e operano nello stesso insieme
+di cinque dispositivi: IBM Falcon 27, IBM Falcon 127, IBM Heron 133,
+IBM Heron 156 e Quantinuum H2-56. Si usano le proprietà sintetiche congelate
+di MQT Bench. Una scelta è ammessa solo se il dispositivo può ospitare
+il circuito. Il processo di compilazione ha un limite di 100 secondi,
+che comprende anche il suo avvio. Un fallimento conclude quel caso:
+non si cerca una nuova configurazione per migliorarne l'esito.
+
+Per le tre varianti LLM e per Random, la compilazione usa Qiskit con seme 0 e un solo
+processo. La scelta è limitata a un catalogo di dodici configurazioni.
+Le opzioni combinano livelli di ottimizzazione 2 e 3 con diverse modalità
+di disposizione dei qubit e instradamento delle operazioni.
+Il catalogo è lo stesso per questi quattro sistemi.
+
+\subsection{LLM + RAG}
+Questo sistema usa Qwen3.5-4B con pesi Q8\_0 e temperatura t=0; configurazione scelta sulla validation. Riceve le caratteristiche del circuito, i dispositivi compatibili, le dodici configurazioni Qiskit
+e cinque esempi recuperati tramite RAG sul dataset generato dal solo train. L’assunzione fatta sugli esempi recuperati è che circuiti con caratteristiche simili possano fornire indicazioni utili sulla
+compilazione, ed essere quindi esempi coerenti.
+Il recupero confronta 49 caratteristiche numeriche con distanza Manhattan. L’indice usa 396
+circuiti distinti per contenuto: questo perchè sono presenti 26 duplicati fra i 422 circuiti di train.
+La loro inclusione avrebbe implicato dare un maggiore peso a circuiti già visti, mentre l’obiettivo è
+valutare la capacità di generalizzazione del modello. Il Dataset del RAG contiene compilazioni Qiskit
+già valutate; non contiene i punteggi dei circuiti di validation e di test. Al modello viene fornita
+una rappresentazione compatta in JSON delle informazioni, senza il codice QASM completo (stesso
+formato della validation).
+La risposta deve indicare una coppia dispositivo/configurazione e uno o due fatti verificabili. Sono
+consentite al massimo tre risposte complete, quindi due richieste di correzione. La prima scelta accettabile diventa definitiva e viene compilata una sola volta. All’ultimo tentativo una coppia ammessa
+può essere accettata anche se i fatti non sono tutti verificati: questa condizione viene registrata. La
+spiegazione libera non è certificata.
+Il limite di risposta è 4096 token e quello di attesa è 3600 secondi per chiamata. Il contesto richiesto
+è 60000 token, la cache è quantizzata a 8 bit (Q8\_0), Il pensiero esteso di qwen è disattivato. Il seme
+è 20260913; i parametri di generazione sono \texttt{top\_p}=0,95, \texttt{top\_k}=40, \texttt{min\_p}=0.
+
+\subsection{LLM no RAG}
+Si usa lo stesso Qwen3.5-4B, con gli stessi pesi e tutti i parametri appena descritti: temperatura 0,
+massimo 4096 token, contesto 60000 e lo stesso seme. Restano disponibili caratteristiche del circuito,
+dispositivi compatibili e dodici configurazioni, ma non vengono recuperati esempi. Questo sistema
+permette di osservare quanto cambia la scelta quando il modello dispone soltanto delle informazioni
+sul caso corrente.
+La risposta deve riportare un solo fatto sulla capacità in qubit del dispositivo scelto, perchè gli
+altri fatti erano necessari solo nel sistema LLM+RAG. Visto che nessun esempio viene recuperato qui,
+non è necessario validare altri fatti. Restano il massimo di tre tentativi, i controlli sulla coppia e la
+stessa regola di accettazione finale dei fatti
+
+\subsection{MQT Predictor}
+Il Training set per il selettore e il Dataset del RAG sono quindi risorse diverse, costruite per scopi
+diversi.
+Le cinque politiche RL sono state preparate prima del Test, con un obiettivo di 100000 passi di
+addestramento per dispositivo (100352 al completamento dei gruppi di aggiornamento). Ottimizzano
+la metrica di expected fidelity. Il Test esegue una sola selezione e una sola compilazione RL per circuito,
+con limite esterno di 100 secondi. Il seme interno di MQT non è controllato. MQT può costruire una
+sequenza di passaggi e non è vincolato alle dodici configurazioni Qiskit degli altri sistemi.
+Il selettore è una Random Forest con 200 alberi, pesi delle classi bilanciati, seme 0 e 2 processi.
+Questi parametri sono stati fissati senza una ricerca degli iperparametri sulla validation 
+
+\textbf{La prova MQT qui riportata è esplorativa.} Il selettore usa 384 dei 396 campioni train
+previsti; 12 sono esclusi. La raccolta contiene 1853 compilazioni riuscite su 1878 coppie previste. Le
+classi apprese dal selettore sono 4: Falcon 127, Heron 133, Heron 156 e Quantinuum H2-56. Falcon 27
+non compare fra i vincitori del Training set in nemmeno un circuito, perciò non diventa mai etichetta
+del training set e non viene di consguenza mai scelto dal selettore ML. La generazione del training set
+per il selettore comprende tentativi a 100 secondi e recuperi a 300 secondi per i circuiti che non riuscivano ad essere compilati entro 100 secondi. Il Test mantiene invece il limite di 100 secondi. Questo
+è un primo limite del test: alcuni circuiti possono richiedere decine di minuti per essere compilati da
+MQT-Predicotr, e quindi con un limite di 300 secondi, a non tutti i circuiti del training set è stata
+assegnata l’etichetta. Infatti questo test usa solo 384 dei 396 circuiti previsti, e quindi non completa
+la valutazione conforme al test originale. Detto questo è comunque da tenere in considerazione nel
+test che MQT richiede tempi di compilazione più lunghi, e poichè stiamo confrontando tutti i sistemi
+equalmente su 100 secondi, il test rimane valido per confrontare le prestazioni dei sistemi. Probabilmente con quei 12 circuiti in più, MQT avrebbe potuto ottenere risultati ancora migliori in termini
+di score sui circuiti compilati (non esprimibile con assoluta certezza), ma le tempistiche sarebbero
+rimaste alte, anzi sarebbero addirittura aumentate.
+
+\subsection{Random}
+Random estrae con probabilità uniforme una coppia fra tutte quelle compatibili di dispositivo e configurazione Qiskit. Il seme deriva da 20260921 e dall’impronta del circuito, così da conservare la scelta
+effettuata. La coppia estratta viene compilata una sola volta, con seme Qiskit 0 e limite di 100 secondi.
+Un fallimento non provoca una nuova estrazione.
+Random non usa esempi, modelli linguistici o addestramento. Fornisce un riferimento semplice:
+permette di capire quanto la scelta ragionata migliori rispetto a una scelta casuale nello stesso catalogo.
+Una sola estrazione per circuito, tuttavia, non misura tutte le possibili prestazioni del metodo casuale.
+
+
+
+\subsection{LLM + Random RAG}
+L'unica differenza tra questo sistema e LLM+RAG è il modo in cui vengono recuperati gli esempi. Vengono estratti cinque
+esempi di train dal dataset causalmente. Non calcola la distanza Manhattan. Il seme del recupero è 20260927; quello per circuito
+dipende anche dall'impronta del QASM. Il seme di generazione LLM resta 20260913.
+
+I fatti dichiarati vengono sottoposti agli stessi controlli del RAG.
+Una compilazione valida può comunque essere accettata con fatti non verificati.
+Le ipotesi testuali non sono verificate e non vanno considerate affermazioni vere.
+\clearpage\section{Risultati}
+\subsection{Riuscita e qualità: i dati di insieme}
+Le tabelle raccolgono prima i risultati principali. Ogni circuito ha lo stesso peso. Lo score medio
+considera soltanto le compilazioni riuscite: quando cambiano i successi, cambia anche l’insieme su cui
+è calcolato. Un fallimento non riceve uno score uguale a zero. Per un confronto diretto della qualità
+useremo quindi i circuiti riusciti per entrambi i sistemi.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.0cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}}
+\toprule
+Misura & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+Circuiti previsti & 90 & 90 & 90 & 90 & 90 \\
+Circuiti conclusi & 90 & 90 & 90 & 90 & 90 \\
+Compilazioni riuscite & 90 & 90 & 75 & 80 & 90 \\
+Fallimenti & 0 & 0 & 15 & 10 & 0 \\
+Score medio sui successi & 0,798379 & 0,634778 & 0,875638 & 0,682664 & 0,751812 \\
+Score mediano sui successi & 0,921379 & 0,803307 & 0,958844 & 0,815146 & 0,894525 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+La soglia 0,8 offre una seconda lettura: quanti dei circuiti previsti ottengono una compilazione valida
+con score almeno pari a questo valore. Il denominatore comprende anche i fallimenti; i casi senza score
+restano distinti dai successi sotto soglia
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.0cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}}
+\toprule
+Misura & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+Circuiti con score $\geq 0{,}8$ & 70/90 & 45/90 & 65/90 & 44/90 & 64/90 \\
+Percentuale sul Test & 77,8\% & 50,0\% & 72,2\% & 48,9\% & 71,1\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+I fallimenti osservati sono MQT Predictor : 15, Random: 10. In tutti questi casi il processo ha
+superato il limite di tempo. I dettagli e le misure mancanti rimangono visibili nell’appendice.
+\clearpage\subsection{Tempi e costo delle risposte}
+Il tempo totale misura il percorso dal circuito all’esito, compresi scelta, risposte, correzioni e compilazione. Il tempo interno riguarda soltanto il lavoro del compilatore. Il tempo del processo comprende
+anche avvio e controlli. I timeout entrano nel tempo totale e nel tempo del processo quando misurati.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.0cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}}
+\toprule
+Misura & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+Tempo totale medio (s) & 27,49 & 14,11 & 35,36 & 12,49 & 29,99 \\
+Tempo totale mediano (s) & 26,09 & 14,10 & 18,37 & 1,23 & 29,01 \\
+Circuiti con misura & 90/90 & 90/90 & 90/90 & 90/90 & 90/90 \\
+Compilazione interna medio (s) & 1,79 & 0,39 & 17,76 & 0,67 & 1,46 \\
+Compilazione interna mediano (s) & 0,71 & 0,37 & 13,09 & 0,38 & 0,49 \\
+Circuiti con misura & 90/90 & 90/90 & 75/90 & 80/90 & 90/90 \\
+Processo di compilazione medio (s) & 2,40 & 0,93 & 35,35 & 12,20 & 2,01 \\
+Processo di compilazione mediano (s) & 1,32 & 0,90 & 18,35 & 0,95 & 1,09 \\
+Circuiti con misura & 90/90 & 90/90 & 90/90 & 90/90 & 90/90 \\
+Preparazione e scelta medio (s) & 25,06 & 13,17 & 0,24 & 0,26 & 27,96 \\
+Preparazione e scelta mediano (s) & 24,52 & 13,20 & 0,27 & 0,26 & 27,44 \\
+Circuiti con misura & 90/90 & 90/90 & 75/90 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+I token sommano ingresso e uscita di tutte le chiamate, comprese le correzioni. Una correzione è una
+richiesta aggiuntiva al modello, non una nuova compilazione. Questi costi non si applicano a MQT e Random.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.8cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}>{\centering\arraybackslash}p{2.2cm}}
+\toprule
+Misura & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+Token in ingresso (somma) & 1\,460\,430 & 764\,221 & 2\,370\,076 \\
+Token in uscita (somma) & 20\,277 & 10\,533 & 32\,467 \\
+Token complessivi (somma) & 1\,480\,707 & 774\,754 & 2\,402\,543 \\
+Chiamate (somma) & 126 & 90 & 202 \\
+Correzioni (somma) & 36 & 0 & 112 \\
+Circuiti con correzioni & 19 & 0 & 57 \\
+Accettati con fatti non verificati & 17 & 0 & 55 \\
+Tempo medio delle risposte (s) & 20,27 & 12,58 & 26,43 \\
+Circuiti con misura dei token & 90/90 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+\clearpage\subsection{Confronti sugli stessi circuiti}
+Per confrontare LLM + RAG con ciascun concorrente consideriamo solo i circuiti con score disponibile
+per entrambi. La differenza è lo score RAG meno lo score dell’altro sistema. Un valore positivo indica
+una qualità stimata maggiore per RAG. Questa analisi non sostituisce il conteggio dei fallimenti.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.0cm}>{\centering\arraybackslash}p{2.4cm}>{\centering\arraybackslash}p{2.4cm}>{\centering\arraybackslash}p{2.4cm}>{\centering\arraybackslash}p{2.4cm}}
+\toprule
+Confronto con LLM + RAG & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+Circuiti riusciti in comune & 90 & 75 & 80 & 90 \\
+Score medio LLM + RAG & 0,798379 & 0,798956 & 0,826257 & 0,798379 \\
+Score medio del sistema in colonna & 0,634778 & 0,875638 & 0,682664 & 0,751812 \\
+Differenza media (RAG meno altro) & 0,163601 & -0,076682 & 0,143593 & 0,046567 \\
+RAG ha score maggiore & 71 & 17 & 65 & 38 \\
+Score uguale & 10 & 0 & 10 & 40 \\
+RAG ha score minore & 9 & 58 & 5 & 12 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+I successi comuni a tutti i sistemi presenti sono 68. Le medie su questo stesso insieme sono:
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.0cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.9cm}}
+\toprule
+Misura & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+Score medio sui successi comuni & 0,828165 & 0,701237 & 0,889967 & 0,704892 & 0,780934 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+I grafici che seguono mantengono sempre lo stesso ordine: LLM + RAG in alto a sinistra, LLM no RAG in alto a destra, MQT nella seconda riga a sinistra, Random nella seconda riga a destra e LLM + Random RAG centrato nella terza riga. Nei grafici per circuito, la posizione orizzontale segue l’ordine alfabetico dei nomi in appendice.
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Quanti circuiti arrivano a una compilazione valida}
+\begingroup\small La riuscita mostra se il sistema arriva a un circuito compilato valido. Le barre distinguono successi e fallimenti. Il confronto riguarda tutti i circuiti previsti, quindi rende visibili anche i casi che non entrano nelle medie dello score. I due LLM completano 90 e 90 compilazioni; MQT ne completa 75 e Random 80. LLM + Random RAG completa 90 compilazioni.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/esiti.tex}
+\captionof{figure}{Riuscita sui circuiti previsti.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Quanti circuiti raggiungono uno score di almeno 0,8}
+\begingroup\small Ogni torta rappresenta l’intero Test, con 90 circuiti. Il blu indica uno score almeno pari a 0,8; l’arancione uno score inferiore; il grigio un caso senza score. In questo modo qualità e copertura si leggono con lo stesso denominatore. LLM + RAG: 70/90; LLM no RAG: 45/90; MQT Predictor: 65/90; Random: 44/90; LLM + Random RAG: 64/90.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/soglia_score_080.tex}
+\captionof{figure}{Percentuali sui circuiti previsti, senza assegnare uno score ai fallimenti. La soglia è descrittiva.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Qualità delle compilazioni}
+\begingroup\small Ogni punto mostra lo score di un circuito riuscito. La separazione in cinque pannelli permette di osservare la distribuzione dei valori senza sovrapporre i sistemi. Le posizioni prive di un punto corrispondono a uno score non disponibile; non indicano qualità nulla. Per stabilire quante volte RAG migliora una scelta valgono i confronti appaiati delle tabelle precedenti.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/score.tex}
+\captionof{figure}{Score sui successi; scala comune da 0 a 1.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Tempo necessario per arrivare all’esito}
+\begingroup\small Il tempo totale è il costo di esecuzione osservato per ciascun circuito e comprende anche i fallimenti. I casi vicini al limite di tempo rendono visibili le attese più onerose. Media e mediana aiutano a distinguere il costo complessivo da quello tipico di un circuito. RAG richiede in media 27,49 s contro 14,11 s senza esempi: circa 1,95 volte tanto.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/total_seconds.tex}
+\captionof{figure}{Tempi totali misurati in secondi, inclusi i casi falliti.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Tempo impiegato dal compilatore}
+\begingroup\small Qui isoliamo il tempo interno del compilatore, lasciando fuori la scelta del dispositivo e la risposta LLM. Per un processo interrotto dal limite esterno può mancare questa misura. I punti assenti di MQT e Random non devono quindi essere letti come compilazioni istantanee, né confrontati come se tutti i sistemi avessero completato gli stessi casi.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/compilation_seconds.tex}
+\captionof{figure}{Durata interna sulle sole misure disponibili; i timeout senza misura restano assenti.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Durata del processo di compilazione}
+\begingroup\small Il processo comprende l’avvio, il lavoro del compilatore e i controlli finali. A differenza della misura interna, questa durata rende visibili anche i timeout registrati dall’esterno. La differenza rispetto al grafico precedente aiuta a capire quanto pesano i casi che non producono una compilazione valida.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/compilation_process_seconds.tex}
+\captionof{figure}{Durata del processo in secondi, compresi i timeout misurati.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Quantità di testo elaborata dagli LLM}
+\begingroup\small Il conteggio somma i token di ingresso e uscita di tutte le chiamate relative allo stesso circuito. Gli esempi del RAG aumentano il testo in ingresso; le richieste di correzione aggiungono ulteriori chiamate. I token descrivono il volume di testo elaborato, non un costo monetario. Per MQT e Random questa misura non si applica.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/total_tokens.tex}
+\captionof{figure}{Token complessivi per circuito; le celle non applicabili restano nella posizione prevista.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Attesa delle risposte degli LLM}
+\begingroup\small Per ciascun circuito sommiamo il tempo trascorso fra invio e ricezione completa di tutte le risposte LLM. Il grafico separa così questa attesa dalla compilazione e dal recupero degli esempi. La presenza del RAG si accompagna a risposte mediamente più lente in questa esecuzione, ma il Test non permette di attribuire tutta la differenza a una singola causa.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/llm_response_seconds.tex}
+\captionof{figure}{Tempo cumulativo delle risposte in secondi; nessuna misura LLM per MQT e Random.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Richieste di correzione prima della compilazione}
+\begingroup\small Una correzione è una chiamata oltre la prima nello stesso caso. Serve a ottenere una risposta accettabile e non ripete la compilazione quantistica. I picchi mostrano dove aumentano le chiamate e, di conseguenza, anche token e attesa. La riuscita della compilazione non certifica comunque la spiegazione libera del modello.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/retries.tex}
+\captionof{figure}{Numero di correzioni per circuito; zero significa che è bastata la prima risposta.}
+\end{center}\restoregeometry
+\clearpage\newgeometry{margin=1.2cm}\captionsetup{hypcap=false}
+\subsection{Come si distribuiscono gli score}
+\begingroup\small La curva indica la quota di compilazioni riuscite con score non superiore al valore letto sull’asse orizzontale. Un aumento vicino a 1 segnala molti risultati di qualità stimata elevata. Ogni pannello considera soltanto i successi del proprio sistema: i denominatori sono scritti sugli assi e possono essere diversi. Questa figura descrive la forma delle distribuzioni; non sostituisce il confronto sugli stessi circuiti.\par\endgroup
+\begin{center}
+\input{\TestReportPath grafici/distribuzione_score.tex}
+\captionof{figure}{Distribuzioni cumulative sui successi, con scale comuni.}
+\end{center}\restoregeometry
+\clearpage\section{Conclusioni}
+L’esito è positivo per l’obiettivo di usare esempi di compilazione a supporto del modello linguistico. LLM + RAG ottiene uno score maggiore in 71 dei 90 confronti con LLM no RAG e in 65 degli 80 confronti con Random. Gli esempi migliorano quindi la qualità stimata nella maggior parte dei confronti osservati. Questo risultato riguarda i circuiti confrontabili e va letto insieme ai fallimenti riportati separatamente.
+
+Sui 75 successi comuni, RAG ha score medio 0,7990 e MQT 0,8756. RAG produce però 90 compilazioni valide su 90 circuiti, contro 75 di MQT. Offre dunque una maggiore copertura nel campione osservato. La riuscita su tutti i casi osservati, quando presente, è un’indicazione di affidabilità pratica, non una garanzia su qualsiasi circuito futuro.
+
+Anche il tempo medio totale è diverso: 27,49 s per RAG e 35,36 s per MQT. La mediana è invece 26,09 s per RAG e 18,37 s per MQT. È quindi corretto descrivere il costo medio e l’effetto dei timeout, evitando di estendere la graduatoria a ogni circuito o a tutte le statistiche dei tempi. Inoltre questi risultati MQT provengono dalla prova esplorativa con Training set incompleto descritta nella seconda sezione.
+
+Il miglioramento rispetto al modello senza esempi ha un costo: il tempo medio di RAG è 1,95 volte quello di LLM no RAG. Gli esempi, le correzioni e le compilazioni scelte contribuiscono al percorso complessivo. Il Test mostra questo compromesso, senza isolare sperimentalmente il peso causale di ciascuna componente.
+
+LLM + RAG opera oggi entro un catalogo di sole dodici configurazioni Qiskit. Ampliare il catalogo e il Dataset potrebbe includere esempi e casi con compilazioni migliori. È una possibilità da verificare, non un miglioramento già dimostrato: aumenterebbero anche il costo della raccolta e la complessità della scelta.
+
+Un altro elemento da considerare è il criterio di qualità. La fedeltà attesa è una metrica integrata in MQT ed è anche l’obiettivo delle sue politiche di compilazione. Esiste quindi una coerenza fra addestramento e valutazione che aiuta a contestualizzare i risultati. La stessa metrica viene comunque applicata a tutti i sistemi e guida anche la valutazione degli esempi Qiskit: la sua origine, da sola, non dimostra una distorsione del confronto. Altre metriche o prove su hardware reale potrebbero produrre una graduatoria diversa.
+
+Il risultato è incoraggiante anche dal punto di vista della preparazione del sistema. Il RAG riusa un modello linguistico già disponibile e costruisce il proprio Dataset da compilazioni Qiskit, senza addestrare una politica RL per ogni dispositivo. MQT richiede invece le politiche RL e il Training set del selettore supervisionato. Questa differenza riduce gli oneri di addestramento specifici del nostro approccio, ma i tempi del Test non misurano il costo complessivo delle due preparazioni. Possiamo quindi sostenere la maggiore semplicità della preparazione, senza assegnarle un risparmio numerico non misurato. Nel perimetro descritto, il RAG rappresenta una soluzione promettente per combinare qualità delle scelte e riuscita della compilazione.
+\subsection{Il contributo della scelta degli esempi}
+LLM + RAG ha score medio 0,798379, contro 0,751812 di LLM + Random RAG sui medesimi 90 circuiti riusciti. Il divario è 0,046567 di score: circa 4,66\%, vicino ai cinque punti.
+
+La media, da sola, nasconde differenze rilevanti fra circuiti. Per rendere concreta la lettura distinguiamo tre fasce di qubit ricavate dal manifest.
+\begin{samepage}
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\toprule
+Qubit & Casi & Identici & $|\Delta|\leq0{,}01$ & RAG & Random RAG & No RAG \\
+\midrule
+Fino a 5 & 22 & 2/22 & 20/22 & 0,9864 & 0,9851 & 0,9814 \\
+Da 6 a 16 & 50 & 31/50 & 33/50 & 0,9026 & 0,8656 & 0,7059 \\
+Oltre 16 & 18 & 7/18 & 12/18 & 0,2791 & 0,1504 & 0,0134 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+\end{samepage}
+Fra i 22 circuiti fino a 5 qubit, 20 hanno score distanti al massimo 0,01 fra i due recuperi; solo 2 sono identici alla precisione conservata. Il divario medio è 0,001311. Anche LLM no RAG raggiunge in questa fascia uno score medio elevato (0,9814. Questi dati suggeriscono un contributo aggiuntivo ridotto della selezione degli esempi in molti casi piccoli, pur senza dimostrare che tutti i circuiti con pochi qubit siano facili.
+
+Per \nolinkurl{groundstate_medium_indep_tket_12}, LLM + RAG ottiene 0,796377 e LLM + Random RAG 0,596601. La differenza è 0,199776 di score, cioè 19,98\%.
+
+Per \nolinkurl{qpeexact_indep_qiskit_40}, LLM + RAG ottiene 0,374131 e LLM + Random RAG 0,010348. La differenza è 0,363783 di score, cioè 36,38\%.
+
+Per \nolinkurl{qpeexact_indep_tket_14}, LLM + RAG ottiene 0,852260 e LLM + Random RAG 0,513999. La differenza è 0,338261 di score, cioè 33,83\%.
+
+Per \nolinkurl{qpeinexact_indep_qiskit_30}, LLM + RAG ottiene 0,519436 e LLM + Random RAG 0,065441. La differenza è 0,453995 di score, cioè 45,40\%.
+
+Altri esempi che mostrano questa differenza possono essere trovati nelle tabelle dell’appendice. 
+I due esempi mostrano che la scelta di casi pertinenti può accompagnarsi a proposte molto migliori anche quando la differenza media complessiva sembra modesta. Nel campione osservato il vantaggio medio è più ampio nelle fasce con più qubit. La lettura proposta è dunque che una buona metrica per scegliere gli esempi migliori da recuperare può aiutare soprattutto nei casi più impegnativi, senza escludere che anche circuiti piccoli possano trarre beneficio da esempi pertinenti.
+
+Oltre allo score, anche i tempi e il consumo di token aumentano nel sistema LLM + Random RAG. Questo accade perchè il numero di retry è molto superiore: 112 contro 36 del sistema LLM + RAG. La scelta degli esempi riduce quindi anche il numero di correzioni richieste al modello, con un effetto positivo su tempi e token.
+
+\clearpage\subsection{Limiti dell'interpretazione}
+Le conclusioni riguardano questi circuiti e queste esecuzioni. Le famiglie del corpus sono correlate
+e una sola prova per circuito non descrive la variabilità fra nuove esecuzioni. Gli intervalli statistici
+non correggono la dipendenza fra circuiti della stessa famiglia. Temperatura zero non implica risultati
+identici con qualsiasi ambiente di esecuzione.
+Lo score è una stima su dispositivi sintetici. Non abbiamo misurato qualità su hardware quantistico
+reale, energia o memoria durante tutte le prove. I tempi dipendono anche dalla macchina, dal carico e
+dalla cache. Il tempo totale riportato non comprende costruzione del Dataset, addestramento o avvio
+dei servizi. La mediana e la media possono quindi raccontare aspetti diversi, soprattutto quando
+alcuni casi raggiungono il limite di tempo.
+Il migliore fra i cinque sistemi osservati non rappresenta
+necessariamente la migliore compilazione possibile.
+
+\clearpage\appendix\section{Statistiche per circuito}
+Ogni tabella riporta il nome completo del circuito, nello stesso ordine alfabetico dei grafici. Le colonne mantengono i nomi dei sistemi. Le misure sono separate in tabelle dedicate per evitare colonne troppo fitte. Tutti i tempi sono in secondi; token, chiamate e correzioni sono conteggi. Il simbolo -- indica un valore mancante. Le misure LLM non si applicano a MQT e Random.
+
+Il piano corrente prevede un episodio per circuito. Qualora siano presenti repliche, le misure sono prima mediate per circuito, lo score sui soli successi; una media non intera resta tale. I file CSV conservano i valori completi e le coperture di ciascuna misura.
+\subsection{Esito della compilazione}
+Riuscito indica una compilazione valida; fallito un esito terminale senza risultato. I casi misti sono espliciti.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{groundstate_medium_indep_tket_12} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{groundstate_small_indep_tket_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_10} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_11} & Riuscito & Riuscito & Fallito & Fallito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_12} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_13} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_14} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_15} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_16} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_2} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_3} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_30} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_40} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_5} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_50} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_6} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_60} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_7} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_70} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_8} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_qiskit_9} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_10} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_11} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_12} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_13} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_14} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_15} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_2} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_3} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_30} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_40} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_5} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_50} & Riuscito & Riuscito & Fallito & Fallito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_6} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_60} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_7} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_8} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeexact_indep_tket_9} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & Riuscito & Riuscito & Riuscito & Fallito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_10} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_11} & Riuscito & Riuscito & Fallito & Fallito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_12} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_13} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_14} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_15} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_2} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_3} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_30} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_40} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_5} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_50} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_6} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_60} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_7} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_8} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{qpeinexact_indep_tket_9} & Riuscito & Riuscito & Fallito & Riuscito & Riuscito \\
+\nolinkurl{routing_indep_qiskit_12} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{routing_indep_qiskit_2} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{routing_indep_qiskit_6} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{routing_indep_tket_12} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{routing_indep_tket_2} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{routing_indep_tket_6} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{tsp_indep_qiskit_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{tsp_indep_qiskit_9} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{tsp_indep_tket_4} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\nolinkurl{tsp_indep_tket_9} & Riuscito & Riuscito & Riuscito & Riuscito & Riuscito \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Score}
+Score delle compilazioni riuscite, a sei decimali per la lettura. I valori a dieci decimali sono conservati nei CSV. Un fallimento non vale zero.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 0,796377 & 0,510637 & 0,772933 & -- & 0,796377 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 0,796377 & 0,509524 & 0,772933 & -- & 0,596601 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 0,978859 & 0,964426 & 0,970427 & 0,928492 & 0,974951 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 0,968254 & 0,964248 & 0,972176 & 0,964274 & 0,974893 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 0,921835 & 0,767689 & 0,958844 & 0,921835 & 0,768515 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 0,903234 & 0,731685 & -- & -- & 0,903234 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 0,887909 & 0,711847 & 0,945410 & 0,469253 & 0,691400 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 0,871404 & 0,600914 & -- & 0,269624 & 0,871404 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 0,853872 & 0,366016 & 0,940598 & 0,276361 & 0,853872 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 0,830088 & 0,349372 & 0,932305 & 0,391908 & 0,830088 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 0,809586 & 0,251521 & -- & 0,272136 & 0,809586 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 0,998760 & 0,998760 & 0,993791 & 0,993303 & 0,996823 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 0,996095 & 0,995953 & 0,991353 & 0,992857 & 0,997590 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 0,520294 & 0,043532 & 0,860108 & -- & 0,520294 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 0,986949 & 0,986936 & 0,991598 & 0,986936 & 0,989102 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 0,374131 & 0,006102 & 0,824957 & 0,000188 & 0,010348 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 0,972066 & 0,947623 & 0,979059 & 0,939384 & 0,978235 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 0,269473 & 0,000461 & -- & 0,000125 & 0,001155 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 0,959307 & 0,936109 & 0,977444 & 0,970687 & 0,936109 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 0,000011 & 0,000028 & 0,091756 & 0,000000 & 0,000011 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 0,961608 & 0,899305 & 0,970572 & 0,812530 & 0,961608 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 0,000003 & 0,000003 & 0,238544 & 0,000000 & 0,000013 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 0,946599 & 0,848152 & 0,965487 & 0,946599 & 0,946599 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 0,934907 & 0,822892 & 0,960428 & 0,648358 & 0,934907 \\
+\nolinkurl{qpeexact_indep_tket_10} & 0,920923 & 0,812670 & 0,957118 & 0,713933 & 0,801814 \\
+\nolinkurl{qpeexact_indep_tket_11} & 0,902205 & 0,716107 & -- & 0,716107 & 0,902205 \\
+\nolinkurl{qpeexact_indep_tket_12} & 0,886844 & 0,649913 & 0,947115 & 0,663486 & 0,886844 \\
+\nolinkurl{qpeexact_indep_tket_13} & 0,869942 & 0,378679 & -- & 0,377617 & 0,869942 \\
+\nolinkurl{qpeexact_indep_tket_14} & 0,852260 & 0,365688 & 0,935529 & 0,430892 & 0,513999 \\
+\nolinkurl{qpeexact_indep_tket_15} & 0,828172 & 0,353802 & 0,927281 & 0,076135 & 0,828147 \\
+\nolinkurl{qpeexact_indep_tket_2} & 0,998760 & 0,998760 & 0,992844 & 0,999421 & 0,999421 \\
+\nolinkurl{qpeexact_indep_tket_3} & 0,995878 & 0,996051 & 0,987219 & 0,995878 & 0,993775 \\
+\nolinkurl{qpeexact_indep_tket_30} & 0,567455 & 0,060183 & -- & 0,567455 & 0,567455 \\
+\nolinkurl{qpeexact_indep_tket_4} & 0,986858 & 0,982576 & 0,988412 & 0,955892 & 0,982576 \\
+\nolinkurl{qpeexact_indep_tket_40} & 0,439875 & 0,007457 & 0,822239 & 0,000590 & 0,004900 \\
+\nolinkurl{qpeexact_indep_tket_5} & 0,969155 & 0,954778 & 0,980824 & 0,913651 & 0,978147 \\
+\nolinkurl{qpeexact_indep_tket_50} & 0,341593 & 0,000726 & -- & -- & 0,341593 \\
+\nolinkurl{qpeexact_indep_tket_6} & 0,946078 & 0,915528 & 0,977444 & 0,918391 & 0,915528 \\
+\nolinkurl{qpeexact_indep_tket_60} & 0,000027 & 0,000027 & 0,209267 & -- & 0,000159 \\
+\nolinkurl{qpeexact_indep_tket_7} & 0,961204 & 0,917689 & 0,972322 & 0,883125 & 0,917779 \\
+\nolinkurl{qpeexact_indep_tket_8} & 0,946088 & 0,869384 & 0,963750 & 0,827626 & 0,946088 \\
+\nolinkurl{qpeexact_indep_tket_9} & 0,934290 & 0,840261 & 0,962160 & 0,804024 & 0,857613 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 0,918907 & 0,789175 & 0,958844 & 0,918907 & 0,918907 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 0,903207 & 0,730148 & 0,952103 & 0,693265 & 0,796970 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 0,886418 & 0,693625 & 0,950533 & 0,715435 & 0,886418 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 0,868584 & 0,584085 & -- & 0,868584 & 0,868584 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 0,849780 & 0,524930 & 0,937216 & -- & 0,849780 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 0,830088 & 0,348108 & 0,932305 & 0,830088 & 0,830088 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 0,809586 & 0,250598 & 0,930767 & 0,809586 & 0,809586 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 0,999301 & 0,999301 & -- & 0,988421 & 0,996823 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 0,993188 & 0,993384 & 0,991353 & 0,977365 & 0,993188 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 0,519436 & 0,065441 & 0,853934 & 0,009063 & 0,065441 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 0,980528 & 0,974579 & 0,987768 & 0,985930 & 0,974579 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 0,374131 & 0,006078 & 0,821990 & -- & 0,004864 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 0,971085 & 0,950858 & 0,982592 & 0,978235 & 0,951786 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 0,269473 & 0,000461 & 0,780627 & -- & 0,269473 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 0,955010 & 0,916844 & 0,975685 & 0,897655 & 0,926214 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 0,000011 & 0,000028 & 0,000000 & 0,000002 & 0,000028 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 0,958524 & 0,898299 & 0,972322 & 0,752664 & 0,958524 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 0,000003 & 0,000003 & 0,212468 & 0,000000 & 0,000003 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 0,946599 & 0,844502 & 0,963750 & 0,831868 & 0,946599 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 0,933364 & 0,823371 & 0,956975 & 0,789463 & 0,861713 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 0,918025 & 0,793943 & 0,957118 & 0,787248 & 0,918025 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 0,902232 & 0,714672 & -- & -- & 0,763612 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 0,885222 & 0,668218 & 0,950533 & 0,618899 & 0,717856 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 0,867152 & 0,618641 & -- & 0,595351 & 0,867152 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 0,848100 & 0,353789 & 0,940598 & 0,353754 & 0,848100 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 0,828272 & 0,352723 & -- & 0,354121 & 0,828272 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 0,999301 & 0,999301 & -- & 0,997198 & 0,998354 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 0,993188 & 0,993384 & 0,987219 & 0,966093 & 0,993384 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 0,566672 & 0,043284 & 0,861659 & 0,566621 & 0,566621 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 0,981219 & 0,974579 & 0,987768 & 0,941921 & 0,985900 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 0,439901 & 0,007465 & 0,819035 & 0,000597 & 0,014061 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 0,968512 & 0,957267 & 0,984363 & 0,955254 & 0,971454 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 0,341583 & 0,000725 & 0,782737 & 0,341583 & 0,341583 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 0,968853 & 0,936714 & 0,973929 & 0,839923 & 0,968853 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 0,000027 & 0,000027 & 0,000002 & 0,000000 & 0,000027 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 0,958179 & 0,882983 & 0,972322 & 0,817763 & 0,840859 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 0,946145 & 0,871213 & 0,963750 & 0,752538 & 0,946145 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 0,932665 & 0,841670 & -- & 0,673731 & 0,932665 \\
+\nolinkurl{routing_indep_qiskit_12} & 0,939834 & 0,939834 & 0,927142 & 0,803168 & 0,930540 \\
+\nolinkurl{routing_indep_qiskit_2} & 0,997834 & 0,997834 & 0,998849 & 0,992076 & 0,992076 \\
+\nolinkurl{routing_indep_qiskit_6} & 0,981658 & 0,981658 & 0,963750 & 0,972061 & 0,967051 \\
+\nolinkurl{routing_indep_tket_12} & 0,939834 & 0,939834 & 0,927142 & 0,892150 & 0,928472 \\
+\nolinkurl{routing_indep_tket_2} & 0,997834 & 0,997834 & 0,998849 & 0,985913 & 0,997834 \\
+\nolinkurl{routing_indep_tket_6} & 0,981658 & 0,981658 & 0,963750 & 0,961419 & 0,981658 \\
+\nolinkurl{tsp_indep_qiskit_4} & 0,983920 & 0,981631 & 0,980026 & 0,970105 & 0,970105 \\
+\nolinkurl{tsp_indep_qiskit_9} & 0,924719 & 0,944808 & 0,928395 & 0,929628 & 0,924719 \\
+\nolinkurl{tsp_indep_tket_4} & 0,983920 & 0,981631 & 0,980026 & 0,943612 & 0,981631 \\
+\nolinkurl{tsp_indep_tket_9} & 0,924802 & 0,944849 & 0,928395 & 0,924802 & 0,924802 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Tempo totale (secondi)}
+Comprende il percorso dal circuito all’esito, incluse eventuali correzioni e fallimenti.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 37,294 & 15,314 & 39,276 & 100,499 & 28,701 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 26,693 & 13,695 & 34,711 & 100,351 & 27,388 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 23,943 & 13,846 & 15,475 & 2,695 & 27,890 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 25,402 & 14,320 & 16,891 & 1,207 & 26,730 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 25,832 & 14,418 & 15,137 & 1,314 & 27,229 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 26,627 & 14,142 & 100,176 & 100,279 & 37,943 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 26,098 & 14,318 & 18,039 & 1,245 & 27,705 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 33,600 & 13,975 & 100,174 & 1,321 & 28,794 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 26,386 & 14,416 & 18,525 & 1,186 & 27,980 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 26,961 & 14,541 & 18,477 & 1,246 & 27,985 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 26,469 & 14,778 & 100,170 & 1,298 & 28,424 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 26,515 & 14,957 & 15,221 & 1,162 & 28,187 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 24,334 & 14,037 & 16,627 & 1,112 & 21,758 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 31,727 & 13,276 & 25,349 & 100,278 & 29,312 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 31,477 & 14,581 & 17,380 & 1,165 & 26,614 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 41,729 & 13,287 & 36,381 & 1,332 & 22,850 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 23,998 & 14,061 & 17,074 & 1,200 & 30,921 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 34,168 & 13,463 & 100,177 & 1,571 & 26,947 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 24,365 & 14,091 & 15,263 & 1,176 & 23,447 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 29,426 & 13,755 & 52,959 & 4,804 & 20,627 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 24,969 & 14,212 & 15,866 & 1,161 & 30,548 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 22,999 & 13,852 & 55,697 & 1,538 & 29,185 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 25,598 & 14,303 & 15,919 & 1,402 & 42,347 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 25,752 & 14,408 & 18,780 & 1,107 & 28,878 \\
+\nolinkurl{qpeexact_indep_tket_10} & 25,915 & 14,226 & 15,167 & 1,218 & 29,093 \\
+\nolinkurl{qpeexact_indep_tket_11} & 26,428 & 13,917 & 100,166 & 1,132 & 24,274 \\
+\nolinkurl{qpeexact_indep_tket_12} & 26,638 & 13,893 & 17,375 & 1,157 & 26,131 \\
+\nolinkurl{qpeexact_indep_tket_13} & 26,804 & 14,408 & 100,165 & 1,155 & 25,389 \\
+\nolinkurl{qpeexact_indep_tket_14} & 26,805 & 14,421 & 18,539 & 1,116 & 31,492 \\
+\nolinkurl{qpeexact_indep_tket_15} & 26,644 & 15,029 & 19,778 & 1,232 & 50,864 \\
+\nolinkurl{qpeexact_indep_tket_2} & 30,424 & 14,108 & 14,867 & 1,136 & 24,189 \\
+\nolinkurl{qpeexact_indep_tket_3} & 30,730 & 14,075 & 16,979 & 1,115 & 28,201 \\
+\nolinkurl{qpeexact_indep_tket_30} & 39,630 & 13,226 & 100,212 & 1,266 & 32,625 \\
+\nolinkurl{qpeexact_indep_tket_4} & 24,592 & 14,401 & 17,383 & 1,106 & 31,048 \\
+\nolinkurl{qpeexact_indep_tket_40} & 32,947 & 13,338 & 48,659 & 1,362 & 24,878 \\
+\nolinkurl{qpeexact_indep_tket_5} & 24,303 & 14,216 & 17,638 & 9,353 & 26,982 \\
+\nolinkurl{qpeexact_indep_tket_50} & 27,656 & 13,436 & 100,172 & 100,290 & 25,853 \\
+\nolinkurl{qpeexact_indep_tket_6} & 24,802 & 14,027 & 17,431 & 1,206 & 26,160 \\
+\nolinkurl{qpeexact_indep_tket_60} & 23,456 & 13,881 & 63,139 & 100,292 & 30,499 \\
+\nolinkurl{qpeexact_indep_tket_7} & 26,221 & 14,218 & 14,965 & 1,204 & 26,453 \\
+\nolinkurl{qpeexact_indep_tket_8} & 37,687 & 14,499 & 16,068 & 1,168 & 32,784 \\
+\nolinkurl{qpeexact_indep_tket_9} & 25,828 & 15,106 & 19,597 & 1,235 & 30,851 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 33,306 & 14,207 & 15,118 & 1,332 & 33,657 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 26,329 & 14,172 & 15,516 & 1,354 & 26,098 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 31,801 & 14,405 & 19,594 & 1,324 & 31,598 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 26,217 & 13,876 & 100,169 & 1,607 & 33,338 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 26,184 & 14,013 & 18,332 & 100,289 & 34,597 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 26,258 & 14,457 & 18,418 & 1,185 & 54,485 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 26,055 & 14,839 & 21,779 & 1,491 & 22,661 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 26,087 & 14,942 & 100,170 & 1,109 & 27,984 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 23,204 & 13,855 & 17,429 & 1,160 & 30,482 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 25,124 & 13,429 & 27,852 & 1,282 & 24,523 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 23,436 & 14,078 & 17,324 & 1,202 & 31,414 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 41,540 & 13,421 & 30,405 & 100,320 & 25,802 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 23,784 & 14,071 & 17,030 & 1,324 & 33,020 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 33,887 & 13,474 & 58,429 & 100,348 & 29,113 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 24,105 & 14,113 & 17,324 & 1,194 & 27,920 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 29,449 & 13,879 & 20,581 & 1,588 & 31,032 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 24,573 & 14,063 & 14,766 & 1,163 & 29,513 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 22,643 & 13,952 & 55,381 & 7,697 & 30,114 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 25,289 & 14,351 & 15,924 & 1,313 & 27,374 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 26,338 & 14,396 & 15,083 & 2,011 & 26,668 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 26,083 & 14,218 & 15,369 & 1,317 & 33,743 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 25,976 & 13,941 & 100,174 & 100,307 & 33,038 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 26,173 & 13,965 & 20,146 & 1,258 & 36,614 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 25,939 & 13,972 & 100,173 & 1,218 & 35,027 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 25,988 & 14,445 & 18,827 & 1,242 & 36,399 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 25,888 & 15,006 & 100,168 & 1,114 & 35,480 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 29,714 & 14,095 & 100,172 & 1,260 & 35,258 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 23,209 & 14,041 & 17,577 & 1,128 & 30,740 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 39,365 & 13,339 & 32,960 & 1,168 & 29,733 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 23,461 & 13,911 & 17,235 & 1,164 & 28,936 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 31,972 & 13,352 & 38,726 & 1,447 & 30,236 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 23,477 & 14,198 & 17,276 & 1,110 & 27,779 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 26,878 & 13,498 & 52,381 & 1,336 & 28,166 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 30,314 & 14,150 & 15,579 & 1,102 & 26,635 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 22,421 & 13,719 & 22,036 & 2,651 & 30,835 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 24,790 & 14,132 & 16,621 & 1,126 & 25,935 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 37,336 & 14,431 & 16,233 & 1,173 & 34,582 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 25,940 & 13,823 & 100,168 & 1,274 & 32,927 \\
+\nolinkurl{routing_indep_qiskit_12} & 24,159 & 14,197 & 19,683 & 1,184 & 35,936 \\
+\nolinkurl{routing_indep_qiskit_2} & 23,234 & 14,010 & 15,119 & 1,410 & 26,059 \\
+\nolinkurl{routing_indep_qiskit_6} & 23,887 & 14,204 & 15,129 & 1,105 & 27,805 \\
+\nolinkurl{routing_indep_tket_12} & 23,763 & 14,096 & 19,239 & 1,108 & 28,179 \\
+\nolinkurl{routing_indep_tket_2} & 23,342 & 13,919 & 14,229 & 1,158 & 32,623 \\
+\nolinkurl{routing_indep_tket_6} & 23,942 & 14,164 & 15,017 & 1,052 & 32,835 \\
+\nolinkurl{tsp_indep_qiskit_4} & 30,106 & 14,186 & 17,582 & 1,164 & 32,272 \\
+\nolinkurl{tsp_indep_qiskit_9} & 25,403 & 14,133 & 16,472 & 1,175 & 34,776 \\
+\nolinkurl{tsp_indep_tket_4} & 30,075 & 14,063 & 17,373 & 1,107 & 26,183 \\
+\nolinkurl{tsp_indep_tket_9} & 25,510 & 14,042 & 16,437 & 1,201 & 32,582 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Tempo interno del compilatore (secondi)}
+Una misura assente dopo un timeout resta -- e non viene sostituita con 100 secondi.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 3,923 & 0,399 & 29,045 & -- & 0,765 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 0,839 & 0,389 & 28,405 & -- & 0,399 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 0,705 & 0,388 & 10,580 & 1,895 & 0,483 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 1,677 & 0,381 & 12,298 & 0,381 & 0,484 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 0,792 & 0,382 & 10,710 & 0,391 & 0,396 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 0,759 & 0,389 & -- & -- & 16,944 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 0,760 & 0,353 & 13,468 & 0,375 & 0,392 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 0,855 & 0,380 & -- & 0,557 & 0,730 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 0,761 & 0,371 & 13,996 & 0,380 & 0,737 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 0,839 & 0,417 & 13,957 & 0,370 & 0,818 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 0,873 & 0,376 & -- & 0,482 & 0,832 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 0,373 & 0,356 & 11,046 & 0,365 & 0,381 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 0,391 & 0,348 & 12,480 & 0,365 & 0,368 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 0,835 & 0,396 & 20,919 & -- & 0,759 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 0,455 & 0,378 & 13,202 & 0,365 & 0,446 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 11,124 & 0,410 & 31,890 & 0,452 & 0,512 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 0,438 & 0,371 & 12,452 & 0,454 & 7,003 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 3,993 & 0,436 & -- & 0,521 & 0,497 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 0,389 & 0,370 & 10,666 & 0,378 & 0,370 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 0,743 & 0,459 & 48,581 & 3,580 & 0,602 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 0,589 & 0,411 & 10,555 & 0,370 & 0,594 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 0,759 & 0,482 & 51,383 & 0,487 & 0,595 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 0,660 & 0,358 & 11,338 & 0,637 & 12,525 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 0,662 & 0,395 & 14,252 & 0,370 & 0,662 \\
+\nolinkurl{qpeexact_indep_tket_10} & 0,708 & 0,357 & 10,571 & 0,390 & 0,389 \\
+\nolinkurl{qpeexact_indep_tket_11} & 0,780 & 0,373 & -- & 0,370 & 0,712 \\
+\nolinkurl{qpeexact_indep_tket_12} & 0,814 & 0,379 & 12,817 & 0,371 & 0,733 \\
+\nolinkurl{qpeexact_indep_tket_13} & 0,791 & 0,375 & -- & 0,367 & 0,727 \\
+\nolinkurl{qpeexact_indep_tket_14} & 0,770 & 0,397 & 13,967 & 0,369 & 0,418 \\
+\nolinkurl{qpeexact_indep_tket_15} & 0,854 & 0,380 & 15,136 & 0,403 & 21,622 \\
+\nolinkurl{qpeexact_indep_tket_2} & 0,447 & 0,356 & 10,737 & 0,366 & 0,374 \\
+\nolinkurl{qpeexact_indep_tket_3} & 0,452 & 0,370 & 12,835 & 0,368 & 0,387 \\
+\nolinkurl{qpeexact_indep_tket_30} & 15,311 & 0,404 & -- & 0,392 & 0,771 \\
+\nolinkurl{qpeexact_indep_tket_4} & 0,411 & 0,382 & 12,413 & 0,374 & 0,402 \\
+\nolinkurl{qpeexact_indep_tket_40} & 8,632 & 0,435 & 44,274 & 0,497 & 0,449 \\
+\nolinkurl{qpeexact_indep_tket_5} & 0,412 & 0,365 & 13,094 & 8,483 & 0,518 \\
+\nolinkurl{qpeexact_indep_tket_50} & 3,230 & 0,439 & -- & -- & 0,467 \\
+\nolinkurl{qpeexact_indep_tket_6} & 0,438 & 0,380 & 12,866 & 0,387 & 0,383 \\
+\nolinkurl{qpeexact_indep_tket_60} & 0,686 & 0,458 & 58,678 & -- & 0,531 \\
+\nolinkurl{qpeexact_indep_tket_7} & 0,549 & 0,365 & 10,293 & 0,443 & 0,384 \\
+\nolinkurl{qpeexact_indep_tket_8} & 12,785 & 0,369 & 11,466 & 0,381 & 0,639 \\
+\nolinkurl{qpeexact_indep_tket_9} & 0,685 & 0,364 & 15,009 & 0,444 & 0,389 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 0,786 & 0,364 & 10,488 & 0,381 & 0,687 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 0,722 & 0,372 & 11,154 & 0,484 & 0,386 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 0,747 & 0,374 & 15,149 & 0,390 & 0,753 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 0,787 & 0,367 & -- & 0,745 & 0,766 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 0,774 & 0,392 & 13,735 & -- & 0,793 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 0,826 & 0,377 & 13,981 & 0,384 & 21,578 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 0,816 & 0,378 & 17,362 & 0,599 & 0,836 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 0,357 & 0,357 & -- & 0,367 & 0,374 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 0,379 & 0,366 & 13,291 & 0,364 & 0,374 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 0,806 & 0,447 & 23,265 & 0,421 & 0,416 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 0,375 & 0,366 & 12,102 & 0,419 & 0,378 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 11,197 & 0,425 & 25,859 & -- & 0,456 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 0,378 & 0,365 & 12,311 & 0,389 & 0,391 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 3,892 & 0,433 & 53,954 & -- & 0,460 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 0,405 & 0,354 & 12,779 & 0,368 & 0,380 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 0,695 & 0,467 & 16,141 & 0,583 & 0,478 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 0,590 & 0,355 & 10,145 & 0,362 & 0,596 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 0,606 & 0,516 & 51,042 & 6,367 & 0,497 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 0,621 & 0,364 & 11,265 & 0,509 & 0,619 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 0,670 & 0,367 & 10,625 & 1,221 & 0,388 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 0,723 & 0,359 & 10,710 & 0,464 & 0,691 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 0,719 & 0,388 & -- & -- & 0,390 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 0,725 & 0,368 & 15,814 & 0,448 & 0,389 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 0,762 & 0,367 & -- & 0,396 & 0,774 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 0,780 & 0,371 & 14,241 & 0,370 & 0,786 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 0,792 & 0,403 & -- & 0,386 & 0,847 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 0,366 & 0,354 & -- & 0,441 & 0,364 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 0,361 & 0,356 & 13,381 & 0,364 & 0,373 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 15,463 & 0,425 & 28,505 & 0,382 & 0,776 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 0,374 & 0,368 & 11,967 & 0,375 & 3,254 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 8,241 & 0,428 & 34,315 & 0,495 & 0,468 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 0,363 & 0,376 & 12,710 & 0,367 & 0,396 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 2,994 & 0,445 & 47,832 & 0,410 & 2,914 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 0,547 & 0,356 & 11,010 & 0,365 & 0,564 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 0,565 & 0,460 & 16,610 & 1,410 & 0,595 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 0,586 & 0,374 & 10,601 & 0,370 & 0,671 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 12,584 & 0,370 & 11,681 & 0,419 & 0,631 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 0,664 & 0,363 & -- & 0,370 & 0,668 \\
+\nolinkurl{routing_indep_qiskit_12} & 0,364 & 0,365 & 15,281 & 0,382 & 1,949 \\
+\nolinkurl{routing_indep_qiskit_2} & 0,354 & 0,345 & 10,909 & 0,512 & 0,433 \\
+\nolinkurl{routing_indep_qiskit_6} & 0,362 & 0,362 & 10,465 & 0,363 & 0,410 \\
+\nolinkurl{routing_indep_tket_12} & 0,363 & 0,359 & 14,838 & 0,361 & 0,395 \\
+\nolinkurl{routing_indep_tket_2} & 0,352 & 0,358 & 10,018 & 0,350 & 0,378 \\
+\nolinkurl{routing_indep_tket_6} & 0,359 & 0,360 & 10,387 & 0,356 & 0,378 \\
+\nolinkurl{tsp_indep_qiskit_4} & 0,364 & 0,357 & 13,342 & 0,366 & 0,415 \\
+\nolinkurl{tsp_indep_qiskit_9} & 0,422 & 0,358 & 12,006 & 0,362 & 0,423 \\
+\nolinkurl{tsp_indep_tket_4} & 0,362 & 0,358 & 13,158 & 0,368 & 0,378 \\
+\nolinkurl{tsp_indep_tket_9} & 0,404 & 0,362 & 12,010 & 0,375 & 0,408 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Tempo del processo di compilazione (secondi)}
+Comprende avvio, compilazione e controlli, inclusi i timeout misurati.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 4,886 & 0,928 & 39,254 & 100,016 & 1,318 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 1,660 & 0,917 & 34,694 & 100,014 & 0,918 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 1,282 & 0,867 & 15,458 & 2,425 & 1,017 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 2,301 & 0,917 & 16,874 & 0,967 & 1,016 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 1,471 & 0,917 & 15,120 & 1,017 & 0,917 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 1,456 & 0,917 & 100,160 & 100,038 & 17,505 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 1,369 & 0,866 & 18,028 & 0,917 & 0,917 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 1,471 & 0,921 & 100,162 & 1,067 & 1,267 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 1,423 & 0,880 & 18,515 & 0,917 & 1,268 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 1,576 & 0,967 & 18,468 & 0,917 & 1,368 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 1,575 & 0,917 & 100,163 & 1,030 & 1,368 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 0,916 & 0,867 & 15,209 & 0,867 & 0,917 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 0,966 & 0,866 & 16,613 & 0,867 & 0,866 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 1,486 & 0,967 & 25,342 & 100,016 & 1,319 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 1,089 & 0,867 & 17,374 & 0,867 & 0,967 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 11,774 & 0,969 & 36,367 & 1,068 & 1,119 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 1,017 & 0,867 & 17,067 & 0,967 & 7,532 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 4,687 & 1,069 & 100,170 & 1,218 & 1,119 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 0,966 & 0,867 & 15,256 & 0,922 & 0,867 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 1,521 & 1,120 & 52,952 & 4,479 & 1,320 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 1,217 & 0,968 & 15,860 & 0,917 & 1,117 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 1,672 & 1,171 & 55,690 & 1,167 & 1,322 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 1,267 & 0,867 & 15,912 & 1,167 & 13,145 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 1,267 & 0,917 & 18,773 & 0,867 & 1,217 \\
+\nolinkurl{qpeexact_indep_tket_10} & 1,380 & 0,867 & 15,161 & 0,934 & 0,916 \\
+\nolinkurl{qpeexact_indep_tket_11} & 1,424 & 0,917 & 100,159 & 0,867 & 1,268 \\
+\nolinkurl{qpeexact_indep_tket_12} & 1,587 & 0,867 & 17,363 & 0,926 & 1,268 \\
+\nolinkurl{qpeexact_indep_tket_13} & 1,542 & 0,917 & 100,158 & 0,869 & 1,268 \\
+\nolinkurl{qpeexact_indep_tket_14} & 1,417 & 0,967 & 18,533 & 0,866 & 0,967 \\
+\nolinkurl{qpeexact_indep_tket_15} & 1,574 & 0,967 & 19,771 & 0,917 & 22,164 \\
+\nolinkurl{qpeexact_indep_tket_2} & 1,017 & 0,867 & 14,860 & 0,866 & 0,917 \\
+\nolinkurl{qpeexact_indep_tket_3} & 1,070 & 0,868 & 16,973 & 0,866 & 0,918 \\
+\nolinkurl{qpeexact_indep_tket_30} & 15,977 & 0,967 & 100,172 & 0,966 & 1,317 \\
+\nolinkurl{qpeexact_indep_tket_4} & 1,017 & 0,917 & 17,373 & 0,867 & 0,917 \\
+\nolinkurl{qpeexact_indep_tket_40} & 9,301 & 1,017 & 48,649 & 1,118 & 1,071 \\
+\nolinkurl{qpeexact_indep_tket_5} & 0,966 & 0,867 & 17,632 & 9,044 & 1,069 \\
+\nolinkurl{qpeexact_indep_tket_50} & 3,895 & 1,067 & 100,165 & 100,016 & 1,067 \\
+\nolinkurl{qpeexact_indep_tket_6} & 1,067 & 0,917 & 17,425 & 0,917 & 0,917 \\
+\nolinkurl{qpeexact_indep_tket_60} & 1,608 & 1,121 & 63,132 & 100,019 & 1,167 \\
+\nolinkurl{qpeexact_indep_tket_7} & 1,118 & 0,867 & 14,957 & 0,968 & 0,867 \\
+\nolinkurl{qpeexact_indep_tket_8} & 13,315 & 0,917 & 16,061 & 0,868 & 1,168 \\
+\nolinkurl{qpeexact_indep_tket_9} & 1,333 & 0,867 & 19,591 & 0,967 & 0,917 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 1,374 & 0,917 & 15,111 & 1,018 & 1,218 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 1,268 & 0,917 & 15,508 & 1,062 & 0,917 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 1,317 & 0,867 & 19,584 & 1,088 & 1,267 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 1,483 & 0,867 & 100,162 & 1,320 & 1,317 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 1,439 & 0,917 & 18,325 & 100,015 & 1,318 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 1,474 & 0,918 & 18,369 & 0,918 & 22,113 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 1,453 & 0,917 & 21,772 & 1,172 & 1,370 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 0,917 & 0,867 & 100,164 & 0,867 & 0,916 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 0,917 & 0,917 & 17,422 & 0,873 & 0,866 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 1,476 & 1,017 & 27,842 & 1,020 & 0,969 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 0,917 & 0,867 & 17,316 & 0,967 & 0,867 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 11,810 & 1,074 & 30,391 & 100,014 & 1,068 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 0,917 & 0,868 & 17,020 & 0,967 & 0,867 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 4,480 & 1,071 & 58,419 & 100,039 & 1,017 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 0,967 & 0,867 & 17,317 & 0,867 & 0,866 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 1,429 & 1,117 & 20,573 & 1,318 & 1,119 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 1,117 & 0,867 & 14,758 & 0,867 & 1,117 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 1,425 & 1,270 & 55,364 & 7,403 & 1,219 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 1,167 & 0,867 & 15,914 & 1,019 & 1,119 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 1,323 & 0,867 & 15,073 & 1,775 & 0,917 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 1,268 & 0,867 & 15,360 & 1,017 & 1,267 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 1,318 & 0,967 & 100,164 & 100,016 & 0,917 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 1,319 & 0,866 & 20,138 & 0,967 & 0,917 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 1,371 & 0,868 & 100,161 & 0,917 & 1,317 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 1,378 & 0,918 & 18,819 & 0,917 & 1,318 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 1,392 & 0,967 & 100,160 & 0,870 & 1,418 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 0,920 & 0,866 & 100,165 & 0,967 & 0,866 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 0,873 & 0,866 & 17,568 & 0,867 & 0,867 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 16,014 & 1,030 & 32,952 & 0,919 & 1,317 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 0,867 & 0,867 & 17,216 & 0,867 & 3,773 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 8,844 & 1,017 & 38,718 & 1,167 & 1,068 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 0,867 & 0,866 & 17,265 & 0,876 & 0,918 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 3,593 & 1,121 & 52,371 & 1,016 & 3,479 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 1,118 & 0,866 & 15,568 & 0,866 & 1,117 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 1,222 & 1,139 & 22,024 & 2,327 & 1,320 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 1,117 & 0,866 & 16,612 & 0,868 & 1,218 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 13,122 & 0,868 & 16,220 & 0,923 & 1,167 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 1,237 & 0,867 & 100,160 & 0,917 & 1,219 \\
+\nolinkurl{routing_indep_qiskit_12} & 0,867 & 0,917 & 19,672 & 0,867 & 2,471 \\
+\nolinkurl{routing_indep_qiskit_2} & 0,867 & 0,816 & 15,111 & 1,117 & 1,068 \\
+\nolinkurl{routing_indep_qiskit_6} & 0,867 & 0,866 & 15,118 & 0,867 & 0,917 \\
+\nolinkurl{routing_indep_tket_12} & 0,867 & 0,867 & 19,220 & 0,867 & 0,917 \\
+\nolinkurl{routing_indep_tket_2} & 0,866 & 0,867 & 14,221 & 0,867 & 0,917 \\
+\nolinkurl{routing_indep_tket_6} & 0,867 & 0,867 & 15,008 & 0,817 & 0,867 \\
+\nolinkurl{tsp_indep_qiskit_4} & 0,967 & 0,868 & 17,570 & 0,917 & 0,967 \\
+\nolinkurl{tsp_indep_qiskit_9} & 0,968 & 0,867 & 16,461 & 0,883 & 0,967 \\
+\nolinkurl{tsp_indep_tket_4} & 0,866 & 0,867 & 17,365 & 0,868 & 0,867 \\
+\nolinkurl{tsp_indep_tket_9} & 0,967 & 0,866 & 16,425 & 0,918 & 0,967 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Preparazione e scelta (secondi)}
+Tempo precedente alla compilazione, secondo la misura conservata dal sistema.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{MQT\\Predictor} & Random & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{6}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 32,180 & 14,375 & 0,267 & 0,392 & 27,370 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 24,995 & 12,742 & 0,278 & 0,318 & 26,458 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 22,634 & 12,969 & 0,270 & 0,254 & 26,862 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 23,081 & 13,390 & 0,265 & 0,228 & 25,703 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 24,313 & 13,488 & 0,266 & 0,282 & 26,301 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 25,139 & 13,202 & -- & 0,227 & 20,427 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 24,718 & 13,442 & 0,270 & 0,294 & 26,774 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 32,100 & 13,042 & -- & 0,228 & 27,513 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 24,901 & 13,521 & 0,269 & 0,231 & 26,701 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 25,350 & 13,508 & 0,267 & 0,287 & 26,604 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 24,858 & 13,850 & -- & 0,246 & 27,046 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 25,572 & 14,080 & 0,092 & 0,281 & 27,257 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 23,313 & 13,160 & 0,096 & 0,234 & 20,881 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 30,174 & 12,297 & 0,272 & 0,233 & 27,982 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 30,355 & 13,700 & 0,093 & 0,288 & 25,635 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 29,926 & 12,303 & 0,277 & 0,253 & 21,720 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 22,969 & 13,183 & 0,267 & 0,222 & 23,378 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 29,438 & 12,378 & -- & 0,318 & 25,817 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 23,374 & 13,213 & 0,269 & 0,244 & 22,568 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 27,894 & 12,621 & 0,264 & 0,314 & 19,295 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 23,740 & 13,229 & 0,263 & 0,232 & 29,420 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 21,296 & 12,668 & 0,141 & 0,359 & 27,853 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 24,320 & 13,425 & 0,268 & 0,224 & 29,192 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 24,459 & 13,481 & 0,266 & 0,229 & 27,648 \\
+\nolinkurl{qpeexact_indep_tket_10} & 24,512 & 13,346 & 0,267 & 0,272 & 28,162 \\
+\nolinkurl{qpeexact_indep_tket_11} & 24,953 & 12,989 & -- & 0,254 & 22,996 \\
+\nolinkurl{qpeexact_indep_tket_12} & 25,039 & 13,012 & 0,269 & 0,220 & 24,852 \\
+\nolinkurl{qpeexact_indep_tket_13} & 25,170 & 13,480 & -- & 0,275 & 24,107 \\
+\nolinkurl{qpeexact_indep_tket_14} & 25,376 & 13,433 & 0,266 & 0,238 & 30,511 \\
+\nolinkurl{qpeexact_indep_tket_15} & 25,012 & 14,052 & 0,273 & 0,297 & 28,689 \\
+\nolinkurl{qpeexact_indep_tket_2} & 29,342 & 13,194 & 0,092 & 0,256 & 23,261 \\
+\nolinkurl{qpeexact_indep_tket_3} & 29,620 & 13,196 & 0,093 & 0,233 & 27,271 \\
+\nolinkurl{qpeexact_indep_tket_30} & 23,636 & 12,245 & -- & 0,288 & 31,295 \\
+\nolinkurl{qpeexact_indep_tket_4} & 23,553 & 13,472 & 0,097 & 0,227 & 30,120 \\
+\nolinkurl{qpeexact_indep_tket_40} & 23,608 & 12,307 & 0,276 & 0,234 & 23,795 \\
+\nolinkurl{qpeexact_indep_tket_5} & 23,325 & 13,338 & 0,272 & 0,297 & 25,902 \\
+\nolinkurl{qpeexact_indep_tket_50} & 23,733 & 12,358 & -- & 0,263 & 24,774 \\
+\nolinkurl{qpeexact_indep_tket_6} & 23,666 & 13,098 & 0,268 & 0,278 & 25,232 \\
+\nolinkurl{qpeexact_indep_tket_60} & 21,835 & 12,748 & 0,310 & 0,259 & 29,314 \\
+\nolinkurl{qpeexact_indep_tket_7} & 25,071 & 13,337 & 0,269 & 0,225 & 25,576 \\
+\nolinkurl{qpeexact_indep_tket_8} & 24,326 & 13,571 & 0,271 & 0,275 & 31,597 \\
+\nolinkurl{qpeexact_indep_tket_9} & 24,484 & 14,228 & 0,268 & 0,245 & 29,923 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 31,921 & 13,279 & 0,271 & 0,224 & 32,422 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 25,046 & 13,244 & 0,270 & 0,280 & 25,169 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 30,466 & 13,522 & 0,279 & 0,224 & 30,318 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 24,723 & 12,992 & -- & 0,275 & 32,010 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 24,734 & 13,080 & 0,267 & 0,259 & 33,265 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 24,771 & 13,529 & 0,269 & 0,256 & 32,360 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 24,590 & 13,911 & 0,270 & 0,304 & 21,270 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 25,146 & 14,025 & -- & 0,228 & 27,057 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 22,262 & 12,927 & 0,094 & 0,275 & 29,603 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 23,632 & 12,382 & 0,273 & 0,246 & 23,537 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 22,495 & 13,200 & 0,271 & 0,223 & 30,516 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 29,716 & 12,334 & 0,282 & 0,294 & 24,720 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 22,814 & 13,173 & 0,265 & 0,333 & 32,138 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 29,375 & 12,392 & 0,297 & 0,297 & 28,083 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 23,110 & 13,236 & 0,271 & 0,239 & 27,042 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 28,000 & 12,747 & 0,125 & 0,259 & 29,888 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 23,442 & 13,184 & 0,277 & 0,284 & 28,376 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 21,176 & 12,673 & 0,137 & 0,282 & 28,869 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 24,110 & 13,473 & 0,268 & 0,282 & 26,218 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 25,001 & 13,501 & 0,266 & 0,224 & 25,725 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 24,804 & 13,341 & 0,269 & 0,288 & 32,449 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 24,647 & 12,962 & -- & 0,274 & 32,090 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 24,833 & 13,071 & 0,270 & 0,233 & 35,672 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 24,555 & 13,092 & -- & 0,231 & 33,672 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 24,593 & 13,516 & 0,274 & 0,271 & 35,047 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 24,441 & 13,992 & -- & 0,223 & 34,029 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 28,776 & 13,194 & -- & 0,278 & 34,350 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 22,324 & 13,151 & 0,092 & 0,247 & 29,845 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 23,326 & 12,299 & 0,277 & 0,236 & 28,386 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 22,584 & 13,033 & 0,269 & 0,280 & 25,137 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 23,114 & 12,324 & 0,278 & 0,266 & 29,143 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 22,586 & 13,320 & 0,267 & 0,223 & 26,835 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 23,271 & 12,366 & 0,285 & 0,306 & 24,657 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 29,184 & 13,255 & 0,270 & 0,221 & 25,465 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 21,189 & 12,569 & 0,316 & 0,313 & 29,486 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 23,655 & 13,252 & 0,268 & 0,243 & 24,691 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 24,203 & 13,535 & 0,266 & 0,239 & 33,389 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 24,677 & 12,944 & -- & 0,319 & 31,683 \\
+\nolinkurl{routing_indep_qiskit_12} & 23,279 & 13,266 & 0,270 & 0,223 & 33,432 \\
+\nolinkurl{routing_indep_qiskit_2} & 22,357 & 13,181 & 0,094 & 0,278 & 24,965 \\
+\nolinkurl{routing_indep_qiskit_6} & 23,005 & 13,325 & 0,271 & 0,225 & 26,862 \\
+\nolinkurl{routing_indep_tket_12} & 22,874 & 13,217 & 0,274 & 0,227 & 27,184 \\
+\nolinkurl{routing_indep_tket_2} & 22,465 & 13,041 & 0,094 & 0,276 & 31,681 \\
+\nolinkurl{routing_indep_tket_6} & 23,062 & 13,283 & 0,269 & 0,222 & 31,941 \\
+\nolinkurl{tsp_indep_qiskit_4} & 29,128 & 13,306 & 0,093 & 0,226 & 31,266 \\
+\nolinkurl{tsp_indep_qiskit_9} & 24,424 & 13,255 & 0,274 & 0,272 & 33,748 \\
+\nolinkurl{tsp_indep_tket_4} & 29,198 & 13,186 & 0,092 & 0,228 & 25,274 \\
+\nolinkurl{tsp_indep_tket_9} & 24,531 & 13,164 & 0,271 & 0,272 & 31,575 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Token in ingresso}
+Somma dei token in ingresso di tutte le chiamate del caso.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 12\,186 & 8\,575 & 36\,183 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 12\,174 & 8\,563 & 34\,956 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 11\,115 & 8\,556 & 35\,943 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 11\,287 & 8\,561 & 35\,271 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 11\,993 & 8\,594 & 35\,697 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 12\,250 & 8\,578 & 11\,889 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 12\,245 & 8\,606 & 35\,352 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 37\,005 & 8\,607 & 36\,468 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 12\,262 & 8\,606 & 36\,072 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 12\,300 & 8\,592 & 36\,120 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 12\,293 & 8\,591 & 35\,826 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 21\,934 & 8\,518 & 35\,673 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 11\,054 & 8\,569 & 11\,494 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 35\,691 & 8\,164 & 33\,900 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 34\,110 & 8\,583 & 34\,785 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 34\,362 & 8\,162 & 11\,288 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 11\,273 & 8\,572 & 12\,169 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 34\,434 & 8\,163 & 33\,831 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 11\,545 & 8\,575 & 11\,761 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 32\,082 & 8\,087 & 10\,651 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 11\,544 & 8\,592 & 35\,904 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 10\,622 & 8\,087 & 32\,235 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 12\,009 & 8\,588 & 35\,595 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 12\,010 & 8\,605 & 35\,982 \\
+\nolinkurl{qpeexact_indep_tket_10} & 11\,995 & 8\,596 & 34\,677 \\
+\nolinkurl{qpeexact_indep_tket_11} & 12\,173 & 8\,580 & 11\,945 \\
+\nolinkurl{qpeexact_indep_tket_12} & 12\,320 & 8\,608 & 11\,819 \\
+\nolinkurl{qpeexact_indep_tket_13} & 12\,311 & 8\,609 & 12\,001 \\
+\nolinkurl{qpeexact_indep_tket_14} & 12\,280 & 8\,608 & 34\,194 \\
+\nolinkurl{qpeexact_indep_tket_15} & 12\,187 & 8\,594 & 35\,913 \\
+\nolinkurl{qpeexact_indep_tket_2} & 32\,961 & 8\,520 & 23\,236 \\
+\nolinkurl{qpeexact_indep_tket_3} & 33\,384 & 8\,571 & 35\,718 \\
+\nolinkurl{qpeexact_indep_tket_30} & 11\,526 & 8\,166 & 34\,893 \\
+\nolinkurl{qpeexact_indep_tket_4} & 11\,300 & 8\,585 & 34\,986 \\
+\nolinkurl{qpeexact_indep_tket_40} & 11\,524 & 8\,164 & 11\,310 \\
+\nolinkurl{qpeexact_indep_tket_5} & 11\,275 & 8\,574 & 12\,225 \\
+\nolinkurl{qpeexact_indep_tket_50} & 11\,525 & 8\,165 & 11\,749 \\
+\nolinkurl{qpeexact_indep_tket_6} & 11\,547 & 8\,577 & 12\,027 \\
+\nolinkurl{qpeexact_indep_tket_60} & 10\,630 & 8\,089 & 32\,124 \\
+\nolinkurl{qpeexact_indep_tket_7} & 11\,546 & 8\,594 & 11\,969 \\
+\nolinkurl{qpeexact_indep_tket_8} & 12\,052 & 8\,590 & 35\,955 \\
+\nolinkurl{qpeexact_indep_tket_9} & 12\,162 & 8\,607 & 35\,013 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 36\,996 & 8\,590 & 37\,011 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 12\,250 & 8\,578 & 11\,792 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 37\,059 & 8\,591 & 35\,871 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 12\,297 & 8\,589 & 36\,072 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 12\,297 & 8\,589 & 35\,205 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 12\,300 & 8\,592 & 35\,811 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 12\,293 & 8\,591 & 12\,276 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 21\,934 & 8\,518 & 23\,580 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 10\,953 & 8\,540 & 34\,542 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 11\,739 & 8\,158 & 11\,139 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 11\,259 & 8\,552 & 34\,878 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 34\,362 & 8\,162 & 11\,112 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 11\,273 & 8\,572 & 35\,769 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 34\,434 & 8\,163 & 11\,848 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 11\,289 & 8\,588 & 11\,634 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 32\,082 & 8\,087 & 32\,448 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 11\,530 & 8\,586 & 12\,180 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 10\,622 & 8\,087 & 32\,298 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 12\,009 & 8\,588 & 11\,786 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 12\,208 & 8\,574 & 11\,545 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 12\,185 & 8\,592 & 35\,208 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 12\,173 & 8\,580 & 34\,338 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 12\,186 & 8\,593 & 36\,021 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 12\,184 & 8\,591 & 36\,432 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 12\,184 & 8\,591 & 36\,612 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 12\,187 & 8\,594 & 35\,766 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 32\,961 & 8\,520 & 34\,914 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 10\,955 & 8\,542 & 34\,692 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 11\,520 & 8\,160 & 11\,773 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 11\,258 & 8\,554 & 11\,898 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 11\,524 & 8\,164 & 33\,147 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 11\,275 & 8\,574 & 11\,762 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 11\,525 & 8\,165 & 11\,683 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 34\,446 & 8\,590 & 11\,969 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 10\,630 & 8\,089 & 32\,460 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 11\,811 & 8\,588 & 11\,499 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 12\,052 & 8\,590 & 35\,691 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 12\,154 & 8\,576 & 36\,885 \\
+\nolinkurl{routing_indep_qiskit_12} & 11\,455 & 8\,593 & 35\,877 \\
+\nolinkurl{routing_indep_qiskit_2} & 11\,038 & 8\,534 & 11\,632 \\
+\nolinkurl{routing_indep_qiskit_6} & 11\,346 & 8\,588 & 12\,104 \\
+\nolinkurl{routing_indep_tket_12} & 11\,455 & 8\,593 & 11\,764 \\
+\nolinkurl{routing_indep_tket_2} & 11\,038 & 8\,534 & 35\,028 \\
+\nolinkurl{routing_indep_tket_6} & 11\,346 & 8\,588 & 35\,649 \\
+\nolinkurl{tsp_indep_qiskit_4} & 33\,750 & 8\,589 & 35\,046 \\
+\nolinkurl{tsp_indep_qiskit_9} & 12\,189 & 8\,587 & 36\,159 \\
+\nolinkurl{tsp_indep_tket_4} & 33\,750 & 8\,589 & 11\,841 \\
+\nolinkurl{tsp_indep_tket_9} & 12\,189 & 8\,587 & 36\,630 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Token in uscita}
+Somma dei token prodotti in tutte le chiamate del caso.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 158 & 92 & 511 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 157 & 92 & 507 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 156 & 98 & 492 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 163 & 130 & 442 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 157 & 129 & 465 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 157 & 115 & 157 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 156 & 123 & 507 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 509 & 98 & 503 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 157 & 127 & 470 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 157 & 128 & 459 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 157 & 153 & 503 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 314 & 176 & 446 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 168 & 113 & 157 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 440 & 97 & 506 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 513 & 130 & 457 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 500 & 99 & 167 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 157 & 113 & 163 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 469 & 101 & 506 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 143 & 110 & 157 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 484 & 125 & 159 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 157 & 99 & 501 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 157 & 125 & 469 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 156 & 124 & 439 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 157 & 125 & 528 \\
+\nolinkurl{qpeexact_indep_tket_10} & 157 & 115 & 476 \\
+\nolinkurl{qpeexact_indep_tket_11} & 156 & 98 & 157 \\
+\nolinkurl{qpeexact_indep_tket_12} & 157 & 92 & 156 \\
+\nolinkurl{qpeexact_indep_tket_13} & 157 & 127 & 153 \\
+\nolinkurl{qpeexact_indep_tket_14} & 174 & 126 & 501 \\
+\nolinkurl{qpeexact_indep_tket_15} & 157 & 164 & 460 \\
+\nolinkurl{qpeexact_indep_tket_2} & 511 & 117 & 320 \\
+\nolinkurl{qpeexact_indep_tket_3} & 520 & 113 & 445 \\
+\nolinkurl{qpeexact_indep_tket_30} & 165 & 97 & 518 \\
+\nolinkurl{qpeexact_indep_tket_4} & 160 & 130 & 524 \\
+\nolinkurl{qpeexact_indep_tket_40} & 157 & 97 & 159 \\
+\nolinkurl{qpeexact_indep_tket_5} & 157 & 122 & 157 \\
+\nolinkurl{qpeexact_indep_tket_50} & 165 & 97 & 159 \\
+\nolinkurl{qpeexact_indep_tket_6} & 143 & 111 & 157 \\
+\nolinkurl{qpeexact_indep_tket_60} & 170 & 125 & 502 \\
+\nolinkurl{qpeexact_indep_tket_7} & 157 & 115 & 167 \\
+\nolinkurl{qpeexact_indep_tket_8} & 157 & 130 & 444 \\
+\nolinkurl{qpeexact_indep_tket_9} & 157 & 176 & 500 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 517 & 113 & 435 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 157 & 115 & 157 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 437 & 130 & 497 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 157 & 98 & 449 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 157 & 99 & 503 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 157 & 128 & 465 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 157 & 153 & 157 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 314 & 176 & 323 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 171 & 98 & 492 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 157 & 101 & 157 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 158 & 113 & 472 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 500 & 99 & 163 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 157 & 113 & 470 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 469 & 101 & 157 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 169 & 110 & 169 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 484 & 125 & 464 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 157 & 113 & 169 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 157 & 125 & 464 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 156 & 124 & 170 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 157 & 132 & 157 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 165 & 115 & 514 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 156 & 98 & 520 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 166 & 97 & 455 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 157 & 98 & 443 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 157 & 128 & 445 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 157 & 164 & 501 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 511 & 117 & 546 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 171 & 113 & 507 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 165 & 97 & 157 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 158 & 106 & 157 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 157 & 97 & 520 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 157 & 122 & 157 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 165 & 97 & 157 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 483 & 110 & 157 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 170 & 125 & 498 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 157 & 115 & 169 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 157 & 130 & 519 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 163 & 98 & 443 \\
+\nolinkurl{routing_indep_qiskit_12} & 157 & 116 & 449 \\
+\nolinkurl{routing_indep_qiskit_2} & 157 & 115 & 178 \\
+\nolinkurl{routing_indep_qiskit_6} & 171 & 120 & 157 \\
+\nolinkurl{routing_indep_tket_12} & 157 & 116 & 157 \\
+\nolinkurl{routing_indep_tket_2} & 157 & 115 & 467 \\
+\nolinkurl{routing_indep_tket_6} & 171 & 120 & 514 \\
+\nolinkurl{tsp_indep_qiskit_4} & 499 & 117 & 501 \\
+\nolinkurl{tsp_indep_qiskit_9} & 158 & 115 & 449 \\
+\nolinkurl{tsp_indep_tket_4} & 499 & 117 & 171 \\
+\nolinkurl{tsp_indep_tket_9} & 158 & 115 & 443 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Token complessivi}
+Ingresso più uscita, comprese le richieste di correzione.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 12\,344 & 8\,667 & 36\,694 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 12\,331 & 8\,655 & 35\,463 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 11\,271 & 8\,654 & 36\,435 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 11\,450 & 8\,691 & 35\,713 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 12\,150 & 8\,723 & 36\,162 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 12\,407 & 8\,693 & 12\,046 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 12\,401 & 8\,729 & 35\,859 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 37\,514 & 8\,705 & 36\,971 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 12\,419 & 8\,733 & 36\,542 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 12\,457 & 8\,720 & 36\,579 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 12\,450 & 8\,744 & 36\,329 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 22\,248 & 8\,694 & 36\,119 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 11\,222 & 8\,682 & 11\,651 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 36\,131 & 8\,261 & 34\,406 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 34\,623 & 8\,713 & 35\,242 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 34\,862 & 8\,261 & 11\,455 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 11\,430 & 8\,685 & 12\,332 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 34\,903 & 8\,264 & 34\,337 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 11\,688 & 8\,685 & 11\,918 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 32\,566 & 8\,212 & 10\,810 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 11\,701 & 8\,691 & 36\,405 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 10\,779 & 8\,212 & 32\,704 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 12\,165 & 8\,712 & 36\,034 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 12\,167 & 8\,730 & 36\,510 \\
+\nolinkurl{qpeexact_indep_tket_10} & 12\,152 & 8\,711 & 35\,153 \\
+\nolinkurl{qpeexact_indep_tket_11} & 12\,329 & 8\,678 & 12\,102 \\
+\nolinkurl{qpeexact_indep_tket_12} & 12\,477 & 8\,700 & 11\,975 \\
+\nolinkurl{qpeexact_indep_tket_13} & 12\,468 & 8\,736 & 12\,154 \\
+\nolinkurl{qpeexact_indep_tket_14} & 12\,454 & 8\,734 & 34\,695 \\
+\nolinkurl{qpeexact_indep_tket_15} & 12\,344 & 8\,758 & 36\,373 \\
+\nolinkurl{qpeexact_indep_tket_2} & 33\,472 & 8\,637 & 23\,556 \\
+\nolinkurl{qpeexact_indep_tket_3} & 33\,904 & 8\,684 & 36\,163 \\
+\nolinkurl{qpeexact_indep_tket_30} & 11\,691 & 8\,263 & 35\,411 \\
+\nolinkurl{qpeexact_indep_tket_4} & 11\,460 & 8\,715 & 35\,510 \\
+\nolinkurl{qpeexact_indep_tket_40} & 11\,681 & 8\,261 & 11\,469 \\
+\nolinkurl{qpeexact_indep_tket_5} & 11\,432 & 8\,696 & 12\,382 \\
+\nolinkurl{qpeexact_indep_tket_50} & 11\,690 & 8\,262 & 11\,908 \\
+\nolinkurl{qpeexact_indep_tket_6} & 11\,690 & 8\,688 & 12\,184 \\
+\nolinkurl{qpeexact_indep_tket_60} & 10\,800 & 8\,214 & 32\,626 \\
+\nolinkurl{qpeexact_indep_tket_7} & 11\,703 & 8\,709 & 12\,136 \\
+\nolinkurl{qpeexact_indep_tket_8} & 12\,209 & 8\,720 & 36\,399 \\
+\nolinkurl{qpeexact_indep_tket_9} & 12\,319 & 8\,783 & 35\,513 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 37\,513 & 8\,703 & 37\,446 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 12\,407 & 8\,693 & 11\,949 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 37\,496 & 8\,721 & 36\,368 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 12\,454 & 8\,687 & 36\,521 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 12\,454 & 8\,688 & 35\,708 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 12\,457 & 8\,720 & 36\,276 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 12\,450 & 8\,744 & 12\,433 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 22\,248 & 8\,694 & 23\,903 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 11\,124 & 8\,638 & 35\,034 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 11\,896 & 8\,259 & 11\,296 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 11\,417 & 8\,665 & 35\,350 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 34\,862 & 8\,261 & 11\,275 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 11\,430 & 8\,685 & 36\,239 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 34\,903 & 8\,264 & 12\,005 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 11\,458 & 8\,698 & 11\,803 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 32\,566 & 8\,212 & 32\,912 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 11\,687 & 8\,699 & 12\,349 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 10\,779 & 8\,212 & 32\,762 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 12\,165 & 8\,712 & 11\,956 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 12\,365 & 8\,706 & 11\,702 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 12\,350 & 8\,707 & 35\,722 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 12\,329 & 8\,678 & 34\,858 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 12\,352 & 8\,690 & 36\,476 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 12\,341 & 8\,689 & 36\,875 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 12\,341 & 8\,719 & 37\,057 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 12\,344 & 8\,758 & 36\,267 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 33\,472 & 8\,637 & 35\,460 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 11\,126 & 8\,655 & 35\,199 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 11\,685 & 8\,257 & 11\,930 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 11\,416 & 8\,660 & 12\,055 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 11\,681 & 8\,261 & 33\,667 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 11\,432 & 8\,696 & 11\,919 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 11\,690 & 8\,262 & 11\,840 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 34\,929 & 8\,700 & 12\,126 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 10\,800 & 8\,214 & 32\,958 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 11\,968 & 8\,703 & 11\,668 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 12\,209 & 8\,720 & 36\,210 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 12\,317 & 8\,674 & 37\,328 \\
+\nolinkurl{routing_indep_qiskit_12} & 11\,612 & 8\,709 & 36\,326 \\
+\nolinkurl{routing_indep_qiskit_2} & 11\,195 & 8\,649 & 11\,810 \\
+\nolinkurl{routing_indep_qiskit_6} & 11\,517 & 8\,708 & 12\,261 \\
+\nolinkurl{routing_indep_tket_12} & 11\,612 & 8\,709 & 11\,921 \\
+\nolinkurl{routing_indep_tket_2} & 11\,195 & 8\,649 & 35\,495 \\
+\nolinkurl{routing_indep_tket_6} & 11\,517 & 8\,708 & 36\,163 \\
+\nolinkurl{tsp_indep_qiskit_4} & 34\,249 & 8\,706 & 35\,547 \\
+\nolinkurl{tsp_indep_qiskit_9} & 12\,347 & 8\,702 & 36\,608 \\
+\nolinkurl{tsp_indep_tket_4} & 34\,249 & 8\,706 & 12\,012 \\
+\nolinkurl{tsp_indep_tket_9} & 12\,347 & 8\,702 & 37\,073 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Tempo delle risposte LLM (secondi)}
+Somma delle attese delle risposte complete.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 20,603 & 12,528 & 25,694 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 20,086 & 12,226 & 24,768 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 17,952 & 12,372 & 25,199 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 18,463 & 12,822 & 24,043 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 19,704 & 12,932 & 24,619 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 20,296 & 12,639 & 19,280 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 20,196 & 12,859 & 25,093 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 26,580 & 12,492 & 25,861 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 20,231 & 12,933 & 25,050 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 20,575 & 12,936 & 24,932 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 20,312 & 13,302 & 25,403 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 20,675 & 13,499 & 25,662 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 18,728 & 12,613 & 19,705 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 24,685 & 11,732 & 26,373 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 24,889 & 13,092 & 23,946 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 24,619 & 11,743 & 20,582 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 18,395 & 12,636 & 22,194 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 24,218 & 11,778 & 24,185 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 18,601 & 12,590 & 21,378 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 22,858 & 12,055 & 18,160 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 18,850 & 12,538 & 27,714 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 16,975 & 12,050 & 26,165 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 19,691 & 12,857 & 27,525 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 19,716 & 12,914 & 25,862 \\
+\nolinkurl{qpeexact_indep_tket_10} & 19,736 & 12,740 & 26,468 \\
+\nolinkurl{qpeexact_indep_tket_11} & 20,114 & 12,403 & 21,864 \\
+\nolinkurl{qpeexact_indep_tket_12} & 20,386 & 12,417 & 23,673 \\
+\nolinkurl{qpeexact_indep_tket_13} & 20,402 & 12,936 & 22,941 \\
+\nolinkurl{qpeexact_indep_tket_14} & 20,576 & 12,929 & 28,815 \\
+\nolinkurl{qpeexact_indep_tket_15} & 20,152 & 13,479 & 27,030 \\
+\nolinkurl{qpeexact_indep_tket_2} & 23,810 & 12,636 & 21,862 \\
+\nolinkurl{qpeexact_indep_tket_3} & 24,280 & 12,623 & 25,658 \\
+\nolinkurl{qpeexact_indep_tket_30} & 18,899 & 11,727 & 29,628 \\
+\nolinkurl{qpeexact_indep_tket_4} & 18,368 & 12,911 & 28,502 \\
+\nolinkurl{qpeexact_indep_tket_40} & 18,745 & 11,729 & 22,603 \\
+\nolinkurl{qpeexact_indep_tket_5} & 18,472 & 12,758 & 24,786 \\
+\nolinkurl{qpeexact_indep_tket_50} & 18,899 & 11,743 & 23,583 \\
+\nolinkurl{qpeexact_indep_tket_6} & 18,710 & 12,597 & 24,118 \\
+\nolinkurl{qpeexact_indep_tket_60} & 17,273 & 12,094 & 27,645 \\
+\nolinkurl{qpeexact_indep_tket_7} & 19,689 & 12,740 & 24,409 \\
+\nolinkurl{qpeexact_indep_tket_8} & 19,803 & 12,962 & 29,974 \\
+\nolinkurl{qpeexact_indep_tket_9} & 19,993 & 13,674 & 28,250 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 26,725 & 12,710 & 30,778 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 20,211 & 12,658 & 23,981 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 25,382 & 12,966 & 28,720 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 20,290 & 12,486 & 30,393 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 20,327 & 12,518 & 31,603 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 20,296 & 12,948 & 30,671 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 20,296 & 13,335 & 20,144 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 20,587 & 13,504 & 25,646 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 17,843 & 12,377 & 27,900 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 19,162 & 11,798 & 22,407 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 18,181 & 12,618 & 28,783 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 24,670 & 11,760 & 23,572 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 18,191 & 12,641 & 30,408 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 24,186 & 11,798 & 26,903 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 18,569 & 12,642 & 25,834 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 22,995 & 12,090 & 28,238 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 18,910 & 12,664 & 27,152 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 16,949 & 12,063 & 27,076 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 19,653 & 12,843 & 25,024 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 20,202 & 12,926 & 24,457 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 20,268 & 12,765 & 30,659 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 20,081 & 12,420 & 30,129 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 20,232 & 12,488 & 33,773 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 20,076 & 12,502 & 31,823 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 20,100 & 12,938 & 33,163 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 20,087 & 13,462 & 32,174 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 23,678 & 12,626 & 32,537 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 17,835 & 12,585 & 28,041 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 18,817 & 11,728 & 27,139 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 18,176 & 12,488 & 23,953 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 18,678 & 11,726 & 27,294 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 18,210 & 12,753 & 25,588 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 18,833 & 11,725 & 23,387 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 24,235 & 12,679 & 24,077 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 17,190 & 12,035 & 27,677 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 19,290 & 12,682 & 23,492 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 19,799 & 12,937 & 31,513 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 20,046 & 12,381 & 29,777 \\
+\nolinkurl{routing_indep_qiskit_12} & 18,601 & 12,729 & 31,591 \\
+\nolinkurl{routing_indep_qiskit_2} & 17,774 & 12,594 & 23,614 \\
+\nolinkurl{routing_indep_qiskit_6} & 18,599 & 12,748 & 25,553 \\
+\nolinkurl{routing_indep_tket_12} & 18,580 & 12,715 & 25,919 \\
+\nolinkurl{routing_indep_tket_2} & 17,783 & 12,586 & 29,835 \\
+\nolinkurl{routing_indep_tket_6} & 18,563 & 12,734 & 29,963 \\
+\nolinkurl{tsp_indep_qiskit_4} & 24,193 & 12,738 & 29,451 \\
+\nolinkurl{tsp_indep_qiskit_9} & 20,106 & 12,664 & 31,819 \\
+\nolinkurl{tsp_indep_tket_4} & 24,179 & 12,721 & 23,992 \\
+\nolinkurl{tsp_indep_tket_9} & 20,113 & 12,648 & 29,701 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Richieste di correzione}
+Chiamate aggiuntive oltre la prima, prima dell’unica compilazione prevista.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 0 & 0 & 2 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 0 & 0 & 2 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 0 & 0 & 2 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 2 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 1 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 2 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 2 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 2 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 2 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 2 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_10} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_11} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_12} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_13} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_14} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_15} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_2} & 2 & 0 & 1 \\
+\nolinkurl{qpeexact_indep_tket_3} & 2 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_30} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_4} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_40} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_5} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_50} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_6} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_60} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_7} & 0 & 0 & 0 \\
+\nolinkurl{qpeexact_indep_tket_8} & 0 & 0 & 2 \\
+\nolinkurl{qpeexact_indep_tket_9} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 2 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 2 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 1 & 0 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 2 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 2 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 2 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 2 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 2 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 0 & 0 & 0 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 0 & 0 & 2 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 0 & 0 & 2 \\
+\nolinkurl{routing_indep_qiskit_12} & 0 & 0 & 2 \\
+\nolinkurl{routing_indep_qiskit_2} & 0 & 0 & 0 \\
+\nolinkurl{routing_indep_qiskit_6} & 0 & 0 & 0 \\
+\nolinkurl{routing_indep_tket_12} & 0 & 0 & 0 \\
+\nolinkurl{routing_indep_tket_2} & 0 & 0 & 2 \\
+\nolinkurl{routing_indep_tket_6} & 0 & 0 & 2 \\
+\nolinkurl{tsp_indep_qiskit_4} & 2 & 0 & 2 \\
+\nolinkurl{tsp_indep_qiskit_9} & 0 & 0 & 2 \\
+\nolinkurl{tsp_indep_tket_4} & 2 & 0 & 0 \\
+\nolinkurl{tsp_indep_tket_9} & 0 & 0 & 2 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Numero di chiamate LLM}
+Comprende la prima risposta e le eventuali correzioni.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 1 & 1 & 3 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 1 & 1 & 3 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 1 & 1 & 3 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 3 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 2 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 3 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 3 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 3 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 3 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 3 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_10} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_11} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_12} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_13} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_14} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_15} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_2} & 3 & 1 & 2 \\
+\nolinkurl{qpeexact_indep_tket_3} & 3 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_30} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_4} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_40} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_5} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_50} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_6} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_60} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_7} & 1 & 1 & 1 \\
+\nolinkurl{qpeexact_indep_tket_8} & 1 & 1 & 3 \\
+\nolinkurl{qpeexact_indep_tket_9} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 3 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 3 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 2 & 1 & 2 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 3 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 3 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 3 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 3 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 3 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 1 & 1 & 1 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 1 & 1 & 3 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 1 & 1 & 3 \\
+\nolinkurl{routing_indep_qiskit_12} & 1 & 1 & 3 \\
+\nolinkurl{routing_indep_qiskit_2} & 1 & 1 & 1 \\
+\nolinkurl{routing_indep_qiskit_6} & 1 & 1 & 1 \\
+\nolinkurl{routing_indep_tket_12} & 1 & 1 & 1 \\
+\nolinkurl{routing_indep_tket_2} & 1 & 1 & 3 \\
+\nolinkurl{routing_indep_tket_6} & 1 & 1 & 3 \\
+\nolinkurl{tsp_indep_qiskit_4} & 3 & 1 & 3 \\
+\nolinkurl{tsp_indep_qiskit_9} & 1 & 1 & 3 \\
+\nolinkurl{tsp_indep_tket_4} & 3 & 1 & 1 \\
+\nolinkurl{tsp_indep_tket_9} & 1 & 1 & 3 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Tempo di recupero degli esempi (secondi)}
+Tempo del recupero registrato. Per LLM no RAG il recupero è disattivato.
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6.0cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}>{\centering\arraybackslash}p{1.75cm}}
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule
+\endfirsthead
+\toprule
+Circuito & \shortstack{LLM +\\RAG} & \shortstack{LLM no\\RAG} & \shortstack{LLM +\\Random\\RAG} \\
+\midrule\endhead
+\midrule\multicolumn{4}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+\nolinkurl{groundstate_medium_indep_qiskit_12} & 4,914 & 0,000 & 0,592 \\
+\nolinkurl{groundstate_medium_indep_tket_12} & 3,882 & 0,000 & 0,590 \\
+\nolinkurl{groundstate_small_indep_qiskit_4} & 3,900 & 0,000 & 0,585 \\
+\nolinkurl{groundstate_small_indep_tket_4} & 3,865 & 0,000 & 0,600 \\
+\nolinkurl{qpeexact_indep_qiskit_10} & 3,707 & 0,000 & 0,592 \\
+\nolinkurl{qpeexact_indep_qiskit_11} & 3,953 & 0,000 & 0,596 \\
+\nolinkurl{qpeexact_indep_qiskit_12} & 3,738 & 0,000 & 0,592 \\
+\nolinkurl{qpeexact_indep_qiskit_13} & 3,894 & 0,000 & 0,586 \\
+\nolinkurl{qpeexact_indep_qiskit_14} & 3,917 & 0,000 & 0,538 \\
+\nolinkurl{qpeexact_indep_qiskit_15} & 3,880 & 0,000 & 0,592 \\
+\nolinkurl{qpeexact_indep_qiskit_16} & 3,832 & 0,000 & 0,591 \\
+\nolinkurl{qpeexact_indep_qiskit_2} & 3,891 & 0,000 & 0,533 \\
+\nolinkurl{qpeexact_indep_qiskit_3} & 3,806 & 0,000 & 0,590 \\
+\nolinkurl{qpeexact_indep_qiskit_30} & 3,939 & 0,000 & 0,583 \\
+\nolinkurl{qpeexact_indep_qiskit_4} & 3,860 & 0,000 & 0,605 \\
+\nolinkurl{qpeexact_indep_qiskit_40} & 3,915 & 0,000 & 0,593 \\
+\nolinkurl{qpeexact_indep_qiskit_5} & 3,962 & 0,000 & 0,605 \\
+\nolinkurl{qpeexact_indep_qiskit_50} & 3,903 & 0,000 & 0,591 \\
+\nolinkurl{qpeexact_indep_qiskit_6} & 4,129 & 0,000 & 0,607 \\
+\nolinkurl{qpeexact_indep_qiskit_60} & 3,703 & 0,000 & 0,535 \\
+\nolinkurl{qpeexact_indep_qiskit_7} & 4,005 & 0,000 & 0,603 \\
+\nolinkurl{qpeexact_indep_qiskit_70} & 3,606 & 0,000 & 0,598 \\
+\nolinkurl{qpeexact_indep_qiskit_8} & 3,955 & 0,000 & 0,615 \\
+\nolinkurl{qpeexact_indep_qiskit_9} & 4,006 & 0,000 & 0,600 \\
+\nolinkurl{qpeexact_indep_tket_10} & 4,082 & 0,000 & 0,608 \\
+\nolinkurl{qpeexact_indep_tket_11} & 4,102 & 0,000 & 0,593 \\
+\nolinkurl{qpeexact_indep_tket_12} & 3,968 & 0,000 & 0,596 \\
+\nolinkurl{qpeexact_indep_tket_13} & 4,044 & 0,000 & 0,632 \\
+\nolinkurl{qpeexact_indep_tket_14} & 4,149 & 0,000 & 0,593 \\
+\nolinkurl{qpeexact_indep_tket_15} & 4,044 & 0,000 & 0,590 \\
+\nolinkurl{qpeexact_indep_tket_2} & 3,955 & 0,000 & 0,599 \\
+\nolinkurl{qpeexact_indep_tket_3} & 4,020 & 0,000 & 0,527 \\
+\nolinkurl{qpeexact_indep_tket_30} & 4,029 & 0,000 & 0,589 \\
+\nolinkurl{qpeexact_indep_tket_4} & 4,352 & 0,000 & 0,586 \\
+\nolinkurl{qpeexact_indep_tket_40} & 4,129 & 0,000 & 0,594 \\
+\nolinkurl{qpeexact_indep_tket_5} & 4,160 & 0,000 & 0,585 \\
+\nolinkurl{qpeexact_indep_tket_50} & 4,142 & 0,000 & 0,595 \\
+\nolinkurl{qpeexact_indep_tket_6} & 4,132 & 0,000 & 0,581 \\
+\nolinkurl{qpeexact_indep_tket_60} & 3,748 & 0,000 & 0,595 \\
+\nolinkurl{qpeexact_indep_tket_7} & 4,274 & 0,000 & 0,589 \\
+\nolinkurl{qpeexact_indep_tket_8} & 3,861 & 0,000 & 0,598 \\
+\nolinkurl{qpeexact_indep_tket_9} & 3,850 & 0,000 & 0,590 \\
+\nolinkurl{qpeinexact_indep_qiskit_10} & 4,012 & 0,000 & 0,586 \\
+\nolinkurl{qpeinexact_indep_qiskit_11} & 3,933 & 0,000 & 0,539 \\
+\nolinkurl{qpeinexact_indep_qiskit_12} & 3,825 & 0,000 & 0,584 \\
+\nolinkurl{qpeinexact_indep_qiskit_13} & 3,823 & 0,000 & 0,585 \\
+\nolinkurl{qpeinexact_indep_qiskit_14} & 3,651 & 0,000 & 0,606 \\
+\nolinkurl{qpeinexact_indep_qiskit_15} & 3,782 & 0,000 & 0,585 \\
+\nolinkurl{qpeinexact_indep_qiskit_16} & 3,745 & 0,000 & 0,585 \\
+\nolinkurl{qpeinexact_indep_qiskit_2} & 3,739 & 0,000 & 0,598 \\
+\nolinkurl{qpeinexact_indep_qiskit_3} & 3,815 & 0,000 & 0,597 \\
+\nolinkurl{qpeinexact_indep_qiskit_30} & 3,808 & 0,000 & 0,585 \\
+\nolinkurl{qpeinexact_indep_qiskit_4} & 3,725 & 0,000 & 0,590 \\
+\nolinkurl{qpeinexact_indep_qiskit_40} & 3,747 & 0,000 & 0,577 \\
+\nolinkurl{qpeinexact_indep_qiskit_5} & 3,912 & 0,000 & 0,600 \\
+\nolinkurl{qpeinexact_indep_qiskit_50} & 3,870 & 0,000 & 0,595 \\
+\nolinkurl{qpeinexact_indep_qiskit_6} & 3,844 & 0,000 & 0,601 \\
+\nolinkurl{qpeinexact_indep_qiskit_60} & 3,574 & 0,000 & 0,591 \\
+\nolinkurl{qpeinexact_indep_qiskit_7} & 3,893 & 0,000 & 0,535 \\
+\nolinkurl{qpeinexact_indep_qiskit_70} & 3,553 & 0,000 & 0,585 \\
+\nolinkurl{qpeinexact_indep_qiskit_8} & 3,766 & 0,000 & 0,601 \\
+\nolinkurl{qpeinexact_indep_qiskit_9} & 3,889 & 0,000 & 0,597 \\
+\nolinkurl{qpeinexact_indep_tket_10} & 3,941 & 0,000 & 0,584 \\
+\nolinkurl{qpeinexact_indep_tket_11} & 3,872 & 0,000 & 0,611 \\
+\nolinkurl{qpeinexact_indep_tket_12} & 3,818 & 0,000 & 0,588 \\
+\nolinkurl{qpeinexact_indep_tket_13} & 3,770 & 0,000 & 0,584 \\
+\nolinkurl{qpeinexact_indep_tket_14} & 3,773 & 0,000 & 0,604 \\
+\nolinkurl{qpeinexact_indep_tket_15} & 3,678 & 0,000 & 0,586 \\
+\nolinkurl{qpeinexact_indep_tket_2} & 3,764 & 0,000 & 0,596 \\
+\nolinkurl{qpeinexact_indep_tket_3} & 3,761 & 0,000 & 0,593 \\
+\nolinkurl{qpeinexact_indep_tket_30} & 3,823 & 0,000 & 0,589 \\
+\nolinkurl{qpeinexact_indep_tket_4} & 3,830 & 0,000 & 0,538 \\
+\nolinkurl{qpeinexact_indep_tket_40} & 3,791 & 0,000 & 0,596 \\
+\nolinkurl{qpeinexact_indep_tket_5} & 3,818 & 0,000 & 0,597 \\
+\nolinkurl{qpeinexact_indep_tket_50} & 3,688 & 0,000 & 0,599 \\
+\nolinkurl{qpeinexact_indep_tket_6} & 3,783 & 0,000 & 0,619 \\
+\nolinkurl{qpeinexact_indep_tket_60} & 3,356 & 0,000 & 0,592 \\
+\nolinkurl{qpeinexact_indep_tket_7} & 3,715 & 0,000 & 0,589 \\
+\nolinkurl{qpeinexact_indep_tket_8} & 3,801 & 0,000 & 0,601 \\
+\nolinkurl{qpeinexact_indep_tket_9} & 3,999 & 0,000 & 0,601 \\
+\nolinkurl{routing_indep_qiskit_12} & 3,848 & 0,000 & 0,539 \\
+\nolinkurl{routing_indep_qiskit_2} & 3,818 & 0,000 & 0,591 \\
+\nolinkurl{routing_indep_qiskit_6} & 3,794 & 0,000 & 0,592 \\
+\nolinkurl{routing_indep_tket_12} & 3,780 & 0,000 & 0,597 \\
+\nolinkurl{routing_indep_tket_2} & 4,037 & 0,000 & 0,594 \\
+\nolinkurl{routing_indep_tket_6} & 3,924 & 0,000 & 0,590 \\
+\nolinkurl{tsp_indep_qiskit_4} & 3,729 & 0,000 & 0,580 \\
+\nolinkurl{tsp_indep_qiskit_9} & 3,744 & 0,000 & 0,602 \\
+\nolinkurl{tsp_indep_tket_4} & 3,777 & 0,000 & 0,588 \\
+\nolinkurl{tsp_indep_tket_9} & 3,742 & 0,000 & 0,597 \\
+\end{longtable}
+\endgroup

@@ -1,0 +1,14 @@
+\begin{tikzpicture}\begin{axis}[
+width=0.96\linewidth,height=6.2cm,grid=major,grid style={gray!20},tick label style={font=\small},label style={font=\small},
+xlabel={Expected fidelity},ylabel={Quota cumulativa},
+legend style={at={(0.5,1.03)},anchor=south,draw=none,font=\small},legend columns=2,unbounded coords=discard,
+xmin=0,xmax=1,ymin=0,ymax=1,]
+\addplot[color=blue!75!black,mark=*,mark size=1.3pt,thick,no marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/distribuzione_score_0.csv};
+\addlegendentry{LLM + RAG (n=90)}
+\addplot[color=orange!85!black,mark=triangle*,mark size=1.3pt,thick,no marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/distribuzione_score_1.csv};
+\addlegendentry{LLM senza RAG (n=90)}
+\addplot[color=violet,mark=square*,mark size=1.3pt,thick,no marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/distribuzione_score_2.csv};
+\addlegendentry{MQT Predictor (n=80)}
+\addplot[color=teal!80!black,mark=diamond*,mark size=1.3pt,thick,no marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/distribuzione_score_3.csv};
+\addlegendentry{Random (n=80)}
+\end{axis}\end{tikzpicture}

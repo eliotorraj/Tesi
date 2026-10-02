@@ -1,0 +1,825 @@
+\providecommand{\TestReportPath}{../}
+\section*{Solo prova di impaginazione: MQT simulato, non un risultato sperimentale}
+\section{Stato del Test e risultato principale}
+Questo rapporto raccoglie i risultati conclusi disponibili al momento della generazione. I metodi disponibili sono LLM + RAG, LLM senza RAG, MQT Predictor, Random. I metodi assenti non sono trattati come fallimenti e non vengono avviati da questa analisi.
+
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Sistema & Circuiti & Episodi & Successi & Fallimenti & Score medio \\
+\midrule
+LLM + RAG & 90/90 & 90 & 90 & 0 & 0,798379 \\
+LLM senza RAG & 90/90 & 90 & 90 & 0 & 0,634778 \\
+MQT Predictor & 90/90 & 90 & 80 & 10 & 0,682664 \\
+Random & 90/90 & 90 & 80 & 10 & 0,682664 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Gli score medi di questa tabella hanno denominatori diversi quando un sistema fallisce. Il confronto appaiato più avanti usa invece gli stessi circuiti per entrambi i sistemi.
+
+Sui 90 successi comuni con LLM senza RAG, la differenza media di score a favore di LLM + RAG è 0,163601. Sui 80 successi comuni con Random, la differenza media di score a favore di LLM + RAG è 0,143593. Sui 80 successi comuni con MQT Predictor, la differenza media di score a favore di LLM + RAG è 0,143593. Queste differenze descrivono gli esiti osservati e vanno lette insieme ad affidabilità e costi.
+
+Il costo osservato dei due LLM mostra il compromesso fra qualità e risorse: RAG usa in media 16\,452,30 token e 27,49 s per circuito; senza RAG si osservano 8\,608,38 token e 14,11 s. Queste medie includono le correzioni e hanno le coperture dichiarate nelle tabelle successive.
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/esiti.tex}
+\caption{Compilazioni riuscite e fallimenti, contati sugli episodi conservati. Un metodo assente non è rappresentato da una barra nulla.}
+\end{figure}
+\FloatBarrier
+\section{Procedura e assunzioni}
+\subsection{Che cosa vogliamo misurare}
+Il confronto valuta quanto bene un sistema sceglie un dispositivo e una procedura
+per compilare un circuito quantistico. Il risultato deve essere eseguibile sul
+Target scelto. La qualità è stimata con la metrica \texttt{expected\_fidelity}
+di MQT Predictor 2.4.0. Non si eseguono circuiti su un computer quantistico reale.
+Un valore maggiore indica una migliore fedeltà stimata con le proprietà sintetiche
+usate nell'esperimento; non misura l'accuratezza di un risultato fisico.
+
+Il protocollo corrente riserva 90 circuiti al Test, dopo 422 circuiti train e 88
+validation. Il modello e le impostazioni sono stati scelti sulla validation
+\texttt{local-llm-v2}. Il Test non viene usato per cambiare il prompt o scegliere
+una nuova configurazione. Questa revisione amplia soltanto la presentazione
+dei risultati già conservati. Non produce nuove decisioni o compilazioni.
+
+\subsection{I quattro sistemi previsti}
+\paragraph{LLM con RAG.}
+Qwen3.5-4B, con pesi Q8\_0 e temperatura 0, riceve le caratteristiche del circuito,
+i dispositivi compatibili, dodici configurazioni Qiskit e cinque esempi recuperati
+dal solo train. Il recupero confronta 49 caratteristiche numeriche con distanza
+Manhattan e trasformazione fissata sul train. L'indice deriva da 396 circuiti
+train distinti per SHA-256; i 26 alias byte-identici non diventano nuovi esempi.
+Il Dataset contiene esempi per il RAG; il Training set è invece destinato
+all'addestramento del selettore ML di MQT Predictor.
+
+\paragraph{LLM senza RAG.}
+Si usano lo stesso modello, gli stessi pesi e parametri. Restano le caratteristiche
+del circuito, i dispositivi e le configurazioni, ma non vengono recuperati esempi.
+Il contratto richiede un solo fatto sulla capacità in qubit del dispositivo scelto.
+La differenza operativa comprende quindi gli esempi e la conseguente regola sui
+fatti; non si isola soltanto la lunghezza del prompt.
+
+\paragraph{Random.}
+Si estrae uniformemente una coppia compatibile dispositivo/configurazione Qiskit.
+Il seme deriva da 20260921 e dall'impronta SHA-256 del circuito. La coppia scelta
+è compilata una volta. Un fallimento non provoca una nuova estrazione.
+
+\paragraph{MQT Predictor.}
+Il selettore supervisionato sceglie il dispositivo; la politica RL specifica del
+dispositivo sceglie i passaggi di compilazione. Sono le due operazioni interne
+a \texttt{qcompile} 2.4.0, misurate separatamente. Per aprire questa prova servono
+cinque politiche RL conformi, il selettore addestrato sul solo train e sei prove
+tecniche riuscite. La presenza del software, da sola, non equivale a un sistema
+addestrato. Se mancano risultati, il metodo resta esplicitamente assente dal
+confronto e non riceve valori stimati.
+
+\subsection{Scelta, correzioni e compilazione}
+I cinque dispositivi sono IBM Falcon 27, IBM Falcon 127, IBM Heron 133,
+IBM Heron 156 e Quantinuum H2-56, con i Target sintetici congelati di MQT Bench.
+Il catalogo Qiskit contiene dodici combinazioni dei livelli 2 e 3, con layout
+predefinito, Sabre, dense o trivial e instradamento predefinito, Sabre, lookahead
+o basic. Si considerano soltanto le coppie ammesse e compatibili.
+
+Gli LLM producono una risposta JSON con coppia scelta, fatti strutturati e
+un'ipotesi libera. La vista dei dati inviata al modello usa TOON e non include
+il QASM né i metadati di provenienza. La prima risposta accettabile è definitiva.
+Sono possibili al massimo tre tentativi completi per correggere la risposta.
+Al terzo tentativo una coppia conforme può essere accettata anche con fatti non
+verificati: questa condizione viene contata a parte. L'ipotesi libera non riceve
+una certificazione semantica. Nessun punteggio Test o risultato dei concorrenti
+viene fornito per decidere o correggere la scelta.
+
+Ogni metodo opera su un circuito alla volta. Il piano corrente prevede una sola
+compilazione per circuito; per Qiskit il seed è 0 e \texttt{num\_processes=1}.
+Il seed interno MQT non è controllato. Il limite esterno del processo è 100 s,
+compreso il suo avvio. La chiamata LLM ha limite di 3600 s e non prevede ripetizioni
+automatiche di trasporto. Gli esiti terminali non vengono ripetuti per ottenere
+un risultato favorevole. Le tre compilazioni per coppia della validation non
+sono repliche del Test.
+
+\subsection{Configurazione LLM e ambiente}
+La configurazione selezionata è \texttt{qwen/p0\_t0}: contesto richiesto 60000,
+cache Q8\_0, batch 512, micro-batch 128, massimo 4096 token di risposta,
+seed 20260913, \texttt{top\_p=0.95}, \texttt{top\_k=40}, \texttt{min\_p=0},
+penalità di ripetizione 1 e pensiero esteso disattivato. I valori predefiniti
+pubblicati dal server possono essere diversi: per verificare una chiamata
+contano i parametri effettivamente inviati, conservati nei registri e riepilogati
+nell'appendice di provenienza. Il contesto dichiarato 60160 corrisponde
+all'arrotondamento del profilo richiesto da parte del server.
+
+Le versioni e le impronte dei Target sono fissate dal protocollo, con Python 3.12
+e dipendenze del progetto. Ogni esecuzione conserva il proprio ambiente.
+Non si deducono modello della CPU o della GPU da quelli descritti nel documento
+della validation: senza una misura nel registro Test, quell'informazione resta
+non verificata. Memoria, energia, temperature e carico concorrente non sono
+misurati sistematicamente in questi registri. I tempi sono quindi descrittivi
+delle esecuzioni osservate.
+\section{Come sono calcolate le statistiche}
+\subsection{Esiti, costi e unità statistica}
+Un successo è un episodio terminato con un circuito compilato, eseguibile sul
+Target, e score finito. I controlli del procedimento conservato verificano queste
+condizioni prima di pubblicare \texttt{success}. Qualsiasi esito terminale senza
+compilazione valida è un fallimento, indipendentemente dalla causa: errore,
+timeout o interruzione. I circuiti ancora senza esito sono pendenti e non diventano
+fallimenti. Il numero di successi e fallimenti è un conteggio, non una media.
+
+L'unità statistica è il circuito. Se sono conservati più episodi indipendenti
+dello stesso circuito e metodo, si calcola prima la media delle misure note del
+circuito e poi la media fra circuiti, con un peso uguale per ciascuno. I tentativi
+di correzione dello stesso episodio non sono repliche. Lo score del circuito è
+la media dei soli episodi riusciti: gli episodi falliti restano nei conteggi,
+senza assegnare loro zero. La somma dei costi riguarda invece tutti gli episodi
+misurati. Il piano corrente prevede un episodio per circuito; la capacità del
+generatore di leggere più episodi non autorizza nuove ripetizioni del Test.
+
+\paragraph{Retry e token.}
+Un retry è una chiamata LLM aggiuntiva oltre la prima nello stesso episodio:
+\(r=\max(0,N_{\mathrm{chiamate}}-1)\). Il costo in token somma ingresso e uscita
+di tutte le chiamate, comprese le correzioni e i tentativi falliti quando
+misurabili. L'ingresso è il prompt completo tokenizzato, anche quando il server
+riusa una cache; l'uscita è il conteggio restituito dal server. Un token ignoto
+non vale zero. Le somme parziali note dei token sono conservate separatamente.
+Token, retry e risposta LLM non si applicano a Random e MQT Predictor.
+
+\paragraph{Tempi.}
+Il tempo totale decorre dall'ingresso del circuito nella procedura fino all'esito
+misurato: include lettura e preparazione, recupero RAG, chiamate, correzioni,
+avvio del processo, compilazione e controlli. Il cronometro si ferma prima del
+riepilogo finale dei token e della scrittura di \texttt{esito.json}; non include
+avvio del server, controlli preliminari di tutta l'esecuzione o generazione di
+questo rapporto. La somma di questi tempi è un costo cumulativo, non il tempo
+trascorso sul calendario fra due avvii o sessioni.
+
+Il tempo interno di compilazione misura soltanto \texttt{transpile} o
+\texttt{rl\_compile}. Il tempo del processo comprende anche importazioni, avvio,
+controlli e salvataggi. Se il processo termina per timeout senza pubblicare la
+misura interna, quella durata resta mancante: il limite di 100 s non viene
+sostituito al tempo del compilatore. La risposta LLM misura l'intervallo fra
+invio della generazione e ricezione della risposta completa; con più chiamate
+si riporta la loro somma. Si tratta della latenza osservata dal client, non del
+solo calcolo dei token. Tutti i tempi sono in secondi, misurati con
+\texttt{perf\_counter}.
+
+\paragraph{Copertura.}
+Il simbolo -- indica misura mancante o non applicabile; le didascalie distinguono
+i casi. Ogni media dichiara quanti circuiti hanno almeno una misura e ogni
+riepilogo dichiara gli episodi misurati sul totale pertinente. Una media basata
+su misure parziali resta tale; i file leggibili da programma indicano anche
+quanti episodi mancano per ogni circuito. Non si eliminano gli esiti sfavorevoli.
+
+\subsection{Confronto di qualità}
+La media descrittiva di un metodo usa i suoi successi. Per confrontare due metodi
+si usano soltanto i circuiti con uno score disponibile per entrambi, mantenendo
+l'appaiamento per identificativo e SHA-256. I fallimenti restano visibili nella
+tabella di affidabilità; il confronto sui successi comuni è condizionato alla
+riuscita e non li sostituisce. Con episodi ripetuti, un circuito misto entra con
+la media dei suoi successi e i fallimenti restano dichiarati.
+
+Per ogni confronto con LLM + RAG si calcola
+\(\Delta_c=s_{c,\mathrm{RAG}}-s_{c,\mathrm{altro}}\).
+Il piano descrittivo usa 10000 ricampionamenti appaiati con reinserimento dei
+circuiti, seed 20260901 e intervallo percentile al 95\% della differenza media.
+Con meno di due circuiti comuni l'intervallo non viene stimato. Non si eseguono
+test confermativi né si applica il precedente piano sul regret della validation.
+L'intervallo descrive la variabilità fra i circuiti osservati: non comprende la
+variabilità di nuove esecuzioni, hardware diversi o altre scelte di Random.
+Non si dichiara superiorità statistica sulla base di queste sole analisi.
+\section{Risultati aggregati}
+\subsection{LLM + RAG}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Misura & Media & Mediana & Somma nota & Circuiti & Episodi \\
+\midrule
+Expected fidelity & 0,798379 & 0,921379 & -- & 90/90 & 90/90 \\
+Tempo totale (s) & 27,49 & 26,09 & 2\,473,83 & 90/90 & 90/90 \\
+Compilazione interna (s) & 1,79 & 0,71 & 160,69 & 90/90 & 90/90 \\
+Processo di compilazione (s) & 2,40 & 1,32 & 216,40 & 90/90 & 90/90 \\
+Preparazione e scelta (s) & 25,06 & 24,52 & 2\,254,98 & 90/90 & 90/90 \\
+Retry LLM & 0,40 & 0,00 & 36 & 90/90 & 90/90 \\
+Chiamate LLM & 1,40 & 1,00 & 126 & 90/90 & 90/90 \\
+Token in ingresso & 16\,227,00 & 12\,167,50 & 1\,460\,430 & 90/90 & 90/90 \\
+Token in uscita & 225,30 & 157,00 & 20\,277 & 90/90 & 90/90 \\
+Token totali & 16\,452,30 & 12\,324,00 & 1\,480\,707 & 90/90 & 90/90 \\
+Risposta LLM cumulativa (s) & 20,27 & 20,06 & 1\,823,95 & 90/90 & 90/90 \\
+Recupero RAG (s) & 3,88 & 3,85 & 349,28 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Circuiti conclusi: 90/90; episodi: 90; successi: 90; fallimenti: 0. Episodi con retry: 19; accettati con fatti non verificati: 17. Nelle coperture, lo score considera gli episodi riusciti; le altre misure considerano tutti gli episodi.
+
+\subsection{LLM senza RAG}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Misura & Media & Mediana & Somma nota & Circuiti & Episodi \\
+\midrule
+Expected fidelity & 0,634778 & 0,803307 & -- & 90/90 & 90/90 \\
+Tempo totale (s) & 14,11 & 14,10 & 1\,269,72 & 90/90 & 90/90 \\
+Compilazione interna (s) & 0,39 & 0,37 & 34,66 & 90/90 & 90/90 \\
+Processo di compilazione (s) & 0,93 & 0,90 & 83,37 & 90/90 & 90/90 \\
+Preparazione e scelta (s) & 13,17 & 13,20 & 1\,184,91 & 90/90 & 90/90 \\
+Retry LLM & 0,00 & 0,00 & 0 & 90/90 & 90/90 \\
+Chiamate LLM & 1,00 & 1,00 & 90 & 90/90 & 90/90 \\
+Token in ingresso & 8\,491,34 & 8\,580,00 & 764\,221 & 90/90 & 90/90 \\
+Token in uscita & 117,03 & 115,00 & 10\,533 & 90/90 & 90/90 \\
+Token totali & 8\,608,38 & 8\,693,00 & 774\,754 & 90/90 & 90/90 \\
+Risposta LLM cumulativa (s) & 12,58 & 12,64 & 1\,132,38 & 90/90 & 90/90 \\
+Recupero RAG (s) & 0,00 & 0,00 & 0,00 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Circuiti conclusi: 90/90; episodi: 90; successi: 90; fallimenti: 0. Episodi con retry: 0; accettati con fatti non verificati: 0. Nelle coperture, lo score considera gli episodi riusciti; le altre misure considerano tutti gli episodi.
+
+\subsection{MQT Predictor}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Misura & Media & Mediana & Somma nota & Circuiti & Episodi \\
+\midrule
+Expected fidelity & 0,682664 & 0,815146 & -- & 80/90 & 80/80 \\
+Tempo totale (s) & 12,49 & 1,23 & 1\,123,74 & 90/90 & 90/90 \\
+Compilazione interna (s) & 0,67 & 0,38 & 53,56 & 80/90 & 80/90 \\
+Processo di compilazione (s) & 12,20 & 0,95 & 1\,098,44 & 90/90 & 90/90 \\
+Preparazione e scelta (s) & 0,26 & 0,26 & 23,48 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Circuiti conclusi: 90/90; episodi: 90; successi: 80; fallimenti: 10. Cause: process\_timeout (10). Nelle coperture, lo score considera gli episodi riusciti; le altre misure considerano tutti gli episodi.
+
+\subsection{Random}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Misura & Media & Mediana & Somma nota & Circuiti & Episodi \\
+\midrule
+Expected fidelity & 0,682664 & 0,815146 & -- & 80/90 & 80/80 \\
+Tempo totale (s) & 12,49 & 1,23 & 1\,123,74 & 90/90 & 90/90 \\
+Compilazione interna (s) & 0,67 & 0,38 & 53,56 & 80/90 & 80/90 \\
+Processo di compilazione (s) & 12,20 & 0,95 & 1\,098,44 & 90/90 & 90/90 \\
+Preparazione e scelta (s) & 0,26 & 0,26 & 23,48 & 90/90 & 90/90 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+Circuiti conclusi: 90/90; episodi: 90; successi: 80; fallimenti: 10. Cause: process\_timeout (10). Nelle coperture, lo score considera gli episodi riusciti; le altre misure considerano tutti gli episodi.
+
+\subsection{Confronto appaiato dello score}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Confronto con RAG & N & Media RAG & Media altro & $\Delta$ medio & Intervallo 95\% \\
+\midrule
+LLM senza RAG & 90 & 0,798379 & 0,634778 & 0,163601 & [0,126003; 0,201430] \\
+MQT Predictor & 80 & 0,826257 & 0,682664 & 0,143593 & [0,104052; 0,186283] \\
+Random & 80 & 0,826257 & 0,682664 & 0,143593 & [0,104052; 0,186283] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+La differenza è RAG meno altro sistema; un valore positivo favorisce RAG nel campione comune. L’intervallo è descrittivo, percentile, ottenuto ricampionando gli stessi circuiti per entrambi i metodi.
+
+\begingroup\small
+\setlength{\tabcolsep}{5pt}
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Confronto & RAG maggiore & Parità & RAG minore \\
+\midrule
+LLM senza RAG & 71 & 10 & 9 \\
+MQT Predictor & 65 & 10 & 5 \\
+Random & 65 & 10 & 5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+L'intersezione dei circuiti con score disponibile per tutti i metodi presenti contiene 80 circuiti. Su questa stessa popolazione: LLM + RAG: 0,826257, LLM senza RAG: 0,676097, MQT Predictor: 0,682664, Random: 0,682664. L’intersezione può cambiare con l’aggiunta di MQT; le precedenti versioni del rapporto rimangono conservate.
+\subsection{Grafici del confronto}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/score.tex}
+\caption{Score per circuito. I fallimenti non hanno un punto e non sono imputati a zero. Le tabelle finali associano gli indici ai circuiti.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/total_seconds.tex}
+\caption{Tempo totale per circuito su tutti gli esiti misurati, inclusi i fallimenti. Le tabelle finali associano gli indici ai circuiti.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/compilation_seconds.tex}
+\caption{Tempo interno di compilazione. Mancano le misure dei processi terminati senza risultato interno. Le tabelle finali associano gli indici ai circuiti.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/compilation_process_seconds.tex}
+\caption{Durata del processo di compilazione, che comprende i timeout. Le tabelle finali associano gli indici ai circuiti.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/total_tokens.tex}
+\caption{Token complessivi per circuito, inclusi ingresso, uscita e correzioni. Le eventuali repliche vengono prima mediate per circuito.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/llm_response_seconds.tex}
+\caption{Latenza cumulativa delle risposte LLM per circuito. Le eventuali repliche vengono prima mediate per circuito.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/retries.tex}
+\caption{Retry per circuito: chiamate oltre la prima nello stesso episodio. Le eventuali repliche vengono prima mediate per circuito.}
+\end{figure}
+
+\begin{figure}[!htbp]\centering
+\input{\TestReportPath grafici/distribuzione_score.tex}
+\caption{Distribuzione cumulativa dello score sui successi di ciascun sistema. Per una soglia sull’asse orizzontale, l’altezza indica la quota con score non superiore. Le popolazioni possono differire: la figura è descrittiva e non sostituisce il confronto appaiato.}
+\end{figure}
+\FloatBarrier
+\section{Limiti e interpretazione}
+Il Test contiene 90 circuiti provenienti da un corpus specifico. I circuiti
+appartengono a famiglie e dimensioni correlate: i risultati non descrivono ogni
+possibile circuito quantistico. I ricampionamenti trattano il circuito come
+unità, senza correggere la dipendenza fra membri della stessa famiglia.
+
+La qualità è una fedeltà stimata sui Target sintetici di MQT Bench, non una
+misura sperimentale su hardware quantistico. Gli score sono arrotondati a dieci
+decimali; valori molto piccoli possono diventare zero. Gli indicatori di
+arrotondamento e underflow restano nei dati. Non viene costruito un oracle
+esaustivo: il migliore fra i metodi osservati non è la migliore compilazione
+possibile.
+
+Un solo seed Qiskit e una sola estrazione Random per circuito non misurano la
+variabilità tra ripetizioni. Temperatura zero non prova una riproducibilità
+assoluta su runtime diversi. MQT usa un diverso compilatore e
+una procedura di addestramento diversa; il confronto riguarda il sistema
+complessivo, non soltanto il selettore ML.
+
+I tempi dipendono da macchina, carico, cache e momento dell'esecuzione. Non sono
+costi monetari e non includono la preparazione del Dataset, l'addestramento dei
+modelli o il tempo di avvio dei servizi. In particolare i timeout rendono
+incompleta la misura interna del compilatore. Confrontare soltanto la media di
+compilazione sui successi può favorire un sistema che fallisce sui casi più
+lenti; per questo si mostrano anche fallimenti, tempo del processo e tempo totale.
+
+Il contratto senza RAG richiede un fatto di capacità, mentre il contratto con RAG
+consente anche fatti sugli esempi. Il confronto non separa l'effetto degli esempi
+da quello di questa diversa verifica. L'accettazione di fatti non verificati
+non equivale a un fallimento di compilazione e l'ipotesi libera non è certificata.
+
+Il pilota storico aveva già compilato due circuiti poi assegnati al Test:
+\texttt{qpeexact\_indep\_tket\_60} e \texttt{routing\_indep\_qiskit\_12}.
+Questa esposizione resta un limite: i registri non consentono di escluderne ogni
+influenza sulle decisioni successive. Non si può inoltre escludere la presenza
+di MQT Bench nei dati di preaddestramento degli LLM. La seconda validation è
+stata decisa dopo la prima e non è una replica indipendente.
+
+La presentazione è stata ampliata dopo la disponibilità dei risultati Test.
+Le metriche principali e il confronto appaiato seguono il piano congelato;
+i grafici aggiuntivi, la distribuzione degli score e le spiegazioni sono analisi
+descrittive. Non cambiano la selezione del modello o le regole dell'esperimento.
+I dati mancanti e i metodi ancora assenti restano visibili. Lo stesso comando rigenera
+il rapporto quando sono disponibili nuovi esiti, compresi quelli MQT, mantenendo
+le versioni precedenti e senza avviare nuove prove dal generatore.
+\clearpage\section{Tabelle complete per circuito}
+Gli indici sono comuni a tutti i report e derivano dall’ordine lessicografico del manifest. R = LLM + RAG; N = LLM senza RAG; M = MQT Predictor; C = Random. Sono presenti solo le colonne dei metodi disponibili. S/F conta successi e fallimenti dell’intero circuito; le misure numeriche sono medie per episodio, lo score sui soli successi.
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lr}
+\toprule
+N. & Circuito \\
+\midrule
+\endfirsthead
+\toprule
+N. & Circuito \\
+\midrule\endhead
+\midrule\multicolumn{2}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+1 & groundstate\_medium\_indep\_qiskit\_12 \\
+2 & groundstate\_medium\_indep\_tket\_12 \\
+3 & groundstate\_small\_indep\_qiskit\_4 \\
+4 & groundstate\_small\_indep\_tket\_4 \\
+5 & qpeexact\_indep\_qiskit\_10 \\
+6 & qpeexact\_indep\_qiskit\_11 \\
+7 & qpeexact\_indep\_qiskit\_12 \\
+8 & qpeexact\_indep\_qiskit\_13 \\
+9 & qpeexact\_indep\_qiskit\_14 \\
+10 & qpeexact\_indep\_qiskit\_15 \\
+11 & qpeexact\_indep\_qiskit\_16 \\
+12 & qpeexact\_indep\_qiskit\_2 \\
+13 & qpeexact\_indep\_qiskit\_3 \\
+14 & qpeexact\_indep\_qiskit\_30 \\
+15 & qpeexact\_indep\_qiskit\_4 \\
+16 & qpeexact\_indep\_qiskit\_40 \\
+17 & qpeexact\_indep\_qiskit\_5 \\
+18 & qpeexact\_indep\_qiskit\_50 \\
+19 & qpeexact\_indep\_qiskit\_6 \\
+20 & qpeexact\_indep\_qiskit\_60 \\
+21 & qpeexact\_indep\_qiskit\_7 \\
+22 & qpeexact\_indep\_qiskit\_70 \\
+23 & qpeexact\_indep\_qiskit\_8 \\
+24 & qpeexact\_indep\_qiskit\_9 \\
+25 & qpeexact\_indep\_tket\_10 \\
+26 & qpeexact\_indep\_tket\_11 \\
+27 & qpeexact\_indep\_tket\_12 \\
+28 & qpeexact\_indep\_tket\_13 \\
+29 & qpeexact\_indep\_tket\_14 \\
+30 & qpeexact\_indep\_tket\_15 \\
+31 & qpeexact\_indep\_tket\_2 \\
+32 & qpeexact\_indep\_tket\_3 \\
+33 & qpeexact\_indep\_tket\_30 \\
+34 & qpeexact\_indep\_tket\_4 \\
+35 & qpeexact\_indep\_tket\_40 \\
+36 & qpeexact\_indep\_tket\_5 \\
+37 & qpeexact\_indep\_tket\_50 \\
+38 & qpeexact\_indep\_tket\_6 \\
+39 & qpeexact\_indep\_tket\_60 \\
+40 & qpeexact\_indep\_tket\_7 \\
+41 & qpeexact\_indep\_tket\_8 \\
+42 & qpeexact\_indep\_tket\_9 \\
+43 & qpeinexact\_indep\_qiskit\_10 \\
+44 & qpeinexact\_indep\_qiskit\_11 \\
+45 & qpeinexact\_indep\_qiskit\_12 \\
+46 & qpeinexact\_indep\_qiskit\_13 \\
+47 & qpeinexact\_indep\_qiskit\_14 \\
+48 & qpeinexact\_indep\_qiskit\_15 \\
+49 & qpeinexact\_indep\_qiskit\_16 \\
+50 & qpeinexact\_indep\_qiskit\_2 \\
+51 & qpeinexact\_indep\_qiskit\_3 \\
+52 & qpeinexact\_indep\_qiskit\_30 \\
+53 & qpeinexact\_indep\_qiskit\_4 \\
+54 & qpeinexact\_indep\_qiskit\_40 \\
+55 & qpeinexact\_indep\_qiskit\_5 \\
+56 & qpeinexact\_indep\_qiskit\_50 \\
+57 & qpeinexact\_indep\_qiskit\_6 \\
+58 & qpeinexact\_indep\_qiskit\_60 \\
+59 & qpeinexact\_indep\_qiskit\_7 \\
+60 & qpeinexact\_indep\_qiskit\_70 \\
+61 & qpeinexact\_indep\_qiskit\_8 \\
+62 & qpeinexact\_indep\_qiskit\_9 \\
+63 & qpeinexact\_indep\_tket\_10 \\
+64 & qpeinexact\_indep\_tket\_11 \\
+65 & qpeinexact\_indep\_tket\_12 \\
+66 & qpeinexact\_indep\_tket\_13 \\
+67 & qpeinexact\_indep\_tket\_14 \\
+68 & qpeinexact\_indep\_tket\_15 \\
+69 & qpeinexact\_indep\_tket\_2 \\
+70 & qpeinexact\_indep\_tket\_3 \\
+71 & qpeinexact\_indep\_tket\_30 \\
+72 & qpeinexact\_indep\_tket\_4 \\
+73 & qpeinexact\_indep\_tket\_40 \\
+74 & qpeinexact\_indep\_tket\_5 \\
+75 & qpeinexact\_indep\_tket\_50 \\
+76 & qpeinexact\_indep\_tket\_6 \\
+77 & qpeinexact\_indep\_tket\_60 \\
+78 & qpeinexact\_indep\_tket\_7 \\
+79 & qpeinexact\_indep\_tket\_8 \\
+80 & qpeinexact\_indep\_tket\_9 \\
+81 & routing\_indep\_qiskit\_12 \\
+82 & routing\_indep\_qiskit\_2 \\
+83 & routing\_indep\_qiskit\_6 \\
+84 & routing\_indep\_tket\_12 \\
+85 & routing\_indep\_tket\_2 \\
+86 & routing\_indep\_tket\_6 \\
+87 & tsp\_indep\_qiskit\_4 \\
+88 & tsp\_indep\_qiskit\_9 \\
+89 & tsp\_indep\_tket\_4 \\
+90 & tsp\_indep\_tket\_9 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Esiti e score}
+\begingroup\scriptsize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrrrrrr}
+\toprule
+N. & R S/F & R score & N S/F & N score & M S/F & M score & C S/F & C score \\
+\midrule
+\endfirsthead
+\toprule
+N. & R S/F & R score & N S/F & N score & M S/F & M score & C S/F & C score \\
+\midrule\endhead
+\midrule\multicolumn{9}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+1 & 1/0 & 0,7963772008 & 1/0 & 0,5106374597 & 0/1 & -- & 0/1 & -- \\
+2 & 1/0 & 0,7963772008 & 1/0 & 0,5095240413 & 0/1 & -- & 0/1 & -- \\
+3 & 1/0 & 0,9788591374 & 1/0 & 0,9644256307 & 1/0 & 0,9284918739 & 1/0 & 0,9284918739 \\
+4 & 1/0 & 0,9682535640 & 1/0 & 0,9642484591 & 1/0 & 0,9642743738 & 1/0 & 0,9642743738 \\
+5 & 1/0 & 0,9218353887 & 1/0 & 0,7676892178 & 1/0 & 0,9218353887 & 1/0 & 0,9218353887 \\
+6 & 1/0 & 0,9032343267 & 1/0 & 0,7316851381 & 0/1 & -- & 0/1 & -- \\
+7 & 1/0 & 0,8879093206 & 1/0 & 0,7118469724 & 1/0 & 0,4692527054 & 1/0 & 0,4692527054 \\
+8 & 1/0 & 0,8714043421 & 1/0 & 0,6009140939 & 1/0 & 0,2696240489 & 1/0 & 0,2696240489 \\
+9 & 1/0 & 0,8538721240 & 1/0 & 0,3660156895 & 1/0 & 0,2763611471 & 1/0 & 0,2763611471 \\
+10 & 1/0 & 0,8300875325 & 1/0 & 0,3493721339 & 1/0 & 0,3919079076 & 1/0 & 0,3919079076 \\
+11 & 1/0 & 0,8095860950 & 1/0 & 0,2515214081 & 1/0 & 0,2721360527 & 1/0 & 0,2721360527 \\
+12 & 1/0 & 0,9987599534 & 1/0 & 0,9987599534 & 1/0 & 0,9933030092 & 1/0 & 0,9933030092 \\
+13 & 1/0 & 0,9960947806 & 1/0 & 0,9959534703 & 1/0 & 0,9928566050 & 1/0 & 0,9928566050 \\
+14 & 1/0 & 0,5202940694 & 1/0 & 0,0435319136 & 0/1 & -- & 0/1 & -- \\
+15 & 1/0 & 0,9869487051 & 1/0 & 0,9869362511 & 1/0 & 0,9869362511 & 1/0 & 0,9869362511 \\
+16 & 1/0 & 0,3741311339 & 1/0 & 0,0061016048 & 1/0 & 0,0001880909 & 1/0 & 0,0001880909 \\
+17 & 1/0 & 0,9720658176 & 1/0 & 0,9476227940 & 1/0 & 0,9393843391 & 1/0 & 0,9393843391 \\
+18 & 1/0 & 0,2694733993 & 1/0 & 0,0004614703 & 1/0 & 0,0001248227 & 1/0 & 0,0001248227 \\
+19 & 1/0 & 0,9593073443 & 1/0 & 0,9361087506 & 1/0 & 0,9706868019 & 1/0 & 0,9706868019 \\
+20 & 1/0 & 0,0000113956 & 1/0 & 0,0000282707 & 1/0 & 0,0000000000 & 1/0 & 0,0000000000 \\
+21 & 1/0 & 0,9616082099 & 1/0 & 0,8993048226 & 1/0 & 0,8125297659 & 1/0 & 0,8125297659 \\
+22 & 1/0 & 0,0000028783 & 1/0 & 0,0000027717 & 1/0 & 0,0000002812 & 1/0 & 0,0000002812 \\
+23 & 1/0 & 0,9465992541 & 1/0 & 0,8481521960 & 1/0 & 0,9465992541 & 1/0 & 0,9465992541 \\
+24 & 1/0 & 0,9349067710 & 1/0 & 0,8228917572 & 1/0 & 0,6483575217 & 1/0 & 0,6483575217 \\
+25 & 1/0 & 0,9209232096 & 1/0 & 0,8126703393 & 1/0 & 0,7139331217 & 1/0 & 0,7139331217 \\
+26 & 1/0 & 0,9022052109 & 1/0 & 0,7161070620 & 1/0 & 0,7161070620 & 1/0 & 0,7161070620 \\
+27 & 1/0 & 0,8868444525 & 1/0 & 0,6499129714 & 1/0 & 0,6634856329 & 1/0 & 0,6634856329 \\
+28 & 1/0 & 0,8699415900 & 1/0 & 0,3786787545 & 1/0 & 0,3776168582 & 1/0 & 0,3776168582 \\
+29 & 1/0 & 0,8522598056 & 1/0 & 0,3656884931 & 1/0 & 0,4308917351 & 1/0 & 0,4308917351 \\
+30 & 1/0 & 0,8281722146 & 1/0 & 0,3538023137 & 1/0 & 0,0761345497 & 1/0 & 0,0761345497 \\
+31 & 1/0 & 0,9987599534 & 1/0 & 0,9987599534 & 1/0 & 0,9994205726 & 1/0 & 0,9994205726 \\
+32 & 1/0 & 0,9958784484 & 1/0 & 0,9960511573 & 1/0 & 0,9958784484 & 1/0 & 0,9958784484 \\
+33 & 1/0 & 0,5674551344 & 1/0 & 0,0601828249 & 1/0 & 0,5674551344 & 1/0 & 0,5674551344 \\
+34 & 1/0 & 0,9868581315 & 1/0 & 0,9825764873 & 1/0 & 0,9558923799 & 1/0 & 0,9558923799 \\
+35 & 1/0 & 0,4398748201 & 1/0 & 0,0074565990 & 1/0 & 0,0005904883 & 1/0 & 0,0005904883 \\
+36 & 1/0 & 0,9691548425 & 1/0 & 0,9547777525 & 1/0 & 0,9136507159 & 1/0 & 0,9136507159 \\
+37 & 1/0 & 0,3415929475 & 1/0 & 0,0007258100 & 0/1 & -- & 0/1 & -- \\
+38 & 1/0 & 0,9460784319 & 1/0 & 0,9155277265 & 1/0 & 0,9183910228 & 1/0 & 0,9183910228 \\
+39 & 1/0 & 0,0000273505 & 1/0 & 0,0000274379 & 0/1 & -- & 0/1 & -- \\
+40 & 1/0 & 0,9612044132 & 1/0 & 0,9176887989 & 1/0 & 0,8831252361 & 1/0 & 0,8831252361 \\
+41 & 1/0 & 0,9460882208 & 1/0 & 0,8693836472 & 1/0 & 0,8276258590 & 1/0 & 0,8276258590 \\
+42 & 1/0 & 0,9342899269 & 1/0 & 0,8402609774 & 1/0 & 0,8040237889 & 1/0 & 0,8040237889 \\
+43 & 1/0 & 0,9189065362 & 1/0 & 0,7891746629 & 1/0 & 0,9189065362 & 1/0 & 0,9189065362 \\
+44 & 1/0 & 0,9032072297 & 1/0 & 0,7301475407 & 1/0 & 0,6932646221 & 1/0 & 0,6932646221 \\
+45 & 1/0 & 0,8864178847 & 1/0 & 0,6936251078 & 1/0 & 0,7154354271 & 1/0 & 0,7154354271 \\
+46 & 1/0 & 0,8685836016 & 1/0 & 0,5840851732 & 1/0 & 0,8685836016 & 1/0 & 0,8685836016 \\
+47 & 1/0 & 0,8497804839 & 1/0 & 0,5249297556 & 0/1 & -- & 0/1 & -- \\
+48 & 1/0 & 0,8300875325 & 1/0 & 0,3481077175 & 1/0 & 0,8300875325 & 1/0 & 0,8300875325 \\
+49 & 1/0 & 0,8095860950 & 1/0 & 0,2505979614 & 1/0 & 0,8095860950 & 1/0 & 0,8095860950 \\
+50 & 1/0 & 0,9993011566 & 1/0 & 0,9993011566 & 1/0 & 0,9884206189 & 1/0 & 0,9884206189 \\
+51 & 1/0 & 0,9931879680 & 1/0 & 0,9933839355 & 1/0 & 0,9773647170 & 1/0 & 0,9773647170 \\
+52 & 1/0 & 0,5194357059 & 1/0 & 0,0654409889 & 1/0 & 0,0090626618 & 1/0 & 0,0090626618 \\
+53 & 1/0 & 0,9805279150 & 1/0 & 0,9745794670 & 1/0 & 0,9859297789 & 1/0 & 0,9859297789 \\
+54 & 1/0 & 0,3741311339 & 1/0 & 0,0060775772 & 0/1 & -- & 0/1 & -- \\
+55 & 1/0 & 0,9710851394 & 1/0 & 0,9508577410 & 1/0 & 0,9782345802 & 1/0 & 0,9782345802 \\
+56 & 1/0 & 0,2694733993 & 1/0 & 0,0004613870 & 0/1 & -- & 0/1 & -- \\
+57 & 1/0 & 0,9550100512 & 1/0 & 0,9168439858 & 1/0 & 0,8976554802 & 1/0 & 0,8976554802 \\
+58 & 1/0 & 0,0000113715 & 1/0 & 0,0000282469 & 1/0 & 0,0000019947 & 1/0 & 0,0000019947 \\
+59 & 1/0 & 0,9585242347 & 1/0 & 0,8982993209 & 1/0 & 0,7526640637 & 1/0 & 0,7526640637 \\
+60 & 1/0 & 0,0000028650 & 1/0 & 0,0000027682 & 1/0 & 0,0000000000 & 1/0 & 0,0000000000 \\
+61 & 1/0 & 0,9465992541 & 1/0 & 0,8445016285 & 1/0 & 0,8318682021 & 1/0 & 0,8318682021 \\
+62 & 1/0 & 0,9333643936 & 1/0 & 0,8233705427 & 1/0 & 0,7894633068 & 1/0 & 0,7894633068 \\
+63 & 1/0 & 0,9180247960 & 1/0 & 0,7939430799 & 1/0 & 0,7872484053 & 1/0 & 0,7872484053 \\
+64 & 1/0 & 0,9022322778 & 1/0 & 0,7146722920 & 0/1 & -- & 0/1 & -- \\
+65 & 1/0 & 0,8852220100 & 1/0 & 0,6682177210 & 1/0 & 0,6188988546 & 1/0 & 0,6188988546 \\
+66 & 1/0 & 0,8671515989 & 1/0 & 0,6186412093 & 1/0 & 0,5953505018 & 1/0 & 0,5953505018 \\
+67 & 1/0 & 0,8480995580 & 1/0 & 0,3537888017 & 1/0 & 0,3537538590 & 1/0 & 0,3537538590 \\
+68 & 1/0 & 0,8282716028 & 1/0 & 0,3527234652 & 1/0 & 0,3541211774 & 1/0 & 0,3541211774 \\
+69 & 1/0 & 0,9993011566 & 1/0 & 0,9993011566 & 1/0 & 0,9971982459 & 1/0 & 0,9971982459 \\
+70 & 1/0 & 0,9931879680 & 1/0 & 0,9933839355 & 1/0 & 0,9660926192 & 1/0 & 0,9660926192 \\
+71 & 1/0 & 0,5666719493 & 1/0 & 0,0432843387 & 1/0 & 0,5666209503 & 1/0 & 0,5666209503 \\
+72 & 1/0 & 0,9812192516 & 1/0 & 0,9745794670 & 1/0 & 0,9419211140 & 1/0 & 0,9419211140 \\
+73 & 1/0 & 0,4399012138 & 1/0 & 0,0074645012 & 1/0 & 0,0005974840 & 1/0 & 0,0005974840 \\
+74 & 1/0 & 0,9685123249 & 1/0 & 0,9572671917 & 1/0 & 0,9552540193 & 1/0 & 0,9552540193 \\
+75 & 1/0 & 0,3415826997 & 1/0 & 0,0007245491 & 1/0 & 0,3415826997 & 1/0 & 0,3415826997 \\
+76 & 1/0 & 0,9688528397 & 1/0 & 0,9367136243 & 1/0 & 0,8399226713 & 1/0 & 0,8399226713 \\
+77 & 1/0 & 0,0000272864 & 1/0 & 0,0000273387 & 1/0 & 0,0000000000 & 1/0 & 0,0000000000 \\
+78 & 1/0 & 0,9581792229 & 1/0 & 0,8829826542 & 1/0 & 0,8177631214 & 1/0 & 0,8177631214 \\
+79 & 1/0 & 0,9461449886 & 1/0 & 0,8712128763 & 1/0 & 0,7525378167 & 1/0 & 0,7525378167 \\
+80 & 1/0 & 0,9326646222 & 1/0 & 0,8416700545 & 1/0 & 0,6737314493 & 1/0 & 0,6737314493 \\
+81 & 1/0 & 0,9398337239 & 1/0 & 0,9398337239 & 1/0 & 0,8031681576 & 1/0 & 0,8031681576 \\
+82 & 1/0 & 0,9978340951 & 1/0 & 0,9978340951 & 1/0 & 0,9920759249 & 1/0 & 0,9920759249 \\
+83 & 1/0 & 0,9816579456 & 1/0 & 0,9816579456 & 1/0 & 0,9720610235 & 1/0 & 0,9720610235 \\
+84 & 1/0 & 0,9398337239 & 1/0 & 0,9398337239 & 1/0 & 0,8921500043 & 1/0 & 0,8921500043 \\
+85 & 1/0 & 0,9978340951 & 1/0 & 0,9978340951 & 1/0 & 0,9859125362 & 1/0 & 0,9859125362 \\
+86 & 1/0 & 0,9816579456 & 1/0 & 0,9816579456 & 1/0 & 0,9614190555 & 1/0 & 0,9614190555 \\
+87 & 1/0 & 0,9839199580 & 1/0 & 0,9816313852 & 1/0 & 0,9701045558 & 1/0 & 0,9701045558 \\
+88 & 1/0 & 0,9247191115 & 1/0 & 0,9448083109 & 1/0 & 0,9296277591 & 1/0 & 0,9296277591 \\
+89 & 1/0 & 0,9839199580 & 1/0 & 0,9816313852 & 1/0 & 0,9436115996 & 1/0 & 0,9436115996 \\
+90 & 1/0 & 0,9248023412 & 1/0 & 0,9448492731 & 1/0 & 0,9248023412 & 1/0 & 0,9248023412 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Tempi per circuito}
+Tutti i valori sono in secondi. Per ogni sistema: tot. = tempo totale, comp. = tempo interno del compilatore, proc. = durata del processo. -- indica una misura mancante.
+\begingroup\scriptsize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrrrrrrrrrr}
+\toprule
+N. & R tot. & R comp. & R proc. & N tot. & N comp. & N proc. & M tot. & M comp. & M proc. & C tot. & C comp. & C proc. \\
+\midrule
+\endfirsthead
+\toprule
+N. & R tot. & R comp. & R proc. & N tot. & N comp. & N proc. & M tot. & M comp. & M proc. & C tot. & C comp. & C proc. \\
+\midrule\endhead
+\midrule\multicolumn{13}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+1 & 37,294 & 3,923 & 4,886 & 15,314 & 0,399 & 0,928 & 100,499 & -- & 100,016 & 100,499 & -- & 100,016 \\
+2 & 26,693 & 0,839 & 1,660 & 13,695 & 0,389 & 0,917 & 100,351 & -- & 100,014 & 100,351 & -- & 100,014 \\
+3 & 23,943 & 0,705 & 1,282 & 13,846 & 0,388 & 0,867 & 2,695 & 1,895 & 2,425 & 2,695 & 1,895 & 2,425 \\
+4 & 25,402 & 1,677 & 2,301 & 14,320 & 0,381 & 0,917 & 1,207 & 0,381 & 0,967 & 1,207 & 0,381 & 0,967 \\
+5 & 25,832 & 0,792 & 1,471 & 14,418 & 0,382 & 0,917 & 1,314 & 0,391 & 1,017 & 1,314 & 0,391 & 1,017 \\
+6 & 26,627 & 0,759 & 1,456 & 14,142 & 0,389 & 0,917 & 100,279 & -- & 100,038 & 100,279 & -- & 100,038 \\
+7 & 26,098 & 0,760 & 1,369 & 14,318 & 0,353 & 0,866 & 1,245 & 0,375 & 0,917 & 1,245 & 0,375 & 0,917 \\
+8 & 33,600 & 0,855 & 1,471 & 13,975 & 0,380 & 0,921 & 1,321 & 0,557 & 1,067 & 1,321 & 0,557 & 1,067 \\
+9 & 26,386 & 0,761 & 1,423 & 14,416 & 0,371 & 0,880 & 1,186 & 0,380 & 0,917 & 1,186 & 0,380 & 0,917 \\
+10 & 26,961 & 0,839 & 1,576 & 14,541 & 0,417 & 0,967 & 1,246 & 0,370 & 0,917 & 1,246 & 0,370 & 0,917 \\
+11 & 26,469 & 0,873 & 1,575 & 14,778 & 0,376 & 0,917 & 1,298 & 0,482 & 1,030 & 1,298 & 0,482 & 1,030 \\
+12 & 26,515 & 0,373 & 0,916 & 14,957 & 0,356 & 0,867 & 1,162 & 0,365 & 0,867 & 1,162 & 0,365 & 0,867 \\
+13 & 24,334 & 0,391 & 0,966 & 14,037 & 0,348 & 0,866 & 1,112 & 0,365 & 0,867 & 1,112 & 0,365 & 0,867 \\
+14 & 31,727 & 0,835 & 1,486 & 13,276 & 0,396 & 0,967 & 100,278 & -- & 100,016 & 100,278 & -- & 100,016 \\
+15 & 31,477 & 0,455 & 1,089 & 14,581 & 0,378 & 0,867 & 1,165 & 0,365 & 0,867 & 1,165 & 0,365 & 0,867 \\
+16 & 41,729 & 11,124 & 11,774 & 13,287 & 0,410 & 0,969 & 1,332 & 0,452 & 1,068 & 1,332 & 0,452 & 1,068 \\
+17 & 23,998 & 0,438 & 1,017 & 14,061 & 0,371 & 0,867 & 1,200 & 0,454 & 0,967 & 1,200 & 0,454 & 0,967 \\
+18 & 34,168 & 3,993 & 4,687 & 13,463 & 0,436 & 1,069 & 1,571 & 0,521 & 1,218 & 1,571 & 0,521 & 1,218 \\
+19 & 24,365 & 0,389 & 0,966 & 14,091 & 0,370 & 0,867 & 1,176 & 0,378 & 0,922 & 1,176 & 0,378 & 0,922 \\
+20 & 29,426 & 0,743 & 1,521 & 13,755 & 0,459 & 1,120 & 4,804 & 3,580 & 4,479 & 4,804 & 3,580 & 4,479 \\
+21 & 24,969 & 0,589 & 1,217 & 14,212 & 0,411 & 0,968 & 1,161 & 0,370 & 0,917 & 1,161 & 0,370 & 0,917 \\
+22 & 22,999 & 0,759 & 1,672 & 13,852 & 0,482 & 1,171 & 1,538 & 0,487 & 1,167 & 1,538 & 0,487 & 1,167 \\
+23 & 25,598 & 0,660 & 1,267 & 14,303 & 0,358 & 0,867 & 1,402 & 0,637 & 1,167 & 1,402 & 0,637 & 1,167 \\
+24 & 25,752 & 0,662 & 1,267 & 14,408 & 0,395 & 0,917 & 1,107 & 0,370 & 0,867 & 1,107 & 0,370 & 0,867 \\
+25 & 25,915 & 0,708 & 1,380 & 14,226 & 0,357 & 0,867 & 1,218 & 0,390 & 0,934 & 1,218 & 0,390 & 0,934 \\
+26 & 26,428 & 0,780 & 1,424 & 13,917 & 0,373 & 0,917 & 1,132 & 0,370 & 0,867 & 1,132 & 0,370 & 0,867 \\
+27 & 26,638 & 0,814 & 1,587 & 13,893 & 0,379 & 0,867 & 1,157 & 0,371 & 0,926 & 1,157 & 0,371 & 0,926 \\
+28 & 26,804 & 0,791 & 1,542 & 14,408 & 0,375 & 0,917 & 1,155 & 0,367 & 0,869 & 1,155 & 0,367 & 0,869 \\
+29 & 26,805 & 0,770 & 1,417 & 14,421 & 0,397 & 0,967 & 1,116 & 0,369 & 0,866 & 1,116 & 0,369 & 0,866 \\
+30 & 26,644 & 0,854 & 1,574 & 15,029 & 0,380 & 0,967 & 1,232 & 0,403 & 0,917 & 1,232 & 0,403 & 0,917 \\
+31 & 30,424 & 0,447 & 1,017 & 14,108 & 0,356 & 0,867 & 1,136 & 0,366 & 0,866 & 1,136 & 0,366 & 0,866 \\
+32 & 30,730 & 0,452 & 1,070 & 14,075 & 0,370 & 0,868 & 1,115 & 0,368 & 0,866 & 1,115 & 0,368 & 0,866 \\
+33 & 39,630 & 15,311 & 15,977 & 13,226 & 0,404 & 0,967 & 1,266 & 0,392 & 0,966 & 1,266 & 0,392 & 0,966 \\
+34 & 24,592 & 0,411 & 1,017 & 14,401 & 0,382 & 0,917 & 1,106 & 0,374 & 0,867 & 1,106 & 0,374 & 0,867 \\
+35 & 32,947 & 8,632 & 9,301 & 13,338 & 0,435 & 1,017 & 1,362 & 0,497 & 1,118 & 1,362 & 0,497 & 1,118 \\
+36 & 24,303 & 0,412 & 0,966 & 14,216 & 0,365 & 0,867 & 9,353 & 8,483 & 9,044 & 9,353 & 8,483 & 9,044 \\
+37 & 27,656 & 3,230 & 3,895 & 13,436 & 0,439 & 1,067 & 100,290 & -- & 100,016 & 100,290 & -- & 100,016 \\
+38 & 24,802 & 0,438 & 1,067 & 14,027 & 0,380 & 0,917 & 1,206 & 0,387 & 0,917 & 1,206 & 0,387 & 0,917 \\
+39 & 23,456 & 0,686 & 1,608 & 13,881 & 0,458 & 1,121 & 100,292 & -- & 100,019 & 100,292 & -- & 100,019 \\
+40 & 26,221 & 0,549 & 1,118 & 14,218 & 0,365 & 0,867 & 1,204 & 0,443 & 0,968 & 1,204 & 0,443 & 0,968 \\
+41 & 37,687 & 12,785 & 13,315 & 14,499 & 0,369 & 0,917 & 1,168 & 0,381 & 0,868 & 1,168 & 0,381 & 0,868 \\
+42 & 25,828 & 0,685 & 1,333 & 15,106 & 0,364 & 0,867 & 1,235 & 0,444 & 0,967 & 1,235 & 0,444 & 0,967 \\
+43 & 33,306 & 0,786 & 1,374 & 14,207 & 0,364 & 0,917 & 1,332 & 0,381 & 1,018 & 1,332 & 0,381 & 1,018 \\
+44 & 26,329 & 0,722 & 1,268 & 14,172 & 0,372 & 0,917 & 1,354 & 0,484 & 1,062 & 1,354 & 0,484 & 1,062 \\
+45 & 31,801 & 0,747 & 1,317 & 14,405 & 0,374 & 0,867 & 1,324 & 0,390 & 1,088 & 1,324 & 0,390 & 1,088 \\
+46 & 26,217 & 0,787 & 1,483 & 13,876 & 0,367 & 0,867 & 1,607 & 0,745 & 1,320 & 1,607 & 0,745 & 1,320 \\
+47 & 26,184 & 0,774 & 1,439 & 14,013 & 0,392 & 0,917 & 100,289 & -- & 100,015 & 100,289 & -- & 100,015 \\
+48 & 26,258 & 0,826 & 1,474 & 14,457 & 0,377 & 0,918 & 1,185 & 0,384 & 0,918 & 1,185 & 0,384 & 0,918 \\
+49 & 26,055 & 0,816 & 1,453 & 14,839 & 0,378 & 0,917 & 1,491 & 0,599 & 1,172 & 1,491 & 0,599 & 1,172 \\
+50 & 26,087 & 0,357 & 0,917 & 14,942 & 0,357 & 0,867 & 1,109 & 0,367 & 0,867 & 1,109 & 0,367 & 0,867 \\
+51 & 23,204 & 0,379 & 0,917 & 13,855 & 0,366 & 0,917 & 1,160 & 0,364 & 0,873 & 1,160 & 0,364 & 0,873 \\
+52 & 25,124 & 0,806 & 1,476 & 13,429 & 0,447 & 1,017 & 1,282 & 0,421 & 1,020 & 1,282 & 0,421 & 1,020 \\
+53 & 23,436 & 0,375 & 0,917 & 14,078 & 0,366 & 0,867 & 1,202 & 0,419 & 0,967 & 1,202 & 0,419 & 0,967 \\
+54 & 41,540 & 11,197 & 11,810 & 13,421 & 0,425 & 1,074 & 100,320 & -- & 100,014 & 100,320 & -- & 100,014 \\
+55 & 23,784 & 0,378 & 0,917 & 14,071 & 0,365 & 0,868 & 1,324 & 0,389 & 0,967 & 1,324 & 0,389 & 0,967 \\
+56 & 33,887 & 3,892 & 4,480 & 13,474 & 0,433 & 1,071 & 100,348 & -- & 100,039 & 100,348 & -- & 100,039 \\
+57 & 24,105 & 0,405 & 0,967 & 14,113 & 0,354 & 0,867 & 1,194 & 0,368 & 0,867 & 1,194 & 0,368 & 0,867 \\
+58 & 29,449 & 0,695 & 1,429 & 13,879 & 0,467 & 1,117 & 1,588 & 0,583 & 1,318 & 1,588 & 0,583 & 1,318 \\
+59 & 24,573 & 0,590 & 1,117 & 14,063 & 0,355 & 0,867 & 1,163 & 0,362 & 0,867 & 1,163 & 0,362 & 0,867 \\
+60 & 22,643 & 0,606 & 1,425 & 13,952 & 0,516 & 1,270 & 7,697 & 6,367 & 7,403 & 7,697 & 6,367 & 7,403 \\
+61 & 25,289 & 0,621 & 1,167 & 14,351 & 0,364 & 0,867 & 1,313 & 0,509 & 1,019 & 1,313 & 0,509 & 1,019 \\
+62 & 26,338 & 0,670 & 1,323 & 14,396 & 0,367 & 0,867 & 2,011 & 1,221 & 1,775 & 2,011 & 1,221 & 1,775 \\
+63 & 26,083 & 0,723 & 1,268 & 14,218 & 0,359 & 0,867 & 1,317 & 0,464 & 1,017 & 1,317 & 0,464 & 1,017 \\
+64 & 25,976 & 0,719 & 1,318 & 13,941 & 0,388 & 0,967 & 100,307 & -- & 100,016 & 100,307 & -- & 100,016 \\
+65 & 26,173 & 0,725 & 1,319 & 13,965 & 0,368 & 0,866 & 1,258 & 0,448 & 0,967 & 1,258 & 0,448 & 0,967 \\
+66 & 25,939 & 0,762 & 1,371 & 13,972 & 0,367 & 0,868 & 1,218 & 0,396 & 0,917 & 1,218 & 0,396 & 0,917 \\
+67 & 25,988 & 0,780 & 1,378 & 14,445 & 0,371 & 0,918 & 1,242 & 0,370 & 0,917 & 1,242 & 0,370 & 0,917 \\
+68 & 25,888 & 0,792 & 1,392 & 15,006 & 0,403 & 0,967 & 1,114 & 0,386 & 0,870 & 1,114 & 0,386 & 0,870 \\
+69 & 29,714 & 0,366 & 0,920 & 14,095 & 0,354 & 0,866 & 1,260 & 0,441 & 0,967 & 1,260 & 0,441 & 0,967 \\
+70 & 23,209 & 0,361 & 0,873 & 14,041 & 0,356 & 0,866 & 1,128 & 0,364 & 0,867 & 1,128 & 0,364 & 0,867 \\
+71 & 39,365 & 15,463 & 16,014 & 13,339 & 0,425 & 1,030 & 1,168 & 0,382 & 0,919 & 1,168 & 0,382 & 0,919 \\
+72 & 23,461 & 0,374 & 0,867 & 13,911 & 0,368 & 0,867 & 1,164 & 0,375 & 0,867 & 1,164 & 0,375 & 0,867 \\
+73 & 31,972 & 8,241 & 8,844 & 13,352 & 0,428 & 1,017 & 1,447 & 0,495 & 1,167 & 1,447 & 0,495 & 1,167 \\
+74 & 23,477 & 0,363 & 0,867 & 14,198 & 0,376 & 0,866 & 1,110 & 0,367 & 0,876 & 1,110 & 0,367 & 0,876 \\
+75 & 26,878 & 2,994 & 3,593 & 13,498 & 0,445 & 1,121 & 1,336 & 0,410 & 1,016 & 1,336 & 0,410 & 1,016 \\
+76 & 30,314 & 0,547 & 1,118 & 14,150 & 0,356 & 0,866 & 1,102 & 0,365 & 0,866 & 1,102 & 0,365 & 0,866 \\
+77 & 22,421 & 0,565 & 1,222 & 13,719 & 0,460 & 1,139 & 2,651 & 1,410 & 2,327 & 2,651 & 1,410 & 2,327 \\
+78 & 24,790 & 0,586 & 1,117 & 14,132 & 0,374 & 0,866 & 1,126 & 0,370 & 0,868 & 1,126 & 0,370 & 0,868 \\
+79 & 37,336 & 12,584 & 13,122 & 14,431 & 0,370 & 0,868 & 1,173 & 0,419 & 0,923 & 1,173 & 0,419 & 0,923 \\
+80 & 25,940 & 0,664 & 1,237 & 13,823 & 0,363 & 0,867 & 1,274 & 0,370 & 0,917 & 1,274 & 0,370 & 0,917 \\
+81 & 24,159 & 0,364 & 0,867 & 14,197 & 0,365 & 0,917 & 1,184 & 0,382 & 0,867 & 1,184 & 0,382 & 0,867 \\
+82 & 23,234 & 0,354 & 0,867 & 14,010 & 0,345 & 0,816 & 1,410 & 0,512 & 1,117 & 1,410 & 0,512 & 1,117 \\
+83 & 23,887 & 0,362 & 0,867 & 14,204 & 0,362 & 0,866 & 1,105 & 0,363 & 0,867 & 1,105 & 0,363 & 0,867 \\
+84 & 23,763 & 0,363 & 0,867 & 14,096 & 0,359 & 0,867 & 1,108 & 0,361 & 0,867 & 1,108 & 0,361 & 0,867 \\
+85 & 23,342 & 0,352 & 0,866 & 13,919 & 0,358 & 0,867 & 1,158 & 0,350 & 0,867 & 1,158 & 0,350 & 0,867 \\
+86 & 23,942 & 0,359 & 0,867 & 14,164 & 0,360 & 0,867 & 1,052 & 0,356 & 0,817 & 1,052 & 0,356 & 0,817 \\
+87 & 30,106 & 0,364 & 0,967 & 14,186 & 0,357 & 0,868 & 1,164 & 0,366 & 0,917 & 1,164 & 0,366 & 0,917 \\
+88 & 25,403 & 0,422 & 0,968 & 14,133 & 0,358 & 0,867 & 1,175 & 0,362 & 0,883 & 1,175 & 0,362 & 0,883 \\
+89 & 30,075 & 0,362 & 0,866 & 14,063 & 0,358 & 0,867 & 1,107 & 0,368 & 0,868 & 1,107 & 0,368 & 0,868 \\
+90 & 25,510 & 0,404 & 0,967 & 14,042 & 0,362 & 0,866 & 1,201 & 0,375 & 0,918 & 1,201 & 0,375 & 0,918 \\
+\end{longtable}
+\endgroup
+\clearpage\subsection{Costi e correzioni dei sistemi LLM}
+Token = ingresso più uscita di tutte le chiamate. Risposta = latenza cumulativa in secondi. Retry = chiamate aggiuntive per episodio. Le eventuali repliche sono mediate per circuito.
+\begingroup\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{lrrrrrr}
+\toprule
+N. & R token & R risposta & R retry & N token & N risposta & N retry \\
+\midrule
+\endfirsthead
+\toprule
+N. & R token & R risposta & R retry & N token & N risposta & N retry \\
+\midrule\endhead
+\midrule\multicolumn{7}{r}{\footnotesize Segue nella pagina successiva}\\
+\endfoot
+\bottomrule\endlastfoot
+1 & 12\,344,00 & 20,603 & 0,00 & 8\,667,00 & 12,528 & 0,00 \\
+2 & 12\,331,00 & 20,086 & 0,00 & 8\,655,00 & 12,226 & 0,00 \\
+3 & 11\,271,00 & 17,952 & 0,00 & 8\,654,00 & 12,372 & 0,00 \\
+4 & 11\,450,00 & 18,463 & 0,00 & 8\,691,00 & 12,822 & 0,00 \\
+5 & 12\,150,00 & 19,704 & 0,00 & 8\,723,00 & 12,932 & 0,00 \\
+6 & 12\,407,00 & 20,296 & 0,00 & 8\,693,00 & 12,639 & 0,00 \\
+7 & 12\,401,00 & 20,196 & 0,00 & 8\,729,00 & 12,859 & 0,00 \\
+8 & 37\,514,00 & 26,580 & 2,00 & 8\,705,00 & 12,492 & 0,00 \\
+9 & 12\,419,00 & 20,231 & 0,00 & 8\,733,00 & 12,933 & 0,00 \\
+10 & 12\,457,00 & 20,575 & 0,00 & 8\,720,00 & 12,936 & 0,00 \\
+11 & 12\,450,00 & 20,312 & 0,00 & 8\,744,00 & 13,302 & 0,00 \\
+12 & 22\,248,00 & 20,675 & 1,00 & 8\,694,00 & 13,499 & 0,00 \\
+13 & 11\,222,00 & 18,728 & 0,00 & 8\,682,00 & 12,613 & 0,00 \\
+14 & 36\,131,00 & 24,685 & 2,00 & 8\,261,00 & 11,732 & 0,00 \\
+15 & 34\,623,00 & 24,889 & 2,00 & 8\,713,00 & 13,092 & 0,00 \\
+16 & 34\,862,00 & 24,619 & 2,00 & 8\,261,00 & 11,743 & 0,00 \\
+17 & 11\,430,00 & 18,395 & 0,00 & 8\,685,00 & 12,636 & 0,00 \\
+18 & 34\,903,00 & 24,218 & 2,00 & 8\,264,00 & 11,778 & 0,00 \\
+19 & 11\,688,00 & 18,601 & 0,00 & 8\,685,00 & 12,590 & 0,00 \\
+20 & 32\,566,00 & 22,858 & 2,00 & 8\,212,00 & 12,055 & 0,00 \\
+21 & 11\,701,00 & 18,850 & 0,00 & 8\,691,00 & 12,538 & 0,00 \\
+22 & 10\,779,00 & 16,975 & 0,00 & 8\,212,00 & 12,050 & 0,00 \\
+23 & 12\,165,00 & 19,691 & 0,00 & 8\,712,00 & 12,857 & 0,00 \\
+24 & 12\,167,00 & 19,716 & 0,00 & 8\,730,00 & 12,914 & 0,00 \\
+25 & 12\,152,00 & 19,736 & 0,00 & 8\,711,00 & 12,740 & 0,00 \\
+26 & 12\,329,00 & 20,114 & 0,00 & 8\,678,00 & 12,403 & 0,00 \\
+27 & 12\,477,00 & 20,386 & 0,00 & 8\,700,00 & 12,417 & 0,00 \\
+28 & 12\,468,00 & 20,402 & 0,00 & 8\,736,00 & 12,936 & 0,00 \\
+29 & 12\,454,00 & 20,576 & 0,00 & 8\,734,00 & 12,929 & 0,00 \\
+30 & 12\,344,00 & 20,152 & 0,00 & 8\,758,00 & 13,479 & 0,00 \\
+31 & 33\,472,00 & 23,810 & 2,00 & 8\,637,00 & 12,636 & 0,00 \\
+32 & 33\,904,00 & 24,280 & 2,00 & 8\,684,00 & 12,623 & 0,00 \\
+33 & 11\,691,00 & 18,899 & 0,00 & 8\,263,00 & 11,727 & 0,00 \\
+34 & 11\,460,00 & 18,368 & 0,00 & 8\,715,00 & 12,911 & 0,00 \\
+35 & 11\,681,00 & 18,745 & 0,00 & 8\,261,00 & 11,729 & 0,00 \\
+36 & 11\,432,00 & 18,472 & 0,00 & 8\,696,00 & 12,758 & 0,00 \\
+37 & 11\,690,00 & 18,899 & 0,00 & 8\,262,00 & 11,743 & 0,00 \\
+38 & 11\,690,00 & 18,710 & 0,00 & 8\,688,00 & 12,597 & 0,00 \\
+39 & 10\,800,00 & 17,273 & 0,00 & 8\,214,00 & 12,094 & 0,00 \\
+40 & 11\,703,00 & 19,689 & 0,00 & 8\,709,00 & 12,740 & 0,00 \\
+41 & 12\,209,00 & 19,803 & 0,00 & 8\,720,00 & 12,962 & 0,00 \\
+42 & 12\,319,00 & 19,993 & 0,00 & 8\,783,00 & 13,674 & 0,00 \\
+43 & 37\,513,00 & 26,725 & 2,00 & 8\,703,00 & 12,710 & 0,00 \\
+44 & 12\,407,00 & 20,211 & 0,00 & 8\,693,00 & 12,658 & 0,00 \\
+45 & 37\,496,00 & 25,382 & 2,00 & 8\,721,00 & 12,966 & 0,00 \\
+46 & 12\,454,00 & 20,290 & 0,00 & 8\,687,00 & 12,486 & 0,00 \\
+47 & 12\,454,00 & 20,327 & 0,00 & 8\,688,00 & 12,518 & 0,00 \\
+48 & 12\,457,00 & 20,296 & 0,00 & 8\,720,00 & 12,948 & 0,00 \\
+49 & 12\,450,00 & 20,296 & 0,00 & 8\,744,00 & 13,335 & 0,00 \\
+50 & 22\,248,00 & 20,587 & 1,00 & 8\,694,00 & 13,504 & 0,00 \\
+51 & 11\,124,00 & 17,843 & 0,00 & 8\,638,00 & 12,377 & 0,00 \\
+52 & 11\,896,00 & 19,162 & 0,00 & 8\,259,00 & 11,798 & 0,00 \\
+53 & 11\,417,00 & 18,181 & 0,00 & 8\,665,00 & 12,618 & 0,00 \\
+54 & 34\,862,00 & 24,670 & 2,00 & 8\,261,00 & 11,760 & 0,00 \\
+55 & 11\,430,00 & 18,191 & 0,00 & 8\,685,00 & 12,641 & 0,00 \\
+56 & 34\,903,00 & 24,186 & 2,00 & 8\,264,00 & 11,798 & 0,00 \\
+57 & 11\,458,00 & 18,569 & 0,00 & 8\,698,00 & 12,642 & 0,00 \\
+58 & 32\,566,00 & 22,995 & 2,00 & 8\,212,00 & 12,090 & 0,00 \\
+59 & 11\,687,00 & 18,910 & 0,00 & 8\,699,00 & 12,664 & 0,00 \\
+60 & 10\,779,00 & 16,949 & 0,00 & 8\,212,00 & 12,063 & 0,00 \\
+61 & 12\,165,00 & 19,653 & 0,00 & 8\,712,00 & 12,843 & 0,00 \\
+62 & 12\,365,00 & 20,202 & 0,00 & 8\,706,00 & 12,926 & 0,00 \\
+63 & 12\,350,00 & 20,268 & 0,00 & 8\,707,00 & 12,765 & 0,00 \\
+64 & 12\,329,00 & 20,081 & 0,00 & 8\,678,00 & 12,420 & 0,00 \\
+65 & 12\,352,00 & 20,232 & 0,00 & 8\,690,00 & 12,488 & 0,00 \\
+66 & 12\,341,00 & 20,076 & 0,00 & 8\,689,00 & 12,502 & 0,00 \\
+67 & 12\,341,00 & 20,100 & 0,00 & 8\,719,00 & 12,938 & 0,00 \\
+68 & 12\,344,00 & 20,087 & 0,00 & 8\,758,00 & 13,462 & 0,00 \\
+69 & 33\,472,00 & 23,678 & 2,00 & 8\,637,00 & 12,626 & 0,00 \\
+70 & 11\,126,00 & 17,835 & 0,00 & 8\,655,00 & 12,585 & 0,00 \\
+71 & 11\,685,00 & 18,817 & 0,00 & 8\,257,00 & 11,728 & 0,00 \\
+72 & 11\,416,00 & 18,176 & 0,00 & 8\,660,00 & 12,488 & 0,00 \\
+73 & 11\,681,00 & 18,678 & 0,00 & 8\,261,00 & 11,726 & 0,00 \\
+74 & 11\,432,00 & 18,210 & 0,00 & 8\,696,00 & 12,753 & 0,00 \\
+75 & 11\,690,00 & 18,833 & 0,00 & 8\,262,00 & 11,725 & 0,00 \\
+76 & 34\,929,00 & 24,235 & 2,00 & 8\,700,00 & 12,679 & 0,00 \\
+77 & 10\,800,00 & 17,190 & 0,00 & 8\,214,00 & 12,035 & 0,00 \\
+78 & 11\,968,00 & 19,290 & 0,00 & 8\,703,00 & 12,682 & 0,00 \\
+79 & 12\,209,00 & 19,799 & 0,00 & 8\,720,00 & 12,937 & 0,00 \\
+80 & 12\,317,00 & 20,046 & 0,00 & 8\,674,00 & 12,381 & 0,00 \\
+81 & 11\,612,00 & 18,601 & 0,00 & 8\,709,00 & 12,729 & 0,00 \\
+82 & 11\,195,00 & 17,774 & 0,00 & 8\,649,00 & 12,594 & 0,00 \\
+83 & 11\,517,00 & 18,599 & 0,00 & 8\,708,00 & 12,748 & 0,00 \\
+84 & 11\,612,00 & 18,580 & 0,00 & 8\,709,00 & 12,715 & 0,00 \\
+85 & 11\,195,00 & 17,783 & 0,00 & 8\,649,00 & 12,586 & 0,00 \\
+86 & 11\,517,00 & 18,563 & 0,00 & 8\,708,00 & 12,734 & 0,00 \\
+87 & 34\,249,00 & 24,193 & 2,00 & 8\,706,00 & 12,738 & 0,00 \\
+88 & 12\,347,00 & 20,106 & 0,00 & 8\,702,00 & 12,664 & 0,00 \\
+89 & 34\,249,00 & 24,179 & 2,00 & 8\,706,00 & 12,721 & 0,00 \\
+90 & 12\,347,00 & 20,113 & 0,00 & 8\,702,00 & 12,648 & 0,00 \\
+\end{longtable}
+\endgroup

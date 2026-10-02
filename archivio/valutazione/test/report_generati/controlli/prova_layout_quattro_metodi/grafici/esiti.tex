@@ -1,0 +1,6 @@
+\begin{tikzpicture}\begin{axis}[width=0.96\linewidth,height=5.5cm,ybar stacked,bar width=24pt,ymin=0,enlarge x limits=0.25,xtick={1,2,3,4},xticklabels={{LLM + RAG},{LLM senza RAG},{MQT Predictor},{Random}},ylabel={Episodi},nodes near coords,legend style={at={(0.5,1.03)},anchor=south,draw=none},legend columns=2,tick label style={font=\small}]
+\addplot[fill=blue!65] table[x=index,y=success,col sep=comma]{\TestReportPath grafici/esiti.csv};
+\addlegendentry{Successi}
+\addplot[fill=orange!85] table[x=index,y=failure,col sep=comma]{\TestReportPath grafici/esiti.csv};
+\addlegendentry{Fallimenti}
+\end{axis}\end{tikzpicture}

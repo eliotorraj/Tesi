@@ -1,0 +1,5 @@
+method,threshold,total,high,low,no_score,pending,percentage
+llm_rag,0.8,90,70,20,0,0,77.77777777777777
+llm_senza_rag,0.8,90,45,45,0,0,50.0
+mqt_predictor,0.8,90,65,10,15,0,72.22222222222223
+random,0.8,90,44,36,10,0,48.888888888888886

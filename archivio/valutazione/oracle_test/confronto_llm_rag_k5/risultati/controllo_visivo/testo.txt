@@ -1,0 +1,372 @@
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                      Confronto con oracle max3
+
+
+
+Quanto manca al massimo conosciuto?
+LLM + RAG con 5 esempi sui 90 circuiti Test
+Il confronto usa i risultati originali del RAG con distanza Manhattan e l’oracle generato il 29 settembre 2026. Lo score è expected_fidelity: una stima sui Target sintetici,
+non una misura su hardware quantistico reale.
+Risultato principale. Il sistema raggiunge il massimo conosciuto in 55 casi su 90 (61,1%) e resta sotto in 35 (38,9%). Nessun caso supera il riferimento. Lo scarto medio è
+0,0018434763, pari a 0,18434763 punti percentuali sulla scala dello score. La mediana dello scarto è zero. In 84 casi su 90 lo scarto non supera 0,01.
+ Misura                          Tutti i circuiti   Oracle completo   Oracle parziale
+ Circuiti                                    90                  30                60
+ Score medio RAG                  0.7983788141        0.9772610668      0.7089376877
+ Massimo conosciuto medio         0.8002222904        0.9815701417      0.7095483647
+ Scarto medio                     0.0018434763        0.0043090749      0.0006106770
+ Scarto massimo                   0.0244336595        0.0200891994      0.0244336595
+ Al massimo conosciuto                  55 / 90              9 / 30           46 / 60
+ Sotto il massimo conosciuto            35 / 90             21 / 30           14 / 60
+
+Definizione. Per ogni circuito, R = maxd,c,s F (d, c, s) è il massimo degli score validi osservati: 5 dispositivi, 12 configurazioni Qiskit e seed s ∈ {0, 1, 2}, solo su dispositivi
+compatibili. Il sistema ha una sola compilazione, con seed 0, e score S. Lo scarto è ∆ = R − S: zero indica parità; un valore positivo indica margine osservato. I punti
+percentuali sono 100∆; la perdita percentuale relativa è invece 100∆/R.
+La generazione è terminata, ma non tutti i riferimenti sono completi. Le 16 200 celle comprendono 864 incompatibilità. Delle 15 336 compilazioni compatibili, 14 249
+riescono, 1 086 superano il limite di 100 secondi e una fallisce. Tutti i 90 circuiti hanno un riferimento; solo 30 hanno tutte le compilazioni compatibili riuscite. Negli altri 60,
+il massimo osservato può sottostimare ciò che si otterrebbe completando le prove. Errori e timeout sono dati mancanti, mai score zero.
+Conclusione corretta. In 9 circuiti il sistema uguaglia il massimo dell’intera griglia valutata; in altri 46 uguaglia il massimo osservato di una griglia incompleta. Non è una
+prova di ottimalità assoluta, né un limite superiore per compilatori esterni alla griglia. Il confronto è descrittivo e successivo al Test: l’oracle non è stato usato nel recupero o
+nel prompt.
+
+
+
+
+                                                                                         1
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                    Confronto con oracle max3
+
+
+
+Scelta della coppia e variabilità del seed
+Il massimo della coppia scelta è P = maxs=0,1,2 F (dLLM , cLLM , s):
+
+                                                      R−S           =           R−P                +                    P −S                        .
+                                                      | {z }                    | {z }                                  | {z }
+                                                    scarto totale       margine cambiando coppia       margine cambiando seed nella stessa coppia
+
+Tutte le 90 coppie scelte hanno tre compilazioni riuscite nell’oracle. In tutti i casi il loro seed 0 riproduce esattamente lo score storico del RAG. Il margine medio tra coppie
+è 0,0014354875; quello interno alla coppia è 0,0004079888. La coppia scelta è fra le migliori note in 55/90 casi. Anche confrontando solo il seed 0 dell’oracle, lo scarto medio
+resta 0,0018044775.
+I dieci scarti maggiori. C = ricerca completa; P = ricerca parziale. I valori sono score, non percentuali.
+ Circuito                                  RAG S        Oracle R          Totale R − S      Coppia R − P            Seed P − S       Ricerca
+ qpeexact_indep_tket_6                 0.94607843     0.97051209             0.02443366            0.00823415        0.01619951          P
+ tsp_indep_qiskit_9                    0.92471911     0.94480831             0.02008920            0.02008920        0.00000000          C
+ tsp_indep_tket_9                      0.92480234     0.94484927             0.02004693            0.02004693        0.00000000          C
+ qpeinexact_indep_qiskit_6             0.95501005     0.96908540             0.01407534            0.01085023        0.00322512          C
+ qpeexact_indep_qiskit_6               0.95930734     0.97068680             0.01137946            0.00828582        0.00309364          P
+ groundstate_small_indep_tket_4        0.96825356     0.97885361             0.01060004            0.01049310        0.00010694          C
+ qpeinexact_indep_tket_5               0.96851232     0.97814654             0.00963422            0.00615871        0.00347551          C
+ qpeexact_indep_tket_5                 0.96915484     0.97814654             0.00899170            0.00508486        0.00390684          C
+ qpeinexact_indep_qiskit_5             0.97108514     0.97823458             0.00714944            0.00634262        0.00080682          C
+ qpeexact_indep_qiskit_5               0.97206582     0.97823458             0.00616876            0.00535370        0.00081506          C
+
+Esempio: qpeexact_indep_tket_6. Il RAG sceglie ibm_heron_156 con o3_default_default. Lo score è 0,9460784319. La stessa coppia arriva a 0,9622779418 con seed
+1 o 2. Il massimo noto è 0,9705120914 su quantinuum_h2_56 (per esempio o2_default_default, tutti i seed). Dello scarto 0,0244336595, 0,0161995099 riguarda il seed e
+0,0082341496 la coppia. Il riferimento è parziale: 172 compilazioni valide su 180.
+Esempio: tsp_indep_qiskit_9. Qui il riferimento è completo. Il RAG sceglie quantinuum_h2_56, o2_default_default, con score 0,9247191115 per tutti i seed.
+ibm_falcon_127, con o2_default_default oppure o3_default_default, raggiunge 0,9448083109. L’intero scarto 0,0200891994 riguarda la scelta della coppia.
+Lettura dei grafici. Punto blu = RAG; cerchio arancione = oracle. Se coincidono, il punto è dentro il cerchio. A destra lo scarto è ingrandito su una scala comune da 0 a
+0,026: barre verdi = oracle completo; grigie = parziale. L’asterisco indica un oracle parziale. Gli ID e l’ordine alfabetico coincidono con le tabelle.
+
+
+
+
+                                                                                                    2
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                                   Confronto con oracle max3
+
+
+
+Score e scarto per circuito: 1–30
+Circuito (* = oracle parziale)                                   Score: RAG e massimo conosciuto                                                  Scarto R − S
+                                                              0.0            0.2            0.4           0.6            0.8           1.0     0.000   0.005   0.010   0.015   0.020   0.025
+01   groundstate_medium_indep_qiskit_12*
+02   groundstate_medium_indep_tket_12*
+03   groundstate_small_indep_qiskit_4
+04   groundstate_small_indep_tket_4
+05   qpeexact_indep_qiskit_10*
+06   qpeexact_indep_qiskit_11*
+07   qpeexact_indep_qiskit_12*
+08   qpeexact_indep_qiskit_13*
+09   qpeexact_indep_qiskit_14*
+10   qpeexact_indep_qiskit_15*
+11   qpeexact_indep_qiskit_16*
+12   qpeexact_indep_qiskit_2
+13   qpeexact_indep_qiskit_3
+14   qpeexact_indep_qiskit_30*
+15   qpeexact_indep_qiskit_4
+16   qpeexact_indep_qiskit_40*
+17   qpeexact_indep_qiskit_5
+18   qpeexact_indep_qiskit_50*
+19   qpeexact_indep_qiskit_6*
+20   qpeexact_indep_qiskit_60*
+21   qpeexact_indep_qiskit_7*
+22   qpeexact_indep_qiskit_70*
+23   qpeexact_indep_qiskit_8*
+24   qpeexact_indep_qiskit_9*
+25   qpeexact_indep_tket_10*
+26   qpeexact_indep_tket_11*
+27   qpeexact_indep_tket_12*
+28   qpeexact_indep_tket_13*
+29   qpeexact_indep_tket_14*
+30   qpeexact_indep_tket_15*
+
+
+Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.
+
+
+
+
+                                                                                                  3
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                                   Confronto con oracle max3
+
+
+
+Score e scarto per circuito: 31–60
+Circuito (* = oracle parziale)                                   Score: RAG e massimo conosciuto                                                  Scarto R − S
+                                                              0.0            0.2            0.4           0.6            0.8           1.0     0.000   0.005   0.010   0.015   0.020   0.025
+31   qpeexact_indep_tket_2
+32   qpeexact_indep_tket_3
+33   qpeexact_indep_tket_30*
+34   qpeexact_indep_tket_4
+35   qpeexact_indep_tket_40*
+36   qpeexact_indep_tket_5
+37   qpeexact_indep_tket_50*
+38   qpeexact_indep_tket_6*
+39   qpeexact_indep_tket_60*
+40   qpeexact_indep_tket_7*
+41   qpeexact_indep_tket_8*
+42   qpeexact_indep_tket_9*
+43   qpeinexact_indep_qiskit_10*
+44   qpeinexact_indep_qiskit_11*
+45   qpeinexact_indep_qiskit_12*
+46   qpeinexact_indep_qiskit_13*
+47   qpeinexact_indep_qiskit_14*
+48   qpeinexact_indep_qiskit_15*
+49   qpeinexact_indep_qiskit_16*
+50   qpeinexact_indep_qiskit_2
+51   qpeinexact_indep_qiskit_3
+52   qpeinexact_indep_qiskit_30*
+53   qpeinexact_indep_qiskit_4
+54   qpeinexact_indep_qiskit_40*
+55   qpeinexact_indep_qiskit_5
+56   qpeinexact_indep_qiskit_50*
+57   qpeinexact_indep_qiskit_6
+58   qpeinexact_indep_qiskit_60*
+59   qpeinexact_indep_qiskit_7*
+60   qpeinexact_indep_qiskit_70*
+
+
+Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.
+
+
+
+
+                                                                                                  4
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                                   Confronto con oracle max3
+
+
+
+Score e scarto per circuito: 61–90
+Circuito (* = oracle parziale)                                   Score: RAG e massimo conosciuto                                                  Scarto R − S
+                                                              0.0            0.2            0.4           0.6            0.8           1.0     0.000   0.005   0.010   0.015   0.020   0.025
+61   qpeinexact_indep_qiskit_8*
+62   qpeinexact_indep_qiskit_9*
+63   qpeinexact_indep_tket_10*
+64   qpeinexact_indep_tket_11*
+65   qpeinexact_indep_tket_12*
+66   qpeinexact_indep_tket_13*
+67   qpeinexact_indep_tket_14*
+68   qpeinexact_indep_tket_15*
+69   qpeinexact_indep_tket_2
+70   qpeinexact_indep_tket_3
+71   qpeinexact_indep_tket_30*
+72   qpeinexact_indep_tket_4
+73   qpeinexact_indep_tket_40*
+74   qpeinexact_indep_tket_5
+75   qpeinexact_indep_tket_50*
+76   qpeinexact_indep_tket_6
+77   qpeinexact_indep_tket_60*
+78   qpeinexact_indep_tket_7*
+79   qpeinexact_indep_tket_8*
+80   qpeinexact_indep_tket_9*
+81   routing_indep_qiskit_12
+82   routing_indep_qiskit_2
+83   routing_indep_qiskit_6
+84   routing_indep_tket_12
+85   routing_indep_tket_2
+86   routing_indep_tket_6
+87   tsp_indep_qiskit_4
+88   tsp_indep_qiskit_9
+89   tsp_indep_tket_4
+90   tsp_indep_tket_9
+
+
+Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.
+
+
+
+
+                                                                                                  5
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                   Confronto con oracle max3
+
+
+
+Tabella completa: circuiti 1–30
+Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale. C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
+
+ ID   Circuito                               Qubit         RAG S        Oracle R    Scarto R − S   Coppia al max   C/P
+  1   groundstate_medium_indep_qiskit_12         12   0.7963772008   0.7964010929   0.0000238921        No         P
+  2   groundstate_medium_indep_tket_12           12   0.7963772008   0.7964488791   0.0000716783        No         P
+  3   groundstate_small_indep_qiskit_4            4   0.9788591374   0.9788591374   0.0000000000        Sì         C
+  4   groundstate_small_indep_tket_4              4   0.9682535640   0.9788536053   0.0106000413        No         C
+  5   qpeexact_indep_qiskit_10                   10   0.9218353887   0.9218353887   0.0000000000        Sì         P
+  6   qpeexact_indep_qiskit_11                   11   0.9032343267   0.9032343267   0.0000000000        Sì         P
+  7   qpeexact_indep_qiskit_12                   12   0.8879093206   0.8879093206   0.0000000000        Sì         P
+  8   qpeexact_indep_qiskit_13                   13   0.8714043421   0.8714043421   0.0000000000        Sì         P
+  9   qpeexact_indep_qiskit_14                   14   0.8538721240   0.8538721240   0.0000000000        Sì         P
+ 10   qpeexact_indep_qiskit_15                   15   0.8300875325   0.8300875325   0.0000000000        Sì         P
+ 11   qpeexact_indep_qiskit_16                   16   0.8095860950   0.8095860950   0.0000000000        Sì         P
+ 12   qpeexact_indep_qiskit_2                     2   0.9987599534   0.9994205726   0.0006606192        No         C
+ 13   qpeexact_indep_qiskit_3                     3   0.9960947806   0.9975896111   0.0014948305        No         C
+ 14   qpeexact_indep_qiskit_30                   30   0.5202940694   0.5202940694   0.0000000000        Sì         P
+ 15   qpeexact_indep_qiskit_4                     4   0.9869487051   0.9928297161   0.0058810110        No         C
+ 16   qpeexact_indep_qiskit_40                   40   0.3741311339   0.3741311339   0.0000000000        Sì         P
+ 17   qpeexact_indep_qiskit_5                     5   0.9720658176   0.9782345802   0.0061687626        No         C
+ 18   qpeexact_indep_qiskit_50                   50   0.2694733993   0.2694733993   0.0000000000        Sì         P
+ 19   qpeexact_indep_qiskit_6                     6   0.9593073443   0.9706868019   0.0113794576        No         P
+ 20   qpeexact_indep_qiskit_60                   60   0.0000113956   0.0001043470   0.0000929514        No         P
+ 21   qpeexact_indep_qiskit_7                     7   0.9616082099   0.9616082099   0.0000000000        Sì         P
+ 22   qpeexact_indep_qiskit_70                   70   0.0000028783   0.0000130971   0.0000102188        No         P
+ 23   qpeexact_indep_qiskit_8                     8   0.9465992541   0.9465992541   0.0000000000        Sì         P
+ 24   qpeexact_indep_qiskit_9                     9   0.9349067710   0.9349067710   0.0000000000        Sì         P
+ 25   qpeexact_indep_tket_10                     10   0.9209232096   0.9209232096   0.0000000000        Sì         P
+ 26   qpeexact_indep_tket_11                     11   0.9022052109   0.9022052109   0.0000000000        Sì         P
+ 27   qpeexact_indep_tket_12                     12   0.8868444525   0.8868444525   0.0000000000        Sì         P
+ 28   qpeexact_indep_tket_13                     13   0.8699415900   0.8699415900   0.0000000000        Sì         P
+ 29   qpeexact_indep_tket_14                     14   0.8522598056   0.8523109435   0.0000511379        No         P
+ 30   qpeexact_indep_tket_15                     15   0.8281722146   0.8281722146   0.0000000000        Sì         P
+
+Parità: tolleranza 10−12 sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in confronto_90_circuiti.csv e dati.json.
+
+
+
+
+                                                                                            6
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                   Confronto con oracle max3
+
+
+
+Tabella completa: circuiti 31–60
+Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale. C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
+
+ ID   Circuito                     Qubit         RAG S        Oracle R    Scarto R − S   Coppia al max   C/P
+ 31   qpeexact_indep_tket_2             2   0.9987599534   0.9994205726   0.0006606192           No      C
+ 32   qpeexact_indep_tket_3             3   0.9958784484   0.9976856074   0.0018071590           No      C
+ 33   qpeexact_indep_tket_30           30   0.5674551344   0.5674551344   0.0000000000           Sì      P
+ 34   qpeexact_indep_tket_4             4   0.9868581315   0.9928297161   0.0059715846           No      C
+ 35   qpeexact_indep_tket_40           40   0.4398748201   0.4398748201   0.0000000000           Sì      P
+ 36   qpeexact_indep_tket_5             5   0.9691548425   0.9781465418   0.0089916993           No      C
+ 37   qpeexact_indep_tket_50           50   0.3415929475   0.3415929475   0.0000000000           Sì      P
+ 38   qpeexact_indep_tket_6             6   0.9460784319   0.9705120914   0.0244336595           No      P
+ 39   qpeexact_indep_tket_60           60   0.0000273505   0.0002111392   0.0001837887           No      P
+ 40   qpeexact_indep_tket_7             7   0.9612044132   0.9612044132   0.0000000000           Sì      P
+ 41   qpeexact_indep_tket_8             8   0.9460882208   0.9460882208   0.0000000000           Sì      P
+ 42   qpeexact_indep_tket_9             9   0.9342899269   0.9342899269   0.0000000000           Sì      P
+ 43   qpeinexact_indep_qiskit_10       10   0.9189065362   0.9189065362   0.0000000000           Sì      P
+ 44   qpeinexact_indep_qiskit_11       11   0.9032072297   0.9032072297   0.0000000000           Sì      P
+ 45   qpeinexact_indep_qiskit_12       12   0.8864178847   0.8864178847   0.0000000000           Sì      P
+ 46   qpeinexact_indep_qiskit_13       13   0.8685836016   0.8685836016   0.0000000000           Sì      P
+ 47   qpeinexact_indep_qiskit_14       14   0.8497804839   0.8497804839   0.0000000000           Sì      P
+ 48   qpeinexact_indep_qiskit_15       15   0.8300875325   0.8300875325   0.0000000000           Sì      P
+ 49   qpeinexact_indep_qiskit_16       16   0.8095860950   0.8095860950   0.0000000000           Sì      P
+ 50   qpeinexact_indep_qiskit_2         2   0.9993011566   0.9993011566   0.0000000000           Sì      C
+ 51   qpeinexact_indep_qiskit_3         3   0.9931879680   0.9933839355   0.0001959675           No      C
+ 52   qpeinexact_indep_qiskit_30       30   0.5194357059   0.5194357059   0.0000000000           Sì      P
+ 53   qpeinexact_indep_qiskit_4         4   0.9805279150   0.9859297789   0.0054018639           No      C
+ 54   qpeinexact_indep_qiskit_40       40   0.3741311339   0.3741311339   0.0000000000           Sì      P
+ 55   qpeinexact_indep_qiskit_5         5   0.9710851394   0.9782345802   0.0071494408           No      C
+ 56   qpeinexact_indep_qiskit_50       50   0.2694733993   0.2694733993   0.0000000000           Sì      P
+ 57   qpeinexact_indep_qiskit_6         6   0.9550100512   0.9690853958   0.0140753446           No      C
+ 58   qpeinexact_indep_qiskit_60       60   0.0000113715   0.0001042694   0.0000928979           No      P
+ 59   qpeinexact_indep_qiskit_7         7   0.9585242347   0.9585242347   0.0000000000           Sì      P
+ 60   qpeinexact_indep_qiskit_70       70   0.0000028650   0.0000131268   0.0000102618           No      P
+
+Parità: tolleranza 10−12 sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in confronto_90_circuiti.csv e dati.json.
+
+
+
+
+                                                                                             7
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                   Confronto con oracle max3
+
+
+
+Tabella completa: circuiti 61–90
+Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale. C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
+
+ ID   Circuito                    Qubit         RAG S        Oracle R    Scarto R − S   Coppia al max   C/P
+ 61   qpeinexact_indep_qiskit_8        8   0.9465992541   0.9465992541   0.0000000000        Sì         P
+ 62   qpeinexact_indep_qiskit_9        9   0.9333643936   0.9333643936   0.0000000000        Sì         P
+ 63   qpeinexact_indep_tket_10        10   0.9180247960   0.9180247960   0.0000000000        Sì         P
+ 64   qpeinexact_indep_tket_11        11   0.9022322778   0.9022864142   0.0000541364        No         P
+ 65   qpeinexact_indep_tket_12        12   0.8852220100   0.8852220100   0.0000000000        Sì         P
+ 66   qpeinexact_indep_tket_13        13   0.8671515989   0.8671515989   0.0000000000        Sì         P
+ 67   qpeinexact_indep_tket_14        14   0.8480995580   0.8480995580   0.0000000000        Sì         P
+ 68   qpeinexact_indep_tket_15        15   0.8282716028   0.8282964517   0.0000248489        No         P
+ 69   qpeinexact_indep_tket_2          2   0.9993011566   0.9993011566   0.0000000000        Sì         C
+ 70   qpeinexact_indep_tket_3          3   0.9931879680   0.9933839355   0.0001959675        No         C
+ 71   qpeinexact_indep_tket_30        30   0.5666719493   0.5666719493   0.0000000000        Sì         P
+ 72   qpeinexact_indep_tket_4          4   0.9812192516   0.9859002010   0.0046809494        No         C
+ 73   qpeinexact_indep_tket_40        40   0.4399012138   0.4399012138   0.0000000000        Sì         P
+ 74   qpeinexact_indep_tket_5          5   0.9685123249   0.9781465418   0.0096342169        No         C
+ 75   qpeinexact_indep_tket_50        50   0.3415826997   0.3415826997   0.0000000000        Sì         P
+ 76   qpeinexact_indep_tket_6          6   0.9688528397   0.9688819062   0.0000290665        No         C
+ 77   qpeinexact_indep_tket_60        60   0.0000272864   0.0002109966   0.0001837102        No         P
+ 78   qpeinexact_indep_tket_7          7   0.9581792229   0.9581792229   0.0000000000        Sì         P
+ 79   qpeinexact_indep_tket_8          8   0.9461449886   0.9461449886   0.0000000000        Sì         P
+ 80   qpeinexact_indep_tket_9          9   0.9326646222   0.9326926030   0.0000279808        No         P
+ 81   routing_indep_qiskit_12         12   0.9398337239   0.9398337239   0.0000000000        Sì         C
+ 82   routing_indep_qiskit_2           2   0.9978340951   0.9978340951   0.0000000000        Sì         C
+ 83   routing_indep_qiskit_6           6   0.9816579456   0.9816579456   0.0000000000        Sì         C
+ 84   routing_indep_tket_12           12   0.9398337239   0.9398337239   0.0000000000        Sì         C
+ 85   routing_indep_tket_2             2   0.9978340951   0.9978340951   0.0000000000        Sì         C
+ 86   routing_indep_tket_6             6   0.9816579456   0.9816579456   0.0000000000        Sì         C
+ 87   tsp_indep_qiskit_4               4   0.9839199580   0.9866884442   0.0027684862        No         C
+ 88   tsp_indep_qiskit_9               9   0.9247191115   0.9448083109   0.0200891994        No         C
+ 89   tsp_indep_tket_4                 4   0.9839199580   0.9866884442   0.0027684862        No         C
+ 90   tsp_indep_tket_9                 9   0.9248023412   0.9448492731   0.0200469319        No         C
+
+Parità: tolleranza 10−12 sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in confronto_90_circuiti.csv e dati.json.
+
+
+
+
+                                                                                             8
+Test: LLM + RAG, Manhattan, 5 esempi                                                                                                                                  Confronto con oracle max3
+
+
+
+Fonti, controlli e riproducibilità
+Sistema. Risultati originali llm_rag, avviati il 21 settembre 2026. Recupero Manhattan e 5 esempi verificati nei registri dei 90 circuiti. Modello Qwen selezionato con profilo qwen/p0_t0,
+compilazione Qiskit con seed 0. Non si usano varianti WL, recupero casuale, k = 1 o k = 10.
+Oracle. Analisi 20260929T210523_9df1db2b, campagna test_max3_v1. Massimo dei seed 0, 1 e 2 per coppia, poi massimo fra coppie. Versioni: Python 3.12.13, Qiskit 2.5.0, MQT Bench
+2.2.3, NumPy 2.5.1, MQT Predictor 2.4.0. Dispositivi: ibm_falcon_27, ibm_heron_133, ibm_falcon_127, ibm_heron_156, quantinuum_h2_56. Configurazioni, Target e opzioni sono quelli
+del contratto dell’oracle.
+Verifiche. Controllate le impronte dei 16 200 esiti originali dell’oracle. Ricalcolati i massimi delle 5 400 coppie e dei 90 circuiti. Identificativi e impronte dei sorgenti coincidono fra oracle
+e RAG. Gli score RAG sono verificati sui risultati di compilazione. Medie aritmetiche per circuito, senza esclusioni. I sottogruppi completo/parziale comprendono circuiti diversi: le loro
+medie non isolano un effetto causale. I dieci casi sono selezionati per scarto decrescente; grafici, tabelle e CSV includono tutti i 90.
+Limiti. L’oracle prende il migliore di tre seed, il sistema usa un solo seed: il confronto principale è intenzionalmente favorevole all’oracle, come richiesto. Un riferimento parziale è un limite
+inferiore del massimo della griglia completa. La parità non certifica allora l’assenza di alternative migliori. Score arrotondati a zero non provano identità dei valori non arrotondati. Non
+sono state avviate compilazioni quantistiche né modificati dati originali, decisioni, prompt o Dataset. Il grafo graphify non è stato aggiornato.
+Fonti originali.
+/home/elio/oracoli_mqt_test/test_max3_v1/analisi/20260929T210523_9df1db2b
+/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/risultati/llm_rag
+/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/preparazione/contratto_congelato.json
+Artefatti. analizza.py legge e verifica le fonti; impagina.py genera il LaTeX. dati.json conserva misure e pari merito. confronto_90_circuiti.csv contiene anche scelte, scarti relativi
+e scomposizione. provenienza.json registra le impronte. In grafici/ sono conservate le tre figure autonome.
+Separazione. Il report è nell’area di valutazione oracle_test/confronto_llm_rag_k5. La campagna oracle resta nella cartella esterna. Nessun risultato è aggiunto all’indice RAG o alle
+pipeline di decisione.
+
+
+
+
+                                                                                                9
+

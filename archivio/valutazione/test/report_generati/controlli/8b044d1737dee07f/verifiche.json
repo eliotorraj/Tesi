@@ -1,0 +1,28 @@
+{
+  "idempotence": true,
+  "synthetic_unit_tests": 13,
+  "independent_call_audit": {
+    "llm_episodes": 180,
+    "rag_calls": 126,
+    "no_rag_calls": 90,
+    "all_measurements_match": true
+  },
+  "documents": {
+    "confronto": {
+      "pages": 18,
+      "latex_warnings": []
+    },
+    "llm_rag": {
+      "pages": 9,
+      "latex_warnings": []
+    },
+    "llm_senza_rag": {
+      "pages": 9,
+      "latex_warnings": []
+    },
+    "random": {
+      "pages": 7,
+      "latex_warnings": []
+    }
+  }
+}

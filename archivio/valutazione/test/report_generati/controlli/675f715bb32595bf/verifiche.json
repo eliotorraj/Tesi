@@ -1,0 +1,12 @@
+{
+  "tests_passed": 20,
+  "other_summaries_unchanged": true,
+  "existing_pair_comparisons_unchanged": true,
+  "pdfs_compiled": 5,
+  "final_latex_warnings": [],
+  "idempotent": true,
+  "visual_review": [
+    "confronto",
+    "mqt_predictor"
+  ]
+}

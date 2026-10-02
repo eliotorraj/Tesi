@@ -1,0 +1,889 @@
+\documentclass[10pt,a4paper,landscape]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[italian]{babel}
+\usepackage[margin=15mm]{geometry}
+\usepackage{lmodern,booktabs,array,amsmath,tikz,xcolor,hyperref,fancyhdr}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black}
+\pagestyle{fancy}\fancyhf{}\lhead{\small Test: LLM + RAG, Manhattan, 5 esempi}
+\rhead{\small Confronto con oracle max3}\cfoot{\small\thepage}
+\setlength{\headheight}{13pt}\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}
+\newcommand{\titolo}[1]{{\Large\bfseries #1}\par\vspace{3mm}}
+\begin{document}
+\titolo{Quanto manca al massimo conosciuto?}
+{\large LLM + RAG con 5 esempi sui 90 circuiti Test}\par
+Il confronto usa i risultati originali del RAG con distanza Manhattan e l'oracle
+generato il 29 settembre 2026. Lo score è \texttt{expected\_fidelity}:
+una stima sui Target sintetici, non una misura su hardware quantistico reale.
+
+\textbf{Risultato principale.} Il sistema raggiunge il massimo conosciuto in
+55 casi su 90 (61,1\%) e resta sotto in 35 (38,9\%). Nessun caso supera il riferimento.
+Lo scarto medio è 0,0018434763, pari a 0,18434763 punti percentuali sulla scala dello score.
+La mediana dello scarto è zero. In 84 casi su 90 lo scarto non supera 0,01.
+
+\begin{tabular}{lrrr}
+\toprule
+Misura & Tutti i circuiti & Oracle completo & Oracle parziale \\
+\midrule
+Circuiti & 90 & 30 & 60 \\
+Score medio RAG & 0.7983788141 & 0.9772610668 & 0.7089376877 \\
+Massimo conosciuto medio & 0.8002222904 & 0.9815701417 & 0.7095483647 \\
+Scarto medio & 0.0018434763 & 0.0043090749 & 0.0006106770 \\
+Scarto massimo & 0.0244336595 & 0.0200891994 & 0.0244336595 \\
+Al massimo conosciuto & 55 / 90 & 9 / 30 & 46 / 60 \\
+Sotto il massimo conosciuto & 35 / 90 & 21 / 30 & 14 / 60 \\
+\bottomrule
+\end{tabular}
+
+
+\medskip\textbf{Definizione.}
+Per ogni circuito, $R=\max_{d,c,s} F(d,c,s)$ è il massimo degli score validi osservati:
+5 dispositivi, 12 configurazioni Qiskit e seed $s\in\{0,1,2\}$, solo su dispositivi compatibili.
+Il sistema ha una sola compilazione, con seed 0, e score $S$.
+Lo scarto è $\Delta=R-S$: zero indica parità; un valore positivo indica margine osservato.
+I punti percentuali sono $100\Delta$; la perdita percentuale relativa è invece $100\Delta/R$.
+
+\textbf{La generazione è terminata, ma non tutti i riferimenti sono completi.}
+Le 16\,200 celle comprendono 864 incompatibilità. Delle 15\,336 compilazioni compatibili,
+14\,249 riescono, 1\,086 superano il limite di 100 secondi e una fallisce.
+Tutti i 90 circuiti hanno un riferimento; solo 30 hanno tutte le compilazioni compatibili riuscite.
+Negli altri 60, il massimo osservato può sottostimare ciò che si otterrebbe completando le prove.
+Errori e timeout sono dati mancanti, mai score zero.
+
+\textbf{Conclusione corretta.}
+In 9 circuiti il sistema uguaglia il massimo dell'intera griglia valutata;
+in altri 46 uguaglia il massimo osservato di una griglia incompleta.
+Non è una prova di ottimalità assoluta, né un limite superiore per compilatori esterni alla griglia.
+Il confronto è descrittivo e successivo al Test: l'oracle non è stato usato nel recupero o nel prompt.
+\newpage
+\titolo{Scelta della coppia e variabilità del seed}
+Il massimo della coppia scelta è $P=\max_{s=0,1,2}F(d_{\mathrm{LLM}},c_{\mathrm{LLM}},s)$:
+\[
+\underbrace{R-S}_{\text{scarto totale}} =
+\underbrace{R-P}_{\text{margine cambiando coppia}}+
+\underbrace{P-S}_{\text{margine cambiando seed nella stessa coppia}}.
+\]
+Tutte le 90 coppie scelte hanno tre compilazioni riuscite nell'oracle.
+In tutti i casi il loro seed 0 riproduce esattamente lo score storico del RAG.
+Il margine medio tra coppie è 0,0014354875; quello interno alla coppia è 0,0004079888.
+La coppia scelta è fra le migliori note in 55/90 casi.
+Anche confrontando solo il seed 0 dell'oracle, lo scarto medio resta 0,0018044775.
+
+\textbf{I dieci scarti maggiori.} C = ricerca completa; P = ricerca parziale.
+I valori sono score, non percentuali.
+
+\begin{tabular}{lrrrrrc}
+\toprule
+Circuito & RAG $S$ & Oracle $R$ & Totale $R-S$ & Coppia $R-P$ & Seed $P-S$ & Ricerca \\
+\midrule
+qpeexact\_indep\_tket\_6 & 0.94607843 & 0.97051209 & 0.02443366 & 0.00823415 & 0.01619951 & P \\
+tsp\_indep\_qiskit\_9 & 0.92471911 & 0.94480831 & 0.02008920 & 0.02008920 & 0.00000000 & C \\
+tsp\_indep\_tket\_9 & 0.92480234 & 0.94484927 & 0.02004693 & 0.02004693 & 0.00000000 & C \\
+qpeinexact\_indep\_qiskit\_6 & 0.95501005 & 0.96908540 & 0.01407534 & 0.01085023 & 0.00322512 & C \\
+qpeexact\_indep\_qiskit\_6 & 0.95930734 & 0.97068680 & 0.01137946 & 0.00828582 & 0.00309364 & P \\
+groundstate\_small\_indep\_tket\_4 & 0.96825356 & 0.97885361 & 0.01060004 & 0.01049310 & 0.00010694 & C \\
+qpeinexact\_indep\_tket\_5 & 0.96851232 & 0.97814654 & 0.00963422 & 0.00615871 & 0.00347551 & C \\
+qpeexact\_indep\_tket\_5 & 0.96915484 & 0.97814654 & 0.00899170 & 0.00508486 & 0.00390684 & C \\
+qpeinexact\_indep\_qiskit\_5 & 0.97108514 & 0.97823458 & 0.00714944 & 0.00634262 & 0.00080682 & C \\
+qpeexact\_indep\_qiskit\_5 & 0.97206582 & 0.97823458 & 0.00616876 & 0.00535370 & 0.00081506 & C \\
+\bottomrule
+\end{tabular}
+
+
+\medskip\textbf{Esempio: \texttt{qpeexact\_indep\_tket\_6}.}
+Il RAG sceglie \texttt{ibm\_heron\_156} con \texttt{o3\_default\_default}.
+Lo score è 0,9460784319. La stessa coppia arriva a 0,9622779418 con seed 1 o 2.
+Il massimo noto è 0,9705120914 su \texttt{quantinuum\_h2\_56}
+(per esempio \texttt{o2\_default\_default}, tutti i seed).
+Dello scarto 0,0244336595, 0,0161995099 riguarda il seed e 0,0082341496 la coppia.
+Il riferimento è parziale: 172 compilazioni valide su 180.
+
+\textbf{Esempio: \texttt{tsp\_indep\_qiskit\_9}.}
+Qui il riferimento è completo. Il RAG sceglie \texttt{quantinuum\_h2\_56},
+\texttt{o2\_default\_default}, con score 0,9247191115 per tutti i seed.
+\texttt{ibm\_falcon\_127}, con \texttt{o2\_default\_default} oppure
+\texttt{o3\_default\_default}, raggiunge 0,9448083109.
+L'intero scarto 0,0200891994 riguarda la scelta della coppia.
+
+\textbf{Lettura dei grafici.}
+Punto blu = RAG; cerchio arancione = oracle. Se coincidono, il punto è dentro il cerchio.
+A destra lo scarto è ingrandito su una scala comune da 0 a 0,026:
+barre verdi = oracle completo; grigie = parziale. L'asterisco indica un oracle parziale.
+Gli ID e l'ordine alfabetico coincidono con le tabelle.
+
+\newpage
+\titolo{Score e scarto per circuito: 1--30}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\fontsize{8}{9}\selectfont]
+\node[anchor=west,font=\bfseries] at (0,.8) {Circuito (* = oracle parziale)};
+\node[anchor=west,font=\bfseries] at (8.8,.8) {Score: RAG e massimo conosciuto};
+\node[anchor=west,font=\bfseries] at (20,.8) {Scarto $R-S$};
+\draw[gray!25] (8.8,.25)--(8.8,-11.1);
+\node at (8.8,.42) {0.0};
+\draw[gray!25] (10.8,.25)--(10.8,-11.1);
+\node at (10.8,.42) {0.2};
+\draw[gray!25] (12.8,.25)--(12.8,-11.1);
+\node at (12.8,.42) {0.4};
+\draw[gray!25] (14.8,.25)--(14.8,-11.1);
+\node at (14.8,.42) {0.6};
+\draw[gray!25] (16.8,.25)--(16.8,-11.1);
+\node at (16.8,.42) {0.8};
+\draw[gray!25] (18.8,.25)--(18.8,-11.1);
+\node at (18.8,.42) {1.0};
+\draw[gray!25] (20.0,.25)--(20.0,-11.1);
+\node[font=\scriptsize] at (20.0,.42) {0.000};
+\draw[gray!25] (21.057692307692307,.25)--(21.057692307692307,-11.1);
+\node[font=\scriptsize] at (21.057692307692307,.42) {0.005};
+\draw[gray!25] (22.115384615384617,.25)--(22.115384615384617,-11.1);
+\node[font=\scriptsize] at (22.115384615384617,.42) {0.010};
+\draw[gray!25] (23.173076923076923,.25)--(23.173076923076923,-11.1);
+\node[font=\scriptsize] at (23.173076923076923,.42) {0.015};
+\draw[gray!25] (24.23076923076923,.25)--(24.23076923076923,-11.1);
+\node[font=\scriptsize] at (24.23076923076923,.42) {0.020};
+\draw[gray!25] (25.28846153846154,.25)--(25.28846153846154,-11.1);
+\node[font=\scriptsize] at (25.28846153846154,.42) {0.025};
+\fill[gray!5] (0,-0.16) rectangle (25.6,0.16);
+\node[anchor=west] at (0,0.0) {01\quad groundstate\_medium\_indep\_qiskit\_12*};
+\draw[gray,thick] (16.763772008,0.0)--(16.764010929,0.0);
+\draw[orange!85!black,line width=.7pt] (16.764010929,0.0) circle (2pt);
+\fill[blue!70!black] (16.763772008,0.0) circle (1pt);
+\fill[gray!65] (20,-0.1) rectangle (20.005054098076922,0.1);
+\node[anchor=west] at (0,-0.37) {02\quad groundstate\_medium\_indep\_tket\_12*};
+\draw[gray,thick] (16.763772008,-0.37)--(16.764488790999998,-0.37);
+\draw[orange!85!black,line width=.7pt] (16.764488790999998,-0.37) circle (2pt);
+\fill[blue!70!black] (16.763772008,-0.37) circle (1pt);
+\fill[gray!65] (20,-0.47) rectangle (20.015162717307692,-0.27);
+\fill[gray!5] (0,-0.9) rectangle (25.6,-0.58);
+\node[anchor=west] at (0,-0.74) {03\quad groundstate\_small\_indep\_qiskit\_4};
+\draw[gray,thick] (18.588591374,-0.74)--(18.588591374,-0.74);
+\draw[orange!85!black,line width=.7pt] (18.588591374,-0.74) circle (2pt);
+\fill[blue!70!black] (18.588591374,-0.74) circle (1pt);
+\fill[teal!75!black] (20,-0.74) circle (.8pt);
+\node[anchor=west] at (0,-1.1099999999999999) {04\quad groundstate\_small\_indep\_tket\_4};
+\draw[gray,thick] (18.482535640000002,-1.1099999999999999)--(18.588536053,-1.1099999999999999);
+\draw[orange!85!black,line width=.7pt] (18.588536053,-1.1099999999999999) circle (2pt);
+\fill[blue!70!black] (18.482535640000002,-1.1099999999999999) circle (1pt);
+\fill[teal!75!black] (20,-1.21) rectangle (22.242316428846152,-1.0099999999999998);
+\fill[gray!5] (0,-1.64) rectangle (25.6,-1.32);
+\node[anchor=west] at (0,-1.48) {05\quad qpeexact\_indep\_qiskit\_10*};
+\draw[gray,thick] (18.018353887000004,-1.48)--(18.018353887000004,-1.48);
+\draw[orange!85!black,line width=.7pt] (18.018353887000004,-1.48) circle (2pt);
+\fill[blue!70!black] (18.018353887000004,-1.48) circle (1pt);
+\fill[gray!65] (20,-1.48) circle (.8pt);
+\node[anchor=west] at (0,-1.85) {06\quad qpeexact\_indep\_qiskit\_11*};
+\draw[gray,thick] (17.832343267,-1.85)--(17.832343267,-1.85);
+\draw[orange!85!black,line width=.7pt] (17.832343267,-1.85) circle (2pt);
+\fill[blue!70!black] (17.832343267,-1.85) circle (1pt);
+\fill[gray!65] (20,-1.85) circle (.8pt);
+\fill[gray!5] (0,-2.38) rectangle (25.6,-2.0599999999999996);
+\node[anchor=west] at (0,-2.2199999999999998) {07\quad qpeexact\_indep\_qiskit\_12*};
+\draw[gray,thick] (17.679093206,-2.2199999999999998)--(17.679093206,-2.2199999999999998);
+\draw[orange!85!black,line width=.7pt] (17.679093206,-2.2199999999999998) circle (2pt);
+\fill[blue!70!black] (17.679093206,-2.2199999999999998) circle (1pt);
+\fill[gray!65] (20,-2.2199999999999998) circle (.8pt);
+\node[anchor=west] at (0,-2.59) {08\quad qpeexact\_indep\_qiskit\_13*};
+\draw[gray,thick] (17.514043421,-2.59)--(17.514043421,-2.59);
+\draw[orange!85!black,line width=.7pt] (17.514043421,-2.59) circle (2pt);
+\fill[blue!70!black] (17.514043421,-2.59) circle (1pt);
+\fill[gray!65] (20,-2.59) circle (.8pt);
+\fill[gray!5] (0,-3.12) rectangle (25.6,-2.8);
+\node[anchor=west] at (0,-2.96) {09\quad qpeexact\_indep\_qiskit\_14*};
+\draw[gray,thick] (17.33872124,-2.96)--(17.33872124,-2.96);
+\draw[orange!85!black,line width=.7pt] (17.33872124,-2.96) circle (2pt);
+\fill[blue!70!black] (17.33872124,-2.96) circle (1pt);
+\fill[gray!65] (20,-2.96) circle (.8pt);
+\node[anchor=west] at (0,-3.33) {10\quad qpeexact\_indep\_qiskit\_15*};
+\draw[gray,thick] (17.100875325,-3.33)--(17.100875325,-3.33);
+\draw[orange!85!black,line width=.7pt] (17.100875325,-3.33) circle (2pt);
+\fill[blue!70!black] (17.100875325,-3.33) circle (1pt);
+\fill[gray!65] (20,-3.33) circle (.8pt);
+\fill[gray!5] (0,-3.8600000000000003) rectangle (25.6,-3.54);
+\node[anchor=west] at (0,-3.7) {11\quad qpeexact\_indep\_qiskit\_16*};
+\draw[gray,thick] (16.89586095,-3.7)--(16.89586095,-3.7);
+\draw[orange!85!black,line width=.7pt] (16.89586095,-3.7) circle (2pt);
+\fill[blue!70!black] (16.89586095,-3.7) circle (1pt);
+\fill[gray!65] (20,-3.7) circle (.8pt);
+\node[anchor=west] at (0,-4.07) {12\quad qpeexact\_indep\_qiskit\_2};
+\draw[gray,thick] (18.787599534,-4.07)--(18.794205726,-4.07);
+\draw[orange!85!black,line width=.7pt] (18.794205726,-4.07) circle (2pt);
+\fill[blue!70!black] (18.787599534,-4.07) circle (1pt);
+\fill[teal!75!black] (20,-4.17) rectangle (20.13974636923077,-3.97);
+\fill[gray!5] (0,-4.6) rectangle (25.6,-4.279999999999999);
+\node[anchor=west] at (0,-4.4399999999999995) {13\quad qpeexact\_indep\_qiskit\_3};
+\draw[gray,thick] (18.760947806,-4.4399999999999995)--(18.775896111,-4.4399999999999995);
+\draw[orange!85!black,line width=.7pt] (18.775896111,-4.4399999999999995) circle (2pt);
+\fill[blue!70!black] (18.760947806,-4.4399999999999995) circle (1pt);
+\fill[teal!75!black] (20,-4.539999999999999) rectangle (20.31621414423077,-4.34);
+\node[anchor=west] at (0,-4.81) {14\quad qpeexact\_indep\_qiskit\_30*};
+\draw[gray,thick] (14.002940694000001,-4.81)--(14.002940694000001,-4.81);
+\draw[orange!85!black,line width=.7pt] (14.002940694000001,-4.81) circle (2pt);
+\fill[blue!70!black] (14.002940694000001,-4.81) circle (1pt);
+\fill[gray!65] (20,-4.81) circle (.8pt);
+\fill[gray!5] (0,-5.34) rectangle (25.6,-5.02);
+\node[anchor=west] at (0,-5.18) {15\quad qpeexact\_indep\_qiskit\_4};
+\draw[gray,thick] (18.669487051,-5.18)--(18.728297161,-5.18);
+\draw[orange!85!black,line width=.7pt] (18.728297161,-5.18) circle (2pt);
+\fill[blue!70!black] (18.669487051,-5.18) circle (1pt);
+\fill[teal!75!black] (20,-5.279999999999999) rectangle (21.24406001923077,-5.08);
+\node[anchor=west] at (0,-5.55) {16\quad qpeexact\_indep\_qiskit\_40*};
+\draw[gray,thick] (12.541311339,-5.55)--(12.541311339,-5.55);
+\draw[orange!85!black,line width=.7pt] (12.541311339,-5.55) circle (2pt);
+\fill[blue!70!black] (12.541311339,-5.55) circle (1pt);
+\fill[gray!65] (20,-5.55) circle (.8pt);
+\fill[gray!5] (0,-6.08) rectangle (25.6,-5.76);
+\node[anchor=west] at (0,-5.92) {17\quad qpeexact\_indep\_qiskit\_5};
+\draw[gray,thick] (18.520658176,-5.92)--(18.582345802,-5.92);
+\draw[orange!85!black,line width=.7pt] (18.582345802,-5.92) circle (2pt);
+\fill[blue!70!black] (18.520658176,-5.92) circle (1pt);
+\fill[teal!75!black] (20,-6.02) rectangle (21.30493055,-5.82);
+\node[anchor=west] at (0,-6.29) {18\quad qpeexact\_indep\_qiskit\_50*};
+\draw[gray,thick] (11.494733993,-6.29)--(11.494733993,-6.29);
+\draw[orange!85!black,line width=.7pt] (11.494733993,-6.29) circle (2pt);
+\fill[blue!70!black] (11.494733993,-6.29) circle (1pt);
+\fill[gray!65] (20,-6.29) circle (.8pt);
+\fill[gray!5] (0,-6.82) rectangle (25.6,-6.5);
+\node[anchor=west] at (0,-6.66) {19\quad qpeexact\_indep\_qiskit\_6*};
+\draw[gray,thick] (18.393073443,-6.66)--(18.506868019000002,-6.66);
+\draw[orange!85!black,line width=.7pt] (18.506868019000002,-6.66) circle (2pt);
+\fill[blue!70!black] (18.393073443,-6.66) circle (1pt);
+\fill[gray!65] (20,-6.76) rectangle (22.407192953846156,-6.5600000000000005);
+\node[anchor=west] at (0,-7.03) {20\quad qpeexact\_indep\_qiskit\_60*};
+\draw[gray,thick] (8.800113956,-7.03)--(8.801043470000002,-7.03);
+\draw[orange!85!black,line width=.7pt] (8.801043470000002,-7.03) circle (2pt);
+\fill[blue!70!black] (8.800113956,-7.03) circle (1pt);
+\fill[gray!65] (20,-7.13) rectangle (20.019662796153845,-6.930000000000001);
+\fill[gray!5] (0,-7.5600000000000005) rectangle (25.6,-7.24);
+\node[anchor=west] at (0,-7.4) {21\quad qpeexact\_indep\_qiskit\_7*};
+\draw[gray,thick] (18.416082099,-7.4)--(18.416082099,-7.4);
+\draw[orange!85!black,line width=.7pt] (18.416082099,-7.4) circle (2pt);
+\fill[blue!70!black] (18.416082099,-7.4) circle (1pt);
+\fill[gray!65] (20,-7.4) circle (.8pt);
+\node[anchor=west] at (0,-7.77) {22\quad qpeexact\_indep\_qiskit\_70*};
+\draw[gray,thick] (8.800028783,-7.77)--(8.800130971000002,-7.77);
+\draw[orange!85!black,line width=.7pt] (8.800130971000002,-7.77) circle (2pt);
+\fill[blue!70!black] (8.800028783,-7.77) circle (1pt);
+\fill[gray!65] (20,-7.869999999999999) rectangle (20.00216166923077,-7.67);
+\fill[gray!5] (0,-8.3) rectangle (25.6,-7.98);
+\node[anchor=west] at (0,-8.14) {23\quad qpeexact\_indep\_qiskit\_8*};
+\draw[gray,thick] (18.265992541000003,-8.14)--(18.265992541000003,-8.14);
+\draw[orange!85!black,line width=.7pt] (18.265992541000003,-8.14) circle (2pt);
+\fill[blue!70!black] (18.265992541000003,-8.14) circle (1pt);
+\fill[gray!65] (20,-8.14) circle (.8pt);
+\node[anchor=west] at (0,-8.51) {24\quad qpeexact\_indep\_qiskit\_9*};
+\draw[gray,thick] (18.14906771,-8.51)--(18.14906771,-8.51);
+\draw[orange!85!black,line width=.7pt] (18.14906771,-8.51) circle (2pt);
+\fill[blue!70!black] (18.14906771,-8.51) circle (1pt);
+\fill[gray!65] (20,-8.51) circle (.8pt);
+\fill[gray!5] (0,-9.04) rectangle (25.6,-8.719999999999999);
+\node[anchor=west] at (0,-8.879999999999999) {25\quad qpeexact\_indep\_tket\_10*};
+\draw[gray,thick] (18.009232095999998,-8.879999999999999)--(18.009232095999998,-8.879999999999999);
+\draw[orange!85!black,line width=.7pt] (18.009232095999998,-8.879999999999999) circle (2pt);
+\fill[blue!70!black] (18.009232095999998,-8.879999999999999) circle (1pt);
+\fill[gray!65] (20,-8.879999999999999) circle (.8pt);
+\node[anchor=west] at (0,-9.25) {26\quad qpeexact\_indep\_tket\_11*};
+\draw[gray,thick] (17.822052109,-9.25)--(17.822052109,-9.25);
+\draw[orange!85!black,line width=.7pt] (17.822052109,-9.25) circle (2pt);
+\fill[blue!70!black] (17.822052109,-9.25) circle (1pt);
+\fill[gray!65] (20,-9.25) circle (.8pt);
+\fill[gray!5] (0,-9.78) rectangle (25.6,-9.459999999999999);
+\node[anchor=west] at (0,-9.62) {27\quad qpeexact\_indep\_tket\_12*};
+\draw[gray,thick] (17.668444524999998,-9.62)--(17.668444524999998,-9.62);
+\draw[orange!85!black,line width=.7pt] (17.668444524999998,-9.62) circle (2pt);
+\fill[blue!70!black] (17.668444524999998,-9.62) circle (1pt);
+\fill[gray!65] (20,-9.62) circle (.8pt);
+\node[anchor=west] at (0,-9.99) {28\quad qpeexact\_indep\_tket\_13*};
+\draw[gray,thick] (17.499415900000002,-9.99)--(17.499415900000002,-9.99);
+\draw[orange!85!black,line width=.7pt] (17.499415900000002,-9.99) circle (2pt);
+\fill[blue!70!black] (17.499415900000002,-9.99) circle (1pt);
+\fill[gray!65] (20,-9.99) circle (.8pt);
+\fill[gray!5] (0,-10.52) rectangle (25.6,-10.2);
+\node[anchor=west] at (0,-10.36) {29\quad qpeexact\_indep\_tket\_14*};
+\draw[gray,thick] (17.322598056,-10.36)--(17.323109435,-10.36);
+\draw[orange!85!black,line width=.7pt] (17.323109435,-10.36) circle (2pt);
+\fill[blue!70!black] (17.322598056,-10.36) circle (1pt);
+\fill[gray!65] (20,-10.459999999999999) rectangle (20.01081763269231,-10.26);
+\node[anchor=west] at (0,-10.73) {30\quad qpeexact\_indep\_tket\_15*};
+\draw[gray,thick] (17.081722146,-10.73)--(17.081722146,-10.73);
+\draw[orange!85!black,line width=.7pt] (17.081722146,-10.73) circle (2pt);
+\fill[blue!70!black] (17.081722146,-10.73) circle (1pt);
+\fill[gray!65] (20,-10.73) circle (.8pt);
+\end{tikzpicture}
+\par\small Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.
+\newpage
+\titolo{Score e scarto per circuito: 31--60}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\fontsize{8}{9}\selectfont]
+\node[anchor=west,font=\bfseries] at (0,.8) {Circuito (* = oracle parziale)};
+\node[anchor=west,font=\bfseries] at (8.8,.8) {Score: RAG e massimo conosciuto};
+\node[anchor=west,font=\bfseries] at (20,.8) {Scarto $R-S$};
+\draw[gray!25] (8.8,.25)--(8.8,-11.1);
+\node at (8.8,.42) {0.0};
+\draw[gray!25] (10.8,.25)--(10.8,-11.1);
+\node at (10.8,.42) {0.2};
+\draw[gray!25] (12.8,.25)--(12.8,-11.1);
+\node at (12.8,.42) {0.4};
+\draw[gray!25] (14.8,.25)--(14.8,-11.1);
+\node at (14.8,.42) {0.6};
+\draw[gray!25] (16.8,.25)--(16.8,-11.1);
+\node at (16.8,.42) {0.8};
+\draw[gray!25] (18.8,.25)--(18.8,-11.1);
+\node at (18.8,.42) {1.0};
+\draw[gray!25] (20.0,.25)--(20.0,-11.1);
+\node[font=\scriptsize] at (20.0,.42) {0.000};
+\draw[gray!25] (21.057692307692307,.25)--(21.057692307692307,-11.1);
+\node[font=\scriptsize] at (21.057692307692307,.42) {0.005};
+\draw[gray!25] (22.115384615384617,.25)--(22.115384615384617,-11.1);
+\node[font=\scriptsize] at (22.115384615384617,.42) {0.010};
+\draw[gray!25] (23.173076923076923,.25)--(23.173076923076923,-11.1);
+\node[font=\scriptsize] at (23.173076923076923,.42) {0.015};
+\draw[gray!25] (24.23076923076923,.25)--(24.23076923076923,-11.1);
+\node[font=\scriptsize] at (24.23076923076923,.42) {0.020};
+\draw[gray!25] (25.28846153846154,.25)--(25.28846153846154,-11.1);
+\node[font=\scriptsize] at (25.28846153846154,.42) {0.025};
+\fill[gray!5] (0,-0.16) rectangle (25.6,0.16);
+\node[anchor=west] at (0,0.0) {31\quad qpeexact\_indep\_tket\_2};
+\draw[gray,thick] (18.787599534,0.0)--(18.794205726,0.0);
+\draw[orange!85!black,line width=.7pt] (18.794205726,0.0) circle (2pt);
+\fill[blue!70!black] (18.787599534,0.0) circle (1pt);
+\fill[teal!75!black] (20,-0.1) rectangle (20.13974636923077,0.1);
+\node[anchor=west] at (0,-0.37) {32\quad qpeexact\_indep\_tket\_3};
+\draw[gray,thick] (18.758784484,-0.37)--(18.776856074,-0.37);
+\draw[orange!85!black,line width=.7pt] (18.776856074,-0.37) circle (2pt);
+\fill[blue!70!black] (18.758784484,-0.37) circle (1pt);
+\fill[teal!75!black] (20,-0.47) rectangle (20.382283634615384,-0.27);
+\fill[gray!5] (0,-0.9) rectangle (25.6,-0.58);
+\node[anchor=west] at (0,-0.74) {33\quad qpeexact\_indep\_tket\_30*};
+\draw[gray,thick] (14.474551344,-0.74)--(14.474551344,-0.74);
+\draw[orange!85!black,line width=.7pt] (14.474551344,-0.74) circle (2pt);
+\fill[blue!70!black] (14.474551344,-0.74) circle (1pt);
+\fill[gray!65] (20,-0.74) circle (.8pt);
+\node[anchor=west] at (0,-1.1099999999999999) {34\quad qpeexact\_indep\_tket\_4};
+\draw[gray,thick] (18.668581315,-1.1099999999999999)--(18.728297161,-1.1099999999999999);
+\draw[orange!85!black,line width=.7pt] (18.728297161,-1.1099999999999999) circle (2pt);
+\fill[blue!70!black] (18.668581315,-1.1099999999999999) circle (1pt);
+\fill[teal!75!black] (20,-1.21) rectangle (21.26321981923077,-1.0099999999999998);
+\fill[gray!5] (0,-1.64) rectangle (25.6,-1.32);
+\node[anchor=west] at (0,-1.48) {35\quad qpeexact\_indep\_tket\_40*};
+\draw[gray,thick] (13.198748201,-1.48)--(13.198748201,-1.48);
+\draw[orange!85!black,line width=.7pt] (13.198748201,-1.48) circle (2pt);
+\fill[blue!70!black] (13.198748201,-1.48) circle (1pt);
+\fill[gray!65] (20,-1.48) circle (.8pt);
+\node[anchor=west] at (0,-1.85) {36\quad qpeexact\_indep\_tket\_5};
+\draw[gray,thick] (18.491548424999998,-1.85)--(18.581465418,-1.85);
+\draw[orange!85!black,line width=.7pt] (18.581465418,-1.85) circle (2pt);
+\fill[blue!70!black] (18.491548424999998,-1.85) circle (1pt);
+\fill[teal!75!black] (20,-1.9500000000000002) rectangle (21.902090236538463,-1.75);
+\fill[gray!5] (0,-2.38) rectangle (25.6,-2.0599999999999996);
+\node[anchor=west] at (0,-2.2199999999999998) {37\quad qpeexact\_indep\_tket\_50*};
+\draw[gray,thick] (12.215929475000001,-2.2199999999999998)--(12.215929475000001,-2.2199999999999998);
+\draw[orange!85!black,line width=.7pt] (12.215929475000001,-2.2199999999999998) circle (2pt);
+\fill[blue!70!black] (12.215929475000001,-2.2199999999999998) circle (1pt);
+\fill[gray!65] (20,-2.2199999999999998) circle (.8pt);
+\node[anchor=west] at (0,-2.59) {38\quad qpeexact\_indep\_tket\_6*};
+\draw[gray,thick] (18.260784319000003,-2.59)--(18.505120914000003,-2.59);
+\draw[orange!85!black,line width=.7pt] (18.505120914000003,-2.59) circle (2pt);
+\fill[blue!70!black] (18.260784319000003,-2.59) circle (1pt);
+\fill[gray!65] (20,-2.69) rectangle (25.168658740384615,-2.4899999999999998);
+\fill[gray!5] (0,-3.12) rectangle (25.6,-2.8);
+\node[anchor=west] at (0,-2.96) {39\quad qpeexact\_indep\_tket\_60*};
+\draw[gray,thick] (8.800273505,-2.96)--(8.802111392,-2.96);
+\draw[orange!85!black,line width=.7pt] (8.802111392,-2.96) circle (2pt);
+\fill[blue!70!black] (8.800273505,-2.96) circle (1pt);
+\fill[gray!65] (20,-3.06) rectangle (20.038878378846153,-2.86);
+\node[anchor=west] at (0,-3.33) {40\quad qpeexact\_indep\_tket\_7*};
+\draw[gray,thick] (18.412044132000002,-3.33)--(18.412044132000002,-3.33);
+\draw[orange!85!black,line width=.7pt] (18.412044132000002,-3.33) circle (2pt);
+\fill[blue!70!black] (18.412044132000002,-3.33) circle (1pt);
+\fill[gray!65] (20,-3.33) circle (.8pt);
+\fill[gray!5] (0,-3.8600000000000003) rectangle (25.6,-3.54);
+\node[anchor=west] at (0,-3.7) {41\quad qpeexact\_indep\_tket\_8*};
+\draw[gray,thick] (18.260882207999998,-3.7)--(18.260882207999998,-3.7);
+\draw[orange!85!black,line width=.7pt] (18.260882207999998,-3.7) circle (2pt);
+\fill[blue!70!black] (18.260882207999998,-3.7) circle (1pt);
+\fill[gray!65] (20,-3.7) circle (.8pt);
+\node[anchor=west] at (0,-4.07) {42\quad qpeexact\_indep\_tket\_9*};
+\draw[gray,thick] (18.142899269,-4.07)--(18.142899269,-4.07);
+\draw[orange!85!black,line width=.7pt] (18.142899269,-4.07) circle (2pt);
+\fill[blue!70!black] (18.142899269,-4.07) circle (1pt);
+\fill[gray!65] (20,-4.07) circle (.8pt);
+\fill[gray!5] (0,-4.6) rectangle (25.6,-4.279999999999999);
+\node[anchor=west] at (0,-4.4399999999999995) {43\quad qpeinexact\_indep\_qiskit\_10*};
+\draw[gray,thick] (17.989065361999998,-4.4399999999999995)--(17.989065361999998,-4.4399999999999995);
+\draw[orange!85!black,line width=.7pt] (17.989065361999998,-4.4399999999999995) circle (2pt);
+\fill[blue!70!black] (17.989065361999998,-4.4399999999999995) circle (1pt);
+\fill[gray!65] (20,-4.4399999999999995) circle (.8pt);
+\node[anchor=west] at (0,-4.81) {44\quad qpeinexact\_indep\_qiskit\_11*};
+\draw[gray,thick] (17.832072297,-4.81)--(17.832072297,-4.81);
+\draw[orange!85!black,line width=.7pt] (17.832072297,-4.81) circle (2pt);
+\fill[blue!70!black] (17.832072297,-4.81) circle (1pt);
+\fill[gray!65] (20,-4.81) circle (.8pt);
+\fill[gray!5] (0,-5.34) rectangle (25.6,-5.02);
+\node[anchor=west] at (0,-5.18) {45\quad qpeinexact\_indep\_qiskit\_12*};
+\draw[gray,thick] (17.664178847000002,-5.18)--(17.664178847000002,-5.18);
+\draw[orange!85!black,line width=.7pt] (17.664178847000002,-5.18) circle (2pt);
+\fill[blue!70!black] (17.664178847000002,-5.18) circle (1pt);
+\fill[gray!65] (20,-5.18) circle (.8pt);
+\node[anchor=west] at (0,-5.55) {46\quad qpeinexact\_indep\_qiskit\_13*};
+\draw[gray,thick] (17.485836016,-5.55)--(17.485836016,-5.55);
+\draw[orange!85!black,line width=.7pt] (17.485836016,-5.55) circle (2pt);
+\fill[blue!70!black] (17.485836016,-5.55) circle (1pt);
+\fill[gray!65] (20,-5.55) circle (.8pt);
+\fill[gray!5] (0,-6.08) rectangle (25.6,-5.76);
+\node[anchor=west] at (0,-5.92) {47\quad qpeinexact\_indep\_qiskit\_14*};
+\draw[gray,thick] (17.297804839,-5.92)--(17.297804839,-5.92);
+\draw[orange!85!black,line width=.7pt] (17.297804839,-5.92) circle (2pt);
+\fill[blue!70!black] (17.297804839,-5.92) circle (1pt);
+\fill[gray!65] (20,-5.92) circle (.8pt);
+\node[anchor=west] at (0,-6.29) {48\quad qpeinexact\_indep\_qiskit\_15*};
+\draw[gray,thick] (17.100875325,-6.29)--(17.100875325,-6.29);
+\draw[orange!85!black,line width=.7pt] (17.100875325,-6.29) circle (2pt);
+\fill[blue!70!black] (17.100875325,-6.29) circle (1pt);
+\fill[gray!65] (20,-6.29) circle (.8pt);
+\fill[gray!5] (0,-6.82) rectangle (25.6,-6.5);
+\node[anchor=west] at (0,-6.66) {49\quad qpeinexact\_indep\_qiskit\_16*};
+\draw[gray,thick] (16.89586095,-6.66)--(16.89586095,-6.66);
+\draw[orange!85!black,line width=.7pt] (16.89586095,-6.66) circle (2pt);
+\fill[blue!70!black] (16.89586095,-6.66) circle (1pt);
+\fill[gray!65] (20,-6.66) circle (.8pt);
+\node[anchor=west] at (0,-7.03) {50\quad qpeinexact\_indep\_qiskit\_2};
+\draw[gray,thick] (18.793011566,-7.03)--(18.793011566,-7.03);
+\draw[orange!85!black,line width=.7pt] (18.793011566,-7.03) circle (2pt);
+\fill[blue!70!black] (18.793011566,-7.03) circle (1pt);
+\fill[teal!75!black] (20,-7.03) circle (.8pt);
+\fill[gray!5] (0,-7.5600000000000005) rectangle (25.6,-7.24);
+\node[anchor=west] at (0,-7.4) {51\quad qpeinexact\_indep\_qiskit\_3};
+\draw[gray,thick] (18.73187968,-7.4)--(18.733839355,-7.4);
+\draw[orange!85!black,line width=.7pt] (18.733839355,-7.4) circle (2pt);
+\fill[blue!70!black] (18.73187968,-7.4) circle (1pt);
+\fill[teal!75!black] (20,-7.5) rectangle (20.04145466346154,-7.300000000000001);
+\node[anchor=west] at (0,-7.77) {52\quad qpeinexact\_indep\_qiskit\_30*};
+\draw[gray,thick] (13.994357059,-7.77)--(13.994357059,-7.77);
+\draw[orange!85!black,line width=.7pt] (13.994357059,-7.77) circle (2pt);
+\fill[blue!70!black] (13.994357059,-7.77) circle (1pt);
+\fill[gray!65] (20,-7.77) circle (.8pt);
+\fill[gray!5] (0,-8.3) rectangle (25.6,-7.98);
+\node[anchor=west] at (0,-8.14) {53\quad qpeinexact\_indep\_qiskit\_4};
+\draw[gray,thick] (18.60527915,-8.14)--(18.659297789,-8.14);
+\draw[orange!85!black,line width=.7pt] (18.659297789,-8.14) circle (2pt);
+\fill[blue!70!black] (18.60527915,-8.14) circle (1pt);
+\fill[teal!75!black] (20,-8.24) rectangle (21.142701978846155,-8.040000000000001);
+\node[anchor=west] at (0,-8.51) {54\quad qpeinexact\_indep\_qiskit\_40*};
+\draw[gray,thick] (12.541311339,-8.51)--(12.541311339,-8.51);
+\draw[orange!85!black,line width=.7pt] (12.541311339,-8.51) circle (2pt);
+\fill[blue!70!black] (12.541311339,-8.51) circle (1pt);
+\fill[gray!65] (20,-8.51) circle (.8pt);
+\fill[gray!5] (0,-9.04) rectangle (25.6,-8.719999999999999);
+\node[anchor=west] at (0,-8.879999999999999) {55\quad qpeinexact\_indep\_qiskit\_5};
+\draw[gray,thick] (18.510851394,-8.879999999999999)--(18.582345802,-8.879999999999999);
+\draw[orange!85!black,line width=.7pt] (18.582345802,-8.879999999999999) circle (2pt);
+\fill[blue!70!black] (18.510851394,-8.879999999999999) circle (1pt);
+\fill[teal!75!black] (20,-8.979999999999999) rectangle (21.512381707692306,-8.78);
+\node[anchor=west] at (0,-9.25) {56\quad qpeinexact\_indep\_qiskit\_50*};
+\draw[gray,thick] (11.494733993,-9.25)--(11.494733993,-9.25);
+\draw[orange!85!black,line width=.7pt] (11.494733993,-9.25) circle (2pt);
+\fill[blue!70!black] (11.494733993,-9.25) circle (1pt);
+\fill[gray!65] (20,-9.25) circle (.8pt);
+\fill[gray!5] (0,-9.78) rectangle (25.6,-9.459999999999999);
+\node[anchor=west] at (0,-9.62) {57\quad qpeinexact\_indep\_qiskit\_6};
+\draw[gray,thick] (18.350100512,-9.62)--(18.490853958000002,-9.62);
+\draw[orange!85!black,line width=.7pt] (18.490853958000002,-9.62) circle (2pt);
+\fill[blue!70!black] (18.350100512,-9.62) circle (1pt);
+\fill[teal!75!black] (20,-9.719999999999999) rectangle (22.977476742307694,-9.52);
+\node[anchor=west] at (0,-9.99) {58\quad qpeinexact\_indep\_qiskit\_60*};
+\draw[gray,thick] (8.800113715,-9.99)--(8.801042694000001,-9.99);
+\draw[orange!85!black,line width=.7pt] (8.801042694000001,-9.99) circle (2pt);
+\fill[blue!70!black] (8.800113715,-9.99) circle (1pt);
+\fill[gray!65] (20,-10.09) rectangle (20.019651478846153,-9.89);
+\fill[gray!5] (0,-10.52) rectangle (25.6,-10.2);
+\node[anchor=west] at (0,-10.36) {59\quad qpeinexact\_indep\_qiskit\_7*};
+\draw[gray,thick] (18.385242347000002,-10.36)--(18.385242347000002,-10.36);
+\draw[orange!85!black,line width=.7pt] (18.385242347000002,-10.36) circle (2pt);
+\fill[blue!70!black] (18.385242347000002,-10.36) circle (1pt);
+\fill[gray!65] (20,-10.36) circle (.8pt);
+\node[anchor=west] at (0,-10.73) {60\quad qpeinexact\_indep\_qiskit\_70*};
+\draw[gray,thick] (8.800028650000002,-10.73)--(8.800131268000001,-10.73);
+\draw[orange!85!black,line width=.7pt] (8.800131268000001,-10.73) circle (2pt);
+\fill[blue!70!black] (8.800028650000002,-10.73) circle (1pt);
+\fill[gray!65] (20,-10.83) rectangle (20.002170765384616,-10.63);
+\end{tikzpicture}
+\par\small Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.
+\newpage
+\titolo{Score e scarto per circuito: 61--90}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\fontsize{8}{9}\selectfont]
+\node[anchor=west,font=\bfseries] at (0,.8) {Circuito (* = oracle parziale)};
+\node[anchor=west,font=\bfseries] at (8.8,.8) {Score: RAG e massimo conosciuto};
+\node[anchor=west,font=\bfseries] at (20,.8) {Scarto $R-S$};
+\draw[gray!25] (8.8,.25)--(8.8,-11.1);
+\node at (8.8,.42) {0.0};
+\draw[gray!25] (10.8,.25)--(10.8,-11.1);
+\node at (10.8,.42) {0.2};
+\draw[gray!25] (12.8,.25)--(12.8,-11.1);
+\node at (12.8,.42) {0.4};
+\draw[gray!25] (14.8,.25)--(14.8,-11.1);
+\node at (14.8,.42) {0.6};
+\draw[gray!25] (16.8,.25)--(16.8,-11.1);
+\node at (16.8,.42) {0.8};
+\draw[gray!25] (18.8,.25)--(18.8,-11.1);
+\node at (18.8,.42) {1.0};
+\draw[gray!25] (20.0,.25)--(20.0,-11.1);
+\node[font=\scriptsize] at (20.0,.42) {0.000};
+\draw[gray!25] (21.057692307692307,.25)--(21.057692307692307,-11.1);
+\node[font=\scriptsize] at (21.057692307692307,.42) {0.005};
+\draw[gray!25] (22.115384615384617,.25)--(22.115384615384617,-11.1);
+\node[font=\scriptsize] at (22.115384615384617,.42) {0.010};
+\draw[gray!25] (23.173076923076923,.25)--(23.173076923076923,-11.1);
+\node[font=\scriptsize] at (23.173076923076923,.42) {0.015};
+\draw[gray!25] (24.23076923076923,.25)--(24.23076923076923,-11.1);
+\node[font=\scriptsize] at (24.23076923076923,.42) {0.020};
+\draw[gray!25] (25.28846153846154,.25)--(25.28846153846154,-11.1);
+\node[font=\scriptsize] at (25.28846153846154,.42) {0.025};
+\fill[gray!5] (0,-0.16) rectangle (25.6,0.16);
+\node[anchor=west] at (0,0.0) {61\quad qpeinexact\_indep\_qiskit\_8*};
+\draw[gray,thick] (18.265992541000003,0.0)--(18.265992541000003,0.0);
+\draw[orange!85!black,line width=.7pt] (18.265992541000003,0.0) circle (2pt);
+\fill[blue!70!black] (18.265992541000003,0.0) circle (1pt);
+\fill[gray!65] (20,0.0) circle (.8pt);
+\node[anchor=west] at (0,-0.37) {62\quad qpeinexact\_indep\_qiskit\_9*};
+\draw[gray,thick] (18.133643936,-0.37)--(18.133643936,-0.37);
+\draw[orange!85!black,line width=.7pt] (18.133643936,-0.37) circle (2pt);
+\fill[blue!70!black] (18.133643936,-0.37) circle (1pt);
+\fill[gray!65] (20,-0.37) circle (.8pt);
+\fill[gray!5] (0,-0.9) rectangle (25.6,-0.58);
+\node[anchor=west] at (0,-0.74) {63\quad qpeinexact\_indep\_tket\_10*};
+\draw[gray,thick] (17.98024796,-0.74)--(17.98024796,-0.74);
+\draw[orange!85!black,line width=.7pt] (17.98024796,-0.74) circle (2pt);
+\fill[blue!70!black] (17.98024796,-0.74) circle (1pt);
+\fill[gray!65] (20,-0.74) circle (.8pt);
+\node[anchor=west] at (0,-1.1099999999999999) {64\quad qpeinexact\_indep\_tket\_11*};
+\draw[gray,thick] (17.822322778,-1.1099999999999999)--(17.822864142,-1.1099999999999999);
+\draw[orange!85!black,line width=.7pt] (17.822864142,-1.1099999999999999) circle (2pt);
+\fill[blue!70!black] (17.822322778,-1.1099999999999999) circle (1pt);
+\fill[gray!65] (20,-1.21) rectangle (20.01145193076923,-1.0099999999999998);
+\fill[gray!5] (0,-1.64) rectangle (25.6,-1.32);
+\node[anchor=west] at (0,-1.48) {65\quad qpeinexact\_indep\_tket\_12*};
+\draw[gray,thick] (17.6522201,-1.48)--(17.6522201,-1.48);
+\draw[orange!85!black,line width=.7pt] (17.6522201,-1.48) circle (2pt);
+\fill[blue!70!black] (17.6522201,-1.48) circle (1pt);
+\fill[gray!65] (20,-1.48) circle (.8pt);
+\node[anchor=west] at (0,-1.85) {66\quad qpeinexact\_indep\_tket\_13*};
+\draw[gray,thick] (17.471515989,-1.85)--(17.471515989,-1.85);
+\draw[orange!85!black,line width=.7pt] (17.471515989,-1.85) circle (2pt);
+\fill[blue!70!black] (17.471515989,-1.85) circle (1pt);
+\fill[gray!65] (20,-1.85) circle (.8pt);
+\fill[gray!5] (0,-2.38) rectangle (25.6,-2.0599999999999996);
+\node[anchor=west] at (0,-2.2199999999999998) {67\quad qpeinexact\_indep\_tket\_14*};
+\draw[gray,thick] (17.280995580000003,-2.2199999999999998)--(17.280995580000003,-2.2199999999999998);
+\draw[orange!85!black,line width=.7pt] (17.280995580000003,-2.2199999999999998) circle (2pt);
+\fill[blue!70!black] (17.280995580000003,-2.2199999999999998) circle (1pt);
+\fill[gray!65] (20,-2.2199999999999998) circle (.8pt);
+\node[anchor=west] at (0,-2.59) {68\quad qpeinexact\_indep\_tket\_15*};
+\draw[gray,thick] (17.082716028,-2.59)--(17.082964517,-2.59);
+\draw[orange!85!black,line width=.7pt] (17.082964517,-2.59) circle (2pt);
+\fill[blue!70!black] (17.082716028,-2.59) circle (1pt);
+\fill[gray!65] (20,-2.69) rectangle (20.005256498076925,-2.4899999999999998);
+\fill[gray!5] (0,-3.12) rectangle (25.6,-2.8);
+\node[anchor=west] at (0,-2.96) {69\quad qpeinexact\_indep\_tket\_2};
+\draw[gray,thick] (18.793011566,-2.96)--(18.793011566,-2.96);
+\draw[orange!85!black,line width=.7pt] (18.793011566,-2.96) circle (2pt);
+\fill[blue!70!black] (18.793011566,-2.96) circle (1pt);
+\fill[teal!75!black] (20,-2.96) circle (.8pt);
+\node[anchor=west] at (0,-3.33) {70\quad qpeinexact\_indep\_tket\_3};
+\draw[gray,thick] (18.73187968,-3.33)--(18.733839355,-3.33);
+\draw[orange!85!black,line width=.7pt] (18.733839355,-3.33) circle (2pt);
+\fill[blue!70!black] (18.73187968,-3.33) circle (1pt);
+\fill[teal!75!black] (20,-3.43) rectangle (20.04145466346154,-3.23);
+\fill[gray!5] (0,-3.8600000000000003) rectangle (25.6,-3.54);
+\node[anchor=west] at (0,-3.7) {71\quad qpeinexact\_indep\_tket\_30*};
+\draw[gray,thick] (14.466719493,-3.7)--(14.466719493,-3.7);
+\draw[orange!85!black,line width=.7pt] (14.466719493,-3.7) circle (2pt);
+\fill[blue!70!black] (14.466719493,-3.7) circle (1pt);
+\fill[gray!65] (20,-3.7) circle (.8pt);
+\node[anchor=west] at (0,-4.07) {72\quad qpeinexact\_indep\_tket\_4};
+\draw[gray,thick] (18.612192516,-4.07)--(18.659002010000002,-4.07);
+\draw[orange!85!black,line width=.7pt] (18.659002010000002,-4.07) circle (2pt);
+\fill[blue!70!black] (18.612192516,-4.07) circle (1pt);
+\fill[teal!75!black] (20,-4.17) rectangle (20.990200834615386,-3.97);
+\fill[gray!5] (0,-4.6) rectangle (25.6,-4.279999999999999);
+\node[anchor=west] at (0,-4.4399999999999995) {73\quad qpeinexact\_indep\_tket\_40*};
+\draw[gray,thick] (13.199012138,-4.4399999999999995)--(13.199012138,-4.4399999999999995);
+\draw[orange!85!black,line width=.7pt] (13.199012138,-4.4399999999999995) circle (2pt);
+\fill[blue!70!black] (13.199012138,-4.4399999999999995) circle (1pt);
+\fill[gray!65] (20,-4.4399999999999995) circle (.8pt);
+\node[anchor=west] at (0,-4.81) {74\quad qpeinexact\_indep\_tket\_5};
+\draw[gray,thick] (18.485123249,-4.81)--(18.581465418,-4.81);
+\draw[orange!85!black,line width=.7pt] (18.581465418,-4.81) circle (2pt);
+\fill[blue!70!black] (18.485123249,-4.81) circle (1pt);
+\fill[teal!75!black] (20,-4.909999999999999) rectangle (22.038007421153846,-4.71);
+\fill[gray!5] (0,-5.34) rectangle (25.6,-5.02);
+\node[anchor=west] at (0,-5.18) {75\quad qpeinexact\_indep\_tket\_50*};
+\draw[gray,thick] (12.215826997,-5.18)--(12.215826997,-5.18);
+\draw[orange!85!black,line width=.7pt] (12.215826997,-5.18) circle (2pt);
+\fill[blue!70!black] (12.215826997,-5.18) circle (1pt);
+\fill[gray!65] (20,-5.18) circle (.8pt);
+\node[anchor=west] at (0,-5.55) {76\quad qpeinexact\_indep\_tket\_6};
+\draw[gray,thick] (18.488528397000003,-5.55)--(18.488819062,-5.55);
+\draw[orange!85!black,line width=.7pt] (18.488819062,-5.55) circle (2pt);
+\fill[blue!70!black] (18.488528397000003,-5.55) circle (1pt);
+\fill[teal!75!black] (20,-5.6499999999999995) rectangle (20.00614868269231,-5.45);
+\fill[gray!5] (0,-6.08) rectangle (25.6,-5.76);
+\node[anchor=west] at (0,-5.92) {77\quad qpeinexact\_indep\_tket\_60*};
+\draw[gray,thick] (8.800272864,-5.92)--(8.802109966000002,-5.92);
+\draw[orange!85!black,line width=.7pt] (8.802109966000002,-5.92) circle (2pt);
+\fill[blue!70!black] (8.800272864,-5.92) circle (1pt);
+\fill[gray!65] (20,-6.02) rectangle (20.038861773076924,-5.82);
+\node[anchor=west] at (0,-6.29) {78\quad qpeinexact\_indep\_tket\_7*};
+\draw[gray,thick] (18.381792229,-6.29)--(18.381792229,-6.29);
+\draw[orange!85!black,line width=.7pt] (18.381792229,-6.29) circle (2pt);
+\fill[blue!70!black] (18.381792229,-6.29) circle (1pt);
+\fill[gray!65] (20,-6.29) circle (.8pt);
+\fill[gray!5] (0,-6.82) rectangle (25.6,-6.5);
+\node[anchor=west] at (0,-6.66) {79\quad qpeinexact\_indep\_tket\_8*};
+\draw[gray,thick] (18.261449886,-6.66)--(18.261449886,-6.66);
+\draw[orange!85!black,line width=.7pt] (18.261449886,-6.66) circle (2pt);
+\fill[blue!70!black] (18.261449886,-6.66) circle (1pt);
+\fill[gray!65] (20,-6.66) circle (.8pt);
+\node[anchor=west] at (0,-7.03) {80\quad qpeinexact\_indep\_tket\_9*};
+\draw[gray,thick] (18.126646222,-7.03)--(18.12692603,-7.03);
+\draw[orange!85!black,line width=.7pt] (18.12692603,-7.03) circle (2pt);
+\fill[blue!70!black] (18.126646222,-7.03) circle (1pt);
+\fill[gray!65] (20,-7.13) rectangle (20.005919015384617,-6.930000000000001);
+\fill[gray!5] (0,-7.5600000000000005) rectangle (25.6,-7.24);
+\node[anchor=west] at (0,-7.4) {81\quad routing\_indep\_qiskit\_12};
+\draw[gray,thick] (18.198337239,-7.4)--(18.198337239,-7.4);
+\draw[orange!85!black,line width=.7pt] (18.198337239,-7.4) circle (2pt);
+\fill[blue!70!black] (18.198337239,-7.4) circle (1pt);
+\fill[teal!75!black] (20,-7.4) circle (.8pt);
+\node[anchor=west] at (0,-7.77) {82\quad routing\_indep\_qiskit\_2};
+\draw[gray,thick] (18.778340951,-7.77)--(18.778340951,-7.77);
+\draw[orange!85!black,line width=.7pt] (18.778340951,-7.77) circle (2pt);
+\fill[blue!70!black] (18.778340951,-7.77) circle (1pt);
+\fill[teal!75!black] (20,-7.77) circle (.8pt);
+\fill[gray!5] (0,-8.3) rectangle (25.6,-7.98);
+\node[anchor=west] at (0,-8.14) {83\quad routing\_indep\_qiskit\_6};
+\draw[gray,thick] (18.616579456,-8.14)--(18.616579456,-8.14);
+\draw[orange!85!black,line width=.7pt] (18.616579456,-8.14) circle (2pt);
+\fill[blue!70!black] (18.616579456,-8.14) circle (1pt);
+\fill[teal!75!black] (20,-8.14) circle (.8pt);
+\node[anchor=west] at (0,-8.51) {84\quad routing\_indep\_tket\_12};
+\draw[gray,thick] (18.198337239,-8.51)--(18.198337239,-8.51);
+\draw[orange!85!black,line width=.7pt] (18.198337239,-8.51) circle (2pt);
+\fill[blue!70!black] (18.198337239,-8.51) circle (1pt);
+\fill[teal!75!black] (20,-8.51) circle (.8pt);
+\fill[gray!5] (0,-9.04) rectangle (25.6,-8.719999999999999);
+\node[anchor=west] at (0,-8.879999999999999) {85\quad routing\_indep\_tket\_2};
+\draw[gray,thick] (18.778340951,-8.879999999999999)--(18.778340951,-8.879999999999999);
+\draw[orange!85!black,line width=.7pt] (18.778340951,-8.879999999999999) circle (2pt);
+\fill[blue!70!black] (18.778340951,-8.879999999999999) circle (1pt);
+\fill[teal!75!black] (20,-8.879999999999999) circle (.8pt);
+\node[anchor=west] at (0,-9.25) {86\quad routing\_indep\_tket\_6};
+\draw[gray,thick] (18.616579456,-9.25)--(18.616579456,-9.25);
+\draw[orange!85!black,line width=.7pt] (18.616579456,-9.25) circle (2pt);
+\fill[blue!70!black] (18.616579456,-9.25) circle (1pt);
+\fill[teal!75!black] (20,-9.25) circle (.8pt);
+\fill[gray!5] (0,-9.78) rectangle (25.6,-9.459999999999999);
+\node[anchor=west] at (0,-9.62) {87\quad tsp\_indep\_qiskit\_4};
+\draw[gray,thick] (18.63919958,-9.62)--(18.666884442,-9.62);
+\draw[orange!85!black,line width=.7pt] (18.666884442,-9.62) circle (2pt);
+\fill[blue!70!black] (18.63919958,-9.62) circle (1pt);
+\fill[teal!75!black] (20,-9.719999999999999) rectangle (20.58564131153846,-9.52);
+\node[anchor=west] at (0,-9.99) {88\quad tsp\_indep\_qiskit\_9};
+\draw[gray,thick] (18.047191115,-9.99)--(18.248083109,-9.99);
+\draw[orange!85!black,line width=.7pt] (18.248083109,-9.99) circle (2pt);
+\fill[blue!70!black] (18.047191115,-9.99) circle (1pt);
+\fill[teal!75!black] (20,-10.09) rectangle (24.249638334615383,-9.89);
+\fill[gray!5] (0,-10.52) rectangle (25.6,-10.2);
+\node[anchor=west] at (0,-10.36) {89\quad tsp\_indep\_tket\_4};
+\draw[gray,thick] (18.63919958,-10.36)--(18.666884442,-10.36);
+\draw[orange!85!black,line width=.7pt] (18.666884442,-10.36) circle (2pt);
+\fill[blue!70!black] (18.63919958,-10.36) circle (1pt);
+\fill[teal!75!black] (20,-10.459999999999999) rectangle (20.58564131153846,-10.26);
+\node[anchor=west] at (0,-10.73) {90\quad tsp\_indep\_tket\_9};
+\draw[gray,thick] (18.048023412,-10.73)--(18.248492731,-10.73);
+\draw[orange!85!black,line width=.7pt] (18.248492731,-10.73) circle (2pt);
+\fill[blue!70!black] (18.048023412,-10.73) circle (1pt);
+\fill[teal!75!black] (20,-10.83) rectangle (24.240697132692308,-10.63);
+\end{tikzpicture}
+\par\small Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.
+\newpage
+\titolo{Tabella completa: circuiti 1--30}
+
+\small Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale.
+C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
+\par\vspace{2mm}
+{\fontsize{8.5}{10}\selectfont\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.18}
+
+\begin{tabular}{rlrrrrcc}
+\toprule
+ID & Circuito & Qubit & RAG $S$ & Oracle $R$ & Scarto $R-S$ & Coppia al max & C/P \\
+\midrule
+1 & groundstate\_medium\_indep\_qiskit\_12 & 12 & 0.7963772008 & 0.7964010929 & 0.0000238921 & No & P \\
+2 & groundstate\_medium\_indep\_tket\_12 & 12 & 0.7963772008 & 0.7964488791 & 0.0000716783 & No & P \\
+3 & groundstate\_small\_indep\_qiskit\_4 & 4 & 0.9788591374 & 0.9788591374 & 0.0000000000 & Sì & C \\
+4 & groundstate\_small\_indep\_tket\_4 & 4 & 0.9682535640 & 0.9788536053 & 0.0106000413 & No & C \\
+5 & qpeexact\_indep\_qiskit\_10 & 10 & 0.9218353887 & 0.9218353887 & 0.0000000000 & Sì & P \\
+6 & qpeexact\_indep\_qiskit\_11 & 11 & 0.9032343267 & 0.9032343267 & 0.0000000000 & Sì & P \\
+7 & qpeexact\_indep\_qiskit\_12 & 12 & 0.8879093206 & 0.8879093206 & 0.0000000000 & Sì & P \\
+8 & qpeexact\_indep\_qiskit\_13 & 13 & 0.8714043421 & 0.8714043421 & 0.0000000000 & Sì & P \\
+9 & qpeexact\_indep\_qiskit\_14 & 14 & 0.8538721240 & 0.8538721240 & 0.0000000000 & Sì & P \\
+10 & qpeexact\_indep\_qiskit\_15 & 15 & 0.8300875325 & 0.8300875325 & 0.0000000000 & Sì & P \\
+11 & qpeexact\_indep\_qiskit\_16 & 16 & 0.8095860950 & 0.8095860950 & 0.0000000000 & Sì & P \\
+12 & qpeexact\_indep\_qiskit\_2 & 2 & 0.9987599534 & 0.9994205726 & 0.0006606192 & No & C \\
+13 & qpeexact\_indep\_qiskit\_3 & 3 & 0.9960947806 & 0.9975896111 & 0.0014948305 & No & C \\
+14 & qpeexact\_indep\_qiskit\_30 & 30 & 0.5202940694 & 0.5202940694 & 0.0000000000 & Sì & P \\
+15 & qpeexact\_indep\_qiskit\_4 & 4 & 0.9869487051 & 0.9928297161 & 0.0058810110 & No & C \\
+16 & qpeexact\_indep\_qiskit\_40 & 40 & 0.3741311339 & 0.3741311339 & 0.0000000000 & Sì & P \\
+17 & qpeexact\_indep\_qiskit\_5 & 5 & 0.9720658176 & 0.9782345802 & 0.0061687626 & No & C \\
+18 & qpeexact\_indep\_qiskit\_50 & 50 & 0.2694733993 & 0.2694733993 & 0.0000000000 & Sì & P \\
+19 & qpeexact\_indep\_qiskit\_6 & 6 & 0.9593073443 & 0.9706868019 & 0.0113794576 & No & P \\
+20 & qpeexact\_indep\_qiskit\_60 & 60 & 0.0000113956 & 0.0001043470 & 0.0000929514 & No & P \\
+21 & qpeexact\_indep\_qiskit\_7 & 7 & 0.9616082099 & 0.9616082099 & 0.0000000000 & Sì & P \\
+22 & qpeexact\_indep\_qiskit\_70 & 70 & 0.0000028783 & 0.0000130971 & 0.0000102188 & No & P \\
+23 & qpeexact\_indep\_qiskit\_8 & 8 & 0.9465992541 & 0.9465992541 & 0.0000000000 & Sì & P \\
+24 & qpeexact\_indep\_qiskit\_9 & 9 & 0.9349067710 & 0.9349067710 & 0.0000000000 & Sì & P \\
+25 & qpeexact\_indep\_tket\_10 & 10 & 0.9209232096 & 0.9209232096 & 0.0000000000 & Sì & P \\
+26 & qpeexact\_indep\_tket\_11 & 11 & 0.9022052109 & 0.9022052109 & 0.0000000000 & Sì & P \\
+27 & qpeexact\_indep\_tket\_12 & 12 & 0.8868444525 & 0.8868444525 & 0.0000000000 & Sì & P \\
+28 & qpeexact\_indep\_tket\_13 & 13 & 0.8699415900 & 0.8699415900 & 0.0000000000 & Sì & P \\
+29 & qpeexact\_indep\_tket\_14 & 14 & 0.8522598056 & 0.8523109435 & 0.0000511379 & No & P \\
+30 & qpeexact\_indep\_tket\_15 & 15 & 0.8281722146 & 0.8281722146 & 0.0000000000 & Sì & P \\
+\bottomrule
+\end{tabular}
+
+}\par\small Parità: tolleranza $10^{-12}$ sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in \texttt{confronto\_90\_circuiti.csv} e \texttt{dati.json}.
+\newpage
+\titolo{Tabella completa: circuiti 31--60}
+
+\small Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale.
+C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
+\par\vspace{2mm}
+{\fontsize{8.5}{10}\selectfont\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.18}
+
+\begin{tabular}{rlrrrrcc}
+\toprule
+ID & Circuito & Qubit & RAG $S$ & Oracle $R$ & Scarto $R-S$ & Coppia al max & C/P \\
+\midrule
+31 & qpeexact\_indep\_tket\_2 & 2 & 0.9987599534 & 0.9994205726 & 0.0006606192 & No & C \\
+32 & qpeexact\_indep\_tket\_3 & 3 & 0.9958784484 & 0.9976856074 & 0.0018071590 & No & C \\
+33 & qpeexact\_indep\_tket\_30 & 30 & 0.5674551344 & 0.5674551344 & 0.0000000000 & Sì & P \\
+34 & qpeexact\_indep\_tket\_4 & 4 & 0.9868581315 & 0.9928297161 & 0.0059715846 & No & C \\
+35 & qpeexact\_indep\_tket\_40 & 40 & 0.4398748201 & 0.4398748201 & 0.0000000000 & Sì & P \\
+36 & qpeexact\_indep\_tket\_5 & 5 & 0.9691548425 & 0.9781465418 & 0.0089916993 & No & C \\
+37 & qpeexact\_indep\_tket\_50 & 50 & 0.3415929475 & 0.3415929475 & 0.0000000000 & Sì & P \\
+38 & qpeexact\_indep\_tket\_6 & 6 & 0.9460784319 & 0.9705120914 & 0.0244336595 & No & P \\
+39 & qpeexact\_indep\_tket\_60 & 60 & 0.0000273505 & 0.0002111392 & 0.0001837887 & No & P \\
+40 & qpeexact\_indep\_tket\_7 & 7 & 0.9612044132 & 0.9612044132 & 0.0000000000 & Sì & P \\
+41 & qpeexact\_indep\_tket\_8 & 8 & 0.9460882208 & 0.9460882208 & 0.0000000000 & Sì & P \\
+42 & qpeexact\_indep\_tket\_9 & 9 & 0.9342899269 & 0.9342899269 & 0.0000000000 & Sì & P \\
+43 & qpeinexact\_indep\_qiskit\_10 & 10 & 0.9189065362 & 0.9189065362 & 0.0000000000 & Sì & P \\
+44 & qpeinexact\_indep\_qiskit\_11 & 11 & 0.9032072297 & 0.9032072297 & 0.0000000000 & Sì & P \\
+45 & qpeinexact\_indep\_qiskit\_12 & 12 & 0.8864178847 & 0.8864178847 & 0.0000000000 & Sì & P \\
+46 & qpeinexact\_indep\_qiskit\_13 & 13 & 0.8685836016 & 0.8685836016 & 0.0000000000 & Sì & P \\
+47 & qpeinexact\_indep\_qiskit\_14 & 14 & 0.8497804839 & 0.8497804839 & 0.0000000000 & Sì & P \\
+48 & qpeinexact\_indep\_qiskit\_15 & 15 & 0.8300875325 & 0.8300875325 & 0.0000000000 & Sì & P \\
+49 & qpeinexact\_indep\_qiskit\_16 & 16 & 0.8095860950 & 0.8095860950 & 0.0000000000 & Sì & P \\
+50 & qpeinexact\_indep\_qiskit\_2 & 2 & 0.9993011566 & 0.9993011566 & 0.0000000000 & Sì & C \\
+51 & qpeinexact\_indep\_qiskit\_3 & 3 & 0.9931879680 & 0.9933839355 & 0.0001959675 & No & C \\
+52 & qpeinexact\_indep\_qiskit\_30 & 30 & 0.5194357059 & 0.5194357059 & 0.0000000000 & Sì & P \\
+53 & qpeinexact\_indep\_qiskit\_4 & 4 & 0.9805279150 & 0.9859297789 & 0.0054018639 & No & C \\
+54 & qpeinexact\_indep\_qiskit\_40 & 40 & 0.3741311339 & 0.3741311339 & 0.0000000000 & Sì & P \\
+55 & qpeinexact\_indep\_qiskit\_5 & 5 & 0.9710851394 & 0.9782345802 & 0.0071494408 & No & C \\
+56 & qpeinexact\_indep\_qiskit\_50 & 50 & 0.2694733993 & 0.2694733993 & 0.0000000000 & Sì & P \\
+57 & qpeinexact\_indep\_qiskit\_6 & 6 & 0.9550100512 & 0.9690853958 & 0.0140753446 & No & C \\
+58 & qpeinexact\_indep\_qiskit\_60 & 60 & 0.0000113715 & 0.0001042694 & 0.0000928979 & No & P \\
+59 & qpeinexact\_indep\_qiskit\_7 & 7 & 0.9585242347 & 0.9585242347 & 0.0000000000 & Sì & P \\
+60 & qpeinexact\_indep\_qiskit\_70 & 70 & 0.0000028650 & 0.0000131268 & 0.0000102618 & No & P \\
+\bottomrule
+\end{tabular}
+
+}\par\small Parità: tolleranza $10^{-12}$ sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in \texttt{confronto\_90\_circuiti.csv} e \texttt{dati.json}.
+\newpage
+\titolo{Tabella completa: circuiti 61--90}
+
+\small Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale.
+C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
+\par\vspace{2mm}
+{\fontsize{8.5}{10}\selectfont\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.18}
+
+\begin{tabular}{rlrrrrcc}
+\toprule
+ID & Circuito & Qubit & RAG $S$ & Oracle $R$ & Scarto $R-S$ & Coppia al max & C/P \\
+\midrule
+61 & qpeinexact\_indep\_qiskit\_8 & 8 & 0.9465992541 & 0.9465992541 & 0.0000000000 & Sì & P \\
+62 & qpeinexact\_indep\_qiskit\_9 & 9 & 0.9333643936 & 0.9333643936 & 0.0000000000 & Sì & P \\
+63 & qpeinexact\_indep\_tket\_10 & 10 & 0.9180247960 & 0.9180247960 & 0.0000000000 & Sì & P \\
+64 & qpeinexact\_indep\_tket\_11 & 11 & 0.9022322778 & 0.9022864142 & 0.0000541364 & No & P \\
+65 & qpeinexact\_indep\_tket\_12 & 12 & 0.8852220100 & 0.8852220100 & 0.0000000000 & Sì & P \\
+66 & qpeinexact\_indep\_tket\_13 & 13 & 0.8671515989 & 0.8671515989 & 0.0000000000 & Sì & P \\
+67 & qpeinexact\_indep\_tket\_14 & 14 & 0.8480995580 & 0.8480995580 & 0.0000000000 & Sì & P \\
+68 & qpeinexact\_indep\_tket\_15 & 15 & 0.8282716028 & 0.8282964517 & 0.0000248489 & No & P \\
+69 & qpeinexact\_indep\_tket\_2 & 2 & 0.9993011566 & 0.9993011566 & 0.0000000000 & Sì & C \\
+70 & qpeinexact\_indep\_tket\_3 & 3 & 0.9931879680 & 0.9933839355 & 0.0001959675 & No & C \\
+71 & qpeinexact\_indep\_tket\_30 & 30 & 0.5666719493 & 0.5666719493 & 0.0000000000 & Sì & P \\
+72 & qpeinexact\_indep\_tket\_4 & 4 & 0.9812192516 & 0.9859002010 & 0.0046809494 & No & C \\
+73 & qpeinexact\_indep\_tket\_40 & 40 & 0.4399012138 & 0.4399012138 & 0.0000000000 & Sì & P \\
+74 & qpeinexact\_indep\_tket\_5 & 5 & 0.9685123249 & 0.9781465418 & 0.0096342169 & No & C \\
+75 & qpeinexact\_indep\_tket\_50 & 50 & 0.3415826997 & 0.3415826997 & 0.0000000000 & Sì & P \\
+76 & qpeinexact\_indep\_tket\_6 & 6 & 0.9688528397 & 0.9688819062 & 0.0000290665 & No & C \\
+77 & qpeinexact\_indep\_tket\_60 & 60 & 0.0000272864 & 0.0002109966 & 0.0001837102 & No & P \\
+78 & qpeinexact\_indep\_tket\_7 & 7 & 0.9581792229 & 0.9581792229 & 0.0000000000 & Sì & P \\
+79 & qpeinexact\_indep\_tket\_8 & 8 & 0.9461449886 & 0.9461449886 & 0.0000000000 & Sì & P \\
+80 & qpeinexact\_indep\_tket\_9 & 9 & 0.9326646222 & 0.9326926030 & 0.0000279808 & No & P \\
+81 & routing\_indep\_qiskit\_12 & 12 & 0.9398337239 & 0.9398337239 & 0.0000000000 & Sì & C \\
+82 & routing\_indep\_qiskit\_2 & 2 & 0.9978340951 & 0.9978340951 & 0.0000000000 & Sì & C \\
+83 & routing\_indep\_qiskit\_6 & 6 & 0.9816579456 & 0.9816579456 & 0.0000000000 & Sì & C \\
+84 & routing\_indep\_tket\_12 & 12 & 0.9398337239 & 0.9398337239 & 0.0000000000 & Sì & C \\
+85 & routing\_indep\_tket\_2 & 2 & 0.9978340951 & 0.9978340951 & 0.0000000000 & Sì & C \\
+86 & routing\_indep\_tket\_6 & 6 & 0.9816579456 & 0.9816579456 & 0.0000000000 & Sì & C \\
+87 & tsp\_indep\_qiskit\_4 & 4 & 0.9839199580 & 0.9866884442 & 0.0027684862 & No & C \\
+88 & tsp\_indep\_qiskit\_9 & 9 & 0.9247191115 & 0.9448083109 & 0.0200891994 & No & C \\
+89 & tsp\_indep\_tket\_4 & 4 & 0.9839199580 & 0.9866884442 & 0.0027684862 & No & C \\
+90 & tsp\_indep\_tket\_9 & 9 & 0.9248023412 & 0.9448492731 & 0.0200469319 & No & C \\
+\bottomrule
+\end{tabular}
+
+}\par\small Parità: tolleranza $10^{-12}$ sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in \texttt{confronto\_90\_circuiti.csv} e \texttt{dati.json}.
+\newpage
+\titolo{Fonti, controlli e riproducibilità}
+\textbf{Sistema.} Risultati originali \texttt{llm\_rag}, avviati il 21 settembre 2026.
+Recupero Manhattan e 5 esempi verificati nei registri dei 90 circuiti.
+Modello Qwen selezionato con profilo \texttt{qwen/p0\_t0}, compilazione Qiskit con seed 0.
+Non si usano varianti WL, recupero casuale, $k=1$ o $k=10$.
+
+\textbf{Oracle.} Analisi \texttt{20260929T210523\_9df1db2b}, campagna \texttt{test\_max3\_v1}.
+Massimo dei seed 0, 1 e 2 per coppia, poi massimo fra coppie.
+Versioni: Python 3.12.13, Qiskit 2.5.0, MQT Bench 2.2.3, NumPy 2.5.1, MQT Predictor 2.4.0.
+Dispositivi: \texttt{ibm\_falcon\_27}, \texttt{ibm\_heron\_133}, \texttt{ibm\_falcon\_127},
+\texttt{ibm\_heron\_156}, \texttt{quantinuum\_h2\_56}.
+Configurazioni, Target e opzioni sono quelli del contratto dell'oracle.
+
+\textbf{Verifiche.}
+Controllate le impronte dei 16\,200 esiti originali dell'oracle.
+Ricalcolati i massimi delle 5\,400 coppie e dei 90 circuiti.
+Identificativi e impronte dei sorgenti coincidono fra oracle e RAG.
+Gli score RAG sono verificati sui risultati di compilazione.
+Medie aritmetiche per circuito, senza esclusioni.
+I sottogruppi completo/parziale comprendono circuiti diversi: le loro medie non isolano un effetto causale.
+I dieci casi sono selezionati per scarto decrescente; grafici, tabelle e CSV includono tutti i 90.
+
+\textbf{Limiti.}
+L'oracle prende il migliore di tre seed, il sistema usa un solo seed:
+il confronto principale è intenzionalmente favorevole all'oracle, come richiesto.
+Un riferimento parziale è un limite inferiore del massimo della griglia completa.
+La parità non certifica allora l'assenza di alternative migliori.
+Score arrotondati a zero non provano identità dei valori non arrotondati.
+Non sono state avviate compilazioni quantistiche né modificati dati originali, decisioni, prompt o Dataset.
+Il grafo graphify non è stato aggiornato.
+
+\textbf{Fonti originali.}\par
+{\footnotesize
+\path{/home/elio/oracoli_mqt_test/test_max3_v1/analisi/20260929T210523_9df1db2b}\par
+\path{/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/risultati/llm_rag}\par
+\path{/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/preparazione/contratto_congelato.json}\par
+}
+\textbf{Artefatti.}
+\texttt{analizza.py} legge e verifica le fonti; \texttt{impagina.py} genera il LaTeX.
+\texttt{dati.json} conserva misure e pari merito.
+\texttt{confronto\_90\_circuiti.csv} contiene anche scelte, scarti relativi e scomposizione.
+\texttt{provenienza.json} registra le impronte. In \texttt{grafici/} sono conservate le tre figure autonome.
+
+\textbf{Separazione.}
+Il report è nell'area di valutazione \texttt{oracle\_test/confronto\_llm\_rag\_k5}.
+La campagna oracle resta nella cartella esterna. Nessun risultato è aggiunto all'indice RAG
+o alle pipeline di decisione.
+\end{document}

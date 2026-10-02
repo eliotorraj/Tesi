@@ -1,0 +1,47 @@
+{
+  "pdf_sha256": "54320823b94228bd7887cd6f8988a30e1779ad0afdf2c8819478004a60a8a74f",
+  "tex_sha256": "48c86de5369fb8f76fe16da09402c409e4d5189efefc5a44ad0fd7e770298dd0",
+  "audit_sha256": "142580c2631dbf8e81569b459f920ba72adc291b26f87a31aa41dbbfb50f4ae1",
+  "audit_esteso_sha256": "d53966ca110f02ccd46b8d8e7dd79f5e93bebf1f695daf045c962d73c5ddbb00",
+  "pages": 6,
+  "responses_checked": 418,
+  "final_decisions": 270,
+  "same_90_test_circuits": true,
+  "source_files_verified": 1929,
+  "sample_4": {
+    "circuit": "routing_indep_qiskit_6",
+    "attempt": 1,
+    "distinct_records": [
+      "E1",
+      "E2"
+    ],
+    "checks": [
+      "verified",
+      "verified"
+    ],
+    "original_json_preserved": true
+  },
+  "random_counts": {
+    "attempt_fact_verified": 237,
+    "attempt_fact_unsupported": 167,
+    "attempts": 202,
+    "attempt_unverified": 167,
+    "first_unverified": 57,
+    "responses": 90,
+    "unverified": 55,
+    "fact_verified": 125,
+    "historical_verified": 94,
+    "fact_unsupported": 55,
+    "attempt_verified": 35,
+    "first_verified": 33,
+    "verified": 35
+  },
+  "previous_three_samples_unchanged": true,
+  "previous_method_counts_unchanged": true,
+  "comparison_pdf_unchanged": true,
+  "visual_review": "Tutte le sei pagine controllate; nessuna sovrapposizione o testo fuori margine.",
+  "native_compiler": "Errore di ambiente: Unable to find standard directories for platform.",
+  "compilation": "Due passaggi pdflatex in WSL riusciti; nessun avviso di impaginazione.",
+  "backup": "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report_generati/30dd5b4f737c058e/analisi_fatti/revisioni/due_evidenze_random_20260928T002632Z",
+  "graph_updated": false
+}

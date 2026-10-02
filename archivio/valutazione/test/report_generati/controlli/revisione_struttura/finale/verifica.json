@@ -1,0 +1,83 @@
+{
+  "version": "30dd5b4f737c058e",
+  "previous": "675f715bb32595bf",
+  "identical_original_data": {
+    "confronto.json": true,
+    "confronto/tabelle/circuiti_tutti_sistemi.csv": true,
+    "confronto/tabelle/riepiloghi.json": true,
+    "confronto/tabelle/confronti_appaiati.json": true,
+    "confronto/tabelle/differenze_appaiate.csv": true
+  },
+  "input_hashes_unchanged": true,
+  "previous_and_new_output_hashes_valid": true,
+  "threshold": [
+    {
+      "method": "llm_rag",
+      "threshold": "0.8",
+      "total": "90",
+      "high": "70",
+      "low": "20",
+      "no_score": "0",
+      "pending": "0",
+      "percentage": "77.77777777777777"
+    },
+    {
+      "method": "llm_senza_rag",
+      "threshold": "0.8",
+      "total": "90",
+      "high": "45",
+      "low": "45",
+      "no_score": "0",
+      "pending": "0",
+      "percentage": "50.0"
+    },
+    {
+      "method": "mqt_predictor",
+      "threshold": "0.8",
+      "total": "90",
+      "high": "65",
+      "low": "10",
+      "no_score": "15",
+      "pending": "0",
+      "percentage": "72.22222222222223"
+    },
+    {
+      "method": "random",
+      "threshold": "0.8",
+      "total": "90",
+      "high": "44",
+      "low": "36",
+      "no_score": "10",
+      "pending": "0",
+      "percentage": "48.888888888888886"
+    }
+  ],
+  "overfull": {
+    "confronto/latex/verifica.log": 0,
+    "sistemi/random/latex/verifica.log": 0,
+    "sistemi/llm_senza_rag/latex/verifica.log": 0,
+    "sistemi/llm_rag/latex/verifica.log": 0,
+    "sistemi/mqt_predictor/latex/verifica.log": 0
+  },
+  "comparison_pages": 45,
+  "figure_pages": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "sections": [
+    "Introduzione al Test",
+    "Sistemi e impostazioni prima del Test",
+    "Risultati",
+    "Conclusioni",
+    "Statistiche per circuito",
+    "Fonti e criteri di lettura"
+  ]
+}

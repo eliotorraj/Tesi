@@ -1,0 +1,22 @@
+{
+  "pages": 46,
+  "changed_pages": [
+    "pagina-04.png",
+    "pagina-07.png",
+    "pagina-08.png",
+    "pagina-09.png",
+    "pagina-10.png",
+    "pagina-11.png",
+    "pagina-12.png",
+    "pagina-13.png",
+    "pagina-14.png",
+    "pagina-15.png",
+    "pagina-16.png",
+    "pagina-20.png"
+  ],
+  "warnings": [],
+  "pending_references": 0,
+  "exploratory_parenthetical_labels": 0,
+  "pdf_sha256": "886d4baaffa308dc3190d51458ae28020304b2c03ae2f873ac28d016730acb1a",
+  "graph_updated": false
+}

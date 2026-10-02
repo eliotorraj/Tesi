@@ -1,0 +1,299 @@
+
+\documentclass[a4paper,10pt]{article}
+\usepackage[margin=1.85cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{lmodern,booktabs,tabularx,xcolor,listings,tikz,hyperref}
+\usetikzlibrary{arrows.meta,positioning}
+\definecolor{ink}{HTML}{163047}
+\definecolor{pale}{HTML}{EEF4F7}
+\definecolor{warn}{HTML}{934618}
+\lstset{basicstyle=\ttfamily\fontsize{7.8}{9.1}\selectfont,breaklines=true,
+breakatwhitespace=false,columns=fullflexible,keepspaces=true,showstringspaces=false,
+backgroundcolor=\color{pale},frame=single,rulecolor=\color{pale},
+xleftmargin=4pt,xrightmargin=4pt,aboveskip=6pt,belowskip=6pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}
+\newcommand{\tagline}[1]{{\small\color{ink}\textbf{#1}}\par}
+\begin{document}
+
+{\LARGE\bfseries Qualità e correttezza\\dei fatti verificabili}\par
+Analisi dei registri di LLM + RAG, LLM senza RAG e LLM + Random RAG: 90 decisioni finali per sistema, già raccolte sugli stessi circuiti Test.
+Questo documento integra il confronto esistente senza modificarlo e senza eseguire nuovi Test.
+\section*{Che cosa è verificato}
+La risposta JSON separa \texttt{facts} da \texttt{hypothesis}. I fatti sono asserzioni scelte da quattro
+tipi predefiniti:\\ \texttt{selected\_device\_matches\_example}, \texttt{selected\_pair\_among\_reported\_best}, \texttt{same\_qubit\_count\_as\_example}, \texttt{selected\_device\_has\_enough\_qubits}.\\
+Rispettivamente controllano:\\
+- \texttt{selected\_device\_matches\_example}: Verifica che il dispositivo selezionato corrisponda all'esempio.\\
+- \texttt{selected\_pair\_among\_reported\_best}: Verifica che la coppia selezionata sia tra quelle riportate come migliori.\\
+- \texttt{same\_qubit\_count\_as\_example}: Verifica che il conteggio dei qubit del dispositivo selezionato sia uguale a quello dell'esempio.\\
+- \texttt{selected\_device\_has\_enough\_qubits}: Verifica che il dispositivo selezionato abbia abbastanza qubit.\\
+
+Il programma confronta campi precisi con i dati disponibili. Non valuta la verità di un testo libero.
+
+\textbf{E1, \ldots, E5 identificano gli esempi recuperati, non i fatti.}
+Ogni fatto con riferimento indica un alias locale. La posizione dell'esempio nel prompt lo collega
+a un record train preciso. E1 può quindi indicare circuiti diversi in richieste diverse.
+\begin{center}
+\begin{tikzpicture}[node distance=5mm,every node/.style={draw=ink,rounded corners,
+align=center,font=\small,fill=pale,minimum height=13mm},>=Latex]
+\node(a){Fatto nel JSON\\\texttt{example\_id: Ei}};
+\node(b)[right=of a]{Alias Ei\\nel prompt};
+\node(c)[right=of b]{Record train\\\texttt{rag\_id}};
+\node(d)[right=of c]{Campo del record\\confrontato};
+\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\draw[->,thick](c)--(d);
+\end{tikzpicture}\end{center}
+\section*{Risultati su tutti i casi}
+
+\begingroup\small
+\begin{tabularx}{\linewidth}{Xrrr}\toprule
+Misura & LLM + RAG & Senza RAG & \shortstack{LLM +\\Random RAG}\\\midrule
+Risposte finali con tutti i fatti validi & 73/90 & 90/90 & 35/90\\
+Risposte finali con almeno un fatto non valido & 17/90 & 0/90 & 55/90\\
+Fatti validi nelle risposte finali & 163/180 & 90/90 & 125/180\\
+Risposte valide già al primo tentativo & 71/90 & 90/90 & 33/90\\
+Risposte complete, incluse le correzioni & 126 & 90 & 202\\
+\bottomrule\end{tabularx}\par\endgroup
+Nel RAG, 95 fatti finali riferiti agli esempi risultano tutti coerenti con i campi citati. I 17 fatti non validi sono sempre fatti sulla capacità del dispositivo con un riferimento $E_i$ non consentito. La capacità risulta comunque sufficiente; l'errore è nell'attribuzione dell'evidenza. Dopo tre tentativi queste scelte sono state accettate dalla regola prevista, conservando lo stato di mancata verifica.\par
+Nel Random RAG, i 94 fatti finali riferiti agli esempi sono tutti validi. Anche qui, i 55 fatti non validi riguardano la capacità con un riferimento $E_i$ non consentito, pur essendo il dispositivo abbastanza capiente. Le 55 risposte sono accettate dopo tre tentativi, mantenendo la mancata verifica. I conteggi descrivono la campagna con seme 20260927.\par
+\textbf{Il 90/90 senza RAG riguarda solo \texttt{selected\_device\_has\_enough\_qubits}.} È un controllo più semplice: non dimostra spiegazioni migliori né prestazioni di compilazione superiori.\par
+\textbf{Le ipotesi non sono verificate sul piano dei contenuti e non vanno prese come affermazioni vere.} I controlli di formato, lunghezza o scelta ammessa non certificano ciò che il testo sostiene.\par
+\newpage
+\tagline{CAMPIONE 1 / 4 | selezione illustrativa}
+\section*{Due fatti sostenuti dallo stesso esempio}
+\textbf{Circuito Test:} \texttt{groundstate\_small\_indep\_tket\_4}. Risposta finale, tentativo 1.\par
+\textbf{JSON originale dell'LLM.}
+\begin{lstlisting}
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o2_dense_sabre",
+  "facts": [
+    {
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1"
+    }
+  ],
+  "hypothesis": "This pair is selected because the device and configuration appear together as top performers in the historical record for a similar four-qubit circuit. The hypothesis suggests that applying this specific setup to the current circuit may yield comparable results, though no performance guarantee exists for this new instance."
+}
+\end{lstlisting}
+
+\textbf{Collegamento all'esempio citato}
+\begin{center}\begin{tikzpicture}[>=Latex,every node/.style={draw=ink,fill=pale,rounded corners,font=\small,align=center}]\node(a){\texttt{example\_id: E1}};\node(b)[right=8mm of a]{E1 nel prompt};\node(c)[right=8mm of b]{\texttt{qaoa\_indep\_qiskit\_4}\\esempio train};\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\end{tikzpicture}\end{center}
+{\footnotesize Record completo: \texttt{rag\_41b126cd2f33c412dbe984b3b8ce1bb72143184b5521243a890e29f7b64b74b5}}\par
+\textbf{Estratto del record (prima riga della graduatoria)}
+\begin{lstlisting}
+{
+  "id": "E1",
+  "num_qubits": 4,
+  "selected_device": "ibm_falcon_127",
+  "top_configurations": [
+    {
+      "rank": 1,
+      "device_id": "ibm_falcon_127",
+      "config_id": "o2_dense_sabre",
+      "median_score": 0.9822170185,
+      "tied_score_config_ids": [
+        "o2_dense_sabre",
+        "o3_dense_sabre"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Esito del controllo.} Il dispositivo scelto coincide con quello selezionato nel record. Anche la coppia Falcon 127 / o2\_dense\_sabre compare nella graduatoria mostrata, al primo posto. È presente una parità con o3\_dense\_sabre: il fatto non certifica un vincitore unico. Il valore 0,9822170185 è la mediana storica del circuito di train recuperato.
+{\color{warn}\textbf{Limite dell'ipotesi.}} L'ipotesi propone che il risultato si trasferisca al circuito nuovo. Questo passaggio non è verificato deterministicamente, ma è solo una predizione basata sugli esempi storici.\par
+{\small Stati registrati, in ordine: \texttt{verified, verified}. Stato della risposta: \texttt{success}.}
+\newpage
+\tagline{CAMPIONE 2 / 4 | selezione illustrativa}
+\section*{Coppia storica e uguaglianza dei qubit}
+\textbf{Circuito Test:} \texttt{qpeexact\_indep\_qiskit\_2}. Risposta finale, tentativo 2.\par
+\textbf{JSON originale dell'LLM.} Valori integrali; sola impaginazione modificata.\par
+\begin{lstlisting}
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o2_default_default",
+  "facts": [
+    {
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "same_qubit_count_as_example",
+      "example_id": "E1"
+    }
+  ],
+  "hypothesis": "This pair is selected because it matches the top-performing configuration for a similar 2-qubit circuit on the same hardware, and the qubit count is identical to the reference example."
+}
+\end{lstlisting}
+
+\textbf{Collegamento all'esempio citato}
+\begin{center}\begin{tikzpicture}[>=Latex,every node/.style={draw=ink,fill=pale,rounded corners,font=\small,align=center}]\node(a){\texttt{example\_id: E1}};\node(b)[right=8mm of a]{E1 nel prompt};\node(c)[right=8mm of b]{\texttt{dj\_indep\_qiskit\_2}\\esempio train};\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);\end{tikzpicture}\end{center}
+{\footnotesize Record completo: \texttt{rag\_251477152075954d06ead6d2f929526b197b4e3f572f8c9ae5f01bf4481156cd}}\par
+\textbf{Estratto del record (prima riga della graduatoria)}
+\begin{lstlisting}
+{
+  "id": "E1",
+  "num_qubits": 2,
+  "selected_device": "ibm_falcon_127",
+  "top_configurations": [
+    {
+      "rank": 1,
+      "device_id": "ibm_falcon_127",
+      "config_id": "o2_default_default",
+      "median_score": 0.9994380656,
+      "tied_score_config_ids": [
+        "o2_default_default",
+        "o3_default_default"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Esito del controllo.} La coppia scelta è presente nelle righe mostrate del record Deutsch--Jozsa. Il circuito corrente e l'esempio hanno entrambi 2 qubit: il secondo fatto è quindi vero. L'uguaglianza del numero di qubit non prova che topologia, sequenza delle porte o risposta alla compilazione siano simili.\par
+{\color{warn}\textbf{Limite dell'ipotesi.}} La formulazione \emph{similar 2-qubit circuit} è una valutazione libera. Il validatore controlla l'uguaglianza 2 = 2, non la similarità strutturale né il trasferimento delle prestazioni.\par
+{\small Stati registrati, in ordine: \texttt{verified, verified}. Stato della risposta: \texttt{success}.}
+\newpage
+\tagline{CAMPIONE 3 / 4 | fatto non valido}
+\section*{Fallimento del controllo: evidenza non ammessa}
+\textbf{Circuito Test:} \texttt{qpeexact\_indep\_qiskit\_13}.
+Primo tentativo, seguito da una richiesta di correzione: non è la risposta finale.\par
+\textbf{JSON originale dell'LLM.} Contenuto integrale; sola impaginazione modificata.\par
+\begin{lstlisting}
+{
+  "selected_device": "quantinuum_h2_56",
+  "config_id": "o2_default_default",
+  "facts": [
+    {
+      "assertion": "selected_device_matches_example",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "selected_device_has_enough_qubits",
+      "example_id": "E1"
+    }
+  ],
+  "hypothesis": "This pair is selected because the device matches the top choice in the historical examples and possesses sufficient qubits for the current circuit. The hypothesis is a proposal, not a verified fact: do not claim that performance on the current circuit is known or guaranteed. Historical results belong only to their original circuits."
+}
+\end{lstlisting}
+
+\textbf{E1 esiste, ma non sostiene entrambi i fatti.} Nel prompt corrisponde a questo esempio train:
+\begin{lstlisting}
+{
+  "id": "E1",
+  "circuit_id": "graphstate_indep_qiskit_14",
+  "num_qubits": 14,
+  "selected_device": "quantinuum_h2_56"
+}
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,every node/.style={rounded corners,draw=ink,fill=pale,
+font=\small,align=center,minimum height=10mm}]
+\node(a){Fatto 1: stesso dispositivo};
+\node(b)[right=7mm of a]{E1: Quantinuum H2-56};
+\node(c)[right=7mm of b]{\texttt{verified}};
+\node(d)[below=5mm of a]{Fatto 2: capacità sufficiente};
+\node(e)[below=5mm of b,draw=warn]{E1: fonte non ammessa};
+\node(f)[below=5mm of c,draw=warn]{\texttt{unsupported}};
+\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);
+\draw[->,thick,draw=warn](d)--(e);\draw[->,thick,draw=warn](e)--(f);
+\end{tikzpicture}
+\end{center}
+\textbf{Errore registrato dal validatore (estratto).} L'indice 1 identifica il secondo fatto.
+\begin{lstlisting}
+{
+  "facts_status": "unverified",
+  "fact_checks": [{"index": 1, "result": "unsupported"}],
+  "issues": [{"code": "FACT_NOT_SUPPORTED", "path": "$.facts[1]"}]
+}
+\end{lstlisting}
+\textbf{Perché fallisce.} L'asserzione \texttt{selected\_device\_has\_enough\_qubits}
+non richiede di essere collegata ad un \texttt{example\_id}, ma viene controllata deterministicamente confrontando il numero di qubit del dispositivo con il numero di qubit del circuito. 
+Il validatore accetta un fatto vero senza esempio, ma non accetta un esempio che non dimostra il fatto. L'esempio E1 mostra 14 qubit, mentre il circuito corrente richiede 13.
+I 14 qubit dell'esempio descrivono quel circuito train,
+non la capacità del dispositivo. Il dato pertinente è 56 qubit disponibili per i 13 richiesti.\par
+\textbf{Non è una capacità falsa, ma un fatto non valido nel contratto di risposta.}
+Il JSON sopra resta quello prodotto dal modello, senza correzioni.\par
+\textbf{Che cosa succede dopo.} Il controllo richiede una correzione. L'errore persiste fino al
+tentativo 3; la coppia viene infine accettata come \texttt{accepted\_with\_unverified\_facts}.
+La compilazione riesce: il fallimento illustrato riguarda la verifica del fatto.\par
+{\color{warn}\textbf{Ipotesi non verificata.}} La prosa non viene validata semanticamente,
+anche quando ripete le istruzioni del prompt, e non va letta come un'affermazione vera.\par
+
+\newpage
+\tagline{CAMPIONE 4 / 4 | due evidenze distinte}
+\section*{Due fatti sostenuti da due esempi diversi}
+\textbf{Circuito Test:} \texttt{routing\_indep\_qiskit\_6}. LLM + RAG, risposta finale, tentativo 1.\par
+\textbf{JSON originale dell'LLM.} Valori integrali; sola impaginazione modificata.\par
+\begin{lstlisting}
+{
+  "selected_device": "ibm_falcon_127",
+  "config_id": "o2_default_default",
+  "facts": [
+    {
+      "assertion": "selected_pair_among_reported_best",
+      "example_id": "E1"
+    },
+    {
+      "assertion": "selected_device_matches_example",
+      "example_id": "E2"
+    }
+  ],
+  "hypothesis": "This pair is selected because it appears as a top-ranked configuration for a similar 6-qubit circuit on the same hardware, and the device choice aligns with historical results for other 6-qubit benchmarks. The hypothesis suggests that default optimization settings may yield consistent performance across small-scale VQE circuits on this processor."
+}
+\end{lstlisting}
+
+\textbf{Ogni fatto rimanda al proprio esempio train}
+\begin{center}
+\begin{tikzpicture}[>=Latex,every node/.style={draw=ink,fill=pale,rounded corners,
+font=\small,align=center,minimum height=10mm}]
+\node(a){Fatto 1: coppia storica};
+\node(b)[right=6mm of a]{E1: \texttt{vqe\_indep\_tket\_6}};
+\node(c)[right=6mm of b]{\texttt{verified}};
+\node(d)[below=5mm of a]{Fatto 2: stesso dispositivo};
+\node(e)[below=5mm of b]{E2: \texttt{vqe\_indep\_qiskit\_6}};
+\node(f)[below=5mm of c]{\texttt{verified}};
+\draw[->,thick](a)--(b);\draw[->,thick](b)--(c);
+\draw[->,thick](d)--(e);\draw[->,thick](e)--(f);
+\end{tikzpicture}
+\end{center}
+\textbf{Campi pertinenti degli esempi nel prompt} (estratti, non record completi).
+
+\begin{lstlisting}
+[
+  {"id": "E1", "circuit": {"circuit_id": "vqe_indep_tket_6"},
+   "top_configurations": [{
+     "device_id": "ibm_falcon_127",
+     "config_id": "o2_default_default",
+     "tied_score_config_ids": ["o2_default_default", "o3_default_default"]
+   }]},
+  {"id": "E2", "circuit": {"circuit_id": "vqe_indep_qiskit_6"},
+   "selected_device": "ibm_falcon_127"}
+]
+\end{lstlisting}
+\textbf{Esito.} La coppia scelta compare in E1 al primo posto, con una parità dichiarata. E2 seleziona Falcon 127: sostiene il secondo fatto, che riguarda soltanto il dispositivo. Gli alias rimandano a due record diversi:\par
+{\footnotesize E1: \texttt{rag\_1fd9e3183b33fc1344f376a4e2b03f3d38adaf41bf8ebc2f6a888f6cc0b49ccd}}\par
+{\footnotesize E2: \texttt{rag\_543407d64d38d75c0630254e2cbcaf4b63cce718908e292837644047ba9ca4f0}}\par
+I due esempi appartengono alla stessa famiglia VQE; essere record distinti non li rende prove indipendenti della qualità della scelta sul circuito Test.\par
+{\color{warn}\textbf{Limite dell'ipotesi.}} La prosa parla di circuiti VQE, mentre il circuito corrente è routing. I fatti storici validi non verificano questa spiegazione né il trasferimento delle prestazioni al circuito corrente.\par
+\newpage\tagline{PORTATA DEI RISULTATI E RIPRODUCIBILITÀ}
+\section*{Correttezza dei fatti e qualità della spiegazione}
+\begin{tabularx}{\linewidth}{Xrr}\toprule Tipo di fatto finale RAG & Validi & Totali\\\midrule
+\texttt{selected\_device\_matches\_example} & 88 & 88\\
+\texttt{selected\_pair\_among\_reported\_best} & 5 & 5\\
+\texttt{same\_qubit\_count\_as\_example} & 2 & 2\\
+\texttt{selected\_device\_has\_enough\_qubits} & 68 & 85\\
+\bottomrule\end{tabularx}\par
+Il sistema rende controllabile una parte limitata della motivazione. La maggior parte dei fatti storici riguarda solo il dispositivo: 88 asserzioni. Soltanto 5 riguardano esplicitamente la coppia dispositivo/configurazione. Le 2 uguaglianze dei qubit descrivono la dimensione, senza dimostrare una somiglianza di comportamento.\par
+Possiamo notare che la totalità dei fallimenti riguarda la capacità del dispositivo, con 17 fatti non validi su 85. Il sistema confonde spesso il numero di qubit del circuito di esempio con la capacità del dispositivo, pur essendo quest'ultima sufficiente. 
+Una possibile soluzione è distinguere chiaramente nel campi dello schema json tra \texttt{num\_qubits} del circuito e \texttt{num\_qubits} del dispositivo, in questo modo il modello potrebbe evitare di usare lo stesso alias $E_i$ per entrambi i valori.\par
+\section*{Come è stata svolta l'analisi}
+Sono stati analizzati tutti i JSON delle risposte e dei controlli, compresi i tentativi scartati. Il JSON del tentativo finale coincide con la decisione conservata. Le mappe $E_i$, le impronte della vista e il contenuto degli esempi sono stati confrontati con prompt, registri e Dataset train verificato. I risultati coincidono con i controlli registrati.\par
+Le 126 risposte RAG contengono 252 fatti: 199 validi e 53 non validi. Le 202 risposte Random RAG contengono 404 fatti: 237 validi e 167 non validi. Questi denominatori includono le correzioni e non vanno confusi con i 180 fatti finali di ciascun metodo. Senza RAG abbiamo 90 risposte e 90 fatti validi (risultato dato dalla semplicità dei fatti da dimostrare, poichè questo sistema deve verificare solo 1 fatto). In totale sono state controllate 418 risposte per 270 decisioni finali. I quattro campioni sono illustrativi; i conteggi provengono da tutti i 90 circuiti per sistema.\par
+\end{document}

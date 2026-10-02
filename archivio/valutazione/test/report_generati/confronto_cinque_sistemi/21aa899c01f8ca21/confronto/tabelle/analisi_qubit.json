@@ -1,0 +1,963 @@
+{
+  "rows": [
+    {
+      "circuit_id": "groundstate_medium_indep_qiskit_12",
+      "num_qubits": 12,
+      "rag": 0.7963772008,
+      "random_rag": 0.7963772008,
+      "no_rag": 0.5106374597,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "groundstate_medium_indep_tket_12",
+      "num_qubits": 12,
+      "rag": 0.7963772008,
+      "random_rag": 0.596601279,
+      "no_rag": 0.5095240413,
+      "difference": 0.19977592179999992,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "groundstate_small_indep_qiskit_4",
+      "num_qubits": 4,
+      "rag": 0.9788591374,
+      "random_rag": 0.9749510267,
+      "no_rag": 0.9644256307,
+      "difference": 0.003908110699999967,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "groundstate_small_indep_tket_4",
+      "num_qubits": 4,
+      "rag": 0.968253564,
+      "random_rag": 0.9748925305,
+      "no_rag": 0.9642484591,
+      "difference": -0.006638966500000065,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_10",
+      "num_qubits": 10,
+      "rag": 0.9218353887,
+      "random_rag": 0.7685150998,
+      "no_rag": 0.7676892178,
+      "difference": 0.15332028890000005,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_11",
+      "num_qubits": 11,
+      "rag": 0.9032343267,
+      "random_rag": 0.9032343267,
+      "no_rag": 0.7316851381,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_12",
+      "num_qubits": 12,
+      "rag": 0.8879093206,
+      "random_rag": 0.6913996974,
+      "no_rag": 0.7118469724,
+      "difference": 0.1965096232000001,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_13",
+      "num_qubits": 13,
+      "rag": 0.8714043421,
+      "random_rag": 0.8714043421,
+      "no_rag": 0.6009140939,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_14",
+      "num_qubits": 14,
+      "rag": 0.853872124,
+      "random_rag": 0.853872124,
+      "no_rag": 0.3660156895,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_15",
+      "num_qubits": 15,
+      "rag": 0.8300875325,
+      "random_rag": 0.8300875325,
+      "no_rag": 0.3493721339,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_16",
+      "num_qubits": 16,
+      "rag": 0.809586095,
+      "random_rag": 0.809586095,
+      "no_rag": 0.2515214081,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_2",
+      "num_qubits": 2,
+      "rag": 0.9987599534,
+      "random_rag": 0.9968228031,
+      "no_rag": 0.9987599534,
+      "difference": 0.001937150299999968,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_3",
+      "num_qubits": 3,
+      "rag": 0.9960947806,
+      "random_rag": 0.9975896111,
+      "no_rag": 0.9959534703,
+      "difference": -0.0014948304999999884,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_30",
+      "num_qubits": 30,
+      "rag": 0.5202940694,
+      "random_rag": 0.5202940694,
+      "no_rag": 0.0435319136,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_4",
+      "num_qubits": 4,
+      "rag": 0.9869487051,
+      "random_rag": 0.9891019293,
+      "no_rag": 0.9869362511,
+      "difference": -0.00215322419999997,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_40",
+      "num_qubits": 40,
+      "rag": 0.3741311339,
+      "random_rag": 0.0103480024,
+      "no_rag": 0.0061016048,
+      "difference": 0.3637831315,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_5",
+      "num_qubits": 5,
+      "rag": 0.9720658176,
+      "random_rag": 0.9782345802,
+      "no_rag": 0.947622794,
+      "difference": -0.0061687625999999884,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_50",
+      "num_qubits": 50,
+      "rag": 0.2694733993,
+      "random_rag": 0.0011545293,
+      "no_rag": 0.0004614703,
+      "difference": 0.26831887000000004,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_6",
+      "num_qubits": 6,
+      "rag": 0.9593073443,
+      "random_rag": 0.9361087506,
+      "no_rag": 0.9361087506,
+      "difference": 0.023198593699999992,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_60",
+      "num_qubits": 60,
+      "rag": 1.13956e-05,
+      "random_rag": 1.13956e-05,
+      "no_rag": 2.82707e-05,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_7",
+      "num_qubits": 7,
+      "rag": 0.9616082099,
+      "random_rag": 0.9616082099,
+      "no_rag": 0.8993048226,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_70",
+      "num_qubits": 70,
+      "rag": 2.8783e-06,
+      "random_rag": 1.30971e-05,
+      "no_rag": 2.7717e-06,
+      "difference": -1.0218800000000001e-05,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_8",
+      "num_qubits": 8,
+      "rag": 0.9465992541,
+      "random_rag": 0.9465992541,
+      "no_rag": 0.848152196,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_9",
+      "num_qubits": 9,
+      "rag": 0.934906771,
+      "random_rag": 0.934906771,
+      "no_rag": 0.8228917572,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_10",
+      "num_qubits": 10,
+      "rag": 0.9209232096,
+      "random_rag": 0.8018138843,
+      "no_rag": 0.8126703393,
+      "difference": 0.11910932529999996,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_11",
+      "num_qubits": 11,
+      "rag": 0.9022052109,
+      "random_rag": 0.9022052109,
+      "no_rag": 0.716107062,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_12",
+      "num_qubits": 12,
+      "rag": 0.8868444525,
+      "random_rag": 0.8868444525,
+      "no_rag": 0.6499129714,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_13",
+      "num_qubits": 13,
+      "rag": 0.86994159,
+      "random_rag": 0.86994159,
+      "no_rag": 0.3786787545,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_14",
+      "num_qubits": 14,
+      "rag": 0.8522598056,
+      "random_rag": 0.5139992142,
+      "no_rag": 0.3656884931,
+      "difference": 0.3382605914,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_15",
+      "num_qubits": 15,
+      "rag": 0.8281722146,
+      "random_rag": 0.8281473695,
+      "no_rag": 0.3538023137,
+      "difference": 2.484510000000384e-05,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_2",
+      "num_qubits": 2,
+      "rag": 0.9987599534,
+      "random_rag": 0.9994205726,
+      "no_rag": 0.9987599534,
+      "difference": -0.0006606191999999345,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_3",
+      "num_qubits": 3,
+      "rag": 0.9958784484,
+      "random_rag": 0.9937749483,
+      "no_rag": 0.9960511573,
+      "difference": 0.002103500099999933,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_30",
+      "num_qubits": 30,
+      "rag": 0.5674551344,
+      "random_rag": 0.5674551344,
+      "no_rag": 0.0601828249,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_4",
+      "num_qubits": 4,
+      "rag": 0.9868581315,
+      "random_rag": 0.9825764873,
+      "no_rag": 0.9825764873,
+      "difference": 0.00428164419999999,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_40",
+      "num_qubits": 40,
+      "rag": 0.4398748201,
+      "random_rag": 0.0049004001,
+      "no_rag": 0.007456599,
+      "difference": 0.43497442000000003,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_5",
+      "num_qubits": 5,
+      "rag": 0.9691548425,
+      "random_rag": 0.9781465418,
+      "no_rag": 0.9547777525,
+      "difference": -0.0089916993000001,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_50",
+      "num_qubits": 50,
+      "rag": 0.3415929475,
+      "random_rag": 0.3415929475,
+      "no_rag": 0.00072581,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_6",
+      "num_qubits": 6,
+      "rag": 0.9460784319,
+      "random_rag": 0.9155277265,
+      "no_rag": 0.9155277265,
+      "difference": 0.030550705399999933,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_60",
+      "num_qubits": 60,
+      "rag": 2.73505e-05,
+      "random_rag": 0.0001589098,
+      "no_rag": 2.74379e-05,
+      "difference": -0.0001315593,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_7",
+      "num_qubits": 7,
+      "rag": 0.9612044132,
+      "random_rag": 0.9177788094,
+      "no_rag": 0.9176887989,
+      "difference": 0.043425603800000045,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_8",
+      "num_qubits": 8,
+      "rag": 0.9460882208,
+      "random_rag": 0.9460882208,
+      "no_rag": 0.8693836472,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeexact_indep_tket_9",
+      "num_qubits": 9,
+      "rag": 0.9342899269,
+      "random_rag": 0.8576134566,
+      "no_rag": 0.8402609774,
+      "difference": 0.07667647030000002,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_10",
+      "num_qubits": 10,
+      "rag": 0.9189065362,
+      "random_rag": 0.9189065362,
+      "no_rag": 0.7891746629,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_11",
+      "num_qubits": 11,
+      "rag": 0.9032072297,
+      "random_rag": 0.796970409,
+      "no_rag": 0.7301475407,
+      "difference": 0.10623682069999996,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_12",
+      "num_qubits": 12,
+      "rag": 0.8864178847,
+      "random_rag": 0.8864178847,
+      "no_rag": 0.6936251078,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_13",
+      "num_qubits": 13,
+      "rag": 0.8685836016,
+      "random_rag": 0.8685836016,
+      "no_rag": 0.5840851732,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_14",
+      "num_qubits": 14,
+      "rag": 0.8497804839,
+      "random_rag": 0.8497804839,
+      "no_rag": 0.5249297556,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_15",
+      "num_qubits": 15,
+      "rag": 0.8300875325,
+      "random_rag": 0.8300875325,
+      "no_rag": 0.3481077175,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_16",
+      "num_qubits": 16,
+      "rag": 0.809586095,
+      "random_rag": 0.809586095,
+      "no_rag": 0.2505979614,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_2",
+      "num_qubits": 2,
+      "rag": 0.9993011566,
+      "random_rag": 0.9968228031,
+      "no_rag": 0.9993011566,
+      "difference": 0.002478353499999919,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_3",
+      "num_qubits": 3,
+      "rag": 0.993187968,
+      "random_rag": 0.993187968,
+      "no_rag": 0.9933839355,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_30",
+      "num_qubits": 30,
+      "rag": 0.5194357059,
+      "random_rag": 0.0654409889,
+      "no_rag": 0.0654409889,
+      "difference": 0.453994717,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_4",
+      "num_qubits": 4,
+      "rag": 0.980527915,
+      "random_rag": 0.974579467,
+      "no_rag": 0.974579467,
+      "difference": 0.005948448000000051,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_40",
+      "num_qubits": 40,
+      "rag": 0.3741311339,
+      "random_rag": 0.0048638824,
+      "no_rag": 0.0060775772,
+      "difference": 0.3692672515,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_5",
+      "num_qubits": 5,
+      "rag": 0.9710851394,
+      "random_rag": 0.9517855103,
+      "no_rag": 0.950857741,
+      "difference": 0.019299629099999938,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_50",
+      "num_qubits": 50,
+      "rag": 0.2694733993,
+      "random_rag": 0.2694733993,
+      "no_rag": 0.000461387,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_6",
+      "num_qubits": 6,
+      "rag": 0.9550100512,
+      "random_rag": 0.926214019,
+      "no_rag": 0.9168439858,
+      "difference": 0.028796032200000043,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_60",
+      "num_qubits": 60,
+      "rag": 1.13715e-05,
+      "random_rag": 2.82469e-05,
+      "no_rag": 2.82469e-05,
+      "difference": -1.6875399999999998e-05,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_7",
+      "num_qubits": 7,
+      "rag": 0.9585242347,
+      "random_rag": 0.9585242347,
+      "no_rag": 0.8982993209,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_70",
+      "num_qubits": 70,
+      "rag": 2.865e-06,
+      "random_rag": 2.7682e-06,
+      "no_rag": 2.7682e-06,
+      "difference": 9.680000000000007e-08,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_8",
+      "num_qubits": 8,
+      "rag": 0.9465992541,
+      "random_rag": 0.9465992541,
+      "no_rag": 0.8445016285,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_qiskit_9",
+      "num_qubits": 9,
+      "rag": 0.9333643936,
+      "random_rag": 0.861713432,
+      "no_rag": 0.8233705427,
+      "difference": 0.07165096160000006,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_10",
+      "num_qubits": 10,
+      "rag": 0.918024796,
+      "random_rag": 0.918024796,
+      "no_rag": 0.7939430799,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_11",
+      "num_qubits": 11,
+      "rag": 0.9022322778,
+      "random_rag": 0.7636120271,
+      "no_rag": 0.714672292,
+      "difference": 0.13862025070000006,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_12",
+      "num_qubits": 12,
+      "rag": 0.88522201,
+      "random_rag": 0.7178555846,
+      "no_rag": 0.668217721,
+      "difference": 0.16736642540000002,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_13",
+      "num_qubits": 13,
+      "rag": 0.8671515989,
+      "random_rag": 0.8671515989,
+      "no_rag": 0.6186412093,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_14",
+      "num_qubits": 14,
+      "rag": 0.848099558,
+      "random_rag": 0.848099558,
+      "no_rag": 0.3537888017,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_15",
+      "num_qubits": 15,
+      "rag": 0.8282716028,
+      "random_rag": 0.8282716028,
+      "no_rag": 0.3527234652,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_2",
+      "num_qubits": 2,
+      "rag": 0.9993011566,
+      "random_rag": 0.9983540163,
+      "no_rag": 0.9993011566,
+      "difference": 0.0009471402999999823,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_3",
+      "num_qubits": 3,
+      "rag": 0.993187968,
+      "random_rag": 0.9933839355,
+      "no_rag": 0.9933839355,
+      "difference": -0.00019596750000006047,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_30",
+      "num_qubits": 30,
+      "rag": 0.5666719493,
+      "random_rag": 0.5666209503,
+      "no_rag": 0.0432843387,
+      "difference": 5.099899999994051e-05,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_4",
+      "num_qubits": 4,
+      "rag": 0.9812192516,
+      "random_rag": 0.985900201,
+      "no_rag": 0.974579467,
+      "difference": -0.004680949399999967,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_40",
+      "num_qubits": 40,
+      "rag": 0.4399012138,
+      "random_rag": 0.0140609795,
+      "no_rag": 0.0074645012,
+      "difference": 0.4258402343,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_5",
+      "num_qubits": 5,
+      "rag": 0.9685123249,
+      "random_rag": 0.9714539051,
+      "no_rag": 0.9572671917,
+      "difference": -0.0029415801999999047,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_50",
+      "num_qubits": 50,
+      "rag": 0.3415826997,
+      "random_rag": 0.3415826997,
+      "no_rag": 0.0007245491,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_6",
+      "num_qubits": 6,
+      "rag": 0.9688528397,
+      "random_rag": 0.9688528397,
+      "no_rag": 0.9367136243,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_60",
+      "num_qubits": 60,
+      "rag": 2.72864e-05,
+      "random_rag": 2.72864e-05,
+      "no_rag": 2.73387e-05,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_7",
+      "num_qubits": 7,
+      "rag": 0.9581792229,
+      "random_rag": 0.8408592301,
+      "no_rag": 0.8829826542,
+      "difference": 0.11731999280000005,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_8",
+      "num_qubits": 8,
+      "rag": 0.9461449886,
+      "random_rag": 0.9461449886,
+      "no_rag": 0.8712128763,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "qpeinexact_indep_tket_9",
+      "num_qubits": 9,
+      "rag": 0.9326646222,
+      "random_rag": 0.9326646222,
+      "no_rag": 0.8416700545,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "routing_indep_qiskit_12",
+      "num_qubits": 12,
+      "rag": 0.9398337239,
+      "random_rag": 0.9305395104,
+      "no_rag": 0.9398337239,
+      "difference": 0.009294213499999926,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "routing_indep_qiskit_2",
+      "num_qubits": 2,
+      "rag": 0.9978340951,
+      "random_rag": 0.9920759249,
+      "no_rag": 0.9978340951,
+      "difference": 0.0057581702000000234,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "routing_indep_qiskit_6",
+      "num_qubits": 6,
+      "rag": 0.9816579456,
+      "random_rag": 0.9670513541,
+      "no_rag": 0.9816579456,
+      "difference": 0.014606591499999988,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "routing_indep_tket_12",
+      "num_qubits": 12,
+      "rag": 0.9398337239,
+      "random_rag": 0.9284724521,
+      "no_rag": 0.9398337239,
+      "difference": 0.011361271800000017,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "routing_indep_tket_2",
+      "num_qubits": 2,
+      "rag": 0.9978340951,
+      "random_rag": 0.9978340951,
+      "no_rag": 0.9978340951,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "routing_indep_tket_6",
+      "num_qubits": 6,
+      "rag": 0.9816579456,
+      "random_rag": 0.9816579456,
+      "no_rag": 0.9816579456,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "tsp_indep_qiskit_4",
+      "num_qubits": 4,
+      "rag": 0.983919958,
+      "random_rag": 0.9701045558,
+      "no_rag": 0.9816313852,
+      "difference": 0.013815402199999993,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "tsp_indep_qiskit_9",
+      "num_qubits": 9,
+      "rag": 0.9247191115,
+      "random_rag": 0.9247191115,
+      "no_rag": 0.9448083109,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    },
+    {
+      "circuit_id": "tsp_indep_tket_4",
+      "num_qubits": 4,
+      "rag": 0.983919958,
+      "random_rag": 0.9816313852,
+      "no_rag": 0.9816313852,
+      "difference": 0.002288572799999944,
+      "identical": false,
+      "within_001": true
+    },
+    {
+      "circuit_id": "tsp_indep_tket_9",
+      "num_qubits": 9,
+      "rag": 0.9248023412,
+      "random_rag": 0.9248023412,
+      "no_rag": 0.9448492731,
+      "difference": 0.0,
+      "identical": true,
+      "within_001": true
+    }
+  ],
+  "groups": [
+    {
+      "group": "Fino a 5",
+      "n": 22,
+      "equal": 2,
+      "close": 20,
+      "mean_rag": 0.9864301963727272,
+      "mean_random": 0.985119309009091,
+      "mean_no_rag": 0.9814407691181818,
+      "mean_difference": 0.0013108873636363512
+    },
+    {
+      "group": "Da 6 a 16",
+      "n": 50,
+      "equal": 31,
+      "close": 33,
+      "mean_rag": 0.9025705638460001,
+      "mean_random": 0.865648473264,
+      "mean_no_rag": 0.7059254972700001,
+      "mean_difference": 0.036922090582
+    },
+    {
+      "group": "Oltre 16",
+      "n": 18,
+      "equal": 7,
+      "close": 12,
+      "mean_rag": 0.2791167085444444,
+      "mean_random": 0.1504460937333333,
+      "mean_no_rag": 0.013446133266666667,
+      "mean_difference": 0.1286706148111111
+    }
+  ],
+  "mean_rag": 0.79837881407,
+  "mean_random": 0.7518119794288888,
+  "difference": 0.04656683464111122,
+  "relative_decrease": 0.05832674141704911,
+  "selected_examples": [
+    {
+      "circuit_id": "groundstate_medium_indep_tket_12",
+      "num_qubits": 12,
+      "rag": 0.7963772008,
+      "random_rag": 0.596601279,
+      "no_rag": 0.5095240413,
+      "difference": 0.19977592179999992,
+      "identical": false,
+      "within_001": false
+    },
+    {
+      "circuit_id": "qpeexact_indep_qiskit_40",
+      "num_qubits": 40,
+      "rag": 0.3741311339,
+      "random_rag": 0.0103480024,
+      "no_rag": 0.0061016048,
+      "difference": 0.3637831315,
+      "identical": false,
+      "within_001": false
+    }
+  ],
+  "grouping_note": "Fasce descrittive scelte dopo la lettura del Test; qubit dal manifest; nessuna equivalenza qubit/complessità."
+}

@@ -1,0 +1,30 @@
+\subsection{Limiti dell'interpretazione}
+Le conclusioni riguardano questi circuiti e queste esecuzioni. Le famiglie
+del corpus sono correlate e una sola prova per circuito non descrive la
+variabilità fra nuove esecuzioni. Gli intervalli statistici non correggono
+la dipendenza fra circuiti della stessa famiglia. Temperatura zero non implica
+risultati identici con qualsiasi ambiente di esecuzione.
+
+Lo score è una stima su dispositivi sintetici. Non abbiamo misurato qualità
+su hardware quantistico reale, energia o memoria durante tutte le prove.
+I tempi dipendono anche dalla macchina, dal carico e dalla cache.
+Il tempo totale riportato non comprende costruzione del Dataset,
+addestramento o avvio dei servizi. La mediana e la media possono quindi
+raccontare aspetti diversi, soprattutto quando alcuni casi raggiungono il
+limite di tempo.
+
+Il pilota storico aveva già compilato due circuiti poi assegnati al Test:
+\texttt{qpeexact\_indep\_tket\_60} e
+\texttt{routing\_indep\_qiskit\_12}. Questa esposizione resta un limite;
+i registri non permettono di escluderne ogni influenza sulle scelte successive.
+Non si può nemmeno escludere la presenza di MQT Bench nei dati di
+preaddestramento del modello linguistico. La seconda validation è stata
+decisa dopo la prima e non è una replica indipendente.
+
+La soglia di score 0,8 e i grafici aggiuntivi sono descrizioni introdotte
+dopo aver visto i risultati. Non sono nuovi criteri di selezione sul Test.
+Gli score sono conservati a dieci decimali: i valori molto piccoli possono
+essere arrotondati a zero. I dati originali mantengono gli indicatori di questa
+condizione. Il migliore fra i quattro sistemi osservati non rappresenta
+necessariamente la migliore compilazione possibile.
+

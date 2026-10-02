@@ -1,0 +1,35 @@
+{
+  "pdf_pages": 9,
+  "table_circuits": 90,
+  "plotted_circuits": 90,
+  "oracle_original_results_verified": 16200,
+  "source_files_unchanged": 457,
+  "all_scores_in_pdf": true,
+  "no_overfull_boxes": true,
+  "compiler": "pdflatex (TeX Live 2025/Debian)",
+  "native_compiler_error": "Unable to find standard directories for platform",
+  "real_quantum_compilations_started": 0,
+  "development_notes": [
+    "Due tentativi di composizione del generatore rifiutati per quoting JavaScript, senza scritture.",
+    "Corretta una parentesi nella stringa delle etichette prima della generazione.",
+    "Librerie grafiche Python non disponibili: usati grafici vettoriali TikZ senza installazioni."
+  ],
+  "script_sha256": {
+    "compila_verifica.py": "afd1e949eeec165887ea839594d0582e84bad3ec721d167d623e15ac9148503d",
+    "analizza.py": "1d220699fe80796b601d3e79b4878b95497f6e70168437e2412120b05ad9b91a",
+    "impagina.py": "08bf5b37e63368ab84dff33176201db9c5470e57e3b584992c2aea070f346a5f"
+  },
+  "output_sha256": {
+    "provenienza.json": "7250b405be8f7916357b18b6785d752fa3477384360c2028a7360adc24abfb55",
+    "confronto_90_circuiti.csv": "37bab8734dfb12e294ccb450bca02552b2899f543cacf4359385da6a08ea7923",
+    "confronto_oracle_rag5.pdf": "7a99b783c19515fd3c3d6ab05ffeed35fa03e75011942669ecadefbb87233441",
+    "confronto_oracle_rag5.tex": "0e6f4c0ac5e503c6817a85ed6a1edc1537628f5a55a51c054808dcfe99a9f53b",
+    "dati.json": "114b0ef079d559456f4af0278c315dc88d44176a155dbfd9826d60fc4c9ba2ac",
+    "grafici/confronto_3.pdf": "df29579d35f3da5429fd7454eed1937fbd7adf75b08d16d1801b33ea0bd4b6e3",
+    "grafici/confronto_2.pdf": "106d7241229ca950721ddf933262d889566b634792736e0a9731ab241e49d25d",
+    "grafici/confronto_3.tex": "9de5196f5af21fbe0d9caad4af08ef18f71bb215d14f239c89a839af387fc77d",
+    "grafici/confronto_2.tex": "c96bc44d0cf2021dfb8609a0510b7ce083cea66d6526d9cacf2c8afdae039980",
+    "grafici/confronto_1.tex": "0ce4082afc2cb96fbe0c0ae7723fa313b8671eac5477e4eb6f712a6a64606974",
+    "grafici/confronto_1.pdf": "d6c735345fff7e705e9ba4b85abe96dc5deb720091472fed5e19001d778a3689"
+  }
+}

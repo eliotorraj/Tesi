@@ -1,0 +1,14 @@
+\begin{tikzpicture}\begin{axis}[
+width=0.96\linewidth,height=6.2cm,grid=major,grid style={gray!20},tick label style={font=\small},label style={font=\small},
+xlabel={Indice del circuito},ylabel={Tempo totale (s)},
+legend style={at={(0.5,1.03)},anchor=south,draw=none,font=\small},legend columns=2,unbounded coords=discard,
+ymin=0,xmin=0,xmax=91,]
+\addplot[color=blue!75!black,mark=*,mark size=1.3pt,only marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/total_seconds_0.csv};
+\addlegendentry{LLM + RAG}
+\addplot[color=orange!85!black,mark=triangle*,mark size=1.3pt,only marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/total_seconds_1.csv};
+\addlegendentry{LLM senza RAG}
+\addplot[color=violet,mark=square*,mark size=1.3pt,only marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/total_seconds_2.csv};
+\addlegendentry{MQT Predictor}
+\addplot[color=teal!80!black,mark=diamond*,mark size=1.3pt,only marks] table[x=x,y=y,col sep=comma]{\TestReportPath grafici/total_seconds_3.csv};
+\addlegendentry{Random}
+\end{axis}\end{tikzpicture}

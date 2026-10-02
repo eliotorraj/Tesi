@@ -1,0 +1,27 @@
+{
+  "pdf_sha256": "7198ceac4e49b8d6cdd3bfc4b6b82ac93393531f3a9577d2418b243b70a50c66",
+  "tex_sha256": "59e480e001d1d93eb840427091e9e039f14a6d80656b55968b1cc1bc9ecc3183",
+  "audit_sha256": "77eec3fae32cef8f9f52928442034f41a37e877ed9b25ebd8ad99273701f9c2f",
+  "pages": 5,
+  "unchanged_pages": [
+    1,
+    2,
+    3
+  ],
+  "sample_3": {
+    "circuit": "qpeexact_indep_qiskit_13",
+    "attempt": 1,
+    "final": false,
+    "invalid_fact_index": 1,
+    "error": "FACT_NOT_SUPPORTED",
+    "verification_reproduced": true
+  },
+  "previous_samples_unchanged": true,
+  "counts_unchanged": true,
+  "comparison_pdf_unchanged": true,
+  "visual_review": "Pagine 4 e 5 controllate; immagini delle pagine 1-3 identiche alla versione precedente.",
+  "native_compiler": "Errore di ambiente: Unable to find standard directories for platform.",
+  "compilation": "Due passaggi pdflatex in WSL riusciti, nessun avviso di impaginazione.",
+  "backup": "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report_generati/30dd5b4f737c058e/analisi_fatti/revisioni/campione_fallimento_20260928T001622Z",
+  "graph_updated": false
+}

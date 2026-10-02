@@ -29,8 +29,6 @@ __pycache__/
 
 /archivio/valutazione/addestramento/mqt/prove_tecniche/
 
-# Report derivati dai registri Test: conservare separatamente con i dati.
-/archivio/valutazione/test/report_generati/
 
 # Prova MQT esplorativa: artefatti conservati su disco, separati dal codice.
 /archivio/valutazione/test_mqt_esplorativo/runtime/
@@ -74,6 +72,8 @@ node_modules/
 !/riproducibilita/validation/risultati/README.md
 /riproducibilita/test/risultati/*
 !/riproducibilita/test/risultati/README.md
+/archivio/riorganizzazione_2026_09_20/*
+/archivio/riorganizzazione_2026_09_21/*
 /archivio/riorganizzazione_2026_10_01/*
 !/archivio/riorganizzazione_2026_10_01/README.md
 !/archivio/riorganizzazione_2026_10_01/verifiche.json
@@ -87,3 +87,4 @@ node_modules/
 /archivio/valutazione/**/generati/
 /archivio/valutazione/**/indice/
 /archivio/valutazione/**/__pycache__/
+!archivio/valutazione/oracle_test/confronto_llm_rag_k5/risultati

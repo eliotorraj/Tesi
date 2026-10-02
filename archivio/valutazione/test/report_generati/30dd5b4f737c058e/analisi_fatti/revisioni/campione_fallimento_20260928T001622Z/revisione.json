@@ -1,0 +1,8 @@
+{
+  "backup": "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/report_generati/30dd5b4f737c058e/analisi_fatti/revisioni/campione_fallimento_20260928T001622Z",
+  "source_circuit": "qpeexact_indep_qiskit_13",
+  "attempt": 1,
+  "comparison_pdf_sha256": "294e9ee6a6a33a92c483ee84a41a2492df16145ef3fedf8ea4eff0da66513a1f",
+  "original_reports_unchanged": true,
+  "new_sample_final": false
+}
