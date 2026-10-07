@@ -1,4 +1,4 @@
-"""Verifica server con GGUF sintetico e /props simulato, senza inferenza."""
+'Check the server with a synthetic GGUF and simulated /props, without inference.'
 import io
 import json
 from pathlib import Path
@@ -48,19 +48,19 @@ class TestServer(unittest.TestCase):
     def test_other_contexts_and_invalid_types_are_rejected(self):
         for context in (16384, 59904, 60001, 60159, 60161, 65536, None, "60160", 60160.0, True):
             with self.subTest(context=context):
-                with self.assertRaisesRegex(ValueError, "profilo desktop"):
+                with self.assertRaisesRegex(ValueError, 'desktop profile'):
                     self.verify(context)
 
     def test_wrong_served_model_is_rejected_even_with_padding(self):
         other = Path(self.temp.name) / "other" / self.model.name
         other.parent.mkdir()
         other.write_bytes(b"different model")
-        with self.assertRaisesRegex(ValueError, "GGUF effettivamente"):
+        with self.assertRaisesRegex(ValueError, "actual GGUF"):
             self.verify(60160, served=other)
 
     def test_wrong_supplied_model_is_rejected(self):
         self.model.write_bytes(b"incorrect model")
-        with self.assertRaisesRegex(ValueError, "modello selezionato"):
+        with self.assertRaisesRegex(ValueError, 'selected model'):
             self.verify(60160)
 
 

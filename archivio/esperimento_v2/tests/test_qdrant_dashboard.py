@@ -1,4 +1,4 @@
-"""Controlla che la copia di consultazione rilevi modifiche reali ai dati."""
+'Check that the dashboard copy detects actual data changes.'
 import importlib.util
 import math
 import unittest

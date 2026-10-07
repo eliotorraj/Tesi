@@ -1,4 +1,4 @@
-"""Mantiene gli import storici per richieste e maschera hardware."""
+'Preserve historical request and hardware-mask imports.'
 
 from .hardware import (
     DEVICE_DEFINITIONS,

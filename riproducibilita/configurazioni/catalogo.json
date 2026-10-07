@@ -42,7 +42,7 @@
     "name": "expected_fidelity",
     "direction": "maximize",
     "implementation": "mqt.predictor.reward.expected_fidelity",
-    "interpretation": "Stima deterministica basata sul Target sintetico MQT Bench 2.2.3; non è una misura su hardware reale."
+    "interpretation": "Deterministic estimate based on the synthetic MQT Bench 2.2.3 Target; not a measurement on physical hardware."
   },
   "seeds": [0, 1, 2],
   "fixed_transpile_options": {

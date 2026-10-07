@@ -1,4 +1,4 @@
-"""Test MQT completo separato, con selettore esplorativo."""
+'Separate complete MQT Test, with an exploratory selector.'
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))

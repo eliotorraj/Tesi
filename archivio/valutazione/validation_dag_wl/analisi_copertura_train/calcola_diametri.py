@@ -1,4 +1,4 @@
-"""Diametri esatti dei DAG train: nessuna inferenza, nessuna compilazione quantistica."""
+'Exact train DAG diameters: no inference or quantum compilation.'
 from pathlib import Path
 import argparse,csv,hashlib,json,math,platform,statistics,sys,time
 from datetime import datetime,timezone
@@ -55,7 +55,7 @@ def main():
         row={"circuit_id":c["circuit_id"],"rag_id":r["rag_id"],"source_sha256":c["source_sha256"],"train_aliases":sorted(aliases[c["source_sha256"]]),"num_qubits":c["num_qubits"],"nodes":len(G),"edges_original":len(d["graph"]["edges"]),"components":len(comps),"component_sizes":[len(x) for x in comps],"component_diameters":diams,"h_full_coverage":max(diams),"dependency_layers":d["summary"]["dependency_layers_including_barriers"],"measurement_seconds":time.perf_counter()-tick}
         rows.append(row)
         with (out/"circuiti.jsonl").open("a") as f:f.write(json.dumps(row,ensure_ascii=False)+"\n")
-        if i%25==0 or i==len(paths):print(f"{i}/{len(paths)}; massimo finora {max(x['h_full_coverage'] for x in rows)}",flush=True)
+        if i%25==0 or i==len(paths):print(f"{i}/{len(paths)}; maximum so far {max((x['h_full_coverage'] for x in rows))}",flush=True)
     maximum=max(r["h_full_coverage"] for r in rows)
     winners=sorted([r for r in rows if r["h_full_coverage"]==maximum],key=lambda r:r["circuit_id"])
     # Independent exact cross-check of extrema: all-source BFS distances.

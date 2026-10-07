@@ -1,8 +1,8 @@
-# Come orientarsi nel kit
+# Toolkit documentation
 
-- [Guida](guida.md): percorso Linux completo, dalla configurazione iniziale all'esportazione, con indicazioni CPU/GPU e fisso.
-- [Configurazione](configurazione.md): ricettario dei comandi per catalogo, circuiti, modelli, sistemi Test e risorse, senza editare JSON.
-- [Mappa](mappa.md): moduli da leggere per capire il funzionamento.
-- [Condizioni](condizioni.md): limiti, differenze operative e conservazione delle evidenze.
+- [Operational guide](guida.md): setup, CPU/GPU inference, experiment phases and export.
+- [Configuration recipes](configurazione.md): circuits, models, Test methods, quantum devices, compilation settings and resources.
+- [Module map](mappa.md): implementation of each phase.
+- [Conditions](condizioni.md): assumptions, operational differences and evidence preservation.
 
-La [guida del prototipo](../../prototipo/docs/guida_passo_passo.md) serve invece a provare il sistema già selezionato. Il kit costruisce nuove esecuzioni e mantiene train, validation e Test separati.
+The [prototype guide](../../prototipo/docs/guida_passo_passo.md) covers the selected system. This toolkit creates new experiments with separate train, validation and Test roles.

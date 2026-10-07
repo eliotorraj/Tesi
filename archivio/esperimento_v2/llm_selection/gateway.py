@@ -1,4 +1,4 @@
-"""Collegamento locale Windows/WSL con richieste e flussi originali conservati."""
+'Local Windows/WSL connection preserving original requests and streams.'
 from __future__ import annotations
 import json
 import os
@@ -28,7 +28,7 @@ def request(endpoint, payload, directory, *, timeout=120):
     return json.loads(result.stdout)
 
 def native_payload(chat_payload, audit_directory):
-    """Applica il modello di chat nativo una volta, poi genera con lo schema."""
+    'Apply the native chat template once, then generate with the schema.'
     excluded={"messages","chat_template_kwargs","reasoning_effort","reasoning_format","response_format","stream_options","max_tokens"}
     result={key:value for key,value in chat_payload.items() if key not in excluded}
     result.update(prompt=read_json(Path(audit_directory)/"template"/"response.json")["prompt"],
@@ -36,7 +36,7 @@ def native_payload(chat_payload, audit_directory):
     return result
 
 def generate(payload, directory, *, timeout):
-    """Una chiamata sola. Nessun nuovo tentativo automatico del trasporto."""
+    'One call only. No automatic transport retry.'
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=False)
     write_json(directory/"request.json", payload)
@@ -110,7 +110,7 @@ def generate(payload, directory, *, timeout):
     return result
 
 class LocalLlmGateway:
-    """Adattatore del prototipo: una richiesta, stessi vincoli e registri delle prove."""
+    'Prototype adapter: one request with the same experiment constraints and records.'
     def __init__(self, directory, configuration, context_limit, timeout):
         self.directory=Path(directory)
         self.configuration=configuration

@@ -1,4 +1,4 @@
-"""Accerta un arresto senza inventare ora o codice di uscita."""
+'Confirm a stop without inventing its time or exit code.'
 import json
 import subprocess
 from .common import read_json, write_json

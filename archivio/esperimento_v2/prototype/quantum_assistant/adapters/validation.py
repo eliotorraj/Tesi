@@ -1,4 +1,4 @@
-"""Legge e controlla in modo deterministico le raccomandazioni dell'LLM."""
+'Read and check LLM recommendations deterministically.'
 
 from __future__ import annotations
 
@@ -39,20 +39,20 @@ if (
     LLM_RECOMMENDATION_SCHEMA["properties"]["schema_version"]["const"]
     != LLM_RECOMMENDATION_SCHEMA_VERSION
 ):
-    raise ValueError("Versione dello schema della raccomandazione incoerente.")
+    raise ValueError('Inconsistent recommendation schema version.')
 MAX_LLM_OUTPUT_BYTES = 65_536
 MAX_FEEDBACK_ISSUES = 12
 
 
 def _issue(code: str, path: str, message: str) -> ValidationIssue:
-    """Crea un problema di validazione con codice e posizione stabili."""
+    'Create a validation issue with stable code and location.'
     return ValidationIssue(code=code, path=path, message=message)
 
 
 def _bounded_issues(
     issues: tuple[ValidationIssue, ...] | list[ValidationIssue],
 ) -> tuple[ValidationIssue, ...]:
-    """Limita i problemi restituiti senza perdere l'indicazione dei rimanenti."""
+    'Limit returned issues while indicating how many remain.'
     values = tuple(issues)
     if len(values) <= MAX_FEEDBACK_ISSUES:
         return values
@@ -62,8 +62,7 @@ def _bounded_issues(
             "LLM_OUTPUT_ISSUES_TRUNCATED",
             "$",
             (
-                "Sono stati omessi "
-                f"{len(values) - len(retained)} errori aggiuntivi."
+                f'Omitted issues: {len(values) - len(retained)} additional errors.'
             ),
         ),
     )
@@ -72,18 +71,17 @@ def _bounded_issues(
 def _invalid(
     issues: tuple[ValidationIssue, ...] | list[ValidationIssue],
 ) -> ValidationResult:
-    """Costruisce un esito non valido con un numero limitato di problemi."""
+    'Build an invalid outcome with a bounded issue list.'
     return ValidationResult(is_valid=False, issues=_bounded_issues(issues))
 
 
 def _decode_output(raw_response: LlmOutput) -> Mapping[str, Any] | ValidationResult:
-    """Estrae un solo oggetto JSON oppure descrive l'errore di formato."""
+    'Extract one JSON object or describe the format error.'
     if isinstance(raw_response, Mapping):
         return raw_response
     if not isinstance(raw_response, (str, bytes)):
         raise TypeError(
-            "Il collegamento LLM deve restituire testo JSON, byte UTF-8 "
-            "oppure un oggetto JSON già decodificato."
+            'The LLM gateway must return JSON text, UTF-8 bytes or an already decoded JSON object.'
         )
     try:
         return decode_json_object(
@@ -97,8 +95,7 @@ def _decode_output(raw_response: LlmOutput) -> Mapping[str, Any] | ValidationRes
                     "LLM_OUTPUT_JSON_INVALID",
                     "$",
                     (
-                        "La risposta deve contenere un solo oggetto JSON valido, "
-                        "senza testo o blocchi Markdown aggiuntivi."
+                        'The response must contain one valid JSON object without additional text or Markdown blocks.'
                     ),
                 ),
             )
@@ -106,7 +103,7 @@ def _decode_output(raw_response: LlmOutput) -> Mapping[str, Any] | ValidationRes
 
 
 class StructuredRecommendationValidator:
-    """Controlla ogni valore della risposta che può influire sulla compilazione."""
+    'Check every response value that can affect compilation.'
 
     def __init__(
         self,
@@ -114,7 +111,7 @@ class StructuredRecommendationValidator:
         configuration_catalog: ConfigurationCatalog | None = None,
         explanation_renderer: ExplanationRenderer | None = None,
     ) -> None:
-        """Configura il catalogo e il costruttore delle spiegazioni finali."""
+        'Configure the catalog and final explanation builder.'
         self._configuration_catalog = (
             load_catalog(V2_CATALOG_PATH)
             if configuration_catalog is None
@@ -132,13 +129,12 @@ class StructuredRecommendationValidator:
         compatibility: CompatibilityView,
         catalog: HardwareCatalogSnapshot | None,
     ) -> None:
-        """Verifica che richiesta, maschera e cataloghi usino gli stessi dati."""
+        'Verify that request, mask and catalogs use the same data.'
         if catalog is None:
             return
         if request.catalog_snapshot_id != catalog.catalog_snapshot_id:
             raise RuntimeError(
-                "La richiesta normalizzata e il catalogo hardware non "
-                "appartengono alla stessa istantanea."
+                'The normalized request and hardware catalog belong to different snapshots.'
             )
         mask_snapshot_id = getattr(
             compatibility,
@@ -147,16 +143,14 @@ class StructuredRecommendationValidator:
         )
         if mask_snapshot_id != catalog.catalog_snapshot_id:
             raise RuntimeError(
-                "La maschera e il catalogo hardware non appartengono alla "
-                "stessa istantanea."
+                'The mask and hardware catalog belong to different snapshots.'
             )
         if (
             self._configuration_catalog.catalog_id
             != catalog.configuration_catalog_id
         ):
             raise RuntimeError(
-                "Il catalogo delle configurazioni non coincide con quello "
-                "registrato nell'istantanea hardware."
+                'The configuration catalog differs from the one recorded in the hardware snapshot.'
             )
         configuration_ids = tuple(
             configuration.config_id
@@ -164,8 +158,7 @@ class StructuredRecommendationValidator:
         )
         if configuration_ids != catalog.qiskit_configuration_ids:
             raise RuntimeError(
-                "Le configurazioni caricate non coincidono con l'istantanea "
-                "hardware."
+                'Loaded configurations differ from the hardware snapshot.'
             )
 
     def validate(
@@ -178,7 +171,7 @@ class StructuredRecommendationValidator:
         evidence_registry: EvidenceRegistry,
         citation_context=None,
     ) -> ValidationResult:
-        """Valida struttura, contenuto, claim ed evidenze della risposta."""
+        'Validate response structure, content, claims and evidence.'
         self._validate_context(request, compatibility, catalog)
         if citation_context is not None:
             return self._validate_minimal(raw_response, request, compatibility, catalog,
@@ -202,7 +195,7 @@ class StructuredRecommendationValidator:
                 _issue(
                     "LLM_OUTPUT_REQUEST_MISMATCH",
                     "$.request_id",
-                    "La risposta non appartiene alla richiesta corrente.",
+                    'The response does not belong to the current request.',
                 )
             )
         if decoded["catalog_snapshot_id"] != request.catalog_snapshot_id:
@@ -210,7 +203,7 @@ class StructuredRecommendationValidator:
                 _issue(
                     "LLM_OUTPUT_CATALOG_MISMATCH",
                     "$.catalog_snapshot_id",
-                    "La risposta non usa l'istantanea hardware corrente.",
+                    'The response does not use the current hardware snapshot.',
                 )
             )
         if decoded["figure_of_merit"] != request.figure_of_merit:
@@ -218,7 +211,7 @@ class StructuredRecommendationValidator:
                 _issue(
                     "LLM_OUTPUT_METRIC_MISMATCH",
                     "$.figure_of_merit",
-                    "La risposta usa una misura diversa da quella richiesta.",
+                    'The response uses a different metric from the requested one.',
                 )
             )
 
@@ -240,7 +233,7 @@ class StructuredRecommendationValidator:
                 _issue(
                     "LLM_OUTPUT_UNKNOWN_DEVICE",
                     "$.selected_device",
-                    "Il dispositivo indicato non esiste nel catalogo corrente.",
+                    'The specified device is absent from the current catalog.',
                 )
             )
         elif selected_device not in compatibility.available_device_ids:
@@ -249,8 +242,7 @@ class StructuredRecommendationValidator:
                     "LLM_OUTPUT_DEVICE_NOT_ELIGIBLE",
                     "$.selected_device",
                     (
-                        "Il dispositivo indicato non è utilizzabile per la "
-                        "richiesta corrente."
+                        'The specified device is unavailable for the current request.'
                     ),
                 )
             )
@@ -267,8 +259,7 @@ class StructuredRecommendationValidator:
                     "LLM_OUTPUT_CONFIGURATION_NOT_ALLOWED",
                     "$.qiskit_plan",
                     (
-                        "La configurazione non appartiene alle 12 "
-                        "configurazioni Qiskit ammesse."
+                        'The configuration is outside the 12 allowed Qiskit configurations.'
                     ),
                 )
             )
@@ -282,8 +273,7 @@ class StructuredRecommendationValidator:
                     "LLM_OUTPUT_CONFIGURATION_NOT_SUPPORTED_BY_DEVICE",
                     "$.qiskit_plan",
                     (
-                        "La configurazione non è supportata dal dispositivo "
-                        "selezionato."
+                        'The selected device does not support the configuration.'
                     ),
                 )
             )
@@ -297,7 +287,7 @@ class StructuredRecommendationValidator:
                 _issue(
                     "LLM_OUTPUT_METRIC_NOT_SUPPORTED_BY_DEVICE",
                     "$.figure_of_merit",
-                    "Il dispositivo non supporta la misura richiesta.",
+                    'The device does not support the requested metric.',
                 )
             )
 
@@ -338,7 +328,7 @@ class StructuredRecommendationValidator:
                     _issue(
                         "LLM_OUTPUT_EVIDENCE_REFERENCE_ID_DUPLICATE",
                         f"{path}.reference_id",
-                        "Ogni riferimento deve avere un ID univoco.",
+                        'Every reference must have a unique ID.',
                     )
                 )
             else:
@@ -355,7 +345,7 @@ class StructuredRecommendationValidator:
                     _issue(
                         "LLM_OUTPUT_EVIDENCE_SOURCE_DUPLICATE",
                         path,
-                        "La stessa fonte storica non può essere dichiarata due volte.",
+                        'The same historical source cannot be declared twice.',
                     )
                 )
             else:
@@ -368,8 +358,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_EVIDENCE_RECORD_UNKNOWN",
                         f"{path}.record_id",
                         (
-                            "Il record non appartiene ai circuiti più simili "
-                            "recuperati per questa richiesta."
+                            'The record is not among the closest circuits retrieved for this request.'
                         ),
                     )
                 )
@@ -386,8 +375,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_SOURCE_CLAIM_REQUIRED",
                             f"{path}.source_claim_id",
                             (
-                                "Un risultato storico deve indicare il claim "
-                                "sorgente del medesimo record."
+                                'A historical result must identify a source claim from the same record.'
                             ),
                         )
                     )
@@ -399,8 +387,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_SOURCE_CLAIM_UNKNOWN",
                             f"{path}.source_claim_id",
                             (
-                                "Il claim sorgente non appartiene al record "
-                                "storico indicato."
+                                'The source claim does not belong to the specified historical record.'
                             ),
                         )
                     )
@@ -412,8 +399,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_EVIDENCE_UNKNOWN",
                             f"{path}.source_id",
                             (
-                                "L'evidenza non appartiene al record storico "
-                                "indicato."
+                                'The evidence does not belong to the specified historical record.'
                             ),
                         )
                     )
@@ -423,8 +409,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_EVIDENCE_LINK_MISMATCH",
                             path,
                             (
-                                "Il claim sorgente non è collegato "
-                                "all'evidenza indicata."
+                                'The source claim is not linked to the specified evidence.'
                             ),
                         )
                     )
@@ -435,8 +420,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_SOURCE_CLAIM_FORBIDDEN",
                             f"{path}.source_claim_id",
                             (
-                                "Un'avvertenza scientifica non deve dichiarare "
-                                "un claim sorgente."
+                                'A scientific caveat must not declare a source claim.'
                             ),
                         )
                     )
@@ -446,8 +430,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_CAVEAT_UNKNOWN",
                             f"{path}.source_id",
                             (
-                                "L'avvertenza non appartiene al record storico "
-                                "indicato."
+                                'The caveat does not belong to the specified historical record.'
                             ),
                         )
                     )
@@ -498,7 +481,7 @@ class StructuredRecommendationValidator:
                     _issue(
                         "LLM_OUTPUT_CLAIM_ID_DUPLICATE",
                         f"{path}.claim_id",
-                        "Ogni claim deve avere un ID univoco.",
+                        'Every claim must have a unique ID.',
                     )
                 )
             claim_ids.add(claim.claim_id)
@@ -510,8 +493,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_CLAIM_PARAMETERS_INVALID",
                         f"{path}.parameters",
                         (
-                            "I parametri non corrispondono al tipo di claim "
-                            "dichiarato."
+                            'Parameters do not match the declared claim type.'
                         ),
                     )
                 )
@@ -530,8 +512,7 @@ class StructuredRecommendationValidator:
                                 f"[{reference_index}]"
                             ),
                             (
-                                "Il claim cita un riferimento non dichiarato "
-                                "nella risposta."
+                                'The claim cites a reference not declared in the response.'
                             ),
                         )
                     )
@@ -579,8 +560,7 @@ class StructuredRecommendationValidator:
                                 "LLM_OUTPUT_SOURCE_EVIDENCE_SET_MISMATCH",
                                 f"{path}.evidence_ref_ids",
                                 (
-                                    "Un claim storico deve citare tutte e sole "
-                                    "le evidenze del claim sorgente."
+                                    "A historical claim must cite all and only its source claim's evidence."
                                 ),
                             )
                         )
@@ -595,8 +575,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
                             f"{path}.evidence_ref_ids",
                             (
-                                "Il sostegno storico del dispositivo richiede "
-                                "almeno un'evidenza."
+                                'Historical device support requires at least one piece of evidence.'
                             ),
                         )
                     )
@@ -606,8 +585,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_CLAIM_DEVICE_MISMATCH",
                             f"{path}.parameters.device_id",
                             (
-                                "Il claim deve riguardare il dispositivo "
-                                "raccomandato."
+                                'The claim must concern the recommended device.'
                             ),
                         )
                     )
@@ -630,8 +608,7 @@ class StructuredRecommendationValidator:
                                 "LLM_OUTPUT_DEVICE_EVIDENCE_MISMATCH",
                                 path,
                                 (
-                                    "Il riferimento non sostiene la scelta "
-                                    "storica del dispositivo raccomandato."
+                                    'The reference does not support the historical selection of the recommended device.'
                                 ),
                             )
                         )
@@ -646,8 +623,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_HISTORICAL_EVIDENCE_REQUIRED",
                             f"{path}.evidence_ref_ids",
                             (
-                                "Il sostegno storico della configurazione "
-                                "richiede almeno un'evidenza."
+                                'Historical configuration support requires at least one piece of evidence.'
                             ),
                         )
                     )
@@ -666,8 +642,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_CONFIGURATION_CLAIM_MISMATCH",
                             f"{path}.parameters",
                             (
-                                "Il claim deve riguardare il dispositivo e la "
-                                "configurazione raccomandati."
+                                'The claim must concern the recommended device and configuration.'
                             ),
                         )
                     )
@@ -702,8 +677,7 @@ class StructuredRecommendationValidator:
                                 "LLM_OUTPUT_CONFIGURATION_EVIDENCE_MISMATCH",
                                 path,
                                 (
-                                    "Il riferimento non sostiene la "
-                                    "configurazione raccomandata."
+                                    'The reference does not support the recommended configuration.'
                                 ),
                             )
                         )
@@ -715,8 +689,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_LIVE_CLAIM_HAS_EVIDENCE",
                             f"{path}.evidence_ref_ids",
                             (
-                                "La compatibilità corrente è verificata dal "
-                                "prototipo e non usa evidenze storiche."
+                                'Current compatibility is checked by the prototype without historical evidence.'
                             ),
                         )
                     )
@@ -726,8 +699,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_CLAIM_DEVICE_MISMATCH",
                             f"{path}.parameters.device_id",
                             (
-                                "Il claim deve riguardare il dispositivo "
-                                "raccomandato."
+                                'The claim must concern the recommended device.'
                             ),
                         )
                     )
@@ -739,8 +711,7 @@ class StructuredRecommendationValidator:
                             "LLM_OUTPUT_CAVEAT_EVIDENCE_REQUIRED",
                             f"{path}.evidence_ref_ids",
                             (
-                                "L'avvertenza deve citare almeno una fonte "
-                                "scientifica del registro."
+                                'The caveat must cite at least one scientific source from the registry.'
                             ),
                         )
                     )
@@ -768,8 +739,7 @@ class StructuredRecommendationValidator:
                                 "LLM_OUTPUT_CAVEAT_EVIDENCE_MISMATCH",
                                 path,
                                 (
-                                    "L'avvertenza non è collegata a un claim "
-                                    "storico usato nella raccomandazione."
+                                    'The caveat is not linked to a historical claim used in the recommendation.'
                                 ),
                             )
                         )
@@ -784,8 +754,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_UNAVAILABLE_CLAIM_HAS_EVIDENCE",
                         f"{path}.evidence_ref_ids",
                         (
-                            "L'assenza di evidenze storiche non può citare "
-                            "riferimenti."
+                            'An absence-of-historical-evidence claim cannot cite references.'
                         ),
                     )
                 )
@@ -798,8 +767,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_EVIDENCE_REFERENCE_UNUSED",
                         f"$.evidence_refs[{reference_index}]",
                         (
-                            "Ogni riferimento dichiarato deve essere usato da "
-                            "un claim."
+                            'Every declared reference must be used by a claim.'
                         ),
                     )
                 )
@@ -809,8 +777,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_EVIDENCE_REFERENCE_REUSED",
                         f"$.evidence_refs[{reference_index}]",
                         (
-                            "Ogni riferimento dichiarato può sostenere un solo "
-                            "claim."
+                            'Each declared reference may support only one claim.'
                         ),
                     )
                 )
@@ -825,8 +792,7 @@ class StructuredRecommendationValidator:
                     "LLM_OUTPUT_LIVE_COMPATIBILITY_REQUIRED",
                     "$.claims",
                     (
-                        "Serve un solo claim di compatibilità verificata per "
-                        "la richiesta corrente."
+                        'Exactly one verified-compatibility claim is required for the current request.'
                     ),
                 )
             )
@@ -841,8 +807,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_EVIDENCE_UNAVAILABLE_CONTRADICTED",
                         "$.claims",
                         (
-                            "Sono disponibili risultati storici dei circuiti "
-                            "più simili: non dichiararne l'assenza."
+                            'Historical results for the closest circuits are available; do not claim they are absent.'
                         ),
                     )
                 )
@@ -861,8 +826,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_HISTORICAL_SUPPORT_INCOMPLETE",
                         "$.claims",
                         (
-                            "Serve un solo claim storico per il dispositivo e "
-                            "un solo claim storico per la configurazione."
+                            'Exactly one historical device claim and one historical configuration claim are required.'
                         ),
                     )
                 )
@@ -873,8 +837,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_EVIDENCE_NOT_AVAILABLE",
                         "$.evidence_refs",
                         (
-                            "I circuiti recuperati non espongono risultati "
-                            "storici citabili."
+                            'Retrieved circuits provide no citable historical results.'
                         ),
                     )
                 )
@@ -891,8 +854,7 @@ class StructuredRecommendationValidator:
                         "LLM_OUTPUT_NO_HISTORY_CLAIMS_INVALID",
                         "$.claims",
                         (
-                            "Senza risultati storici servono soltanto il claim "
-                            "di compatibilità e quello di indisponibilità."
+                            'Without historical results, only compatibility and unavailability claims are required.'
                         ),
                     )
                 )
@@ -925,11 +887,11 @@ class StructuredRecommendationValidator:
         )
 
     def _validate_minimal(self, raw_response, request, compatibility, catalog, registry, context):
-        """Controlla la scelta e la provenienza delle citazioni, non la verità del testo."""
+        'Check the choice and citation provenance, not the truth of free text.'
         from prototype.prompting.minimal import CitationContext, SCHEMA, CONTRACT_VERSION, digest
         from ..models import ExampleCitation
         if not isinstance(context, CitationContext):
-            raise RuntimeError("Contesto delle citazioni assente o non valido.")
+            raise RuntimeError('Citation context is missing or invalid.')
         registry_ids = tuple(record.record_id for record in registry.records)
         if (context.request_id != request.request_id
                 or context.catalog_snapshot_id != request.catalog_snapshot_id
@@ -940,7 +902,7 @@ class StructuredRecommendationValidator:
                 or len(context.record_ids) > 5
                 or len(context.record_ids) != len(set(context.record_ids))
                 or tuple(r for r in context.record_ids if r in registry_ids) != registry_ids):
-            raise RuntimeError("Contesto delle citazioni non appartenente alla richiesta o al registro.")
+            raise RuntimeError('Citation context does not belong to the request or registry.')
         decoded = _decode_output(raw_response)
         if isinstance(decoded, ValidationResult):
             return decoded
@@ -949,36 +911,36 @@ class StructuredRecommendationValidator:
             return _invalid(issues)
         if not decoded["claim"].strip():
             return _invalid([_issue("LLM_OUTPUT_CLAIM_EMPTY", "$.claim",
-                                    "Scrivi una motivazione non vuota.")])
+                                    'Write a non-empty explanation.')])
         device_id = decoded["selected_device"]
         profile = next((p for p in compatibility.available if p.device_id == device_id), None)
         if profile is None:
             issues.append(_issue("LLM_OUTPUT_DEVICE_NOT_ELIGIBLE", "$.selected_device",
-                                 "Scegli un dispositivo compatibile."))
+                                 'Choose a compatible device.'))
         elif request.figure_of_merit not in profile.supported_figure_of_merit_ids:
             issues.append(_issue("LLM_OUTPUT_METRIC_NOT_SUPPORTED_BY_DEVICE", "$.selected_device",
-                                 "Il dispositivo non supporta la misura richiesta."))
+                                 'The device does not support the requested metric.'))
         configuration = self._configuration_catalog.by_id.get(decoded["config_id"])
         if configuration is None:
             issues.append(_issue("LLM_OUTPUT_CONFIGURATION_NOT_ALLOWED", "$.config_id",
-                                 "Scegli una configurazione del catalogo."))
+                                 'Choose a catalog configuration.'))
         elif profile is not None and configuration.config_id not in profile.allowed_qiskit_configuration_ids:
             issues.append(_issue("LLM_OUTPUT_CONFIGURATION_NOT_SUPPORTED_BY_DEVICE", "$.config_id",
-                                 "La configurazione non è ammessa per il dispositivo."))
+                                 'The configuration is not allowed for the device.'))
         citations = []
         for index, alias in enumerate(decoded["evidence"]):
             record_id = context.aliases.get(alias)
             if record_id not in registry_ids:
                 issues.append(_issue("LLM_OUTPUT_UNKNOWN_EXAMPLE", f"$.evidence[{index}]",
-                                     "Cita soltanto un esempio storico fornito."))
+                                     'Cite only a supplied historical example.'))
             else:
                 citations.append(ExampleCitation(alias=alias, record_id=record_id))
         if registry_ids and not decoded["evidence"]:
             issues.append(_issue("LLM_OUTPUT_EVIDENCE_REQUIRED", "$.evidence",
-                                 "Cita almeno un esempio storico fornito."))
+                                 'Cite at least one supplied historical example.'))
         if not registry_ids and decoded["evidence"]:
             issues.append(_issue("LLM_OUTPUT_EVIDENCE_NOT_AVAILABLE", "$.evidence",
-                                 "Senza esempi storici evidence deve essere vuota."))
+                                 'Without historical examples, evidence must be empty.'))
         if issues:
             return _invalid(issues)
         return ValidationResult(is_valid=True, recommendation=Recommendation(
@@ -994,6 +956,6 @@ class StructuredRecommendationValidator:
             schema_version=CONTRACT_VERSION,
             citation_validation="provided_examples_resolved",
             warnings=(
-                "Le citazioni rimandano agli esempi forniti. Il testo della motivazione non è verificato semanticamente.",
-                "Expected fidelity è una stima su Target sintetici, non una misura su hardware reale.",
+                'Citations point to the supplied examples. The explanation text is not verified semantically.',
+                'Expected fidelity is an estimate on synthetic Targets, not a physical-hardware measurement.',
             )))

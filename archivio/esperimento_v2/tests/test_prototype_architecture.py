@@ -40,7 +40,7 @@ def qasm_for_two_qubit_circuit() -> str:
 
 def valid_llm_response(device_id: str, prompt) -> dict[str, object]:
     return {"selected_device": device_id, "config_id": "o2_default_default",
-            "claim": "Scelta senza supporto: non sono disponibili risultati storici utilizzabili.",
+            "claim": 'Unsupported choice: no usable historical results are available.',
             "evidence": []}
 
 
@@ -50,7 +50,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         self.root = Path(self.temp_dir.name)
         self.submission = UiSubmission(
             request_id="request-1",
-            user_text="Scegli un device e proponi una compilazione.",
+            user_text='Choose a device and propose a compilation.',
             qasm2=qasm_for_two_qubit_circuit(),
             figure_of_merit="expected_fidelity",
         )
@@ -92,7 +92,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
                          valid_llm_response("ibm_falcon_27", prompts[-1])["claim"])
         self.assertEqual(result.recommendation.evidence, ())
         self.assertEqual(result.recommendation.schema_version, "3.0.0")
-        self.assertIn("non è verificato semanticamente", result.recommendation.warnings[0])
+        self.assertIn('is not verified semantically', result.recommendation.warnings[0])
         self.assertTrue(
             prompts[1].payload["previous_validation_errors"],
         )
@@ -141,7 +141,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
         result = legacy.recommend(self.submission)
         self.assertEqual(result.recommendation.selected_device, "ibm_falcon_27")
         self.assertIn(
-            "non sono disponibili risultati storici utilizzabili",
+            'no usable historical results',
             result.recommendation.explanation,
         )
 
@@ -210,8 +210,8 @@ class PrototypeArchitectureTests(unittest.TestCase):
         dataset_path = self.root / "dataset.json"
         dataset_path.write_text(json.dumps(dataset), encoding="utf-8")
 
-        # La nuova ricerca accetta esclusivamente il JSONL train corrente.
-        with self.assertRaisesRegex(ValueError, "Fonte RAG non ammessa"):
+        # The new search accepts only the current train JSONL.
+        with self.assertRaisesRegex(ValueError, 'RAG source is not allowed'):
             JsonDatasetContextRetriever(dataset_path).retrieve(request, report, limit=1)
 
     def test_rag_prompt_compaction_preserves_claim_and_evidence(self) -> None:
@@ -268,7 +268,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
             "claims": [
                 {
                     "claim_id": "claim_" + "e" * 64,
-                    "text": "Scelta sostenuta dalla mediana osservata.",
+                    "text": 'Choice supported by the observed median.',
                     "evidence_ids": ["evidence_" + "d" * 64],
                 }
             ],
@@ -281,7 +281,7 @@ class PrototypeArchitectureTests(unittest.TestCase):
             "scientific_caveats": [
                 {
                     "caveat_id": "estimate",
-                    "text": "Non e una misura hardware.",
+                    "text": 'This is not a hardware measurement.',
                 }
             ],
         }

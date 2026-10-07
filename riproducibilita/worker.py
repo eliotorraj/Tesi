@@ -1,4 +1,4 @@
-"""Processo figlio della singola compilazione; non avvia campagne."""
+'Child process for one compilation; does not launch campaigns.'
 import bootstrap
 from pathlib import Path
 import sys, time, traceback
@@ -6,7 +6,7 @@ import settings as s
 
 def main(path):
     job=s.read(path);folder=Path(path).parent;start=time.perf_counter()
-    # Termina il figlio se viene meno il supervisore Linux.
+    # Terminate the child if its Linux supervisor exits.
     if sys.platform.startswith("linux"):
         import ctypes, os, signal
         parent=os.getppid();ctypes.CDLL(None).prctl(1,signal.SIGTERM)
@@ -35,13 +35,13 @@ def main(path):
             predictor=Predictor(figure_of_merit="expected_fidelity",device=target,max_steps=64)
             compiled,passes=rl_compile(circuit,device=target,figure_of_merit="expected_fidelity",predictor_singleton=predictor)
             duration=time.perf_counter()-t
-            if not passes or str(passes[-1])!="terminate":raise ValueError("RL non terminato")
+            if not passes or str(passes[-1])!="terminate":raise ValueError('RL did not terminate')
             target=get_device(device);validation=validate_compiled_circuit(compiled,target)
-            if not validation["is_executable_on_target"]:raise ValueError("Circuito MQT non conforme al Target")
+            if not validation["is_executable_on_target"]:raise ValueError('MQT circuit does not conform to the Target')
             qasm2.dump(compiled,folder/"compiled.qasm")
             result={"status":"success","selected_device":device,"passes":list(map(str,passes)),"validation":validation,
                     "choice_seconds":choice,"compilation_seconds":duration,**expected_fidelity(compiled,target)}
-        else:raise ValueError("Tipo di lavoro sconosciuto")
+        else:raise ValueError('Unknown job type')
     except Exception as exc:
         result={"status":"failure","score":None,"error":type(exc).__name__,"message":str(exc),"traceback":traceback.format_exc()}
     result["process_seconds"]=time.perf_counter()-start

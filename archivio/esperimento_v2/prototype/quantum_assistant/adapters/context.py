@@ -1,4 +1,4 @@
-"""Recupera esempi sicuri dal Dataset e costruisce la richiesta per l'LLM."""
+'Retrieve valid Dataset examples and build the LLM request.'
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ LLM_RECOMMENDATION_SCHEMA = load_schema("llm_recommendation.schema.json")
 
 
 def _json_ready(value: Any) -> Any:
-    """Converte strutture immutabili in valori serializzabili come JSON."""
+    'Convert immutable structures into JSON-serializable values.'
     if isinstance(value, Mapping):
         return {
             str(key): _json_ready(item)
@@ -44,7 +44,7 @@ def _json_ready(value: Any) -> Any:
 
 
 def _compact_prompt_input(record_input: Mapping[str, Any]) -> dict[str, Any]:
-    """Riduce un vecchio esempio ai soli dati utili per il confronto."""
+    'Reduce a legacy example to the data needed for comparison.'
     circuit = record_input.get("circuit") or {}
     features = circuit.get("features") or {}
     backends = record_input.get("compatible_backends") or []
@@ -69,7 +69,7 @@ def _compact_prompt_input(record_input: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _compact_rag_example(record: Mapping[str, Any]) -> dict[str, Any]:
-    """Riduce un esempio RAG senza perdere claim ed evidenze necessarie."""
+    'Reduce a RAG example while retaining required claims and evidence.'
     retrieval_input = record.get("retrieval_input") or {}
     circuit = retrieval_input.get("circuit") or {}
     features = circuit.get("features") or {}
@@ -124,35 +124,33 @@ _RAG_REQUIRED_FIELDS = {
 
 
 def _is_labeled_rag_record(record: Mapping[str, Any]) -> bool:
-    """Riconosce un record che dichiara il formato RAG etichettato."""
+    'Recognize a record declaring the labeled RAG format.'
     return "rag_id" in record or "retrieval_input" in record
 
 
 def _validate_labeled_rag_envelope(record: Mapping[str, Any]) -> None:
-    """Rifiuta un record RAG incompleto prima che possa essere ignorato."""
+    'Reject incomplete RAG records before they can be silently ignored.'
     record_id = str(record.get("rag_id", "<missing>"))
     for field_name, expected_type in _RAG_REQUIRED_FIELDS.items():
         value = record.get(field_name)
         if not isinstance(value, expected_type):
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record_id}, $.{field_name}): campo essenziale assente "
-                "o di tipo errato."
+                f'Invalid RAG Dataset ({record_id}, $.{field_name}): essential field missing or of the wrong type.'
             )
     if not record["rag_id"].strip():
         raise EvidenceRegistryDataError(
-            "Dataset RAG non valido (<missing>, $.rag_id): ID non valido."
+            'Invalid RAG Dataset (<missing>, $.rag_id): invalid ID.'
         )
 
 
 class EvidenceRegistryDataError(ValueError):
-    """Errore stabile per un record RAG incompleto o incoerente."""
+    'Stable error for an incomplete or inconsistent RAG record.'
 
     code = "EVIDENCE_REGISTRY_DATA_INVALID"
     retryable = False
 
     def to_dict(self) -> dict[str, object]:
-        """Restituisce l'errore nel formato stabile esposto dall'applicazione."""
+        "Return the error in the application's stable format."
         return {
             "code": self.code,
             "retryable": self.retryable,
@@ -166,10 +164,10 @@ def _registry_mapping(
     record_id: str,
     path: str,
 ) -> Mapping[str, Any]:
-    """Richiede un oggetto nel campo indicato del record RAG."""
+    'Require an object in the specified RAG record field.'
     if not isinstance(value, Mapping):
         raise EvidenceRegistryDataError(
-            f"Dataset RAG non valido ({record_id}, {path}): oggetto atteso."
+            f'Invalid RAG Dataset ({record_id}, {path}): expected an object.'
         )
     return value
 
@@ -180,10 +178,10 @@ def _registry_sequence(
     record_id: str,
     path: str,
 ) -> Sequence[Any]:
-    """Richiede una lista nel campo indicato del record RAG."""
+    'Require a list in the specified RAG record field.'
     if not isinstance(value, (list, tuple)):
         raise EvidenceRegistryDataError(
-            f"Dataset RAG non valido ({record_id}, {path}): lista attesa."
+            f'Invalid RAG Dataset ({record_id}, {path}): expected a list.'
         )
     return value
 
@@ -194,11 +192,10 @@ def _registry_string(
     record_id: str,
     path: str,
 ) -> str:
-    """Richiede una stringa non vuota nel campo indicato del record RAG."""
+    'Require a nonempty string in the specified RAG record field.'
     if not isinstance(value, str) or not value.strip():
         raise EvidenceRegistryDataError(
-            f"Dataset RAG non valido ({record_id}, {path}): "
-            "stringa non vuota attesa."
+            f'Invalid RAG Dataset ({record_id}, {path}): expected a nonempty string.'
         )
     return value
 
@@ -209,7 +206,7 @@ def _registry_optional_string(
     record_id: str,
     path: str,
 ) -> str | None:
-    """Legge una stringa facoltativa dal campo indicato del record RAG."""
+    'Read an optional string from the specified RAG record field.'
     if value is None:
         return None
     return _registry_string(value, record_id=record_id, path=path)
@@ -221,10 +218,10 @@ def _registry_integer(
     record_id: str,
     path: str,
 ) -> int:
-    """Richiede un numero intero nel campo indicato del record RAG."""
+    'Require an integer in the specified RAG record field.'
     if isinstance(value, bool) or not isinstance(value, int):
         raise EvidenceRegistryDataError(
-            f"Dataset RAG non valido ({record_id}, {path}): intero atteso."
+            f'Invalid RAG Dataset ({record_id}, {path}): expected an integer.'
         )
     return value
 
@@ -235,27 +232,27 @@ def _registry_number(
     record_id: str,
     path: str,
 ) -> float:
-    """Richiede un numero finito nel campo indicato del record RAG."""
+    'Require a finite number in the specified RAG record field.'
     if (
         isinstance(value, bool)
         or not isinstance(value, (int, float))
         or not math.isfinite(float(value))
     ):
         raise EvidenceRegistryDataError(
-            f"Dataset RAG non valido ({record_id}, {path}): numero finito atteso."
+            f'Invalid RAG Dataset ({record_id}, {path}): expected a finite number.'
         )
     return float(value)
 
 
 class StructuredEvidenceRegistryBuilder:
-    """Costruisce il registro immutabile dai risultati storici recuperati."""
+    'Build an immutable registry from retrieved historical outcomes.'
 
     def __init__(
         self,
         *,
         configuration_catalog: ConfigurationCatalog | None = None,
     ) -> None:
-        """Configura il catalogo usato per controllare le evidenze storiche."""
+        'Configure the catalog used to validate historical evidence.'
         self._configuration_catalog = (
             load_catalog(V2_CATALOG_PATH)
             if configuration_catalog is None
@@ -266,7 +263,7 @@ class StructuredEvidenceRegistryBuilder:
         self,
         examples: Sequence[RetrievedExample],
     ) -> EvidenceRegistry:
-        """Costruisce il registro dai soli esempi RAG completi recuperati."""
+        'Build the registry from complete retrieved RAG examples only.'
         records: list[EvidenceRecord] = []
         for rank, example in enumerate(examples, start=1):
             payload = _registry_mapping(
@@ -285,24 +282,22 @@ class StructuredEvidenceRegistryBuilder:
                 if "rag_id" in payload or "retrieval_input" in payload:
                     missing = ", ".join(sorted(evidence_keys))
                     raise EvidenceRegistryDataError(
-                        "Dataset RAG non valido "
-                        f"({example.record_id}, $): campi mancanti: {missing}."
+                        f'Invalid RAG Dataset ({example.record_id}, $): missing fields: {missing}.'
                     )
-                # I vecchi record espongono solo l'ingresso e non possono
-                # sostenere claim basati sui risultati storici.
+                # Legacy records expose inputs only and cannot
+                # support claims based on historical outcomes.
                 continue
             if present_keys != evidence_keys:
                 missing = ", ".join(sorted(evidence_keys - present_keys))
                 raise EvidenceRegistryDataError(
-                    "Dataset RAG non valido "
-                    f"({example.record_id}, $): campi mancanti: {missing}."
+                    f'Invalid RAG Dataset ({example.record_id}, $): missing fields: {missing}.'
                 )
             records.append(self._build_record(example, rank, payload))
         try:
             return EvidenceRegistry(records=tuple(records))
         except ValueError as error:
             raise EvidenceRegistryDataError(
-                f"Registro delle evidenze del Dataset non valido: {error}"
+                f'Invalid Dataset evidence registry: {error}'
             ) from error
 
     def _build_record(
@@ -311,7 +306,7 @@ class StructuredEvidenceRegistryBuilder:
         rank: int,
         payload: Mapping[str, Any],
     ) -> EvidenceRecord:
-        """Converte un esempio recuperato in un record di evidenze controllato."""
+        'Convert a retrieved example into a validated evidence record.'
         record_id = example.record_id
         embedded_record_id = _registry_string(
             payload.get("rag_id"),
@@ -320,8 +315,7 @@ class StructuredEvidenceRegistryBuilder:
         )
         if embedded_record_id != record_id:
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record_id}, $.rag_id): ID diverso dal risultato recuperato."
+                f'Invalid RAG Dataset ({record_id}, $.rag_id): ID differs from the retrieved result.'
             )
 
         label = _registry_mapping(
@@ -409,7 +403,7 @@ class StructuredEvidenceRegistryBuilder:
             )
         except ValueError as error:
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, $): {error}"
+                f'Invalid RAG Dataset ({record_id}, $): {error}'
             ) from error
         self._validate_selected_label(
             record,
@@ -426,13 +420,12 @@ class StructuredEvidenceRegistryBuilder:
         value: Any,
         index: int,
     ) -> HistoricalEvidence:
-        """Converte un risultato aggregato del Dataset in evidenza storica."""
+        'Convert an aggregated Dataset outcome into historical evidence.'
         path = f"$.evidence[{index}]"
         item = _registry_mapping(value, record_id=record_id, path=path)
         if item.get("evidence_type") != "offline_seed_aggregate":
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}.evidence_type): "
-                "tipo di evidenza non supportato."
+                f'Invalid RAG Dataset ({record_id}, {path}.evidence_type): unsupported evidence type.'
             )
         aggregation = _registry_mapping(
             item.get("aggregation"),
@@ -441,8 +434,7 @@ class StructuredEvidenceRegistryBuilder:
         )
         if aggregation.get("method") != "median":
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, "
-                f"{path}.aggregation.method): aggregazione non supportata."
+                f'Invalid RAG Dataset ({record_id}, {path}.aggregation.method): unsupported aggregation.'
             )
         metric = _registry_string(
             item.get("metric"),
@@ -451,8 +443,7 @@ class StructuredEvidenceRegistryBuilder:
         )
         if metric != "median_expected_fidelity_across_seeds":
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}.metric): "
-                "misura storica non supportata."
+                f'Invalid RAG Dataset ({record_id}, {path}.metric): unsupported historical metric.'
             )
         try:
             return HistoricalEvidence(
@@ -492,7 +483,7 @@ class StructuredEvidenceRegistryBuilder:
             if isinstance(error, EvidenceRegistryDataError):
                 raise
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}): {error}"
+                f'Invalid RAG Dataset ({record_id}, {path}): {error}'
             ) from error
 
     @staticmethod
@@ -501,7 +492,7 @@ class StructuredEvidenceRegistryBuilder:
         value: Any,
         index: int,
     ) -> ScientificCaveat:
-        """Converte un'avvertenza scientifica nel modello interno."""
+        'Convert a scientific caveat into the internal model.'
         path = f"$.scientific_caveats[{index}]"
         item = _registry_mapping(value, record_id=record_id, path=path)
         try:
@@ -521,7 +512,7 @@ class StructuredEvidenceRegistryBuilder:
             if isinstance(error, EvidenceRegistryDataError):
                 raise
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}): {error}"
+                f'Invalid RAG Dataset ({record_id}, {path}): {error}'
             ) from error
 
     @staticmethod
@@ -530,7 +521,7 @@ class StructuredEvidenceRegistryBuilder:
         value: Any,
         index: int,
     ) -> HistoricalClaim:
-        """Converte un claim storico e conserva i suoi collegamenti."""
+        'Convert a historical claim and retain its links.'
         path = f"$.claims[{index}]"
         item = _registry_mapping(value, record_id=record_id, path=path)
         try:
@@ -543,8 +534,7 @@ class StructuredEvidenceRegistryBuilder:
             )
         except ValueError as error:
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}.claim_type): "
-                "tipo di claim non supportato."
+                f'Invalid RAG Dataset ({record_id}, {path}.claim_type): unsupported claim type.'
             ) from error
         evidence_ids = tuple(
             _registry_string(
@@ -589,7 +579,7 @@ class StructuredEvidenceRegistryBuilder:
             if isinstance(error, EvidenceRegistryDataError):
                 raise
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}): {error}"
+                f'Invalid RAG Dataset ({record_id}, {path}): {error}'
             ) from error
 
     @staticmethod
@@ -598,7 +588,7 @@ class StructuredEvidenceRegistryBuilder:
         value: Any,
         index: int,
     ) -> HistoricalConfiguration:
-        """Converte una configurazione classificata del record storico."""
+        'Convert a ranked configuration from a historical record.'
         path = f"$.label.top_configurations[{index}]"
         item = _registry_mapping(value, record_id=record_id, path=path)
         try:
@@ -658,7 +648,7 @@ class StructuredEvidenceRegistryBuilder:
             if isinstance(error, EvidenceRegistryDataError):
                 raise
             raise EvidenceRegistryDataError(
-                f"Dataset RAG non valido ({record_id}, {path}): {error}"
+                f'Invalid RAG Dataset ({record_id}, {path}): {error}'
             ) from error
 
     @staticmethod
@@ -669,7 +659,7 @@ class StructuredEvidenceRegistryBuilder:
         best_configuration_id: str,
         median_score: float,
     ) -> None:
-        """Controlla che l'etichetta scelta coincida con il primo risultato."""
+        'Check that the selected label matches the first result.'
         best_configuration = record.top_configurations[0]
         best_evidence = record.find_evidence(best_configuration.evidence_id)
         if (
@@ -695,13 +685,11 @@ class StructuredEvidenceRegistryBuilder:
             )
         ):
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record.record_id}, $.label.selected_device): "
-                "migliore configurazione ed evidenza non coerenti."
+                f'Invalid RAG Dataset ({record.record_id}, $.label.selected_device): best configuration and evidence are inconsistent.'
             )
 
     def _validate_links(self, record: EvidenceRecord) -> None:
-        """Controlla tutti i legami tra claim, configurazioni ed evidenze."""
+        'Check all links between claims, configurations and evidence.'
         device_claims = tuple(
             claim
             for claim in record.source_claims
@@ -709,9 +697,7 @@ class StructuredEvidenceRegistryBuilder:
         )
         if len(device_claims) != 1:
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record.record_id}, $.claims): serve un solo claim "
-                "selected_device."
+                f'Invalid RAG Dataset ({record.record_id}, $.claims): exactly one selected_device claim is required.'
             )
         ranked_claim_ids = {
             claim.claim_id
@@ -738,9 +724,7 @@ class StructuredEvidenceRegistryBuilder:
             != expected_ranks
         ):
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record.record_id}, $.label.top_configurations): "
-                "ranghi o claim di configurazione non coerenti."
+                f'Invalid RAG Dataset ({record.record_id}, $.label.top_configurations): inconsistent ranks or configuration claims.'
             )
         if any(
             item.configuration_id
@@ -748,17 +732,14 @@ class StructuredEvidenceRegistryBuilder:
             for item in record.evidence
         ):
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record.record_id}, $.evidence): configurazione fuori catalogo."
+                f'Invalid RAG Dataset ({record.record_id}, $.evidence): configuration not in the catalog.'
             )
         if (
             record.top_configurations[0].evidence_id
             not in device_claims[0].evidence_ids
         ):
             raise EvidenceRegistryDataError(
-                "Dataset RAG non valido "
-                f"({record.record_id}, $.claims): il claim sul dispositivo "
-                "non cita la migliore configurazione storica."
+                f'Invalid RAG Dataset ({record.record_id}, $.claims): the device claim does not cite the best historical configuration.'
             )
         for configuration in record.top_configurations:
             catalog_configuration = self._configuration_catalog.find(
@@ -772,9 +753,7 @@ class StructuredEvidenceRegistryBuilder:
                 != configuration.configuration_id
             ):
                 raise EvidenceRegistryDataError(
-                    "Dataset RAG non valido "
-                    f"({record.record_id}, $.label.top_configurations): "
-                    "configurazione fuori catalogo o ID incoerente."
+                    f'Invalid RAG Dataset ({record.record_id}, $.label.top_configurations): configuration outside the catalog or inconsistent ID.'
                 )
             claim = record.find_claim(configuration.claim_id)
             evidence = record.find_evidence(configuration.evidence_id)
@@ -785,9 +764,7 @@ class StructuredEvidenceRegistryBuilder:
                 or tuple(claim.evidence_ids) != (configuration.evidence_id,)
             ):
                 raise EvidenceRegistryDataError(
-                    "Dataset RAG non valido "
-                    f"({record.record_id}, $.label.top_configurations): "
-                    "legame claim-evidenza non coerente."
+                    f'Invalid RAG Dataset ({record.record_id}, $.label.top_configurations): inconsistent claim/evidence link.'
                 )
             if (
                 evidence is None
@@ -804,16 +781,14 @@ class StructuredEvidenceRegistryBuilder:
                 or configuration.device_id != record.selected_device_id
             ):
                 raise EvidenceRegistryDataError(
-                    "Dataset RAG non valido "
-                    f"({record.record_id}, $.label.top_configurations): "
-                    "configurazione ed evidenza non coerenti."
+                    f'Invalid RAG Dataset ({record.record_id}, $.label.top_configurations): configuration and evidence are inconsistent.'
                 )
 
 
 class JsonDatasetContextRetriever:
-    """Nome storico per il riferimento Manhattan esplicito sul solo JSONL v2.
+    """Legacy name for explicit Manhattan retrieval over v2 JSONL only.
 
-    I vecchi JSON senza provenienza train non sono più ammessi.
+    Older JSON without train provenance is no longer accepted.
     """
 
     def __init__(self, dataset_path: Path, *, required: bool = False, rag_root: Path | None = None) -> None:
@@ -828,7 +803,7 @@ class JsonDatasetContextRetriever:
 
 
 class StructuredPromptBuilder:
-    """Costruisce i dati indipendenti dal servizio che chiamerà l'LLM."""
+    'Build data independently of the service that will call the LLM.'
 
     def __init__(
         self,
@@ -836,7 +811,7 @@ class StructuredPromptBuilder:
         configuration_catalog: ConfigurationCatalog | None = None,
         legacy_contract: bool = False,
     ) -> None:
-        """Configura il catalogo delle opzioni che l'LLM può scegliere."""
+        'Configure the catalog of options available to the LLM.'
         self.legacy_contract = legacy_contract
         self._configuration_catalog = (
             load_catalog(V2_CATALOG_PATH)
@@ -853,7 +828,7 @@ class StructuredPromptBuilder:
         evidence_registry: EvidenceRegistry,
         validation_issues: Sequence[ValidationIssue] = (),
     ) -> PromptEnvelope:
-        """Raccoglie richiesta, hardware, esempi, regole ed errori precedenti."""
+        'Collect the request, hardware, examples, rules and previous errors.'
         available = [
             {
                 "id": profile.device_id,

@@ -1,4 +1,4 @@
-"""Oracle Test separato: identità, persistenza, matrice e aggregazione."""
+'Separate Test oracle: identity, persistence, matrix and aggregation.'
 from __future__ import annotations
 from collections import Counter
 from datetime import datetime, timezone
@@ -42,7 +42,7 @@ def sha(p):
     return h.hexdigest()
 
 def publish(path,value):
-    """Pubblicazione atomica senza sovrascrivere dati esistenti."""
+    'Publish atomically without overwriting existing data.'
     path=Path(path)
     path.parent.mkdir(parents=True,exist_ok=True)
     temp=path.with_name("."+path.name+"."+uuid4().hex+".tmp")
@@ -67,16 +67,16 @@ def publish_bytes(path,content):
 def external_path(value):
     path=Path(value).expanduser().resolve()
     if path.is_relative_to(REPO) or REPO.is_relative_to(path):
-        raise ValueError("L'output deve essere esterno al progetto, non un suo antenato.")
+        raise ValueError('Output must be outside the project and cannot be its ancestor.')
     for parent in (path,*path.parents):
         if (parent/".git").exists() or ((parent/"prototipo").is_dir() and (parent/"archivio").is_dir()):
-            raise ValueError("Non salvare l'oracle dentro un'altra repository.")
+            raise ValueError('Do not save the oracle inside another repository.')
     return path
 
 def preflight(workers=6):
     if sys.platform!="linux" or sys.version_info[:2]!=(3,12):
-        raise ValueError("Eseguire in Linux/WSL con Python 3.12.")
-    if not 1<=workers<=6:raise ValueError("Sono ammessi da 1 a 6 processi esterni.")
+        raise ValueError('Run on Linux/WSL with Python 3.12.')
+    if not 1<=workers<=6:raise ValueError('Between 1 and 6 external workers are allowed.')
     from qiskit import QuantumCircuit
     from qiskit_dataset.catalog import load_catalog,DEFAULT_CATALOG_PATH
     from scripts.mqt_predictor_protocol import target_payload
@@ -87,30 +87,30 @@ def preflight(workers=6):
     frozen_raw=read(frozen_catalog)
     if ({k:v for k,v in live_raw.items() if k!="required_versions"} !=
         {k:v for k,v in frozen_raw.items() if k!="required_versions"}):
-        raise ValueError("Parametri del catalogo diversi da train/validation.")
+        raise ValueError('Catalog parameters differ from train/validation.')
     if any(frozen_raw["required_versions"].get(k)!=v for k,v in catalog.required_versions.items()):
-        raise ValueError("Versioni del catalogo diverse da train/validation.")
+        raise ValueError('Catalog versions differ from train/validation.')
     versions={n:version(n) for n in ("qiskit","mqt.bench","numpy","mqt.predictor")}
     expected={**catalog.required_versions,"mqt.predictor":"2.4.0"}
-    if versions!=expected:raise ValueError(f"Versioni diverse dal catalogo: {versions}; richieste {expected}")
-    if sha(SOURCE)!=SOURCE_SHA:raise ValueError("Manifest sorgenti modificato.")
+    if versions!=expected:raise ValueError(f'Versions differ from the catalog: {versions}; requested {expected}')
+    if sha(SOURCE)!=SOURCE_SHA:raise ValueError('Source manifest changed.')
     rows=sorted((r for r in read(SOURCE)["circuits"] if r["split"]=="test"),key=lambda r:r["circuit_id"])
-    if len(rows)!=90 or len({r["circuit_id"] for r in rows})!=90:raise ValueError("Attesi esattamente 90 Test.")
+    if len(rows)!=90 or len({r["circuit_id"] for r in rows})!=90:raise ValueError('Exactly 90 Test circuits expected.')
     if list(catalog.seeds)!=SEEDS or len(catalog.configurations)!=12 or len(catalog.supported_device_ids)!=5:
-        raise ValueError("Spazio diverso da 5 dispositivi, 12 configurazioni e 3 seed.")
+        raise ValueError('Space differs from 5 devices, 12 configurations and 3 seeds.')
     if catalog.fixed_transpile_options!={"approximation_degree":1.0,"num_processes":1}:
-        raise ValueError("Opzioni Qiskit fisse diverse dal protocollo.")
+        raise ValueError('Fixed Qiskit options differ from the protocol.')
     if catalog.execution_policy!={"workers":6,"timeout_seconds":100}:
-        raise ValueError("Politica del catalogo modificata.")
+        raise ValueError('Catalog policy was modified.')
     devices={}
     for name in catalog.supported_device_ids:
         target=get_device(name);fingerprint=digest(target_payload(target))
-        if fingerprint!=catalog.target_sha256[name]:raise ValueError("Target cambiato: "+name)
+        if fingerprint!=catalog.target_sha256[name]:raise ValueError('Target changed: '+name)
         devices[name]={"num_qubits":target.num_qubits,"sha256":fingerprint}
     for row in rows:
-        if sha(source_path(row))!=row["source_sha256"]:raise ValueError("QASM modificato: "+row["circuit_id"])
+        if sha(source_path(row))!=row["source_sha256"]:raise ValueError('QASM changed: '+row["circuit_id"])
         if QuantumCircuit.from_qasm_file(str(source_path(row))).num_qubits!=row["num_qubits"]:
-            raise ValueError("Numero di qubit incoerente.")
+            raise ValueError('Inconsistent qubit count.')
     code=[HERE/"genera_oracle_test.py",HERE/"oracle_core.py",HERE/"oracle_worker.py",
           TEST_TOOLS/"common.py",TEST_TOOLS/"score.py",PROTO/"qiskit_dataset/catalog.py",
           PROTO/"scripts/mqt_predictor_protocol.py",PROTO/"prototype/quantum_assistant/adapters/compilation.py",
@@ -150,36 +150,36 @@ def prepare(out,identity):
     if path.exists():
         old=read(path)
         if old["identity"]!=identity or old["identity_sha256"]!=digest(identity):
-            raise ValueError("Ripresa incompatibile: preservare la campagna e scegliere una nuova cartella.")
+            raise ValueError('Incompatible resume: preserve this campaign and choose a new directory.')
     else:
-        if any(p.name!=".lock" for p in out.iterdir()):raise ValueError("Cartella non vuota e priva di contratto.")
+        if any(p.name!=".lock" for p in out.iterdir()):raise ValueError('Directory is non-empty and has no contract.')
         publish(path,{"at":now(),"identity_sha256":digest(identity),"identity":identity,"plan":plan_counts(identity),
                       "host":platform.platform(),"cpu_count":os.cpu_count(),"memory_measurement":"not collected"})
     for row in identity["circuits"]:
         dest=out/"sorgenti"/(row["circuit_id"]+".qasm")
         if not dest.exists():publish_bytes(dest,source_path(row).read_bytes())
-        if sha(dest)!=row["source_sha256"]:raise ValueError("Copia QASM dell'oracle alterata.")
+        if sha(dest)!=row["source_sha256"]:raise ValueError('Oracle QASM copy changed.')
     for rel,expected in identity["code_sha256"].items():
         dest=out/"provenienza"/rel
         if not dest.exists():publish_bytes(dest,(REPO/rel).read_bytes())
-        if sha(dest)!=expected:raise ValueError("Copia sorgente non valida.")
+        if sha(dest)!=expected:raise ValueError('Invalid source copy.')
     return read(path)
 
 def validate_result(job,result,folder=None):
     if result.get("job_id")!=job["job_id"] or result.get("status") not in TERMINAL:
-        raise ValueError("Esito con identità/stato non valido.")
-    if result["status"]=="incompatible" and job["compatible"]:raise ValueError("Esclusione incompatibile con il piano.")
+        raise ValueError('Outcome has an invalid identity/status.')
+    if result["status"]=="incompatible" and job["compatible"]:raise ValueError('Exclusion is incompatible with the plan.')
     if result["status"]=="success":
         score=result.get("score")
         if not job["compatible"] or isinstance(score,bool) or not isinstance(score,(int,float)) or not math.isfinite(score) or not 0<=score<=1:
-            raise ValueError("Score non valido.")
+            raise ValueError('Invalid score.')
         for key in ("source_sha256","target_sha256","seed","config_id","device"):
-            if result.get(key)!=job[key]:raise ValueError("Provenienza/configurazione dell'esito non valida.")
-        if not result.get("validation",{}).get("is_executable_on_target"):raise ValueError("Target non validato.")
-        if result.get("timings",{}).get("total",math.inf)>job["timeout_seconds"]:raise ValueError("Risultato oltre il limite.")
+            if result.get(key)!=job[key]:raise ValueError('Invalid outcome provenance/configuration.')
+        if not result.get("validation",{}).get("is_executable_on_target"):raise ValueError('Target was not validated.')
+        if result.get("timings",{}).get("total",math.inf)>job["timeout_seconds"]:raise ValueError('Result exceeds the limit.')
         if folder is not None and sha(folder/"compiled.qasm")!=result["compiled_sha256"]:
-            raise ValueError("Circuito compilato alterato.")
-    elif result.get("score") is not None:raise ValueError("Un esito non riuscito deve avere score nullo.")
+            raise ValueError('Compiled circuit was modified.')
+    elif result.get("score") is not None:raise ValueError('An unsuccessful outcome must have a null score.')
     return result
 
 def terminal(job,status,reason,**extra):
@@ -191,21 +191,21 @@ def resolve_existing(folder,job):
     if result_path.exists():
         result=validate_result(job,read(result_path),folder)
         if (folder/"inizio.json").exists() and read(folder/"inizio.json")["job"]!=job:
-            raise ValueError("Piano del tentativo cambiato.")
+            raise ValueError('Attempt plan changed.')
         return result
     if not (folder/"inizio.json").exists():return None
-    if read(folder/"inizio.json")["job"]!=job:raise ValueError("Tentativo interrotto con piano differente.")
+    if read(folder/"inizio.json")["job"]!=job:raise ValueError('Interrupted attempt has a different plan.')
     if (folder/"worker_result.json").exists():
         result={**validate_result(job,read(folder/"worker_result.json"),folder),"recovered_persisted_result":True}
     else:
-        result=terminal(job,"interrupted","Interruzione precedente; nessuna ripetizione automatica.")
+        result=terminal(job,"interrupted",'Previous interruption; no automatic retry.')
     publish(result_path,result)
     return result
 
 def aggregate_rows(identity,records):
-    """Una cella mancante/errata non diventa score zero."""
+    'A missing/failed cell never becomes a zero score.'
     all_jobs=list(jobs(identity))
-    if set(records)-{j["job_id"] for j in all_jobs}:raise ValueError("Esiti estranei al piano.")
+    if set(records)-{j["job_id"] for j in all_jobs}:raise ValueError('Outcomes do not belong to the plan.')
     grouped={}
     for job in all_jobs:
         r=records.get(job["job_id"])

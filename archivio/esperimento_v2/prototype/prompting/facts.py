@@ -1,4 +1,4 @@
-"""Contratto v4: fatti controllabili e ipotesi libera, senza score di valutazione."""
+'v4 contract: checkable facts and a free hypothesis, without evaluation scores.'
 from __future__ import annotations
 import copy
 import json

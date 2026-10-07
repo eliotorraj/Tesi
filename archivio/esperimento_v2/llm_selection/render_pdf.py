@@ -1,4 +1,4 @@
-"""Esporta tutte le pagine del PDF in PNG per il controllo visivo."""
+'Export every PDF page to PNG for visual inspection.'
 import argparse
 from pathlib import Path
 def main():
@@ -9,5 +9,5 @@ def main():
     with pymupdf.open(args.pdf) as document:
         for index,page in enumerate(document):
             page.get_pixmap(matrix=pymupdf.Matrix(1.5,1.5),alpha=False).save(args.output/f"pagina-{index+1:03}.png")
-        print(f"PDF: {len(document)} pagine; anteprime in {args.output}")
+        print(f'PDF: {len(document)} pages; previews in {args.output}')
 if __name__=="__main__": main()

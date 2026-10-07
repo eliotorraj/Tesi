@@ -1,9 +1,9 @@
-"""Argomenti condivisi fra l'avviatore LLM e il comando esperimento.py server."""
+'Arguments shared by the LLM launcher and esperimento.py server.'
 def add_arguments(parser):
-    parser.add_argument("modello", nargs="?", help="ID del candidato attivo")
-    parser.add_argument("--bin", help="Eseguibile Linux; prevale sul percorso salvato")
-    parser.add_argument("--device", help="Identificativo GPU esposto da llama.cpp")
-    parser.add_argument("--list-devices", action="store_true", help="Elenca i dispositivi del backend, senza caricare il GGUF")
-    parser.add_argument("--gpu-layers", type=int, help="Strati su GPU; prevale sul profilo salvato")
-    parser.add_argument("--threads", type=int, help="Thread; prevale sul profilo salvato")
-    parser.add_argument("--controlla", action="store_true", help="Verifica identità e contesto del server già avviato")
+    parser.add_argument("modello", nargs="?", help='Active candidate ID')
+    parser.add_argument("--bin", help='Linux executable; overrides the saved path')
+    parser.add_argument("--device", help='GPU identifier exposed by llama.cpp')
+    parser.add_argument("--list-devices", action="store_true", help='List backend devices without loading the GGUF')
+    parser.add_argument("--gpu-layers", type=int, help='GPU layers; overrides the saved profile')
+    parser.add_argument("--threads", type=int, help='Threads; overrides the saved profile')
+    parser.add_argument("--controlla", action="store_true", help='Check identity and context of an already running server')

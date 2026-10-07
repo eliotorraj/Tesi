@@ -1,98 +1,59 @@
-# Riassunto del progetto e dei concetti MQT
+# Project context and MQT concepts
 
-Aggiornamento documentale: **15 settembre 2026**.
-Per lo stato verificato e la prossima attività leggere il [README principale](../README.md).
-Per le regole usare solo il [protocollo sperimentale](../docs/protocollo_sperimentale.md).
+Use the [repository README](../../../README.md) for current navigation and the [current experimental protocol](../../../prototipo/docs/protocollo_sperimentale.md) for scientific rules. The [archived protocol](../docs/protocollo_sperimentale.md) and dated records explain earlier work; they are not instructions to reopen completed experiments.
 
-## Obiettivo della tesi
+## Purpose and current organization
 
-Valutare se un modello linguistico, aiutato da esempi di compilazioni precedenti,
-riesce a scegliere un dispositivo e una configurazione Qiskit di buona qualità.
-La scelta viene confrontata con lo stesso LLM senza esempi, un LLM di frontiera,
-MQT Predictor, configurazioni Qiskit fisse e una scelta casuale.
+QAdviser evaluates whether an LLM supported by earlier compilation examples can choose a useful quantum device and Qiskit configuration. The completed comparisons include the selected LLM with and without RAG, random example retrieval, Random and MQT Predictor. Earlier plans also discussed a frontier LLM and fixed Qiskit baselines; a planned comparison must not be described as completed without its records.
 
-Il lavoro attuale usa MQT Predictor **2.4.0**, Python **3.12** e le dipendenze
-esatte di `uv.lock`. I risultati della versione 2.3.0 sono storici.
+The pinned experiment uses MQT Predictor **2.4.0**, Python **3.12** and the exact dependencies in `uv.lock`. MQT Predictor 2.3.0 results are historical. `prototipo/` is the standalone selected system; `riproducibilita/` supports new campaigns; `archivio/` preserves sources, experiments and provenance.
 
-## Le distinzioni da mantenere
+## Terminology
 
-| Termine | Significato nel progetto |
+| Term | Meaning in this project |
 | --- | --- |
-| Dataset | Esempi destinati al RAG o a un eventuale adattamento dell'LLM. |
-| Training set | Dati circuito-dispositivo per il selettore supervisionato di MQT Predictor. |
-| Train | Circuiti dai quali ricaviamo esempi e dati di apprendimento. |
-| Validation | Circuiti usati per scegliere la configurazione prima del confronto finale. |
-| Test | Circuiti riservati alla valutazione finale, ancora protetti dalle condizioni di apertura. |
-| Prova tecnica | Controllo del funzionamento, senza conclusioni sulla generalizzazione. |
+| Dataset | Examples for RAG or possible LLM adaptation. |
+| Training set | Circuit/device data used to train MQT Predictor's supervised selector. |
+| Train | Circuits supplying examples and learning data. |
+| Validation | Circuits used to select a configuration before the main comparison. |
+| Test | Circuits reserved for the main evaluation; subsequent analyses of the same cases do not constitute a new unseen test. |
+| Technical check | A software or resource check, without conclusions about generalization. |
 
-Le valutazioni delle coppie circuito-dispositivo servono a ricavare l'etichetta
-del selettore: nella tabella supervisionata finale ogni circuito ha come
-etichetta il dispositivo migliore tra quelli valutati.
+Circuit/device evaluations determine selector labels: each final supervised row labels a circuit with the best device among those evaluated. Distinguish the intended 396 unique train samples from the actual 384-sample selector used in the archived MQT comparison.
 
-## I due lavori MQT
+## Two different MQT papers
 
-**Paper del 2023.** Il modello supervisionato predice una configurazione che
-comprende tecnologia, dispositivo, compilatore e impostazioni.
+**2023 compilation-option predictor:** a supervised model predicts a configuration covering technology, device, compiler and settings.
 
-**Architettura MQT Predictor del 2025.** Il modello supervisionato sceglie il
-dispositivo. Una politica di apprendimento per rinforzo (RL), specifica del
-dispositivo e della metrica, sceglie poi i passaggi di compilazione.
-
-Il flusso MQT è quindi:
+**2025 MQT Predictor architecture:** a supervised model selects the device. A device- and metric-specific reinforcement learning policy then selects compilation passes.
 
 ```text
-circuito → caratteristiche → selettore ML → dispositivo → compilatore RL
+MQT: circuit → features → ML selector → device → RL compiler
+
+QAdviser: circuit and constraints → compatible devices → RAG examples
+          → LLM choice → checks → Qiskit compilation
 ```
 
-Il flusso del nostro assistente usa invece esempi di compilazioni Qiskit:
+The comparison does not establish universal superiority. QAdviser offers greater coverage under the recorded timeout conditions; MQT has higher mean scores on shared successful cases. LLM fine-tuning is not a completed phase of this experiment.
 
-```text
-circuito e vincoli → dispositivi compatibili → esempi RAG
-                 → scelta LLM → controlli → compilazione Qiskit
-```
+## Meaning of quality
 
-Il progetto non ha dimostrato che uno dei due metodi sia superiore all'altro.
-Il fine-tuning dell'LLM non è una fase già eseguita dell'esperimento corrente.
+A source circuit is device independent and must be adapted to the selected hardware's allowed operations and connectivity. `expected_fidelity` combines operation and readout fidelities. These experiments use synthetic MQT Bench Targets, not execution on a real quantum computer.
 
-## Che cosa significa qualità
+A device is better for a particular circuit, metric, hardware description and compilation procedure. Changing any of these can change selector labels. A smoke-trained model demonstrates that the pipeline runs; it does not establish good compilation quality. Installing MQT Predictor alone does not supply the trained RL policies and supervised selector required by `qcompile`.
 
-Un circuito sorgente è ancora indipendente dal dispositivo: deve essere
-adattato alle operazioni e ai collegamenti consentiti dall'hardware scelto.
+## Corpus and retrieval
 
-La metrica `expected_fidelity` stima la qualità combinando le fedeltà delle
-operazioni e della lettura. Nel nostro esperimento si usano Target sintetici
-di MQT Bench: non si misura un'esecuzione su un computer quantistico reale.
+The frozen corpus has 600 source circuits, split into 422 train, 88 validation and 90 Test entries. The train Dataset contains 396 unique records. Within this archived experiment, Dataset files and artifacts are under `datasets/experiments/` and `artifacts/experiments/`.
 
-Un dispositivo “migliore” è migliore per quel circuito, quella metrica,
-quelle proprietà hardware e quella procedura di compilazione. Cambiando questi
-elementi possono cambiare anche le etichette del selettore.
+The original corpus in `archivio/protocollo_v1/datasets/expected_fidelity/full/` still verifies provenance. Its old scores are not reused as v2 results. Frozen manifest paths are logical references resolved by the source resolver; do not rewrite them to match a later directory layout.
 
-Un modello addestrato solo per una prova minima dimostra che la procedura
-funziona; non dimostra buona qualità di compilazione.
+The selected RAG uses train examples from the global view. It compares 49 numerical circuit features using Manhattan distance after transformations and scaling fitted on train only. Local Qdrant stores the derived index. The current circuit's evaluation score does not enter its prompt or evidence.
 
-## Dati e recupero correnti
+## History and sources
 
-Il corpus contiene 600 circuiti sorgente. Il Dataset corrente e gli artefatti
-si trovano sotto `datasets/experiments/` e `artifacts/experiments/`.
-Il corpus originale in `archivio/protocollo_v1/datasets/expected_fidelity/full/`
-serve ancora a verificarne la provenienza; i suoi vecchi punteggi non vengono riusati.
+The earlier summary combined theory and conversations in more than 6000 lines. Its full text remains in the [history through 9 September](../docs/resoconti/cronologia_progetto_fino_al_9_settembre_2026.md), including TuniQ comparisons and reasons for early decisions. Read its commands and statuses in their historical context.
 
-Il RAG usa solo gli esempi train della vista globale. Confronta 49 caratteristiche
-numeriche del circuito, con trasformazione e scala ricavate solo dal train,
-tramite distanza Manhattan. Qdrant locale conserva l'indice derivato.
-Non si usano gli score del circuito da valutare per suggerire la sua risposta.
+Papers are listed in the [knowledge README](README.md). Archived technical guides are in [docs/approfondimenti/](../docs/approfondimenti/README.md), and dated evidence is in [docs/resoconti/](../docs/resoconti/README.md).
 
-## Storia e fonti
-
-Il precedente riassunto univa teoria e molte conversazioni in oltre 6.000 righe.
-Il testo originale è conservato integralmente nella
-[cronologia fino al 9 settembre](../docs/resoconti/cronologia_progetto_fino_al_9_settembre_2026.md).
-Contiene anche il confronto storico con TuniQ e motivazioni delle prime scelte;
-i suoi comandi e stati vanno letti nel loro contesto temporale.
-
-Gli articoli sono elencati nel [README delle fonti](README.md).
-Le guide tecniche sono in [docs/approfondimenti/](../docs/approfondimenti/README.md).
-I resoconti delle prove recenti sono in [docs/resoconti/](../docs/resoconti/README.md).
-
-Distinguere sempre fatti degli articoli, comportamento del software fissato
-nel progetto e decisioni sperimentali della tesi.
+Always distinguish claims from papers, behavior of the pinned software and this project's engineering or experimental choices. For future API or installation changes, consult official MQT documentation and package metadata rather than assuming that a paper describes the installed release.

@@ -1,4 +1,4 @@
-"""Confronto riproducibile train, senza inferenza: prepara file per llama-tokenize."""
+'Reproducible train comparison without inference: prepare llama-tokenize inputs.'
 from __future__ import annotations
 import argparse
 import copy

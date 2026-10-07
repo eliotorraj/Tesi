@@ -1,4 +1,4 @@
-"""Diagnostica del conteggio; usa esclusivamente un prompt tecnico train."""
+'Token-count diagnostics using a technical train prompt only.'
 import json
 from tokenizers import Tokenizer
 from .common import OUTPUT, write_json, now

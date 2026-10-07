@@ -1,4 +1,4 @@
-"""Avvio Linux di Qwen: CPU o GPU riconosciute da llama.cpp, senza dipendenze Windows."""
+'Start Qwen on Linux with a CPU or llama.cpp-supported GPU, without Windows dependencies.'
 from __future__ import annotations
 import argparse
 import datetime
@@ -25,19 +25,19 @@ def sha256(path):
 
 
 def available_memory():
-    """RAM disponibile vista dal kernel Linux, senza contare lo swap."""
+    'Available RAM reported by the Linux kernel, excluding swap.'
     for line in Path("/proc/meminfo").read_text().splitlines():
         if line.startswith("MemAvailable:"):
             return int(line.split()[1]) * 1024
-    raise RuntimeError("MemAvailable non disponibile: impossibile verificare il margine RAM")
+    raise RuntimeError('MemAvailable is unavailable: cannot verify RAM headroom')
 
 
 def check_model(path):
     artifact = json.loads((ROOT / "config.json").read_text())["profile"]["artifact"]
     if not path.is_file():
-        raise ValueError("GGUF assente: seguire docs/guida_passo_passo.md")
+        raise ValueError('GGUF missing: follow docs/guida_passo_passo.md')
     if path.stat().st_size != artifact["size_bytes"] or sha256(path) != artifact["gguf_sha256"]:
-        raise ValueError("Dimensione o SHA-256 del GGUF diversi da config.json")
+        raise ValueError('GGUF size or SHA-256 differs from config.json')
     return artifact["gguf_sha256"]
 
 
@@ -66,38 +66,38 @@ def write_json(path, value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", type=Path)
-    parser.add_argument("--bin", default="llama-server", help="Eseguibile compilato per Linux")
+    parser.add_argument("--bin", default="llama-server", help='Executable built for Linux')
     parser.add_argument("--profile", choices=PROFILES, default="cpu")
-    parser.add_argument("--device", help="Identificativo restituito da --list-devices; non il nome di un Target quantistico")
-    parser.add_argument("--gpu-layers", default="all", help="all oppure numero di strati, per gpu/desktop")
+    parser.add_argument("--device", help='Identifier returned by --list-devices, not a quantum Target name')
+    parser.add_argument("--gpu-layers", default="all", help='all or a layer count, for gpu/desktop')
     parser.add_argument("--threads", type=int, default=min(6, os.cpu_count() or 1))
     parser.add_argument("--port", type=int, default=8089)
-    parser.add_argument("--list-devices", action="store_true", help="Mostra i dispositivi di questo eseguibile senza caricare pesi")
-    parser.add_argument("--dry-run", action="store_true", help="Verifica pesi e RAM, stampa il comando senza avviare il modello")
+    parser.add_argument("--list-devices", action="store_true", help="List this executable's devices without loading weights")
+    parser.add_argument("--dry-run", action="store_true", help='Check weights and RAM, then print the command without loading the model')
     args = parser.parse_args()
     if platform.system() != "Linux":
-        parser.error("Usare Linux/WSL; sul fisso Windows restano disponibili gli avviatori .ps1")
+        parser.error('Use Linux/WSL; Windows desktop launchers remain available as .ps1 scripts')
     executable = shutil.which(args.bin)
     if not executable:
-        parser.error("llama-server non trovato: passare --bin /percorso/llama-server")
+        parser.error('llama-server not found: pass --bin /path/to/llama-server')
     executable = str(Path(executable).resolve())
     if args.list_devices:
         return subprocess.run([executable, "--list-devices"]).returncode
     if args.model is None:
-        parser.error("Specificare --model /percorso/Qwen3.5-4B-Q8_0.gguf")
+        parser.error('Specify --model /path/to/Qwen3.5-4B-Q8_0.gguf')
     if args.threads < 1 or not 1 <= args.port <= 65535:
-        parser.error("Thread positivi e porta fra 1 e 65535 richiesti")
+        parser.error('Positive thread count and a port between 1 and 65535 are required')
     if args.profile == "cpu" and (args.device or args.gpu_layers != "all"):
-        parser.error("Il profilo cpu impone device=none e zero strati GPU; usare gpu o desktop per accelerare")
+        parser.error('The cpu profile requires device=none and zero GPU layers; use gpu or desktop for acceleration')
     if args.gpu_layers != "all" and (not args.gpu_layers.isdigit() or int(args.gpu_layers) < 1):
-        parser.error("Per GPU usare all oppure un numero positivo di strati")
+        parser.error('For GPU, use all or a positive layer count')
     model = args.model.expanduser().resolve()
-    print("Verifica completa del GGUF; può richiedere tempo...", flush=True)
+    print('Checking the entire GGUF file; this may take time...', flush=True)
     model_hash = check_model(model)
     free = available_memory()
     minimum = (9 if args.profile == "cpu" else 2) * GIB
     if free < minimum:
-        raise RuntimeError(f"RAM disponibile {free/GIB:.1f} GiB; richiesti {minimum/GIB:.0f} GiB liberi prima dell'avvio")
+        raise RuntimeError(f'Available RAM {free / GIB:.1f} GiB; required {minimum / GIB:.0f} GiB free before startup')
     revision = subprocess.run([executable, "--version"], capture_output=True, text=True, check=True, timeout=30)
     devices = subprocess.run([executable, "--list-devices"], capture_output=True, text=True, check=True, timeout=30)
     command = command_for(args, executable, model)
@@ -108,7 +108,7 @@ def main():
         try:
             probe.bind(("127.0.0.1", args.port))
         except OSError as error:
-            raise RuntimeError("Porta occupata: verificare il server già presente oppure cambiare --port") from error
+            raise RuntimeError('Port in use: inspect the existing server or change --port') from error
     folder = ROOT / "runtime" / "server-runs" / (datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%S") + "-" + uuid4().hex[:8])
     folder.mkdir(parents=True)
     write_json(folder / "launch.json", {"command": command, "profile": args.profile,
@@ -116,8 +116,8 @@ def main():
                "binary_sha256": sha256(executable), "version": revision.stdout + revision.stderr,
                "available_devices": devices.stdout + devices.stderr, "platform": platform.platform(),
                "available_before_bytes": free, "gpu_temperature_monitor": False,
-               "note": "Rilevamento del backend; temperatura GPU, memoria GPU ed energia non misurate"})
-    print(f"Registri server: {folder}\nAttendere /health con status=ok. Ctrl+C arresta questo server.", flush=True)
+               "note": 'Backend detection; GPU temperature, GPU memory and energy are not measured'})
+    print(f'Server records: {folder}\nWait for /health to return status=ok. Ctrl+C stops this server.', flush=True)
     proc = None
     reason = "launch_failure"
     try:

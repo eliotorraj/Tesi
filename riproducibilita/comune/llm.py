@@ -1,4 +1,4 @@
-"""Modelli sostituibili, identità del server, prompt e registri delle decisioni."""
+'Replaceable models, server identity, prompts and decision records.'
 from pathlib import Path, PureWindowsPath
 import json, math, os, platform, random, shutil, subprocess, time, urllib.request
 import settings as s
@@ -7,23 +7,23 @@ def freeze_models():
     result={}
     for id,model in s.model_registry().items():
         p=Path(model["path"])
-        if not p.is_file():raise ValueError("GGUF mancante: "+str(p)+"; inserire i pesi oppure rimuovere il candidato dal registro prima del congelamento")
+        if not p.is_file():raise ValueError('Missing GGUF: '+str(p)+'; supply weights or remove the candidate from the registry before freezing')
         observed=s.sha(p)
-        if model.get("sha256") and model["sha256"]!=observed:raise ValueError("Hash GGUF diverso: "+id)
+        if model.get("sha256") and model["sha256"]!=observed:raise ValueError('GGUF hash differs: '+id)
         temperatures=model.get("temperatures",s.CONFIG["temperatures"])
-        if not temperatures or len(temperatures)!=len(set(temperatures)) or any(not isinstance(t,(float,int)) or not math.isfinite(t) or t<0 for t in temperatures):raise ValueError("Temperature non valide")
-        if not 0<int(model["max_output_tokens"])<int(model["context"]):raise ValueError("Budget token non valido")
+        if not temperatures or len(temperatures)!=len(set(temperatures)) or any(not isinstance(t,(float,int)) or not math.isfinite(t) or t<0 for t in temperatures):raise ValueError('Invalid temperatures')
+        if not 0<int(model["max_output_tokens"])<int(model["context"]):raise ValueError('Invalid token budget')
         result[id]={**model,"sha256":observed,"size_bytes":p.stat().st_size,"temperatures":temperatures}
     return result
 
 def verify_server(model):
     path=Path(model["path"])
-    if s.sha(path)!=model["sha256"]:raise ValueError("Pesi cambiati dopo il congelamento")
+    if s.sha(path)!=model["sha256"]:raise ValueError('Weights changed after freezing')
     url=model["url"].rstrip('/')
-    if not url.startswith(("http://127.0.0.1:","http://localhost:")):raise ValueError("Usare un server llama.cpp locale")
+    if not url.startswith(("http://127.0.0.1:","http://localhost:")):raise ValueError('Use a local llama.cpp server')
     curl=shutil.which("curl.exe")
     if model.get("transport","native")=="windows":
-        if not curl:raise ValueError("curl.exe Windows non disponibile")
+        if not curl:raise ValueError('Windows curl.exe unavailable')
         response=subprocess.run([curl,"--silent","--show-error","--fail","--max-time","20",url+"/props"],capture_output=True,check=True)
         props=json.loads(response.stdout)
     else:
@@ -31,10 +31,10 @@ def verify_server(model):
     served=props.get("model_path","");served_path=Path(served)
     if os.name=="posix" and PureWindowsPath(served).drive:
         win=PureWindowsPath(served);served_path=Path('/mnt')/win.drive[0].lower()/Path(*win.parts[1:])
-    if not served_path.is_file() or s.sha(served_path)!=model["sha256"]:raise ValueError("Non è verificabile l'identità del modello servito: "+served)
+    if not served_path.is_file() or s.sha(served_path)!=model["sha256"]:raise ValueError("Cannot verify the served model's identity: "+served)
     allocated=props.get("default_generation_settings",{}).get("n_ctx",props.get("n_ctx"))
     requested=int(model["context"])
-    if allocated not in (requested,((requested+255)//256)*256):raise ValueError("Contesto del server diverso da quello congelato")
+    if allocated not in (requested,((requested+255)//256)*256):raise ValueError('Server context differs from the frozen value')
     return props
 
 def prepare(qasm,method="llm_rag",k=5,wl=None):
@@ -50,7 +50,7 @@ def prepare(qasm,method="llm_rag",k=5,wl=None):
     from dag_wl_core import request_context
     start=time.perf_counter();catalog,request,mask=request_context(qasm);corpus=load_corpus()
     candidates=sorted(matching_records(corpus,devices=mask.available_device_ids,objective=request.figure_of_merit,experiment_id=s.EXPERIMENT_ID),key=lambda x:x["rag_id"])
-    if len(candidates)<k:raise ValueError("Esempi compatibili insufficienti")
+    if len(candidates)<k:raise ValueError('Insufficient compatible examples')
     seed=int(s.digest({"seed":s.CONFIG["random_seed"],"qasm":qasm}),16)
     chosen=random.Random(seed).sample(candidates,k)
     examples=tuple(as_example(x,0.) for x in chosen)
@@ -92,7 +92,7 @@ def decision(row,folder,model,temperature,method="llm_rag",k=5,wl=None):
         if method=='llm_wl_sintesi':
             from prototype.prompting.toon import encode_view,decode_view
             summary=prompt['dag_summaries'];encoded=encode_view(summary)
-            if decode_view(encoded)!=summary:raise ValueError('Sintesi TOON non reversibile')
+            if decode_view(encoded)!=summary:raise ValueError('TOON summary is not reversible')
             def with_summary(*args,**kwargs):
                 msgs=original_messages(*args,**kwargs)
                 msgs[-1]['content']+='\nDAG summaries (not predicted scores):\n'+encoded

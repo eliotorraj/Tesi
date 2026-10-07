@@ -1,4 +1,4 @@
-"""Confronto dai registri conservati: nessuna inferenza o compilazione quantistica."""
+'Comparison from preserved records without inference or quantum compilation.'
 from pathlib import Path
 from collections import Counter
 import argparse
@@ -171,7 +171,7 @@ def collect():
                       "losses":sum(d< -1e-12 for d in ds),
                       "same_pair":sum(byid[a][c]["choice_pair"]==byid[b][c]["choice_pair"] for c in common)})
     groups=[]
-    for label,lo,hi in [("Fino a 5",0,5),("Da 6 a 16",6,16),("Oltre 16",17,10000)]:
+    for label,lo,hi in [('Up to 5',0,5),('6 to 16',6,16),('Over 16',17,10000)]:
         chosen=[c for c in ids if lo<=byid["M"][c]["num_qubits"]<=hi]
         groups.append({"label":label,"n":len(chosen),"score":{k:stats([byid[k][c]["score"] for c in chosen]) for k in runs}})
     changed=[c for c in ids if len({byid[k][c]["score"] for k in runs})>1]
@@ -191,13 +191,13 @@ def collect():
             "retrieval_ids":retrieval,"preparation":preparation,"example":examples,
             "validation":read(REPO/"archivio/valutazione/validation_dag_wl/esecuzioni/wl_v3/riepilogo.json"),
             "selection":read(REPO/"archivio/valutazione/validation_dag_wl/selezioni/wl_v3/wl_h24.json"),
-            "scope":"Analisi descrittiva: h selezionato su 88 validation, confronto finale sugli stessi 90 Test; baseline storica riutilizzata."}
+            "scope":'Descriptive analysis: h selected on 88 validation cases, final comparison on the same 90 Test circuits; historical baseline reused.'}
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--output",type=Path,default=Path(__file__).parent)
     args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
     if (args.output/"dati.json").exists():
-        raise ValueError("Dati già presenti: scegliere una nuova cartella --output.")
+        raise ValueError('Data already exists: choose a new --output directory.')
     data=collect();dump(args.output/"dati.json",data)
     tables=args.output/"tabelle";tables.mkdir()
     fields=["k","index","circuit_id","num_qubits","status",*METRICS,"facts_status","facts_verified","facts_total","device","config_id"]

@@ -52,12 +52,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--deep-load",
         action="store_true",
-        help="Carica sequenzialmente i tensori PPO con SB3 2.9.0 oltre all'audit ZIP.",
+        help='Load PPO tensors sequentially with SB3 2.9.0 in addition to the ZIP audit.',
     )
     parser.add_argument(
         "--no-write",
         action="store_true",
-        help="Mostra il risultato senza scrivere il report JSON.",
+        help='Show the result without writing the JSON report.',
     )
     return parser.parse_args()
 
@@ -152,7 +152,7 @@ def tensorboard_summary(log_dir: Path, device_name: str) -> dict[str, Any]:
     try:
         from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
     except ImportError:
-        return {"available": False, "error": "tensorboard non installato"}
+        return {"available": False, "error": 'tensorboard is not installed'}
 
     model_dir = log_dir / f"model_{FIGURE_OF_MERIT}_{device_name}"
     tags = (
@@ -248,7 +248,7 @@ def audit_device(
             loaded = json.loads(training_metadata_path.read_text(encoding="utf-8"))
             training_metadata = loaded if isinstance(loaded, dict) else None
             if training_metadata is None:
-                metadata_error = "metadata non rappresentati da un oggetto JSON"
+                metadata_error = 'metadata is not a JSON object'
         except (OSError, json.JSONDecodeError) as error:
             metadata_error = f"{type(error).__name__}: {error}"
 
@@ -259,11 +259,11 @@ def audit_device(
 
     reasons: list[str] = []
     if archive_errors:
-        reasons.append("checkpoint strutturalmente non valido")
+        reasons.append('structurally invalid checkpoint')
     if deep_errors:
-        reasons.append("checkpoint non caricabile con il runtime 2.4.0")
+        reasons.append('checkpoint cannot be loaded by the 2.4.0 runtime')
     if training_metadata is None:
-        reasons.append("mancano metadati che attestino un training MQT Predictor 2.4.0")
+        reasons.append('metadata attesting MQT Predictor 2.4.0 training is missing')
     else:
         expected_metadata = {
             "bqskit_profile": EXPECTED_RL_BQSKIT_PROFILE,
@@ -277,8 +277,7 @@ def audit_device(
         for field, expected in expected_metadata.items():
             if training_metadata.get(field) != expected:
                 reasons.append(
-                    f"metadato {field} incoerente: "
-                    f"atteso={expected!r}, osservato={training_metadata.get(field)!r}"
+                    f'metadata field {field} is inconsistent: expected={expected!r}, observed={training_metadata.get(field)!r}'
                 )
         target_metadata = training_metadata.get("target")
         if (
@@ -286,15 +285,15 @@ def audit_device(
             or target_metadata.get("target_sha256")
             != FROZEN_TARGET_SHA256[device_name]
         ):
-            reasons.append("fingerprint Target dei metadati non conforme")
+            reasons.append('metadata Target fingerprint mismatch')
         if training_metadata.get("num_timesteps") != archive.get("num_timesteps"):
-            reasons.append("num_timesteps dei metadati diverso dall'archivio SB3")
+            reasons.append('metadata num_timesteps differs from the SB3 archive')
     if evidence["strict_success_rate"] < MIN_HISTORICAL_SUCCESS_RATE:
         reasons.append(
-            "copertura di compilazioni RL rigorosamente validate inferiore al 95%"
+            'strictly validated RL compilation coverage below 95%'
         )
     if evidence["raw_success_rate"] < MIN_HISTORICAL_SUCCESS_RATE:
-        reasons.append("tasso storico di compilazioni riuscite inferiore al 95%")
+        reasons.append('historical successful-compilation rate is below 95%')
 
     result: dict[str, Any] = {
         "device": device_name,
@@ -347,10 +346,7 @@ def main() -> int:
     for item in results:
         evidence = item["compilation_evidence"]
         print(
-            f"{item['device']:<22} {item['recommendation'].upper():<7} "
-            f"step={item['archive'].get('num_timesteps', '?')} "
-            f"successi_storici={evidence['raw_successes']}/{evidence['pairs']} "
-            f"successi_strict={evidence['strict_successes']}/{evidence['pairs']}"
+            f"{item['device']:<22} {item['recommendation'].upper():<7} step={item['archive'].get('num_timesteps', '?')} historical_successes={evidence['raw_successes']}/{evidence['pairs']} strict_successes={evidence['strict_successes']}/{evidence['pairs']}"
         )
         for reason in item["reasons"]:
             print(f"  - {reason}")

@@ -1,4 +1,4 @@
-"""Installa Node e TOON nelle cartelle del progetto, senza cambiare l'ambiente MQT."""
+'Install Node and TOON in project directories without changing the MQT environment.'
 from pathlib import Path
 import hashlib
 import json

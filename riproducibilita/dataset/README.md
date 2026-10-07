@@ -1,9 +1,13 @@
-# Generazione del Dataset per il RAG
+# RAG Dataset generation
 
-`genera.py` pianifica la griglia su train e validation. `qiskit_dataset/` contiene catalogo, compilazione, aggregazione e costruzione degli esempi. `schemi/` conserva i contratti JSON. I tentativi e gli aggregati finiscono in `artefatti/<id>/`.
+`genera.py` plans train and validation grids. `qiskit_dataset/` implements catalog loading, compilation, aggregation and example generation. `schemi/` defines JSON contracts. [artefatti/](artefatti/README.md) links to the Dataset generation documentation.
 
-Dopo setup e `prepara`, da `riproducibilita/` eseguire `.venv/bin/python -B esperimento.py dataset`. La procedura conserva successi, errori e timeout. Le mediane eleggibili richiedono i tre seed riusciti. Soltanto train entra negli esempi e nella trasformazione RAG; la matrice validation serve al valutatore dopo le decisioni.
+After setup and preparation, from the toolkit root:
 
-Il pacchetto train sigillato è in `esecuzioni/<id>/data/`. `--split train`, `--split validation` e `--aggrega` permettono di separare le fasi. La generazione usa CPU e RAM per Qiskit, non il server Qwen. Il parallelismo va fissato prima della prova in base alla memoria. Questo Dataset è distinto dal Training set MQT.
+```bash
+python esperimento.py --esperimento my-trial dataset
+```
 
-Con le configurazioni nominate usa `python esperimento.py --esperimento NOME dataset`. Target, configurazioni Qiskit e processi si scelgono prima di `prepara` con `configura.py dispositivi`, `compilazioni` e `risorse`; gli schemi descrivono i formati, non sono i file da editare per personalizzare una prova.
+`--split train`, `--split validation` and `--aggrega` separate stages. Successes, errors and timeouts are recorded. Eligible medians require all three successful seeds. Only train enters retrieval examples and feature scaling. Validation scores are reserved for evaluation after decisions are sealed.
+
+Generation uses Qiskit CPU/RAM resources, not the LLM server. Configure devices, options and workers before preparation. This Dataset is separate from the MQT Training set. See the [guide](../documentazione/guida.md).

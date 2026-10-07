@@ -1,4 +1,4 @@
-"""Indica i passaggi presenti su disco; non avvia né promuove una prova."""
+'Show phases present on disk without starting or promoting a run.'
 import os
 import shlex
 import settings as s
@@ -11,51 +11,51 @@ def show():
     base = ".venv/bin/python esperimento.py " + choose
     if "RIPRO_OUTPUT" in os.environ:
         base += " --output " + shlex.quote(str(s.OUTPUT))
-    print("Esperimento:", name)
-    print("Risultati:", s.OUTPUT)
+    print('Experiment:', name)
+    print('Results:', s.OUTPUT)
     files = [
-        ("Corpus e Target preparati", s.WORK / "ingressi_sigillati.json"),
-        ("Dataset train/validation sigillato", s.WORK / "data/seal.json"),
-        ("Griglia LLM congelata", s.VALIDATION / "contratto.json"),
-        ("LLM e temperatura selezionati", s.VALIDATION / "selezione.json"),
-        ("Prove tecniche MQT superate", s.MQT / "prove_tecniche/superate.json"),
-        ("Piano Test congelato", s.TEST / "contratto.json"),
+        ('Corpus and Targets prepared', s.WORK / "ingressi_sigillati.json"),
+        ('Train/validation Dataset sealed', s.WORK / "data/seal.json"),
+        ('Frozen LLM grid', s.VALIDATION / "contratto.json"),
+        ('Selected LLM and temperature', s.VALIDATION / "selezione.json"),
+        ('MQT technical checks passed', s.MQT / "prove_tecniche/superate.json"),
+        ('Frozen Test plan', s.TEST / "contratto.json"),
     ]
     for title, path in files:
-        print(("[presente] " if path.exists() else "[da fare] ") + title)
-    print("Gli indicatori mostrano file presenti; i comandi delle fasi ne verificano integrità e contenuto.")
+        print(('[present] ' if path.exists() else '[pending] ') + title)
+    print('Indicators show existing files; phase commands verify their integrity and content.')
     if not (s.WORK / "ingressi_sigillati.json").exists():
-        print("Prossimo passo:", base, "prepara")
+        print('Next step:', base, "prepara")
         return
     try:
         manifest = s.require_prepared()
     except (ValueError, OSError, KeyError) as exc:
-        print("Integrità da risolvere:", exc)
+        print('Integrity issues to resolve:', exc)
         return
     if not (s.WORK / "data/seal.json").exists():
-        print("Prossimo passo:", base, "dataset")
+        print('Next step:', base, "dataset")
     elif not (s.VALIDATION / "contratto.json").exists():
-        print("Prossimo passo:", base, "validation congela")
+        print('Next step:', base, "validation congela")
     elif not (s.VALIDATION / "selezione.json").exists():
-        print("Avviare e controllare un server per ciascun candidato attivo, poi:")
+        print('Start and check a server for each active candidate, then:')
         for model in s.model_registry():
             print(" ", base, "validation esegui --modello", model)
-        print("Dopo tutti i candidati:", base, "validation seleziona")
+        print('After all candidates:', base, "validation seleziona")
     else:
         winner = s.read(s.VALIDATION / "selezione.json")["winner"]
-        print(f"Selezione: {winner['model']}, temperatura {winner['temperature']}")
+        print(f"Selection: {winner['model']}, temperature {winner['temperature']}")
         if "mqt" in s.CONFIG["test_methods"] and not (s.MQT / "prove_tecniche/superate.json").exists():
-            print("Prima del Test completare RL, selettore e test tecnico-mqt; vedere mqt/README.md.")
+            print('Before Test, complete RL training, selector training and test tecnico-mqt; see mqt/README.md.')
         if set(s.CONFIG["test_methods"]) & {"llm_wl", "llm_wl_sintesi"}:
-            print("Per WL serve anche la selezione del recupero:", base, "validation wl")
+            print('WL also requires retrieval selection:', base, "validation wl")
         if not (s.TEST / "contratto.json").exists():
-            print("Quando i prerequisiti sono pronti:", base, "test congela")
+            print('When prerequisites are ready:', base, "test congela")
         else:
             expected = sum(row["split"] == "test" for row in manifest["circuits"])
             for method in s.CONFIG["test_methods"]:
                 results = list((s.TEST / method / "circuiti").glob("*/esito.json"))
                 success = sum(s.read(path).get("status") == "success" for path in results)
-                print(f"  {method}: {len(results)}/{expected} esiti registrati, {success} successi")
+                print(f'  {method}: {len(results)}/{expected} outcomes recorded, {success} successes')
                 if len(results) < expected: print("   ", base, "test esegui --metodo", method)
-            print("Riepilogo dei risultati disponibili:", base, "test analizza")
-            print("Esportazione su richiesta:", base, "esporta /percorso/nuovo-prototipo")
+            print('Summary of available results:', base, "test analizza")
+            print('Export on request:', base, 'esporta /path/to/new-prototype')

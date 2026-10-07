@@ -1,4 +1,4 @@
-"""Conteggio preliminare dei prompt con i tokenizer ufficiali, senza tagli."""
+'Preliminary prompt counts using official tokenizers without truncation.'
 import json
 from tokenizers import Tokenizer
 from .common import OUTPUT, now, write_json

@@ -1,4 +1,4 @@
-"""Riunisce le viste dei singoli dispositivi senza modificarle."""
+'Combine individual device views without changing them.'
 
 from __future__ import annotations
 
@@ -36,18 +36,18 @@ REQUIRED_DEVICE_FILES = (
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    """Legge un file JSON richiesto e controlla che contenga un oggetto."""
+    'Read a required JSON file and check that it contains an object.'
     import json
 
     with path.open(encoding="utf-8") as handle:
         value = json.load(handle)
     if not isinstance(value, dict):
-        raise ValueError(f"{path} non contiene un oggetto JSON.")
+        raise ValueError(f'{path} does not contain a JSON object.')
     return value
 
 
 def _shared_circuit_identity(circuit: Mapping[str, Any]) -> str:
-    """Rappresenta un circuito senza la compatibilità specifica del device."""
+    'Represent a circuit independently of device-specific compatibility.'
     return canonical_json(
         {
             key: value
@@ -61,7 +61,7 @@ def _available_devices(
     scope_root: Path,
     catalog: ConfigurationCatalog,
 ) -> list[str]:
-    """Elenca i dispositivi per cui sono presenti tutti i file necessari."""
+    'List devices for which all required files exist.'
     return [
         device_id
         for device_id in catalog.supported_device_ids
@@ -79,21 +79,21 @@ def _validate_manifest(
     scope: str,
     catalog: ConfigurationCatalog,
 ) -> dict[str, str]:
-    """Controlla un manifest e i circuiti condivisi a cui fa riferimento."""
+    'Check a manifest and the shared circuits it references.'
     if manifest.get("schema_version") != MANIFEST_SCHEMA_VERSION:
-        raise ValueError(f"Versione schema inattesa nel manifest di {device_id}.")
+        raise ValueError(f'Unexpected schema version in the manifest for {device_id}.')
     if manifest.get("device_id") != device_id:
-        raise ValueError(f"Device incoerente nel manifest di {device_id}.")
+        raise ValueError(f'Inconsistent device in the manifest for {device_id}.')
     if manifest.get("dataset_scope") != scope:
-        raise ValueError(f"Scope incoerente nel manifest di {device_id}.")
+        raise ValueError(f'Inconsistent scope in the manifest for {device_id}.')
     if manifest.get("catalog_id") != catalog.catalog_id:
-        raise ValueError(f"Catalogo incoerente nel manifest di {device_id}.")
+        raise ValueError(f'Inconsistent catalog in the manifest for {device_id}.')
     if manifest.get("experiment_id") != catalog.experiment_id:
-        raise ValueError(f"Esperimento incoerente nel manifest di {device_id}.")
+        raise ValueError(f'Inconsistent experiment in the manifest for {device_id}.')
     if manifest.get("objective") != catalog.objective:
-        raise ValueError(f"Objective incoerente nel manifest di {device_id}.")
+        raise ValueError(f'Inconsistent objective in the manifest for {device_id}.')
     if list(manifest.get("seeds", [])) != list(catalog.seeds):
-        raise ValueError(f"Seed incoerenti nel manifest di {device_id}.")
+        raise ValueError(f'Inconsistent seeds in the manifest for {device_id}.')
     storage = manifest.get("circuit_storage") or {}
     if (
         storage.get("layout") != "shared_scope_root"
@@ -102,7 +102,7 @@ def _validate_manifest(
         or storage.get("integrity_field") != "source_sha256"
     ):
         raise ValueError(
-            f"Storage circuiti non condiviso o non riconosciuto per {device_id}."
+            f'Circuit storage is not shared or recognized for {device_id}.'
         )
 
     device_num_qubits = int(manifest["device_num_qubits"])
@@ -110,7 +110,7 @@ def _validate_manifest(
     for circuit in manifest.get("circuits", []):
         circuit_id = str(circuit.get("circuit_id", ""))
         if not circuit_id or circuit_id in identities:
-            raise ValueError(f"circuit_id mancante o duplicato per {device_id}.")
+            raise ValueError(f'Missing or duplicate circuit_id for {device_id}.')
         source_ref = str(circuit.get("source_ref", ""))
         source_path = resolve_circuit_source(
             str(catalog.objective["name"]),
@@ -119,9 +119,9 @@ def _validate_manifest(
             catalog.experiment_id,
         )
         if not source_path.is_file():
-            raise FileNotFoundError(f"Circuito condiviso mancante: {source_path}.")
+            raise FileNotFoundError(f'Missing shared circuit: {source_path}.')
         if sha256_file(source_path) != circuit.get("source_sha256"):
-            raise ValueError(f"SHA-256 circuito incoerente: {source_path}.")
+            raise ValueError(f'Inconsistent circuit SHA-256: {source_path}.')
         compatibility = circuit.get("device_compatibility") or {}
         expected_compatible = int(circuit["num_qubits"]) <= device_num_qubits
         if (
@@ -129,11 +129,11 @@ def _validate_manifest(
             or compatibility.get("device_num_qubits") != device_num_qubits
         ):
             raise ValueError(
-                f"Compatibilità incoerente per {device_id}/{circuit_id}."
+                f'Inconsistent compatibility for {device_id}/{circuit_id}.'
             )
         identities[circuit_id] = _shared_circuit_identity(circuit)
     if not identities:
-        raise ValueError(f"Manifest senza circuiti per {device_id}.")
+        raise ValueError(f'Manifest has no circuits for {device_id}.')
     return identities
 
 
@@ -147,25 +147,25 @@ def _validate_device_records(
     catalog: ConfigurationCatalog,
     expected_schema_version: str,
 ) -> None:
-    """Controlla i campi comuni dei tentativi o degli aggregati di un device."""
+    "Check common fields in a device's attempts or aggregates."
     for index, record in enumerate(records, start=1):
         location = f"{device_id}/{record_kind}:{index}"
         if record.get("schema_version") != expected_schema_version:
-            raise ValueError(f"{location}: versione schema incoerente.")
+            raise ValueError(f'{location}: inconsistent schema version.')
         if record.get("dataset_scope") != scope:
-            raise ValueError(f"{location}: scope incoerente.")
+            raise ValueError(f'{location}: inconsistent scope.')
         objective = record.get("objective") or {}
         if (
             objective.get("name") != objective_name
             or objective.get("direction") != catalog.objective.get("direction")
         ):
-            raise ValueError(f"{location}: objective incoerente.")
+            raise ValueError(f'{location}: inconsistent objective.')
         device = record.get("device") or {}
         if device.get("device_id") != device_id:
-            raise ValueError(f"{location}: device incoerente.")
+            raise ValueError(f'{location}: inconsistent device.')
         configuration = record.get("configuration") or {}
         if configuration.get("catalog_id") != catalog.catalog_id:
-            raise ValueError(f"{location}: catalog_id incoerente.")
+            raise ValueError(f'{location}: inconsistent catalog_id.')
         try:
             allowed = catalog.require_allowed(
                 int(configuration["optimization_level"]),
@@ -173,21 +173,21 @@ def _validate_device_records(
                 configuration.get("routing_method"),
             )
         except (KeyError, TypeError, ValueError) as error:
-            raise ValueError(f"{location}: configurazione non valida.") from error
+            raise ValueError(f'{location}: invalid configuration.') from error
         if configuration.get("config_id") != allowed.config_id:
-            raise ValueError(f"{location}: config_id incoerente.")
+            raise ValueError(f'{location}: inconsistent config_id.')
         if record_kind == "runs":
             if record.get("status") not in {"success", "failure", "timeout"}:
-                raise ValueError(f"{location}: stato non valido.")
+                raise ValueError(f'{location}: invalid status.')
             if record.get("seed_transpiler") not in catalog.seeds:
-                raise ValueError(f"{location}: seed fuori catalogo.")
+                raise ValueError(f'{location}: seed outside the catalog.')
         elif record_kind == "aggregates":
             if record.get("ranking_metric") != (
                 "median_expected_fidelity_across_seeds"
             ):
-                raise ValueError(f"{location}: metrica di ranking incoerente.")
+                raise ValueError(f'{location}: inconsistent ranking metric.')
         else:
-            raise ValueError(f"Tipo record non supportato: {record_kind!r}.")
+            raise ValueError(f'Unsupported record type: {record_kind!r}.')
 
 
 def _validate_records_against_manifest(
@@ -196,7 +196,7 @@ def _validate_records_against_manifest(
     *,
     device_id: str,
 ) -> None:
-    """Verifica che i record descrivano ancora i circuiti del manifest."""
+    'Check that records still describe the manifest circuits.'
     circuits = {
         str(circuit["circuit_id"]): circuit
         for circuit in manifest.get("circuits", [])
@@ -208,26 +208,26 @@ def _validate_records_against_manifest(
         expected = circuits.get(circuit_id)
         if expected is None:
             raise ValueError(
-                f"{device_id}:{index}: circuito fuori manifest: {circuit_id!r}."
+                f'{device_id}:{index}: circuit outside the manifest: {circuit_id!r}.'
             )
         expected_identity = _shared_circuit_identity(expected)
         observed_identity = _shared_circuit_identity(circuit)
         if observed_identity != expected_identity:
             raise ValueError(
-                f"{device_id}:{index}: metadati incoerenti per {circuit_id}."
+                f'{device_id}:{index}: inconsistent metadata for {circuit_id}.'
             )
         if record.get("split") != expected.get("split"):
-            raise ValueError(f"{device_id}:{index}: split incoerente.")
+            raise ValueError(f'{device_id}:{index}: inconsistent split.')
 
         device = record.get("device") or {}
         if device.get("num_qubits") != manifest.get("device_num_qubits"):
-            raise ValueError(f"{device_id}:{index}: larghezza target incoerente.")
+            raise ValueError(f'{device_id}:{index}: inconsistent target width.')
         current_target_identity = canonical_json(device)
         if target_identity is None:
             target_identity = current_target_identity
         elif current_target_identity != target_identity:
             raise ValueError(
-                f"{device_id}:{index}: snapshot del target non uniforme."
+                f'{device_id}:{index}: inconsistent Target snapshot.'
             )
 
 
@@ -235,10 +235,10 @@ def _ensure_unique(
     records: Sequence[Mapping[str, Any]],
     identifier: str,
 ) -> None:
-    """Controlla che ogni record abbia un identificatore unico e non vuoto."""
+    'Check that every record has a unique, nonempty identifier.'
     raw_values = [record.get(identifier) for record in records]
     if any(not isinstance(value, str) or not value for value in raw_values):
-        raise ValueError(f"{identifier} mancante nella vista globale.")
+        raise ValueError(f'{identifier} missing from the global view.')
     values = [str(value) for value in raw_values]
     if len(values) != len(set(values)):
         duplicates = sorted(
@@ -246,13 +246,13 @@ def _ensure_unique(
             for value, count in Counter(values).items()
             if count > 1
         )
-        raise ValueError(f"{identifier} duplicati nella vista globale: {duplicates}.")
+        raise ValueError(f'{identifier} duplicates in the global view: {duplicates}.')
 
 
 def _validate_circuit_identity(
     summaries: Sequence[Mapping[str, Any]],
 ) -> None:
-    """Verifica che ogni circuito conservi gli stessi dati tra i device."""
+    'Check that circuit data remain consistent across devices.'
     by_circuit: dict[str, str] = {}
     for summary in summaries:
         circuit = summary.get("circuit") or {}
@@ -270,12 +270,12 @@ def _validate_circuit_identity(
         previous = by_circuit.setdefault(circuit_id, identity)
         if previous != identity:
             raise ValueError(
-                f"Metadati circuito incoerenti tra device: {circuit_id}."
+                f'Circuit metadata differ across devices: {circuit_id}.'
             )
 
 
 def _record_key(record: Mapping[str, Any]) -> tuple[str, str, str]:
-    """Costruisce la chiave formata da circuito, dispositivo e configurazione."""
+    'Build the circuit/device/configuration key.'
     circuit = record.get("circuit") or {}
     device = record.get("device") or {}
     configuration = record.get("configuration") or {}
@@ -290,7 +290,7 @@ def _validate_summary_run_links(
     runs: Sequence[Mapping[str, Any]],
     summaries: Sequence[Mapping[str, Any]],
 ) -> None:
-    """Controlla che ogni aggregato rappresenti esattamente i suoi tentativi."""
+    'Check that each aggregate exactly represents its attempts.'
     runs_by_key: dict[tuple[str, str, str], list[Mapping[str, Any]]] = defaultdict(list)
     run_by_id: dict[str, Mapping[str, Any]] = {}
     for run in runs:
@@ -303,18 +303,18 @@ def _validate_summary_run_links(
     for summary in summaries:
         key = _record_key(summary)
         if not all(key) or key in seen_summary_keys:
-            raise ValueError(f"Aggregato mancante o duplicato per la chiave {key}.")
+            raise ValueError(f'Missing or duplicate aggregate for key {key}.')
         seen_summary_keys.add(key)
         expected_runs = runs_by_key.get(key, [])
         expected_ids = {str(run["run_id"]) for run in expected_runs}
         raw_summary_ids = summary.get("run_ids")
         if not isinstance(raw_summary_ids, list):
-            raise ValueError(f"run_ids non validi per l'aggregato {key}.")
+            raise ValueError(f'Invalid run_ids for aggregate {key}.')
         summary_ids = [str(run_id) for run_id in raw_summary_ids]
         if len(summary_ids) != len(set(summary_ids)):
-            raise ValueError(f"run_ids duplicati per l'aggregato {key}.")
+            raise ValueError(f'Duplicate run_ids for aggregate {key}.')
         if set(summary_ids) != expected_ids:
-            raise ValueError(f"Aggregato non allineato ai raw run per {key}.")
+            raise ValueError(f'Aggregate does not match raw runs for {key}.')
         linked_run_ids.update(summary_ids)
 
         successful = {
@@ -324,12 +324,12 @@ def _validate_summary_run_links(
         }
         observations = summary.get("score_observations")
         if not isinstance(observations, list):
-            raise ValueError(f"score_observations mancanti per {key}.")
+            raise ValueError(f'Missing score_observations for {key}.')
         observed_ids = [str(item.get("run_id", "")) for item in observations]
         if len(observed_ids) != len(set(observed_ids)):
-            raise ValueError(f"Osservazioni score duplicate per {key}.")
+            raise ValueError(f'Duplicate score observations for {key}.')
         if set(observed_ids) != set(successful):
-            raise ValueError(f"Osservazioni score non allineate ai success per {key}.")
+            raise ValueError(f'Score observations do not match successful runs for {key}.')
         for observation in observations:
             run = run_by_id[str(observation["run_id"])]
             if (
@@ -337,7 +337,7 @@ def _validate_summary_run_links(
                 != int(run["seed_transpiler"])
                 or float(observation["score"]) != float(run["score"])
             ):
-                raise ValueError(f"Evidence score incoerente per {key}.")
+                raise ValueError(f'Inconsistent evidence score for {key}.')
 
         statuses = Counter(str(run.get("status")) for run in expected_runs)
         attempts = summary.get("attempts") or {}
@@ -349,10 +349,10 @@ def _validate_summary_run_links(
         }
         for field, expected in expected_counts.items():
             if attempts.get(field) != expected:
-                raise ValueError(f"{field} incoerente per l'aggregato {key}.")
+                raise ValueError(f'{field} inconsistent for aggregate {key}.')
 
     if linked_run_ids != set(run_by_id):
-        raise ValueError("Esistono raw run non rappresentati dagli aggregati.")
+        raise ValueError('Some raw runs are not represented by aggregates.')
 
 
 def aggregate_device_datasets(
@@ -364,11 +364,11 @@ def aggregate_device_datasets(
     require_all_supported: bool = False,
     write: bool = True,
 ) -> dict[str, Any]:
-    """Riunisce i mini-Dataset selezionati senza modificarne i file."""
+    'Combine selected mini-Datasets without modifying their files.'
     if scope not in {"pilot", "full"}:
-        raise ValueError("scope deve essere pilot oppure full.")
+        raise ValueError('scope must be pilot or full.')
     if top_k <= 0:
-        raise ValueError("top_k deve essere positivo.")
+        raise ValueError('top_k must be positive.')
 
     objective_name = str(catalog.objective["name"])
     scope_root = dataset_scope_root(
@@ -382,18 +382,18 @@ def aggregate_device_datasets(
     else:
         selected_devices = [catalog.require_device(item) for item in device_ids]
         if len(selected_devices) != len(set(selected_devices)):
-            raise ValueError("La lista device contiene duplicati.")
+            raise ValueError('The device list contains duplicates.')
         missing_requested = [
             item for item in selected_devices if item not in available
         ]
         if missing_requested:
             raise FileNotFoundError(
-                "Mini-Dataset incompleti o assenti: "
+                'Incomplete or missing mini-Datasets: '
                 + ", ".join(missing_requested)
             )
     if not selected_devices:
         raise FileNotFoundError(
-            f"Nessun mini-Dataset completo disponibile in {scope_root}."
+            f'No complete mini-Dataset available in {scope_root}.'
         )
 
     missing_supported = [
@@ -403,7 +403,7 @@ def aggregate_device_datasets(
     ]
     if require_all_supported and missing_supported:
         raise FileNotFoundError(
-            "Mancano mini-Dataset per i device supportati: "
+            'Missing mini-Datasets for supported devices: '
             + ", ".join(missing_supported)
         )
 
@@ -429,7 +429,7 @@ def aggregate_device_datasets(
             shared_circuit_identities = circuit_identities
         elif circuit_identities != shared_circuit_identities:
             raise ValueError(
-                f"Inventario circuiti incoerente tra i manifest: {device_id}."
+                f'Inconsistent circuit inventory across manifests: {device_id}.'
             )
         runs = read_jsonl(runs_path)
         summaries = read_jsonl(summaries_path)

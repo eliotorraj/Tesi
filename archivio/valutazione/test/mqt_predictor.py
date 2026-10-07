@@ -1,4 +1,4 @@
-"""Avvio autonomo del Test mqt_predictor."""
+'Standalone launcher for the mqt_predictor Test.'
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))

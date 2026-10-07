@@ -1,4 +1,4 @@
-"""Misura una serializzazione candidata sui soli prompt tecnici, senza inferenza."""
+'Measure a candidate serialization on technical prompts only, without inference.'
 import json
 import sys
 from tokenizers import Tokenizer

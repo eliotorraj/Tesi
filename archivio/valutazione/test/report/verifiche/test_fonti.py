@@ -1,4 +1,4 @@
-"""Verifica il cambio di origine MQT senza eseguire modelli o compilazioni."""
+'Check changes to the MQT source without running models or compilations.'
 import copy
 import sys
 import tempfile
@@ -42,7 +42,7 @@ class SourceTests(unittest.TestCase):
         self.assertEqual(run['summary']['episodes'],1)
         self.assertEqual(run['summary']['metrics']['score']['mean'],0.7)
         self.assertTrue(run['source']['exploratory'])
-        self.assertIn('(espl.)',run_label('mqt_predictor',run))
+        self.assertIn('(expl.)',run_label('mqt_predictor',run))
         self.assertEqual(run['source']['base'],str(self.external/'risultati/mqt_predictor'))
         self.assertEqual(before,{str(p):sha(p) for p in self.root.rglob('*.json')})
         self.assertEqual(compare(runs,{'bootstrap_seed':1,'bootstrap_draws':10,'confidence':0.95})['exploratory_methods'],['mqt_predictor'])

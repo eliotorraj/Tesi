@@ -1,4 +1,4 @@
-"""Controllo tecnico train: identità del sorgente e uso delle prove recuperate."""
+'Technical train check: source identity and use of retrieved evidence.'
 import json
 
 def check(saved, response=None, *, valid=False):

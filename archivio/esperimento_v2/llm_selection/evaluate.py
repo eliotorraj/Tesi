@@ -1,4 +1,4 @@
-"""Valuta la validation soltanto dopo i sigilli; riusa la matrice Qiskit."""
+'Evaluate validation only after sealing; reuse the Qiskit matrix.'
 from __future__ import annotations
 import argparse
 import csv

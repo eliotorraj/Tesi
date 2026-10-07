@@ -1,4 +1,4 @@
-"""Controlli v2 comuni e requisiti distinti per metodo; nessuna apertura v1."""
+'Shared v2 checks and separate per-method requirements; never open v1.'
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -10,9 +10,9 @@ from collections import Counter
 def verify_files(root, values):
     for name, expected in values.items():
         if Path(name).is_absolute() or ".." in Path(name).parts:
-            raise ValueError("Riferimento non valido: " + name)
+            raise ValueError('Invalid reference: ' + name)
         if sha(root / name) != expected:
-            raise ValueError("Impronta cambiata: " + name)
+            raise ValueError('Fingerprint changed: ' + name)
     return len(values)
 
 def selection_v2():
@@ -21,50 +21,50 @@ def selection_v2():
     study = read(STUDY / "frozen_study.json")
     seals = read(STUDY / "all_decisions_sealed.json")
     if final.get("study_id") != "local-llm-v2" or final.get("winner") != "qwen/p0_t0":
-        raise ValueError("Serve la selezione ufficiale local-llm-v2 qwen/p0_t0.")
+        raise ValueError('The official local-llm-v2 qwen/p0_t0 selection is required.')
     if proof.get("study_id") != final["study_id"] or proof.get("winner") != final["winner"]:
-        raise ValueError("Prova di selezione incoerente.")
+        raise ValueError('Inconsistent selection check.')
     if final["study_sha256"] != digest(study) or seals["study_sha256"] != digest(study):
-        raise ValueError("Sigillo dello studio non valido.")
+        raise ValueError('Invalid study seal.')
     if final["selection_sha256"] != digest(read(STUDY / "analysis/selection.json")):
-        raise ValueError("Selezione analitica cambiata.")
+        raise ValueError('Analytical selection changed.')
     n = verify_files(ARCHIVE, proof["files"])
     for field in ("input_hashes", "evaluation_input_hashes", "code_hashes"):
         n += verify_files(ARCHIVE, study[field])
     for model, expected in seals["models"].items():
         seal = read(STUDY / model / "sealed.json")
         if digest(seal) != expected or seal["study_sha256"] != digest(study):
-            raise ValueError("Sigillo modello non valido: " + model)
+            raise ValueError('Invalid model seal: ' + model)
         n += verify_files(ARCHIVE, seal["files"])
         n += verify_files(ARCHIVE, study["models"][model]["technical_evidence_hashes"])
     current = read(ROOT / "config.json")
     for field in ("study_id", "winner", "configuration", "fixed", "policy", "study_sha256", "selection_sha256"):
         if current[field] != final[field]:
-            raise ValueError("Configurazione prototipo diversa dalla selezione: " + field)
+            raise ValueError('Prototype configuration differs from the selection: ' + field)
     if current["source_sha256"] != sha(STUDY / "final_configuration.json"):
-        raise ValueError("Provenienza della configurazione cambiata.")
+        raise ValueError('Configuration provenance changed.')
     for field in ("context", "cache_type", "gpu_layers", "batch", "micro_batch", "weight_precision", "artifact"):
         if current["profile"][field] != final["profile"][field]:
-            raise ValueError("Profilo diverso dalla selezione: " + field)
+            raise ValueError('Profile differs from selection: ' + field)
     return {"study_id": final["study_id"], "winner": final["winner"], "verified_files": n,
             "final_sha256": sha(STUDY / "final_configuration.json")}
 
 def corpus():
     manifest=read(SOURCE)
     if sha(SOURCE)!=read(PLAN)["manifest_sha256"]:
-        raise ValueError("Manifest QASMBench cambiato.")
+        raise ValueError('QASMBench manifest changed.')
     rows=manifest["circuits"]
     if len(rows)!=50 or Counter(r["size_group"] for r in rows)!={"small":30,"medium":15,"large":5}:
-        raise ValueError("Richiesti 30 piccoli, 15 medi, 5 grandi.")
+        raise ValueError('30 small, 15 medium and 5 large circuits are required.')
     if len({r["circuit_id"] for r in rows})!=50 or len({r["source_sha256"] for r in rows})!=50:
-        raise ValueError("Identita o contenuti duplicati.")
+        raise ValueError('Duplicate identities or contents.')
     original=read(EXPERIMENT/"manifests/source_circuits_v2.json")
     previous={r["source_sha256"] for r in original["circuits"]}
     for row in rows:
         if row["split"]!="external_test" or sha(source_path(row))!=row["source_sha256"]:
-            raise ValueError("Sorgente o partizione cambiati: "+row["circuit_id"])
+            raise ValueError('Source or split changed: '+row["circuit_id"])
         if row["source_sha256"] in previous:
-            raise ValueError("Sovrapposizione byte-identica col corpus MQT.")
+            raise ValueError('Byte-identical overlap with the MQT corpus.')
     verify_files(AREA/"circuiti",manifest["support_files"])
     return {"source_sha256":sha(SOURCE),"counts":manifest["counts"],"revision":manifest["revision"]}
 
@@ -73,15 +73,15 @@ def software_targets():
     from scripts.mqt_predictor_protocol import target_payload, FROZEN_TARGET_SHA256
     from mqt.bench.targets import get_device
     if sys.version_info[:2] != (3,12):
-        raise ValueError("Richiesto Python 3.12.")
+        raise ValueError('Python 3.12 is required.')
     versions = {n:version(n) for n in ("qiskit","mqt.bench","numpy","networkx","qdrant-client","portalocker")}
     expected = dict(line.strip().split("==") for line in (ROOT/"requirements.txt").read_text().splitlines() if "==" in line)
     if any(versions[n] != expected[n] for n in versions):
-        raise ValueError("Versioni non conformi: " + str(versions))
+        raise ValueError('Nonconforming versions: ' + str(versions))
     catalog = load_catalog()
     for device in catalog.supported_device_ids:
         if digest(target_payload(get_device(device))) != FROZEN_TARGET_SHA256[device]:
-            raise ValueError("Target cambiato: " + device)
+            raise ValueError('Target changed: ' + device)
     return {"versions":versions,"targets":FROZEN_TARGET_SHA256}
 
 def rag_integrity():
@@ -94,7 +94,7 @@ def preflight(method):
     tasks=[("corpus",corpus),("software_targets",software_targets)]
     if method=="llm_rag": tasks += [("local_llm_v2",selection_v2),("rag_train_integrity",rag_integrity)]
     for name, fn in tasks:
-        print("Verifica: "+name, flush=True)
+        print('Check: '+name, flush=True)
         try:
             checks[name] = {"ok":True,"details":fn()}
         except Exception as exc:
@@ -126,7 +126,7 @@ def freeze():
     contract = frozen_contract()
     if path.exists():
         if read(path) != contract:
-            raise ValueError("Contratto cambiato dopo il congelamento: non mescolare esecuzioni.")
+            raise ValueError('Contract changed after freezing: do not mix runs.')
     else:
         save(path, contract)
     return sha(path)

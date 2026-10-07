@@ -1,4 +1,4 @@
-"""Comandi manuali dell'esperimento. Nessun avvio implicito durante status/doctor."""
+'Manual experiment commands. status/doctor never start work implicitly.'
 from __future__ import annotations
 import argparse
 import importlib.util

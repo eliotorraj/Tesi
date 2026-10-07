@@ -1,4 +1,4 @@
-"""Confronto dai registri conservati: nessuna inferenza o compilazione quantistica."""
+'Comparison from preserved records without inference or quantum compilation.'
 from pathlib import Path
 from collections import Counter
 import argparse
@@ -144,7 +144,7 @@ def collect():
                       "losses":sum(d< -1e-12 for d in ds),
                       "same_pair":sum(byid[a][c]["choice_pair"]==byid[b][c]["choice_pair"] for c in common)})
     groups=[]
-    for label,lo,hi in [("Fino a 5",0,5),("Da 6 a 16",6,16),("Oltre 16",17,10000)]:
+    for label,lo,hi in [('Up to 5',0,5),('6 to 16',6,16),('Over 16',17,10000)]:
         chosen=[c for c in ids if lo<=byid[5][c]["num_qubits"]<=hi]
         groups.append({"label":label,"n":len(chosen),"score":{k:stats([byid[k][c]["score"] for c in chosen]) for k in runs}})
     changed=[c for c in ids if len({byid[k][c]["score"] for k in runs})>1]
@@ -161,13 +161,13 @@ def collect():
             "checks":{"same_90_circuits_and_sources":True,"nested_retrieval_all_90":True,
                       "same_live_model_view":True,"same_gguf_and_generation_parameters":True,
                       "tokens_recomputed":True,"facts_revalidated":True},
-            "scope":"Analisi descrittiva di esecuzioni conservate; k=1 e k=10 decisi dopo il Test k=5."}
+            "scope":'Descriptive analysis of preserved runs; k=1 and k=10 were chosen after k=5 Test.'}
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--output",type=Path,default=Path(__file__).parent)
     args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
     if (args.output/"dati.json").exists():
-        raise ValueError("Dati già presenti: scegliere una nuova cartella --output.")
+        raise ValueError('Data already exists: choose a new --output directory.')
     data=collect();dump(args.output/"dati.json",data)
     tables=args.output/"tabelle";tables.mkdir()
     fields=["k","index","circuit_id","num_qubits","status",*METRICS,"facts_status","facts_verified","facts_total","device","config_id"]

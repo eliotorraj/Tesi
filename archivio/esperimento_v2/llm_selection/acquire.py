@@ -1,4 +1,4 @@
-"""Download riprendibile di pesi pubblici con revisioni e SHA-256 verificati."""
+'Resumable download of public weights with verified revisions and SHA-256.'
 from __future__ import annotations
 import argparse
 import hashlib
@@ -25,7 +25,7 @@ def download(url, destination, expected_sha, expected_size, repair_tail=False):
     events=destination.with_suffix(".download_events.jsonl")
     if destination.exists():
         if destination.stat().st_size != expected_size or sha(destination) != expected_sha:
-            raise ValueError(f"File esistente alterato: {destination}")
+            raise ValueError(f'Existing file changed: {destination}')
         append_jsonl(events,{"at":now(),"event":"existing_file_verified","sha256":expected_sha})
         return
     partial = destination.with_suffix(".part")
@@ -72,7 +72,7 @@ def download(url, destination, expected_sha, expected_size, repair_tail=False):
     observed=sha(partial)
     append_jsonl(events,{"at":now(),"event":"hash_checked","sha256":observed,"expected_sha256":expected_sha,"valid":observed==expected_sha})
     if observed != expected_sha:
-        raise ValueError(f"SHA-256 errato per {destination.name}: {observed}")
+        raise ValueError(f'Incorrect SHA-256 for {destination.name}: {observed}')
     partial.replace(destination)
 
 def acquire(name, quant, repair_tail=False):

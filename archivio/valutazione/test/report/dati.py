@@ -1,4 +1,4 @@
-"""Lettura e aggregazione del Test: nessuna importazione del motore sperimentale."""
+'Read and aggregate Test results without importing the experiment engine.'
 from __future__ import annotations
 import csv
 import hashlib
@@ -10,15 +10,15 @@ from pathlib import Path
 import numpy as np
 
 METHODS = ('llm_rag', 'llm_senza_rag', 'mqt_predictor', 'random')
-LABELS = dict(zip(METHODS, ('LLM + RAG', 'LLM senza RAG', 'MQT Predictor', 'Random')))
-LABELS['llm_recupero_random'] = 'LLM + recupero casuale'
+LABELS = dict(zip(METHODS, ('LLM + RAG', 'LLM no RAG', 'MQT Predictor', 'Random')))
+LABELS['llm_recupero_random'] = 'LLM + Random RAG'
 BASE_METRICS = ('score', 'total_seconds', 'compilation_seconds', 'compilation_process_seconds', 'choice_seconds')
 LLM_METRICS = ('retries', 'llm_calls', 'input_tokens', 'output_tokens', 'total_tokens', 'llm_response_seconds', 'rag_seconds')
 ALL_METRICS = BASE_METRICS + LLM_METRICS
 
 
 def run_label(method, run):
-    suffix = ' (espl.)' if run.get('source', {}).get('exploratory') else ''
+    suffix = ' (expl.)' if run.get('source', {}).get('exploratory') else ''
     return LABELS[method] + suffix
 
 
@@ -64,10 +64,10 @@ def stats(values):
 
 
 def aggregate(rows, expected_ids, method):
-    """Prima media degli episodi dello stesso circuito; poi media fra circuiti.
+    """Average episodes for each circuit first, then average across circuits.
 
-    Le somme sono costi effettivi degli episodi. Le medie note conservano sempre
-    la copertura; nessuna imputazione. Score sui soli episodi riusciti.
+    Sums are actual episode costs. Available means always retain coverage;
+    no imputation is applied. Scores cover successful episodes only.
     """
     grouped = defaultdict(list)
     for row in rows:
@@ -123,11 +123,11 @@ def load_run(base, expected, contract_hash, plan_hash, *, expected_kind='test'):
     meta = read(base/'esecuzione.json')
     method = base.name
     if meta.get('method')!=method or meta.get('kind')!=expected_kind:
-        raise ValueError(f'Identità o split incompatibile: {base}')
+        raise ValueError(f'Incompatible identity or split: {base}')
     if meta.get('contract_sha256')!=contract_hash or meta.get('plan_sha256')!=plan_hash:
-        raise ValueError(f'Contratto o piano incompatibile: {base}')
+        raise ValueError(f'Incompatible contract or plan: {base}')
     if meta.get('expected_circuits')!=len(expected):
-        raise ValueError(f'Numero di circuiti attesi incompatibile: {base}')
+        raise ValueError(f'Incompatible expected circuit count: {base}')
     files=sorted((base/'circuiti').rglob('esito.json'))
     rows=[]
     hashes={}
@@ -136,31 +136,31 @@ def load_run(base, expected, contract_hash, plan_hash, *, expected_kind='test'):
         row=read(path)
         cid=row.get('circuit_id')
         if cid not in expected or row.get('source_sha256')!=expected[cid]:
-            raise ValueError(f'Circuito o SHA-256 non coerente col Test: {path}')
+            raise ValueError(f'Circuit or SHA-256 does not match the Test: {path}')
         if row.get('method')!=method or row.get('split')!='test':
-            raise ValueError(f'Metodo o split errato: {path}')
+            raise ValueError(f'Incorrect method or split: {path}')
         if row.get('status') not in ('success','failure','timeout','interrupted'):
-            raise ValueError(f'Esito non terminale o sconosciuto: {path}')
+            raise ValueError(f'Non-terminal or unknown outcome: {path}')
         if row['status']=='success' and (not number(row.get('score')) or not 0<=row['score']<=1):
-            raise ValueError(f'Successo senza score valido: {path}')
+            raise ValueError(f'Success without a valid score: {path}')
         if row['status']!='success' and row.get('score') is not None:
-            raise ValueError(f'Fallimento con score: {path}')
+            raise ValueError(f'Failure with a score: {path}')
         for key in ALL_METRICS:
             value=row.get(key)
             if value is not None and (not number(value) or value<0):
-                raise ValueError(f'Misura non valida ({key}): {path}')
+                raise ValueError(f'Invalid measurement ({key}): {path}')
         episode_paths[cid].append(path)
         row=dict(row, episode_source=str(path.relative_to(base)))
         rows.append(row)
     for paths in episode_paths.values():
-        # Non scambiare un riepilogo di circuito e i suoi episodi per repliche.
+        # Do not mistake a circuit summary and its episodes for replicates.
         if len(paths)>1 and any(a.parent in b.parents for a in paths for b in paths if a!=b):
-            raise ValueError(f'Esiti annidati ambigui: {paths}')
+            raise ValueError(f'Ambiguous nested outcomes: {paths}')
     for folder in ('circuiti','sessioni'):
         for path in sorted((base/folder).rglob('*.json')):
             hashes[str(path.relative_to(base))]=sha(path)
     hashes['esecuzione.json']=sha(base/'esecuzione.json')
-    # Registra i parametri effettivamente inviati, non i default del server.
+    # Record parameters actually sent, not server defaults.
     settings=Counter()
     for path in sorted((base/'circuiti').rglob('request.json')):
         if path.parent.name!='call':
@@ -175,7 +175,7 @@ def load_run(base, expected, contract_hash, plan_hash, *, expected_kind='test'):
 
 
 def paired(left, right, plan):
-    """Intervallo descrittivo appaiato: un peso per circuito, non per episodio."""
+    'Paired descriptive interval: one weight per circuit, not per episode.'
     a={r['circuit_id']:r for r in left}
     b={r['circuit_id']:r for r in right}
     common=sorted(k for k in a.keys() & b.keys() if number(a[k].get('score')) and number(b[k].get('score')))

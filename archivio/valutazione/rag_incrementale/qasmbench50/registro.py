@@ -1,4 +1,4 @@
-"""Giornale append-only: la memoria deriva soltanto da passaggi conclusi."""
+'Append-only journal: memory derives only from completed steps.'
 from __future__ import annotations
 from comune import *
 from memoria import make_observation
@@ -8,18 +8,18 @@ def expected_observation(base, folder, row, position, records, contract):
     result = read(folder / "esito.json")
     if (result.get("circuit_id") != row["circuit_id"]
             or result.get("source_sha256") != row["source_sha256"]):
-        raise ValueError("Esito di un altro circuito.")
+        raise ValueError('Outcome belongs to another circuit.')
     if result.get("status") == "success" and not valid_score(result):
-        raise ValueError("Successo con score non valido.")
+        raise ValueError('Successful outcome has an invalid score.')
     if not valid_score(result):
         return None, "unsuccessful_or_missing_score"
     if sha(folder / "input.qasm") != row["source_sha256"]:
-        raise ValueError("Ingresso compilato diverso dalla sorgente.")
+        raise ValueError('Compiled input differs from the source.')
     if not (folder / "compilazione/compiled.qasm").is_file():
-        raise ValueError("Circuito compilato mancante.")
+        raise ValueError('Compiled circuit is missing.')
     prompt = read(folder / "prompt.json")
     if hashlib.sha256(prompt["live_request"]["circuit"]["qasm2"].encode()).hexdigest() != hashlib.sha256((folder / "input.qasm").read_text().encode()).hexdigest():
-        raise ValueError("Prompt e ingresso non concordano.")
+        raise ValueError('Prompt and input disagree.')
     known = set(contract["initial_source_hashes"]) | {r["source_sha256"] for r in records}
     return make_observation(
         row, position, result, prompt, read(folder / "decision.json"),
@@ -35,14 +35,14 @@ def finish_step(base, contract, position, row, records, previous):
         if path.exists():
             before = read(path).get("memory_before_sha256")
             if before is not None and before != memory_digest(records):
-                raise ValueError("La decisione ha usato una memoria diversa dal prefisso concluso.")
+                raise ValueError('Decision used memory different from the completed prefix.')
     observation, reason = expected_observation(base, folder, row, position, records, contract)
     pointer = None
     if observation is not None:
         path = base / "memoria_incrementale/records" / f"{position:03d}.json"
         if path.exists():
             if read(path) != observation:
-                raise ValueError("Osservazione pendente incompatibile; non viene sostituita.")
+                raise ValueError('Pending observation is incompatible and will not be replaced.')
         else:
             save(path, observation)
         pointer = {"path": str(path.relative_to(base)), "sha256": sha(path)}
@@ -69,44 +69,44 @@ def replay(base, contract):
             gap = True
             continue
         if gap:
-            raise ValueError("Passaggio futuro concluso prima di un passaggio precedente.")
+            raise ValueError('A future step completed before an earlier one.')
         commit = read(path)
         if (commit["position"] != position or commit["circuit_id"] != row["circuit_id"]
                 or commit["contract_sha256"] != sha(base / "contratto.json")
                 or commit["previous_commit_sha256"] != previous
                 or commit["memory_before_sha256"] != memory_digest(records)
                 or commit["memory_before_count"] != len(records)):
-            raise ValueError("Catena dei passaggi non valida.")
+            raise ValueError('Invalid step chain.')
         for relative, expected in commit["files"].items():
             validate_relative_file(base, relative, expected)
         if commit["files"] != path_hashes(base, folder):
-            raise ValueError("File aggiunti o rimossi da un passaggio concluso.")
+            raise ValueError('Files added to or removed from a completed step.')
         observation, reason = expected_observation(base, folder, row, position, records, contract)
         if reason != commit["admission"]:
-            raise ValueError("Regola di ammissione non rispettata.")
+            raise ValueError('Admission rule was not followed.')
         pointer = commit["observation"]
         if observation is None:
             if pointer is not None:
-                raise ValueError("Un fallimento non può alimentare il Dataset.")
+                raise ValueError('A failure cannot contribute to the Dataset.')
         else:
             if pointer is None:
-                raise ValueError("Osservazione attesa ma mancante.")
+                raise ValueError('Expected observation is missing.')
             p = validate_relative_file(base, pointer["path"], pointer["sha256"])
             if read(p) != observation:
-                raise ValueError("Osservazione diversa dall'esito verificato.")
+                raise ValueError('Observation differs from the verified outcome.')
             records.append(observation)
         if (commit["memory_after_sha256"] != memory_digest(records)
                 or commit["memory_after_count"] != len(records)):
-            raise ValueError("Memoria finale del passaggio incoerente.")
+            raise ValueError('Inconsistent final step memory.')
         commits.append(commit)
         previous = sha(path)
     for path in (base / "circuiti").glob("*"):
         if path.is_dir() and path.name not in expected_folders:
-            raise ValueError("Cartella di un circuito fuori contratto.")
-    # Un solo passaggio può essere pendente; non caricare mai file di memoria non pubblicati.
+            raise ValueError('Circuit directory is outside the contract.')
+    # Only one step can be pending; never load unpublished memory files.
     for position, row in enumerate(contract["rows"], 1):
         if position > len(commits) + 1 and step_folder(base, position, row).exists():
-            raise ValueError("Artefatti di passaggi futuri fuori sequenza.")
+            raise ValueError('Artifacts from future steps are out of sequence.')
     return records, commits, previous
 
 
@@ -121,12 +121,12 @@ def recover_interruption(folder, row, position):
 
 
 def export_memory(base, records):
-    """Esportazione derivata finale; il giornale resta la fonte della ripresa."""
+    'Final derived export; the journal remains the resume source.'
     path = base / "memoria_incrementale/dataset.jsonl"
     text = "".join(json.dumps(r, ensure_ascii=False, sort_keys=True, allow_nan=False) + "\n" for r in records)
     if path.exists():
         if path.read_text() != text:
-            raise ValueError("Esportazione finale già presente e diversa.")
+            raise ValueError('Final export already exists and differs.')
     else:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_name("." + uuid4().hex + ".tmp")

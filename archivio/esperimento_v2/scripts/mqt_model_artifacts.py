@@ -52,7 +52,7 @@ EXPECTED_RL_BQSKIT_PROFILE = "ci-lightweight-dynamic-synthesis"
 def rl_model_filename(device_name: str) -> str:
     """Return MQT's exact runtime filename for one frozen RL policy."""
     if device_name not in FROZEN_DEVICES:
-        raise ValueError(f"Device fuori protocollo: {device_name}")
+        raise ValueError(f'Device outside the protocol: {device_name}')
     return f"model_{FIGURE_OF_MERIT}_{device_name}.zip"
 
 
@@ -72,19 +72,19 @@ def validate_rl_archive(path: Path) -> tuple[dict[str, Any], list[str]]:
     metadata: dict[str, Any] = {"path": str(path), "kind": "rl"}
     errors: list[str] = []
     if not path.is_file():
-        return metadata, ["file mancante"]
+        return metadata, ['missing file']
     metadata["size_bytes"] = path.stat().st_size
     if is_git_lfs_pointer(path):
-        return metadata, ["puntatore Git LFS non materializzato; esegui git lfs pull"]
+        return metadata, ['unmaterialized Git LFS pointer; restore the original model artifact from external storage']
     try:
         with zipfile.ZipFile(path) as archive:
             names = set(archive.namelist())
             missing_members = sorted(REQUIRED_RL_ARCHIVE_MEMBERS - names)
             if missing_members:
-                errors.append("membri SB3 mancanti: " + ", ".join(missing_members))
+                errors.append('missing SB3 members: ' + ", ".join(missing_members))
             corrupt_member = archive.testzip()
             if corrupt_member is not None:
-                errors.append(f"membro ZIP corrotto: {corrupt_member}")
+                errors.append(f'corrupted ZIP member: {corrupt_member}')
             metadata["archive_members"] = len(names)
             metadata["sb3_version"] = (
                 archive.read("_stable_baselines3_version").decode("utf-8").strip()
@@ -96,11 +96,11 @@ def validate_rl_archive(path: Path) -> tuple[dict[str, Any], list[str]]:
                     saved_data = json.loads(archive.read("data"))
                 except (json.JSONDecodeError, UnicodeDecodeError) as error:
                     errors.append(
-                        f"metadati SB3 non validi: {type(error).__name__}: {error}"
+                        f'invalid SB3 metadata: {type(error).__name__}: {error}'
                     )
                 else:
                     if not isinstance(saved_data, dict):
-                        errors.append("metadati SB3 non rappresentati da un oggetto JSON")
+                        errors.append('SB3 metadata are not a JSON object')
                         saved_data = {}
                     raw_timesteps = saved_data.get("num_timesteps")
                     try:
@@ -110,7 +110,7 @@ def validate_rl_archive(path: Path) -> tuple[dict[str, Any], list[str]]:
                     metadata["num_timesteps"] = num_timesteps
                     if num_timesteps <= 0:
                         errors.append(
-                            f"num_timesteps non valido: {raw_timesteps!r}"
+                            f'invalid num_timesteps: {raw_timesteps!r}'
                         )
 
                     action_space = saved_data.get("action_space")
@@ -126,8 +126,7 @@ def validate_rl_archive(path: Path) -> tuple[dict[str, Any], list[str]]:
                     metadata["action_count"] = action_count
                     if action_count != EXPECTED_ACTION_COUNT:
                         errors.append(
-                            "action space incompatibile: "
-                            f"atteso={EXPECTED_ACTION_COUNT}, osservato={raw_action_count!r}"
+                            f'incompatible action space: expected={EXPECTED_ACTION_COUNT}, observed={raw_action_count!r}'
                         )
 
                     observation_space = saved_data.get("observation_space")
@@ -144,12 +143,10 @@ def validate_rl_archive(path: Path) -> tuple[dict[str, Any], list[str]]:
                     metadata["observation_keys"] = sorted(observed_keys)
                     if observed_keys != EXPECTED_OBSERVATION_KEYS:
                         errors.append(
-                            "observation space incompatibile: "
-                            f"atteso={sorted(EXPECTED_OBSERVATION_KEYS)}, "
-                            f"osservato={sorted(observed_keys)}"
+                            f'incompatible observation space: expected={sorted(EXPECTED_OBSERVATION_KEYS)}, observed={sorted(observed_keys)}'
                         )
     except (OSError, UnicodeDecodeError, zipfile.BadZipFile) as error:
-        errors.append(f"archivio ZIP non valido: {type(error).__name__}: {error}")
+        errors.append(f'invalid ZIP archive: {type(error).__name__}: {error}')
     return metadata, errors
 
 
@@ -165,18 +162,18 @@ def validate_rl_training_metadata(
     metadata: dict[str, Any] = {"path": str(path), "kind": "rl_metadata"}
     errors: list[str] = []
     if device_name not in FROZEN_DEVICES:
-        return metadata, [f"device fuori protocollo: {device_name}"]
+        return metadata, [f'device outside the protocol: {device_name}']
     if not path.is_file():
-        return metadata, ["metadati training mancanti"]
+        return metadata, ['missing training metadata']
 
     try:
         loaded = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError) as error:
         return metadata, [
-            f"metadati training non validi: {type(error).__name__}: {error}"
+            f'invalid training metadata: {type(error).__name__}: {error}'
         ]
     if not isinstance(loaded, dict):
-        return metadata, ["metadati training non rappresentati da un oggetto JSON"]
+        return metadata, ['training metadata are not a JSON object']
     metadata.update(loaded)
 
     expected = {
@@ -198,8 +195,7 @@ def validate_rl_training_metadata(
     for field, expected_value in expected.items():
         if loaded.get(field) != expected_value:
             errors.append(
-                f"{field} non conforme: "
-                f"atteso={expected_value!r}, osservato={loaded.get(field)!r}"
+                f'{field} mismatch: expected={expected_value!r}, observed={loaded.get(field)!r}'
             )
 
     target = loaded.get("target")
@@ -207,26 +203,24 @@ def validate_rl_training_metadata(
         not isinstance(target, dict)
         or target.get("target_sha256") != FROZEN_TARGET_SHA256[device_name]
     ):
-        errors.append("fingerprint Target dei metadati non conforme")
+        errors.append('metadata Target fingerprint mismatch')
 
     try:
         num_timesteps = int(loaded.get("num_timesteps"))
     except (TypeError, ValueError):
         num_timesteps = -1
     if num_timesteps <= 0:
-        errors.append(f"num_timesteps non valido: {loaded.get('num_timesteps')!r}")
+        errors.append(f"invalid num_timesteps: {loaded.get('num_timesteps')!r}")
     if (
         expected_num_timesteps is not None
         and num_timesteps != expected_num_timesteps
     ):
         errors.append(
-            "num_timesteps non conforme: "
-            f"atteso={expected_num_timesteps}, osservato={num_timesteps}"
+            f'num_timesteps mismatch: expected={expected_num_timesteps}, observed={num_timesteps}'
         )
     if expected_max_steps is not None and loaded.get("max_steps") != expected_max_steps:
         errors.append(
-            f"max_steps non conforme: "
-            f"atteso={expected_max_steps}, osservato={loaded.get('max_steps')!r}"
+            f"max_steps mismatch: expected={expected_max_steps}, observed={loaded.get('max_steps')!r}"
         )
     return metadata, errors
 
@@ -236,10 +230,10 @@ def validate_ml_classifier(path: Path) -> tuple[dict[str, Any], list[str]]:
     metadata: dict[str, Any] = {"path": str(path), "kind": "ml"}
     errors: list[str] = []
     if not path.is_file():
-        return metadata, ["file mancante"]
+        return metadata, ['missing file']
     metadata["size_bytes"] = path.stat().st_size
     if is_git_lfs_pointer(path):
-        return metadata, ["puntatore Git LFS non materializzato; esegui git lfs pull"]
+        return metadata, ['unmaterialized Git LFS pointer; restore the original model artifact from external storage']
     try:
         import joblib
         import numpy as np
@@ -256,12 +250,11 @@ def validate_ml_classifier(path: Path) -> tuple[dict[str, Any], list[str]]:
         )
         if set(classes) != set(FROZEN_DEVICES) or len(classes) != len(FROZEN_DEVICES):
             errors.append(
-                "classi non conformi al protocollo: "
-                f"attese={list(FROZEN_DEVICES)}, osservate={classes}"
+                f'classes do not match the protocol: expected={list(FROZEN_DEVICES)}, observed={classes}'
             )
         if feature_count != EXPECTED_FEATURE_COUNT:
             errors.append(
-                f"numero feature errato: atteso={EXPECTED_FEATURE_COUNT}, osservato={feature_count}"
+                f'incorrect feature count: expected={EXPECTED_FEATURE_COUNT}, observed={feature_count}'
             )
         if not errors:
             probabilities = np.asarray(
@@ -269,11 +262,11 @@ def validate_ml_classifier(path: Path) -> tuple[dict[str, Any], list[str]]:
                 dtype=float,
             )
             if probabilities.shape != (1, len(FROZEN_DEVICES)):
-                errors.append(f"shape predict_proba inattesa: {probabilities.shape}")
+                errors.append(f'Unexpected predict_proba shape: {probabilities.shape}')
             elif not all(math.isfinite(float(value)) for value in probabilities.flat):
-                errors.append("predict_proba contiene valori non finiti")
+                errors.append('predict_proba contains non-finite values')
     except Exception as error:
-        errors.append(f"classificatore non caricabile: {type(error).__name__}: {error}")
+        errors.append(f'cannot load classifier: {type(error).__name__}: {error}')
     return metadata, errors
 
 
@@ -286,15 +279,15 @@ def validate_ml_training_metadata(
     metadata: dict[str, Any] = {"path": str(path), "kind": "ml_metadata"}
     errors: list[str] = []
     if not path.is_file():
-        return metadata, ["metadati training mancanti"]
+        return metadata, ['missing training metadata']
     try:
         loaded = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError) as error:
         return metadata, [
-            f"metadati training non validi: {type(error).__name__}: {error}"
+            f'invalid training metadata: {type(error).__name__}: {error}'
         ]
     if not isinstance(loaded, dict):
-        return metadata, ["metadati training non rappresentati da un oggetto JSON"]
+        return metadata, ['training metadata are not a JSON object']
     metadata.update(loaded)
     expected = {
         "experiment_id": EXPERIMENT_ID,
@@ -309,12 +302,11 @@ def validate_ml_training_metadata(
     for field, expected_value in expected.items():
         if loaded.get(field) != expected_value:
             errors.append(
-                f"{field} non conforme: "
-                f"atteso={expected_value!r}, osservato={loaded.get(field)!r}"
+                f'{field} mismatch: expected={expected_value!r}, observed={loaded.get(field)!r}'
             )
     targets = loaded.get("targets")
     if not isinstance(targets, dict):
-        errors.append("fingerprint Target mancanti")
+        errors.append('missing Target fingerprints')
     else:
         for device_name in FROZEN_DEVICES:
             record = targets.get(device_name)
@@ -322,16 +314,15 @@ def validate_ml_training_metadata(
                 not isinstance(record, dict)
                 or record.get("target_sha256") != FROZEN_TARGET_SHA256[device_name]
             ):
-                errors.append(f"fingerprint Target non conforme: {device_name}")
+                errors.append(f'Target fingerprint mismatch: {device_name}')
     software = loaded.get("software")
     if not isinstance(software, dict):
-        errors.append("versioni software mancanti")
+        errors.append('missing software versions')
     else:
         for distribution, expected_version in EXPECTED_PACKAGE_VERSIONS.items():
             if software.get(distribution) != expected_version:
                 errors.append(
-                    f"versione {distribution} non conforme: "
-                    f"attesa={expected_version}, osservata={software.get(distribution)!r}"
+                    f'version {distribution} mismatch: expected={expected_version}, observed={software.get(distribution)!r}'
                 )
     return metadata, errors
 
@@ -341,7 +332,7 @@ def validate_model_set(
     expected_max_steps: int = 64,
     expected_num_timesteps: int = RL_FINAL_TIMESTEPS,
 ) -> tuple[dict[str, Any], list[str]]:
-    """Controlla le copie canoniche/runtime e tutta la provenienza qcompile."""
+    'Check canonical/runtime copies and all qcompile provenance.'
     from mqt.predictor.ml.helper import get_path_training_data
     from mqt.predictor.rl.helper import get_path_trained_model
     from mqt_predictor_protocol import file_sha256
@@ -381,7 +372,7 @@ def validate_model_set(
                 archive_timesteps = item["canonical"].get("num_timesteps")
                 if archive_timesteps != metadata.get("num_timesteps"):
                     errors.append(
-                        f"{filename}: num_timesteps archivio/metadati diversi"
+                        f'{filename}: archive and metadata num_timesteps differ'
                     )
         report[filename] = item
 

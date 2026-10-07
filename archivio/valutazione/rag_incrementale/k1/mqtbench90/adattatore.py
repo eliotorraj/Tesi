@@ -1,4 +1,4 @@
-"""Adattatore sperimentale: riusa il framework senza modificarlo o scrivere il suo indice."""
+'Experimental adapter: reuse the framework without changing it or writing its index.'
 from __future__ import annotations
 import copy
 import json
@@ -92,7 +92,7 @@ def messages(prompt, feedback=()):
 
 
 def decide(prompt, directory, http):
-    """Stesso budget e controlli v4; cambia solo la vista delle osservazioni."""
+    'Same budget and v4 checks; only the observation view changes.'
     feedback = []
     context = app.PROFILES["desktop"]
     for attempt in range(1, 4):
@@ -106,14 +106,14 @@ def decide(prompt, directory, http):
         count = len(tokenized["tokens"])
         save(folder / "context.json", {"input_tokens": count, "output_budget": 4096, "context": context})
         if count + 4096 > context:
-            raise ValueError("Contesto insufficiente; nessuna generazione o rimozione di esempi.")
+            raise ValueError('Insufficient context; no generation or example removal.')
         excluded = {"stream_options", "max_tokens", "chat_template_kwargs", "reasoning_effort", "reasoning_format"}
         payload = {k: v for k, v in app.CONFIG["fixed"].items() if k not in excluded}
         payload.update(temperature=0.0, stream=False, prompt=formatted["prompt"],
                        json_schema=facts.response_schema(), n_predict=4096, return_tokens=True)
         response = http("/completion", payload, folder / "call")
         if response.get("truncated") or response.get("stop_type") == "limit" or response.get("stop") is False:
-            raise RuntimeError("Risposta incompleta; tentativo conservato.")
+            raise RuntimeError('Incomplete response; attempt preserved.')
         checked = facts.verify(response.get("content", ""), prompt)
         checked.update(attempt=attempt, input_tokens=count, timings=response.get("timings"),
                        tokens_predicted=response.get("tokens_predicted"))
@@ -123,18 +123,18 @@ def decide(prompt, directory, http):
                            completed_attempts=attempt, hypothesis_status="not_semantically_verified")
             return checked
         feedback = checked["issues"]
-    raise ValueError("Nessuna coppia valida dopo tre tentativi.")
+    raise ValueError('No valid pair after three attempts.')
 
 
 def evaluate(row, folder, *, corpus, observations, position, url, transport, plan, strategy="incremental"):
     if plan.get("k") != 1 or (strategy == "fixed" and observations):
-        raise ValueError("Configurazione k=1 o memoria fissa non valida.")
+        raise ValueError('Invalid k=1 configuration or fixed memory.')
     method = method_for(strategy)
     started = time.perf_counter()
     folder.mkdir(parents=True, exist_ok=True)
     source = source_path(row)
     if sha(source) != row["source_sha256"]:
-        raise ValueError("Sorgente modificata prima dell'esecuzione.")
+        raise ValueError('Source changed before execution.')
     save(folder / "begin.json", {"at": now(), "circuit": row, "position": position,
                                 "memory_before_sha256": memory_digest(observations)})
     result = {"circuit_id": row["circuit_id"], "source_sha256": row["source_sha256"],

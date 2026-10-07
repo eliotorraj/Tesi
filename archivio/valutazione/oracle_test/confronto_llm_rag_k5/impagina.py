@@ -1,4 +1,4 @@
-"""Genera LaTeX e grafici TikZ autonomi dai dati verificati."""
+'Generate standalone LaTeX and TikZ plots from verified data.'
 from pathlib import Path
 import argparse,json
 HERE=Path(__file__).resolve().parent
@@ -8,8 +8,8 @@ def table(h,rs,cols):
  return r"\begin{tabular}{"+cols+"}\n\\toprule\n"+line(h)+"\\midrule\n"+"".join(line(r) for r in rs)+"\\bottomrule\n\\end{tabular}\n"
 def chart(rows):
  t=[r"\begin{tikzpicture}[x=1cm,y=1cm,font=\fontsize{8}{9}\selectfont]",
- r"\node[anchor=west,font=\bfseries] at (0,.8) {Circuito (* = oracle parziale)};",
- r"\node[anchor=west,font=\bfseries] at (8.8,.8) {Score: RAG e massimo conosciuto};",
+ '\\node[anchor=west,font=\\bfseries] at (0,.8) {Circuit (* = partial oracle)};',
+ '\\node[anchor=west,font=\\bfseries] at (8.8,.8) {Score: RAG and best known};',
  r"\node[anchor=west,font=\bfseries] at (20,.8) {Scarto $R-S$};"]
  for val in [0,.2,.4,.6,.8,1]:
   x=8.8+10*val
@@ -30,162 +30,70 @@ def chart(rows):
 def main():
  ap=argparse.ArgumentParser();ap.add_argument("--directory",type=Path,default=HERE/"risultati");a=ap.parse_args()
  d=json.loads((a.directory/"dati.json").read_text());rows=d["rows"];s=d["summary"]
- out=[r"""\documentclass[10pt,a4paper,landscape]{article}
-\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[italian]{babel}
-\usepackage[margin=15mm]{geometry}
-\usepackage{lmodern,booktabs,array,amsmath,tikz,xcolor,hyperref,fancyhdr}
-\hypersetup{colorlinks=true,linkcolor=blue!50!black}
-\pagestyle{fancy}\fancyhf{}\lhead{\small Test: LLM + RAG, Manhattan, 5 esempi}
-\rhead{\small Confronto con oracle max3}\cfoot{\small\thepage}
-\setlength{\headheight}{13pt}\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}
-\newcommand{\titolo}[1]{{\Large\bfseries #1}\par\vspace{3mm}}
-\begin{document}
-\titolo{Quanto manca al massimo conosciuto?}
-{\large LLM + RAG con 5 esempi sui 90 circuiti Test}\par
-Il confronto usa i risultati originali del RAG con distanza Manhattan e l'oracle
-generato il 29 settembre 2026. Lo score è \texttt{expected\_fidelity}:
-una stima sui Target sintetici, non una misura su hardware quantistico reale.
-
-\textbf{Risultato principale.} Il sistema raggiunge il massimo conosciuto in
-55 casi su 90 (61,1\%) e resta sotto in 35 (38,9\%). Nessun caso supera il riferimento.
-Lo scarto medio è 0,0018434763, pari a 0,18434763 punti percentuali sulla scala dello score.
-La mediana dello scarto è zero. In 84 casi su 90 lo scarto non supera 0,01.
+ out=["""\\documentclass[10pt,a4paper,landscape]{article}
+\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage[english]{babel}
+\\usepackage[margin=15mm]{geometry}
+\\usepackage{lmodern,booktabs,array,amsmath,tikz,xcolor,hyperref,fancyhdr}
+\\hypersetup{colorlinks=true,linkcolor=blue!50!black}
+\\pagestyle{fancy}\\fancyhf{}\\lhead{\\small Test: LLM + RAG, Manhattan, 5 examples}
+\\rhead{\\small Comparison with max3 oracle}\\cfoot{\\small\\thepage}
+\\setlength{\\headheight}{13pt}\\setlength{\\parindent}{0pt}\\setlength{\\parskip}{5pt}
+\\newcommand{\\titolo}[1]{{\\Large\\bfseries #1}\\par\\vspace{3mm}}
+\\begin{document}
+\\titolo{How far is the best known result?}
+{\\large LLM + RAG with 5 examples on 90 Test circuits}\\par
+This compares original Manhattan RAG results with the oracle generated on 29 September 2026. \\texttt{expected\\_fidelity} is an estimate on synthetic Targets, not a physical-hardware measurement.
+\\textbf{Main result.} The system reaches the best known score in 55/90 cases (61.1\\%) and remains below it in 35 (38.9\\%). No case exceeds the reference. Mean gap is 0.0018434763, or 0.18434763 percentage points on the score scale. Median gap is zero; 84/90 cases have gap at most 0.01.
 """]
  sr=[]
- for label,key in [("Score medio RAG","mean_system"),("Massimo conosciuto medio","mean_oracle"),("Scarto medio","mean_gap"),("Scarto massimo","max_gap")]:
+ for label,key in [('Mean RAG score',"mean_system"),('Mean best-known score',"mean_oracle"),('Mean gap',"mean_gap"),('Largest gap',"max_gap")]:
   sr.append([label]+[f"{v[key]:.10f}" for v in [s,s["complete"],s["partial"]]])
- out.append(table(["Misura","Tutti i circuiti","Oracle completo","Oracle parziale"],[["Circuiti",90,30,60]]+sr+[["Al massimo conosciuto","55 / 90","9 / 30","46 / 60"],["Sotto il massimo conosciuto","35 / 90","21 / 30","14 / 60"]],"lrrr"))
- out.append(r"""
-\medskip\textbf{Definizione.}
-Per ogni circuito, $R=\max_{d,c,s} F(d,c,s)$ è il massimo degli score validi osservati:
-5 dispositivi, 12 configurazioni Qiskit e seed $s\in\{0,1,2\}$, solo su dispositivi compatibili.
-Il sistema ha una sola compilazione, con seed 0, e score $S$.
-Lo scarto è $\Delta=R-S$: zero indica parità; un valore positivo indica margine osservato.
-I punti percentuali sono $100\Delta$; la perdita percentuale relativa è invece $100\Delta/R$.
-
-\textbf{La generazione è terminata, ma non tutti i riferimenti sono completi.}
-Le 16\,200 celle comprendono 864 incompatibilità. Delle 15\,336 compilazioni compatibili,
-14\,249 riescono, 1\,086 superano il limite di 100 secondi e una fallisce.
-Tutti i 90 circuiti hanno un riferimento; solo 30 hanno tutte le compilazioni compatibili riuscite.
-Negli altri 60, il massimo osservato può sottostimare ciò che si otterrebbe completando le prove.
-Errori e timeout sono dati mancanti, mai score zero.
-
-\textbf{Conclusione corretta.}
-In 9 circuiti il sistema uguaglia il massimo dell'intera griglia valutata;
-in altri 46 uguaglia il massimo osservato di una griglia incompleta.
-Non è una prova di ottimalità assoluta, né un limite superiore per compilatori esterni alla griglia.
-Il confronto è descrittivo e successivo al Test: l'oracle non è stato usato nel recupero o nel prompt.
-\newpage
-\titolo{Scelta della coppia e variabilità del seed}
-Il massimo della coppia scelta è $P=\max_{s=0,1,2}F(d_{\mathrm{LLM}},c_{\mathrm{LLM}},s)$:
-\[
-\underbrace{R-S}_{\text{scarto totale}} =
-\underbrace{R-P}_{\text{margine cambiando coppia}}+
-\underbrace{P-S}_{\text{margine cambiando seed nella stessa coppia}}.
-\]
-Tutte le 90 coppie scelte hanno tre compilazioni riuscite nell'oracle.
-In tutti i casi il loro seed 0 riproduce esattamente lo score storico del RAG.
-Il margine medio tra coppie è 0,0014354875; quello interno alla coppia è 0,0004079888.
-La coppia scelta è fra le migliori note in 55/90 casi.
-Anche confrontando solo il seed 0 dell'oracle, lo scarto medio resta 0,0018044775.
-
-\textbf{I dieci scarti maggiori.} C = ricerca completa; P = ricerca parziale.
-I valori sono score, non percentuali.
+ out.append(table(['Measurement','All circuits','Complete oracle','Partial oracle'],[['Circuits',90,30,60]]+sr+[['At the best known score',"55 / 90","9 / 30","46 / 60"],['Below the best known score',"35 / 90","21 / 30","14 / 60"]],"lrrr"))
+ out.append("""
+\\medskip\\textbf{Definition.} For each circuit, $R=\\max_{d,c,s}F(d,c,s)$ is the maximum valid observed score over five devices, twelve Qiskit configurations and seeds $s\\in\\{0,1,2\\}$, restricted to compatible devices. The system uses one seed-0 compilation with score $S$. Gap is $\\Delta=R-S$: zero indicates a tie; positive values indicate observed headroom. Percentage points are $100\\Delta$; relative percentage loss is $100\\Delta/R$.
+\\textbf{Generation finished, but some references remain incomplete.} The 16\\,200 cells include 864 incompatibilities. Of 15\\,336 compatible compilations, 14\\,249 succeed, 1\\,086 exceed 100 seconds and one fails. All 90 circuits have a reference, but only 30 have every compatible compilation succeed. For the other 60, observed maxima may underestimate what completing the grid could achieve. Errors and timeouts remain missing data, never zero scores.
+\\textbf{Interpretation.} On nine circuits the system matches the full evaluated grid's maximum; on 46 more it matches an incomplete grid's observed maximum. This proves neither absolute optimality nor an upper bound for compilers outside the grid. This descriptive post-Test comparison never supplied the oracle to retrieval or prompts.
+\\newpage\\titolo{Pair selection and seed variability}
+The selected pair's maximum is $P=\\max_{s=0,1,2}F(d_{\\mathrm{LLM}},c_{\\mathrm{LLM}},s)$:\\[\\underbrace{R-S}_{\\text{total gap}}=\\underbrace{R-P}_{\\text{headroom from changing pair}}+\\underbrace{P-S}_{\\text{headroom from changing seed within the pair}}.\\]
+All 90 selected pairs have three successful oracle compilations. Their seed-0 scores exactly reproduce historical RAG scores in every case. Mean between-pair headroom is 0.0014354875; mean within-pair headroom is 0.0004079888. The selected pair is among the best known in 55/90 cases. Restricting the oracle to seed 0 still gives mean gap 0.0018044775.
+\\textbf{Ten largest gaps.} C = complete search; P = partial search. Values are scores, not percentages.
 """)
  top=sorted(rows,key=lambda r:r["gap"],reverse=True)[:10]
- out.append(table(["Circuito","RAG $S$","Oracle $R$","Totale $R-S$","Coppia $R-P$","Seed $P-S$","Ricerca"],
+ out.append(table(['Circuit',"RAG $S$","Oracle $R$",'Total $R-S$','Pair $R-P$',"Seed $P-S$",'Search'],
  [[esc(r["circuit_id"])]+[f"{r[k]:.8f}" for k in ["system_score","oracle_score","gap","choice_gap","within_pair_gap"]]+["C" if r["exhaustive"] else "P"] for r in top],"lrrrrrc"))
- out.append(r"""
-\medskip\textbf{Esempio: \texttt{qpeexact\_indep\_tket\_6}.}
-Il RAG sceglie \texttt{ibm\_heron\_156} con \texttt{o3\_default\_default}.
-Lo score è 0,9460784319. La stessa coppia arriva a 0,9622779418 con seed 1 o 2.
-Il massimo noto è 0,9705120914 su \texttt{quantinuum\_h2\_56}
-(per esempio \texttt{o2\_default\_default}, tutti i seed).
-Dello scarto 0,0244336595, 0,0161995099 riguarda il seed e 0,0082341496 la coppia.
-Il riferimento è parziale: 172 compilazioni valide su 180.
-
-\textbf{Esempio: \texttt{tsp\_indep\_qiskit\_9}.}
-Qui il riferimento è completo. Il RAG sceglie \texttt{quantinuum\_h2\_56},
-\texttt{o2\_default\_default}, con score 0,9247191115 per tutti i seed.
-\texttt{ibm\_falcon\_127}, con \texttt{o2\_default\_default} oppure
-\texttt{o3\_default\_default}, raggiunge 0,9448083109.
-L'intero scarto 0,0200891994 riguarda la scelta della coppia.
-
-\textbf{Lettura dei grafici.}
-Punto blu = RAG; cerchio arancione = oracle. Se coincidono, il punto è dentro il cerchio.
-A destra lo scarto è ingrandito su una scala comune da 0 a 0,026:
-barre verdi = oracle completo; grigie = parziale. L'asterisco indica un oracle parziale.
-Gli ID e l'ordine alfabetico coincidono con le tabelle.
+ out.append("""
+\\medskip\\textbf{Example: \\texttt{qpeexact\\_indep\\_tket\\_6}.} RAG selects \\texttt{ibm\\_heron\\_156} with \\texttt{o3\\_default\\_default}, scoring 0.9460784319. The same pair reaches 0.9622779418 with seed 1 or 2. The best known score is 0.9705120914 on \\texttt{quantinuum\\_h2\\_56}, for example with \\texttt{o2\\_default\\_default} at every seed. Of the 0.0244336595 gap, 0.0161995099 concerns seed and 0.0082341496 concerns pair choice. The reference is partial: 172 valid compilations out of 180.
+\\textbf{Example: \\texttt{tsp\\_indep\\_qiskit\\_9}.} This reference is complete. RAG selects \\texttt{quantinuum\\_h2\\_56}, \\texttt{o2\\_default\\_default}, scoring 0.9247191115 at every seed. \\texttt{ibm\\_falcon\\_127} with \\texttt{o2\\_default\\_default} or \\texttt{o3\\_default\\_default} reaches 0.9448083109. The entire 0.0200891994 gap concerns pair choice.
+\\textbf{Reading the plots.} Blue point = RAG; orange circle = oracle. Equal scores place the point inside the circle. The right-hand gap plot shares a 0--0.026 scale: green bars = complete oracle; gray = partial. An asterisk marks a partial oracle. IDs and alphabetical order match the tables.
 """)
  figs=a.directory/"grafici";figs.mkdir(exist_ok=True)
  for p in range(3):
   c=chart(rows[p*30:(p+1)*30])
-  out.append(r"\newpage"+"\n"+r"\titolo{Score e scarto per circuito: "+f"{p*30+1}--{(p+1)*30}"+"}\n"+c)
-  out.append(r"\par\small Blu: RAG; arancione: oracle. Scarto verde: riferimento completo; grigio: parziale. Scale identiche nelle tre pagine. I piccoli scarti sono leggibili nelle tabelle.")
+  out.append(r"\newpage"+"\n"+'\\titolo{Score and gap per circuit: '+f"{p*30+1}--{(p+1)*30}"+"}\n"+c)
+  out.append('\\par\\small Blue: RAG; orange: oracle. Green gap: complete reference; gray: partial. Scales match across the three pages. Small gaps are readable in the tables.')
   (figs/f"confronto_{p+1}.tex").write_text(r"""\documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage{lmodern,tikz}
 \usepackage[paperwidth=28cm,paperheight=14cm,margin=8mm]{geometry}
 \pagestyle{empty}\begin{document}\noindent
 """+c+"\n"+r"\end{document}",encoding="utf-8")
  for p in range(3):
-  out.append(r"\newpage"+"\n"+r"\titolo{Tabella completa: circuiti "+f"{p*30+1}--{(p+1)*30}"+"}\n")
-  out.append(r"""\small Coppia al max: massimo dei tre seed della coppia scelta uguale al massimo globale.
-C/P: oracle completo/parziale. Tutti gli esiti RAG sono successi.
-\par\vspace{2mm}
-{\fontsize{8.5}{10}\selectfont\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.18}
+  out.append(r"\newpage"+"\n"+'\\titolo{Full table: circuits '+f"{p*30+1}--{(p+1)*30}"+"}\n")
+  out.append("""\\small Pair at max: selected pair's three-seed maximum equals the global maximum. C/P: complete/partial oracle. Every RAG outcome is successful.\\par\\vspace{2mm}{\\fontsize{8.5}{10}\\selectfont\\setlength{\\tabcolsep}{5pt}\\renewcommand{\\arraystretch}{1.18}
 """)
-  out.append(table(["ID","Circuito","Qubit","RAG $S$","Oracle $R$","Scarto $R-S$","Coppia al max","C/P"],
-  [[r["id"],esc(r["circuit_id"]),r["num_qubits"]]+[f"{r[k]:.10f}" for k in ["system_score","oracle_score","gap"]]+["Sì" if r["selected_pair_is_best"] else "No","C" if r["exhaustive"] else "P"] for r in rows[p*30:(p+1)*30]],"rlrrrrcc"))
-  out.append(r"}\par\small Parità: tolleranza $10^{-12}$ sui valori a 10 decimali. Scelte, seed e tutti i pari merito sono in \texttt{confronto\_90\_circuiti.csv} e \texttt{dati.json}.")
- out.append(r"""\newpage
-\titolo{Fonti, controlli e riproducibilità}
-\textbf{Sistema.} Risultati originali \texttt{llm\_rag}, avviati il 21 settembre 2026.
-Recupero Manhattan e 5 esempi verificati nei registri dei 90 circuiti.
-Modello Qwen selezionato con profilo \texttt{qwen/p0\_t0}, compilazione Qiskit con seed 0.
-Non si usano varianti WL, recupero casuale, $k=1$ o $k=10$.
-
-\textbf{Oracle.} Analisi \texttt{20260929T210523\_9df1db2b}, campagna \texttt{test\_max3\_v1}.
-Massimo dei seed 0, 1 e 2 per coppia, poi massimo fra coppie.
-Versioni: Python 3.12.13, Qiskit 2.5.0, MQT Bench 2.2.3, NumPy 2.5.1, MQT Predictor 2.4.0.
-Dispositivi: \texttt{ibm\_falcon\_27}, \texttt{ibm\_heron\_133}, \texttt{ibm\_falcon\_127},
-\texttt{ibm\_heron\_156}, \texttt{quantinuum\_h2\_56}.
-Configurazioni, Target e opzioni sono quelli del contratto dell'oracle.
-
-\textbf{Verifiche.}
-Controllate le impronte dei 16\,200 esiti originali dell'oracle.
-Ricalcolati i massimi delle 5\,400 coppie e dei 90 circuiti.
-Identificativi e impronte dei sorgenti coincidono fra oracle e RAG.
-Gli score RAG sono verificati sui risultati di compilazione.
-Medie aritmetiche per circuito, senza esclusioni.
-I sottogruppi completo/parziale comprendono circuiti diversi: le loro medie non isolano un effetto causale.
-I dieci casi sono selezionati per scarto decrescente; grafici, tabelle e CSV includono tutti i 90.
-
-\textbf{Limiti.}
-L'oracle prende il migliore di tre seed, il sistema usa un solo seed:
-il confronto principale è intenzionalmente favorevole all'oracle, come richiesto.
-Un riferimento parziale è un limite inferiore del massimo della griglia completa.
-La parità non certifica allora l'assenza di alternative migliori.
-Score arrotondati a zero non provano identità dei valori non arrotondati.
-Non sono state avviate compilazioni quantistiche né modificati dati originali, decisioni, prompt o Dataset.
-Il grafo graphify non è stato aggiornato.
-
-\textbf{Fonti originali.}\par
-{\footnotesize
-\path{/home/elio/oracoli_mqt_test/test_max3_v1/analisi/20260929T210523_9df1db2b}\par
-\path{/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/risultati/llm_rag}\par
-\path{/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/preparazione/contratto_congelato.json}\par
-}
-\textbf{Artefatti.}
-\texttt{analizza.py} legge e verifica le fonti; \texttt{impagina.py} genera il LaTeX.
-\texttt{dati.json} conserva misure e pari merito.
-\texttt{confronto\_90\_circuiti.csv} contiene anche scelte, scarti relativi e scomposizione.
-\texttt{provenienza.json} registra le impronte. In \texttt{grafici/} sono conservate le tre figure autonome.
-
-\textbf{Separazione.}
-Il report è nell'area di valutazione \texttt{oracle\_test/confronto\_llm\_rag\_k5}.
-La campagna oracle resta nella cartella esterna. Nessun risultato è aggiunto all'indice RAG
-o alle pipeline di decisione.
-\end{document}
+  out.append(table(["ID",'Circuit',"Qubit","RAG $S$","Oracle $R$",'Gap $R-S$','Pair at maximum',"C/P"],
+  [[r["id"],esc(r["circuit_id"]),r["num_qubits"]]+[f"{r[k]:.10f}" for k in ["system_score","oracle_score","gap"]]+['Yes' if r["selected_pair_is_best"] else "No","C" if r["exhaustive"] else "P"] for r in rows[p*30:(p+1)*30]],"rlrrrrcc"))
+  out.append('}\\par\\small Ties: $10^{-12}$ tolerance on 10-decimal values. Choices, seeds and all ties are in \\texttt{confronto\\_90\\_circuiti.csv} and \\texttt{dati.json}.')
+ out.append("""\\newpage\\titolo{Sources, checks and reproducibility}
+\\textbf{System.} Original \\texttt{llm\\_rag} results started on 21 September 2026. Manhattan retrieval and five examples are verified in all 90 records. Selected Qwen profile \\texttt{qwen/p0\\_t0}, Qiskit seed 0; no WL, random retrieval, $k=1$ or $k=10$ variants.
+\\textbf{Oracle.} Analysis \\texttt{20260929T210523\\_9df1db2b}, campaign \\texttt{test\\_max3\\_v1}. Maximum across seeds 0, 1 and 2 per pair, then across pairs. Versions: Python 3.12.13, Qiskit 2.5.0, MQT Bench 2.2.3, NumPy 2.5.1, MQT Predictor 2.4.0. Devices: \\texttt{ibm\\_falcon\\_27}, \\texttt{ibm\\_heron\\_133}, \\texttt{ibm\\_falcon\\_127}, \\texttt{ibm\\_heron\\_156}, \\texttt{quantinuum\\_h2\\_56}. Configurations, Targets and options match the oracle contract.
+\\textbf{Checks.} Hashes of all 16\\,200 original outcomes were checked. Maxima for 5\\,400 pairs and 90 circuits were recomputed. Source IDs and hashes match between oracle and RAG; RAG scores match compilation results. Arithmetic circuit means use no exclusions. Complete/partial subsets contain different circuits, so their means do not isolate causal effects. The ten cases have the largest gaps; plots, tables and CSV include all 90.
+\\textbf{Limits.} The oracle takes the best of three seeds while the system uses one, intentionally favoring the oracle. A partial reference is a lower bound on the full grid's maximum; a tie does not exclude better alternatives. Scores rounded to zero do not prove equal unrounded values. No quantum compilation was started and no original data, decisions, prompts or Dataset were changed. This analysis did not update graphify.
+\\textbf{Original sources.}\\par{\\footnotesize
+\\path{/home/elio/oracoli_mqt_test/test_max3_v1/analisi/20260929T210523_9df1db2b}\\par
+\\path{/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/risultati/llm_rag}\\par
+\\path{/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/test/preparazione/contratto_congelato.json}\\par}
+\\textbf{Artifacts.} \\texttt{analizza.py} reads and verifies sources; \\texttt{impagina.py} generates LaTeX. \\texttt{dati.json} preserves measurements and ties. \\texttt{confronto\\_90\\_circuiti.csv} also contains choices, relative gaps and decomposition. \\texttt{provenienza.json} records hashes; \\texttt{grafici/} contains three standalone figures.
+\\textbf{Separation.} The report is under \\texttt{oracle\\_test/confronto\\_llm\\_rag\\_k5}; the campaign remains external. No result enters the RAG index or decision pipelines.\\end{document}
 """)
  (a.directory/"confronto_oracle_rag5.tex").write_text("\n".join(out),encoding="utf-8")
  print(a.directory/"confronto_oracle_rag5.tex")

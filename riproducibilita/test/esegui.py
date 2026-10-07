@@ -1,4 +1,4 @@
-"""Confronto finale in una nuova campagna; nessuna lettura dei vecchi esiti."""
+'Final comparison in a new campaign without reading previous outcomes.'
 from pathlib import Path
 import random,time
 from uuid import uuid4
@@ -13,7 +13,7 @@ def freeze():
     from seleziona import verify_selection
     selection=verify_selection()
     methods=s.CONFIG['test_methods']
-    if not methods or set(methods)-METHODS or len(set(methods))!=len(methods):raise ValueError('Metodi Test non validi')
+    if not methods or set(methods)-METHODS or len(set(methods))!=len(methods):raise ValueError('Invalid Test methods')
     value={"selection_sha256":s.sha(s.VALIDATION/'selezione.json'),"contract_sha256":s.sha(s.WORK/'contratto.json'),
            "methods":methods,"seed":s.CONFIG['test_seed'],"random_seed":s.CONFIG['random_seed'],
            "dataset_sha256":s.sha(s.WORK/'data/rag_examples.jsonl'),"models":None,"wl_sha256":None}
@@ -21,24 +21,24 @@ def freeze():
         from gestione import assets
         value['models']=assets()
         technical=s.read(s.MQT/'prove_tecniche/superate.json')
-        if technical['assets']!=value['models']:raise ValueError('Ripetere la prova tecnica con i modelli correnti')
+        if technical['assets']!=value['models']:raise ValueError('Repeat the technical check with the current models')
     if set(methods)&{'llm_wl','llm_wl_sintesi'}:value['wl_sha256']=s.sha(s.VALIDATION/'wl/selezione.json')
     s.same_or_save(s.TEST/'contratto.json',value)
     return value
 
 def check():
     s.require_prepared();c=s.read(s.TEST/'contratto.json')
-    if c['selection_sha256']!=s.sha(s.VALIDATION/'selezione.json') or c['dataset_sha256']!=s.sha(s.WORK/'data/rag_examples.jsonl'):raise ValueError('Fonti Test cambiate')
+    if c['selection_sha256']!=s.sha(s.VALIDATION/'selezione.json') or c['dataset_sha256']!=s.sha(s.WORK/'data/rag_examples.jsonl'):raise ValueError('Test sources changed')
     if c.get('models'):
         from gestione import assets
-        if c['models']!=assets():raise ValueError('Modelli MQT diversi dal congelamento Test')
+        if c['models']!=assets():raise ValueError('MQT models differ from the frozen Test identities')
     return c
 
 def run(method):
     import portalocker
     from qiskit_dataset.catalog import load_catalog
     manifest=s.require_prepared();c=check();catalog=load_catalog()
-    if method not in c['methods']:raise ValueError('Metodo non previsto dal piano congelato')
+    if method not in c['methods']:raise ValueError('Method not included in the frozen plan')
     selection=s.read(s.VALIDATION/'selezione.json');model=selection['model'];temperature=selection['winner']['temperature']
     wl=None;k=1 if method=='llm_rag_k1' else 10 if method=='llm_rag_k10' else s.CONFIG['retrieval_k']
     if method.startswith('llm'):
@@ -46,7 +46,7 @@ def run(method):
         if method in ('llm_wl','llm_wl_sintesi'):
             from dag_wl_core import prepare_index
             from prototype.quantum_assistant.adapters.rag_dataset import load_corpus
-            if s.sha(s.VALIDATION/'wl/selezione.json')!=c['wl_sha256']:raise ValueError('Selezione WL modificata')
+            if s.sha(s.VALIDATION/'wl/selezione.json')!=c['wl_sha256']:raise ValueError('WL selection was modified')
             corpus=load_corpus();index,index_hash=prepare_index(corpus,s.TEST/method/'indice')
             wl=(corpus,index,s.read(s.VALIDATION/'wl/selezione.json')['h'],index_hash)
     folder=s.TEST/method;folder.mkdir(parents=True,exist_ok=True)
@@ -71,7 +71,7 @@ def run(method):
                         result=execute(case/'compilazione',{'kind':'qiskit','task':t},catalog.execution_policy['timeout_seconds'])
                 elif method=='random':
                     pairs=[(d,cfg) for d in catalog.supported_device_ids if row['num_qubits']<=manifest['targets'][d]['num_qubits'] for cfg in catalog.configurations]
-                    if not pairs:raise ValueError('Nessuna coppia compatibile')
+                    if not pairs:raise ValueError('No compatible pair')
                     rng=random.Random(int(s.digest({'seed':c['random_seed'],'source':row['source_sha256']}),16))
                     d,cfg=rng.choice(pairs);chosen={'selected_device':d,'config_id':cfg.config_id};s.save(case/'decision.json',chosen)
                     result=execute(case/'compilazione',{'kind':'qiskit','task':task(row,d,cfg,c['seed'],catalog,manifest)},catalog.execution_policy['timeout_seconds'])

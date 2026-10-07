@@ -1,1 +1,1 @@
-"""Seconda selezione: contratto v4, studi indipendenti e ripresa durevole."""
+'Second selection: contract v4, independent studies and durable resume.'

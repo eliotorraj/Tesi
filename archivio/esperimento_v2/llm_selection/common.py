@@ -1,4 +1,4 @@
-"""Percorsi e scritture durevoli, separati dagli artefatti MQT."""
+'Paths and durable writes, separate from MQT artifacts.'
 from __future__ import annotations
 import hashlib
 import json
@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = EXPERIMENT_ROOT / "llm_selection"
 
 def json_ready(value):
-    """Serializza dataclass e MappingProxyType senza deepcopy/pickle."""
+    'Serialize dataclasses and MappingProxyType without deepcopy/pickle.'
     from collections.abc import Mapping
     from dataclasses import fields, is_dataclass
     from enum import Enum
@@ -53,7 +53,7 @@ def append_jsonl(path, value):
         os.fsync(stream.fileno())
 
 def windows_path(path):
-    """Percorso del medesimo file WSL per gli eseguibili Windows."""
+    'Windows path to the same WSL file.'
     path = Path(path).resolve()
     parts = path.parts
     if len(parts) >= 3 and parts[1] == "mnt" and len(parts[2]) == 1:

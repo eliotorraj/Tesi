@@ -1,4 +1,4 @@
-"""Avvio della sola validation del recupero DAG/WL."""
+'Run DAG/WL retrieval validation only.'
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"test/strumenti"))

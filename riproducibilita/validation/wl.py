@@ -1,4 +1,4 @@
-"""Selezione della profondità WL sul recupero validation, senza chiamate LLM."""
+'Select WL depth on validation retrieval without LLM calls.'
 from statistics import mean
 import settings as s
 
@@ -10,7 +10,7 @@ def select():
     manifest=s.require_prepared();corpus=load_corpus(verify_features=True)
     grid=s.CONFIG['wl_iterations']
     if not grid or len(set(grid))!=len(grid) or any(type(h) is not int or not 1<=h<=30 for h in grid):
-        raise ValueError('wl_iterations deve contenere interi distinti fra 1 e 30')
+        raise ValueError('wl_iterations must contain distinct integers between 1 and 30')
     root=s.VALIDATION/'wl';root.mkdir(parents=True,exist_ok=True)
     with portalocker.Lock(str(root/'.lock'),timeout=0):
         s.same_or_save(root/'contratto.json',{'grid':grid,'k':5,'criterion':'max evaluable coverage, min mean best-in-five regret, min h',
@@ -26,7 +26,7 @@ def select():
                 values={str(h):[r['rag_id'] for r,score in rank(corpus,index,query,mask.available_device_ids,request.figure_of_merit,h)[:5]] for h in grid}
                 s.save(path,{'circuit_id':row['circuit_id'],'source_sha256':row['source_sha256'],'index_sha256':index_hash,'rankings':values})
             rankings[row['circuit_id']]=s.read(path)['rankings'];sources[str(path.relative_to(root))]=s.sha(path)
-        # Le graduatorie dipendono soltanto da QASM e train. Ora si leggono gli score validation.
+        # Rankings depend only on QASM and train. Read validation scores only now.
         s.same_or_save(root/'recuperi_sigillati.json',sources)
         scores={};best={}
         for record in s.read(s.DATASET/'aggregati.json'):
@@ -46,10 +46,10 @@ def select():
                         if key in scores:observed.append(scores[key])
                 if observed:regrets[h][id]=best[id]-max(observed)
         coverage=max(map(len,regrets.values()))
-        if not coverage:raise ValueError('Nessuna scelta recuperata valutabile')
+        if not coverage:raise ValueError('No evaluable retrieved choice')
         eligible=[h for h in grid if len(regrets[h])==coverage]
         common=set.intersection(*(set(regrets[h]) for h in eligible))
-        if not common:raise ValueError('Nessun circuito comune fra le profondità eleggibili')
+        if not common:raise ValueError('No common circuits among eligible depths')
         table=[{'h':h,'evaluable':len(regrets[h]),'common_count':sum(id in regrets[h] for id in common),
                 'mean_best_in_five_regret':mean(regrets[h][id] for id in common) if h in eligible else None} for h in grid]
         winner=min((r for r in table if r['h'] in eligible),key=lambda r:(r['mean_best_in_five_regret'],r['h']))

@@ -1,401 +1,128 @@
-# Architettura e flusso del prototipo
+# Architecture and execution flow
 
-Il percorso descritto comprende il client Linux e il collegamento al server del fisso.
-Per nuove campagne si usa il kit autonomo `riproducibilita/`.
-Questo documento descrive il comportamento dei sorgenti distribuiti in
-`prototipo/`. Per avviare il programma usare la
-[guida passo passo](guida_passo_passo.md). Le regole di confronto tra metodi
-sono nel [protocollo sperimentale](protocollo_sperimentale.md).
+This document explains how the standalone prototype turns an OpenQASM 2 circuit into a device and compilation-configuration recommendation. For installation and commands, start with the [step-by-step guide](guida_passo_passo.md). For the experimental conditions, see the [protocol](protocollo_sperimentale.md).
 
-## 1. Scopo e confini
+## 1. Components and boundaries
 
-Il programma riceve un circuito OpenQASM 2 e propone una coppia composta da
-un dispositivo e una configurazione Qiskit. Il modello linguistico vede le
-caratteristiche del circuito e, nel percorso ordinario, esempi di compilazioni
-del train. La compilazione è facoltativa e avviene solo con `--compile`.
+`app.py` coordinates circuit parsing, 49-feature extraction, hardware eligibility, retrieval of up to five train examples, TOON encoding, local LLM inference and response validation. Compilation with the selected Qiskit configuration is optional. The prototype uses the selected LLM + RAG system; RAG is the retrieval technique within that system.
 
-```text
-QASM e vincoli
-    → lettura del circuito e 49 caratteristiche
-    → controllo della richiesta e maschera hardware
-    → recupero di massimo 5 esempi train
-    → registro delle evidenze e vista essenziale TOON
-    → modello locale → JSON → controllo di coppia e fatti
-    → eventuali correzioni, fino a 3 tentativi
-    → proposta accettata → compilazione Qiskit facoltativa
-```
+The hardware catalog contains synthetic MQT Bench Targets with fixed properties. It does not contact quantum hardware. Running the prototype does not require the trained MQT Predictor device selector or RL policies. Feature extraction uses the local `portable_features` implementation and retains its MIT attribution.
 
-[app.py](../app.py) coordina le fasi. Le strutture dati e le operazioni concrete
-sono in [prototype/quantum_assistant/](../prototype/quantum_assistant/README.md).
-[prototype/prompting/](../prototype/prompting/README.md) costruisce il messaggio
-e controlla la risposta. I cataloghi e i dati distribuiti sono locali.
+The main folders separate application modules (`prototype/`), train data and catalogs (`data/`), runtime files (`runtime/`) and new execution records (`runs/`). Feature extraction is in `portable_features.py`; runtime profiles are defined in `config.json`. The [module README](../prototype/README.md) and the repository's [reproducibility kit](../../riproducibilita/README.md) provide further navigation.
 
-Il prototipo non esegue circuiti su hardware quantistico reale e non addestra
-modelli MQT. Usa Target sintetici di MQT Bench e una copia portabile
-[dell'estrattore di caratteristiche](../portable_features.py) derivata da MQT
-Predictor 2.4.0. La licenza è conservata in
-[LICENSE-MQT-Predictor](../LICENSE-MQT-Predictor).
-Questo percorso è distinto dall'architettura MQT Predictor che seleziona un
-dispositivo con un modello supervisionato e compila con una politica RL.
+## 2. Input and parsing
 
-## 2. Ingresso e lettura del circuito
+The public command accepts a UTF-8 OpenQASM 2 file. Repeated `--device` options restrict the eligible devices. The internal `prepareUiSubmission` path retains an empty legacy `user_text` field; the public interface does not interpret a free-text hardware request.
 
-Il comando `run` legge un file QASM UTF-8. L'opzione ripetibile `--device`
-limita gli identificativi ammessi. La funzione `prepare` costruisce una
-`UiSubmission` di compatibilità e la passa a `QasmRequestParser`.
-Il campo storico `user_text` è vuoto e non viene usato per interpretare
-vincoli in linguaggio naturale.
+The structured request model supports provider and device restrictions, minimum and maximum qubit counts, native gates and a hardware snapshot. The current CLI exposes the device restriction. `expected_fidelity` is the supported metric.
 
-Il [lettore della richiesta](../prototype/quantum_assistant/adapters/request.py)
-accetta anche `UserRequest`, oggetti Python e JSON conformi allo
-[schema di ingresso](../schemas/assistant_request.schema.json). L'interfaccia
-strutturata può esprimere fornitori ammessi, dispositivi ammessi, minimo e
-massimo di qubit fisici, gate nativi richiesti e identificativo dello snapshot
-hardware. Il comando pubblico espone solo il filtro `--device`.
-La sola metrica ammessa è `expected_fidelity`.
+JSON input checks reject duplicate keys and non-finite numbers. The QASM input limit is 2,100,000 UTF-8 bytes. Only the `qelib1.inc` include is allowed. Parsing uses `qasm2.loads` with the supported legacy classical instructions and `strict=False`; these parser settings do not bypass the application's input checks.
 
-La lettura applica questi controlli:
+A valid circuit must contain at least one qubit. Preparation records its width, depth, operation names, feature vector and source SHA-256. Non-finite features and invalid inputs fail before retrieval or inference.
 
-1. Verifica struttura e limiti della richiesta. La decodifica JSON rifiuta
-   chiavi duplicate, valori numerici non finiti e oggetti superiori a
-   2.100.000 byte UTF-8. Il sorgente QASM deve essere non vuoto e rispettare
-   i limiti applicati dal lettore e dallo schema.
-2. Esamina gli `include`, dopo aver escluso i commenti. Ammette solo
-   `qelib1.inc`, risolto nella libreria fornita con Qiskit.
-3. Carica il testo con `qiskit.qasm2.loads`, con istruzioni e funzioni
-   classiche di compatibilità Qiskit e `strict=False`. Quest'ultima opzione
-   riguarda la sintassi QASM accettata, non elimina i controlli applicativi.
-4. Richiede almeno un qubit ed estrae larghezza, profondità, nomi delle
-   operazioni, vettore numerico e SHA-256 del sorgente.
-5. Controlla lunghezza e finitezza del vettore. Un errore interrompe il flusso
-   prima del recupero degli esempi e della chiamata al modello.
+## 3. The 49 circuit features
 
-Il risultato è una `ParsedRequest`. Il circuito originale resta disponibile
-per la compilazione successiva; il suo testo non viene inviato all'LLM.
+The vector contains 42 operation counts, the number of qubits, circuit depth and five structural features. Extraction does not first decompose every operation into a universal basis. An operation outside the 42 named counters has no dedicated count in the vector.
 
-## 3. Le 49 caratteristiche
+The structural features use a DAG with barriers removed. Let `n` be the number of qubits, `D` its depth, `gate_count` the number of gate nodes and `two_qubit_count` the number of two-qubit operations:
 
-[portable_features.py](../portable_features.py) calcola il vettore senza
-chiamare un modello MQT addestrato. L'ordine è fissato anche in
-[rag_features.py](../prototype/quantum_assistant/adapters/rag_features.py).
-
-| Gruppo | Numero | Significato |
-| --- | ---: | --- |
-| `gate_count_*` | 42 | Conteggi delle operazioni della lista OpenQASM fissata nell'estrattore; i conteggi assenti valgono zero. |
-| `num_qubits`, `depth` | 2 | Numero di qubit dichiarati e profondità restituita da Qiskit. |
-| Indicatori strutturali | 5 | Comunicazione, profondità critica, rapporto di operazioni a due qubit, parallelismo e attività. |
-
-Il conteggio usa le operazioni presenti nel circuito caricato. Non esegue
-una decomposizione preliminare universale: un nome fuori dalla lista dei 42
-gate non ottiene un contatore dedicato. I nomi effettivi delle operazioni
-sono conservati separatamente.
-
-Per i cinque indicatori viene costruito il grafo aciclico del circuito e
-vengono rimosse le barriere. Indicando con `n` il numero di qubit e con `D`
-la profondità di questo grafo:
-
-| Indicatore | Calcolo implementato |
+| Feature | Definition and boundary cases |
 | --- | --- |
-| `program_communication` | Somma dei gradi del grafo non diretto delle interazioni a due qubit, divisa per `n × (n − 1)`; zero con un solo qubit. |
-| `critical_depth` | Conteggio sul cammino più lungo dei nomi delle operazioni a due qubit, diviso per il numero totale di operazioni a due qubit; zero se queste sono assenti. |
-| `entanglement_ratio` | Numero di operazioni a due qubit diviso per il numero di nodi gate; zero se non ci sono gate. |
-| `parallelism` | `max(((numero_gate / D) − 1) / (n − 1), 0)`; zero con un qubit o profondità nulla. |
-| `liveness` | Numero di celle attive della matrice qubit-per-livello, diviso per `n × D`; zero con profondità nulla. |
+| `program_communication` | Sum of the degrees in the undirected two-qubit interaction graph, divided by `n(n−1)`; zero for one qubit. |
+| `critical_depth` | Number of two-qubit operations on the longest DAG path, divided by `two_qubit_count`; zero when there are no two-qubit operations. The implementation identifies these operations by name. |
+| `entanglement_ratio` | `two_qubit_count / gate_count`, with the empty-circuit boundary handled explicitly. |
+| `parallelism` | `max(((gate_count / D) − 1) / (n − 1), 0)`; zero for one qubit or zero depth. |
+| `liveness` | Number of active qubit/layer cells divided by `nD`, with the zero-depth boundary handled explicitly. |
 
-L'estrattore controlla che questi indicatori siano tra zero e uno.
-`depth` nel vettore proviene dal circuito originale: non va confuso con `D`,
-calcolato dopo la rimozione delle barriere per gli indicatori strutturali.
+The structural features are bounded between zero and one. The original circuit-depth feature and the barrier-free structural depth `D` are distinct quantities.
 
-## 4. Catalogo e mascheramento hardware
+## 4. Hardware eligibility
 
-[MqtHardwareCatalog](../prototype/quantum_assistant/adapters/hardware.py)
-combina il [catalogo delle configurazioni](../configs/qiskit_dataset_configurations_v2.json)
-con i Target caricati tramite `mqt.bench.targets.get_device`.
-Controlla versioni richieste, dispositivi, gate nativi, numero di qubit,
-collegamenti e impronta dei Target. Lo snapshot risultante contiene un
-identificativo derivato dai dati hardware e dalla provenienza.
-Un'incoerenza del catalogo produce un errore. Un Target che non può essere
-caricato per altri motivi viene segnato come non disponibile.
+`MqtHardwareCatalog` loads the MQT Bench Targets and checks the expected software versions, qubit counts, native operations, coupling maps and fingerprints. A catalog mismatch is an error. A Target that cannot otherwise be loaded is reported as unavailable.
 
-`RequestSemanticValidator` verifica gli identificativi rispetto allo snapshot.
-Nell'ingresso strutturato lo snapshot richiesto deve coincidere con quello
-corrente; l'adattatore `UiSubmission` viene invece legato allo snapshot
-appena costruito. I gate richiesti sono normalizzati in minuscolo, con
-`cnot → cx` e `i → id`. Il controllo rifiuta valori sconosciuti, duplicati
-dopo la normalizzazione, intervalli incoerenti e conflitti tra dispositivo
-e fornitore richiesti.
+`RequestSemanticValidator` checks request identifiers and the snapshot. The UI submission path also checks current bounds. Gate names are normalized, including `cnot` to `cx` and `i` to `id`. Duplicate restrictions, invalid intervals and conflicting provider/device constraints are rejected.
 
-`HardwareMaskBuilder` ordina i dispositivi per identificativo e applica
-contemporaneamente tutte le condizioni:
+The hardware mask is a sorted list of device IDs satisfying all applicable restrictions: provider, explicit allowlist, circuit width, requested native gates, metric support and availability. An empty mask stops execution before retrieval. This does not imply that every input operation must already be native: the compiler can decompose operations for the selected Target.
 
-- fornitore e dispositivo nelle eventuali liste ammesse;
-- qubit sufficienti per il circuito e compresi nell'eventuale intervallo utente;
-- presenza di tutti i gate nativi esplicitamente richiesti;
-- metrica supportata e Target disponibile.
+The mask determines eligibility. It is not an anonymization step.
 
-La maschera conserva sia i dispositivi ammessi sia i motivi di esclusione.
-Se non resta alcun dispositivo, `app.prepare` termina prima della chiamata
-LLM. Questo filtro non pretende che ogni gate del sorgente sia già nativo:
-Qiskit può decomporlo durante la compilazione. Il controllo di compatibilità
-precede la compilazione e non è una prova completa della sua riuscita.
+## 5. Train data and retrieval
 
-Il mascheramento è quindi un filtro di ammissibilità. Non anonimizza i nomi
-dei dispositivi. Gli alias E1–E5 descritti più avanti riguardano gli esempi.
+The supplied RAG Dataset contains 396 deduplicated train records in the `global_multi_device` view. Loading checks the seal, train manifest, IDs, software versions, features, Target metadata, provenance and uniqueness of source hashes. Optional feature verification recomputes the vectors from the stored circuits.
 
-## 5. Fonte RAG, trasformazione e recupero
+Preprocessing applies `log1p` to the 44 count/size features and leaves the five structural features unchanged. Each dimension is divided by its maximum absolute value in train, or by one if that maximum is zero. There is no centering, clipping or L2 normalization. A new input can therefore exceed one in a dimension.
 
-[rag_dataset.py](../prototype/quantum_assistant/adapters/rag_dataset.py)
-accetta esclusivamente il Dataset distribuito in
-[data/rag_examples.jsonl](../data/rag_examples.jsonl): **396 esempi train**
-nella vista `global_multi_device`. Verifica le impronte elencate nel sigillo,
-il manifest train, gli identificativi dei circuiti, le versioni del protocollo,
-le caratteristiche, i Target e la provenienza delle evidenze. Identificativi
-RAG e impronte dei circuiti sorgente devono essere unici.
-La verifica opzionale `verify_features=True` ricalcola inoltre le caratteristiche
-dai QASM train e le confronta con quelle salvate.
+The local Qdrant index is generated under `runtime/rag/index/`. It stores float32 vectors. Existing indexes are checked against the manifest, software, record count, IDs and payloads. A new index is built in a temporary location, verified, reopened and then promoted atomically.
 
-La trasformazione del recupero è fissata in
-[rag_features.py](../prototype/quantum_assistant/adapters/rag_features.py):
+Retrieval filters by experiment, train split and metric. It also requires the historical winning device of an example to belong to the current hardware mask. Equal qubit count is not required. All eligible candidates are fetched and reranked with exact float64 Manhattan distance. Qdrant scores are checked with absolute tolerance `1e-5` and relative tolerance `1e-6`; equal distances are ordered by RAG record ID. The selected system retrieves at most five examples.
 
-1. Applica `log(1 + x)` ai 42 conteggi, al numero di qubit e alla profondità.
-2. Lascia invariati i cinque indicatori strutturali.
-3. Divide ogni componente per il massimo valore assoluto di quella componente
-   nel solo train. Se il massimo è zero, usa il divisore uno.
-4. Usa la somma delle differenze assolute, cioè la distanza Manhattan.
+`LocalReferenceRetriever` and `DisabledRetriever` are explicit alternatives used by supporting code. They are not automatic fallbacks when Qdrant fails. The internal `prepare(rag=False)` option is not a public standalone CLI flag.
 
-Non applica centratura, taglio dei valori o normalizzazione L2. Un nuovo
-circuito può quindi superare uno in una componente scalata. I divisori
-ricalcolati devono coincidere con [data/transform.json](../data/transform.json).
+## 6. Prompt construction and TOON
 
-[qdrant_context.py](../prototype/quantum_assistant/adapters/qdrant_context.py)
-conserva l'indice locale in `runtime/rag/index/`. L'indice contiene vettori
-float32, record e metadati verificabili. Prima dell'uso vengono confrontati
-manifest, versione del software, numero e identità dei punti, vettori e dati
-associati. Un indice esistente viene verificato; non viene sovrascritto in
-silenzio. Un nuovo indice viene preparato in una cartella temporanea e reso
-disponibile dopo verifica e riapertura.
+Context construction checks the registry, historical rankings, labels and associated claims. An inconsistent record is rejected rather than silently dropped.
 
-La ricerca filtra per esperimento, split train, metrica e **dispositivo
-vincente storico appartenente ai dispositivi ora ammessi**. Non richiede
-che l'esempio abbia lo stesso numero di qubit del circuito corrente.
-Interroga tutti i candidati filtrati, ricalcola le distanze in float64 e
-verifica gli score Qdrant con tolleranza assoluta `1e-5` e relativa `1e-6`.
-Ordina infine per distanza e, a parità esatta, per `rag_id`. Il programma
-prende al massimo cinque esempi, senza usare score del circuito corrente.
+The compact prompt view includes the current circuit's name, qubit count, depth, operation counts and full feature vector; eligible hardware IDs and connectivity; the configuration catalog; and examples labeled `E1` to `E5`. Each example includes its winning device and up to three reported configurations for that device, with median scores and recorded ties. These are not three different devices.
 
-I componenti `LocalReferenceContextRetriever` e `DisabledContextRetriever`
-sono disponibili nel modulo per un uso esplicito. Il comando ordinario usa
-Qdrant e non passa automaticamente a questi componenti in caso di errore.
-La funzione `prepare(..., rag=False)` permette un ingresso senza esempi;
-questa opzione non è esposta dal comando pubblico `run`.
+The view omits raw QASM, source hashes, extended provenance, retrieval distances and the full registry. It retains `circuit_id` and family information, so it must not be described as anonymous. Input features are not rounded. Scores in the prompt belong only to train examples, never to the decision being evaluated. Local example aliases are mapped back to their records in the execution log.
 
-## 6. Dal documento completo al testo TOON
+TOON combines feature rows for the current circuit and examples. Connectivity can use an adjacency representation when ordering allows exact reconstruction; fully connected hardware has an explicit compact representation. The official TOON 4.1.1 package, run with Node.js 22, must round-trip the compact view exactly. This check applies to that view, not to fields deliberately omitted from the original context document.
 
-[context.py](../prototype/quantum_assistant/adapters/context.py) costruisce un
-registro delle evidenze dei soli esempi recuperati. Controlla risultati
-storici, configurazioni, classifiche, etichetta vincente e collegamenti tra
-affermazioni ed evidenze. Un record incoerente non viene scartato tacitamente.
-Il registro completo e il documento della richiesta restano nei registri locali.
+The selected `facts` messages use the v4 response contract. Some internal compatibility components, including an intermediate `StructuredPromptBuilder` contract, retain v3 names. Their presence does not change the final messages sent in this workflow.
 
-[model_input](../prototype/prompting/minimal.py) ricava una vista essenziale:
+## 7. Local inference
 
-| Parte | Informazioni mostrate al modello |
+Inference uses a local HTTP endpoint, with native or Windows transport as configured. Each attempt applies the chat template with thinking disabled, tokenizes the resulting input and requests a completion under the v4 contract. The selected configuration uses temperature zero and a maximum output of 4,096 tokens.
+
+The historical reference profile has a 60,000-token context; the smaller CPU/GPU profiles start at 16,384. The client verifies that input tokens plus the reserved output budget fit the configured context. Requests use `stream=False`, even where a historical configuration retains a `stream` field set to true.
+
+Temperature zero and a fixed seed do not guarantee identical results across backend versions or hardware. The [runtime guide](installazione_e_runtime.md) explains profiles, transport, memory checks and server logs.
+
+## 8. Decision schema and facts
+
+The v4 response has exactly these fields: `selected_device`, `config_id`, `facts` and `hypothesis`. It does not contain executable compiler code. Validation rejects unknown fields, duplicate keys and non-finite JSON values, and limits the response to 65,536 UTF-8 bytes.
+
+There must be one or two distinct facts and a non-empty hypothesis of at most 1,000 characters. The selected device/configuration pair must exist in the allowed catalogs, and the device must have enough qubits.
+
+| Fact type | What is checked |
 | --- | --- |
-| Circuito corrente | Nome, larghezza, profondità, operazioni e tutte le caratteristiche disponibili. |
-| Hardware compatibile | Identificativi reali, qubit, operazioni, collegamenti e restrizioni di configurazione. |
-| Catalogo | `config_id`, livello di ottimizzazione, metodo di layout e metodo di routing. |
-| Esempi train | Alias E1–E5, caratteristiche, dispositivi compatibili, vincitore storico e prime tre righe della classifica con mediane e parità esplicite. |
-| Vincoli | Vincoli normalizzati, se presenti. |
+| `selected_pair_among_reported_best` | The selected pair appears among the reported example configurations, including recorded ties. This does not mean it is a unique global optimum. |
+| `selected_device_matches_example` | The selected device matches the referenced example. This makes no claim about its configuration. |
+| `same_qubit_count_as_example` | The input and example have the same qubit count. This does not establish equal topology or performance. |
+| `selected_device_has_enough_qubits` | The selected device can hold the input circuit. This fact has no `example_id` and makes no quality claim. |
 
-La vista esclude il sorgente QASM, gli hash, la provenienza estesa, le distanze
-di recupero e il registro completo delle evidenze. Conserva però gli
-identificativi e i metadati descrittivi del circuito storico previsti dalla
-lista esplicita del modulo, per esempio `circuit_id` e famiglia del circuito.
-Non è quindi una procedura di anonimizzazione generale.
-I valori numerici delle caratteristiche non vengono arrotondati o selezionati
-in base alla loro importanza. Le mediane mostrate appartengono agli esempi
-train e non descrivono il circuito da compilare.
+A valid decision need not copy a train pair. The free-text hypothesis is not checked semantically. References to invalid example aliases are recorded as non-blocking hypothesis violations. Records therefore keep `explanation_fully_verified=False` and `hypothesis_status=not_semantically_verified`.
 
-Gli alias dipendono dall'ordine recuperato: E1 indica il primo record di quella
-richiesta. `citation_context` mantiene localmente la mappa verso i record,
-l'identità della richiesta e le impronte dei dati. Sono ammessi al massimo
-cinque esempi distinti.
+The schema validator implements the required subset of JSON Schema. Unsupported keywords are rejected instead of being assumed to work.
 
-[toon.py](../prototype/prompting/toon.py) effettua una seconda trasformazione:
-le caratteristiche sono disposte per righe con colonne `current`, `E1`…`E5`
-quando la struttura è uniforme. Gli archi hardware diventano liste di
-adiacenza solo se è possibile ricostruirne anche l'ordine originale.
-Una topologia completamente connessa e nell'ordine atteso può essere
-rappresentata mediante una descrizione compatta esplicita.
+## 9. Attempts and acceptance
 
-L'encoder ufficiale `@toon-format/toon` 4.1.1 viene chiamato tramite Node.js 22.
-La codifica è seguita da decodifica e ricostruzione: entrambe devono restituire
-esattamente i dati della vista essenziale. Il controllo riguarda questa vista,
-non la ricostruzione del documento completo, dal quale alcuni campi sono stati
-intenzionalmente esclusi.
+The system permits up to three complete LLM attempts. Repairs keep the same problem and provide structured validation feedback; they do not simply paste the previous raw answer into the next prompt.
 
-Il messaggio effettivo è costruito da
-[facts.messages](../prototype/prompting/facts.py): istruzioni, blocco TOON,
-regole dei fatti e schema JSON v4, con eventuali errori da correggere.
-Il documento intermedio di `StructuredPromptBuilder` conserva ancora un
-`response_contract` v3. Quel campo non è il contratto inviato da `app.decide`:
-quest'ultimo usa esplicitamente lo schema v4 di `facts.py`.
+A valid pair with verified facts is accepted. Invalid facts trigger a repair on the first two attempts. On the third, an otherwise valid pair can be accepted with `accepted_with_unverified_facts`. An invalid pair or schema still fails. Transport errors, insufficient context and truncated responses stop the standalone run; it has no automatic experimental supervisor or hidden retrieval fallback.
 
-## 7. Chiamata al modello e disponibilità del contesto
+A decision accepted with unverified facts may still be compiled because its device/configuration pair passed the required checks. Toolkit execution contracts and recovery procedures must not be attributed to a standalone demonstration that did not use them.
 
-Il client di [app.py](../app.py) accetta un server HTTP su `127.0.0.1` o
-`localhost`. `--transport native` usa HTTP Python verso il server Linux;
-`--transport windows` usa `curl.exe` da WSL verso Windows. Il valore `auto`
-mantiene la scelta Windows in WSL e nativa altrove. Conserva richieste e risposte delle tre
-operazioni di ogni tentativo:
+## 10. Optional compilation
 
-1. `/apply-template` applica il modello di conversazione del server con
-   `enable_thinking=False` e `reasoning_effort=none`.
-2. `/tokenize` conta i token del testo realmente formattato.
-3. `/completion` genera con schema JSON v4, temperatura `0.0` e massimo
-   4096 token di uscita, usando gli altri parametri fissati in
-   [config.json](../config.json).
+The selected configuration resolves locally to optimization level, layout and routing. The transpiler seed defaults to zero. Before compilation, the application rechecks metric and qubit compatibility, parses the QASM into a `QuantumCircuit` and transpiles against the selected Target. A default layout or routing method is omitted from the call so Qiskit can choose it.
 
-Il profilo `desktop` prevede 60.000 token; `cpu`, `gpu` e il nome compatibile
-`laptop` ne prevedono 16.384. Il profilo del client deve coincidere con il server.
-Prima della generazione il programma verifica `token_ingresso + 4096 ≤ contesto`.
-Se non c'è spazio termina senza eliminare esempi e senza generare.
-Il client usa una risposta non trasmessa a frammenti (`stream=False`), anche
-se la configurazione di origine contiene impostazioni di streaming.
+Post-compilation checks allow barriers, verify the native basis with `GatesInBasis`, and check the coupling map with `CheckMap` when applicable. The record contains the compiled OpenQASM 2, depth, size, operation counts and effective parameters.
 
-Temperatura zero, seed fissato e catalogo chiuso riducono le variazioni.
-Non costituiscono da soli una garanzia di identità dei risultati tra versioni,
-modelli, hardware o librerie diversi.
+These checks do not constitute a formal equivalence proof. The standalone command does not execute the circuit on quantum hardware or report a measured hardware fidelity. It also does not compute the experimental expected-fidelity score.
 
-## 8. Parsing e validazione della risposta v4
+## 11. Execution records
 
-La risposta prevista dallo
-[schema v4](../schemas/llm_recommendation_v4.schema.json) contiene esattamente
-`selected_device`, `config_id`, `facts` e `hypothesis`. Non contiene codice
-Qiskit da eseguire né parametri arbitrari di compilazione.
+Each run receives a timestamp/random identifier and creates its JSON records exclusively, avoiding overwrite. The records cover:
 
-[verify](../prototype/prompting/facts.py) separa tre controlli:
+- Start: input hash, profile, parameters, seed, software and source hashes, retrieval and prompt encoding.
+- Attempts: HTTP requests and responses, measurable tokens and timings, context checks and validation feedback.
+- Decision: selected pair, fact checks and hypothesis status.
+- Optional compilation: effective options and compiled circuit.
+- End or failure: the terminal outcome and associated error.
 
-1. **JSON e schema.** Richiede un oggetto JSON completo entro 65.536 byte,
-   senza chiavi duplicate o numeri non finiti. Rifiuta campi aggiuntivi.
-   Richiede uno o due fatti distinti e un'ipotesi non vuota entro 1000 caratteri.
-2. **Coppia ammessa.** Il dispositivo deve essere fra quelli compatibili;
-   `config_id` deve appartenere al catalogo ed essere ammesso dal dispositivo.
-   Ricontrolla anche la sufficienza dei qubit.
-3. **Fatti.** Ogni fatto viene confrontato con i dati forniti in questa stessa
-   richiesta. Gli alias sono risolti nei record correnti, mai in esempi esterni.
+Standalone inputs are labeled `technical_prototype` and `user_input_not_experimental_test`. They do not automatically become experimental Test cases. Host memory and power consumption are not measured by this execution path.
 
-| Affermazione ammessa | Condizione verificata |
-| --- | --- |
-| `selected_pair_among_reported_best` | La coppia scelta compare insieme nelle righe storiche mostrate dell'esempio, incluse le configurazioni dichiarate a pari punteggio. Non significa necessariamente primo posto o vincitore unico. |
-| `selected_device_matches_example` | Il dispositivo scelto coincide con il vincitore storico dell'esempio. Non afferma nulla sulla configurazione. |
-| `same_qubit_count_as_example` | Circuito corrente ed esempio hanno esattamente lo stesso numero di qubit. Non dimostra somiglianza della topologia o delle prestazioni. |
-| `selected_device_has_enough_qubits` | Il dispositivo scelto contiene almeno i qubit del circuito. Questo fatto non usa `example_id` e non dimostra qualità di compilazione. |
+## 12. Deployment boundary
 
-Il modello può proporre qualunque coppia ammessa, anche assente dalle
-classifiche storiche. La sola disponibilità di esempi non obbliga la scelta
-a copiare una coppia del train.
-
-`hypothesis` resta testo libero: il verificatore ne controlla forma e lunghezza,
-ma non la verità. L'istruzione di evitare alias come E1 nell'ipotesi è una
-regola del messaggio; la loro eventuale presenza viene registrata, senza
-costituire da sola un errore bloccante. Il risultato dichiara
-`explanation_fully_verified=False` e, dopo l'accettazione,
-`hypothesis_status=not_semantically_verified`.
-
-Il modulo [schema_validation.py](../prototype/quantum_assistant/schema_validation.py)
-implementa soltanto il sottoinsieme JSON Schema necessario ai file distribuiti.
-Rifiuta schemi che richiedono parole chiave non supportate: non è un validatore
-generale dell'intero standard.
-
-## 9. Correzioni, accettazione e arresto
-
-`app.decide` esegue al massimo tre tentativi. Dopo una risposta non accettata,
-invia gli errori del verificatore insieme agli stessi dati del problema e
-chiede una nuova risposta JSON completa. Non reinvia il testo grezzo della
-risposta precedente come nuovo messaggio. Per i fatti errati, gli errori
-contengono i dati osservati e la regola violata. La coppia può restare la stessa
-se era già ammessa.
-
-| Esito | Comportamento |
-| --- | --- |
-| Schema valido, coppia ammessa e tutti i fatti verificati | Accetta subito con `status=success`. |
-| Schema valido e coppia ammessa, ma fatti non verificati nei primi due tentativi | Richiede una correzione. |
-| Schema valido e coppia ammessa al terzo tentativo, ma fatti ancora non verificati | Accetta con `status=accepted_with_unverified_facts` e mantiene i fatti non verificati nel registro. |
-| Nessuna coppia con schema valido e ammessa al termine | Interrompe con errore. |
-| Errore di trasporto, contesto insufficiente o risposta segnalata come troncata | Interrompe l'esecuzione; il comando dimostrativo non implementa riprese automatiche. |
-
-Non viene scelta automaticamente una coppia casuale o predefinita in caso
-di fallimento. Nemmeno un problema del recupero diventa automaticamente una
-richiesta senza RAG. L'accettazione al terzo tentativo è una regola esplicita
-sui fatti, non una certificazione dell'ipotesi o della qualità prevista.
-Con `--compile`, anche una proposta accettata con fatti non verificati può
-passare alla compilazione, perché la coppia è stata comunque controllata.
-
-Il [kit sperimentale](../../riproducibilita/README.md) conserva contratti e
-registri per validation e Test. Le sue procedure non vanno attribuite
-automaticamente al comando dimostrativo `app.py run`.
-
-## 10. Risoluzione della scelta e compilazione
-
-`app.compile_decision` risolve `config_id` nel
-[catalogo locale](../qiskit_dataset/catalog.py). Recupera livello di
-ottimizzazione, layout e routing; aggiunge il seed scelto con
-`--seed-transpiler` (zero se omesso). Questi valori formano la raccomandazione
-passata a [QiskitDeterministicCompiler](../prototype/quantum_assistant/adapters/compilation.py).
-
-Il compilatore ricontrolla metrica e numero di qubit, rilegge il QASM originale
-con `QuantumCircuit.from_qasm_str` e chiama `qiskit.transpile` con il Target.
-I metodi di layout e routing nulli vengono omessi, lasciando i valori
-predefiniti di Qiskit. Non esegue codice prodotto dal modello.
-
-Dopo la compilazione controlla:
-
-- operazioni presenti nel Target, con le barriere ammesse separatamente;
-- base di gate tramite `GatesInBasis(target=...)`;
-- collegamenti tramite `CheckMap`, quando il Target ha una mappa esplicita.
-
-Se un controllo fallisce, non restituisce un circuito come valido.
-Altrimenti esporta OpenQASM 2 e registra profondità, dimensione, conteggi
-delle operazioni e opzioni di compilazione. Questi controlli non sono una
-prova formale di equivalenza al circuito sorgente e non misurano la fedeltà
-su un dispositivo reale. Il comando dimostrativo non calcola uno score
-`expected_fidelity` del circuito corrente.
-
-## 11. Registri e interpretazione dei risultati
-
-Ogni invocazione `run` crea una cartella distinta sotto `runs/`, con data e
-suffisso casuale. La funzione `save` usa creazione esclusiva dei JSON e
-rifiuta di sovrascrivere un documento già presente.
-
-| Registro | Contenuto |
-| --- | --- |
-| `input.qasm`, `begin.json` | Sorgente, impronta, profilo, parametri, seed di compilazione, sistema, versioni e impronte dei sorgenti Python. |
-| `prompt.json`, `retrieval.json`, `encoding.json` | Documento completo, esempi recuperati con distanze, tempi e identità della vista del modello. |
-| `attempt_N/` | Richieste e risposte di formattazione, conteggio token e generazione; tempo, contesto e risultato della validazione. |
-| `decision.json` | Risposta accettata, stato dei fatti, numero di tentativi e parametri di compilazione risolti. |
-| `compiled.qasm`, `compilation.json` | Eventuale circuito compilato e relativo riepilogo. |
-| `end.json` oppure `failure.json` | Fine dell'esecuzione o errore con tempo trascorso; i sottopassi HTTP possono avere propri registri di errore. |
-
-I risultati d'uso del prototipo sono marcati come `technical_prototype` e
-`user_input_not_experimental_test`. Non equivalgono alla valutazione sul Test
-sperimentale. Tempo di recupero, tempi delle chiamate e token sono registrati
-quando disponibili; memoria di processo e potenza dell'host sono dichiarate
-come misure mancanti dal comando dimostrativo.
-
-Un fatto storico corretto non dimostra che la scelta sia ottima sul nuovo
-circuito. Una compilazione riuscita dimostra che quella procedura ha prodotto
-un circuito conforme ai controlli sul Target, non che superi gli altri metodi.
-Le conclusioni comparative richiedono il
-[protocollo sperimentale](protocollo_sperimentale.md) e i dati conservati in
-[nuove esecuzioni](../../riproducibilita/README.md).
-
-## 12. Client e server Linux
-
-`setup.sh` prepara il client senza cambiare i dati train. `server.py` carica il GGUF
-verificato usando un eseguibile llama.cpp Linux e la CPU o un dispositivo
-restituito dal backend. Non importa sensori AMD e non richiede Windows.
-I registri server sono in `runtime/server-runs/`; quelli delle decisioni sono
-in `runs/`. Il percorso personale del fisso conserva gli avviatori `.ps1`
-e usa esplicitamente `--transport windows`. La [guida del runtime](installazione_e_runtime.md)
-definisce margini RAM, contesti e limiti delle misure disponibili.
+Client setup installs the Python and Node.js dependencies, not a Windows or Linux LLM server. The server build, model weights, GPU backend and logs are separate runtime responsibilities. Historical AMD measurements refer to their recorded host; they are not measurements of a new Linux deployment. Use the [installation guide](guida_passo_passo.md) to configure the local runtime and the [reproducibility kit](../../riproducibilita/README.md) to run new campaigns.

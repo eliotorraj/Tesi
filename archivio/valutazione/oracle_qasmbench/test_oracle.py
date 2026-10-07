@@ -1,4 +1,4 @@
-"""Verifiche con dati fittizi: non compila circuiti quantistici."""
+'Checks with synthetic data; no quantum-circuit compilation.'
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch,Mock

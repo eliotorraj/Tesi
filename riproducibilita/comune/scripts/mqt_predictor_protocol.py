@@ -23,8 +23,8 @@ QISKIT_WORKERS = 6
 RL_TRAINING_TIMESTEPS = 100_000
 RL_ROLLOUT_STEPS = 2_048
 RL_CHECKPOINT_EVERY = 5 * RL_ROLLOUT_STEPS
-# Stable-Baselines3 completa sempre il rollout corrente. Il target richiesto
-# resta 100000, mentre il contatore finale attestato è quindi 49 * 2048.
+# Stable-Baselines3 always finishes the current rollout. The requested target
+# remains 100000; the attested final count is therefore 49 * 2048.
 RL_FINAL_TIMESTEPS = (
     (RL_TRAINING_TIMESTEPS + RL_ROLLOUT_STEPS - 1)
     // RL_ROLLOUT_STEPS
@@ -153,7 +153,7 @@ def _target_operation_name(target: Any, operation: Any) -> str:
             continue
         if registered is operation:
             return str(candidate)
-    raise ValueError(f"Operazione Target senza nome stabile: {operation!r}")
+    raise ValueError(f'Target operation has no stable name: {operation!r}')
 
 
 def target_payload(target: Any) -> dict[str, Any]:
@@ -420,10 +420,10 @@ def semantic_circuit_sha256(path: Path) -> str:
 
 
 def resolve_source_reference(source_ref: str) -> Path:
-    """Risolvi i riferimenti congelati dopo lo spostamento del corpus in archivio."""
+    'Resolve frozen references after moving the corpus into the archive.'
     relative = Path(source_ref)
     if relative.is_absolute() or ".." in relative.parts:
-        raise ValueError(f"source_ref fuori repository: {source_ref!r}")
+        raise ValueError(f'source_ref outside the repository: {source_ref!r}')
     root = PROJECT_ROOT.resolve()
     if relative.is_relative_to(LEGACY_DATASET_LOGICAL_ROOT):
         candidate = LEGACY_DATASET_ROOT / relative.relative_to(LEGACY_DATASET_LOGICAL_ROOT)
@@ -433,12 +433,12 @@ def resolve_source_reference(source_ref: str) -> Path:
         allowed_root = root
     candidate = candidate.resolve()
     if not candidate.is_relative_to(root) or not candidate.is_relative_to(allowed_root):
-        raise ValueError(f"source_ref fuori dal corpus: {source_ref!r}")
+        raise ValueError(f'source_ref outside the corpus: {source_ref!r}')
     return candidate
 
 
 def frozen_source_reference(path: Path) -> str:
-    """Conserva i nomi logici originali e quindi gli hash di manifest e piani v2."""
+    'Retain original logical names and thus v2 manifest and plan hashes.'
     path = path.resolve()
     if path.is_relative_to(LEGACY_DATASET_ROOT.resolve()):
         return (LEGACY_DATASET_LOGICAL_ROOT / path.relative_to(LEGACY_DATASET_ROOT.resolve())).as_posix()
@@ -454,7 +454,7 @@ def _safe_source_path(manifest_path: Path, source_ref: str) -> Path:
     try:
         candidate.relative_to(root)
     except ValueError as error:
-        raise ValueError(f"source_ref fuori dal corpus: {source_ref!r}") from error
+        raise ValueError(f'source_ref outside the corpus: {source_ref!r}') from error
     return candidate
 
 
@@ -465,7 +465,7 @@ def verify_source_manifest(
 ) -> dict[str, Any]:
     """Validate the frozen 600-circuit source corpus without compiling tests."""
     if not manifest_path.is_file():
-        raise FileNotFoundError(f"Manifest sorgente mancante: {manifest_path}")
+        raise FileNotFoundError(f'Missing source manifest: {manifest_path}')
     observed_manifest_sha256 = file_sha256(manifest_path)
     if (
         require_frozen_file_hash
@@ -473,22 +473,19 @@ def verify_source_manifest(
         and observed_manifest_sha256 != LEGACY_SOURCE_MANIFEST_SHA256
     ):
         raise ValueError(
-            "Il manifest sorgente legacy è cambiato: "
-            f"atteso={LEGACY_SOURCE_MANIFEST_SHA256}, "
-            f"osservato={observed_manifest_sha256}."
+            f'The legacy source manifest changed: expected={LEGACY_SOURCE_MANIFEST_SHA256}, observed={observed_manifest_sha256}.'
         )
     loaded = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(loaded, dict) or not isinstance(loaded.get("circuits"), list):
-        raise ValueError("Manifest sorgente non valido.")
+        raise ValueError('Invalid source manifest.')
     circuits = loaded["circuits"]
     counts = Counter(str(record.get("split")) for record in circuits)
     if dict(counts) != EXPECTED_SPLIT_COUNTS:
         raise ValueError(
-            f"Split sorgente inattesi: {dict(counts)}; "
-            f"attesi={EXPECTED_SPLIT_COUNTS}."
+            f'Unexpected source splits: {dict(counts)}; expected={EXPECTED_SPLIT_COUNTS}.'
         )
     if len(circuits) != sum(EXPECTED_SPLIT_COUNTS.values()):
-        raise ValueError(f"Numero circuiti inatteso: {len(circuits)}.")
+        raise ValueError(f'Unexpected circuit count: {len(circuits)}.')
 
     source_splits: dict[str, set[str]] = defaultdict(set)
     semantic_splits: dict[str, set[str]] = defaultdict(set)
@@ -496,18 +493,17 @@ def verify_source_manifest(
     verified: list[dict[str, Any]] = []
     for raw_record in circuits:
         if not isinstance(raw_record, dict):
-            raise ValueError("Record circuito non rappresentato da un oggetto.")
+            raise ValueError('Circuit record is not an object.')
         split = str(raw_record.get("split"))
         source_ref = str(raw_record.get("source_ref"))
         path = _safe_source_path(manifest_path, source_ref)
         if not path.is_file():
-            raise FileNotFoundError(f"Circuito sorgente mancante: {path}")
+            raise FileNotFoundError(f'Missing source circuit: {path}')
         expected_sha256 = str(raw_record.get("source_sha256"))
         observed_sha256 = file_sha256(path)
         if observed_sha256 != expected_sha256:
             raise ValueError(
-                f"Hash sorgente diverso per {source_ref}: "
-                f"atteso={expected_sha256}, osservato={observed_sha256}."
+                f'Source hash differs for {source_ref}: expected={expected_sha256}, observed={observed_sha256}.'
             )
         semantic_sha256 = semantic_circuit_sha256(path)
         leakage_group = str(raw_record.get("leakage_group"))
@@ -539,10 +535,7 @@ def verify_source_manifest(
     group_leaks = leaked(group_splits)
     if source_leaks or semantic_leaks or group_leaks:
         raise ValueError(
-            "Leakage tra split rilevato: "
-            f"source_sha256={source_leaks}; "
-            f"semantic_sha256={semantic_leaks}; "
-            f"leakage_group={group_leaks}."
+            f'Cross-split leakage detected: source_sha256={source_leaks}; semantic_sha256={semantic_leaks}; leakage_group={group_leaks}.'
         )
 
     verified.sort(key=lambda record: (record["split"], record["file_name"]))
@@ -587,15 +580,14 @@ def verify_circuit_directory(
     """Require a directory to contain exactly the allowed frozen circuits."""
     allowed = frozenset(map(str, allowed_splits))
     if not allowed or not allowed.issubset(EXPECTED_SPLIT_COUNTS):
-        raise ValueError(f"Split ammessi non validi: {sorted(allowed)}.")
+        raise ValueError(f'Invalid allowed splits: {sorted(allowed)}.')
     if not manifest_path.is_file():
         raise FileNotFoundError(
-            f"Manifest v2 mancante: {manifest_path}. "
-            "Eseguire prima scripts/06_prepare_experiment_v2.py."
+            f'Missing v2 manifest: {manifest_path}. Run circuit preparation first.'
         )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("experiment_id") != EXPERIMENT_ID:
-        raise ValueError("Il manifest dei circuiti non appartiene all'esperimento v2.")
+        raise ValueError('The circuit manifest does not belong to the v2 experiment.')
     records = [
         record
         for record in manifest.get("circuits", [])
@@ -611,15 +603,14 @@ def verify_circuit_directory(
     unexpected = sorted(set(observed) - set(expected))
     if missing or unexpected:
         raise ValueError(
-            f"Directory circuiti non conforme: mancanti={missing}; "
-            f"non previsti={unexpected}."
+            f'Circuit directory mismatch: missing={missing}; unexpected={unexpected}.'
         )
     for name, record in expected.items():
         path = observed[name]
         if file_sha256(path) != record["source_sha256"]:
-            raise ValueError(f"Hash sorgente non conforme nella directory: {name}.")
+            raise ValueError(f'Source hash mismatch in directory: {name}.')
         if semantic_circuit_sha256(path) != record["semantic_sha256"]:
-            raise ValueError(f"Hash semantico non conforme nella directory: {name}.")
+            raise ValueError(f'Semantic hash mismatch in directory: {name}.')
     return {
         "experiment_id": EXPERIMENT_ID,
         "manifest_sha256": file_sha256(manifest_path),
@@ -660,11 +651,11 @@ def assert_records_belong_to_split(
             source_sha256 = circuit.get("source_sha256", source_sha256)
         if split != allowed_split:
             raise ValueError(
-                f"Record {index} fuori split: {split!r}; atteso={allowed_split!r}."
+                f'Record {index} outside the split: {split!r}; expected={allowed_split!r}.'
             )
         if source_sha256 not in allowed_hashes or source_sha256 in forbidden_hashes:
             raise ValueError(
-                f"Record {index} con source_sha256 non ammesso: {source_sha256!r}."
+                f'Record {index} with disallowed source_sha256: {source_sha256!r}.'
             )
 
 
@@ -674,14 +665,14 @@ def validate_test_release_record(
     """Validate the immutable evidence required before touching test circuits."""
     if not path.is_file():
         raise FileNotFoundError(
-            "Lo split test è sigillato: record di apertura mancante."
+            'The Test split is sealed: missing release record.'
         )
     try:
         record = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError) as error:
-        raise ValueError(f"Record di apertura test non valido: {error}") from error
+        raise ValueError(f'Invalid Test release record: {error}') from error
     if not isinstance(record, dict):
-        raise ValueError("Il record di apertura test deve essere un oggetto JSON.")
+        raise ValueError('The Test release record must be a JSON object.')
     expected = {
         "schema_version": "1.0.0",
         "experiment_id": EXPERIMENT_ID,
@@ -700,8 +691,7 @@ def validate_test_release_record(
     for field, expected_value in expected.items():
         if record.get(field) != expected_value:
             errors.append(
-                f"{field} non conforme: "
-                f"atteso={expected_value!r}, osservato={record.get(field)!r}"
+                f'{field} mismatch: expected={expected_value!r}, observed={record.get(field)!r}'
             )
     gates = record.get("gates")
     if (
@@ -709,13 +699,13 @@ def validate_test_release_record(
         or not gates
         or any(value is not True for value in gates.values())
     ):
-        errors.append("i gate di apertura non sono tutti esplicitamente superati")
+        errors.append('not all release gates have explicitly passed')
     for rag_gate in ("rag_qdrant_collection", "rag_validation_pipeline"):
         if not isinstance(gates, dict) or gates.get(rag_gate) is not True:
-            errors.append(f"gate RAG obbligatorio mancante: {rag_gate}")
+            errors.append(f'missing required RAG gate: {rag_gate}')
     frozen_files = record.get("frozen_files")
     if not isinstance(frozen_files, dict) or not frozen_files:
-        errors.append("elenco dei file congelati mancante")
+        errors.append('missing frozen-file list')
     else:
         rag_root = EXPERIMENT_ROOT / "rag"
         required_rag_files = [
@@ -731,25 +721,26 @@ def validate_test_release_record(
         for candidate in required_rag_files:
             relative = candidate.relative_to(PROJECT_ROOT).as_posix()
             if relative not in frozen_files:
-                errors.append(f"file RAG non congelato: {relative}")
+                errors.append(f'RAG file not frozen: {relative}')
         for relative_name, expected_digest in frozen_files.items():
             candidate = (PROJECT_ROOT / str(relative_name)).resolve()
             try:
                 candidate.relative_to(PROJECT_ROOT.resolve())
             except ValueError:
-                errors.append(f"file congelato fuori repository: {relative_name!r}")
+                errors.append(f'frozen file outside repository: {relative_name!r}')
                 continue
             if not candidate.is_file():
-                errors.append(f"file congelato mancante: {relative_name}")
+                errors.append(f'missing frozen file: {relative_name}')
             elif file_sha256(candidate) != expected_digest:
-                errors.append(f"file congelato modificato: {relative_name}")
+                errors.append(f'modified frozen file: {relative_name}')
     if errors:
         raise ValueError(
-            "Record di apertura test rifiutato:\n  - " + "\n  - ".join(errors)
+            """Test opening record rejected:
+  - """ + "\n  - ".join(errors)
         )
     return record
 
-# Area autonoma: i nomi FROZEN indicano il contratto della nuova esecuzione.
+# Standalone area: FROZEN names refer to this new run's contract.
 from settings import WORK, MQT, CONFIG, EXPERIMENT_ID as _ID, CATALOG_PATH, CATALOG_TEMPLATE
 PROJECT_ROOT = WORK
 EXPERIMENT_ID = PROTOCOL_ID = _ID

@@ -1,4 +1,4 @@
-"""Avvio autonomo dell'ordinamento 01_manifest."""
+'Standalone launcher for ordering 01_manifest.'
 import sys
 from pathlib import Path
 sys.dont_write_bytecode = True

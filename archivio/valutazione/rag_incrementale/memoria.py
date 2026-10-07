@@ -1,4 +1,4 @@
-"""Recupero esatto e ammissione di osservazioni, senza etichette di ottimalità."""
+'Exact retrieval and observation admission without optimality labels.'
 from __future__ import annotations
 import copy
 from comune import digest, finite, valid_score
@@ -7,7 +7,7 @@ from prototype.quantum_assistant.adapters.rag_dataset import as_example, record_
 
 
 def rank_examples(corpus, observations, features, devices, source_sha256, position, k=5):
-    """Unione di train e prefisso già concluso; scala train immutata."""
+    'Union of train and the completed prefix; train scaling stays fixed.'
     query = corpus.transform.apply(features)
     candidates = []
     allowed = set(devices)
@@ -20,7 +20,7 @@ def rank_examples(corpus, observations, features, devices, source_sha256, positi
                                "origin": "initial", "record": record})
     for record in observations:
         if record["position"] >= position:
-            raise ValueError("Osservazione corrente o futura nella memoria.")
+            raise ValueError('Current or future observation found in memory.')
         if record["source_sha256"] == source_sha256:
             continue
         if record["observed_configuration"]["device_id"] in allowed:
@@ -29,14 +29,14 @@ def rank_examples(corpus, observations, features, devices, source_sha256, positi
                                "origin": "incremental", "record": record})
     ranked = sorted(candidates, key=lambda r: (r["distance"], r["rag_id"]))
     if len({r["rag_id"] for r in ranked}) != len(ranked):
-        raise ValueError("Identificativi duplicati nella memoria.")
+        raise ValueError('Duplicate memory IDs.')
     if len(ranked) < k:
-        raise ValueError("Meno di cinque esempi compatibili; nessuna inferenza.")
+        raise ValueError('Fewer than five compatible examples; no inference.')
     return ranked[:k]
 
 
 def observation_entry(record, distance):
-    """Nessun median_score, rank o top_configurations viene inventato."""
+    'Never invent median_score, rank or top_configurations.'
     device = record["observed_configuration"]["device_id"]
     return {
         "record_id": record["record_id"], "distance": distance,
@@ -57,19 +57,19 @@ def make_observation(row, position, result, prompt, decision, compiled, *, known
     if row["source_sha256"] in known_hashes:
         return None, "source_already_present"
     if not compiled.get("validation", {}).get("is_executable_on_target"):
-        raise ValueError("Successo senza verifica del compilatore.")
+        raise ValueError('Success without compiler verification.')
     if (compiled.get("status") != "success" or compiled.get("score") != result["score"]
             or compiled.get("device") != decision["selected_device"]
             or result.get("device") != decision["selected_device"]
             or result.get("config_id") != decision["config_id"]):
-        raise ValueError("Decisione, risultato e compilazione non concordano.")
+        raise ValueError('Decision, result and compilation disagree.')
     live = prompt["live_request"]
     device = decision["selected_device"]
     configs = {c["config_id"] for c in prompt["configuration_catalog"]["allowed_configurations"]}
     devices = {d["id"]: d for d in live["compatible_hardware"]}
     if (device not in devices or decision["config_id"] not in configs
             or decision["config_id"] not in devices[device].get("allowed_qiskit_configuration_ids", configs)):
-        raise ValueError("Coppia non ammessa.")
+        raise ValueError('Pair is not allowed.')
     circuit = {k: copy.deepcopy(v) for k, v in live["circuit"].items()
                if k in ("name", "num_qubits", "depth", "operation_names", "features")}
     return {

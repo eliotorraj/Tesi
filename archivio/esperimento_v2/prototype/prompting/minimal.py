@@ -1,4 +1,4 @@
-"""Vista LLM essenziale. Il documento canonico e la provenienza restano esterni."""
+'Minimal LLM view. The canonical document and provenance remain external.'
 from __future__ import annotations
 
 import copy
@@ -34,7 +34,7 @@ def digest(value):
 
 @dataclass(frozen=True)
 class CitationContext:
-    """Identità locali vincolate alla richiesta e al registro, mai inviate al modello."""
+    'Local identities tied to the request and registry, never sent to the model.'
     request_id: str
     catalog_snapshot_id: str
     record_ids: tuple[str, ...]
@@ -69,7 +69,7 @@ def citation_context(prompt):
 
 
 def response_schema(prompt=None):
-    """Lo schema esterno ha una versione; il modello non deve ricopiarla."""
+    'The external schema is versioned; the model does not need to copy its version.'
     schema = copy.deepcopy(SCHEMA)
     if prompt is not None:
         context = citation_context(prompt)
@@ -135,26 +135,24 @@ def _example(entry, alias):
 
 
 def feedback(issues, *, has_examples=True):
-    """Una frase per tipo di errore; nessun valore arbitrario dalla risposta."""
+    'One sentence per error type, without arbitrary values from the response.'
     result = []
     for issue in issues:
         path = issue.get("path", "$")
         if path == "$.selected_device":
-            message = "Dispositivo non ammesso: scegli selected_device dagli ID di compatible_hardware."
+            message = 'Device not allowed: choose selected_device from the compatible_hardware IDs.'
         elif path == "$.config_id":
             message = (
-                "Configurazione non ammessa: scegli config_id da configuration_catalog, "
-                "rispettando i vincoli del dispositivo scelto."
+                "Configuration not allowed: choose config_id from configuration_catalog, respecting the selected device's constraints."
             )
         elif re.fullmatch(r"\$\.evidence(\[[0-9]+\])?", path):
             message = (
-                "Evidence non valida: usa solo gli ID di retrieved_labeled_examples, "
-                "senza duplicati e con almeno un riferimento."
+                'Invalid evidence: use only retrieved_labeled_examples IDs, without duplicates and with at least one reference.'
                 if has_examples else
-                "Evidence non valida: non ci sono esempi storici; usa evidence: []."
+                'Invalid evidence: no historical examples are available; use evidence: [].'
             )
         else:
-            message = "Risposta non conforme allo schema."
+            message = 'The response does not conform to the schema.'
         if message not in result:
             result.append(message)
     return result

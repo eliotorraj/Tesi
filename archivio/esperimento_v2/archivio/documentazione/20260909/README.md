@@ -1,12 +1,7 @@
-# Fotografia della documentazione al 9 settembre 2026
+# Documentation snapshot: September 9, 2026
 
-| File | Che cosa conserva |
-| --- | --- |
-| `README_progetto_prima_del_riordino.md` | Presentazione generale prima dell'organizzazione attuale. |
-| `procedura_operativa_pipeline_v2.md` | Precedente guida operativa, ora ricondotta al protocollo unico. |
-| `protocollo_sperimentale_definitivo.md` | Versione precedente delle regole sperimentali. |
-| `protocollo_sperimentale_v2.md` | Copia storica del protocollo v2. |
-| `verifica_pre_qdrant_20260909.md` | Controlli e decisioni prima dell'integrazione Qdrant. |
+This directory groups documentation from before the September 9 reorganization. `README_progetto_prima_del_riordino.md` describes the old workspace, `procedura_operativa_pipeline_v2.md` the previous execution sequence, and the two `protocollo_sperimentale*.md` files the earlier rules. `verifica_pre_qdrant_20260909.md` records checks before Qdrant integration.
 
-I file sono conservati nel loro contesto originale. Per comandi attuali tornare
-al [protocollo corrente](../../../docs/protocollo_sperimentale.md).
+These documents explain historical decisions and may contain old paths, planned methods or unfinished stages. Current execution instructions are in the root-level prototype and toolkit guides.
+
+[Parent directory](../README.md) · [Current repository guide](../../../../../README.md)

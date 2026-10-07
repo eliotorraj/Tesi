@@ -1,4 +1,4 @@
-"""Definisce e valida le configurazioni ammesse per il Dataset Qiskit."""
+'Define and validate allowed Qiskit Dataset configurations.'
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ LEGACY_CATALOG_PATH = LEGACY_ROOT / "configs" / "qiskit_dataset_configurations.j
 
 @dataclass(frozen=True)
 class QiskitConfiguration:
-    """Rappresenta una configurazione Qiskit ammessa dal catalogo."""
+    'Represent a Qiskit configuration allowed by the catalog.'
 
     config_id: str
     study: str
@@ -29,11 +29,11 @@ class QiskitConfiguration:
 
     @property
     def key(self) -> tuple[int, str | None, str | None]:
-        """Restituisce i tre valori che identificano la configurazione."""
+        'Return the three values identifying a configuration.'
         return (self.optimization_level, self.layout_method, self.routing_method)
 
     def to_dict(self) -> dict[str, Any]:
-        """Converte la configurazione in un oggetto pronto per il JSON."""
+        'Convert the configuration into a JSON-ready object.'
         return {
             "config_id": self.config_id,
             "study": self.study,
@@ -43,7 +43,7 @@ class QiskitConfiguration:
         }
 
     def transpile_kwargs(self) -> dict[str, Any]:
-        """Prepara le opzioni da passare a Qiskit, omettendo quelle di default."""
+        'Prepare Qiskit options, omitting defaults.'
         kwargs: dict[str, Any] = {"optimization_level": self.optimization_level}
         if self.layout_method is not None:
             kwargs["layout_method"] = self.layout_method
@@ -54,7 +54,7 @@ class QiskitConfiguration:
 
 @dataclass(frozen=True)
 class ConfigurationCatalog:
-    """Raccoglie dispositivi, configurazioni e parametri dell'esperimento."""
+    'Collect experiment devices, configurations and parameters.'
 
     schema_version: str
     catalog_id: str
@@ -73,12 +73,12 @@ class ConfigurationCatalog:
 
     @property
     def allowed_keys(self) -> frozenset[tuple[int, str | None, str | None]]:
-        """Restituisce le combinazioni di opzioni ammesse dal catalogo."""
+        'Return the option combinations allowed by the catalog.'
         return frozenset(configuration.key for configuration in self.configurations)
 
     @property
     def by_id(self) -> dict[str, QiskitConfiguration]:
-        """Indicizza le configurazioni tramite il loro identificatore."""
+        'Index configurations by identifier.'
         return {
             configuration.config_id: configuration
             for configuration in self.configurations
@@ -86,16 +86,16 @@ class ConfigurationCatalog:
 
     @property
     def device_id(self) -> str:
-        """Mantiene il vecchio nome usato per il dispositivo predefinito."""
+        'Retain the legacy name for the default device.'
         return self.default_device_id
 
     def require_device(self, device_id: str | None = None) -> str:
-        """Restituisce il dispositivo richiesto solo se è presente nel catalogo."""
+        'Return the requested device only if it belongs to the catalog.'
         selected = self.default_device_id if device_id is None else str(device_id)
         if selected not in self.supported_device_ids:
             allowed = ", ".join(self.supported_device_ids)
             raise ValueError(
-                f"Device fuori catalogo: {selected!r}. Ammessi: {allowed}."
+                f'Device outside the catalog: {selected!r}. Allowed: {allowed}.'
             )
         return selected
 
@@ -105,7 +105,7 @@ class ConfigurationCatalog:
         layout_method: str | None,
         routing_method: str | None,
     ) -> QiskitConfiguration | None:
-        """Cerca la configurazione che corrisponde alle opzioni ricevute."""
+        'Find the configuration matching the supplied options.'
         key = (optimization_level, layout_method, routing_method)
         return next(
             (
@@ -122,7 +122,7 @@ class ConfigurationCatalog:
         layout_method: str | None,
         routing_method: str | None,
     ) -> QiskitConfiguration:
-        """Restituisce una configurazione ammessa oppure segnala l'errore."""
+        'Return an allowed configuration or report an error.'
         configuration = self.find(
             optimization_level,
             layout_method,
@@ -130,32 +130,30 @@ class ConfigurationCatalog:
         )
         if configuration is None:
             raise ValueError(
-                "Configurazione Qiskit fuori catalogo: "
-                f"({optimization_level!r}, {layout_method!r}, "
-                f"{routing_method!r})."
+                f'Qiskit configuration outside the catalog: ({optimization_level!r}, {layout_method!r}, {routing_method!r}).'
             )
         return configuration
 
 
 def _strict_int(value: Any, field: str) -> int:
-    """Accetta soltanto un intero vero, escludendo anche i valori booleani."""
+    'Accept only an actual integer, excluding booleans.'
     if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{field} deve essere un intero.")
+        raise ValueError(f'{field} must be an integer.')
     return value
 
 
 def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
-    """Legge il catalogo e interrompe subito il flusso se non è valido."""
+    'Read the catalog and fail immediately if it is invalid.'
     with path.open(encoding="utf-8") as handle:
         raw = json.load(handle)
 
     raw_configurations = raw.get("configurations")
     if not isinstance(raw_configurations, list):
-        raise ValueError("configurations deve essere una lista.")
+        raise ValueError('configurations must be a list.')
     configurations: list[QiskitConfiguration] = []
     for index, item in enumerate(raw_configurations):
         if not isinstance(item, dict):
-            raise ValueError(f"configurations[{index}] deve essere un oggetto.")
+            raise ValueError(f'configurations[{index}] must be an object.')
         configurations.append(
             QiskitConfiguration(
                 config_id=str(item["config_id"]),
@@ -219,37 +217,36 @@ def load_catalog(path: Path = DEFAULT_CATALOG_PATH) -> ConfigurationCatalog:
 
 
 def _validate_catalog(catalog: ConfigurationCatalog) -> None:
-    """Controlla che il catalogo rispetti il protocollo sperimentale."""
+    'Check that the catalog follows the experimental protocol.'
     if len(catalog.configurations) != 12:
         raise ValueError(
-            "Il catalogo deve contenere esattamente 12 configurazioni, "
-            f"non {len(catalog.configurations)}."
+            f'The catalog must contain exactly 12 configurations, not {len(catalog.configurations)}.'
         )
     identifiers = [
         configuration.config_id for configuration in catalog.configurations
     ]
     if len(identifiers) != len(set(identifiers)):
-        raise ValueError("config_id duplicato nel catalogo.")
+        raise ValueError('Duplicate config_id in the catalog.')
     keys = [configuration.key for configuration in catalog.configurations]
     if len(keys) != len(set(keys)):
-        raise ValueError("Tuple Qiskit duplicate nel catalogo.")
+        raise ValueError('Duplicate Qiskit tuples in the catalog.')
     if len(catalog.seeds) != 3 or len(set(catalog.seeds)) != 3:
-        raise ValueError("Il catalogo deve definire esattamente tre seed distinti.")
+        raise ValueError('The catalog must define exactly three distinct seeds.')
     if any(seed < 0 or seed > 2**32 - 1 for seed in catalog.seeds):
-        raise ValueError("I seed devono essere compresi tra 0 e 2^32-1.")
+        raise ValueError('Seeds must be between 0 and 2^32-1.')
     if not catalog.supported_device_ids:
-        raise ValueError("Il catalogo deve definire almeno un device.")
+        raise ValueError('The catalog must define at least one device.')
     if len(catalog.supported_device_ids) != len(set(catalog.supported_device_ids)):
-        raise ValueError("Device duplicato nel catalogo.")
+        raise ValueError('Duplicate device in the catalog.')
     if catalog.default_device_id not in catalog.supported_device_ids:
-        raise ValueError("Il device di default deve essere tra quelli supportati.")
+        raise ValueError('The default device must be among the supported devices.')
     if catalog.objective.get("name") != "expected_fidelity":
-        raise ValueError("Questa versione ammette soltanto expected_fidelity.")
+        raise ValueError('This version allows expected_fidelity only.')
     if catalog.experiment_id is not None:
         if re.fullmatch(r"[A-Za-z0-9_.-]+", catalog.experiment_id) is None:
-            raise ValueError("experiment_id contiene caratteri non ammessi.")
+            raise ValueError('experiment_id contains invalid characters.')
         if catalog.protocol_version is None:
-            raise ValueError("Il catalogo v2 deve dichiarare protocol_version.")
+            raise ValueError('The v2 catalog must declare protocol_version.')
         missing_versions = sorted(
             {
                 "mqt.predictor",
@@ -260,30 +257,30 @@ def _validate_catalog(catalog: ConfigurationCatalog) -> None:
         )
         if missing_versions:
             raise ValueError(
-                "Versioni richieste mancanti nel catalogo v2: "
+                'Required versions missing from the v2 catalog: '
                 + ", ".join(missing_versions)
             )
         if set(catalog.target_sha256) != set(catalog.supported_device_ids):
             raise ValueError(
-                "Il catalogo v2 deve congelare un Target per ogni device."
+                'The v2 catalog must freeze a Target for every device.'
             )
         if catalog.target_fingerprint_schema_version != 2:
             raise ValueError(
-                "Il catalogo v2 richiede target_fingerprint_schema_version=2."
+                'The v2 catalog requires target_fingerprint_schema_version=2.'
             )
         if set(catalog.execution_policy) != {"workers", "timeout_seconds"}:
             raise ValueError(
-                "Il catalogo v2 deve fissare workers e timeout_seconds."
+                'The v2 catalog must fix workers and timeout_seconds.'
             )
         workers = catalog.execution_policy["workers"]
         timeout = catalog.execution_policy["timeout_seconds"]
         if isinstance(workers, bool) or not isinstance(workers, int) or workers <= 0:
-            raise ValueError("execution_policy.workers deve essere positivo.")
+            raise ValueError('execution_policy.workers must be positive.')
         if (
             isinstance(timeout, bool)
             or not isinstance(timeout, (int, float))
             or timeout <= 0
         ):
             raise ValueError(
-                "execution_policy.timeout_seconds deve essere positivo."
+                'execution_policy.timeout_seconds must be positive.'
             )

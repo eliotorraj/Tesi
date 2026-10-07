@@ -1,4 +1,4 @@
-"""Analisi post-sigillo: riferimento osservato sugli 88 circuiti."""
+'Post-seal analysis: observed reference on the 88 circuits.'
 from __future__ import annotations
 from collections import defaultdict, Counter
 from statistics import median

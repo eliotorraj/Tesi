@@ -1,10 +1,11 @@
-# Artefatti degli esperimenti
+# Artifact sets by experiment
 
-Ogni esperimento ha una cartella autonoma. L’identificativo collega sorgenti,
-modelli e risultati alle condizioni che li hanno prodotti.
+Each experiment directory groups manifests, models, sources and outcomes under a stable identifier. The supplied v2 directory belongs to the five-device expected-fidelity experiment with MQT Predictor 2.4.0. Earlier artifacts remain in the nested protocol v1 archive. New toolkit runs use their own output roots and identifiers.
 
-| Cartella | Contenuto |
+## Subdirectories
+
+| Directory | Contents |
 | --- | --- |
-| [qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2](qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/README.md) | Esperimento corrente con MQT Predictor 2.4.0: manifest, modelli RL, Qdrant, cache Qiskit e prove LLM. |
+| [qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/](qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/README.md) | Five-device v2 artifacts. |
 
-Il materiale precedente resta nell’[archivio](../../archivio/README.md).
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

@@ -1,4 +1,4 @@
-"""Importa la selezione QASMBench fissata. Nessuna inferenza o compilazione."""
+'Import the fixed QASMBench selection. No inference or compilation.'
 import argparse, hashlib, json, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -25,7 +25,7 @@ def download(relative):
     path=AREA/"circuiti"/relative
     path.parent.mkdir(parents=True,exist_ok=True)
     if path.exists():
-        if path.read_bytes()!=data: raise ValueError(f"File diverso, non sovrascritto: {path}")
+        if path.read_bytes()!=data: raise ValueError(f'File differs; not overwritten: {path}')
     else: path.write_bytes(data)
 def inspect():
     from qiskit import QuantumCircuit
@@ -41,17 +41,17 @@ def inspect():
             measured=set()
             for item in flat.data:
                 if item.operation.name in ("reset","if_else","while_loop","for_loop") or getattr(item.operation,"condition",None) is not None:
-                    raise ValueError(f"{name}: operazioni dinamiche")
+                    raise ValueError(f'{name}: dynamic operations')
                 if item.operation.name=="measure": measured.update(item.qubits)
                 elif item.operation.name!="barrier" and measured.intersection(item.qubits):
-                    raise ValueError(f"{name}: misure intermedie")
+                    raise ValueError(f'{name}: mid-circuit measurements')
             value=sha(path.read_bytes())
-            if value in hashes: raise ValueError(f"Duplicato: {name}")
+            if value in hashes: raise ValueError(f'Duplicate: {name}')
             hashes.add(value)
             overlaps=[r["circuit_id"] for r in previous if r["source_sha256"]==value]
-            if overlaps: raise ValueError(f"Sovrapposizione MQT: {name}: {overlaps}")
+            if overlaps: raise ValueError(f'MQT overlap: {name}: {overlaps}')
             low,high={"small":(2,10),"medium":(11,27),"large":(28,156)}[group]
-            if not low<=circuit.num_qubits<=high: raise ValueError(f"Fascia errata: {name}")
+            if not low<=circuit.num_qubits<=high: raise ValueError(f'Incorrect group: {name}')
             records.append(dict(circuit_id="qasmbench_"+name,size_group=group,
                 source_ref=relative,source_sha256=value,split="external_test",
                 qubits=circuit.num_qubits,depth=circuit.depth(),operations=circuit.size(),
@@ -59,8 +59,8 @@ def inspect():
                 byte_identical_mqt_matches=overlaps))
     return dict(schema_version=1,repository="https://github.com/pnnl/QASMBench",revision=REVISION,
         counts={k:len(v) for k,v in SELECTED.items()},circuits=records,
-        independence="Fonte esterna; nessun duplicato byte-identico nel corpus MQT. Non prova disgiunzione semantica o assenza dal preaddestramento LLM.",
-        selection="Selezione ragionata prima degli score: famiglie diverse, circuiti statici, entro 156 qubit, nessuna variante transpiled; non campionamento casuale.",
+        independence='External source; no byte-identical duplicate in the MQT corpus. Does not prove semantic disjointness or absence from LLM pretraining.',
+        selection='Purposive selection before scores: varied families, static circuits, at most 156 qubits, no transpiled variants; not random sampling.',
         support_files={p:sha((AREA/"circuiti"/p).read_bytes()) for p in ("LICENSE","NOTICE","qelib1.inc","README.md")})
 def main():
     ap=argparse.ArgumentParser()
@@ -73,7 +73,7 @@ def main():
     manifest=inspect()
     out=AREA/"manifest.json"
     serialized=json.dumps(manifest,ensure_ascii=False,indent=2)+"\n"
-    if out.exists() and out.read_text()!=serialized: raise ValueError("Manifest diverso; non sovrascritto")
+    if out.exists() and out.read_text()!=serialized: raise ValueError('Manifest differs; not overwritten')
     if not out.exists(): out.write_text(serialized,encoding="utf-8")
     print(json.dumps({"counts":manifest["counts"],"circuits":len(manifest["circuits"])}))
 if __name__=="__main__": main()

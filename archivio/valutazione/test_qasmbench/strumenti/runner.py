@@ -1,4 +1,4 @@
-"""Esecuzione autonoma di un metodo. L'analisi non avvia altri metodi."""
+'Run one method independently. Analysis does not start other methods.'
 from __future__ import annotations
 import argparse
 import json
@@ -46,7 +46,7 @@ def compile_job(folder, job, timeout):
             terminate(process)
             raise
         finally:
-            # Un runtime RL potrebbe lasciare discendenti anche dopo l'uscita del padre.
+            # An RL runtime may leave descendants even after its parent exits.
             if os.name == "posix":
                 terminate(process)
     if not (folder/"result.json").exists():
@@ -125,7 +125,7 @@ def evaluate(row, folder, method, url, technical=False, *, prepare_fn=None, max_
                 choice = {"selected_device":device,"config_id":config,"seed":seed}
             result["choice_seconds"] = time.perf_counter()-choice_start
             result["config_id"]=choice["config_id"]
-            save(folder/"decision.json",choice)  # Scelta durevole PRIMA della compilazione.
+            save(folder/"decision.json",choice)  # Persist the choice BEFORE compilation.
         compiled = compile_job(folder/"compilazione",
             {"method":method,"source":str((folder/"input.qasm").resolve()),"decision":choice,"rl_device":row.get("rl_device")},
             read(PLAN)["compilation_timeout_seconds"])
@@ -147,7 +147,7 @@ def evaluate(row, folder, method, url, technical=False, *, prepare_fn=None, max_
     return result
 
 def interrupted_result(row, folder, method):
-    # Arresto improvviso: non ripetere una decisione o compilazione dall'esito incerto.
+    # Abrupt stop: do not repeat a decision or compilation with an uncertain outcome.
     result = {"circuit_id":row["circuit_id"],"source_sha256":row["source_sha256"],"split":"external_test",
               "method":method,"status":"interrupted","score":None,"total_seconds":None,
               "compilation_seconds":None,"choice_seconds":None,"llm_response_seconds":None,
@@ -161,11 +161,11 @@ def verify_server(args):
     from pathlib import PureWindowsPath
     model = args.model_path
     if model is None or not model.is_file():
-        raise ValueError("--model-path deve indicare il GGUF usato dal server.")
+        raise ValueError('--model-path must identify the GGUF served by the server.')
     artifact = CONFIG["profile"]["artifact"]
     if model.stat().st_size!=artifact["size_bytes"] or sha(model)!=artifact["gguf_sha256"]:
-        raise ValueError("Il GGUF non coincide con il modello selezionato.")
-    # /props e' GET; passare attraverso lo stesso ponte curl Windows usato dal prototipo.
+        raise ValueError('GGUF does not match the selected model.')
+    # /props uses GET through the same Windows curl bridge as the prototype.
     if "microsoft" in platform.release().lower():
         process=subprocess.run(["curl.exe","--silent","--show-error","--fail","--max-time","20",args.url+"/props"],
                                capture_output=True,check=True)
@@ -177,35 +177,34 @@ def verify_server(args):
     defaults=props.get("default_generation_settings",{})
     context=defaults.get("n_ctx",props.get("n_ctx"))
     requested_context=PROFILES["desktop"]
-    # llama.cpp allinea il contesto allocato al multiplo successivo di 256.
+    # llama.cpp rounds allocated context up to the next multiple of 256.
     allocated_context=((requested_context+255)//256)*256
     if type(context) is not int or context not in (requested_context,allocated_context):
-        raise ValueError(f"Il server deve usare il profilo desktop con contesto {requested_context} "
-                         f"({allocated_context} dopo allineamento llama.cpp): {context}")
+        raise ValueError(f'The server must use the desktop profile with context {requested_context} ({allocated_context} after llama.cpp alignment): {context}')
     served=props.get("model_path","")
     if PureWindowsPath(served).name!=model.name and Path(served).name!=model.name:
-        raise ValueError("Il percorso modello dichiarato dal server non coincide col GGUF fornito.")
+        raise ValueError('The model path declared by the server does not match the supplied GGUF.')
     served_path=Path(served)
     if os.name=="posix" and PureWindowsPath(served).drive:
         win=PureWindowsPath(served)
         served_path=Path("/mnt")/win.drive[0].lower()/Path(*win.parts[1:])
     if not served_path.is_file() or sha(served_path)!=artifact["gguf_sha256"]:
-        raise ValueError("Impossibile verificare il GGUF effettivamente dichiarato dal server: "+served)
+        raise ValueError('Cannot verify the actual GGUF declared by the server: '+served)
     return {"model_sha256":artifact["gguf_sha256"],"props":props,"url":args.url,
             "context_requested":requested_context,"context_reported":context}
 
 def cli(method):
-    ap=argparse.ArgumentParser(description="Test indipendente: "+method)
+    ap=argparse.ArgumentParser(description='Independent Test: '+method)
     mode=ap.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--verifica",action="store_true",help="Controlli senza Test e senza inferenza")
-    mode.add_argument("--esegui",action="store_true",help="Esegue/riprende i 50 circuiti QASMBench")
-    mode.add_argument("--tecnico",action="store_true",help="Solo Bell sintetico; non apre il Test")
+    mode.add_argument("--verifica",action="store_true",help='Checks without Test or inference')
+    mode.add_argument("--esegui",action="store_true",help='Run/resume the 50 QASMBench circuits')
+    mode.add_argument("--tecnico",action="store_true",help='Synthetic Bell only; does not open the Test')
     ap.add_argument("--url",default="http://127.0.0.1:8089")
     ap.add_argument("--model-path",type=Path)
     args=ap.parse_args()
     args.url=args.url.rstrip("/")
     if not args.url.startswith(("http://127.0.0.1:","http://localhost:")):
-        ap.error("Il server deve essere locale.")
+        ap.error('The server must be local.')
     verification_id=method+"-"+uuid4().hex
     save(AREA/"preparazione/verifiche"/(verification_id+"-inizio.json"),{"at":now(),"method":method,"kind":"preflight"})
     audit=preflight(method)
@@ -216,7 +215,7 @@ def cli(method):
     if not audit["ready"]:
         return 1
     if args.verifica:
-        print("Controlli statici superati. I metodi LLM verificano server e GGUF all'avvio.")
+        print('Static checks passed. LLM methods check the server and GGUF at startup.')
         return 0
     if method=="mqt_predictor" and args.esegui:
         identity=digest(audit["checks"]["mqt_models"]["details"])
@@ -229,7 +228,7 @@ def cli(method):
                              for name,value in files.items())
             if verified:break
         if not verified:
-            raise ValueError("Eseguire prima mqt_predictor.py --tecnico: servono cinque prove RL e una qcompile.")
+            raise ValueError('Run mqt_predictor.py --tecnico first: five RL checks and one qcompile check are required.')
     server=None
     if method.startswith("llm"):
         server_log=AREA/"preparazione/verifiche"/(method+"-server-"+uuid4().hex+".json")
@@ -258,7 +257,7 @@ def cli(method):
         if begin.exists():
             old=read(begin)
             if any(old[k]!=v for k,v in config.items()):
-                raise ValueError("Ripresa incompatibile con la precedente esecuzione.")
+                raise ValueError('Resume is incompatible with the previous run.')
         else:
             save(begin,{**config,"at":now(),"python":sys.version,"platform":platform.platform(),
                         "cpu_count":os.cpu_count(),"server":server,"code":code_files(),"preflight":audit,
@@ -285,13 +284,12 @@ def cli(method):
                 try:
                     evaluate(row,folder,method,args.url,args.tecnico)
                 except LlmTransportError as exc:
-                    print(f"Test fermato: {exc}. Verificare il server e i suoi registri. "
-                          "Il tentativo corrente e' conservato; i circuiti successivi non sono stati avviati.",
+                    print(f'Test stopped: {exc}. Check the server and its logs. The current attempt is preserved; subsequent circuits have not been started.',
                           file=sys.stderr,flush=True)
                     return 1
             print(f"{method}: {i}/{len(rows)} {row['circuit_id']}",flush=True)
         if args.tecnico and method=="mqt_predictor":
             files={str(p.relative_to(base)):sha(p) for p in (base/"circuiti").glob("*/esito.json")}
             save(base/"verifica_mqt.json",{"model_identity":model_identity,"files":files,"at":now()})
-        print("Risultati: "+str(base)+". Analisi separata: analizza.py")
+        print('Results: '+str(base)+'. Separate analysis: analizza.py')
     return 0

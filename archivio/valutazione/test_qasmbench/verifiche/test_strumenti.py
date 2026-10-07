@@ -1,4 +1,4 @@
-"""Prove sintetiche dei registri e dei confronti; mai inferenza sui 50 circuiti."""
+'Synthetic checks of records and comparisons; never run inference on the 50 circuits.'
 import json,sys,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch

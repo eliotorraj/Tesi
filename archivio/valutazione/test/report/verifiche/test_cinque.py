@@ -1,4 +1,4 @@
-"""Regressioni per quinto pannello e confronti, senza eseguire il Test."""
+'Regression checks for the fifth panel and comparisons, without running the Test.'
 import sys
 import tempfile
 import unittest

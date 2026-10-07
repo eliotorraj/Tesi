@@ -1,4 +1,4 @@
-"""Modelli del dominio condivisi dai livelli del prototipo."""
+'Domain models shared by the prototype layers.'
 
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ HARDWARE_MASK_SCHEMA_VERSION = "1.0.0"
 LLM_RECOMMENDATION_SCHEMA_VERSION = "2.0.0"
 NO_ELIGIBLE_DEVICE_CODE = "NO_ELIGIBLE_DEVICE"
 NO_ELIGIBLE_DEVICE_MESSAGE = (
-    "Nessun device soddisfa contemporaneamente tutti i vincoli hard."
+    'No device satisfies all hard constraints.'
 )
 
 
 def _deep_freeze(value: Any) -> Any:
-    """Converte ricorsivamente liste e mappe in valori non modificabili."""
+    'Recursively convert lists and mappings into immutable values.'
     if isinstance(value, Mapping):
         return MappingProxyType(
             {str(key): _deep_freeze(item) for key, item in value.items()}
@@ -32,7 +32,7 @@ def _deep_freeze(value: Any) -> Any:
 
 
 def _json_copy(value: Any) -> Any:
-    """Crea una copia composta soltanto da valori serializzabili in JSON."""
+    'Create a copy containing JSON-serializable values only.'
     if isinstance(value, Mapping):
         return {str(key): _json_copy(item) for key, item in value.items()}
     if isinstance(value, tuple):
@@ -42,14 +42,14 @@ def _json_copy(value: Any) -> Any:
 
 @dataclass(frozen=True)
 class CircuitInput:
-    """Campi del circuito accettati dalla richiesta strutturata."""
+    'Circuit fields accepted by a structured request.'
 
     source: str
     name: str = "user_circuit"
     format: str = "openqasm2"
 
     def to_dict(self) -> dict[str, str]:
-        """Restituisce il circuito nel formato previsto dallo schema."""
+        'Return the circuit in the schema-defined format.'
         payload = {"format": self.format, "source": self.source}
         if self.name:
             payload["name"] = self.name
@@ -58,13 +58,13 @@ class CircuitInput:
 
 @dataclass(frozen=True)
 class DeviceQubitRange:
-    """Intervallo facoltativo di qubit fisici scelto dall'utente."""
+    'Optional user-selected range of physical qubits.'
 
     minimum: int | None = None
     maximum: int | None = None
 
     def to_dict(self) -> dict[str, int]:
-        """Restituisce soltanto i limiti effettivamente indicati."""
+        'Return only explicitly specified bounds.'
         payload: dict[str, int] = {}
         if self.minimum is not None:
             payload["min"] = self.minimum
@@ -75,7 +75,7 @@ class DeviceQubitRange:
 
 @dataclass(frozen=True)
 class HardwareConstraints:
-    """Vincoli hardware rigidi supportati dal prototipo."""
+    'Hard hardware constraints supported by the prototype.'
 
     allowed_provider_ids: tuple[str, ...] = ()
     allowed_device_ids: tuple[str, ...] = ()
@@ -83,7 +83,7 @@ class HardwareConstraints:
     required_native_gate_ids: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce soltanto i vincoli impostati dall'utente."""
+        'Return only user-specified constraints.'
         payload: dict[str, Any] = {}
         if self.allowed_provider_ids:
             payload["allowed_provider_ids"] = list(self.allowed_provider_ids)
@@ -100,7 +100,7 @@ class HardwareConstraints:
 
 @dataclass(frozen=True)
 class UserRequest:
-    """Richiesta valida nella forma, prima dei dati ricavati dal QASM."""
+    'Structurally valid request before QASM-derived data are added.'
 
     schema_version: str
     request_id: str
@@ -113,7 +113,7 @@ class UserRequest:
     legacy_compatibility: bool = field(default=False, repr=False, compare=False)
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce la richiesta nel formato previsto dallo schema."""
+        'Return the request in the schema-defined format.'
         return {
             "schema_version": self.schema_version,
             "request_id": self.request_id,
@@ -126,11 +126,10 @@ class UserRequest:
 
 @dataclass(frozen=True)
 class UiSubmission:
-    """Adattatore mantenuto per i chiamanti precedenti alla richiesta JSON.
+    """Adapter retained for callers predating the JSON request.
 
-    ``user_text`` viene ignorato e ``constraints`` deve restare vuoto. I nuovi
-    chiamanti devono inviare ``UserRequest`` oppure un oggetto conforme allo
-    schema.
+    ``user_text`` is ignored and ``constraints`` must remain empty. New callers
+    must send ``UserRequest`` or an object conforming to the schema.
     """
 
     request_id: str
@@ -144,7 +143,7 @@ class UiSubmission:
 
 @dataclass(frozen=True)
 class ParsedRequest:
-    """Richiesta arricchita con proprietà ricavate da OpenQASM 2."""
+    'Request enriched with properties derived from OpenQASM 2.'
 
     user_request: UserRequest
     num_qubits: int
@@ -154,68 +153,68 @@ class ParsedRequest:
     source_sha256: str
 
     def __post_init__(self) -> None:
-        """Rende non modificabili le caratteristiche del circuito."""
+        'Make circuit features immutable.'
         object.__setattr__(self, "features", _deep_freeze(self.features))
 
     @property
     def request_id(self) -> str:
-        """Restituisce l'identificativo della richiesta originale."""
+        'Return the original request identifier.'
         return self.user_request.request_id
 
     @property
     def schema_version(self) -> str:
-        """Restituisce la versione dello schema della richiesta."""
+        'Return the request schema version.'
         return self.user_request.schema_version
 
     @property
     def catalog_snapshot_id(self) -> str:
-        """Restituisce l'istantanea hardware richiesta."""
+        'Return the requested hardware snapshot.'
         return self.user_request.catalog_snapshot_id
 
     @property
     def circuit_name(self) -> str:
-        """Restituisce il nome assegnato al circuito."""
+        'Return the assigned circuit name.'
         return self.user_request.circuit.name
 
     @property
     def qasm2(self) -> str:
-        """Restituisce il sorgente OpenQASM 2 del circuito."""
+        "Return the circuit's OpenQASM 2 source."
         return self.user_request.circuit.source
 
     @property
     def figure_of_merit(self) -> str:
-        """Restituisce la misura scelta per valutare la compilazione."""
+        'Return the selected compilation evaluation metric.'
         return self.user_request.figure_of_merit_id
 
     @property
     def hardware_constraints(self) -> HardwareConstraints:
-        """Restituisce i vincoli hardware della richiesta."""
+        "Return the request's hardware constraints."
         return self.user_request.hardware_constraints
 
     @property
     def allowed_devices(self) -> tuple[str, ...]:
-        """Restituisce la lista ammessa mantenuta per compatibilità."""
+        'Return the allowlist retained for compatibility.'
         return self.hardware_constraints.allowed_device_ids
 
     @property
     def constraints(self) -> Mapping[str, Any]:
-        """Restituisce la vista strutturata mantenuta per compatibilità."""
+        'Return the structured view retained for compatibility.'
         return self.hardware_constraints.to_dict()
 
     @property
     def user_text(self) -> str:
-        """Restituisce vuoto il vecchio campo testuale del messaggio."""
+        'Return an empty legacy message text field.'
         return ""
 
 
 @dataclass(frozen=True)
 class NormalizedRequest(ParsedRequest):
-    """Richiesta validata e legata a una precisa istantanea hardware."""
+    'Validated request tied to a specific hardware snapshot.'
 
 
 @dataclass(frozen=True)
 class ValidationIssue:
-    """Errore di validazione leggibile dal programma."""
+    'Machine-readable validation error.'
 
     code: str
     path: str
@@ -223,11 +222,11 @@ class ValidationIssue:
     details: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """Rende non modificabili i dettagli dell'errore."""
+        'Make error details immutable.'
         object.__setattr__(self, "details", _deep_freeze(self.details))
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce l'errore in forma serializzabile."""
+        'Return the error in a serializable form.'
         payload: dict[str, Any] = {
             "code": self.code,
             "path": self.path,
@@ -240,17 +239,17 @@ class ValidationIssue:
 
 @dataclass(frozen=True)
 class ValidationReport:
-    """Rapporto completo della validazione sintattica o semantica."""
+    'Complete syntactic or semantic validation report.'
 
     issues: tuple[ValidationIssue, ...] = ()
 
     @property
     def is_valid(self) -> bool:
-        """Indica se non sono stati trovati errori."""
+        'Indicate whether no errors were found.'
         return not self.issues
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il rapporto in forma serializzabile."""
+        'Return the report in serializable form.'
         return {
             "is_valid": self.is_valid,
             "issues": [issue.to_dict() for issue in self.issues],
@@ -259,13 +258,13 @@ class ValidationReport:
 
 @dataclass(frozen=True)
 class ProviderProfile:
-    """Descrive un fornitore presente nel catalogo hardware."""
+    'Describe a provider in the hardware catalog.'
 
     provider_id: str
     display_name: str
 
     def to_dict(self) -> dict[str, str]:
-        """Restituisce il fornitore in forma serializzabile."""
+        'Return the provider in serializable form.'
         return {
             "provider_id": self.provider_id,
             "display_name": self.display_name,
@@ -274,7 +273,7 @@ class ProviderProfile:
 
 @dataclass(frozen=True)
 class HardwareProfile:
-    """Informazioni hardware normalizzate e ricavate dal Target."""
+    'Normalized hardware information extracted from the Target.'
 
     device_id: str
     num_qubits: int
@@ -292,18 +291,18 @@ class HardwareProfile:
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """Controlla la coerenza del profilo e ne blocca i metadati."""
+        'Check profile consistency and freeze its metadata.'
         if not self.device_id or not self.provider_id:
-            raise ValueError("device_id e provider_id non possono essere vuoti.")
+            raise ValueError('device_id and provider_id cannot be empty.')
         if self.num_qubits <= 0:
-            raise ValueError("num_qubits deve essere positivo.")
+            raise ValueError('num_qubits must be positive.')
         for label, values in (
             ("operation_names", self.operation_names),
             ("native_gate_ids", self.native_gate_ids),
             ("coupling_edges", self.coupling_edges),
         ):
             if len(values) != len(set(values)):
-                raise ValueError(f"{label} contiene duplicati.")
+                raise ValueError(f'{label} contains duplicates.')
         if any(
             source < 0
             or destination < 0
@@ -311,16 +310,16 @@ class HardwareProfile:
             or destination >= self.num_qubits
             for source, destination in self.coupling_edges
         ):
-            raise ValueError("Il coupling contiene indici di qubit non validi.")
+            raise ValueError('Coupling contains invalid qubit indices.')
         object.__setattr__(self, "metadata", _deep_freeze(self.metadata))
 
     @property
     def selectable_native_gate_ids(self) -> tuple[str, ...]:
-        """Restituisce soltanto i gate nativi dichiarati esplicitamente."""
+        'Return only explicitly declared native gates.'
         return self.native_gate_ids
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il profilo hardware in forma serializzabile."""
+        'Return the hardware profile in serializable form.'
         payload: dict[str, Any] = {
             "device_id": self.device_id,
             "provider_id": self.provider_id,
@@ -348,24 +347,24 @@ class HardwareProfile:
 
 @dataclass(frozen=True)
 class CompatibilityReport:
-    """Vista di compatibilità mantenuta per i chiamanti precedenti."""
+    'Compatibility view retained for earlier callers.'
 
     available: tuple[HardwareProfile, ...]
     unavailable: Mapping[str, tuple[str, ...]]
 
     def __post_init__(self) -> None:
-        """Rende non modificabile la diagnostica dei dispositivi esclusi."""
+        'Make excluded-device diagnostics immutable.'
         object.__setattr__(self, "unavailable", _deep_freeze(self.unavailable))
 
     @property
     def available_device_ids(self) -> tuple[str, ...]:
-        """Restituisce gli identificativi dei dispositivi disponibili."""
+        'Return the available device identifiers.'
         return tuple(profile.device_id for profile in self.available)
 
 
 @dataclass(frozen=True)
 class HardwareCatalogSnapshot:
-    """Catalogo immutabile condiviso da UI, maschera e fasi LLM."""
+    'Immutable catalog shared by the UI, mask and LLM stages.'
 
     schema_version: str
     catalog_snapshot_id: str
@@ -378,7 +377,7 @@ class HardwareCatalogSnapshot:
     provenance: Mapping[str, Any]
 
     def __post_init__(self) -> None:
-        """Controlla che provider, dispositivi e configurazioni siano coerenti."""
+        'Check consistency of providers, devices and configurations.'
         provider_ids = tuple(provider.provider_id for provider in self.providers)
         device_ids = tuple(device.device_id for device in self.devices)
         if (
@@ -386,15 +385,15 @@ class HardwareCatalogSnapshot:
             or any(not provider_id for provider_id in provider_ids)
             or len(provider_ids) != len(set(provider_ids))
         ):
-            raise ValueError("Lo snapshot deve avere provider unici e non vuoti.")
+            raise ValueError('The snapshot must contain unique, nonempty providers.')
         if (
             not device_ids
             or any(not device_id for device_id in device_ids)
             or len(device_ids) != len(set(device_ids))
         ):
-            raise ValueError("Lo snapshot deve avere device unici e non vuoti.")
+            raise ValueError('The snapshot must contain unique, nonempty devices.')
         if any(device.provider_id not in provider_ids for device in self.devices):
-            raise ValueError("Ogni device deve riferirsi a un provider dello snapshot.")
+            raise ValueError('Each device must reference a provider in the snapshot.')
         if (
             not self.qiskit_configuration_ids
             or any(not value for value in self.qiskit_configuration_ids)
@@ -402,14 +401,14 @@ class HardwareCatalogSnapshot:
             != len(set(self.qiskit_configuration_ids))
         ):
             raise ValueError(
-                "Gli ID di configurazione Qiskit devono essere unici e non vuoti."
+                'Qiskit configuration IDs must be unique and nonempty.'
             )
         if (
             not self.supported_figure_of_merit_ids
             or len(self.supported_figure_of_merit_ids)
             != len(set(self.supported_figure_of_merit_ids))
         ):
-            raise ValueError("Le figure of merit devono essere uniche e non vuote.")
+            raise ValueError('Figures of merit must be unique and nonempty.')
         global_configurations = set(self.qiskit_configuration_ids)
         global_metrics = set(self.supported_figure_of_merit_ids)
         if any(
@@ -420,8 +419,7 @@ class HardwareCatalogSnapshot:
             for device in self.devices
         ):
             raise ValueError(
-                "Le configurazioni di ogni device devono essere non vuote e "
-                "appartenere al catalogo globale."
+                'Each device must have nonempty configurations belonging to the global catalog.'
             )
         if any(
             not device.supported_figure_of_merit_ids
@@ -431,14 +429,13 @@ class HardwareCatalogSnapshot:
             for device in self.devices
         ):
             raise ValueError(
-                "Le figure of merit di ogni device devono appartenere al "
-                "catalogo globale."
+                "Each device's figures of merit must belong to the global catalog."
             )
         if any(
             device.target_available and not device.target_hash
             for device in self.devices
         ):
-            raise ValueError("Ogni Target disponibile deve avere un target_hash.")
+            raise ValueError('Every available Target must have a target_hash.')
         if any(
             device.target_available
             and (
@@ -450,24 +447,23 @@ class HardwareCatalogSnapshot:
             for device in self.devices
         ):
             raise ValueError(
-                "Ogni Target disponibile deve dichiarare gate nativi "
-                "espliciti presenti nelle operation_names."
+                'Every available Target must declare explicit native gates present in operation_names.'
             )
         object.__setattr__(self, "provenance", _deep_freeze(self.provenance))
 
     @property
     def device_by_id(self) -> dict[str, HardwareProfile]:
-        """Indicizza i profili hardware per identificativo."""
+        'Index hardware profiles by identifier.'
         return {device.device_id: device for device in self.devices}
 
     @property
     def provider_ids(self) -> tuple[str, ...]:
-        """Restituisce gli identificativi dei fornitori disponibili."""
+        'Return the available provider identifiers.'
         return tuple(provider.provider_id for provider in self.providers)
 
     @property
     def native_gate_ids(self) -> tuple[str, ...]:
-        """Raccoglie i gate nativi dichiarati dai dispositivi."""
+        'Collect native gates declared by devices.'
         return tuple(
             sorted(
                 {
@@ -479,7 +475,7 @@ class HardwareCatalogSnapshot:
         )
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce l'istantanea hardware in forma serializzabile."""
+        'Return the hardware snapshot in a serializable form.'
         return {
             "schema_version": self.schema_version,
             "catalog_snapshot_id": self.catalog_snapshot_id,
@@ -498,7 +494,7 @@ class HardwareCatalogSnapshot:
 
 
 class DeviceExclusionReason(StrEnum):
-    """Motivi stabili per cui un dispositivo non supera la maschera."""
+    'Stable reasons why a device fails the mask.'
 
     PROVIDER_NOT_ALLOWED = "PROVIDER_NOT_ALLOWED"
     DEVICE_NOT_ALLOWED = "DEVICE_NOT_ALLOWED"
@@ -512,22 +508,22 @@ class DeviceExclusionReason(StrEnum):
 
 @dataclass(frozen=True)
 class DeviceExclusionDiagnostic:
-    """Descrive perché un dispositivo è stato escluso."""
+    'Describe why a device was excluded.'
 
     device_id: str
     reason_codes: tuple[DeviceExclusionReason, ...]
     details: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """Controlla le ragioni e rende non modificabili i dettagli."""
+        'Check reasons and make details immutable.'
         if not self.reason_codes:
-            raise ValueError("Una diagnostica deve contenere almeno una ragione.")
+            raise ValueError('A diagnostic must contain at least one reason.')
         if len(self.reason_codes) != len(set(self.reason_codes)):
-            raise ValueError("I codici di esclusione devono essere unici.")
+            raise ValueError('Exclusion codes must be unique.')
         object.__setattr__(self, "details", _deep_freeze(self.details))
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce la diagnostica in forma serializzabile."""
+        'Return diagnostics in a serializable form.'
         payload: dict[str, Any] = {
             "device_id": self.device_id,
             "reason_codes": [reason.value for reason in self.reason_codes],
@@ -539,7 +535,7 @@ class DeviceExclusionDiagnostic:
 
 @dataclass(frozen=True)
 class HardwareMaskResult:
-    """Maschera deterministica con la diagnostica delle esclusioni."""
+    'Deterministic mask with exclusion diagnostics.'
 
     schema_version: str
     catalog_snapshot_id: str
@@ -551,15 +547,15 @@ class HardwareMaskResult:
     normalized_constraints: HardwareConstraints
 
     def __post_init__(self) -> None:
-        """Controlla che maschera, profili e diagnostiche coincidano."""
+        'Check that mask, profiles and diagnostics agree.'
         if self.effective_min_qubits < 1:
-            raise ValueError("effective_min_qubits deve essere positivo.")
+            raise ValueError('effective_min_qubits must be positive.')
         if len(self.ordered_device_ids) != len(self.mask):
-            raise ValueError("Mask e ordered_device_ids devono avere pari lunghezza.")
+            raise ValueError('Mask and ordered_device_ids must have equal lengths.')
         if any(type(value) is not bool for value in self.mask):
-            raise ValueError("La maschera deve contenere soltanto booleani.")
+            raise ValueError('The mask must contain booleans only.')
         if len(self.ordered_device_ids) != len(set(self.ordered_device_ids)):
-            raise ValueError("ordered_device_ids deve contenere ID unici.")
+            raise ValueError('ordered_device_ids must contain unique IDs.')
         true_ids = tuple(
             device_id
             for device_id, is_eligible in zip(
@@ -569,7 +565,7 @@ class HardwareMaskResult:
         )
         available_ids = tuple(profile.device_id for profile in self.available)
         if available_ids != true_ids:
-            raise ValueError("I bit true devono coincidere con i device disponibili.")
+            raise ValueError('True bits must match the available devices.')
         false_ids = tuple(
             device_id
             for device_id, is_eligible in zip(
@@ -581,21 +577,21 @@ class HardwareMaskResult:
             diagnostic.device_id for diagnostic in self.excluded_devices
         )
         if diagnostic_ids != false_ids:
-            raise ValueError("Ogni bit false deve avere una sola diagnostica ordinata.")
+            raise ValueError('Each false bit must have exactly one ordered diagnostic.')
 
     @property
     def eligible_device_ids(self) -> tuple[str, ...]:
-        """Restituisce i dispositivi che hanno superato tutti i vincoli."""
+        'Return devices satisfying every constraint.'
         return tuple(profile.device_id for profile in self.available)
 
     @property
     def available_device_ids(self) -> tuple[str, ...]:
-        """Mantiene il vecchio nome usato da recupero e validazione."""
+        'Retain the legacy name used by retrieval and validation.'
         return self.eligible_device_ids
 
     @property
     def unavailable(self) -> Mapping[str, tuple[str, ...]]:
-        """Restituisce la vecchia diagnostica testuale per compatibilità."""
+        'Return legacy text diagnostics for compatibility.'
         unavailable: dict[str, tuple[str, ...]] = {}
         user_filter_reasons = {
             DeviceExclusionReason.PROVIDER_NOT_ALLOWED,
@@ -628,7 +624,7 @@ class HardwareMaskResult:
         return unavailable
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce maschera e diagnostiche in forma serializzabile."""
+        'Return the mask and diagnostics in a serializable form.'
         return {
             "schema_version": self.schema_version,
             "catalog_snapshot_id": self.catalog_snapshot_id,
@@ -648,7 +644,7 @@ CompatibilityView = CompatibilityReport | HardwareMaskResult
 
 @dataclass(frozen=True)
 class PreparedRequestContext:
-    """Risultato prodotto prima del recupero e della chiamata all'LLM."""
+    'Result produced before retrieval and the LLM call.'
 
     request: NormalizedRequest
     hardware_catalog: HardwareCatalogSnapshot
@@ -656,16 +652,16 @@ class PreparedRequestContext:
 
     @property
     def can_recommend(self) -> bool:
-        """Indica se esiste almeno un dispositivo utilizzabile."""
+        'Indicate whether at least one usable device exists.'
         return bool(self.mask_result.eligible_device_ids)
 
     @property
     def status(self) -> str:
-        """Restituisce lo stato sintetico della preparazione."""
+        'Return a summary of preparation status.'
         return "ready" if self.can_recommend else "no_eligible_device"
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il contesto preparato in forma serializzabile."""
+        'Return the prepared context in serializable form.'
         payload: dict[str, Any] = {
             "status": self.status,
             "can_recommend": self.can_recommend,
@@ -689,26 +685,26 @@ class PreparedRequestContext:
 
 @dataclass(frozen=True)
 class RetrievedExample:
-    """Esempio storico sicuro restituito dal recupero del contesto."""
+    'Verified historical example returned by context retrieval.'
 
     record_id: str
     distance: float
     prompt_input: Mapping[str, Any]
 
     def __post_init__(self) -> None:
-        """Rende non modificabile il contenuto destinato al messaggio."""
+        'Make message content immutable.'
         object.__setattr__(self, "prompt_input", _deep_freeze(self.prompt_input))
 
 
 class EvidenceSourceType(StrEnum):
-    """Fonti storiche che l'LLM può indicare."""
+    'Historical sources the LLM may reference.'
 
     HISTORICAL_RESULT = "historical_result"
     SCIENTIFIC_CAVEAT = "scientific_caveat"
 
 
 class SupportedClaimType(StrEnum):
-    """Tipi di claim accettati nell'output strutturato dell'LLM."""
+    'Claim types accepted in structured LLM output.'
 
     HISTORICAL_DEVICE_SUPPORT = "historical_device_support"
     HISTORICAL_CONFIGURATION_SUPPORT = "historical_configuration_support"
@@ -718,7 +714,7 @@ class SupportedClaimType(StrEnum):
 
 
 class HistoricalClaimType(StrEnum):
-    """Tipi di claim presenti in un record storico etichettato."""
+    'Claim types present in a labeled historical record.'
 
     SELECTED_DEVICE = "selected_device"
     RANKED_CONFIGURATION = "ranked_configuration"
@@ -726,7 +722,7 @@ class HistoricalClaimType(StrEnum):
 
 @dataclass(frozen=True)
 class HistoricalEvidence:
-    """Risultato storico che può sostenere un claim della raccomandazione."""
+    'Historical outcome that can support a recommendation claim.'
 
     evidence_id: str
     device_id: str
@@ -737,7 +733,7 @@ class HistoricalEvidence:
     sample_count: int | None = None
 
     def __post_init__(self) -> None:
-        """Controlla identificativi, misura e quantità di campioni."""
+        'Check identifiers, metric and sample count.'
         if not all(
             value.strip()
             for value in (
@@ -748,26 +744,26 @@ class HistoricalEvidence:
             )
         ):
             raise ValueError(
-                "Gli identificatori dell'evidenza non possono essere vuoti."
+                'Evidence identifiers cannot be empty.'
             )
         if (
             isinstance(self.value, bool)
             or not isinstance(self.value, (int, float))
             or not math.isfinite(float(self.value))
         ):
-            raise ValueError("Il valore dell'evidenza deve essere finito.")
+            raise ValueError('The evidence value must be finite.')
         object.__setattr__(self, "value", float(self.value))
         if self.summary_id is not None and not self.summary_id.strip():
-            raise ValueError("summary_id non può contenere soltanto spazi.")
+            raise ValueError('summary_id cannot contain only whitespace.')
         if self.sample_count is not None and (
             isinstance(self.sample_count, bool)
             or not isinstance(self.sample_count, int)
             or self.sample_count <= 0
         ):
-            raise ValueError("sample_count deve essere un intero positivo.")
+            raise ValueError('sample_count must be a positive integer.')
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce l'evidenza storica in forma serializzabile."""
+        'Return historical evidence in a serializable form.'
         payload: dict[str, Any] = {
             "evidence_id": self.evidence_id,
             "device_id": self.device_id,
@@ -784,26 +780,26 @@ class HistoricalEvidence:
 
 @dataclass(frozen=True)
 class ScientificCaveat:
-    """Limite scientifico associato a un record storico."""
+    'Scientific limitation associated with a historical record.'
 
     caveat_id: str
     text: str
 
     def __post_init__(self) -> None:
-        """Controlla che identificativo e testo non siano vuoti."""
+        'Check that identifier and text are nonempty.'
         if not self.caveat_id.strip() or not self.text.strip():
             raise ValueError(
-                "ID e testo dell'avvertenza non possono essere vuoti."
+                'Caveat ID and text cannot be empty.'
             )
 
     def to_dict(self) -> dict[str, str]:
-        """Restituisce l'avvertenza in forma serializzabile."""
+        'Return the caveat in a serializable form.'
         return {"caveat_id": self.caveat_id, "text": self.text}
 
 
 @dataclass(frozen=True)
 class HistoricalClaim:
-    """Claim sorgente conservato in un record storico del Dataset."""
+    'Source claim retained in a historical Dataset record.'
 
     claim_id: str
     claim_type: HistoricalClaimType
@@ -811,11 +807,11 @@ class HistoricalClaim:
     caveat_ids: tuple[str, ...]
 
     def __post_init__(self) -> None:
-        """Controlla tipo, evidenze e avvertenze citate dal claim."""
+        'Check the type, evidence and caveats cited by the claim.'
         object.__setattr__(self, "evidence_ids", tuple(self.evidence_ids))
         object.__setattr__(self, "caveat_ids", tuple(self.caveat_ids))
         if not self.claim_id.strip():
-            raise ValueError("claim_id storico non può essere vuoto.")
+            raise ValueError('Historical claim_id cannot be empty.')
         if not isinstance(self.claim_type, HistoricalClaimType):
             object.__setattr__(
                 self,
@@ -827,12 +823,12 @@ class HistoricalClaim:
             ("caveat_ids", self.caveat_ids),
         ):
             if not values or any(not value.strip() for value in values):
-                raise ValueError(f"{label} deve contenere ID non vuoti.")
+                raise ValueError(f'{label} must contain nonempty IDs.')
             if len(values) != len(set(values)):
-                raise ValueError(f"{label} non può contenere duplicati.")
+                raise ValueError(f'{label} cannot contain duplicates.')
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il claim storico in forma serializzabile."""
+        'Return the historical claim in serializable form.'
         return {
             "claim_id": self.claim_id,
             "claim_type": self.claim_type.value,
@@ -843,7 +839,7 @@ class HistoricalClaim:
 
 @dataclass(frozen=True)
 class HistoricalConfiguration:
-    """Configurazione ordinata presente in un record storico."""
+    'Ranked configuration in a historical record.'
 
     rank: int
     device_id: str
@@ -857,9 +853,9 @@ class HistoricalConfiguration:
     median_score: float
 
     def __post_init__(self) -> None:
-        """Controlla rango, identificativi e valori della configurazione."""
+        'Check configuration rank, identifiers and values.'
         if self.rank <= 0:
-            raise ValueError("Il rango della configurazione deve essere positivo.")
+            raise ValueError('Configuration rank must be positive.')
         if not all(
             value.strip()
             for value in (
@@ -871,26 +867,26 @@ class HistoricalConfiguration:
             )
         ):
             raise ValueError(
-                "Gli identificatori della configurazione non possono essere vuoti."
+                'Configuration identifiers cannot be empty.'
             )
         if self.optimization_level not in (2, 3):
-            raise ValueError("optimization_level storico deve essere 2 oppure 3.")
+            raise ValueError('Historical optimization_level must be 2 or 3.')
         if (
             isinstance(self.median_score, bool)
             or not isinstance(self.median_score, (int, float))
             or not math.isfinite(float(self.median_score))
         ):
-            raise ValueError("median_score storico deve essere finito.")
+            raise ValueError('Historical median_score must be finite.')
         object.__setattr__(self, "median_score", float(self.median_score))
         for field_name in ("layout_method", "routing_method"):
             value = getattr(self, field_name)
             if value is not None and not value.strip():
                 raise ValueError(
-                    f"{field_name} non può contenere soltanto spazi."
+                    f'{field_name} cannot contain only whitespace.'
                 )
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce la configurazione storica in forma serializzabile."""
+        'Return the historical configuration in serializable form.'
         return {
             "rank": self.rank,
             "device_id": self.device_id,
@@ -907,7 +903,7 @@ class HistoricalConfiguration:
 
 @dataclass(frozen=True)
 class EvidenceRecord:
-    """Vista delle evidenze di un circuito storico recuperato."""
+    'Evidence view for a retrieved historical circuit.'
 
     record_id: str
     rank: int
@@ -919,7 +915,7 @@ class EvidenceRecord:
     caveats: tuple[ScientificCaveat, ...]
 
     def __post_init__(self) -> None:
-        """Controlla ordine, unicità e collegamenti interni del record."""
+        'Check record ordering, uniqueness and internal links.'
         object.__setattr__(self, "source_claims", tuple(self.source_claims))
         object.__setattr__(
             self,
@@ -937,15 +933,14 @@ class EvidenceRecord:
             )
         ):
             raise ValueError(
-                "Un record storico deve contenere claim, configurazioni, "
-                "evidenze e avvertenze."
+                'A historical record must contain claims, configurations, evidence and caveats.'
             )
         if not self.record_id.strip() or not self.selected_device_id.strip():
             raise ValueError(
-                "Record e dispositivo storico non possono essere vuoti."
+                'Historical record and device cannot be empty.'
             )
         if self.rank <= 0:
-            raise ValueError("Il rango del record deve essere positivo.")
+            raise ValueError('Record rank must be positive.')
         if (
             isinstance(self.distance, bool)
             or not isinstance(self.distance, (int, float))
@@ -953,7 +948,7 @@ class EvidenceRecord:
             or self.distance < 0
         ):
             raise ValueError(
-                "La distanza del record deve essere finita e non negativa."
+                'Record distance must be finite and nonnegative.'
             )
         object.__setattr__(self, "distance", float(self.distance))
 
@@ -972,13 +967,13 @@ class EvidenceRecord:
         for label, values in identifiers:
             if len(values) != len(set(values)):
                 raise ValueError(
-                    f"Un record non può contenere {label} duplicati."
+                    f'A record cannot contain {label} duplicates.'
                 )
         if tuple(
             item.rank for item in self.top_configurations
         ) != tuple(sorted(item.rank for item in self.top_configurations)):
             raise ValueError(
-                "Le configurazioni storiche devono rispettare il rango."
+                'Historical configurations must follow rank order.'
             )
 
         evidence_ids = {item.evidence_id for item in self.evidence}
@@ -987,24 +982,24 @@ class EvidenceRecord:
         for claim in self.source_claims:
             if not set(claim.evidence_ids).issubset(evidence_ids):
                 raise ValueError(
-                    "Un claim storico cita evidenze assenti dal record."
+                    'A historical claim cites evidence absent from its record.'
                 )
             if not set(claim.caveat_ids).issubset(caveat_ids):
                 raise ValueError(
-                    "Un claim storico cita avvertenze assenti dal record."
+                    'A historical claim cites caveats missing from the record.'
                 )
         for configuration in self.top_configurations:
             if configuration.claim_id not in claim_ids:
                 raise ValueError(
-                    "Una configurazione storica cita un claim assente."
+                    'A historical configuration cites a missing claim.'
                 )
             if configuration.evidence_id not in evidence_ids:
                 raise ValueError(
-                    "Una configurazione storica cita un'evidenza assente."
+                    'A historical configuration cites missing evidence.'
                 )
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il record di evidenze in forma serializzabile."""
+        'Return the evidence record in serializable form.'
         return {
             "record_id": self.record_id,
             "rank": self.rank,
@@ -1022,7 +1017,7 @@ class EvidenceRecord:
         }
 
     def find_claim(self, claim_id: str) -> HistoricalClaim | None:
-        """Cerca un claim sorgente per identificativo."""
+        'Find a source claim by identifier.'
         return next(
             (
                 claim
@@ -1038,7 +1033,7 @@ class EvidenceRecord:
         *,
         device_id: str | None = None,
     ) -> HistoricalConfiguration | None:
-        """Cerca una configurazione, facoltativamente per dispositivo."""
+        'Find a configuration, optionally filtering by device.'
         return next(
             (
                 configuration
@@ -1053,7 +1048,7 @@ class EvidenceRecord:
         )
 
     def find_evidence(self, evidence_id: str) -> HistoricalEvidence | None:
-        """Cerca un'evidenza storica per identificativo."""
+        'Find historical evidence by identifier.'
         return next(
             (
                 item
@@ -1064,7 +1059,7 @@ class EvidenceRecord:
         )
 
     def find_caveat(self, caveat_id: str) -> ScientificCaveat | None:
-        """Cerca un'avvertenza scientifica per identificativo."""
+        'Find a scientific caveat by identifier.'
         return next(
             (
                 item
@@ -1077,7 +1072,7 @@ class EvidenceRecord:
 
 @dataclass(frozen=True)
 class EvidenceReference:
-    """Riferimento dell'LLM a un elemento del registro corrente."""
+    'LLM reference to an entry in the current registry.'
 
     reference_id: str
     record_id: str
@@ -1086,20 +1081,20 @@ class EvidenceReference:
     source_claim_id: str | None = None
 
     def __post_init__(self) -> None:
-        """Controlla gli identificativi e normalizza il tipo di fonte."""
+        'Check identifiers and normalize source type.'
         if not all(
             value.strip()
             for value in (self.reference_id, self.record_id, self.source_id)
         ):
             raise ValueError(
-                "Gli identificatori del riferimento non possono essere vuoti."
+                'Reference identifiers cannot be empty.'
             )
         if (
             self.source_claim_id is not None
             and not self.source_claim_id.strip()
         ):
             raise ValueError(
-                "source_claim_id non può contenere soltanto spazi."
+                'source_claim_id cannot contain only whitespace.'
             )
         if not isinstance(self.source_type, EvidenceSourceType):
             object.__setattr__(
@@ -1109,7 +1104,7 @@ class EvidenceReference:
             )
 
     def to_dict(self) -> dict[str, str]:
-        """Restituisce il riferimento in forma serializzabile."""
+        'Return the reference in serializable form.'
         payload = {
             "reference_id": self.reference_id,
             "record_id": self.record_id,
@@ -1126,34 +1121,34 @@ EvidenceSource = HistoricalEvidence | ScientificCaveat
 
 @dataclass(frozen=True)
 class EvidenceRegistry:
-    """Registro immutabile costruito dagli esempi appena recuperati."""
+    'Immutable registry built from the retrieved examples.'
 
     records: tuple[EvidenceRecord, ...] = ()
 
     def __post_init__(self) -> None:
-        """Controlla unicità e ordine dei record recuperati."""
+        'Check uniqueness and ordering of retrieved records.'
         object.__setattr__(self, "records", tuple(self.records))
         record_ids = tuple(record.record_id for record in self.records)
         ranks = tuple(record.rank for record in self.records)
         if len(record_ids) != len(set(record_ids)):
             raise ValueError(
-                "Il registro non può contenere record_id duplicati."
+                'The registry cannot contain duplicate record_id values.'
             )
         if len(ranks) != len(set(ranks)):
-            raise ValueError("Il registro non può contenere ranghi duplicati.")
+            raise ValueError('The registry cannot contain duplicate ranks.')
         if ranks != tuple(sorted(ranks)):
             raise ValueError(
-                "I record del registro devono rispettare il rango."
+                'Registry records must follow rank order.'
             )
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il registro in forma serializzabile."""
+        'Return the registry in serializable form.'
         return {
             "records": [record.to_dict() for record in self.records],
         }
 
     def find_record(self, record_id: str) -> EvidenceRecord | None:
-        """Cerca un record recuperato per identificativo."""
+        'Find a retrieved record by identifier.'
         return next(
             (
                 record
@@ -1167,7 +1162,7 @@ class EvidenceRegistry:
         self,
         reference: EvidenceReference,
     ) -> EvidenceSource | None:
-        """Risolve un riferimento nella relativa evidenza o avvertenza."""
+        'Resolve a reference to its evidence or caveat.'
         record = self.find_record(reference.record_id)
         if record is None:
             return None
@@ -1180,14 +1175,14 @@ class EvidenceRegistry:
 
 @dataclass(frozen=True)
 class ClaimParameters:
-    """Identificativi facoltativi interpretati in base al tipo di claim."""
+    'Optional identifiers interpreted according to claim type.'
 
     device_id: str | None = None
     configuration_id: str | None = None
     caveat_id: str | None = None
 
     def __post_init__(self) -> None:
-        """Rifiuta i parametri presenti ma vuoti."""
+        'Reject supplied but empty parameters.'
         for field_name in (
             "device_id",
             "configuration_id",
@@ -1196,11 +1191,11 @@ class ClaimParameters:
             value = getattr(self, field_name)
             if value is not None and not value.strip():
                 raise ValueError(
-                    f"{field_name} non può contenere soltanto spazi."
+                    f'{field_name} cannot contain only whitespace.'
                 )
 
     def to_dict(self) -> dict[str, str]:
-        """Restituisce soltanto i parametri presenti."""
+        'Return only supplied parameters.'
         payload: dict[str, str] = {}
         for field_name in (
             "device_id",
@@ -1215,7 +1210,7 @@ class ClaimParameters:
 
 @dataclass(frozen=True)
 class SupportedClaim:
-    """Claim strutturato che può essere verificato senza testo libero."""
+    'Structured claim verifiable without free text.'
 
     claim_id: str
     claim_type: SupportedClaimType
@@ -1223,14 +1218,14 @@ class SupportedClaim:
     evidence_ref_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        """Controlla tipo, identificativo e riferimenti del claim."""
+        "Check the claim's type, identifier and references."
         object.__setattr__(
             self,
             "evidence_ref_ids",
             tuple(self.evidence_ref_ids),
         )
         if not self.claim_id.strip():
-            raise ValueError("claim_id non può essere vuoto.")
+            raise ValueError('claim_id cannot be empty.')
         if not isinstance(self.claim_type, SupportedClaimType):
             object.__setattr__(
                 self,
@@ -1239,18 +1234,18 @@ class SupportedClaim:
             )
         if len(self.evidence_ref_ids) != len(set(self.evidence_ref_ids)):
             raise ValueError(
-                "Un claim non può ripetere lo stesso riferimento."
+                'A claim cannot repeat the same reference.'
             )
         if any(
             not reference_id.strip()
             for reference_id in self.evidence_ref_ids
         ):
             raise ValueError(
-                "Gli ID dei riferimenti non possono essere vuoti."
+                'Reference IDs cannot be empty.'
             )
 
     def to_dict(self) -> dict[str, Any]:
-        """Restituisce il claim validato in forma serializzabile."""
+        'Return the validated claim in serializable form.'
         return {
             "claim_id": self.claim_id,
             "claim_type": self.claim_type.value,
@@ -1261,23 +1256,23 @@ class SupportedClaim:
 
 @dataclass(frozen=True)
 class RenderedExplanation:
-    """Testo per l'utente ricavato soltanto da valori validati."""
+    'User-facing text derived only from validated values.'
 
     explanation: str
     evidence: tuple[str, ...] = ()
     warnings: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        """Rende immutabili le liste e controlla la spiegazione."""
+        'Make lists immutable and check the explanation.'
         object.__setattr__(self, "evidence", tuple(self.evidence))
         object.__setattr__(self, "warnings", tuple(self.warnings))
         if not self.explanation.strip():
-            raise ValueError("La spiegazione derivata non può essere vuota.")
+            raise ValueError('The derived explanation cannot be empty.')
 
 
 @dataclass(frozen=True)
 class PromptEnvelope:
-    """Messaggio strutturato indipendente dal fornitore dell'LLM."""
+    'Structured message independent of the LLM provider.'
 
     payload: Mapping[str, Any]
 
@@ -1287,7 +1282,7 @@ LlmOutput = Mapping[str, Any] | str | bytes
 
 @dataclass(frozen=True)
 class QiskitCompilationPlan:
-    """Parametri Qiskit ammessi e proposti dall'LLM."""
+    'Allowed Qiskit parameters proposed by the LLM.'
 
     optimization_level: int
     seed_transpiler: int
@@ -1297,7 +1292,7 @@ class QiskitCompilationPlan:
 
 @dataclass(frozen=True)
 class ExampleCitation:
-    """Citazione risolta dal programma nel registro della richiesta."""
+    'Citation resolved by the program against the request registry.'
 
     alias: str
     record_id: str
@@ -1305,7 +1300,7 @@ class ExampleCitation:
 
 @dataclass(frozen=True)
 class Recommendation:
-    """Raccomandazione validata e sicura da mostrare nella UI."""
+    'Validated recommendation suitable for display in the UI.'
 
     selected_device: str
     figure_of_merit: str
@@ -1322,7 +1317,7 @@ class Recommendation:
     citation_validation: str | None = None
 
     def __post_init__(self) -> None:
-        """Rende immutabili evidenze, avvertenze, claim e riferimenti."""
+        'Make evidence, caveats, claims and references immutable.'
         object.__setattr__(self, "evidence", tuple(self.evidence))
         object.__setattr__(self, "warnings", tuple(self.warnings))
         object.__setattr__(self, "claims", tuple(self.claims))
@@ -1336,34 +1331,34 @@ class Recommendation:
 
 @dataclass(frozen=True)
 class ValidationResult:
-    """Esito della validazione di una risposta strutturata dell'LLM."""
+    'Validation outcome for a structured LLM response.'
 
     is_valid: bool
     recommendation: Recommendation | None = None
     issues: tuple[ValidationIssue, ...] = ()
 
     def __post_init__(self) -> None:
-        """Controlla la coerenza tra esito, raccomandazione ed errori."""
+        'Check consistency between outcome, recommendation and errors.'
         object.__setattr__(self, "issues", tuple(self.issues))
         if self.is_valid:
             if self.recommendation is None or self.issues:
                 raise ValueError(
-                    "Un risultato valido richiede una raccomandazione senza errori."
+                    'A valid result requires an error-free recommendation.'
                 )
         elif self.recommendation is not None or not self.issues:
             raise ValueError(
-                "Un risultato non valido richiede almeno un errore strutturato."
+                'An invalid result requires at least one structured error.'
             )
 
     @property
     def errors(self) -> tuple[str, ...]:
-        """Restituisce i vecchi messaggi testuali mantenuti per compatibilità."""
+        'Return legacy text messages retained for compatibility.'
         return tuple(issue.message for issue in self.issues)
 
 
 @dataclass(frozen=True)
 class RecommendationResult:
-    """Risultato completo della raccomandazione restituito alla UI."""
+    'Complete recommendation result returned to the UI.'
 
     request: NormalizedRequest
     compatibility: CompatibilityView
@@ -1375,7 +1370,7 @@ class RecommendationResult:
 
 @dataclass(frozen=True)
 class ApprovedCompilation:
-    """Conferma esplicita dell'utente prima della compilazione."""
+    'Explicit user confirmation before compilation.'
 
     recommendation_result: RecommendationResult
     user_confirmed: bool
@@ -1383,7 +1378,7 @@ class ApprovedCompilation:
 
 @dataclass(frozen=True)
 class CompilationArtifact:
-    """Risultato della compilazione Qiskit restituito alla UI."""
+    'Qiskit compilation result returned to the UI.'
 
     device_id: str
     qasm2: str

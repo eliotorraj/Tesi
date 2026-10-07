@@ -1,4 +1,4 @@
-"""Esegue qcompile tre volte per circuito con timeout e ripresa rigorosa."""
+'Run qcompile three times per circuit with timeout and strict resume.'
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def _worker(qasm: str, connection: Any) -> None:
-    """Esegue una singola invocazione qcompile in un nuovo process group."""
+    'Run one qcompile invocation in a new process group.'
     os.setsid()
     os.environ.setdefault("GITHUB_ACTIONS", "true")
     os.environ.setdefault("MPLCONFIGDIR", "/tmp/mqt-predictor-matplotlib")
@@ -79,20 +79,20 @@ def _worker(qasm: str, connection: Any) -> None:
         normalized_passes = [str(value) for value in passes]
         if not normalized_passes or normalized_passes[-1] != "terminate":
             raise RuntimeError(
-                "Trace qcompile vuota o non conclusa dall'azione terminate."
+                'qcompile trace is empty or does not end with terminate.'
             )
         target = get_device(selected_device)
         observed_target = target_sha256(target)
         if observed_target != FROZEN_TARGET_SHA256[selected_device]:
             raise RuntimeError(
-                f"Target drift per {selected_device}: {observed_target}."
+                f'Target drift for {selected_device}: {observed_target}.'
             )
         validation = validate_compiled_circuit(compiled, target)
         if not validation["is_executable_on_target"]:
-            raise RuntimeError(f"Circuito qcompile non valido: {validation}.")
+            raise RuntimeError(f'Invalid qcompile circuit: {validation}.')
         score = float(expected_fidelity(compiled, target))
         if not math.isfinite(score):
-            raise RuntimeError(f"Score qcompile non finito: {score!r}.")
+            raise RuntimeError(f'Non-finite qcompile score: {score!r}.')
         result = {
             "status": "success",
             "selected_device_id": str(selected_device),
@@ -148,7 +148,7 @@ def _terminate(process: Any) -> None:
 
 
 def run_once(qasm: str, timeout: int) -> dict[str, Any]:
-    """Applica un timeout reale all'intero processo e ai discendenti."""
+    'Apply a real timeout to the entire process and its descendants.'
     context = get_context("spawn")
     receive, send = context.Pipe(duplex=False)
     process = context.Process(target=_worker, args=(qasm, send))
@@ -173,7 +173,7 @@ def run_once(qasm: str, timeout: int) -> dict[str, Any]:
                 "failure": {
                     "category": "compilation_timeout",
                     "exception_type": "TimeoutError",
-                    "message": f"qcompile ha superato {timeout} secondi.",
+                    "message": f'qcompile exceeded {timeout} seconds.',
                     "traceback": None,
                 },
             }
@@ -189,7 +189,7 @@ def _load_existing(
     path: Path,
     expected: Mapping[str, Mapping[str, Any]],
 ) -> dict[str, dict[str, Any]]:
-    """Accetta solo checkpoint terminali con identità ancora valida."""
+    'Accept only terminal checkpoints with a still-valid identity.'
     if not path.is_file():
         return {}
     records: dict[str, dict[str, Any]] = {}
@@ -200,7 +200,7 @@ def _load_existing(
             try:
                 record = json.loads(line)
             except json.JSONDecodeError as error:
-                raise ValueError(f"{path}:{line_number}: JSON non valido.") from error
+                raise ValueError(f'{path}:{line_number}: invalid JSON.') from error
             run_id = str(record.get("run_id", ""))
             reference = expected.get(run_id)
             if (
@@ -223,10 +223,10 @@ def _load_existing(
                 != COMPILATION_TIMEOUT_SECONDS
             ):
                 raise ValueError(
-                    f"{path}:{line_number}: checkpoint qcompile fuori contratto."
+                    f'{path}:{line_number}: qcompile checkpoint violates the contract.'
                 )
             if run_id in records:
-                raise ValueError(f"{path}:{line_number}: run_id duplicato.")
+                raise ValueError(f'{path}:{line_number}: duplicate run_id.')
             records[run_id] = record
     return records
 
@@ -234,25 +234,25 @@ def _load_existing(
 def main() -> int:
     args = parse_args()
     if os.name != "posix":
-        raise SystemExit("Il runner qcompile richiede Linux/WSL.")
+        raise SystemExit('The qcompile runner requires Linux/WSL.')
     if args.timeout <= 0:
-        raise SystemExit("--timeout deve essere positivo.")
+        raise SystemExit('--timeout must be positive.')
     if args.timeout != COMPILATION_TIMEOUT_SECONDS:
         raise SystemExit(
-            "Il protocollo v2 richiede "
-            f"--timeout {COMPILATION_TIMEOUT_SECONDS}."
+            f'Protocol v2 requires --timeout {COMPILATION_TIMEOUT_SECONDS}.'
         )
     if args.limit_circuits is not None and args.limit_circuits <= 0:
-        raise SystemExit("--limit-circuits deve essere positivo.")
+        raise SystemExit('--limit-circuits must be positive.')
     if args.split == "test":
         validate_test_release_record()
     version_errors = package_version_mismatches()
     if version_errors:
-        raise SystemExit(f"Versioni non conformi al protocollo v2: {version_errors}.")
+        raise SystemExit(f'Versions do not match the v2 protocol: {version_errors}.')
     model_report, model_errors = validate_model_set(expected_max_steps=64)
     if model_errors:
         raise SystemExit(
-            "qcompile non è pronto; modelli canonici/runtime non conformi:\n  - "
+            """qcompile is not ready; canonical/runtime models do not match:
+  - """
             + "\n  - ".join(model_errors)
         )
     model_hashes = {
@@ -309,12 +309,11 @@ def main() -> int:
         try:
             source_path.relative_to(PROJECT_ROOT.resolve())
         except ValueError as error:
-            raise SystemExit(f"source_ref fuori repository: {source_path}") from error
+            raise SystemExit(f'source_ref outside the repository: {source_path}') from error
         if not source_path.is_file() or file_sha256(source_path) != circuit["source_sha256"]:
-            raise SystemExit(f"Circuito sorgente mancante o modificato: {source_path}")
+            raise SystemExit(f'Source circuit is missing or modified: {source_path}')
         print(
-            f"qcompile {circuit['circuit_id']} "
-            f"ripetizione {repetition_index + 1}/3",
+            f"qcompile {circuit['circuit_id']} repetition {repetition_index + 1}/3",
             flush=True,
         )
         result = run_once(source_path.read_text(encoding="utf-8"), args.timeout)
@@ -351,8 +350,7 @@ def main() -> int:
         print(f"  {record['status']}", flush=True)
 
     print(
-        f"Checkpoint qcompile: {output} "
-        f"({len(completed)}/{len(expected)} ripetizioni terminali)"
+        f'qcompile checkpoint: {output} ({len(completed)}/{len(expected)} terminal repetitions)'
     )
     if args.limit_circuits is not None:
         selected_run_ids = {

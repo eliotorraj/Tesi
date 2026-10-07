@@ -1,9 +1,15 @@
-# MQT: Target, politiche RL e selettore
+# MQT Targets, policies and selector
 
-`gestione.py` mostra i Target quantistici e verifica l'ambiente dedicato. `addestra_rl.py` addestra le politiche per dispositivo. `addestra_selettore.py`, `motore_ml.py` e `deduplica.py` raccolgono le compilazioni circuito/dispositivo, preparano il Training set e addestrano il classificatore. `validazione_selettore.py` controlla il selettore ottenuto.
+| Entry | Purpose |
+| --- | --- |
+| `gestione.py` | Inspect Targets and verify the environment. |
+| `addestra_rl.py` | Train one RL compilation policy per selected device. |
+| `addestra_selettore.py`, `motore_ml.py`, `deduplica.py` | Collect circuit/device outcomes, prepare the Training set and train the selector. |
+| `validazione_selettore.py` | Validate the selector and artifacts. |
+| [artefatti/](artefatti/README.md) | MQT training documentation. |
 
-L'ambiente è Python 3.12 con MQT Predictor 2.4.0 e il lock del kit. L'installazione non include politiche o classificatore. I comandi `esperimento.py mqt ...` e le prove Bell sono descritti nella [guida](../documentazione/guida.md). I modelli e le evidenze finiscono in `artefatti/<id>/`.
+The environment uses Python 3.12, MQT Predictor 2.4.0 and the toolkit lock. Installation alone does not provide trained models. Follow the [guide](../documentazione/guida.md) for `esperimento.py mqt ...` and Bell checks.
 
-Questi lavori sono distinti dall'inferenza Qwen. Una GPU disponibile per llama.cpp non garantisce che PyTorch/MQT la usino. Valutare RAM, durata e numero di processi prima della raccolta. Non ricreare la `.venv` senza conservare sia i modelli canonici sia le copie installate nel pacchetto. Un addestramento breve è un controllo tecnico, non una misura di qualità.
+For named runs, put `--esperimento NAME` before `mqt`. Configure devices and RL steps before preparation with `configura.py dispositivi` and `parametri --passi-rl`. Explicitly include `mqt` among Test methods to evaluate it.
 
-Per un esperimento nominato aggiungi `--esperimento NOME` prima della fase in tutti i comandi di `esperimento.py`. Target e passi RL si impostano con `configura.py dispositivi` e `configura.py parametri --passi-rl`, prima di `prepara`. Includi esplicitamente `mqt` nell’elenco `configura.py sistemi` se vuoi confrontarlo sul Test.
+MQT and llama.cpp use different stacks; GPU availability for one does not guarantee it for the other. Smoke training validates the pipeline, not compilation quality.

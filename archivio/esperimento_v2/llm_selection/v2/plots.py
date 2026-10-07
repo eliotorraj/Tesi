@@ -1,4 +1,4 @@
-"""Figure riproducibili da JSON; nessuna inferenza o compilazione di circuiti."""
+'Reproducible figures from JSON without inference or circuit compilation.'
 import json
 from pathlib import Path
 
@@ -26,33 +26,33 @@ def render(data, output):
             if values:
                 ax.boxplot(values, positions=[i], widths=.5)
             ax.text(i, 1.02, f"n={len(values)}", ha="center", transform=ax.get_xaxis_transform())
-        ax.set(xticks=x, xticklabels=labels, ylabel="Regret rispetto al miglior risultato osservato")
-        save(fig, "regret_osservato", "Regret osservato. Ogni punto statistico rappresenta un circuito; n indica i circuiti valutabili.")
+        ax.set(xticks=x, xticklabels=labels, ylabel='Regret relative to the best observed result')
+        save(fig, "regret_osservato", 'Observed regret. Each statistical point represents a circuit; n counts evaluable circuits.')
     fig, ax = plt.subplots(figsize=(10, 4))
     for offset, (field, label) in enumerate((
-        ("first_attempt_facts_verified", "Fatti verificati alla prima"),
-        ("final_verified", "Fatti verificati alla fine"),
-        ("accepted_with_unverified_facts", "Accettate con fatti errati"))):
+        ("first_attempt_facts_verified", 'Facts verified on first attempt'),
+        ("final_verified", 'Facts verified at completion'),
+        ("accepted_with_unverified_facts", 'Accepted with incorrect facts'))):
         values = [sum(r["facts_status"] == "verified" if field == "final_verified" else bool(r.get(field)) for r in group) for group in groups]
         ax.bar(x + (offset - 1) * .25, values, width=.25, label=label)
-    ax.set(xticks=x, xticklabels=labels, ylabel="Circuiti")
+    ax.set(xticks=x, xticklabels=labels, ylabel='Circuits')
     ax.legend(fontsize=8)
-    save(fig, "fatti", "Esiti dei controlli sui fatti. La motivazione libera non viene validata semanticamente.")
+    save(fig, "fatti", 'Fact-check outcomes. The free-text explanation is not validated semantically.')
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
     axes[0].bar(x, [sum(r["physical_calls"] for r in g) for g in groups])
-    axes[0].set(ylabel="Chiamate fisiche, comprese interruzioni")
-    axes[1].bar(x, [sum(r["repair_count"] for r in g) for g in groups], label="Correzioni")
+    axes[0].set(ylabel='Physical calls, including interruptions')
+    axes[1].bar(x, [sum(r["repair_count"] for r in g) for g in groups], label='Repairs')
     axes[1].bar(x, [sum(r["transport_retries"] for r in g) for g in groups],
-                bottom=[sum(r["repair_count"] for r in g) for g in groups], label="Interruzioni")
+                bottom=[sum(r["repair_count"] for r in g) for g in groups], label='Interruptions')
     axes[1].legend(fontsize=8)
     for ax in axes:
         ax.set(xticks=x, xticklabels=labels)
         ax.tick_params(axis="x", labelsize=8, rotation=45)
         for label in ax.get_xticklabels():
             label.set_horizontalalignment("right")
-    save(fig, "chiamate", "Correzioni e interruzioni sono conteggiate separatamente. Le interruzioni non consumano tentativi logici.")
+    save(fig, "chiamate", 'Repairs and interruptions are counted separately. Interruptions do not consume logical attempts.')
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    for ax, field, label in zip(axes, ("total_call_seconds", "total_output_tokens"), ("Tempo HTTP misurato [s]", "Token di uscita misurati")):
+    for ax, field, label in zip(axes, ("total_call_seconds", "total_output_tokens"), ('Measured HTTP time [s]', 'Measured output tokens')):
         vals = []
         for g in groups:
             measurements = [r[field] for r in g]
@@ -62,7 +62,7 @@ def render(data, output):
         ax.tick_params(axis="x", labelsize=8, rotation=45)
         for label in ax.get_xticklabels():
             label.set_horizontalalignment("right")
-    save(fig, "costo", "Totali solo quando tutte le chiamate sono misurabili. I valori mancanti non diventano zero; attese e caricamenti sono nei registri del supervisore.")
+    save(fig, "costo", 'Totals require every call to be measurable. Missing values do not become zero; waiting and loading are recorded by the supervisor.')
     (output / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
 
 if __name__ == "__main__":

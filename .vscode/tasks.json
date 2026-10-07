@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Tesi: compila PDF",
+      "label": "Thesis: build legacy PDF",
       "type": "process",
       "command": "latexmk",
       "args": [

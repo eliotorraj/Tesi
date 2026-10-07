@@ -1,4 +1,4 @@
-"""Prepara i circuiti, le suddivisioni e i file comuni del Dataset."""
+'Prepare the circuits, splits and shared Dataset files.'
 
 from __future__ import annotations
 
@@ -85,11 +85,11 @@ PILOT_FILENAMES = (
 
 
 def _dataset_storage_root(experiment_id: str | None = None) -> Path:
-    """Separa gli artefatti v2 dai risultati storici del protocollo 1.0."""
+    'Separate v2 artifacts from historical protocol 1.0 results.'
     if experiment_id is None:
         return LEGACY_ROOT / "datasets"
     if Path(experiment_id).name != experiment_id or experiment_id in {".", ".."}:
-        raise ValueError(f"experiment_id non valido per un path: {experiment_id!r}.")
+        raise ValueError(f'Invalid experiment_id for a path: {experiment_id!r}.')
     return DATASETS_ROOT / "experiments" / experiment_id
 
 
@@ -99,12 +99,12 @@ def dataset_scope_root(
     device_id: str | None = None,
     experiment_id: str | None = None,
 ) -> Path:
-    """Individua la cartella generale o quella riservata a un dispositivo."""
+    'Locate the shared directory or a device-specific directory.'
     root = _dataset_storage_root(experiment_id) / objective / scope
     if device_id is None:
         return root
     if Path(device_id).name != device_id or device_id in {".", ".."}:
-        raise ValueError(f"device_id non valido per un path: {device_id!r}.")
+        raise ValueError(f'Invalid device_id for a path: {device_id!r}.')
     return root / device_id
 
 
@@ -113,7 +113,7 @@ def dataset_circuits_root(
     scope: str,
     experiment_id: str | None = None,
 ) -> Path:
-    """Individua la cartella condivisa che contiene i circuiti di uno scope."""
+    'Locate the shared circuit directory for a scope.'
     return dataset_scope_root(
         objective,
         scope,
@@ -127,7 +127,7 @@ def resolve_circuit_source(
     source_ref: str,
     experiment_id: str | None = None,
 ) -> Path:
-    """Risolve il percorso di un circuito e impedisce di uscire dallo scope."""
+    'Resolve a circuit path without allowing it to escape the scope.'
     scope_root = dataset_scope_root(
         objective,
         scope,
@@ -138,13 +138,13 @@ def resolve_circuit_source(
         candidate.relative_to(scope_root)
     except ValueError as error:
         raise ValueError(
-            f"source_ref fuori dallo scope Dataset: {source_ref!r}."
+            f'source_ref is outside the Dataset scope: {source_ref!r}.'
         ) from error
     return candidate
 
 
 def canonical_json(payload: Any) -> str:
-    """Produce una rappresentazione JSON stabile dello stesso contenuto."""
+    'Produce a stable JSON representation of the same content.'
     return json.dumps(
         payload,
         sort_keys=True,
@@ -155,23 +155,23 @@ def canonical_json(payload: Any) -> str:
 
 
 def stable_id(prefix: str, payload: Any) -> str:
-    """Calcola un identificatore stabile a partire dal contenuto ricevuto."""
+    'Compute a stable identifier from the received content.'
     digest = hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
     return f"{prefix}_{digest}"
 
 
 def sha256_bytes(value: bytes) -> str:
-    """Calcola l'impronta SHA-256 di una sequenza di byte."""
+    'Compute the SHA-256 fingerprint of a byte sequence.'
     return hashlib.sha256(value).hexdigest()
 
 
 def sha256_file(path: Path) -> str:
-    """Calcola l'impronta SHA-256 del contenuto di un file."""
+    "Compute the SHA-256 hash of a file's contents."
     return sha256_bytes(path.read_bytes())
 
 
 def finite_float(value: Any) -> float | None:
-    """Converte un valore in numero finito, oppure restituisce None."""
+    'Convert a value to a finite number or return None.'
     if value is None:
         return None
     result = float(value)
@@ -179,7 +179,7 @@ def finite_float(value: Any) -> float | None:
 
 
 def atomic_json_write(path: Path, payload: Any) -> None:
-    """Scrive un JSON completo senza lasciare file parziali."""
+    'Write a complete JSON document without exposing partial files.'
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -198,7 +198,7 @@ def atomic_json_write(path: Path, payload: Any) -> None:
 
 
 def atomic_text_write(path: Path, text: str) -> None:
-    """Scrive un testo completo senza lasciare file parziali."""
+    'Write complete text without exposing partial files.'
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -209,7 +209,7 @@ def atomic_text_write(path: Path, text: str) -> None:
 
 
 def atomic_jsonl_write(path: Path, records: Iterable[Mapping[str, Any]]) -> int:
-    """Scrive record JSONL in modo sicuro e restituisce quanti sono."""
+    'Write JSONL records safely and return their count.'
     lines: list[str] = []
     for record in records:
         lines.append(canonical_json(record))
@@ -218,7 +218,7 @@ def atomic_jsonl_write(path: Path, records: Iterable[Mapping[str, Any]]) -> int:
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
-    """Legge i record JSONL, ignorando le righe vuote."""
+    'Read JSONL records, ignoring blank lines.'
     records: list[dict[str, Any]] = []
     if not path.is_file():
         return records
@@ -228,7 +228,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
                 continue
             value = json.loads(line)
             if not isinstance(value, dict):
-                raise ValueError(f"{path}:{line_number}: record JSONL non oggetto.")
+                raise ValueError(f'{path}:{line_number}: JSONL record is not an object.')
             records.append(value)
     return records
 
@@ -236,7 +236,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 def package_versions(
     distributions: Iterable[str] | None = None,
 ) -> dict[str, str]:
-    """Raccoglie le versioni dei pacchetti usati dall'esperimento."""
+    'Collect versions of the packages used by the experiment.'
     result: dict[str, str] = {}
     names = (
         tuple(distributions)
@@ -252,7 +252,7 @@ def package_versions(
 
 
 def feature_names() -> tuple[str, ...]:
-    """Restituisce i nomi delle caratteristiche estratte da ogni circuito."""
+    'Return the feature names extracted from every circuit.'
     from mqt.predictor.ml.helper import get_openqasm_gates
 
     return tuple(
@@ -270,7 +270,7 @@ def feature_names() -> tuple[str, ...]:
 
 
 def ensure_training_circuits(source: Path | None = None) -> Path:
-    """Trova i circuiti MQT e, se serve, estrae l'archivio locale."""
+    'Locate MQT circuits and extract the local archive if needed.'
     from mqt.predictor.ml.helper import get_path_training_circuits
 
     path = Path(get_path_training_circuits()) if source is None else source
@@ -279,7 +279,7 @@ def ensure_training_circuits(source: Path | None = None) -> Path:
     archive = path / "training_data_device_selection.zip"
     if not archive.is_file():
         raise FileNotFoundError(
-            f"Nessun QASM e nessun archivio del corpus MQT in {path}."
+            f'No QASM or MQT corpus archive in {path}.'
         )
     with zipfile.ZipFile(archive) as handle:
         handle.extractall(path)
@@ -287,7 +287,7 @@ def ensure_training_circuits(source: Path | None = None) -> Path:
 
 
 def _extract_features(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
-    """Estrae le caratteristiche e i dati principali di un circuito QASM."""
+    'Extract features and main properties of a QASM circuit.'
     from mqt.predictor.ml.helper import create_feature_vector
     from qiskit import QuantumCircuit
 
@@ -296,8 +296,7 @@ def _extract_features(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
     values = create_feature_vector(circuit)
     if len(names) != 49 or len(values) != len(names):
         raise RuntimeError(
-            f"Feature inattese per {path.name}: {len(values)} valori, "
-            f"{len(names)} nomi."
+            f'Unexpected features for {path.name}: {len(values)} values, {len(names)} names.'
         )
     features = {
         name: float(value)
@@ -321,10 +320,10 @@ def _base_inventory(
     *,
     included_splits: frozenset[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Verifica i 600 file, ma calcola feature soltanto per gli split aperti."""
+    'Verify all 600 files, extracting features only for released splits.'
     paths = sorted(source.glob("*.qasm"), key=lambda item: item.name)
     if len(paths) != 600:
-        raise ValueError(f"Corpus MQT inatteso: trovati {len(paths)} QASM, attesi 600.")
+        raise ValueError(f'Unexpected MQT corpus: found {len(paths)} QASM files, expected 600.')
 
     hashes = {path.name: sha256_file(path) for path in paths}
     names_by_hash: dict[str, list[str]] = defaultdict(list)
@@ -335,10 +334,10 @@ def _base_inventory(
     for path in paths:
         match = FILENAME_PATTERN.fullmatch(path.name)
         if match is None:
-            raise ValueError(f"Nome QASM MQT non riconosciuto: {path.name}.")
+            raise ValueError(f'Unrecognized MQT QASM name: {path.name}.')
         family = match.group("family")
         if family not in FAMILY_TO_GROUP:
-            raise ValueError(f"Famiglia MQT non classificata: {family}.")
+            raise ValueError(f'Unclassified MQT family: {family}.')
         group = FAMILY_TO_GROUP[family]
         split = GROUP_TO_SPLIT[group]
         if included_splits is not None and split not in included_splits:
@@ -350,9 +349,7 @@ def _base_inventory(
         declared_num_qubits = int(match.group("qubits"))
         if circuit_metadata["num_qubits"] != declared_num_qubits:
             raise ValueError(
-                f"Larghezza incoerente per {path.name}: "
-                f"{declared_num_qubits} nel nome, "
-                f"{circuit_metadata['num_qubits']} nel QASM."
+                f"Inconsistent width for {path.name}: {declared_num_qubits} in the name, {circuit_metadata['num_qubits']} in the QASM."
             )
         inventory.append(
             {
@@ -386,7 +383,7 @@ def _validate_split(
     *,
     included_splits: frozenset[str] | None = None,
 ) -> None:
-    """Controlla quantità e separazione dei circuiti tra gli insiemi."""
+    'Check circuit counts and separation across splits.'
     expected = {
         "pilot": {"train": 6, "validation": 2, "test": 2},
         "full": {"train": 422, "validation": 88, "test": 90},
@@ -399,7 +396,7 @@ def _validate_split(
         }
     observed = Counter(str(record["split"]) for record in records)
     if dict(observed) != expected:
-        raise ValueError(f"Split {scope} inatteso: {dict(observed)}, atteso {expected}.")
+        raise ValueError(f'Split {scope} is unexpected: {dict(observed)}, expected {expected}.')
 
     split_by_hash: dict[str, set[str]] = defaultdict(set)
     for record in records:
@@ -410,7 +407,7 @@ def _validate_split(
         if len(splits) > 1
     }
     if leaked:
-        raise ValueError(f"Hash QASM presenti in split diversi: {leaked}.")
+        raise ValueError(f'QASM hashes present in different splits: {leaked}.')
 
 
 def _ensure_circuit_copy(
@@ -418,12 +415,12 @@ def _ensure_circuit_copy(
     destination: Path,
     expected_sha256: str,
 ) -> None:
-    """Copia un QASM condiviso e ne controlla l'integrità senza sovrascriverlo."""
+    'Copy shared QASM and verify integrity without overwriting it.'
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists():
         if not destination.is_file() or sha256_file(destination) != expected_sha256:
             raise RuntimeError(
-                f"QASM condiviso esistente ma incoerente: {destination}."
+                f'Existing shared QASM is inconsistent: {destination}.'
             )
         return
 
@@ -431,7 +428,7 @@ def _ensure_circuit_copy(
     try:
         shutil.copy2(source, temporary)
         if sha256_file(temporary) != expected_sha256:
-            raise RuntimeError(f"Copia QASM corrotta: {destination}.")
+            raise RuntimeError(f'Corrupted QASM copy: {destination}.')
         os.replace(temporary, destination)
     finally:
         temporary.unlink(missing_ok=True)
@@ -445,9 +442,9 @@ def prepare_dataset(
     device_id: str | None = None,
     include_test: bool = False,
 ) -> dict[str, Any]:
-    """Prepara i circuiti e crea un manifest con suddivisione deterministica."""
+    'Prepare circuits and create a manifest with a deterministic split.'
     if scope not in {"pilot", "full"}:
-        raise ValueError("scope deve essere pilot oppure full.")
+        raise ValueError('scope must be pilot or full.')
     from mqt.bench.targets import get_device
 
     selected_device_id = catalog.require_device(device_id)
@@ -463,7 +460,7 @@ def prepare_dataset(
     }
     if version_mismatches:
         raise RuntimeError(
-            f"Versioni non conformi al catalogo: {version_mismatches}."
+            f'Versions do not match the catalog: {version_mismatches}.'
         )
     observed_target_sha256: str | None = None
     if catalog.experiment_id is not None:
@@ -473,9 +470,7 @@ def prepare_dataset(
         expected_target_sha256 = catalog.target_sha256[selected_device_id]
         if observed_target_sha256 != expected_target_sha256:
             raise RuntimeError(
-                f"Target drift per {selected_device_id}: "
-                f"atteso={expected_target_sha256}, "
-                f"osservato={observed_target_sha256}."
+                f'Target drift for {selected_device_id}: expected={expected_target_sha256}, observed={observed_target_sha256}.'
             )
     source_path = ensure_training_circuits(source)
     included_splits: frozenset[str] | None = None
@@ -502,7 +497,7 @@ def prepare_dataset(
         ]
         missing = sorted(set(selected_pilot_names) - set(by_name))
         if missing:
-            raise ValueError(f"Circuiti pilota mancanti: {missing}.")
+            raise ValueError(f'Missing pilot circuits: {missing}.')
         records = [by_name[name] for name in selected_pilot_names]
     else:
         records = all_records
@@ -588,10 +583,9 @@ def prepare_dataset(
         "split_policy": {
             "type": "family_group_holdout",
             "group_to_split": dict(sorted(GROUP_TO_SPLIT.items())),
-            "claim": "generalizzazione a famiglie di circuiti non viste",
+            "claim": 'generalization to unseen circuit families',
             "limitation": (
-                "validation e test arrivano a 70 qubit; i circuiti da 80/90 "
-                "qubit sono presenti soltanto nel train"
+                'validation and Test reach 70 qubits; 80/90-qubit circuits occur only in train'
             ),
         },
         "counts": {
@@ -641,7 +635,7 @@ def load_manifest(
     device_id: str | None = None,
     experiment_id: str | None = None,
 ) -> dict[str, Any]:
-    """Legge il manifest preparato per uno scope e un dispositivo."""
+    'Read the manifest prepared for a scope and device.'
     path = dataset_scope_root(
         objective,
         scope,
@@ -650,20 +644,19 @@ def load_manifest(
     ) / "split_manifest.json"
     if not path.is_file():
         raise FileNotFoundError(
-            f"Manifest assente: {path}. Eseguire prima 07_prepare_qiskit_dataset.py."
+            f'Manifest missing: {path}. Run 07_prepare_qiskit_dataset.py first.'
         )
     with path.open(encoding="utf-8") as handle:
         manifest = json.load(handle)
     if manifest.get("dataset_scope") != scope:
-        raise ValueError(f"Scope incoerente nel manifest {path}.")
+        raise ValueError(f'Inconsistent scope in manifest {path}.')
     if device_id is not None and manifest.get("device_id") != device_id:
         raise ValueError(
-            f"Device incoerente nel manifest {path}: {manifest.get('device_id')!r}."
+            f"Inconsistent device in manifest {path}: {manifest.get('device_id')!r}."
         )
     if manifest.get("experiment_id") != experiment_id:
         raise ValueError(
-            f"Esperimento incoerente nel manifest {path}: "
-            f"{manifest.get('experiment_id')!r}."
+            f"Inconsistent experiment in manifest {path}: {manifest.get('experiment_id')!r}."
         )
     return manifest
 
@@ -683,7 +676,7 @@ def make_run_id(
     fixed_transpile_options: Mapping[str, Any] | None = None,
     execution_policy: Mapping[str, Any] | None = None,
 ) -> str:
-    """Calcola l'identificatore stabile di un tentativo di compilazione."""
+    'Compute a stable compilation-attempt identifier.'
     identity = {
         "circuit_id": circuit["circuit_id"],
         "source_sha256": circuit["source_sha256"],
@@ -718,12 +711,12 @@ def expand_attempts(
     versions: Mapping[str, str] | None = None,
     device_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Espande il manifest in tutti i tentativi previsti dal catalogo."""
+    'Expand the manifest into all catalog-defined attempts.'
     selected_device_id = catalog.require_device(
         device_id or str(manifest.get("device_id", catalog.default_device_id))
     )
     if manifest.get("device_id") not in {None, selected_device_id}:
-        raise ValueError("Device del manifest incoerente con il piano.")
+        raise ValueError('Manifest device is inconsistent with the plan.')
     version_map = package_versions() if versions is None else dict(versions)
     attempts: list[dict[str, Any]] = []
     configuration_order = {
@@ -797,5 +790,5 @@ def expand_attempts(
     )
     identifiers = [str(attempt["run_id"]) for attempt in attempts]
     if len(identifiers) != len(set(identifiers)):
-        raise ValueError("run_id duplicati nel piano di esecuzione.")
+        raise ValueError('Duplicate run_id values in the execution plan.')
     return attempts

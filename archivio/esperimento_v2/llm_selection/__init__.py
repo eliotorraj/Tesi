@@ -1,1 +1,1 @@
-"""Selezione locale degli LLM e registri riproducibili per la tesi."""
+'Local LLM selection and reproducible thesis experiment records.'

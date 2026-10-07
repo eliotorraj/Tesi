@@ -1,5 +1,5 @@
-# Catalogo letto dal prototipo
+# Catalog support
 
-Questi moduli caricano e verificano configurazioni Qiskit, versioni e Target. Il prototipo li usa per limitare le scelte dell'LLM e tradurre `config_id` in parametri di compilazione.
+These modules load and verify Qiskit configurations, software versions and Targets. The client uses them to restrict LLM choices and resolve `config_id` to compilation parameters.
 
-La generazione di nuovi Dataset è in [riproducibilita/dataset](../../riproducibilita/dataset/README.md). Il comando `app.py run` usa il train già distribuito e non esegue una campagna di generazione.
+New Dataset generation belongs in [riproducibilita/dataset/](../../riproducibilita/dataset/README.md). `app.py run` uses the supplied train Dataset and does not launch a generation campaign.

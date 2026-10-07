@@ -1,29 +1,29 @@
-"""Origini dei risultati: il contratto MQT esplorativo resta distinto dall'originale."""
+'Result sources: the exploratory MQT contract remains separate from the original.'
 from pathlib import Path
 from dati import METHODS, read, sha, load_run
 
 
 def validate_exploratory_contract(original, external, plan):
     if external.get('plan') != plan:
-        raise ValueError('Piano MQT diverso dal proprio contratto congelato.')
+        raise ValueError('MQT plan differs from its own frozen contract.')
     if not plan.get('test_id', '').startswith('mqt-esplorativo-') or not isinstance(plan.get('exploratory'), dict) or not plan['exploratory']:
-        raise ValueError('La fonte MQT alternativa deve dichiarare la natura esplorativa.')
-    # Sono ammesse solo identità e deroghe di addestramento esplicite. Tutti i
-    # criteri di valutazione (split, numero di circuiti, score, timeout, analisi)
-    # devono coincidere; non basta che ci siano 90 file con lo stesso nome.
+        raise ValueError('The alternative MQT source must declare its exploratory status.')
+    # Allow only explicit identity and training deviations. All
+    # Evaluation criteria (split, circuit count, score, timeout, analysis)
+    # must match; 90 files sharing names are not sufficient.
     comparable = lambda p: {k: v for k, v in p.items() if k not in ('test_id', 'exploratory')}
     if comparable(plan) != comparable(original['plan']):
-        raise ValueError('Criteri del Test MQT incompatibili con il confronto originale.')
+        raise ValueError('MQT Test criteria are incompatible with the original comparison.')
     for key in ('source_sha256', 'selection', 'rag_seal_sha256'):
         if key not in external or external[key] != original.get(key):
-            raise ValueError('Provenienza MQT incompatibile: ' + key)
+            raise ValueError('Incompatible MQT provenance: ' + key)
 
 
 def load_sources(area, expected, original, mqt_area=None):
-    """Preferisce l'area esplorativa presente; non unisce mai due esecuzioni MQT.
+    """Prefer the exploratory area when present; never combine two MQT runs.
 
-    Un percorso esplicito assente è un errore. Se l'area predefinita non esiste,
-    resta supportata l'eventuale esecuzione MQT nel Test originale.
+    An explicit missing path is an error. If the default area does not exist,
+    an MQT run in the original Test area remains supported.
     """
     area = Path(area).resolve()
     explicit = mqt_area is not None
@@ -31,7 +31,7 @@ def load_sources(area, expected, original, mqt_area=None):
     external_base = external_area / 'risultati/mqt_predictor'
     use_external = explicit or (external_base / 'esecuzione.json').is_file()
     if use_external and not (external_base / 'esecuzione.json').is_file():
-        raise ValueError('Registro MQT assente nella fonte richiesta: ' + str(external_base))
+        raise ValueError('MQT record missing from the requested source: ' + str(external_base))
     runs = {}
     for method in METHODS:
         run_area = external_area if method == 'mqt_predictor' and use_external else area
@@ -45,7 +45,7 @@ def load_sources(area, expected, original, mqt_area=None):
         if exploratory:
             validate_exploratory_contract(original, contract, plan)
         elif contract != original or plan != original['plan']:
-            raise ValueError('Contratto originale cambiato durante la lettura.')
+            raise ValueError('Original contract changed during reading.')
         run = load_run(base, expected, sha(contract_path), sha(plan_path))
         source_files = [contract_path, plan_path]
         if exploratory:

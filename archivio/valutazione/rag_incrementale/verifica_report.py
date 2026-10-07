@@ -1,4 +1,4 @@
-"""Anteprima del report con dati interamente sintetici, senza leggere esiti reali."""
+'Report preview with entirely synthetic data, without reading real outcomes.'
 from __future__ import annotations
 from comune import *
 import importlib.util
@@ -18,8 +18,8 @@ def synthetic_data():
     data = {"experiment_id": "VERIFICA_SINTETICA", "kind": "synthetic_verification",
             "created_at": now(), "sources": {}, "oracle": {"kind": "synthetic"}, "orders": {},
             "circuits": circuits, "baseline": baseline, "references": refs,
-            "limitations": ["Dati interamente sintetici: nessuna valutazione sperimentale è stata eseguita.",
-                           "Questa anteprima controlla soltanto tabelle, grafici e impaginazione."]}
+            "limitations": ['Entirely synthetic data: no experimental evaluation was performed.',
+                           'This preview checks only tables, plots and layout.']}
     for n, order in enumerate(ORDERS):
         rows, deltas, memory = [], [], 0
         for position, source in enumerate(order_rows(circuits, order), 1):

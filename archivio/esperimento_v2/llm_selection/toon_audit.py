@@ -1,4 +1,4 @@
-"""Confronta tre rappresentazioni sui cinque train, senza chiamare i modelli."""
+'Compare three representations on five train circuits without calling models.'
 from __future__ import annotations
 import argparse
 import copy
@@ -123,18 +123,18 @@ def finish(output):
         total["reduction_original_to_toon_percent"] = 100*(1-total["minimal_toon"]/total["original_v2"])
         report["totals"][model] = total
     write_json(output/"report.json", report)
-    lines = ["# Token dei prompt sui cinque circuiti train", "",
-        "Misure native per modello, template completo e schema incluso. Nessuna inferenza.",
-        "JSON ridotto: richieste realmente archiviate, verificate confrontando tutti gli ID dei token.",
-        "Originale: formato precedente v2 ricostruito; il campo original_v2_kind indica eventuali corrispondenze esatte.",
-        "TOON: richiesta preparata, non ancora inviata. Non si misura il consumo delle future risposte o correzioni.", "",
-        "| Modello | Circuito | Precedente v2 | JSON ridotto | Ridotto + TOON | Risparmio su JSON |",
+    lines = ['# Prompt tokens on five train circuits', "",
+        'Native measurements per model, including the full template and schema. No inference.',
+        'Reduced JSON: actual archived requests, verified against every token ID.',
+        'Original: reconstructed earlier v2 format; original_v2_kind identifies exact matches where available.',
+        'TOON: prepared request, not yet sent. Future response and repair consumption is not measured.', "",
+        '| Model | Circuit | Earlier v2 | Reduced JSON | Reduced + TOON | Savings over JSON |',
         "|---|---|---:|---:|---:|---:|"]
     for row in report["rows"]:
         t = row["tokens"]
         lines.append(f'| {row["model"]} | {row["circuit"]} | {t["original_v2"]} | {t["minimal_json"]} | {t["minimal_toon"]} | {row["reduction_json_to_toon_percent"]:.2f}% |')
-    lines += ["", "Il JSON integrale senza alias, con la precedente regola esatta del grafo completo, è contato separatamente in original_full_json.",
-              "Conteggi e percentuali aggregate sono in report.json. Cinque circuiti train non misurano generalizzazione."]
+    lines += ["", 'Full JSON without aliases, using the earlier exact complete-graph rule, is counted separately in original_full_json.',
+              'Aggregate counts and percentages are in report.json. Five train circuits do not measure generalization.']
     (output/"README.md").write_text("\n".join(lines)+"\n", encoding="utf-8")
     write_json(output/"manifest.json", {str(p.relative_to(output)): sha(p) for p in output.rglob("*")
                                       if p.is_file() and p.name != "manifest.json"})

@@ -1,4 +1,4 @@
-"""Documento e figure dai conteggi TOON; eseguire nel runtime delle analisi."""
+'Document and figures from TOON counts; run in the analysis runtime.'
 import argparse
 import html
 import json
@@ -16,18 +16,18 @@ def render(audit_directory, destination):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.5), layout="constrained")
-    stages = [("original_v2", "Precedente v2", "#8792a2"),
-              ("minimal_json", "JSON ridotto", "#337ab7"),
-              ("minimal_toon", "Ridotto + TOON", "#26846f")]
-    for ax, selected, title in [(axes[0], stages, "Riduzione complessiva"),
-                                (axes[1], stages[1:], "Risparmio aggiuntivo con TOON")]:
+    stages = [("original_v2", 'Previous v2', "#8792a2"),
+              ("minimal_json", 'Reduced JSON', "#337ab7"),
+              ("minimal_toon", 'Reduced + TOON', "#26846f")]
+    for ax, selected, title in [(axes[0], stages, 'Overall reduction'),
+                                (axes[1], stages[1:], 'Additional TOON savings')]:
         width = .24 if len(selected) == 3 else .34
         for i, (key, label, color) in enumerate(selected):
             x = [j + (i - (len(selected)-1)/2)*width for j in range(len(models))]
             bars = ax.bar(x, [totals[m][key]/1000 for m in models], width, label=label, color=color)
             ax.bar_label(bars, fmt="%.1f", fontsize=9, padding=3)
         ax.set_xticks(range(len(models)), [m.capitalize() for m in models])
-        ax.set_ylabel("Migliaia di token input — somma di 5 circuiti")
+        ax.set_ylabel('Thousands of input tokens — sum over 5 circuits')
         ax.set_title(title)
         ax.spines[["top", "right"]].set_visible(False)
         ax.set_ylim(0, ax.get_ylim()[1]*1.14)
@@ -37,7 +37,7 @@ def render(audit_directory, destination):
     plt.close(fig)
     def n(value): return f"{value:,}".replace(",", ".")
     def pct(value): return f"{value:.2f}".replace(".", ",")+"%"
-    headings = ["Modello", "Precedente v2", "JSON ridotto", "Ridotto + TOON", "Risparmio aggiuntivo", "Riduzione rispetto a v2"]
+    headings = ['Model', 'Previous v2', 'Reduced JSON', 'Reduced + TOON', 'Additional savings', 'Reduction from v2']
     aggregate = [[m.capitalize(), n(t["original_v2"]), n(t["minimal_json"]), n(t["minimal_toon"]),
                   pct(t["reduction_json_to_toon_percent"]), pct(t["reduction_original_to_toon_percent"])] for m,t in totals.items()]
     detailed = [[row["model"], row["circuit"], n(row["tokens"]["original_v2"]),
@@ -48,38 +48,38 @@ def render(audit_directory, destination):
         return "\n".join(["| "+" | ".join(headers)+" |", "| "+" | ".join(["---"]*len(headers))+" |"]+
                          ["| "+" | ".join(row)+" |" for row in rows])
     text = [
-        "# Prompt originale, ridotto e ridotto con TOON", "",
-        "19 settembre 2026. Cinque circuiti train, cinque esempi RAG per richiesta. Nessuna nuova inferenza.",
-        "La misura riguarda i token di ingresso dei prompt preparati, non i token delle risposte o il consumo delle future correzioni.", "",
-        "## Risultato complessivo", "",
-        "Totali sui cinque circuiti, calcolati separatamente con il tokenizer di ciascun modello.",
+        '# Original, reduced and TOON-reduced prompts', "",
+        '19 September 2026. Five train circuits, five RAG examples per request. No new inference.',
+        'The measurement covers prepared prompt input tokens, not response tokens or future repair consumption.', "",
+        '## Overall result', "",
+        "Totals across five circuits, computed separately with each model's tokenizer.",
         table(headings, aggregate), "",
-        "![Confronto dei token](confronto_token.png)", "",
-        "## Che cosa significa originale", "",
-        "La colonna «Precedente v2» è il formato usato prima della riduzione dei contenuti: conservava QASM, provenienza e riferimenti multilivello, pur usando già alias e una codifica reversibile. È lo stesso riferimento del precedente confronto 34.318 → 11.667 token per Qwen/DJ.",
-        "Le richieste v2 sono ricostruite sui medesimi esempi con il vecchio serializzatore; original_v2_kind nel rapporto indica quali coincidono esattamente con una richiesta storica. Non vengono presentate come nuove inferenze.",
-        "La colonna «JSON ridotto» corrisponde alle richieste reali delle prove qwen-prompt-v3-01, phi-prompt-v3-02 e gemma-prompt-v3-01, tutte al primo tentativo.",
-        "La colonna «Ridotto + TOON» contiene le nuove richieste preparate, non ancora inviate.",
-        "Per distinguere anche il formato anteriore agli alias, abbiamo contato un quarto riferimento JSON senza alias, ricostruito con la vecchia regola esatta del grafo completo. Totali:", "",
-        table(["Modello", "JSON senza alias, ricostruito"], full), "",
-        "## Come è configurato TOON", "",
-        "È installato @toon-format/toon 4.1.1, dal progetto ufficiale https://github.com/toon-format/toon. Node 22.23.2 e il pacchetto sono locali al progetto e fissati con impronte e lockfile. L'ambiente Python MQT, uv.lock e i modelli addestrati non sono stati modificati.",
-        "La conversione diretta del JSON in TOON aumentava i token. Sono conservate le prove con virgola, tab e barra verticale, tabelle di archi e diverse disposizioni delle feature. La scelta finale usa virgole e due spazi di rientro.",
-        "Le 49 feature sono in una tabella con una riga per caratteristica e colonne current, E1...E5. Ogni zero e valore originale è conservato: non si selezionano feature e non si arrotondano numeri.",
-        "I collegamenti hardware sono liste ordinate di vicini per qubit sorgente, solo quando questo conserva esattamente l'ordine originale degli archi. In caso contrario resta la lista originale. La topologia completa mantiene la precedente regola esatta.",
-        "Ogni richiesta viene decodificata e ricostruita automaticamente prima dell'invio. Se un valore cambia, la richiesta viene bloccata. Le forme di feature non uniformi mantengono la struttura originale.",
-        "Lo schema della risposta resta JSON e il validatore resta invariato. Anche i messaggi correttivi sono conservati. QASM e metadati canonici restano fuori dal testo LLM e disponibili nei registri.", "",
-        "## Metodo di misura e limiti", "",
-        "Conteggio nativo con llama-tokenize.exe b10930 e i tre GGUF Q8_0 originali. Il testo comprende il template di chat di ciascun modello, le istruzioni TOON, i dati, lo schema leggibile e la checklist. Lo schema json_schema passato separatamente al server vincola l'uscita e non aggiunge token al testo.",
-        "Per ciascuno dei 15 casi, l'intera sequenza di token della base JSON coincide con quella archiviata dal server. Le percentuali aggregate usano il rapporto tra le somme, non una media delle percentuali.",
-        "Queste misure non dimostrano che TOON migliori la qualità delle scelte, la latenza o le correzioni. Servono le nuove prove train. Non sono stati avviati validation, test o training sperimentale.", "",
-        "## Dettaglio per circuito", "",
-        table(["Modello", "Circuito", "Precedente v2", "JSON ridotto", "Ridotto + TOON", "Risparmio su JSON"], detailed), "",
-        "## Dati consultabili", "",
-        "I file sono in ../native_counts/<modello>/<circuito>/: original_v2.txt, minimal_json.txt, minimal_toon.txt, original_full_json.txt, data.toon, schema, input canonico e conteggi. prepared_request_not_sent.json conserva la richiesta nativa completa da provare.",
-        "Il rapporto leggibile da programma è ../native_counts/report.json. Il manifesto conserva le impronte. I tentativi storici rimangono intatti.", "",
-        "## Avvio delle prove", "",
-        "Dalla radice WSL, eseguire uno alla volta. Ogni comando prova i cinque circuiti train con p1_t0. La codifica TOON è già quella predefinita.", "",
+        '![Token comparison](confronto_token.png)', "",
+        '## Meaning of original', "",
+        'The Earlier v2 column is the format used before content reduction: it retained QASM, provenance and multilevel references while already using aliases and reversible encoding. It is the reference used for the earlier Qwen/DJ comparison of 34,318 to 11,667 tokens.',
+        'v2 requests are reconstructed on the same examples with the old serializer; original_v2_kind identifies exact matches with historical requests. These are not presented as new inference.',
+        'Reduced JSON corresponds to actual first-attempt requests from qwen-prompt-v3-01, phi-prompt-v3-02 and gemma-prompt-v3-01.',
+        'Reduced + TOON contains newly prepared requests that have not yet been sent.',
+        'A fourth JSON reference without aliases was counted to distinguish the pre-alias format, reconstructed with the old exact complete-graph rule. Totals:', "",
+        table(['Model', 'Reconstructed JSON without aliases'], full), "",
+        '## TOON configuration', "",
+        '@toon-format/toon 4.1.1 is installed from the official project https://github.com/toon-format/toon. Node 22.23.2 and the package are project-local and pinned through hashes and lockfiles. The Python MQT environment, uv.lock and trained models were not changed.',
+        'Direct JSON-to-TOON conversion increased tokens. Trials with commas, tabs, vertical bars, edge tables and alternative feature arrangements are preserved. The final choice uses commas and two-space indentation.',
+        'The 49 features form a table with one row per feature and columns current, E1...E5. Every zero and original value is retained: no feature selection or numeric rounding is applied.',
+        'Hardware links use ordered neighbor lists per source qubit only when this exactly preserves the original edge order. Otherwise the original list remains. Complete topology retains the earlier exact rule.',
+        'Each request is decoded and reconstructed automatically before sending. A changed value blocks the request. Nonuniform feature shapes retain their original structure.',
+        'The response schema remains JSON and the validator is unchanged. Repair messages are retained. QASM and canonical metadata remain outside the LLM text and available in records.', "",
+        '## Measurement method and limitations', "",
+        "Native counting uses llama-tokenize.exe b10930 and the three original Q8_0 GGUFs. Text includes each model's chat template, TOON instructions, data, readable schema and checklist. json_schema sent separately to constrain server output adds no text tokens.",
+        'For all 15 cases, the full JSON-baseline token sequence matches the server archive. Aggregate percentages use the ratio of sums rather than the mean of percentages.',
+        'These measurements do not establish better decision quality, latency or repair rates with TOON. New train checks are required. No validation, Test or experimental training was started.', "",
+        '## Per-circuit details', "",
+        table(['Model', 'Circuit', 'Previous v2', 'Reduced JSON', 'Reduced + TOON', 'Savings over JSON'], detailed), "",
+        '## Available data', "",
+        'Files are under ../native_counts/<model>/<circuit>/: original_v2.txt, minimal_json.txt, minimal_toon.txt, original_full_json.txt, data.toon, schema, canonical input and counts. prepared_request_not_sent.json preserves the full native request to test.',
+        'The machine-readable report is ../native_counts/report.json. The manifest preserves hashes. Historical attempts remain intact.', "",
+        '## Start the checks', "",
+        'Run commands one at a time from the WSL root. Each evaluates the five train circuits with p1_t0. TOON is already the default encoding.', "",
     ]
     commands = [
         '.venv/bin/python -m llm_selection.controller --technical --model qwen --label "qwen-toon-01" --precision Q8_0 --context 147456',
@@ -88,28 +88,28 @@ def render(audit_directory, destination):
     ]
     fence = chr(96)*3
     for command in commands: text += [fence+"bash", command, fence, ""]
-    text += ["I risultati finiscono nelle nuove cartelle technical_episodes/<etichetta>/; ogni encoding.json registra minimal-v3-toon1-20260919 e la versione TOON. Usare altre etichette se questi nomi esistono già.",
-             "Non congelare lo studio di validation finché queste prove non sono concluse.", "",
-             "## Verifiche software", "",
-             "244 test superati. Coprono ricostruzione completa, zeri, precisione, archi diretti e ordine, caratteri speciali, forme non uniformi, assenza di RAG, correzioni e schema JSON. Un test iniziale confrontava tuple Python con liste JSON; è stato corretto confrontando lo stesso modello di dati JSON. I log restano conservati.",
-             "La prima installazione npm da Windows sul percorso UNC ha fallito; è riuscita con Node Linux locale al progetto. La procedura riproducibile è .venv/bin/python -m llm_selection.setup_toon.", ""]
+    text += ['Results go to new technical_episodes/<label>/ directories; each encoding.json records minimal-v3-toon1-20260919 and the TOON version. Choose different labels if these names already exist.',
+             'Do not freeze the validation study until these checks finish.', "",
+             '## Software checks', "",
+             '244 tests passed. They cover complete reconstruction, zeros, precision, directed edges and order, special characters, nonuniform shapes, no-RAG input, repairs and JSON schema. One initial test compared Python tuples against JSON lists; it was corrected to compare the same JSON data model. Logs are preserved.',
+             'The first npm installation from Windows through a UNC path failed; installation succeeded with project-local Linux Node. Reproduce it with .venv/bin/python -m llm_selection.setup_toon.', ""]
     (destination/"README.md").write_text("\n".join(text), encoding="utf-8")
     def html_table(headers, rows):
         return "<table><thead><tr>"+"".join("<th>"+html.escape(h)+"</th>" for h in headers)+"</tr></thead><tbody>"+\
             "".join("<tr>"+"".join("<td>"+html.escape(c)+"</td>" for c in row)+"</tr>" for row in rows)+"</tbody></table>"
-    page = ['<!doctype html><html lang="it"><meta charset="utf-8"><title>Confronto prompt TOON</title>',
+    page = ['<!doctype html><html lang="en"><meta charset="utf-8"><title>TOON prompt comparison</title>',
         '<style>body{font:16px/1.5 system-ui;max-width:1200px;margin:40px auto;padding:0 24px;color:#192639}table{border-collapse:collapse;width:100%;margin:24px 0}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:right}td:first-child,th:first-child{text-align:left}img{width:100%}pre{white-space:pre-wrap;background:#eef2f6;padding:20px}a{color:#165daf}</style>',
-        '<h1>Prompt originale, ridotto e ridotto con TOON</h1><p>19 settembre 2026 · Cinque circuiti train · Token input misurati, nessuna nuova inferenza.</p>',
-        '<p><a href="README.md">Documento completo: metodo, limiti e comandi</a></p>',
-        html_table(headings,aggregate),'<img alt="Confronto dei token" src="confronto_token.png">',
-        '<p>Precedente v2: ricostruzione del formato storico. JSON ridotto: richieste archiviate, token verificati esattamente. TOON: richieste preparate, non inviate.</p>',
-        '<h2>Prompt completi</h2><ul>']
+        '<h1>Original, reduced and TOON-reduced prompts</h1><p>19 September 2026 · Five train circuits · Measured input tokens, no new inference.</p>',
+        '<p><a href="README.md">Full document: method, limits and commands</a></p>',
+        html_table(headings,aggregate),'<img alt="Token comparison" src="confronto_token.png">',
+        '<p>Earlier v2: reconstructed historical format. Reduced JSON: archived requests with exact token verification. TOON: prepared requests, not sent.</p>',
+        '<h2>Complete prompts</h2><ul>']
     for row in data["rows"]:
         prefix = "../native_counts/"+row["model"]+"/"+row["circuit"]+"/"
         page.append('<li>'+html.escape(row["model"]+" / "+row["circuit"])+": "+
                     " · ".join('<a href="'+prefix+stage+'.txt">'+label+'</a>' for stage,label in [
-                        ("original_v2","Precedente"),("minimal_json","JSON ridotto"),("minimal_toon","TOON")])+"</li>")
-    page += ['</ul><h2>Comandi per le prove</h2>', *["<pre>"+html.escape(c)+"</pre>" for c in commands], "</html>"]
+                        ("original_v2",'Previous'),("minimal_json",'Reduced JSON'),("minimal_toon","TOON")])+"</li>")
+    page += ['</ul><h2>Check commands</h2>', *["<pre>"+html.escape(c)+"</pre>" for c in commands], "</html>"]
     (destination/"index.html").write_text("\n".join(page), encoding="utf-8")
     return destination
 

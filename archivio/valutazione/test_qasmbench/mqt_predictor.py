@@ -1,4 +1,4 @@
-"""Avvio indipendente QASMBench: mqt_predictor."""
+'Independent QASMBench launch: mqt_predictor.'
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))

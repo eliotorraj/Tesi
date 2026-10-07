@@ -1,4 +1,4 @@
-"""Prove sintetiche: connessioni successive, timeout, riavvio e ripresa."""
+'Synthetic checks: successive connections, timeout, restart and resume.'
 import json
 import multiprocessing
 import os

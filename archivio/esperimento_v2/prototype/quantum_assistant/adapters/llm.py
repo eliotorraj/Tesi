@@ -1,4 +1,4 @@
-"""Adattatori indipendenti dal servizio usato per chiamare l'LLM."""
+'Adapters independent of the service used to call the LLM.'
 
 from __future__ import annotations
 
@@ -8,27 +8,26 @@ from ..models import LlmOutput, PromptEnvelope
 
 
 class UnconfiguredLlmGateway:
-    """Adattatore esplicito usato quando non è configurato alcun LLM."""
+    'Explicit adapter for use when no LLM is configured.'
 
     def generate(self, prompt: PromptEnvelope) -> LlmOutput:
-        """Interrompe la richiesta perché manca un adattatore concreto."""
+        'Stop the request because no concrete adapter is configured.'
         del prompt
         raise RuntimeError(
-            "Nessun LLM gateway configurato. Inietta un adapter che restituisca "
-            "un oggetto JSON conforme al response_contract."
+            'No LLM gateway configured. Inject an adapter returning a JSON object conforming to response_contract.'
         )
 
 
 class CallableLlmGateway:
-    """Delega la generazione a una funzione, utile negli esperimenti e nei test."""
+    'Delegate generation to a function for experiments and tests.'
 
     def __init__(
         self,
         callback: Callable[[PromptEnvelope], LlmOutput],
     ) -> None:
-        """Salva la funzione che produrrà la risposta dell'LLM."""
+        'Store the function that will produce the LLM response.'
         self._callback = callback
 
     def generate(self, prompt: PromptEnvelope) -> LlmOutput:
-        """Passa la richiesta alla funzione configurata e ne restituisce l'esito."""
+        'Pass the request to the configured function and return its result.'
         return self._callback(prompt)

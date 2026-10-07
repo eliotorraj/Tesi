@@ -1,4 +1,4 @@
-"""Controlli dei confronti appaiati e delle figure; nessuna inferenza."""
+'Paired-comparison and figure checks without inference.'
 from comune import *
 import unittest
 import tempfile
@@ -23,7 +23,7 @@ class ReportTests(unittest.TestCase):
         baseline = comparison["summary"][0]
         self.assertEqual(baseline["n_common"], 46)
         self.assertEqual(baseline["complete_references"]+baseline["partial_references"], 46)
-        # Cambiare l'ordine di presentazione dei registri non cambia gli abbinamenti.
+        # Changing record presentation order does not change pairings.
         shuffled = copy.deepcopy(self.data)
         for item in shuffled["orders"].values():
             item["rows"].reverse()
@@ -63,8 +63,8 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(len((output/"confronti_appaiati.csv").read_text().splitlines()), 7)
             tex = (output/"rapporto.tex").read_text()
             self.assertNotIn("@@", tex)
-            self.assertIn("DATI SINTETICI", tex)
-            self.assertIn("50 circuiti Test QASMBench", tex)
+            self.assertIn('SYNTHETIC DATA', tex)
+            self.assertIn('50 Test circuits from QASMBench', tex)
 
 
     def test_no_k5_fallback_before_new_baseline(self):
@@ -107,8 +107,8 @@ class ReportTests(unittest.TestCase):
             self.assertAlmostEqual(item["rows"][0]["delta_score"], 0.6)
         text = self.report.render_tex(data)
         self.assertIn("k=1", text)
-        self.assertIn("nuova esecuzione", text)
-        self.assertNotIn("cinque esempi", text)
+        self.assertIn('new run', text)
+        self.assertNotIn('five examples', text)
 
 
 if __name__ == "__main__":

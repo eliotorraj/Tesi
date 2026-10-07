@@ -1,4 +1,4 @@
-"""Prove su Bell e risposte simulate: nessuna inferenza o apertura del Test."""
+'Checks on Bell and simulated responses: no inference or Test access.'
 from pathlib import Path
 import copy
 import io
@@ -30,7 +30,7 @@ class ExampleCountTests(unittest.TestCase):
         return {
             "selected_device": e["selected_device"], "config_id": "o2_default_default",
             "facts": [{"assertion": "selected_device_matches_example", "example_id": alias}],
-            "hypothesis": "Proposta tecnica non verificata.",
+            "hypothesis": 'Unverified technical proposal.',
         }
 
     def test_manhattan_prefixes_and_independent_reference(self):
@@ -83,7 +83,7 @@ class ExampleCountTests(unittest.TestCase):
 
     def test_no_silent_reduction_when_examples_missing(self):
         with patch("app.prepare", return_value=self.one):
-            with self.assertRaisesRegex(ValueError, "recuperati 1"):
+            with self.assertRaisesRegex(ValueError, 'retrieved 1'):
                 entry.prepare_k(self.qasm, k=10)
 
     def test_runner_ten_examples_retries_tokens_and_validation(self):
@@ -130,7 +130,7 @@ class ExampleCountTests(unittest.TestCase):
                 return {"tokens": list(range(56000))}
             self.fail("No generation allowed")
         with tempfile.TemporaryDirectory() as temp:
-            with self.assertRaisesRegex(ValueError, "Contesto insufficiente"):
+            with self.assertRaisesRegex(ValueError, 'Insufficient context'):
                 decide(self.ten[1], Path(temp), http, 60000, max_examples=10)
             self.assertEqual(read(Path(temp)/"attempt_1/context.json")["input_tokens"], 56000)
         self.assertEqual(endpoints, ["/apply-template", "/tokenize"])
@@ -159,7 +159,7 @@ class ExampleCountTests(unittest.TestCase):
                     self.assertEqual(entry.cli(k, ["--esegui"]), 0)
                     self.assertEqual(entry.cli(k, ["--esegui"]), 0)
                 with patch.object(entry, "frozen_contract", return_value={"synthetic": "changed"}):
-                    with self.assertRaisesRegex(ValueError, "Ripresa incompatibile"):
+                    with self.assertRaisesRegex(ValueError, 'Incompatible resume'):
                         entry.cli(1, ["--esegui"])
             self.assertEqual(len(calls), 180)
             self.assertEqual({m for _,m in calls}, {"llm_rag_k1", "llm_rag_k10"})

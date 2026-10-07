@@ -1,4 +1,4 @@
-"""Preparazione, congelamento e sigilli indipendenti per ogni studio."""
+'Independent preparation, freezing and seals for each study.'
 from __future__ import annotations
 import copy
 from pathlib import Path
@@ -30,7 +30,7 @@ def prepare(study_id):
                                  pause_hotspot_c=105, resume_hotspot_c=100)
         profile["technical_evidence"] = []
         profile.pop("technical_evidence_hashes", None)
-        profile["precision_reason"] = "Profilo precedente riutilizzato; nuova verifica tecnica train con schema v4."
+        profile["precision_reason"] = 'Previous profile reused; new technical train check with the v4 schema.'
     immutable_json(root / "profiles_to_freeze.json", profiles)
     historical = [OUTPUT / "frozen_study.json", OUTPUT / "final_configuration.json", OUTPUT / "selection_complete.json"]
     historical += list((OUTPUT / "studies/local-llm-v1").rglob("*"))

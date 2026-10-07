@@ -1,8 +1,6 @@
-"""Verifica le impronte dello studio ufficiale senza inferenze, score o apertura Test.
+"""Verify official-study hashes without inference, scoring or Test opening.
 
-Usa Python standard da qualsiasi cartella. I percorsi dei manifest rimangono
-riferimenti relativi alla radice dell'esperimento. --output non sovrascrive file.
-"""
+Use standard Python from any directory. Manifest paths remain relative to the experiment root. --output never overwrites files."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -17,7 +15,7 @@ def main() -> int:
     root = Path(__file__).resolve().parents[1] / "esperimento_v2"
     studies = list(root.glob("artifacts/experiments/*/llm_selection/studies/local-llm-v2"))
     if len(studies) != 1:
-        raise SystemExit("Impossibile identificare un solo studio local-llm-v2.")
+        raise SystemExit('Cannot identify exactly one local-llm-v2 study.')
     study = studies[0]
     frozen = json.loads((study / "frozen_study.json").read_text())
     groups = {"code": frozen["code_hashes"], "inputs": frozen["input_hashes"]}
@@ -35,14 +33,14 @@ def main() -> int:
                 continue
             path = (root / logical).resolve()
             # I modelli storici possono essere collegamenti allo spazio esterno.
-            # Si leggono soltanto file esplicitamente elencati e protetti da SHA256.
+            # Read only explicitly listed files protected by SHA256.
             if not path.is_relative_to(root.resolve()):
                 external[name] = str(path)
             if name not in cache:
                 if not path.is_file():
                     cache[name] = None
                 else:
-                    # Gli aggregati grandi vengono letti a blocchi, senza caricarli in RAM.
+                    # Stream large aggregates in chunks rather than loading them into RAM.
                     with path.open("rb") as handle:
                         cache[name] = hashlib.file_digest(handle, "sha256").hexdigest()
             if cache[name] != expected:

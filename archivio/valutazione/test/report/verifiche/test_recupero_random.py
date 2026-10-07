@@ -1,4 +1,4 @@
-"""Controlli del report su dati inventati; nessuna chiamata ai modelli."""
+'Report checks using synthetic data; no model calls.'
 import copy
 import hashlib
 import json
@@ -59,13 +59,13 @@ class RandomReportTests(unittest.TestCase):
     def test_valid_extension_and_original_loader_remains_strict(self):
         run,_=self.load()
         self.assertEqual(run["summary"]["successes"],1)
-        with self.assertRaisesRegex(ValueError,"Identità"):
+        with self.assertRaisesRegex(ValueError,'identity'):
             load_run(self.base,{"a":"qasmhash"},sha(self.base/"contratto_congelato.json"),None)
 
     def test_rejects_changed_outcome(self):
         p=self.base/"circuiti/a/esito.json"
         p.write_text(p.read_text().replace("0.7","0.6"))
-        with self.assertRaisesRegex(ValueError,"impronte"):
+        with self.assertRaisesRegex(ValueError,"fingerprints"):
             self.load()
 
     def test_rejects_incorrect_summary(self):

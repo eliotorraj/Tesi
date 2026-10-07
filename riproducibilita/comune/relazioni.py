@@ -1,4 +1,4 @@
-"""Relazioni riproducibili dai registri: JSON/CSV, figure e sorgenti LaTeX."""
+'Reproducible reports from records: JSON/CSV, figures and LaTeX sources.'
 from pathlib import Path
 import csv
 import io
@@ -13,7 +13,7 @@ def escape(value):
 def write_text_once(path,content):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     if path.exists():
-        if path.read_text()!=content:raise ValueError('Relazione già esistente diversa: '+str(path))
+        if path.read_text()!=content:raise ValueError('A different report already exists: '+str(path))
     else:path.write_text(content,encoding='utf-8')
 
 
@@ -22,7 +22,7 @@ def table_report(directory,title,explanation,headers,rows,figure=None):
     body=' & '.join(escape(x) for x in headers)+r' \\ \hline'+'\n'
     body+='\n'.join(' & '.join(escape(x) for x in row)+r' \\' for row in rows)
     text=(r'\documentclass{article}'+'\n'+r'\usepackage[T1]{fontenc}'+'\n'+
-          r'\usepackage[utf8]{inputenc}'+'\n'+r'\usepackage[italian]{babel}'+'\n'+
+          r'\usepackage[utf8]{inputenc}'+'\n'+'\\usepackage[english]{babel}'+'\n'+
           r'\usepackage[a4paper,margin=22mm]{geometry}'+'\n'+r'\usepackage{graphicx}'+'\n'+r'\usepackage{pgfplots}\pgfplotsset{compat=1.18}'+'\n'+
           r'\begin{document}'+'\n'+r'\section*{'+escape(title)+'}\n'+escape(explanation)+'\n\n'+
           r'\begin{center}\small\begin{tabular}{'+'l'*len(headers)+'}\n'+body+'\n'+r'\end{tabular}\end{center}'+'\n')
@@ -48,14 +48,7 @@ def validation_report():
           r'},yticklabels={'+labels+r'},xmin=0,enlarge y limits=.4]'+
           r'\addplot coordinates {'+coords+r'};\end{axis}\end{tikzpicture}')
     write_text_once(dest/'regret.pgf',plot)
-    details=('La griglia dei candidati, le impostazioni e le impronte dei modelli sono congelate prima delle decisioni. '
-             'Il Dataset e gli esempi RAG contengono solo train. Gli score validation vengono letti dopo il sigillo delle decisioni. '
-             'La selezione privilegia la copertura valutabile e confronta il regret sui circuiti comuni dei candidati con copertura massima. '
-             'Il riferimento è la migliore mediana osservata sui tre seed per le coppie eleggibili, non un ottimo teorico. '
-             'Le risposte con fatti non verificati sono conteggiate separatamente nei registri. Test non è utilizzato. '
-             'Criterio: '+c['criterion']+'. Selezione: '+selection['winner']['id']+'. Circuiti comuni: '+str(len(selection['common_circuits']))+'. '
-             'Token e tempi mancanti restano mancanti; il riepilogo include anche candidati scartati e fallimenti. '
-             'Le condizioni dipendono dai circuiti, dai Target sintetici e dalle risorse registrate per questa esecuzione.')
-    table_report(dest,'Selezione sulla validation',details,['Candidato','Valutabili','Comuni','Regret medio','Correzioni'],
+    details=('The candidate grid, settings and model fingerprints are frozen before decisions. The Dataset and RAG examples contain train only. Validation scores are read after decisions are sealed. Selection prioritizes evaluable coverage and compares regret on common circuits among candidates with maximum coverage. The reference is the best observed three-seed median among eligible pairs, not a theoretical optimum. Responses with unverified facts are recorded separately. Test is not used. Criterion: '+c['criterion']+'. Selection: '+selection['winner']['id']+'. Common circuits: '+str(len(selection['common_circuits']))+'. Missing tokens and timings remain missing; the summary includes rejected candidates and failures. Conditions depend on the circuits, synthetic Targets and resources recorded for this run.')
+    table_report(dest,'Validation selection',details,['Candidate','Evaluable','Shared','Mean regret','Repairs'],
         [[r['candidate'],r['valid_and_compilable'],r['common_count'],f"{r['mean_regret']:.6g}" if r['mean_regret'] is not None else '--',r['repairs']] for r in rows],'regret.pgf')
-    return {'directory':str(dest),'winner':selection['winner'],'pdf_compilation':'pdflatex -interaction=nonstopmode report.tex (nella directory del report)'}
+    return {'directory':str(dest),'winner':selection['winner'],'pdf_compilation':'pdflatex -interaction=nonstopmode report.tex (in the report directory)'}

@@ -104,7 +104,7 @@ class LlmOutputValidationTests(unittest.TestCase):
         self.root = Path(self.temp_dir.name)
         self.submission = UiSubmission(
             request_id="request-output-validation",
-            user_text="Scegli una configurazione valida.",
+            user_text='Choose a valid configuration.',
             qasm2=_qasm2(),
         )
 
@@ -157,18 +157,14 @@ class LlmOutputValidationTests(unittest.TestCase):
                 self.assertEqual(
                     result.recommendation.explanation,
                     (
-                        "Il dispositivo ibm_falcon_27 rispetta i vincoli "
-                        "verificati per la richiesta corrente. Tra i circuiti "
-                        "più simili recuperati non sono disponibili risultati "
-                        "storici utilizzabili per sostenere la raccomandazione."
+                        'Device ibm_falcon_27 satisfies the constraints checked for the current request. No usable historical results among the closest retrieved circuits support the recommendation.'
                     ),
                 )
                 self.assertEqual(result.recommendation.evidence, ())
                 self.assertEqual(
                     result.recommendation.warnings,
                     (
-                        "La raccomandazione non dispone di evidenze storiche "
-                        "utilizzabili.",
+                        'The recommendation has no usable historical evidence.',
                     ),
                 )
 
@@ -177,7 +173,7 @@ class LlmOutputValidationTests(unittest.TestCase):
         invalid_documents = {
             "malformed": "{",
             "markdown": fence + "json\n{}\n" + fence,
-            "surrounding_text": "Risposta: {}",
+            "surrounding_text": 'Response: {}',
             "multiple_objects": "{}{}",
             "array": "[]",
             "duplicate_key": (
@@ -249,7 +245,7 @@ class LlmOutputValidationTests(unittest.TestCase):
             response["claims"] = []
 
         def llm_prose(response):
-            response["explanation"] = "Testo libero non accettato."
+            response["explanation"] = 'Free text is not accepted.'
 
         cases = (
             ("extra_root", extra_root, "$.invented"),
@@ -306,7 +302,7 @@ class LlmOutputValidationTests(unittest.TestCase):
             prompts.append(prompt)
             response = _valid_response(prompt)
             if attempt == 0:
-                response["explanation"] = "Prosa non prevista"
+                response["explanation"] = 'Unexpected prose'
                 response.update(
                     {f"unknown_{index}": index for index in range(20)}
                 )
@@ -488,7 +484,7 @@ class LlmOutputValidationTests(unittest.TestCase):
 
     def test_infrastructure_and_adapter_errors_are_not_retried(self) -> None:
         failures = (
-            ConnectionError("servizio non disponibile"),
+            ConnectionError('service unavailable'),
             ["not", "a", "json", "object"],
         )
         for failure in failures:
@@ -513,7 +509,7 @@ class LlmOutputValidationTests(unittest.TestCase):
         class BrokenValidator:
             def validate(self, *args, **kwargs):
                 del args, kwargs
-                raise AssertionError("errore interno")
+                raise AssertionError('internal error')
 
         prompts = []
 

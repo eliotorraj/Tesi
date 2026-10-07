@@ -1,4 +1,4 @@
-"""Avvio indipendente QASMBench: llm_rag."""
+'Independent QASMBench launch: llm_rag.'
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))

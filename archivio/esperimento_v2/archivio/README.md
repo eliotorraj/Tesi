@@ -1,33 +1,15 @@
-# Archivio del progetto
+# Earlier experiment material
 
-Qui conserviamo le fasi precedenti, per ricostruire le scelte e confrontare
-il lavoro svolto. Per eseguire l'esperimento attuale usare il
-[README principale](../README.md) e il [protocollo corrente](../docs/protocollo_sperimentale.md).
+This nested archive preserves the stages before the v2 workspace. `protocollo_v1/` contains earlier configuration, compilation results and the original 600-circuit corpus. `documentazione/` contains superseded guides; `resoconti/` contains thesis progress reports.
 
-| Cartella | Funzione |
+The original corpus under `protocollo_v1/datasets/expected_fidelity/full/` is still used to verify v2 provenance. Preserve its QASM files and split manifest. Historical references are resolved logically; earlier scores must not be relabeled as new measurements.
+
+## Subdirectories
+
+| Directory | Contents |
 | --- | --- |
-| [protocollo_v1/](protocollo_v1/README.md) | Dati, configurazioni e cache delle prime prove. |
-| [documentazione/](documentazione/README.md) | Copie dei documenti sostituiti dal protocollo unico. |
-| [resoconti/](resoconti/README.md) | Relazioni periodiche preparate per la tesi. |
-| [sviluppo/](sviluppo/README.md) | Diagnosi, copie intermedie e salvataggi locali; esclusi da Git. |
+| [documentazione/](documentazione/README.md) | Superseded documentation. |
+| [protocollo_v1/](protocollo_v1/README.md) | Protocol v1 material. |
+| [resoconti/](resoconti/README.md) | Historical thesis progress reports. |
 
-## Il corpus originale serve ancora
-
-I 600 QASM e `protocollo_v1/datasets/expected_fidelity/full/split_manifest.json`
-sono la fonte originale del corpus. Il codice v2 verifica le loro impronte e
-prepara le copie ammesse di train e validation. Non riusa gli score storici.
-
-I vecchi nomi dei percorsi nei manifest sono riferimenti logici, risolti dal
-codice. Non vanno riscritti. La presenza dei sorgenti test nell'archivio non
-ne autorizza l'uso prima dell'apertura del test.
-
-## Come leggere i documenti storici
-
-Versioni, comandi, conteggi dei test e frasi come “da fare” descrivono il periodo
-di scrittura. Non rappresentano automaticamente lo stato attuale.
-Il precedente README dell'archivio è conservato nel
-[resoconto del riordino del 9 settembre](../docs/resoconti/2026-09-09_riordino_archivio.md).
-
-Il corpus e parte dei risultati sono in Git; i materiali locali o pesanti
-possono richiedere un trasferimento separato. Consultare la
-[guida di manutenzione](../docs/manutenzione/rimozione_lfs_2026-09-15/README.md).
+[Parent directory](../README.md) · [Current repository guide](../../../README.md)

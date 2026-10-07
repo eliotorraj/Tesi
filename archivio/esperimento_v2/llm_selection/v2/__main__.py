@@ -1,4 +1,4 @@
-"""Comandi per preparare, provare sul train e avviare uno studio esplicito."""
+'Commands to prepare, check on train and start an explicit study.'
 from __future__ import annotations
 import argparse
 import fcntl
@@ -42,7 +42,7 @@ def wait_resources(root, profile, events):
             ready = resources_ready(sample, profile["guards"])
             if time.monotonic() >= next_update:
                 available = sample.get("system_available_bytes", 0) / 1024**3
-                print(f"Risorse: RAM disponibile {available:.2f} GiB; recupero {good}/3 campioni.", flush=True)
+                print(f'Resources: available RAM {available:.2f} GiB; recovery {good}/3 samples.', flush=True)
                 next_update = time.monotonic() + 30
             append_jsonl(events, {"at": now(), "event": "resource_recovery_sample", "ready": ready, **sample})
             good = good + 1 if ready else 0
@@ -86,7 +86,7 @@ def supervise(study_id, *, technical):
     write_json(directory / "request.json", {"study": study_id, "technical": technical, "at": now()})
     for model in MODEL_KEYS:
         if completed_model(root, model, technical):
-            print(model + ": episodi già completati e verificati.", flush=True)
+            print(model + ': episodes already completed and verified.', flush=True)
             continue
         profile = profiles[model]
         server_arguments(profile)
@@ -121,16 +121,16 @@ def supervise(study_id, *, technical):
             if code == 75:
                 return
             if code != 76:
-                raise ExperimentStopped(f"Errore applicativo: controllare {directory / (model + '-' + str(recovery) + '.log')}")
+                raise ExperimentStopped(f"Application error: inspect {directory / (model + '-' + str(recovery) + '.log')}")
             known = (server_dir / "resource_abort.json").exists()
             if not known:
                 unexplained += 1
                 if unexplained >= POLICY["unexplained_transport_restarts"]:
-                    raise ExperimentStopped("Tre interruzioni senza causa di risorse accertata. Episodio sospeso e riprendibile; consultare " + str(directory))
+                    raise ExperimentStopped('Three interruptions without an established resource cause. Episode paused and resumable; consult ' + str(directory))
             else:
                 unexplained = 0
             recovery += 1
-            print(model + ": chiamata interrotta archiviata. Attendo le risorse e ripeto lo stesso tentativo.", flush=True)
+            print(model + ': interrupted call archived. Waiting for resources before repeating the same attempt.', flush=True)
     if technical:
         rows = [read_json(p) for p in sorted((root / "technical").glob("*/*/*/decision.json"))]
         write_json(root / "technical_summary.json", {"episodes": len(rows),
@@ -161,9 +161,9 @@ def main():
     elif args.command == "train":
         supervise(args.study, technical=True)
     elif args.command == "freeze":
-        print("Congelato:", freeze(args.study)["study_id"])
+        print('Frozen:', freeze(args.study)["study_id"])
     elif args.command == "verify":
-        print("Verificato:", verify(args.study)["study_id"])
+        print('Verified:', verify(args.study)["study_id"])
         verify_predecessor(args.study)
     elif args.command == "validate":
         supervise(args.study, technical=False)
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("Esecuzione sospesa; i dati restano conservati. Riprendere con lo stesso comando.", file=sys.stderr)
+        print('Execution paused; data is preserved. Resume with the same command.', file=sys.stderr)
         raise SystemExit(130) from None
     except ExperimentStopped as error:
         print(str(error), file=sys.stderr, flush=True)

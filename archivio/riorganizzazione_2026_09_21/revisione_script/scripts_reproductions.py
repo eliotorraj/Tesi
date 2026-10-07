@@ -1,4 +1,4 @@
-"""Riproduzioni isolate dei rilievi sugli script: nessun modello o servizio reale."""
+'Isolated reproductions of script-review findings without real models or services.'
 from __future__ import annotations
 import ast, csv, json, os, queue, tempfile, time
 from collections import deque
@@ -38,7 +38,7 @@ def run():
         evidence['S04_timeout_not_in_cache_key']={'recorded_timeout':300,'recorded_duration':150,'requested_timeout_in_followup':100,'provenance_accepted':accepted,'function_has_timeout_parameter':False}
         assert accepted
 
-        # Il processo è fittizio. Termina quando il genitore legge la fase; il risultato è già nella coda.
+        # Simulated process: exit when the parent reads the stage; the result is already queued.
         events=[{'type':'ready'},{'type':'started','key':'toy|device'},{'type':'phase','key':'toy|device','phase':'rl'}, {'type':'result','key':'toy|device','status':'success'}, {'type':'done'}]
         class FakeProcess:
             pid=12345
@@ -89,7 +89,7 @@ def run():
         evidence['S07_stale_canary_gate']={'accepted':bool(ns['check_canary']()),'canary_model_hash':'outdated','current_model_hash_compared':False,'test_release_executed':False}
         assert evidence['S07_stale_canary_gate']['accepted']
 
-        # La prima porzione è esattamente il controllo delle righe 456-469 del trainer.
+        # The first section exactly reproduces the check at trainer lines 456-469.
         tree=ast.parse((SOURCE/'03_train_rl_model.py').read_text())
         main=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='main')
         guard=next(n for n in main.body if isinstance(n,ast.If) and n.lineno==456)
@@ -103,7 +103,7 @@ def run():
         monitor=tmp/'monitor.csv';monitor.write_text('previous episode data\n');writer=ns['ResultsWriter'](str(monitor));writer.file_handler.close()
         evidence['S08_restart_overwrites_episode_log']={'restart_guard_accepted':True,'old_episode_data_retained':'previous episode data' in monitor.read_text(),'actual_sb3_writer_only':True,'training_executed':False}
         assert not evidence['S08_restart_overwrites_episode_log']['old_episode_data_retained']
-    # Verificatori di provenienza: nessun ZIP o classificatore viene caricato.
+    # Provenance checkers do not load ZIP files or classifiers.
     import runpy
     protocol=runpy.run_path(str(SOURCE/'mqt_predictor_protocol.py'))
     ns=dict(protocol,json=json,EXPECTED_RL_BQSKIT_PROFILE='ci-lightweight-dynamic-synthesis')

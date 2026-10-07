@@ -1,4 +1,4 @@
-"""DAG e kernel WL diretto. Nessuna lettura di score validation/test."""
+'Directed DAG and WL kernel. Never reads validation/Test scores.'
 from __future__ import annotations
 from collections import Counter
 import hashlib
@@ -38,7 +38,7 @@ def graph_from_qasm(qasm):
             for p in n.op.params:
                 v = float(p)
                 if not math.isfinite(v):
-                    raise ValueError("Parametro non numerico o non finito.")
+                    raise ValueError('Non-numeric or non-finite parameter.')
                 params.append(v)
             def quantize(x):
                 return int(math.copysign(math.floor(abs(x)/(math.pi/8)+0.5), x))
@@ -65,9 +65,9 @@ def graph_from_qasm(qasm):
             "num_clbits": qc.num_clbits}
 
 def wl_counts(graph, max_h=MAX_H):
-    """Tutte le etichette sono hash globali, mai interi assegnati per grafo."""
+    'All labels are global hashes, never graph-local integers.'
     if type(max_h) is not int or max_h not in range(MAX_H+1):
-        raise ValueError("max_h deve essere un intero fra 0 e 30.")
+        raise ValueError('max_h must be an integer between 0 and 30.')
     incoming = [[] for _ in graph["nodes"]]
     outgoing = [[] for _ in graph["nodes"]]
     for a, b, role in graph["edges"]:
@@ -85,9 +85,9 @@ def wl_counts(graph, max_h=MAX_H):
 
 def similarity(a, b, h):
     if type(h) is not int or h not in SUPPORTED_H:
-        raise ValueError("h deve essere un intero fra 1 e 30.")
+        raise ValueError('h must be an integer between 1 and 30.')
     if len(a) <= h or len(b) <= h:
-        raise ValueError("Istogrammi WL insufficienti: ricostruire un indice separato fino a h=30.")
+        raise ValueError('Insufficient WL histograms: rebuild a separate index up to h=30.')
     def dot(x, y):
         if len(x) > len(y):
             x, y = y, x
@@ -96,11 +96,11 @@ def similarity(a, b, h):
     aa = sum(dot(a[i], a[i]) for i in range(h+1))
     bb = sum(dot(b[i], b[i]) for i in range(h+1))
     if not aa or not bb:
-        raise ValueError("Grafo vuoto: similarita non definita.")
+        raise ValueError('Empty graph: similarity is undefined.')
     return min(1.0, max(0.0, cross / math.sqrt(aa*bb)))
 
 def graph_summary(graph):
-    """Statistiche del sorgente, senza etichette di prestazione o stime di score."""
+    'Source statistics without performance labels or score estimates.'
     nodes = graph["nodes"]
     ops = {i: n for i, n in enumerate(nodes) if n["label"][0] == "op"}
     predecessors = [[] for _ in nodes]
@@ -125,7 +125,7 @@ def graph_summary(graph):
             if not indegree[b]:
                 ready.append(b)
     if visited != len(nodes):
-        raise ValueError("Il grafo deve essere aciclico.")
+        raise ValueError('The graph must be acyclic.')
     widths = Counter(levels[i] for i in ops)
     interactions = Counter()
     for n in ops.values():
@@ -171,7 +171,7 @@ def index_identity(corpus):
             "record_ids": sorted(r["rag_id"] for r in corpus.records)}
 
 def prepare_index(corpus, directory):
-    """Indice privato della campagna, riprendibile e verificato prima dell'uso."""
+    'Private campaign index, resumable and verified before use.'
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     import portalocker
@@ -180,19 +180,19 @@ def prepare_index(corpus, directory):
         contract = directory/"contratto.json"
         if contract.exists():
             if read(contract) != identity:
-                raise ValueError("Indice WL incompatibile. Conservare la campagna precedente.")
+                raise ValueError('Incompatible WL index. Preserve the previous campaign.')
         else:
             save(contract, identity)
         by_id, files = {}, {}
         for i, record in enumerate(sorted(corpus.records, key=lambda r:r["rag_id"]), 1):
             if record["split"] != "train":
-                raise ValueError("L'indice ammette soltanto train.")
+                raise ValueError('The index accepts train records only.')
             c = record["retrieval_input"]["circuit"]
             source = (ROOT/"data"/c["source_ref"]).resolve()
             if not source.is_relative_to((ROOT/"data/circuits/train").resolve()):
-                raise ValueError("Sorgente fuori train.")
+                raise ValueError('Source outside train.')
             if sha(source) != c["source_sha256"]:
-                raise ValueError("QASM train modificato.")
+                raise ValueError('Train QASM was modified.')
             path = directory/"record"/(digest(record["rag_id"])+".json")
             if not path.exists():
                 value = descriptor(source.read_text())
@@ -202,19 +202,19 @@ def prepare_index(corpus, directory):
             if (value["source_sha256"] != c["source_sha256"] or
                 value["record_sha256"] != digest(record) or value["rag_id"] != record["rag_id"] or
                 value["graph_sha256"] != digest(value["graph"])):
-                raise ValueError("Record indice WL alterato.")
+                raise ValueError('WL index record was modified.')
             # Verify derived content as well, including before sealing resumed builds.
             if value["counts"] != wl_counts(value["graph"]) or value["summary"] != graph_summary(value["graph"]):
-                raise ValueError("Contenuto derivato WL incoerente.")
+                raise ValueError('Inconsistent derived WL content.')
             files[str(path.relative_to(directory))] = sha(path)
             by_id[record["rag_id"]] = value
             if i % 100 == 0:
-                print(f"Indice WL: {i}/{len(corpus.records)}", flush=True)
+                print(f'WL index: {i}/{len(corpus.records)}', flush=True)
         manifest = {"identity": identity, "files": files}
         target = directory/"manifest.json"
         if target.exists():
             if read(target) != manifest:
-                raise ValueError("Sigillo indice WL alterato.")
+                raise ValueError('WL index seal was modified.')
         else:
             save(target, manifest)
         return by_id, sha(target)
@@ -224,7 +224,7 @@ def rank(corpus, index, query, devices, objective, h):
     from prototype.quantum_assistant.adapters.rag_dataset import EXPERIMENT_ID
     candidates = matching_records(corpus, devices=devices, objective=objective, experiment_id=EXPERIMENT_ID)
     if len(candidates) < 5:
-        raise ValueError("Servono cinque esempi train compatibili.")
+        raise ValueError('Five compatible train examples are required.')
     values = [(r, similarity(query["counts"], index[r["rag_id"]]["counts"], h)) for r in candidates]
     return sorted(values, key=lambda item: (-item[1], item[0]["rag_id"]))
 
@@ -240,7 +240,7 @@ def request_context(qasm):
     request = RequestSemanticValidator().normalize(parsed, hardware)
     mask = HardwareMaskBuilder().filter(request, hardware)
     if not mask.available_device_ids:
-        raise ValueError("Nessun dispositivo compatibile.")
+        raise ValueError('No compatible device.')
     return catalog, request, mask
 
 def prepare_wl(qasm, *, corpus, index, h, with_summary, index_sha256):

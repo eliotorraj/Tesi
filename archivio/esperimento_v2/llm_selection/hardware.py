@@ -1,4 +1,4 @@
-"""Limiti operativi richiesti per le prove; non sono specifiche del produttore."""
+'Operational limits requested for experiments; not manufacturer specifications.'
 DEFAULT_BATCH = 512
 DEFAULT_MICRO_BATCH = 128
 DEFAULT_GUARDS = {
@@ -20,7 +20,7 @@ GUARD_FLAGS = {
 }
 
 def server_arguments(profile):
-    """Usa i valori del profilo, anche dopo il congelamento della validation."""
+    'Use profile values, including after validation freezing.'
     batch, micro = profile["batch"], profile["micro_batch"]
     if not 0 < micro <= batch:
         raise ValueError("Require 0 < micro_batch <= batch")

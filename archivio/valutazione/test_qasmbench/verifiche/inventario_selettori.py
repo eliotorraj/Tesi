@@ -1,4 +1,4 @@
-"""Inventario in sola lettura dei selettori indicati, senza sostituzioni."""
+'Read-only inventory of the specified selectors, without replacements.'
 import json,sys,hashlib,warnings
 from pathlib import Path
 from uuid import uuid4

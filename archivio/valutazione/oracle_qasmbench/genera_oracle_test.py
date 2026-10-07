@@ -1,4 +1,4 @@
-"""Matrice Test privata: 50 circuiti QASMBench, 5 Target, 12 configurazioni, seed 0/1/2."""
+'Private Test matrix: 50 QASMBench circuits, 5 Targets, 12 configurations, seeds 0/1/2.'
 from __future__ import annotations
 import argparse
 import fcntl
@@ -46,7 +46,7 @@ def run(out,identity):
                     counts[previous["status"]]+=1;continue
                 publish(folder/"inizio.json",{"at":now(),"session":session,"supervisor_pid":os.getpid(),"job":job})
                 if not job["compatible"]:
-                    publish(folder/"esito.json",terminal(job,"incompatible","Numero di qubit superiore alla capacità del dispositivo."))
+                    publish(folder/"esito.json",terminal(job,"incompatible",'Qubit count exceeds device capacity.'))
                     counts["incompatible"]+=1;continue
                 stdout=(folder/"stdout.txt").open("xb");stderr=(folder/"stderr.txt").open("xb")
                 try:
@@ -64,7 +64,7 @@ def run(out,identity):
                     ready=folder/"ready.json"
                     if ready.exists():
                         if time.monotonic()-read(ready)["started_monotonic"]>identity["timeout_seconds"]+1:
-                            forced=("timeout","watchdog: oltre 100 s; tolleranza di 1 s solo per salvare il timeout")
+                            forced=("timeout",'watchdog: over 100 s; 1 s tolerance only to save the timeout')
                     elif time.monotonic()-started>identity["startup_watchdog_seconds"]:
                         forced=("failure","worker_startup_watchdog")
                     if forced is None:continue
@@ -72,7 +72,7 @@ def run(out,identity):
                 r=conclude(folder,job,process,started,forced)
                 counts[r["status"]]+=1;del active[pid]
                 done=sum(counts.values())
-                if done%50==0 or done==len(work):print(f"Conclusi {done}/{len(work)}: "+str(dict(counts)),flush=True)
+                if done%50==0 or done==len(work):print(f'Completed {done}/{len(work)}: '+str(dict(counts)),flush=True)
             if active:time.sleep(.1)
     except BaseException:
         stopped=True
@@ -80,7 +80,7 @@ def run(out,identity):
             kill(process)
             if not (folder/"esito.json").exists():
                 if (folder/"worker_result.json").exists():conclude(folder,job,process,started)
-                else:conclude(folder,job,process,started,("interrupted","Interruzione richiesta o errore del supervisore."))
+                else:conclude(folder,job,process,started,("interrupted",'Interruption requested or supervisor error.'))
         raise
     finally:
         signal.signal(signal.SIGTERM,old_handler)
@@ -89,38 +89,38 @@ def run(out,identity):
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     group=ap.add_mutually_exclusive_group(required=True)
-    group.add_argument("--verifica",action="store_true",help="Controlli e conteggi; nessuna scrittura o compilazione.")
-    group.add_argument("--prepara",action="store_true",help="Congela piano e copie QASM all'esterno; non compila.")
-    group.add_argument("--esegui",action="store_true",help="Genera/riprende la matrice; non ripete tentativi terminali.")
-    group.add_argument("--analizza",action="store_true",help="Nuovo riepilogo dei risultati; non compila.")
+    group.add_argument("--verifica",action="store_true",help='Checks and counts without writes or compilation.')
+    group.add_argument("--prepara",action="store_true",help='Freeze the plan and QASM copies externally without compilation.')
+    group.add_argument("--esegui",action="store_true",help='Generate/resume the matrix without repeating terminal attempts.')
+    group.add_argument("--analizza",action="store_true",help='Create a new result summary without compilation.')
     ap.add_argument("--output",type=Path,default=Path.home()/"oracoli_qasmbench_test/qasmbench50_max3_v1")
-    ap.add_argument("--rag-root",type=Path,default=REPO/"archivio/valutazione/test_qasmbench",help="Soli esiti RAG storici per il confronto successivo.")
-    ap.add_argument("--workers",type=int,default=6,help="Processi esterni, da 1 a 6; congelato nel contratto.")
+    ap.add_argument("--rag-root",type=Path,default=REPO/"archivio/valutazione/test_qasmbench",help='Historical RAG outcomes only, for subsequent comparison.')
+    ap.add_argument("--workers",type=int,default=6,help='External processes, from 1 to 6; frozen in the contract.')
     args=ap.parse_args();out=external_path(args.output)
     if args.analizza:
-        if not (out/"contratto.json").is_file():ap.error("Contratto mancante nella cartella esterna.")
+        if not (out/"contratto.json").is_file():ap.error('Contract missing from the external directory.')
         contract=read(out/"contratto.json");identity=contract["identity"]
-        if identity.get("schema")!="qasmbench50-oracle-max3-v1":raise ValueError("Cartella di una campagna differente: atteso QASMBench50.")
-        if digest(identity)!=contract["identity_sha256"]:raise ValueError("Contratto alterato.")
+        if identity.get("schema")!="qasmbench50-oracle-max3-v1":raise ValueError('Directory belongs to a different campaign: expected QASMBench50.')
+        if digest(identity)!=contract["identity_sha256"]:raise ValueError('Contract changed.')
     else:identity=preflight(args.workers)
     if args.verifica:
         print(json.dumps({"ready":True,"output":str(out),"plan":plan_counts(identity),
-              "label":"MAX dei seed 0,1,2; massimo fra tutte le coppie compatibili","identity_sha256":digest(identity)},indent=2))
+              "label":'MAX over seeds 0,1,2; maximum across all compatible pairs',"identity_sha256":digest(identity)},indent=2))
         return 0
     out.mkdir(parents=True,exist_ok=True)
     with (out/".lock").open("a+") as lock:
         try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-        except BlockingIOError as exc:raise ValueError("Un altro processo usa questa campagna.") from exc
+        except BlockingIOError as exc:raise ValueError('Another process is using this campaign.') from exc
         if not args.analizza:prepare(out,identity)
         if args.prepara:
-            print("Piano pronto, nessuna compilazione eseguita: "+str(out));return 0
+            print('Plan ready; no compilation performed: '+str(out));return 0
         try:
             if args.esegui:run(out,identity)
         except KeyboardInterrupt:
             dest,summary=analyze(out,identity)
-            print("Interruzione conservata. Riprendere con lo stesso comando; analisi: "+str(dest));return 130
+            print('Interruption preserved. Resume with the same command; analysis: '+str(dest));return 130
         dest,summary=analyze(out,identity)
-        print(json.dumps(summary,indent=2));print("Analisi esterna: "+str(dest))
+        print(json.dumps(summary,indent=2));print('External analysis: '+str(dest))
         from archivio.valutazione.oracle_qasmbench.analizza import compare
         from archivio.valutazione.oracle_qasmbench.impagina import render
         report=dest/"confronto_llm_rag_k5/risultati"
@@ -128,10 +128,10 @@ def main():
             compare(dest,args.rag_root,report)
             tex=render(report)
         except Exception as exc:
-            print("Oracle conservato. Confronto non prodotto: "+str(exc),file=sys.stderr)
-            print("Correggere gli ingressi del confronto e usare --analizza; non occorre ricompilare.",file=sys.stderr)
+            print('Oracle preserved. Comparison was not generated: '+str(exc),file=sys.stderr)
+            print('Fix comparison inputs and use --analizza; recompilation is unnecessary.',file=sys.stderr)
             return 2
-        print("Confronto LaTeX: "+str(tex))
+        print('LaTeX comparison: '+str(tex))
     return 0
 
 if __name__=="__main__":

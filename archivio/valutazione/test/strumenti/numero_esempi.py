@@ -1,4 +1,4 @@
-"""Avvii separati per misurare il numero di esempi del RAG Manhattan."""
+'Separate runs to measure the number of Manhattan RAG examples.'
 from __future__ import annotations
 import argparse
 from functools import partial
@@ -17,7 +17,7 @@ BASE = AREA / "numero_esempi"
 
 def retrieval_policy(k):
     if type(k) is not int or k not in (1, 10):
-        raise ValueError("Queste due prove richiedono esattamente 1 o 10 esempi.")
+        raise ValueError('These two runs require exactly 1 or 10 examples.')
     return {
         "revision": "manhattan-example-count-v1",
         "k": k, "distance": "Manhattan", "search": "exact",
@@ -37,7 +37,7 @@ def prepare_k(qasm, *, k):
     request, prompt, log = prepare(qasm, rag=True, rag_limit=k)
     count = len(log["records"])
     if count != k:
-        raise ValueError(f"Richiesti {k} esempi train compatibili, recuperati {count}; nessuna inferenza.")
+        raise ValueError(f'Requested {k} compatible train examples, retrieved {count}; no inference.')
     return request, prompt, {
         **log, "policy": policy, "requested_examples": k, "returned_examples": count,
         "records": [{"example_id": f"E{i}", **r} for i, r in enumerate(log["records"], 1)],
@@ -45,7 +45,7 @@ def prepare_k(qasm, *, k):
 
 
 def summarize(base, paths, expected):
-    """Conteggi e misure note; nessun dato mancante viene trasformato in zero."""
+    'Counts and known measurements; missing data never becomes zero.'
     import statistics
     from report import summary
     rows = [read(p) for p in paths]
@@ -78,7 +78,7 @@ def summarize(base, paths, expected):
 def ensure_contract(path, contract):
     if path.exists():
         if read(path) != contract:
-            raise ValueError("Ripresa incompatibile: codice, dati, piano o numero di esempi cambiati. Conservare la prova precedente.")
+            raise ValueError('Incompatible resume: code, data, plan or example count changed. Preserve the previous run.')
     else:
         save(path, contract)
     return sha(path)
@@ -86,16 +86,16 @@ def ensure_contract(path, contract):
 def cli(k, argv=None):
     policy = retrieval_policy(k)
     method = f"llm_rag_k{k}"
-    ap = argparse.ArgumentParser(description=f"LLM + RAG classico con {k} esempi train; risultati separati.")
+    ap = argparse.ArgumentParser(description=f'LLM + standard RAG with {k} train examples; separate results.')
     mode = ap.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--verifica", action="store_true", help="Controlli senza Test e senza inferenza")
-    mode.add_argument("--tecnico", action="store_true", help="Solo Bell sintetico, con server LLM")
-    mode.add_argument("--esegui", action="store_true", help="Nuova estensione sui 90 casi Test gia esposti")
+    mode.add_argument("--verifica", action="store_true", help='Checks without Test or inference')
+    mode.add_argument("--tecnico", action="store_true", help='Synthetic Bell only, with an LLM server')
+    mode.add_argument("--esegui", action="store_true", help='New extension on the 90 already exposed Test cases')
     ap.add_argument("--url", default="http://127.0.0.1:8089")
     ap.add_argument("--model-path", type=Path)
     args = ap.parse_args(argv)
     if not args.url.startswith(("http://127.0.0.1:", "http://localhost:")):
-        ap.error("Il server deve essere locale.")
+        ap.error('The server must be local.')
     campaign = BASE / f"k_{k}"
     check = preflight(method)
     save(campaign / "preparazione/verifiche" / (uuid4().hex + ".json"), check)
@@ -118,7 +118,7 @@ def cli(k, argv=None):
     with portalocker.Lock(str(base / ".lock"), timeout=0):
         contract = {
             "kind": "technical" if args.tecnico else "exploratory_test_extension",
-            "note": "Estensione decisa dopo la lettura del Test; non una nuova conferma indipendente.",
+            "note": 'Extension designed after reading Test, not fresh independent confirmation.',
             "method": method, "retrieval": policy,
             "parent_plan_sha256": sha(PLAN),
             "environment": {"python": sys.version, "platform": platform.platform()},
@@ -130,7 +130,7 @@ def cli(k, argv=None):
                   "contract_sha256": contract_sha, "expected_circuits": 1 if args.tecnico else 90}
         if begin.exists():
             if any(read(begin).get(k) != v for k, v in config.items()):
-                raise ValueError("Ripresa incompatibile con il registro di esecuzione.")
+                raise ValueError('Resume is incompatible with the execution record.')
         else:
             save(begin, {**config, "at": now(), "server": server, "code": code_files(),
                          "cpu_count": os.cpu_count(), "memory_measurement": "not collected"})
@@ -143,7 +143,7 @@ def cli(k, argv=None):
             rows = sorted((r for r in read(SOURCE)["circuits"] if r["split"] == "test"),
                           key=lambda r: r["circuit_id"])
             if len(rows) != 90:
-                raise ValueError("Attesi 90 circuiti Test.")
+                raise ValueError('Expected 90 Test circuits.')
         for i, row in enumerate(rows, 1):
             folder = base / "circuiti" / row["circuit_id"]
             if (folder / "esito.json").exists():
@@ -155,7 +155,7 @@ def cli(k, argv=None):
                     evaluate(row, folder, method, args.url, args.tecnico,
                              prepare_fn=partial(prepare_k, k=k), max_examples=max(5, k))
                 except LlmTransportError as exc:
-                    print(f"Esecuzione fermata; tentativo conservato: {exc}", file=sys.stderr)
+                    print(f'Run stopped; attempt preserved: {exc}', file=sys.stderr)
                     return 1
             print(f"{method}: {i}/{len(rows)} {row['circuit_id']}", flush=True)
         paths = sorted((base / "circuiti").glob("*/esito.json"))
@@ -166,7 +166,7 @@ def cli(k, argv=None):
                       sources={str(p.relative_to(base)): sha(p) for p in paths})
         output = base / "analisi" / (uuid4().hex + ".json")
         save(output, result)
-        print("Riepilogo: " + str(output))
+        print('Summary: ' + str(output))
     return 0
 
 

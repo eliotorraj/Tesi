@@ -1,7 +1,9 @@
-# Nuovi prototipi autonomi
+# Exported standalone prototypes
 
-`esperimento.py esporta` crea una directory nuova con framework, Dataset train, catalogo e configurazione selezionata sulla validation. Non include i pesi GGUF né gli score validation/Test e non sovrascrive il prototipo distribuito.
+After validation selection, from the toolkit root:
 
-Da `riproducibilita/`, dopo la selezione, usare `.venv/bin/python -B esperimento.py esporta esportazioni/mio-prototipo`. È ammessa anche una destinazione esterna nuova. L'output contiene istruzioni di preparazione Linux e il registro del modello; hardware e contesto devono permetterne l'avvio. Gli output di questa cartella restano esclusi da Git: conservarli o versionarli in una destinazione dedicata.
+```bash
+python esperimento.py --esperimento my-trial esporta DESTINATION
+```
 
-Per un esperimento nominato: `python esperimento.py --esperimento NOME esporta /percorso/nuovo-prototipo`. Il nome collega automaticamente selezione, Dataset e radice risultati della stessa campagna.
+Use a new destination; external directories are supported. The export contains framework, train Dataset, catalog, selected settings, model registry and Linux setup instructions. It excludes GGUF weights and validation/Test scores and does not overwrite `prototipo/`.

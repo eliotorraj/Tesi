@@ -1,4 +1,4 @@
-"""Controlli MQT isolati; selettore operativo oppure canonico storico."""
+'Isolated MQT checks; operational or historical canonical selector.'
 from pathlib import Path
 import json
 import sys
@@ -23,7 +23,7 @@ for device in FROZEN_DEVICES:
         errors.extend(f"{device}/{role}: {e}" for e in issues)
     if canonical.is_file() and runtime.is_file():
         if file_sha256(canonical)!=file_sha256(runtime):
-            errors.append(device+": copie RL diverse")
+            errors.append(device+': RL copies differ')
         metadata,issues=models.validate_rl_training_metadata(canonical.with_suffix(".metadata.json"),
             device_name=device,model_sha256=file_sha256(canonical),expected_max_steps=64,
             expected_num_timesteps=RL_FINAL_TIMESTEPS)
@@ -40,12 +40,12 @@ if canonical.is_file() and runtime.is_file():
         model_sha256=file_sha256(canonical))
     errors.extend(issues)
     errors.extend(validate_selection_metadata(metadata, TRAINING_CIRCUITS_V2))
-    if file_sha256(canonical)!=file_sha256(runtime):errors.append("Copie ML diverse")
+    if file_sha256(canonical)!=file_sha256(runtime):errors.append('ML copies differ')
     if metadata.get("source_manifest_sha256")!=file_sha256(SOURCE_MANIFEST_V2):
-        errors.append("ML: provenienza corpus non valida")
+        errors.append('ML: invalid corpus provenance')
     for device,details in report.items():
         if metadata.get("rl_models",{}).get(device,{}).get("sha256")!=details["sha256"]:
-            errors.append("ML addestrato con RL diversi: "+device)
+            errors.append('ML trained with different RL models: '+device)
     report["ML"]={"sha256":file_sha256(canonical),"metadata":metadata,"path":str(canonical)}
 print(json.dumps({"models":report,"errors":errors},default=str))
 raise SystemExit(bool(errors))

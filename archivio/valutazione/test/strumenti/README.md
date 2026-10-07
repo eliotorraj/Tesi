@@ -1,28 +1,7 @@
-# Strumenti della valutazione
+# Historical evaluation utilities
 
-Questi moduli svolgono le operazioni richiamate dagli ingressi nella cartella
-superiore. Non sono necessari al prototipo per un circuito libero.
+`common.py` resolves paths and records; `gates.py` checks inputs/contracts; `mqt_gate.py` verifies models in a separate process. `runner.py` coordinates methods, `worker.py` isolates compilation, `score.py` computes expected fidelity and `report.py` produces earlier summaries.
 
-| File | Funzione |
-| --- | --- |
-| `common.py` | Risolve percorsi, legge i dati e conserva scritture e impronte. |
-| `gates.py` | Verifica requisiti, provenienza e contratto sperimentale. |
-| `mqt_gate.py` | Controlla i modelli MQT in un processo separato. |
-| `runner.py` | Coordina un metodo, registra gli errori e misura le fasi. |
-| `worker.py` | Compila un circuito in un processo separato. |
-| `score.py` | Calcola expected fidelity sul circuito compilato. |
-| `report.py` | Produce i riepiloghi precedenti dagli esiti conservati. |
+`recupero_random.py` and `numero_esempi.py` implement retrieval variants; `dag_wl_*.py` implements graph extraction, validation and campaigns. The framework is imported from root-level `prototipo/`. Saved contracts reject resume after source, data or setting changes; frozen runs require their recorded revisions.
 
-Il framework è importato da `prototipo/`; esiti e preparazione restano
-nell'area sperimentale corrente. Le fonti congelate non vengono riscritte.
-Il contratto rifiuta la ripresa se cambiano codice, dati o impostazioni.
-I dettagli del metodo sono nel
-[protocollo corrente](../../../../prototipo/docs/protocollo_sperimentale.md).
-Per struttura e stato dell'area leggere il [README superiore](../README.md).
-
-## Numero di esempi RAG
-
-`numero_esempi.py` coordina i due avvii separati a 1 e 10 esempi.
-Riusa il recupero esatto e il motore di esecuzione classico, con un limite
-esplicito per gli alias del prompt e contratti propri.
-La [guida](../numero_esempi/README.md) descrive comandi e misure.
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

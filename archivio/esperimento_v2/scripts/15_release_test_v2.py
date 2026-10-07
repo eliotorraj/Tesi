@@ -1,4 +1,4 @@
-"""Verifica tutti i prerequisiti e, su richiesta, apre lo split test."""
+'Check all prerequisites and open Test on request.'
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--release",
         action="store_true",
-        help="Scrive il record di apertura soltanto se ogni gate è superato.",
+        help='Write the opening record only when every check passes.',
     )
     parser.add_argument("--output", type=Path, default=TEST_RELEASE_RECORD)
     return parser.parse_args()
@@ -77,7 +77,7 @@ def main() -> int:
             record = validate_test_release_record(args.output)
         except ValueError as error:
             raise SystemExit(str(error)) from error
-        print(f"Test già aperto con record valido: {args.output}")
+        print(f'Test is already open with a valid record: {args.output}')
         print(json.dumps(record, indent=2, sort_keys=True))
         return 0
 
@@ -155,8 +155,8 @@ def main() -> int:
     else:
         gates["validation_method_plan"] = False
         gates["test_method_plan"] = False
-        details["validation_method_plan"] = "Prerequisiti mancanti."
-        details["test_method_plan"] = "Prerequisiti mancanti."
+        details["validation_method_plan"] = 'Missing prerequisites.'
+        details["test_method_plan"] = 'Missing prerequisites.'
 
     scope_root = dataset_scope_root(
         "expected_fidelity",
@@ -170,11 +170,11 @@ def main() -> int:
 
     def check_qiskit_validation() -> dict[str, Any]:
         if manifest is None or catalog is None or capacities is None:
-            raise ValueError("Prerequisiti mancanti.")
+            raise ValueError('Missing prerequisites.')
         runs = load_jsonl(runs_path)
         summaries = load_jsonl(summaries_path)
         if any(record.get("split") == "test" for record in [*runs, *summaries]):
-            raise ValueError("Sono già presenti risultati test prima dell'apertura.")
+            raise ValueError('Test results already exist before opening.')
         run_index, summary_index = validate_qiskit_matrix(
             runs,
             summaries,
@@ -192,7 +192,7 @@ def main() -> int:
 
     def check_rag() -> dict[str, Any]:
         if manifest is None:
-            raise ValueError("Manifest sorgente non disponibile.")
+            raise ValueError('Source manifest is unavailable.')
         records = load_jsonl(rag_path)
         assert_records_belong_to_split(
             records,
@@ -204,7 +204,7 @@ def main() -> int:
             for record in records
         ]
         if len(hashes) != len(set(hashes)):
-            raise ValueError("L'indice RAG contiene alias SHA-256 duplicati.")
+            raise ValueError('The RAG index contains duplicate SHA-256 aliases.')
         return {"records": len(records), "unique_source_sha256": len(set(hashes))}
 
     check("rag_train_only", check_rag)
@@ -224,7 +224,7 @@ def main() -> int:
         report = load_json(report_path)
         from prototype.quantum_assistant.adapters.rag_checks import validate_validation_report
         if rag_manifest is None or manifest is None:
-            raise ValueError("Prerequisiti RAG non validi.")
+            raise ValueError('Invalid RAG prerequisites.')
         validate_validation_report(report, rag_manifest, manifest)
         return {"path": str(report_path), "sha256": file_sha256(report_path)}
 
@@ -253,7 +253,7 @@ def main() -> int:
                 "timeout_seconds": COMPILATION_TIMEOUT_SECONDS,
             }
         ):
-            raise ValueError("Il report non prova cinque canary RL e un qcompile.")
+            raise ValueError('The report does not demonstrate five RL canaries and one qcompile canary.')
         return {"path": str(QCOMPILE_CANARY), "sha256": file_sha256(QCOMPILE_CANARY)}
 
     check("qcompile_canary", check_canary)
@@ -273,7 +273,7 @@ def main() -> int:
             or summary.get("status") != "complete"
             or summary.get("circuit_count") != 88
         ):
-            raise ValueError("Valutazione validation non completa o fuori protocollo.")
+            raise ValueError('Validation evaluation is incomplete or outside the protocol.')
         if not validation_results_path.is_file():
             raise FileNotFoundError(validation_results_path)
         return {
@@ -312,7 +312,7 @@ def main() -> int:
     if not args.release:
         return 0 if ready else 1
     if not ready:
-        raise SystemExit("Test non aperto: almeno un gate non è stato superato.")
+        raise SystemExit('Test remains closed: at least one check failed.')
 
     frozen_paths = [
         CATALOG_PATH,
@@ -358,7 +358,7 @@ def main() -> int:
     }
     atomic_json_write(args.output, record)
     validate_test_release_record(args.output)
-    print(f"Test aperto: {args.output}")
+    print(f'Test released: {args.output}')
     return 0
 
 

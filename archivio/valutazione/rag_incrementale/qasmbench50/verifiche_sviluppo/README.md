@@ -1,20 +1,7 @@
-# Verifiche QASMBench50
+# QASMBench incremental development checks
 
-Questa cartella documenta i controlli tecnici. Non contiene esiti delle
-nuove decisioni sui 50 QASMBench.
+`derivazione.json` records source origins; `verifiche.json` and `provenienza_consegna.json` identify checks and delivery; `oracle_*.json` records read-only oracle verification.
 
-Esito del 2 ottobre: **15 verifiche automatiche superate**, 50 recuperi storici
-riprodotti, 9.000 esiti oracle verificati. Le quattro campagne sono preparate
-con memorie vuote e zero decisioni sperimentali. Il PDF sintetico di 12 pagine
-e le dodici figure autonome compilano; tutte le pagine sono state controllate
-visivamente. Dettagli e avvisi del compilatore sono in `verifiche.json`.
+The October 2 preparation record reports 15 checks, reproduction of 50 historical retrievals and verification of 9,000 oracle outcomes. At that recorded stage the new campaign memories were empty. Those dated checks do not describe the current number of completed decisions; inspect the campaign records for that.
 
-- `derivazione.json` registra i sorgenti MQT Bench da cui deriva la copia autonoma.
-- `test_incrementale.py`, nella cartella superiore, controlla procedura, ripresa, memoria e recuperi storici; l'LLM è simulato.
-- `test_report.py` controlla abbinamenti per circuito, denominatori, scarti negativi, valori zero, dati mancanti, figure complete e rifiuto di un riepilogo oracle alterato.
-- `oracle_*.json` registra la verifica in sola lettura dell'oracle reale.
-- `temporanei/` conserva le anteprime sintetiche e i controlli visivi, esclusi da Git.
-
-Una sola prova tecnica compila Bell: non è una compilazione di uno dei
-cinquanta circuiti della campagna. Le anteprime sono marcate come sintetiche
-su ogni pagina e in ciascuna figura autonoma. Non dimostrano qualità delle scelte.
+[Parent directory](../README.md) · [Current repository guide](../../../../../README.md)

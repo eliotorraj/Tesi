@@ -1,4 +1,4 @@
-"""Verifica i pesi sul percorso Windows senza leggerli nella cache WSL."""
+'Verify weights on the Windows path without reading them into WSL cache.'
 import json
 import subprocess
 from pathlib import Path

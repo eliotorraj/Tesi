@@ -1,4 +1,4 @@
-"""QASM -> RAG train -> Qwen facts v4 -> configurazione -> compilazione facoltativa."""
+'QASM -> train RAG -> Qwen facts v4 -> configuration -> optional compilation.'
 from __future__ import annotations
 import argparse, dataclasses, datetime, hashlib, json, os, platform, shutil, subprocess, sys, time, urllib.request
 from importlib.metadata import version
@@ -20,7 +20,7 @@ CONFIG=json.loads((ROOT/'config.json').read_text())
 PROFILES={'desktop':60000,'cpu':16384,'gpu':16384,'laptop':16384}
 
 def save(path,value):
-    """Crea un registro nuovo; rifiuta di sovrascrivere un tentativo precedente."""
+    'Create a new record; refuse to overwrite an earlier attempt.'
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     with path.open('x',encoding='utf-8') as handle:
         json.dump(value,handle,ensure_ascii=False,indent=2,allow_nan=False)
@@ -30,16 +30,16 @@ def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 def prepare(qasm,allowed=(),*,rag=True,rag_limit=5):
-    """Prepara evidenze solo train; il percorso standard mantiene cinque esempi."""
+    'Prepare train-only evidence; the standard path retains five examples.'
     if type(rag_limit) is not int or rag_limit not in (1, 5, 10):
-        raise ValueError("Numero di esempi supportato: 1, 5 o 10.")
+        raise ValueError('Supported example counts: 1, 5 or 10.')
     started=time.perf_counter();catalog=load_catalog()
     hardware=MqtHardwareCatalog(catalog.supported_device_ids,configuration_catalog=catalog).snapshot()
     parsed=QasmRequestParser().parse(UiSubmission(request_id=str(uuid4()),user_text='',qasm2=qasm,allowed_devices=tuple(allowed)))
     request=RequestSemanticValidator().normalize(parsed,hardware)
     mask=HardwareMaskBuilder().filter(request,hardware)
     if not mask.available_device_ids:
-        raise ValueError('Nessun dispositivo compatibile con il circuito e i vincoli.')
+        raise ValueError('No device is compatible with the circuit and constraints.')
     examples=()
     rag_started=time.perf_counter()
     if rag:
@@ -51,17 +51,17 @@ def prepare(qasm,allowed=(),*,rag=True,rag_limit=5):
     return request,prompt.payload,{'seconds':time.perf_counter()-started,'rag_seconds':rag_seconds,'records':[{'rag_id':x.record_id,'distance':x.distance} for x in examples]}
 
 class LlmTransportError(RuntimeError):
-    """Il server non ha restituito una risposta utilizzabile: fermare l'esecuzione."""
+    'The server did not return a usable response: stop execution.'
 
 
 class Http:
-    """Collega il client al server locale e conserva richieste, risposte ed errori."""
+    'Connect to the local server and preserve requests, responses and errors.'
     def __init__(self,url,timeout=600,transport="auto"):
         if transport not in ("auto","native","windows"):
-            raise ValueError("Trasporto HTTP non valido")
+            raise ValueError('Invalid HTTP transport')
         self.transport=("windows" if "microsoft" in platform.release().lower() else "native") if transport=="auto" else transport
         if not url.startswith(('http://127.0.0.1:','http://localhost:')):
-            raise ValueError('Il prototipo richiede un server locale su localhost.')
+            raise ValueError('The prototype requires a local server on localhost.')
         self.url=url.rstrip('/');self.timeout=timeout
     def __call__(self,endpoint,payload,directory):
         directory=Path(directory);directory.mkdir(parents=True,exist_ok=False)
@@ -71,13 +71,13 @@ class Http:
             if self.transport == 'windows':
                 source=subprocess.check_output(['wslpath','-w',str(directory/'request.json')],text=True).strip()
                 curl=shutil.which('curl.exe')
-                if not curl:raise RuntimeError('curl.exe Windows non disponibile nel PATH WSL.')
+                if not curl:raise RuntimeError('Windows curl.exe is unavailable in the WSL PATH.')
                 cmd=[curl,'--silent','--show-error','--fail-with-body','--max-time',str(self.timeout),'-H','Content-Type: application/json','--data-binary','@'+source,self.url+endpoint]
                 proc=subprocess.run(cmd,capture_output=True,timeout=self.timeout+10)
                 raw=proc.stdout
                 (directory/'stderr.txt').write_bytes(proc.stderr)
                 (directory/'response_raw.json').write_bytes(raw)
-                if proc.returncode:raise RuntimeError('Errore trasporto curl: '+str(proc.returncode))
+                if proc.returncode:raise RuntimeError('curl transport error: '+str(proc.returncode))
             else:
                 req=urllib.request.Request(self.url+endpoint,data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
                 with urllib.request.urlopen(req,timeout=self.timeout) as response:raw=response.read()
@@ -95,7 +95,7 @@ class Http:
             raise
 
 def decide(prompt,directory,http,context,*,max_examples=5):
-    """Controlla i token e applica i tre tentativi del contratto ufficiale v4."""
+    "Check token counts and apply the official v4 contract's three attempts."
     feedback=[]
     for attempt in range(1,4):
         folder=Path(directory)/f'attempt_{attempt}';folder.mkdir()
@@ -104,13 +104,13 @@ def decide(prompt,directory,http,context,*,max_examples=5):
         tokenized=http('/tokenize',{'content':formatted['prompt'],'add_special':False,'parse_special':True},folder/'tokenize')
         count=len(tokenized['tokens']);save(folder/'context.json',{'input_tokens':count,'output_budget':4096,'context':context})
         if count+4096>context:
-            raise ValueError(f'Contesto insufficiente: {count}+4096 > {context}. Nessuna generazione; nessun esempio eliminato.')
+            raise ValueError(f'Insufficient context: {count}+4096 > {context}. No generation performed; no examples removed.')
         excluded={'stream_options','max_tokens','chat_template_kwargs','reasoning_effort','reasoning_format'}
         payload={k:v for k,v in CONFIG['fixed'].items() if k not in excluded}
         payload.update(temperature=0.0,stream=False,prompt=formatted['prompt'],json_schema=response_schema(max_examples=max_examples),n_predict=4096,return_tokens=True)
         response=http('/completion',payload,folder/'call')
         if response.get('truncated') or response.get('stop_type')=='limit' or response.get('stop') is False:
-            raise RuntimeError('Risposta incompleta o contesto troncato; vedere il registro.')
+            raise RuntimeError('Incomplete response or truncated context; see the record.')
         checked=verify(response.get('content',''),prompt,max_examples=max_examples)
         checked.update(attempt=attempt,input_tokens=count,timings=response.get('timings'),tokens_predicted=response.get('tokens_predicted'))
         save(folder/'validation.json',checked)
@@ -119,47 +119,47 @@ def decide(prompt,directory,http,context,*,max_examples=5):
             checked.update(status='success' if checked['facts_status']=='verified' else 'accepted_with_unverified_facts',completed_attempts=attempt,hypothesis_status='not_semantically_verified')
             return checked
         feedback=checked['issues']
-    raise ValueError('Nessuna coppia strutturalmente valida e ammessa dopo tre tentativi.')
+    raise ValueError('No structurally valid, allowed pair after three attempts.')
 
 def compile_decision(request,decision,seed):
-    """Compila soltanto la coppia ammessa, con il seed scelto per questa prova."""
+    'Compile only the allowed pair with the seed selected for this trial.'
     canonical=decision['canonical_response'];config=load_catalog().by_id[canonical['config_id']]
     recommendation=Recommendation(selected_device=canonical['selected_device'],figure_of_merit='expected_fidelity',qiskit_plan=QiskitCompilationPlan(optimization_level=config.optimization_level,seed_transpiler=seed,layout_method=config.layout_method,routing_method=config.routing_method),explanation=canonical['hypothesis'],evidence=(),schema_version='4.0.0',config_id=config.config_id)
     return QiskitDeterministicCompiler().compile(request,recommendation)
 
 def check_installation():
-    """Verifica i componenti necessari all'uso senza avviare prove sperimentali."""
+    'Check required runtime components without launching experiments.'
     from prototype.prompting.toon import encode_view, decode_view, metadata
     if sys.version_info[:2] != (3, 12):
-        raise RuntimeError("Richiesto Python 3.12.")
+        raise RuntimeError('Python 3.12 is required.')
     expected = dict(line.strip().split("==") for line in (ROOT / "requirements.txt").read_text().splitlines() if "==" in line)
     packages = {name: version(name) for name in expected}
     if packages != expected:
-        raise RuntimeError("Dipendenze diverse da requirements.txt: " + str(packages))
+        raise RuntimeError('Dependencies differ from requirements.txt: ' + str(packages))
     catalog = load_catalog()
     MqtHardwareCatalog(catalog.supported_device_ids, configuration_catalog=catalog).snapshot()
     corpus = load_corpus()
     probe = {"installation_check": [1, 2, 3]}
     if decode_view(encode_view(probe)) != probe:
-        raise RuntimeError("Il codec TOON non conserva i valori.")
+        raise RuntimeError('The TOON codec does not preserve values.')
     return {"status": "ready", "python": platform.python_version(), "packages": packages,
             "train_records": len(corpus.records), "devices": list(catalog.supported_device_ids),
             "toon": metadata(), "llm_server_checked": False,
-            "note": "Verifica locale; disponibilita del server e pesi controllata dagli avviatori."}
+            "note": 'Local check; launchers verify server and weight availability.'}
 
 
 def main():
-    """Separa preparazione, controlli e nuova prova; conserva anche ogni errore."""
+    'Separate preparation, checks and new requests; retain every error.'
     ap=argparse.ArgumentParser(description=__doc__)
     sub=ap.add_subparsers(dest='command',required=True)
-    sub.add_parser('prepare',help='Verifica train e costruisce Qdrant locale')
-    sub.add_parser('check',help='Verifica ambiente, dati train, Target e codec TOON senza inferenza')
-    run=sub.add_parser('run',help='Raccomanda ed eventualmente compila un QASM')
+    sub.add_parser('prepare',help='Verify train data and build local Qdrant storage')
+    sub.add_parser('check',help='Check environment, train data, Targets and TOON without inference')
+    run=sub.add_parser('run',help='Recommend and optionally compile a QASM circuit')
     run.add_argument('qasm',type=Path);run.add_argument('--profile',choices=PROFILES,default='desktop')
     run.add_argument('--url',default='http://127.0.0.1:8089');run.add_argument('--timeout',type=int,default=600)
-    run.add_argument('--transport',choices=('auto','native','windows'),default='auto',help='native per server Linux; windows per server Windows da WSL; auto mantiene la scelta per sistema')
+    run.add_argument('--transport',choices=('auto','native','windows'),default='auto',help='native for Linux servers; windows for Windows servers reached from WSL; auto retains platform-based selection')
     run.add_argument('--compile',action='store_true');run.add_argument('--seed-transpiler',type=int,default=0)
-    run.add_argument('--device',action='append',default=[],help='Limita i dispositivi ammessi; ripetibile')
+    run.add_argument('--device',action='append',default=[],help='Restrict allowed devices; repeatable')
     args=ap.parse_args()
     if args.command=='prepare':
         print(json.dumps(prepare_index(load_corpus()),indent=2));return
@@ -185,7 +185,7 @@ def main():
         print(json.dumps({'directory':str(directory),'status':decision['status'],'response':selected,'facts_status':decision['facts_status'],'hypothesis_status':decision['hypothesis_status'],'transpile':decision['transpile'],'compiled':args.compile},indent=2,ensure_ascii=False))
     except BaseException as exc:
         save(directory/'failure.json',{'at':stamp(),'type':type(exc).__name__,'message':str(exc),'seconds':time.perf_counter()-started})
-        print(f'Errore: {exc}\nRegistro: {directory}',file=sys.stderr)
+        print(f'Error: {exc}\nRecord: {directory}',file=sys.stderr)
         raise
 
 if __name__=='__main__':main()

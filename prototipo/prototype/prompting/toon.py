@@ -1,4 +1,4 @@
-"""TOON ufficiale: vista reversibile, valori controllati dopo la decodifica."""
+'Official TOON: reversible view with values checked after decoding.'
 from __future__ import annotations
 import copy
 from functools import lru_cache
@@ -25,10 +25,10 @@ def node_path():
     if not Path(candidate).is_file():
         candidate=shutil.which("node")
     if not candidate:
-        raise RuntimeError("Installare Node.js 22 o indicare PROTOTIPO_NODE.")
+        raise RuntimeError('Install Node.js 22 or set PROTOTIPO_NODE.')
     result=subprocess.run([str(candidate),"--version"],capture_output=True,text=True,check=True)
     if not result.stdout.strip().startswith("v22."):
-        raise RuntimeError("Richiesto Node.js 22 per TOON; versione osservata "+result.stdout.strip())
+        raise RuntimeError('Node.js 22 is required for TOON; observed version '+result.stdout.strip())
     return Path(candidate)
 
 
@@ -42,7 +42,7 @@ def _codec(job):
 
 
 def project(view):
-    """Raggruppa solo forme ricostruibili esattamente; nessuna feature è scartata."""
+    'Group only exactly reconstructible structures; no feature is discarded.'
     value = copy.deepcopy(view)
     for device in value.get("compatible_hardware", []):
         edges = device.get("coupling_edges")
@@ -76,7 +76,7 @@ def project(view):
 
 
 def restore(value):
-    """Ricostruisce la vista JSON minima, compreso l'ordine degli archi."""
+    'Reconstruct the minimal JSON view, including edge order.'
     value = copy.deepcopy(value)
     for device in value.get("compatible_hardware", []):
         if "coupling_adjacency" in device:

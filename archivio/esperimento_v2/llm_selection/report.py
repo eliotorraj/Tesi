@@ -1,4 +1,4 @@
-"""Figure e documento LaTeX generati dai dati congelati, senza numeri trascritti."""
+'Generate figures and LaTeX from frozen data without transcribing numbers.'
 import argparse
 import json
 import os
@@ -61,101 +61,76 @@ def build_report(compile_pdf=True):
                     "--output",str(picture_dir)],cwd=ROOT,check=True)
     pictures=read_json(picture_dir/"manifest.json")
     parts=[r"\providecommand{\ValidationFiguresPath}{figures/}",
-        r"\section{Selezione del modello LLM locale}",
-        "Sono confrontate tre famiglie e tre impostazioni sugli stessi 88 circuiti di validation. "
-        "La scelta riguarda il modello locale con RAG. Il test resta separato e non viene aperto da questa procedura.",
-        r"\subsection{Hardware, dati e misure}",
-        "Il PC usa AMD Ryzen 5 5600G, 16 GB di RAM e Radeon RX 6750 XT con 12 GB di VRAM. "
-        "WSL ha un limite di 10 GB di RAM e swap separato. I pesi sono sul disco D. "
-        "L'ambiente MQT conserva Python 3.12 e uv.lock; llama.cpp b10930 usa Vulkan e carica un modello alla volta.",
-        "Si recuperano cinque esempi dal solo train. La distanza è Manhattan su 49 caratteristiche, con log1p e divisori stimati sul train. "
-        "Circuiti completi, catalogo, maschera ed evidenze sono conservati. Il grafo completo di connettività è scritto con una regola esatta "
-        "che permette di ricostruire tutti gli archi nello stesso ordine. Nessun prompt viene troncato per farlo entrare nel contesto.",
-        "Il monitor conserva campioni di RAM, VRAM e temperatura. Le pause automatiche del solo processo di inferenza sono incluse nei tempi. "
-        "I limiti operativi sono prudenziali e non identificano la causa dello spegnimento iniziale del PC. "
-        "La potenza del sensore ASIC non è l'energia consumata dall'intero computer.",
-        r"\begin{center}\begin{tabular}{llll}\toprule Modello & Pesi & Contesto & Cache KV\\\midrule"]
+        '\\section{Local LLM selection}',
+        'Three model families and three settings are compared on the same 88 validation circuits. Selection concerns the local model with RAG. Test remains separate and is not opened by this procedure.',
+        '\\subsection{Hardware, data and measurements}',
+        'The host uses an AMD Ryzen 5 5600G, 16 GB of RAM and a Radeon RX 6750 XT with 12 GB of VRAM. WSL has a 10 GB RAM limit and separate swap. Weights are on drive D. The MQT environment retains Python 3.12 and uv.lock; llama.cpp b10930 uses Vulkan and loads one model at a time.',
+        'Five examples are retrieved from train only. Manhattan distance uses 49 features with log1p and train-fitted divisors. Full circuits, catalog, mask and evidence are preserved. Fully connected topology uses an exact rule that reconstructs every edge in the same order. Prompts are never truncated to fit context.',
+        'The monitor preserves RAM, VRAM and temperature samples. Automatic pauses of the inference process are included in timings. Operational limits are precautionary and do not identify the cause of the initial host shutdown. ASIC sensor power is not whole-computer energy consumption.',
+        '\\begin{center}\\begin{tabular}{llll}\\toprule Model & Weights & Context & KV cache\\\\\\midrule']
     for name,profile in study["models"].items():
         parts.append(" & ".join(tex(v) for v in (name,profile["weight_precision"],profile["context"],profile["cache_type"]))+r"\\")
     parts += [r"\bottomrule\end{tabular}\end{center}",
-        "Gemma E4B ha un numero di parametri totali maggiore del numero di parametri attivi. "
-        "Revisioni, dimensioni, SHA-256, tokenizer e motivazioni della precisione sono conservati nei manifest e nella configurazione finale.",
-        r"\subsection{Prove tecniche e sviluppo}",
-        "Le prove tecniche precedono il congelamento e usano il train. I file technical\\_episodes.csv e server\\_runs.csv "
-        "riportano anche configurazioni scartate, interruzioni e caricamenti arrestati prima di una risposta. "
-        "I registri esplorativi precedenti sono conservati in technical/ e incidents/.",
-        "Il riepilogo degli episodi tecnici registrati contiene "+str(len(technical["episodes"]))+" episodi: "+
-        tex(", ".join(str(count)+" "+status for status,count in sorted(technical["episode_status_counts"].items())))+". "
-        "Questi conteggi non fanno parte dei risultati della validation.",
-        r"\subsection{Impostazioni e criteri}",
-        "Le impostazioni confrontate sono: prompt base a temperatura 0; prompt base a temperatura 0,7; "
-        "prompt con controlli espliciti a temperatura 0. Il ragionamento esteso è disabilitato. "
-        "La prima risposta valida è definitiva. Si ammettono al massimo tre chiamate per correggere risposte non conformi; "
-        "trasporto, interruzioni e correzioni sono registrati separatamente.",
-        r"\begin{center}\begin{tabular}{lr}\toprule Parametro & Valore\\\midrule"]
+        'Gemma E4B has more total than active parameters. Revisions, sizes, SHA-256, tokenizers and precision choices are preserved in manifests and the final configuration.',
+        '\\subsection{Technical checks and development}',
+        'Technical checks precede freezing and use train. technical\\_episodes.csv and server\\_runs.csv also retain rejected settings, interruptions and loads stopped before a response. Earlier exploratory records remain in technical/ and incidents/.',
+        'The recorded technical-episode summary contains '+str(len(technical["episodes"]))+' episodes: '+
+        tex(", ".join(str(count)+" "+status for status,count in sorted(technical["episode_status_counts"].items())))+'. These counts are not validation results.',
+        '\\subsection{Settings and criteria}',
+        'The compared settings are a base prompt at temperature 0, a base prompt at 0.7 and a prompt with explicit checks at 0. Extended reasoning is disabled. The first valid response is final. Up to three calls can repair nonconforming responses; transport, interruptions and repairs are recorded separately.',
+        '\\begin{center}\\begin{tabular}{lr}\\toprule Parameter & Value\\\\\\midrule']
     for key in ("max_tokens","top_p","top_k","min_p","seed","repeat_penalty","presence_penalty","frequency_penalty","mirostat","typical_p"):
         parts.append(tex(key)+" & "+tex(study["fixed"][key])+r"\\")
-    parts += ["Timeout per chiamata [s] & "+str(study["timeout_seconds"])+r"\\",
+    parts += ['Timeout per call [s] & '+str(study["timeout_seconds"])+r"\\",
         r"\bottomrule\end{tabular}\end{center}",
-        r"\[R(c)=F_{\mathrm{oracle}}(c)-F_{\mathrm{scelta}}(c).\]",
-        "La fedeltà di una coppia è la mediana dei seed 0, 1 e 2, solo se tutti e tre riescono. "
-        "L'oracle richiede l'intera matrice compatibile riuscita. I regret mancanti restano mancanti. "
-        "I punteggi e i tempi Qiskit sono riutilizzati da risultati precedenti. I nuovi tempi delle chiamate LLM sono misurati.",
-        "Prima di leggere gli score sono sigillate tutte le decisioni. La selezione privilegia le scelte valide e compilabili; "
-        "a parità usa la mediana del regret sullo stesso insieme di circuiti riusciti e valutabili. Seguono validità JSON iniziale, chiamate e costi misurati. "
-        "Il circuito è l'unità statistica: seed e tentativi non aumentano la numerosità.",
-        r"\subsection{Risultati}",
-        r"\begin{center}\small\begin{tabular}{lrrrr}\toprule Prova & Riuscite/88 & Regret $n$ & Mediana regret & Valide alla prima\\\midrule"]
+        '\\[R(c)=F_{\\mathrm{oracle}}(c)-F_{\\mathrm{selected}}(c).\\]',
+        'Pair fidelity is the median of seeds 0, 1 and 2, only when all three succeed. The oracle requires a fully successful compatible matrix. Missing regret remains missing. Qiskit scores and timings are reused from prior results; new LLM call timings are measured.',
+        'All decisions are sealed before scores are read. Selection prioritizes valid, compilable choices, then median regret on the same successful, evaluable circuits. Initial JSON validity, calls and measured costs follow. The circuit is the statistical unit: seeds and attempts do not increase sample size.',
+        '\\subsection{Results}',
+        '\\begin{center}\\small\\begin{tabular}{lrrrr}\\toprule Trial & Successful/88 & Regret $n$ & Median regret & Valid on first call\\\\\\midrule']
     for trial,s in sorted(selection["summaries"].items()):
         parts.append(" & ".join([tex(trial),str(s["valid_and_compilable"]),str(s["regret_available"]),fmt(s["median_regret_absolute"]),str(s["first_attempt_valid"])])+r"\\")
     parts += [r"\bottomrule\end{tabular}\end{center}",
-        "La configurazione selezionata è "+r"\textbf{"+tex(selection["winner"])+r"}. "
-        "I passaggi della scelta, con valori e denominatori, sono conservati in selection.json. "
-        "Questa selezione non dimostra una superiorità generale del modello."]
+        'The selected configuration is '+r"\textbf{"+tex(selection["winner"])+'}. Selection steps, values and denominators are preserved in selection.json. This selection does not establish general model superiority.']
     for name,caption in pictures:
         parts += [r"\begin{figure}[htbp]\centering",r"\includegraphics[width=\linewidth]{\ValidationFiguresPath "+name+".png}",
                   r"\caption{"+tex(caption)+r"}\end{figure}"]
     parts += [r"\clearpage\subsection{Incertezza e limiti}",
-        "Il file paired\\_uncertainty.json confronta il vincitore e le alternative sugli stessi circuiti valutabili. "
-        "Riporta la mediana delle differenze appaiate di regret e intervalli percentili al 95\\%, con 2000 ricampionamenti di circuiti e seed 20260913. "
-        "Con meno di due circuiti non si calcola l'intervallo. Questi intervalli sono descrittivi e non correggono la selezione tra più impostazioni.",
-        "Cache, ordine delle richieste, pause e altri programmi del PC influenzano i tempi. I massimi campionati possono perdere picchi istantanei. "
-        "I valori mancanti rimangono espliciti. Le prove tecniche e le configurazioni scartate sono conservate separatamente.",
-        "La validation locale non richiede qcompile completo. Sul test restano previsti modello senza RAG, MQT, modello di frontiera e riferimenti Qiskit, "
-        "dopo i controlli richiesti dal protocollo. Questo documento non contiene risultati del test.",
-        r"\subsection{Dati e fonti}",
-        "Per rigenerare il documento usare la procedura nel README di llm\\_selection. "
-        "episodes.csv, trials.csv, groups.csv e i registri JSON/JSONL permettono nuove analisi senza trascrivere i risultati."]
+        'paired\\_uncertainty.json compares the winner and alternatives on the same evaluable circuits. It reports median paired regret differences and 95\\% percentile intervals using 2000 circuit resamples and seed 20260913. No interval is computed with fewer than two circuits. These descriptive intervals do not adjust for selection across settings.',
+        'Cache, request order, pauses and other host applications affect timings. Sampled maxima may miss instantaneous peaks. Missing values remain explicit. Technical checks and rejected configurations are retained separately.',
+        'Local validation does not require full qcompile. The historical Test plan includes a no-RAG model, MQT, a frontier model and Qiskit references after the protocol checks. This document contains no Test results.',
+        '\\subsection{Data and sources}',
+        "Regenerate the document through llm\\_selection's report command. episodes.csv, trials.csv, groups.csv and JSON/JSONL records support further analysis without transcribing results."]
     for model,profile in study["models"].items():
         parts.append(tex(model)+": "+tex(profile["precision_reason"])+". "
-                     "Batch "+str(profile["batch"])+", micro-batch "+str(profile["micro_batch"])+", livelli GPU "+tex(profile["gpu_layers"])+".")
+                     "Batch "+str(profile["batch"])+", micro-batch "+str(profile["micro_batch"])+', GPU layers '+tex(profile["gpu_layers"])+".")
     for model,profile in study["models"].items():
         artifact=profile["artifact"]
         parts += [tex(model)+r": \url{https://huggingface.co/"+artifact["base_repository"]+r"}.",
-            r"Pesi effettivi: \url{"+artifact["url"]+r"}.",
+            'Actual weights: \\url{'+artifact["url"]+r"}.",
             r"SHA-256: \texttt{\seqsplit{"+artifact["gguf_sha256"]+r"}}."]
     parts += [r"\url{https://github.com/ggml-org/llama.cpp/blob/b10930/tools/server/README.md}."]
     (directory/"validation_selection.tex").write_text("\n\n".join(parts)+"\n",encoding="utf-8")
-    standalone=r"""\documentclass[11pt,a4paper]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[italian]{babel}
-\usepackage[margin=2.1cm]{geometry}
-\usepackage{graphicx,booktabs,amsmath,seqsplit,microtype}
-\usepackage[hidelinks]{hyperref}
-\title{Selezione del modello LLM locale}
-\author{Esperimenti di validation}
-\date{}
-\begin{document}
-\maketitle
-\input{validation_selection.tex}
-\end{document}
+    standalone="""\\documentclass[11pt,a4paper]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage[english]{babel}
+\\usepackage[margin=2.1cm]{geometry}
+\\usepackage{graphicx,booktabs,amsmath,seqsplit,microtype}
+\\usepackage[hidelinks]{hyperref}
+\\title{Local LLM selection}
+\\author{Validation experiments}
+\\date{}
+\\begin{document}
+\\maketitle
+\\input{validation_selection.tex}
+\\end{document}
 """
     (directory/"standalone.tex").write_text(standalone,encoding="utf-8")
     pdf=None
     if compile_pdf:
         executable=OUTPUT/"runtime/tectonic/tectonic"
-        if not executable.exists(): raise RuntimeError("Sorgenti pronti. Prima installare il compilatore: python -m llm_selection.setup_report")
+        if not executable.exists(): raise RuntimeError('Sources ready. Install the compiler first: python -m llm_selection.setup_report')
         env=dict(os.environ);env["TECTONIC_CACHE_DIR"]=str(OUTPUT/"runtime/tectonic-cache")
         with (directory/"compile.log").open("w") as log:
             subprocess.run([str(executable),"--keep-logs","--outdir",str(directory),str(directory/"standalone.tex")],
@@ -164,7 +139,7 @@ def build_report(compile_pdf=True):
         subprocess.run([str(OUTPUT/"runtime/python/bin/python"),"-m","llm_selection.render_pdf",str(pdf),
                         "--output",str(directory/"preview")],cwd=ROOT,check=True)
     return {"directory":str(directory),"pdf":str(pdf) if pdf else None,
-            "visual_review":"Controllare le pagine PNG prima di inserire il documento nella tesi."}
+            "visual_review":'Inspect the PNG pages before including the document in the thesis.'}
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser();parser.add_argument("--sources-only",action="store_true");args=parser.parse_args()

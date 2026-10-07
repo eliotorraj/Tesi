@@ -1,4 +1,4 @@
-"""Prove tecniche del recupero: nessuna raccomandazione LLM o compilazione."""
+'Technical retrieval checks without LLM recommendations or compilation.'
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from .qdrant_context import expected_manifest
 
 
 def independent_rank(corpus: RagCorpus, features, devices, *, limit: int):
-    """Formula scalare indipendente: non richiama fit/apply/manhattan."""
+    'Independent scalar formula: does not call fit/apply/manhattan.'
     def raw(row):
         return [
             math.log1p(row[name]) if name.startswith("gate_count_") or name in ("depth", "num_qubits") else row[name]
@@ -39,12 +39,12 @@ def independent_rank(corpus: RagCorpus, features, devices, *, limit: int):
 
 
 def prepare_prompt(service, qasm_path: Path, *, devices=None) -> dict:
-    """Usa parser, maschera, adattatore e costruttori del servizio effettivo."""
+    'Use the actual service parser, mask, adapter and builders.'
     source_bytes = qasm_path.read_bytes()
     source_hash = hashlib.sha256(source_bytes).hexdigest()
     forbidden = {r["source_sha256"] for r in source_manifest()["circuits"] if r["split"] == "test"}
     if source_hash in forbidden:
-        raise RetrievalIntegrityError("Questa prova tecnica non accede ai circuiti test.")
+        raise RetrievalIntegrityError('This technical check does not access Test circuits.')
     snapshot = service.hardware_catalog.snapshot()
     request = {
         "schema_version": "1.0.0",
@@ -83,16 +83,16 @@ def validate_validation_report(report: dict, index_manifest: dict, manifest: dic
             or report.get("llm_calls") != 0 or report.get("compilations") != 0
             or report.get("test_accessed") is not False
             or not isinstance(rows, list) or len(rows) != 88):
-        raise RetrievalIntegrityError("Verifica RAG validation assente o incompatibile.")
+        raise RetrievalIntegrityError('RAG validation check is missing or incompatible.')
     observed = {(r.get("circuit_id"), r.get("source_sha256")) for r in rows}
     if observed != expected:
-        raise RetrievalIntegrityError("La verifica non copre gli 88 circuiti validation.")
+        raise RetrievalIntegrityError('The check does not cover all 88 validation circuits.')
     for row in rows:
         examples = row.get("examples", [])
         if (row.get("status") != "prepared" or row.get("registry_count") != len(examples)
                 or len(examples) > 5 or len({r["rag_id"] for r in examples}) != len(examples)
                 or not row.get("prompt_sha256") or not row.get("registry_sha256")):
-            raise RetrievalIntegrityError("Riga della verifica validation incompleta.")
+            raise RetrievalIntegrityError('Incomplete validation-check row.')
 
 
 def check_validation(corpus: RagCorpus, *, limit: int = 5) -> dict:
@@ -102,27 +102,27 @@ def check_validation(corpus: RagCorpus, *, limit: int = 5) -> dict:
     manifest = source_manifest()
     circuits = sorted((r for r in manifest["circuits"] if r["split"] == "validation"), key=lambda r: r["circuit_id"])
     if len(circuits) != 88:
-        raise RetrievalIntegrityError("Attesi 88 circuiti validation.")
+        raise RetrievalIntegrityError('Expected 88 validation circuits.')
     service = build_default_service(device_names=FROZEN_DEVICES, llm_gateway=UnconfiguredLlmGateway(), retrieval_limit=limit)
     rows = []
     maximum_error = 0.0
     for position, circuit in enumerate(circuits, start=1):
         path = VALIDATION_CIRCUITS_V2 / circuit["file_name"]
         if file_sha256(path) != circuit["source_sha256"]:
-            raise RetrievalIntegrityError("Sorgente validation modificato.")
+            raise RetrievalIntegrityError('Validation source was modified.')
         row = prepare_prompt(service, path)
         if row["status"] != "prepared":
-            raise RetrievalIntegrityError(f"Richiesta non preparata: {circuit['circuit_id']}.")
+            raise RetrievalIntegrityError(f"Request is not prepared: {circuit['circuit_id']}.")
         expected = independent_rank(corpus, row.pop("features"), row["devices"], limit=limit)
         observed = [(r["distance"], r["rag_id"]) for r in row["examples"]]
         if [r[1] for r in observed] != [r[1] for r in expected]:
-            raise RetrievalIntegrityError(f"Ordinamento indipendente diverso: {circuit['circuit_id']}.")
+            raise RetrievalIntegrityError(f"Independent ordering differs: {circuit['circuit_id']}.")
         for (a, _), (b, _) in zip(observed, expected, strict=True):
             maximum_error = max(maximum_error, abs(a - b))
             if not math.isclose(a, b, abs_tol=SCORE_ABS_TOL, rel_tol=SCORE_REL_TOL):
-                raise RetrievalIntegrityError("Distanza diversa dal riferimento indipendente.")
+                raise RetrievalIntegrityError('Distance differs from the independent reference.')
         if row["registry_count"] != len(observed):
-            raise RetrievalIntegrityError("Registro incompleto.")
+            raise RetrievalIntegrityError('Incomplete record.')
         row.pop("prompt")
         rows.append(row)
         if position % 8 == 0:

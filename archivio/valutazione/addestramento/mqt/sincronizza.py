@@ -1,4 +1,4 @@
-"""Installa nel runtime corrente i modelli canonici verificati, preservando i precedenti."""
+'Install verified canonical models in the current runtime, preserving previous copies.'
 from pathlib import Path
 import shutil
 import sys
@@ -21,7 +21,7 @@ def main():
         for device in trainer.FROZEN_DEVICES:
             path=trainer.CANONICAL_RL_MODELS_DIR/f"model_expected_fidelity_{device}.zip"
             if metadata.get("rl_models",{}).get(device,{}).get("sha256")!=trainer.file_sha256(path):
-                raise SystemExit("Il selettore usa modelli RL diversi: "+device)
+                raise SystemExit('The selector uses different RL models: '+device)
         sync_rl(False)
         target=trainer.get_ml_model_path("expected_fidelity")
         if target.exists() and trainer.file_sha256(target)!=trainer.file_sha256(canonical):
@@ -30,5 +30,5 @@ def main():
             if not backup.exists():shutil.copy2(target,backup)
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(canonical,target)
-        print("Selettore installato: "+str(target))
+        print('Selector installed: '+str(target))
 if __name__=="__main__":main()

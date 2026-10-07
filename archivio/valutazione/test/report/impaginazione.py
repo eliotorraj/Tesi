@@ -1,4 +1,4 @@
-"""Tabelle e figure PGFPlots: sorgenti leggibili, nessun servizio esterno."""
+'PGFPlots tables and figures: readable sources, no external service.'
 from __future__ import annotations
 import shutil
 import subprocess
@@ -9,11 +9,11 @@ COLORS = {'llm_rag':'blue!75!black','llm_senza_rag':'orange!85!black','mqt_predi
 MARKERS = {'llm_rag':'*','llm_senza_rag':'triangle*','mqt_predictor':'square*','random':'diamond*'}
 COLORS['llm_recupero_random'] = 'green!45!black'
 MARKERS['llm_recupero_random'] = '*'
-METRIC_LABELS = {'score':'Expected fidelity', 'total_seconds':'Tempo totale (s)',
- 'compilation_seconds':'Compilazione interna (s)', 'compilation_process_seconds':'Processo di compilazione (s)',
- 'choice_seconds':'Preparazione e scelta (s)', 'llm_response_seconds':'Risposta LLM cumulativa (s)',
- 'total_tokens':'Token totali', 'input_tokens':'Token in ingresso', 'output_tokens':'Token in uscita',
- 'retries':'Retry LLM', 'llm_calls':'Chiamate LLM', 'rag_seconds':'Recupero RAG (s)'}
+METRIC_LABELS = {'score':'Expected fidelity', 'total_seconds':'Total time (s)',
+ 'compilation_seconds':'Internal compilation (s)', 'compilation_process_seconds':'Compilation process (s)',
+ 'choice_seconds':'Preparation and selection (s)', 'llm_response_seconds':'Cumulative LLM response time (s)',
+ 'total_tokens':'Total tokens', 'input_tokens':'Input tokens', 'output_tokens':'Output tokens',
+ 'retries':'Retry LLM', 'llm_calls':'LLM calls', 'rag_seconds':'RAG retrieval (s)'}
 
 
 def esc(value):
@@ -38,7 +38,8 @@ def table(headers, rows, spec=None, long=False, size='small'):
     text+='\\begin{'+env+'}{'+spec+'}\n'+r'\toprule'+'\n'+head+r'\midrule'+'\n'
     if long:
         text+=r'\endfirsthead'+'\n'+r'\toprule'+'\n'+head+r'\midrule\endhead'+'\n'
-        text+='\\midrule\\multicolumn{'+str(len(headers))+'}{r}{\\footnotesize Segue nella pagina successiva}\\\\\n'+r'\endfoot'+'\n'+r'\bottomrule\endlastfoot'+'\n'
+        text+='\\midrule\\multicolumn{'+str(len(headers))+"""}{r}{\\footnotesize Continued on the next page}\\\\
+"""+r'\endfoot'+'\n'+r'\bottomrule\endlastfoot'+'\n'
     text+='\n'.join(' & '.join(str(c) for c in row)+r' \\' for row in rows)+'\n'
     if not long:
         text+=r'\bottomrule'+'\n'
@@ -52,8 +53,8 @@ def figure(stem, caption):
     return '\n'+r'\begin{figure}[!htbp]\centering'+'\n'+r'\input{\TestReportPath grafici/'+stem+'.tex}\n'+r'\caption{'+caption+'}\n'+r'\end{figure}'+'\n'
 
 
-def plot(output, stem, series, ylabel, xlabel='Indice del circuito', options='', coordinates=False):
-    """series: (method, legend, [(x,y),...]); scrive anche tutti i dati CSV."""
+def plot(output, stem, series, ylabel, xlabel='Circuit index', options='', coordinates=False):
+    'series: (method, legend, [(x,y),...]); also writes all CSV data.'
     folder=output/'grafici'
     folder.mkdir(parents=True,exist_ok=True)
     text=r'\begin{tikzpicture}\begin{axis}['+'\n'
@@ -64,7 +65,7 @@ def plot(output, stem, series, ylabel, xlabel='Indice del circuito', options='',
     for i,(method,label,points) in enumerate(series):
         path=folder/f'{stem}_{i}.csv'
         write_csv(path,[{'x':x,'y':y} for x,y in points],['x','y'])
-        # Non creare legende ingannevoli per popolazioni prive di misure.
+        # Do not create misleading legends for populations without measurements.
         if not points:
             continue
         style=f"color={COLORS[method]},mark={MARKERS[method]},mark size=1.3pt"
@@ -91,8 +92,8 @@ def reliability_plot(output, runs):
     labels=','.join('{'+esc(run_label(m,runs[m]))+'}' for m in methods)
     text=r'\begin{tikzpicture}\begin{axis}[width=0.96\linewidth,height=5.5cm,ybar stacked,bar width=24pt,ymin=0,enlarge x limits=0.25,'
     text+='xtick={'+ticks+'},xticklabels={'+labels+'},'
-    text+=r'ylabel={Episodi},nodes near coords,legend style={at={(0.5,1.03)},anchor=south,draw=none,column sep=8pt},legend columns=2,tick label style={font=\small}]'+'\n'
-    for column,color,label in [('success','blue!65','Successi'),('failure','orange!85','Fallimenti')]:
+    text+='ylabel={Episodes},nodes near coords,legend style={at={(0.5,1.03)},anchor=south,draw=none,column sep=8pt},legend columns=2,tick label style={font=\\small}]'+'\n'
+    for column,color,label in [('success','blue!65','Successes'),('failure','orange!85','Failures')]:
         text+='\\addplot[fill='+color+'] table[x=index,y='+column+',col sep=comma]{\\TestReportPath grafici/esiti.csv};\n\\addlegendentry{'+label+'}\n'
     text+=r'\end{axis}\end{tikzpicture}'+'\n'
     (folder/'esiti.tex').write_text(text,encoding='utf-8')
@@ -103,13 +104,13 @@ def ecdf_plot(output, runs):
     for method,run in runs.items():
         vals=sorted(c['score'] for c in run['circuits'] if number(c.get('score')))
         series.append((method,run_label(method,run)+f' (n={len(vals)})',[(v,(i+1)/len(vals)) for i,v in enumerate(vals)]))
-    plot(output,'distribuzione_score',series,'Quota cumulativa',xlabel='Expected fidelity',options='xmin=0,xmax=1,ymin=0,ymax=1,',coordinates=True)
+    plot(output,'distribuzione_score',series,'Cumulative proportion',xlabel='Expected fidelity',options='xmin=0,xmax=1,ymin=0,ymax=1,',coordinates=True)
 
 
 def retry_plot(output, run):
     points=[(c['index'],c['retries']) for c in run['circuits'] if number(c.get('retries'))]
     method=run['meta']['method']
-    plot(output,'retry',[(method,LABELS[method],points)],'Retry medi per episodio',options='ymin=0,ymax=2.2,ytick={0,1,2},')
+    plot(output,'retry',[(method,LABELS[method],points)],'Mean retries per episode',options='ymin=0,ymax=2.2,ytick={0,1,2},')
 
 
 def metric_table(summary, include_score=True):
@@ -120,40 +121,40 @@ def metric_table(summary, include_score=True):
         total='--' if key=='score' else fmt(s['sum_known'],0 if key in ('retries','llm_calls','input_tokens','output_tokens','total_tokens') else 2)
         rows.append([METRIC_LABELS[key],fmt(s['mean'],6 if key=='score' else 2),fmt(s['median'],6 if key=='score' else 2),total,
                      f"{s['n']}/{summary['completed_circuits']}",f"{s['measured_episodes']}/{s['measured_episodes']+s['missing_episodes']}"])
-    return table(['Misura','Media','Mediana','Somma nota','Circuiti','Episodi'],rows,size='footnotesize')
+    return table(['Measurement','Mean','Median','Known sum','Circuits','Episodes'],rows,size='footnotesize')
 
 
-def compile_document(output, title, body, compile_pdf=True, *, subtitle='Confronto sperimentale sui circuiti Test'):
+def compile_document(output, title, body, compile_pdf=True, *, subtitle='Experimental comparison on Test circuits'):
     latex=output/'latex'; latex.mkdir(parents=True,exist_ok=True)
-    preamble=r'''\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[italian]{babel}
-\usepackage[margin=2cm]{geometry}
-\usepackage{graphicx,booktabs,longtable,amsmath,placeins,array,pdflscape,caption}
-\usepackage[expansion=false]{microtype}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
-\usepackage{xurl}
-\usepackage[hidelinks]{hyperref}
-\setlength{\emergencystretch}{3em}
-\setlength{\parskip}{3pt}
-\captionsetup{font=small,labelfont=bf}
-\widowpenalty=10000
-\clubpenalty=10000
-'''
+    preamble="""\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage{lmodern}
+\\usepackage[english]{babel}
+\\usepackage[margin=2cm]{geometry}
+\\usepackage{graphicx,booktabs,longtable,amsmath,placeins,array,pdflscape,caption}
+\\usepackage[expansion=false]{microtype}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+\\usepackage{xurl}
+\\usepackage[hidelinks]{hyperref}
+\\setlength{\\emergencystretch}{3em}
+\\setlength{\\parskip}{3pt}
+\\captionsetup{font=small,labelfont=bf}
+\\widowpenalty=10000
+\\clubpenalty=10000
+"""
     (latex/'preambolo.tex').write_text(preamble,encoding='utf-8')
     (latex/'risultati.tex').write_text(r'\providecommand{\TestReportPath}{../}'+'\n'+body,encoding='utf-8')
-    standalone=r'\documentclass[11pt,a4paper]{article}'+'\n'+r'\input{preambolo.tex}'+'\n'+r'\title{'+esc(title)+'}\n'+r'\author{'+esc(subtitle)+'}'+'\n'+r'\date{Analisi dei risultati conservati}'+'\n'+r'\begin{document}\maketitle'+'\n'+r'\input{risultati.tex}'+'\n'+r'\end{document}'+'\n'
+    standalone=r'\documentclass[11pt,a4paper]{article}'+'\n'+r'\input{preambolo.tex}'+'\n'+r'\title{'+esc(title)+'}\n'+r'\author{'+esc(subtitle)+'}'+'\n'+'\\date{Analysis of preserved results}'+'\n'+r'\begin{document}\maketitle'+'\n'+r'\input{risultati.tex}'+'\n'+r'\end{document}'+'\n'
     (latex/'verifica.tex').write_text(standalone,encoding='utf-8')
     if compile_pdf:
         if not shutil.which('pdflatex'):
-            raise RuntimeError('pdflatex assente. Installare TeX Live oppure usare --solo-sorgenti.')
+            raise RuntimeError('pdflatex is missing. Install TeX Live or use --solo-sorgenti.')
         logs=[]
         for _ in range(2):
             proc=subprocess.run(['pdflatex','-interaction=nonstopmode','-halt-on-error','verifica.tex'],cwd=latex,capture_output=True,timeout=120)
             logs.append(proc.stdout+proc.stderr)
             (latex/'compilazione_latex.log').write_bytes(b'\n'.join(logs))
             if proc.returncode:
-                raise RuntimeError('Errore LaTeX: '+str(latex/'compilazione_latex.log'))
+                raise RuntimeError('LaTeX error: '+str(latex/'compilazione_latex.log'))
     return latex/'verifica.pdf'

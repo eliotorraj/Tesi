@@ -1,4 +1,4 @@
-"""Compatibilità degli import precedenti della codifica tabellare."""
+'Compatibility for earlier tabular-encoding imports.'
 from prototype.prompting.wire import INSTRUCTION, MARKER_KEYS, encode_prompt, pack, unpack
 
 __all__ = ["INSTRUCTION", "MARKER_KEYS", "encode_prompt", "pack", "unpack"]

@@ -1,18 +1,7 @@
-# Risposte originali Qwen sul circuito DJ
+# Original Qwen DJ responses
 
-Sono copie testuali della prova tecnica train `qwen-prompt-v2-02`.
-Servono a leggere ciò che il modello ha realmente scritto e a confrontarlo
-con gli errori registrati. I testi non sono stati corretti.
+`attempt_1.txt`, `attempt_2.txt` and `attempt_3.txt` are the original responses from the train technical trial `qwen-prompt-v2-02`, including two repair attempts. They were not corrected to become valid examples.
 
-| File | Contenuto |
-| --- | --- |
-| `attempt_1.txt` | Prima risposta del modello. |
-| `attempt_2.txt` | Risposta al primo tentativo di correzione. |
-| `attempt_3.txt` | Risposta al secondo tentativo di correzione. |
+All three satisfy JSON structure but contain source links rejected by the validator. The adjacent `qwen_prompt_v2_dj.json` contains measurements; the archived compact-prompt account explains the errors. These files are raw model evidence rather than documentation to translate.
 
-Tutte le risposte rispettano lo schema JSON, ma contengono collegamenti alle
-fonti che il validatore rifiuta. Non sono esempi di risposta pienamente valida.
-
-Il [riepilogo JSON](../qwen_prompt_v2_dj.json) contiene le misure.
-Il [resoconto tecnico](../../../docs/resoconti/2026-09-15_prompt_compatto.md)
-spiega gli errori e i limiti del confronto.
+[Parent directory](../README.md) · [Current repository guide](../../../../../README.md)

@@ -1,9 +1,13 @@
-# Circuiti di ingresso
+# Input circuits
 
-`train/`, `validation/` e `test/` contengono rispettivamente 422, 88 e 90 file OpenQASM 2. Per un nuovo esperimento si possono sostituire prima di `prepara`, oppure indicare una nuova radice `corpus` nella configurazione. Ogni radice deve avere questi tre split con i QASM direttamente al loro interno.
+`train/`, `validation/` and `test/` contain 422, 88 and 90 OpenQASM 2 files. The 422 train records represent 396 distinct contents; aliases remain in the manifest without adding duplicate RAG examples or MQT samples. `manifest_originale.json` records the distributed corpus's provenance.
 
-Usare nomi univoci tra split. Il programma rifiuta sovrapposizioni byte-identiche o di istruzioni; questi controlli non provano indipendenza algoritmica. I 422 train hanno 396 contenuti distinti: gli alias restano nel manifest, senza aggiungere esempi RAG o campioni ML.
+For a new corpus, use a separate root with these three split directories and QASM files directly inside them. Filenames must be unique across splits. Preparation rejects byte-identical and instruction-identical overlap; it does not prove algorithmic independence.
 
-`manifest_originale.json` conserva la provenienza dei circuiti distribuiti: non va riscritto per quelli personali. Le copie della nuova esecuzione finiscono in `esecuzioni/<id>/circuits/`. I [QASMBench](esterni/qasmbench/README.md) sono ingressi opzionali separati. Una prova CPU limitata si esegue più facilmente con il Bell del prototipo; ridurre un corpus scientifico costituisce una nuova condizione, da dichiarare.
+From the toolkit root, before preparation:
 
-Per collegare una suddivisione personale senza editare JSON: `python configura.py circuiti NOME --cartella /percorso/corpus --crea`, dalla radice del kit. Il comando crea gli split mancanti; i QASM e la loro assegnazione restano a carico dell’utente. Vedi il [ricettario](../documentazione/configurazione.md#cambiare-i-circuiti).
+```bash
+python configura.py circuiti trial-cpu --cartella /path/to/corpus --crea
+```
+
+This creates missing split directories, not circuits or their assignments. The [QASMBench selection](esterni/qasmbench/README.md) is separate. See the [configuration guide](../documentazione/configurazione.md); retain the original manifest as provenance for the supplied corpus.

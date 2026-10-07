@@ -120,7 +120,7 @@ class DeviceSelectorTrainingTests(unittest.TestCase):
             patch.object(
                 TRAIN_SELECTOR,
                 "Parallel",
-                side_effect=AssertionError("joblib non deve essere usato"),
+                side_effect=AssertionError('joblib must not be used'),
             ),
         ):
             TRAIN_SELECTOR.generate_training_arrays(

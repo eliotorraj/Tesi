@@ -1,4 +1,4 @@
-"""Provenienza leggibile e copie del codice; nessuna variabile segreta salvata."""
+'Readable provenance and source copies; no secret variables are saved.'
 import importlib.metadata
 import platform
 import subprocess

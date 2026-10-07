@@ -1,4 +1,4 @@
-"""Riepilogo riproducibile dei prompt e di una prova tecnica train, senza nuovi score."""
+'Reproducible prompt and technical train-run summary without new scores.'
 from __future__ import annotations
 import argparse
 import hashlib

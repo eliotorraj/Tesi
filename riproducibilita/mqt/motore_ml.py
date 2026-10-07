@@ -168,7 +168,7 @@ def atomic_json_write(path: Path, payload: Any) -> None:
 
 
 def repair_tail(path: Path) -> None:
-    """Conserva la coda interrotta, senza assorbire il record successivo."""
+    'Preserve the interrupted tail without absorbing the next record.'
     if not path.exists():
         return
     data = path.read_bytes()
@@ -180,11 +180,11 @@ def repair_tail(path: Path) -> None:
             json.loads(line)
         except (ValueError, UnicodeDecodeError):
             if index != len(lines)-1 or line.endswith(b"\n"):
-                raise ValueError(f"Corruzione interna del manifest: riga {index+1}")
+                raise ValueError(f'Internal manifest corruption: row {index + 1}')
             backup = path.with_name(path.name + ".partial-" + __import__("hashlib").sha256(line).hexdigest()[:16])
             if not backup.exists():
                 backup.write_bytes(line)
-            # Originale integro conservato prima di riparare il registro operativo.
+            # Preserve the intact original before repairing the operational record.
             original = path.with_name(path.name + ".before-repair-" + __import__("hashlib").sha256(data).hexdigest()[:16])
             if not original.exists():
                 original.write_bytes(data)
@@ -225,8 +225,8 @@ def load_manifest(path: Path) -> tuple[dict[str, int], dict[str, str]]:
                 record = json.loads(line)
             except json.JSONDecodeError:
                 if line.endswith("\n") or handle.read():
-                    raise ValueError(f"Corruzione interna del manifest: riga {line_number}")
-                print(f"Manifest: coda incompleta conservata ({line_number}).")
+                    raise ValueError(f'Internal manifest corruption: row {line_number}')
+                print(f'Manifest: incomplete tail preserved ({line_number}).')
                 continue
             key = record.get("key")
             if not isinstance(key, str):
@@ -272,7 +272,7 @@ def ensure_training_circuits(path: Path) -> None:
         return
     archive = path / "training_data_device_selection.zip"
     if not archive.is_file():
-        raise SystemExit(f"Nessun circuito QASM e archivio non trovato: {path}")
+        raise SystemExit(f'No QASM circuit and archive not found: {path}')
     with zipfile.ZipFile(archive) as zip_ref:
         zip_ref.extractall(path)
 
@@ -432,7 +432,7 @@ class BQSKitRuntime:
         manager_command = executable_dir / "bqskit-manager"
         server_command = executable_dir / "bqskit-server"
         if not manager_command.is_file() or not server_command.is_file():
-            raise RuntimeError("Comandi bqskit-manager/bqskit-server non trovati nella virtualenv.")
+            raise RuntimeError('bqskit-manager/bqskit-server commands not found in the virtual environment.')
 
         self.manager_log = (self.log_dir / "bqskit_manager.log").open("a", encoding="utf-8")
         self.server_log = (self.log_dir / "bqskit_server.log").open("a", encoding="utf-8")
@@ -458,7 +458,7 @@ class BQSKitRuntime:
         )
         time.sleep(0.8)
         if self.manager_process.poll() is not None:
-            raise RuntimeError("Il manager BQSKit non è partito; controlla bqskit_manager.log.")
+            raise RuntimeError('BQSKit manager did not start; check bqskit_manager.log.')
 
         self.server_process = subprocess.Popen(
             [
@@ -474,7 +474,7 @@ class BQSKitRuntime:
         )
         time.sleep(1.2)
         if self.server_process.poll() is not None:
-            raise RuntimeError("Il server BQSKit non è partito; controlla bqskit_server.log.")
+            raise RuntimeError('BQSKit server did not start; check bqskit_server.log.')
 
         from bqskit.compiler import Compiler
 
@@ -673,7 +673,7 @@ def _compile_job_inline(
             )
             passes = [f"fallback:qiskit_transpile_o{fallback_optimization_level}"]
         else:
-            raise ValueError(f"Modalità di compilazione sconosciuta: {mode}")
+            raise ValueError(f'Unknown compilation mode: {mode}')
 
         provenance = {
             "model_sha256": model_sha256,
@@ -689,8 +689,7 @@ def _compile_job_inline(
                 "mode": mode,
                 "duration_seconds": round(time.monotonic() - started, 3),
                 "error": (
-                    "episodio RL troncato o circuito non eseguibile: "
-                    f"{validation['termination_reason']}"
+                    f"truncated RL episode or non-executable circuit: {validation['termination_reason']}"
                 ),
                 "passes": passes,
                 **provenance,
@@ -948,10 +947,7 @@ def warn_about_memory(num_workers: int) -> None:
     estimated = num_workers * ESTIMATED_RL_WORKER_GIB
     if num_workers > 2 or (available_gib and estimated > available_gib * 0.75):
         print(
-            "ATTENZIONE: ogni modello RL residente usa circa "
-            f"{ESTIMATED_RL_WORKER_GIB:.1f} GiB. "
-            f"{num_workers} worker richiedono almeno ~{estimated:.1f} GiB, "
-            "oltre alla RAM del runtime BQSKit."
+            f'WARNING: each resident RL model uses approximately {ESTIMATED_RL_WORKER_GIB:.1f} GiB. {num_workers} workers require at least ~{estimated:.1f} GiB, in addition to BQSKit runtime RAM.'
         )
 
 
@@ -1114,7 +1110,7 @@ def compile_resumably(
 ) -> None:
     """Compile with persistent device workers, retries, and a parent watchdog."""
     if fallback_enabled:
-        raise ValueError("Il fallback non e ammesso nella generazione del Training set.")
+        raise ValueError('Fallback is not allowed during Training set generation.')
     attempts, _statuses = load_manifest(manifest_path)
     latest = latest_manifest_records(manifest_path)
     for job in jobs:
@@ -1135,7 +1131,7 @@ def compile_resumably(
         target_sha256_by_device=target_sha256_by_device,
     )
     initial_valid = len(valid_job_keys)
-    print(f"Checkpoint RL validi: {initial_valid}/{len(jobs)}")
+    print(f'Valid RL checkpoints: {initial_valid}/{len(jobs)}')
     warn_about_memory(num_workers)
 
     result_context = get_context("spawn")
@@ -1168,10 +1164,9 @@ def compile_resumably(
                     "error": error,
                 },
             )
-        raise RuntimeError(f"Runtime RL non disponibile: {error}") from exc
+        raise RuntimeError(f'RL runtime unavailable: {error}') from exc
     print(
-        f"Runtime BQSKit condiviso avviato: {num_workers} worker; "
-        f"porta client {runtime.server_port}."
+        f'Shared BQSKit runtime started: {num_workers} worker; client port {runtime.server_port}.'
     )
 
     active: dict[str, WorkerState] = {}
@@ -1225,7 +1220,7 @@ def compile_resumably(
                 process=process,
                 launched_at=time.monotonic(),
             )
-            print(f"Worker avviato: {device_name} ({len(pending)} job, pid={process.pid})")
+            print(f'Worker started: {device_name} ({len(pending)} job, pid={process.pid})')
 
     def record_failure(state: WorkerState, status: str, error: str) -> None:
         nonlocal processed_results
@@ -1279,7 +1274,7 @@ def compile_resumably(
                 },
             )
             processed_results += 1
-        print(f"Modello RL {device_name} non disponibile: {error}.")
+        print(f'RL model {device_name} unavailable: {error}.')
 
     dead_seen: set[int] = set()
     try:
@@ -1334,7 +1329,7 @@ def compile_resumably(
                         job = state.current_job
                         if job is not None and float(message.get("duration_seconds", 0)) > timeout:
                             message["status"] = "timeout"
-                            message["error"] = f"risultato oltre il limite RL di {timeout}s"
+                            message["error"] = f'result exceeds the RL limit of {timeout}s'
                             preserve_unverified_output(job, state.current_output_version)
                         if job is not None and state.current_attempt is not None:
                             status = str(message["status"])
@@ -1384,9 +1379,9 @@ def compile_resumably(
                                 valid_job_keys.add(job.key)
                                 successful_results = len(valid_job_keys)
                             else:
-                                record.setdefault("error", "errore sconosciuto")
+                                record.setdefault("error", 'unknown error')
                                 record.setdefault("traceback", "")
-                                print(f"Fallito {job.key}: {record['error']}")
+                                print(f"Failed {job.key}: {record['error']}")
                             append_manifest(manifest_path, record)
                             duration = message.get("duration_seconds")
                             if isinstance(duration, int | float):
@@ -1398,8 +1393,7 @@ def compile_resumably(
                             ):
                                 average = sum(durations) / len(durations) if durations else 0.0
                                 print(
-                                    f"Progresso: {successful_results}/{len(jobs)} checkpoint validi; "
-                                    f"durata media tentativi {average:.1f}s."
+                                    f'Progress: {successful_results}/{len(jobs)} valid checkpoints; mean attempt duration {average:.1f}s.'
                                 )
                         state.current_job = None
                         state.current_started_at = None
@@ -1419,8 +1413,7 @@ def compile_resumably(
                 ):
                     job_key = state.current_job.key
                     print(
-                        f"Watchdog worker ({watchdog_timeout}s, fase={state.current_phase}): "
-                        f"{job_key}; riavvio worker."
+                        f'Watchdog worker ({watchdog_timeout}s, phase={state.current_phase}): {job_key}; restarting worker.'
                     )
                     _terminate_worker_process(state.process)
                     unverified_output = output_changed(
@@ -1432,22 +1425,22 @@ def compile_resumably(
                     record_failure(
                         state,
                         "timeout",
-                        f"worker senza risposta in fase {state.current_phase}"
-                        + ("; output non verificato conservato separatamente" if unverified_output else ""),
+                        f'worker unresponsive during phase {state.current_phase}'
+                        + ('; unverified output retained separately' if unverified_output else ""),
                     )
                     finished_devices.append(device_name)
                     continue
 
                 if not state.ready and now - state.launched_at > startup_timeout:
-                    print(f"Timeout caricamento modello: {device_name}.")
+                    print(f'Model loading timeout: {device_name}.')
                     _terminate_worker_process(state.process)
                     if state.current_job is not None:
-                        record_failure(state, "worker_startup_timeout", "worker non pronto")
+                        record_failure(state, "worker_startup_timeout", 'worker not ready')
                     else:
                         record_unavailable_device(
                             device_name,
                             "rl_model_startup_timeout",
-                            f"modello non caricato entro {startup_timeout}s",
+                            f'model not loaded within {startup_timeout}s',
                         )
                     finished_devices.append(device_name)
                     continue
@@ -1455,7 +1448,7 @@ def compile_resumably(
                 if not state.process.is_alive():
                     if state.process.pid not in dead_seen:
                         dead_seen.add(state.process.pid)
-                        continue  # Un altro giro drena i messaggi dopo l'uscita osservata.
+                        continue  # Another pass drains messages after the observed process exit.
                     state.process.join(timeout=1)
                     if state.current_job is not None:
                         unverified_output = output_changed(
@@ -1467,14 +1460,14 @@ def compile_resumably(
                         record_failure(
                             state,
                             "worker_crash",
-                            f"worker terminato con exit code {state.process.exitcode}"
-                            + ("; output non verificato conservato separatamente" if unverified_output else ""),
+                            f'worker terminated with exit code {state.process.exitcode}'
+                            + ('; unverified output retained separately' if unverified_output else ""),
                         )
                     elif not state.ready:
                         record_unavailable_device(
                             device_name,
                             "rl_model_load_failed",
-                            f"worker terminato con exit code {state.process.exitcode}",
+                            f'worker terminated with exit code {state.process.exitcode}',
                         )
                     finished_devices.append(device_name)
 
@@ -1489,15 +1482,13 @@ def compile_resumably(
 
             if not runtime.is_alive():
                 raise RuntimeError(
-                    "Il runtime BQSKit condiviso si è arrestato; il run è stato "
-                    "interrotto senza convertire compilazioni mancanti in score minimo. "
-                    f"Controlla {log_dir / 'bqskit_server.log'}."
+                    f"The shared BQSKit runtime stopped; the run was interrupted without converting missing compilations into minimum scores. Check {log_dir / 'bqskit_server.log'}."
                 )
 
             refresh_device_queue()
             launch_available_workers()
     except KeyboardInterrupt:
-        print("Interruzione richiesta: termino i worker; i checkpoint validi restano salvati.")
+        print('Interruption requested: stopping workers; valid checkpoints remain saved.')
         raise
     finally:
         for state in active.values():
@@ -1547,7 +1538,7 @@ def score_compiled_circuit(
         return float(crit_depth(circuit))
     if metric == "expected_fidelity":
         return float(expected_fidelity(circuit, device))
-    raise ValueError(f"Figure of merit non supportata: {metric}")
+    raise ValueError(f'Unsupported figure of merit: {metric}')
 
 
 def choose_best_device(
@@ -1556,7 +1547,7 @@ def choose_best_device(
 ) -> str | None:
     """Choose the highest-scoring device, ignoring failed candidates."""
     if len(device_names) != len(scores):
-        raise ValueError("Dispositivi e score hanno lunghezze diverse.")
+        raise ValueError('Device and score lists have different lengths.')
     valid_indices = [
         index
         for index, score in enumerate(scores)
@@ -1598,8 +1589,7 @@ def generate_training_sample(
                     score = WORST_SCORE
             except Exception as exc:
                 print(
-                    f"Score fallito per {key}: {type(exc).__name__}: {exc}; "
-                    f"assegno {WORST_SCORE}."
+                    f'Scoring failed for {key}: {type(exc).__name__}: {exc}; assigning {WORST_SCORE}.'
                 )
         scores.append(score)
 
@@ -1621,7 +1611,7 @@ def generate_training_arrays(
 ) -> None:
     """Score all RL candidates, select each winner, and save selector arrays."""
     if not sources:
-        raise SystemExit("Nessun circuito sorgente; training annullato.")
+        raise SystemExit('No source circuits; training canceled.')
     device_names = [device.description for device in predictor.devices]
     ordered_sources = sorted(sources)
     if num_workers == 1:
@@ -1637,7 +1627,7 @@ def generate_training_arrays(
                 )
             )
             if index % 10 == 0 or index == len(ordered_sources):
-                print(f"Scoring ML: {index}/{len(ordered_sources)} circuiti.")
+                print(f'ML scoring: {index}/{len(ordered_sources)} circuits.')
     else:
         results = Parallel(n_jobs=num_workers, verbose=10)(
             delayed(generate_training_sample)(
@@ -1657,8 +1647,7 @@ def generate_training_arrays(
         if training_sample is None:
             all_failed += 1
             print(
-                f"Nessun RL valido per {circuit_name}: tutti gli score sono "
-                f"{WORST_SCORE}; circuito escluso dal fit."
+                f'No valid RL outcome for {circuit_name}: all scores are {WORST_SCORE}; circuit excluded from fitting.'
             )
             continue
         training_data.append(training_sample)
@@ -1666,11 +1655,10 @@ def generate_training_arrays(
         scores_list.append(scores)
 
     if not training_data:
-        raise SystemExit("Tutte le compilazioni RL sono fallite; nessuna label addestrabile.")
+        raise SystemExit('All RL compilations failed; no trainable labels.')
     failed_scores = sum(score == WORST_SCORE for row in scores_list for score in row)
     print(
-        f"Score completati: {len(training_data)} circuiti addestrabili; "
-        f"{failed_scores} candidati con score minimo; {all_failed} circuiti senza vincitore."
+        f'Completed scores: {len(training_data)} trainable circuits; {failed_scores} candidates with the minimum score; {all_failed} circuits without a winner.'
     )
 
     atomic_numpy_save(
@@ -1695,7 +1683,7 @@ def load_generated_training_arrays(
     path = training_data_dir / f"training_data_{metric}.npy"
     training_data = np.load(path, allow_pickle=True)
     if len(training_data) == 0:
-        raise SystemExit(f"Nessun campione generato per {metric}: {path}")
+        raise SystemExit(f'No samples generated for {metric}: {path}')
     x_list, y_list = zip(*training_data, strict=False)
     return np.asarray(x_list, dtype=np.float64), np.asarray(y_list, dtype=str)
 
@@ -1745,10 +1733,10 @@ def export_dataset_json(
     names = np.load(training_data_dir / f"names_list_{metric}.npy", allow_pickle=True)
     scores = np.load(training_data_dir / f"scores_list_{metric}.npy", allow_pickle=True)
     if len({len(training_data), len(names), len(scores)}) != 1:
-        raise SystemExit("Array intermedi incoerenti: training_data, names e scores hanno lunghezze diverse.")
+        raise SystemExit('Inconsistent intermediate arrays: training_data, names and scores have different lengths.')
     if scores.ndim != 2 or scores.shape[1] != len(device_names):
         raise SystemExit(
-            f"Colonne score incoerenti: {scores.shape}; dispositivi={device_names}."
+            f'Inconsistent score columns: {scores.shape}; devices={device_names}.'
         )
 
     feature_names = [f"gate_count_{gate}" for gate in get_openqasm_gates()] + [
@@ -1764,7 +1752,7 @@ def export_dataset_json(
     if run_metadata.get("publication_status") != "exploratory-incomplete":
         validate_training_names(names, groups)
     elif len(set(map(str, names))) != len(names) or not set(map(str, names)) <= set(groups):
-        raise ValueError("Array esplorativi estranei alla selezione train")
+        raise ValueError('Exploratory arrays are unrelated to the train selection')
     latest = latest_manifest_records(manifest_path)
     label_counts: Counter[str] = Counter()
     provenance_counts: Counter[str] = Counter()
@@ -1794,8 +1782,7 @@ def export_dataset_json(
             )
             if score > WORST_SCORE and not strict_rl:
                 raise SystemExit(
-                    f"Score non-RL rilevato per {name}|{device_name}. "
-                    "Rigenera gli array con --finalize-only prima di esportare il JSON."
+                    f'Non-RL score detected for {name}|{device_name}. Regenerate arrays with --finalize-only before exporting JSON.'
                 )
             device = get_device(device_name)
             if source_num_qubits > device.num_qubits:
@@ -1822,7 +1809,7 @@ def export_dataset_json(
         expected_label = choose_best_device(device_names, list(score_by_device.values()))
         if expected_label != label:
             raise SystemExit(
-                f"Label/score incoerenti per {name}: label={label}, argmax={expected_label}."
+                f'Inconsistent label/score for {name}: label={label}, argmax={expected_label}.'
             )
         records.append(
             {
@@ -1844,8 +1831,7 @@ def export_dataset_json(
         "generated_at": utc_now(),
         "metric": metric,
         "source_corpus": (
-            "circuiti device-selection inclusi in "
-            f"mqt.predictor {package_version('mqt.predictor')}"
+            f"device-selection circuits included in mqt.predictor {package_version('mqt.predictor')}"
         ),
         "sample_count": len(records),
         "feature_count": len(feature_names),
@@ -1857,7 +1843,7 @@ def export_dataset_json(
         "records": records,
     }
     atomic_json_write(output_path, payload)
-    print(f"Dataset JSON canonico: {output_path} ({len(records)} circuiti)")
+    print(f'Canonical JSON Dataset: {output_path} ({len(records)} circuits)')
 
 
 def train_selector_model(
@@ -1874,7 +1860,7 @@ def train_selector_model(
     validate_training_names(names, expected_sources)
     x, y = load_generated_training_arrays(metric, training_data_dir)
     if len(x) != len(names):
-        raise ValueError("Numero di feature e nomi incoerente")
+        raise ValueError('Feature count and names are inconsistent')
     label_counts = Counter(y)
     smallest_class = min(label_counts.values())
 
@@ -1885,7 +1871,7 @@ def train_selector_model(
             class_weight="balanced",
         )
         classifier.fit(x, y)
-        print("Dataset piccolo/sbilanciato: uso Random Forest compatta senza GridSearchCV.")
+        print('Small/imbalanced Dataset: using a compact Random Forest without GridSearchCV.')
     else:
         x_train, _x_test, y_train, _y_test = train_test_split(
             x,
@@ -1923,8 +1909,7 @@ def train_selector_model(
 
         if isinstance(classifier, GridSearchCV):
             print(
-                f"Migliori iperparametri: {classifier.best_params_}; "
-                f"accuracy CV={classifier.best_score_:.4f}."
+                f'Best hyperparameters: {classifier.best_params_}; accuracy CV={classifier.best_score_:.4f}.'
             )
             classifier = RandomForestClassifier(
                 random_state=seed,
@@ -1932,7 +1917,7 @@ def train_selector_model(
                 **classifier.best_params_,
             )
         classifier.fit(x, y)
-        print(f"Refit finale completato su tutti i {len(y)} circuiti.")
+        print(f'Final refit completed on all {len(y)} circuits.')
 
     model_path.parent.mkdir(parents=True, exist_ok=True)
     temp = model_path.with_name(f".{model_path.name}.{os.getpid()}.tmp")
@@ -1948,8 +1933,8 @@ def train_selector_model(
         temp.unlink(missing_ok=True)
         raise SystemExit("; ".join(class_errors))
     os.replace(temp, model_path)
-    print("Classi apprese: " + ", ".join(sorted(learned_devices)))
-    print("Distribuzione label: " + ", ".join(f"{label}={count}" for label, count in label_counts.items()))
+    print('Learned classes: ' + ", ".join(sorted(learned_devices)))
+    print('Label distribution: ' + ", ".join(f"{label}={count}" for label, count in label_counts.items()))
 
 
 def deploy_selector_artifacts(
@@ -2003,8 +1988,8 @@ def deploy_selector_artifacts(
             "training_split": "train",
         },
     )
-    print(f"Device selector canonico: {canonical_model}")
-    print(f"Copia runtime installata: {target_model}")
+    print(f'Canonical device selector: {canonical_model}')
+    print(f'Runtime copy installed: {target_model}')
 
 
 def parse_args() -> argparse.Namespace:
@@ -2014,7 +1999,7 @@ def parse_args() -> argparse.Namespace:
         "--devices",
         nargs="+",
         default=list(FROZEN_DEVICES),
-        help="Device con un modello RL già addestrato; default: i cinque del protocollo.",
+        help="Device with an already trained RL model; defaults to the protocol's five devices.",
     )
     parser.add_argument(
         "--metric",
@@ -2025,32 +2010,32 @@ def parse_args() -> argparse.Namespace:
         "--uncompiled-circuits",
         type=Path,
         default=TRAINING_CIRCUITS_V2,
-        help="Directory contenente i circuiti train congelati per questa esecuzione.",
+        help="Directory containing this run's frozen train circuits.",
     )
     parser.add_argument(
         "--source-manifest",
         type=Path,
         default=SOURCE_MANIFEST_V2,
-        help="Manifest v2 usato per provare split e hash dei circuiti.",
+        help='v2 manifest used to verify circuit splits and hashes.',
     )
-    parser.add_argument("--compiled-circuits", type=Path, help="Cache QASM compilati personalizzata.")
-    parser.add_argument("--cache-dir", type=Path, help="Directory di cache per manifest e QASM intermedi.")
-    parser.add_argument("--log-dir", type=Path, help="Directory dei log del device selector.")
-    parser.add_argument("--dataset-json", type=Path, help="Percorso del dataset JSON finale.")
-    parser.add_argument("--timeout", type=int, default=COMPILATION_TIMEOUT_SECONDS, help="Timeout della compilazione RL per coppia circuito/device.")
+    parser.add_argument("--compiled-circuits", type=Path, help='Custom compiled-QASM cache.')
+    parser.add_argument("--cache-dir", type=Path, help='Cache directory for intermediate manifests and QASM.')
+    parser.add_argument("--log-dir", type=Path, help='Device-selector log directory.')
+    parser.add_argument("--dataset-json", type=Path, help='Path to the final Dataset JSON.')
+    parser.add_argument("--timeout", type=int, default=COMPILATION_TIMEOUT_SECONDS, help='RL compilation timeout per circuit/device pair.')
     parser.add_argument(
         "--rl-max-steps",
         type=int,
         default=64,
-        help="Numero massimo di azioni per episodio RL; distinto dal timeout in secondi.",
+        help='Maximum actions per RL episode, separate from the timeout in seconds.',
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=0,
-        help="Seed condiviso da policy RL, BQSKit e training del classificatore.",
+        help='Seed shared by the RL policy, BQSKit and classifier training.',
     )
-    parser.add_argument("--startup-timeout", type=int, default=240, help="Timeout per caricare un modello RL.")
+    parser.add_argument("--startup-timeout", type=int, default=240, help='Timeout for loading an RL model.')
     parser.add_argument(
         "--fallback-timeout",
         type=int,
@@ -2073,35 +2058,35 @@ def parse_args() -> argparse.Namespace:
         "--num-workers",
         type=int,
         default=DEFAULT_WORKERS,
-        help="Modelli RL residenti e compilazioni parallele; con circa 8 GiB usa 1 worker.",
+        help='Resident RL models and parallel compilations; use 1 worker with about 8 GiB.',
     )
-    parser.add_argument("--max-attempts", type=int, default=3, help="Tentativi totali per coppia circuito/device.")
-    parser.add_argument("--rf-workers", type=int, default=4, help="Worker usati dal GridSearchCV finale.")
-    parser.add_argument("--progress-every", type=int, default=10, help="Frequenza del riepilogo di avanzamento.")
-    parser.add_argument("--limit-circuits", type=int, help="Canary deterministico sui primi N circuiti.")
+    parser.add_argument("--max-attempts", type=int, default=3, help='Total attempts per circuit/device pair.')
+    parser.add_argument("--rf-workers", type=int, default=4, help='Workers used by the final GridSearchCV.')
+    parser.add_argument("--progress-every", type=int, default=10, help='Progress-summary frequency.')
+    parser.add_argument("--limit-circuits", type=int, help='Deterministic canary on the first N circuits.')
     parser.add_argument(
         "--skip-preflight",
         action="store_true",
-        help="Salta il canary automatico di un circuito per device.",
+        help='Skip the automatic one-circuit-per-device canary.',
     )
     parser.add_argument(
         "--allow-target-drift",
         action="store_true",
-        help="Consenti Target diversi dai fingerprint congelati; richiede rigenerare i competitor.",
+        help='Allow Targets differing from frozen fingerprints; requires regenerating competitors.',
     )
-    parser.add_argument("--compile-only", action="store_true", help="Crea checkpoint QASM senza generare dataset/modello.")
-    parser.add_argument("--finalize-only", action="store_true", help="Genera dataset/modello dai checkpoint esistenti.")
+    parser.add_argument("--compile-only", action="store_true", help='Create QASM checkpoints without generating the Dataset/model.')
+    parser.add_argument("--finalize-only", action="store_true", help='Generate the Dataset/model from existing checkpoints.')
     parser.add_argument(
         "--export-json-only",
         action="store_true",
-        help="Rigenera soltanto il JSON dagli array runtime già installati.",
+        help='Regenerate only JSON from already installed runtime arrays.',
     )
     parser.add_argument(
         "--allow-incomplete",
         action="store_true",
-        help="Modalità esplorativa: usa solo circuiti con copertura completa e non pubblica il modello.",
+        help='Exploratory mode: use only fully covered circuits and do not publish the model.',
     )
-    parser.add_argument("--dry-run", action="store_true", help="Mostra piano e copertura senza compilare o scrivere.")
+    parser.add_argument("--dry-run", action="store_true", help='Show the plan and coverage without compiling or writing.')
     return parser.parse_args()
 
 
@@ -2113,7 +2098,7 @@ def main() -> int:
     exclusive_modes = (args.compile_only, args.finalize_only, args.export_json_only)
     if sum(bool(mode) for mode in exclusive_modes) > 1:
         raise SystemExit(
-            "--compile-only, --finalize-only e --export-json-only sono mutuamente esclusivi."
+            '--compile-only, --finalize-only and --export-json-only are mutually exclusive.'
         )
     for name in (
         "timeout",
@@ -2126,20 +2111,20 @@ def main() -> int:
         "progress_every",
     ):
         if getattr(args, name) <= 0:
-            raise SystemExit(f"--{name.replace('_', '-')} deve essere positivo.")
+            raise SystemExit(f"--{name.replace('_', '-')} must be positive.")
     if args.limit_circuits is not None and args.limit_circuits <= 0:
-        raise SystemExit("--limit-circuits deve essere positivo.")
+        raise SystemExit('--limit-circuits must be positive.')
     if os.name != "posix":
-        raise SystemExit("Il runner robusto richiede Linux/WSL per process group e parent-death signal.")
+        raise SystemExit('The robust runner requires Linux/WSL for process groups and parent-death signals.')
     np.random.seed(args.seed)
 
     version_errors = package_version_mismatches()
     if version_errors:
-        raise SystemExit(f"Versioni non conformi al protocollo v2: {version_errors}.")
+        raise SystemExit(f'Versions do not match the v2 protocol: {version_errors}.')
 
     source_dir = args.uncompiled_circuits
     if not source_dir.is_dir():
-        raise SystemExit(f"Directory QASM non trovata: {source_dir}")
+        raise SystemExit(f'QASM directory not found: {source_dir}')
     try:
         training_partition = verify_circuit_directory(
             source_dir,
@@ -2147,7 +2132,7 @@ def main() -> int:
             manifest_path=args.source_manifest,
         )
     except (FileNotFoundError, ValueError) as error:
-        raise SystemExit(f"Training set ML rifiutato: {error}") from error
+        raise SystemExit(f'ML Training set rejected: {error}') from error
 
     cache_dir = args.cache_dir or (DEFAULT_CACHE_ROOT / args.metric / f"timeout_{args.timeout}")
     compiled_dir = args.compiled_circuits or (cache_dir / "compiled")
@@ -2161,12 +2146,11 @@ def main() -> int:
     devices = [get_device(name) for name in args.devices]
     device_names = [device.description for device in devices]
     if len(set(device_names)) != len(device_names):
-        raise SystemExit("La lista --devices contiene duplicati.")
+        raise SystemExit('The --devices list contains duplicates.')
     if not args.compile_only and not args.dry_run:
         if tuple(device_names) != FROZEN_DEVICES or args.metric != FROZEN_FIGURE_OF_MERIT:
             raise SystemExit(
-                "La finalizzazione pubblicabile richiede esattamente i cinque device "
-                "nell'ordine congelato e la metrica expected_fidelity."
+                'Publishable finalization requires exactly the five devices in frozen order and the expected_fidelity metric.'
             )
 
     target_records = {
@@ -2180,19 +2164,19 @@ def main() -> int:
     target_mismatches = frozen_target_mismatches(devices)
     if target_mismatches:
         details = "\n".join(
-            f"  - {name}: atteso={values['expected']}, osservato={values['observed']}"
+            f"  - {name}: expected={values['expected']}, observed={values['observed']}"
             for name, values in sorted(target_mismatches.items())
         )
         message = (
-            "I Target MQT correnti differiscono dai fingerprint congelati "
-            "del protocollo migrato 2.4-v2:\n"
+            """Current MQT Targets differ from the migrated 2.4-v2 protocol's frozen fingerprints:
+"""
             + details
-            + "\nPer confronti omogenei rigenera i competitor nello stesso ambiente. "
-            "Usa --allow-target-drift soltanto come bypass temporaneo del gate."
+            + """
+For consistent comparisons, regenerate competitors in the same environment. Use --allow-target-drift only as a temporary gate bypass."""
         )
         if not args.allow_target_drift:
             raise SystemExit(message)
-        print("ATTENZIONE: " + message)
+        print('WARNING: ' + message)
     matches_frozen_protocol = bool(
         tuple(device_names) == FROZEN_DEVICES
         and args.metric == FROZEN_FIGURE_OF_MERIT
@@ -2208,7 +2192,8 @@ def main() -> int:
             missing_models.append(path)
     if missing_models:
         formatted = "\n".join(f"  - {path}" for path in missing_models)
-        raise SystemExit("Modelli RL mancanti:\n" + formatted)
+        raise SystemExit("""Missing RL models:
+""" + formatted)
     model_sha256_by_device = {
         name: file_sha256(path)
         for name, path in runtime_model_paths.items()
@@ -2233,10 +2218,11 @@ def main() -> int:
         if metadata_problems:
             formatted = "\n".join(f"  - {error}" for error in metadata_problems)
             raise SystemExit(
-                "Le policy RL non attestano un training conforme a MQT Predictor "
-                "2.4.0 e al protocollo congelato:\n"
+                """RL policies do not attest training compliant with MQT Predictor 2.4.0 and the frozen protocol:
+"""
                 + formatted
-                + "\nCompleta prima scripts/03_train_rl_model.py per tutti i device."
+                + """
+Complete RL training for every device first."""
             )
 
 
@@ -2278,13 +2264,13 @@ def main() -> int:
     identity = {k: run_metadata[k] for k in ("training_selection", "execution_profile", "num_workers", "thread_environment", "seed", "timeout_seconds", "rl_max_steps", "max_attempts", "trainer_sha256", "software", "targets", "rl_models", "source_manifest_sha256")}
     policy_path = cache_dir / "politica.json"
     if policy_path.exists() and json.loads(policy_path.read_text()) != identity:
-        raise SystemExit("La cache appartiene a impostazioni diverse; usare una nuova --cache-dir.")
+        raise SystemExit('The cache belongs to different settings; use a new --cache-dir.')
     if not args.dry_run and not policy_path.exists():
         atomic_json_write(policy_path, identity)
     selection_path = cache_dir / "selezione_train.json"
     if not args.dry_run:
         if selection_path.exists() and json.loads(selection_path.read_text()) != training_selection:
-            raise SystemExit("Mappa alias diversa nella cache; usare una nuova directory")
+            raise SystemExit('Alias map differs in the cache; use a new directory')
         if not selection_path.exists():
             atomic_json_write(selection_path, training_selection)
     strict_before = strict_rl_success_keys(
@@ -2298,14 +2284,14 @@ def main() -> int:
     valid_before = len(strict_before)
 
     per_device = Counter(job.device_name for job in all_jobs)
-    print(f"Corpus verificato: {training_selection['source_circuit_count']} circuiti train")
-    print(f"Campioni ML unici: {len(source_paths)}; alias esclusi: {training_selection['alias_count']}")
-    print(f"Compilazioni compatibili totali: {len(all_jobs)}")
-    print("Per device: " + ", ".join(f"{name}={per_device[name]}" for name in sorted(per_device)))
+    print(f"Verified corpus: {training_selection['source_circuit_count']} train circuits")
+    print(f"Unique ML samples: {len(source_paths)}; aliases excluded: {training_selection['alias_count']}")
+    print(f'Total compatible compilations: {len(all_jobs)}')
+    print('Per device: ' + ", ".join(f"{name}={per_device[name]}" for name in sorted(per_device)))
     if args.limit_circuits:
-        print(f"Canary: {args.limit_circuits} circuiti, {len(compile_jobs)} compilazioni.")
-    print(f"Checkpoint RL già validi nella directory durevole: {valid_before}")
-    print(f"Cache compilazioni: {cache_dir}")
+        print(f'Canary: {args.limit_circuits} circuits, {len(compile_jobs)} compilations.')
+    print(f'RL checkpoints already valid in the durable directory: {valid_before}')
+    print(f'Compilation cache: {cache_dir}')
     print(f"Log: {log_dir}")
     print(f"Dataset JSON: {dataset_json}")
 
@@ -2319,7 +2305,7 @@ def main() -> int:
             target_sha256_by_device=target_sha256_by_device,
         )
         _complete, missing = coverage_report(all_jobs, source_paths, strict_keys)
-        print(f"Copertura RL corrente: {len(all_jobs) - len(missing)}/{len(all_jobs)}")
+        print(f'Current RL coverage: {len(all_jobs) - len(missing)}/{len(all_jobs)}')
         return 0
 
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -2339,8 +2325,7 @@ def main() -> int:
         _complete, missing = coverage_report(all_jobs, source_paths, strict_keys)
         if missing:
             raise SystemExit(
-                "--export-json-only richiede copertura RL completa per la "
-                f"configurazione corrente; mancano {len(missing)} compilazioni."
+                f'--export-json-only requires complete RL coverage for the current configuration; missing {len(missing)} compilations.'
             )
         predictor = Predictor(devices=devices, figure_of_merit=args.metric)
         export_dataset_json(
@@ -2365,8 +2350,7 @@ def main() -> int:
                 seen_devices.add(job.device_name)
                 preflight_jobs.append(job)
             print(
-                "Preflight automatico: una compilazione per ciascun device "
-                "prima del run completo."
+                'Automatic preflight: one compilation per device before the full run.'
             )
             compile_resumably(
                 preflight_jobs,
@@ -2398,8 +2382,7 @@ def main() -> int:
             if failed_preflight:
                 failed_names = ", ".join(job.device_name for job in failed_preflight)
                 raise SystemExit(
-                    f"Preflight RL fallito per {failed_names}. "
-                    "Il run completo non è stato avviato; i checkpoint validi restano salvati."
+                    f'RL preflight failed for {failed_names}. The full run was not started; valid checkpoints remain saved.'
                 )
         compile_resumably(
             compile_jobs,
@@ -2434,10 +2417,7 @@ def main() -> int:
                 successful_rl_keys,
             )
             print(
-                f"Compile-only terminato: {len(all_jobs) - len(missing)}/{len(all_jobs)} "
-                f"compilazioni RL, {len(complete_sources)}/{len(source_paths)} circuiti completi. "
-                "La finalizzazione pubblicabile resterà bloccata finché la copertura "
-                "non sarà completa."
+                f'Compile-only completed: {len(all_jobs) - len(missing)}/{len(all_jobs)} RL compilations, {len(complete_sources)}/{len(source_paths)} fully covered circuits. Publishable finalization remains blocked until coverage is complete.'
             )
             return 0
 
@@ -2469,9 +2449,7 @@ def main() -> int:
 
     if missing:
         summary = (
-            f"Compilazioni RL fallite o mancanti: {len(missing)}; "
-            f"copertura completa per {len(complete_sources)}/{len(source_paths)} circuiti. "
-            "Mancanti per device: "
+            f'Failed or missing RL compilations: {len(missing)}; complete coverage for {len(complete_sources)}/{len(source_paths)} circuits. Missing per device: '
             + ", ".join(
                 f"{device}={count}"
                 for device, count in sorted(missing_counts.items())
@@ -2481,15 +2459,14 @@ def main() -> int:
         if not args.allow_incomplete:
             raise SystemExit(
                 summary
-                + " Finalizzazione annullata: completa i checkpoint RL oppure usa "
-                "--allow-incomplete soltanto per un artefatto esplorativo non pubblicato."
+                + ' Finalization canceled: complete RL checkpoints or use --allow-incomplete only for an unpublished exploratory artifact.'
             )
         if not complete_sources:
-            raise SystemExit(summary + " Nessun circuito completo da usare in modalità esplorativa.")
+            raise SystemExit(summary + ' No fully covered circuits available for exploratory mode.')
         print(
-            "MODALITÀ ESPLORATIVA: "
+            'EXPLORATORY MODE: '
             + summary
-            + " Uso soltanto i circuiti a copertura completa e non aggiorno gli artefatti canonici."
+            + ' Using only fully covered circuits without updating canonical artifacts.'
         )
         selected_sources = complete_sources
     else:
@@ -2527,9 +2504,9 @@ def main() -> int:
     )
 
     if not production_ready:
-        print(f"Artefatto esplorativo: {staged_model}")
-        print(f"Dataset esplorativo: {staged_dataset}")
-        print("Gli artefatti canonici e runtime non sono stati modificati.")
+        print(f'Exploratory artifact: {staged_model}')
+        print(f'Exploratory Dataset: {staged_dataset}')
+        print('Canonical and runtime artifacts were not modified.')
         return 0
 
     deploy_selector_artifacts(
@@ -2543,7 +2520,7 @@ def main() -> int:
     shutil.copy2(staged_dataset, dataset_temp)
     os.replace(dataset_temp, dataset_json)
     shutil.rmtree(staging_dir, ignore_errors=True)
-    print("Pipeline conclusa: JSON e modello canonico sono aggiornati.")
+    print('Pipeline completed: JSON and canonical model are updated.')
     return 0
 
 

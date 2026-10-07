@@ -1,4 +1,4 @@
-"""Contratto v4, fallback, ripresa e confronto su riferimenti incompleti."""
+'Contract v4, fallback, resume and comparison on incomplete references.'
 import copy
 import json
 import tempfile
@@ -24,7 +24,7 @@ VIEW = {
 
 def answer(assertion="selected_device_has_enough_qubits", **extra):
     return {"selected_device": "device_a", "config_id": "c2",
-            "facts": [{"assertion": assertion, **extra}], "hypothesis": "Una proposta da verificare sul circuito corrente."}
+            "facts": [{"assertion": assertion, **extra}], "hypothesis": 'A proposal to verify on the current circuit.'}
 
 class FactsTests(unittest.TestCase):
     def check(self, response):
@@ -97,7 +97,7 @@ class EpisodeTests(unittest.TestCase):
         cls.good = {"selected_device": device["id"],
                     "config_id": device.get("allowed_qiskit_configuration_ids", [c["config_id"] for c in view["configuration_catalog"]])[0],
                     "facts": [{"assertion": "selected_device_has_enough_qubits"}],
-                    "hypothesis": "Propongo questa coppia; il risultato resta da verificare."}
+                    "hypothesis": 'I propose this pair; its result remains to be verified.'}
         cls.bad = copy.deepcopy(cls.good)
         cls.bad["facts"] = [{"assertion": "selected_device_matches_example"}]
 
@@ -314,7 +314,7 @@ class PipelineIntegrationTests(unittest.TestCase):
             with patch.object(report, "study_root", return_value=root), patch.object(report.subprocess, "run", side_effect=fake_plot), \
                  patch("llm_selection.v2.study.require_sealed"):
                 report.build_report("synthetic", compile_pdf=False)
-            self.assertIn("Seconda selezione", (root / "report/validation_selection.tex").read_text())
+            self.assertIn('Second local-model selection', (root / "report/validation_selection.tex").read_text())
             self.assertTrue((root / "report/paired_uncertainty.json").exists())
 
 if __name__ == "__main__":

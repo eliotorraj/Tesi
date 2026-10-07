@@ -1,12 +1,7 @@
-# Strumenti della campagna QASMBench
+# QASMBench execution utilities
 
-`runner.py` avvia un solo metodo e registra gli esiti.
-`worker.py` compila in un processo separato, con termine esterno di 100 secondi.
-`gates.py` verifica dati, configurazione, versioni e Target e congela il contratto.
-`mqt_gate.py` controlla selettore, politiche RL e provenienza dei modelli.
-`common.py` gestisce percorsi e registri che non possono essere sovrascritti.
-`score.py` calcola la stessa expected fidelity del progetto.
+`runner.py` records one method's outcomes; `worker.py` isolates compilation with an external 100-second deadline. `gates.py` checks inputs, versions and Targets and freezes the contract; `mqt_gate.py` checks selector/policy provenance. `common.py` manages paths and protected records; `score.py` computes expected fidelity.
 
-Le dipendenze riutilizzate sono il framework in `prototipo/` e i controlli degli
-artefatti addestrati nell'archivio. Nessun modulo importa gli avviatori dei test precedenti.
-Non sono inclusi modelli nuovi né vengono modificati i modelli installati.
+The code reuses the prototype framework and archived trained-artifact checks without importing previous Test launchers. It does not install or alter trained models.
+
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

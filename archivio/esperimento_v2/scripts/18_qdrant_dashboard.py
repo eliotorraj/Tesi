@@ -1,4 +1,4 @@
-"""Copia nella dashboard locale i punti dell'indice RAG già verificato."""
+'Copy verified RAG index points into the local dashboard.'
 
 from __future__ import annotations
 
@@ -48,8 +48,8 @@ def matching_payload(a: object, b: object, rounding: list[float]) -> bool:
     if isinstance(a, list):
         return len(a) == len(b) and all(matching_payload(x, y, rounding) for x, y in zip(a, b))
     if isinstance(a, float) and a != b:
-        # Il percorso JSON di Qdrant può arrotondare i punteggi float64.
-        # Nessuna tolleranza su interi, testi, identità o impronte di origine.
+        # Qdrant's JSON path may round float64 scores.
+        # No tolerance for integers, text, identities or source fingerprints.
         delta = abs(a - b)
         accepted = math.isfinite(a) and math.isfinite(b) and delta <= 2 * max(math.ulp(a), math.ulp(b))
         if accepted:
@@ -61,19 +61,19 @@ def matching_payload(a: object, b: object, rounding: list[float]) -> bool:
 def verify_copy(client: QdrantClient, original: list[models.Record]) -> list[float]:
     params = client.get_collection(COLLECTION_NAME).config.params.vectors
     if not isinstance(params, models.VectorParams) or params.size != 49 or params.distance != models.Distance.MANHATTAN:
-        raise RuntimeError("La raccolta della dashboard ha dimensione o metrica diversa.")
+        raise RuntimeError('Dashboard collection has a different dimension or metric.')
     actual = read_points(client)
     expected = {str(p.id): p for p in original}
     if len(actual) != len(expected) or {str(p.id) for p in actual} != set(expected):
-        raise RuntimeError("La raccolta della dashboard ha punti mancanti o estranei.")
+        raise RuntimeError('Dashboard collection has missing or unexpected points.')
     rounding = []
     for point in actual:
         source = expected[str(point.id)]
-        # L'API JSON del server arrotonda la rappresentazione decimale di float32.
+        # The server JSON API rounds the decimal representation of float32 values.
         if (not matching_payload(point.payload, source.payload, rounding)
                 or not np.array_equal(np.asarray(point.vector, dtype=np.float32),
                                       np.asarray(source.vector, dtype=np.float32))):
-            raise RuntimeError(f"Dati diversi nella dashboard: {point.id}")
+            raise RuntimeError(f'Dashboard data differs: {point.id}')
     return rounding
 
 
@@ -95,12 +95,12 @@ def main() -> None:
                     models.PointStruct(id=p.id, vector=p.vector, payload=p.payload)
                     for p in original[start:start + 64]
                 ])
-        # Una raccolta esistente è soltanto verificata: nessuna cancellazione.
+        # Verify existing collections only; do not delete them.
         rounding = verify_copy(remote, original)
         server_version = remote.info().version
     after = index_hashes(index)
     if before != after:
-        raise RuntimeError("I file dell'indice originale sono cambiati durante la copia.")
+        raise RuntimeError('Original index files changed during copying.')
     report = {
         "status": "verified", "purpose": "dataset_inspection",
         "dashboard_url": URL + "/dashboard/",

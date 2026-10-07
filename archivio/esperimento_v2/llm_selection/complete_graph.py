@@ -1,4 +1,4 @@
-"""Prova esplorativa dei grafi; codifica comune in prototype.prompting."""
+'Exploratory graph check; shared encoding in prototype.prompting.'
 import json
 from prototype.prompting.complete_graph import NOTE, decode, encode
 

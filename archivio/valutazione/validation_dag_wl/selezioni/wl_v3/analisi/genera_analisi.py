@@ -1,4 +1,4 @@
-"""Analisi riproducibile della scelta h, senza modificare gli esiti della validation."""
+'Reproducible analysis of the h selection without changing validation outcomes.'
 from pathlib import Path
 import json
 import statistics
@@ -14,16 +14,16 @@ def main():
     report=read(run/"riepilogo.json")
     contract=read(run/"contratto.json")
     if contract["code"]!=code_identity() or contract["design"]!=DESIGN:
-        raise ValueError("Codice o disegno diversi dalla validation.")
+        raise ValueError('Code or design differs from validation.')
     if sha(run/"contratto.json")!=report["contract_sha256"]:
-        raise ValueError("Contratto modificato.")
+        raise ValueError('Contract changed.')
     for name,expected in report["record_hashes"].items():
-        if sha(run/name)!=expected:raise ValueError("Record modificato: "+name)
+        if sha(run/name)!=expected:raise ValueError('Record changed: '+name)
     paths=sorted((run/"circuiti").glob("*/esito.json"))
     rows=[read(p) for p in paths]
     actual=summarize(rows)
     for key,value in actual.items():
-        if value!=report[key]:raise ValueError("Riepilogo non riproducibile: "+key)
+        if value!=report[key]:raise ValueError('Summary cannot be reproduced: '+key)
     assert len(rows)==88 and actual["successes"]==88 and len(actual["common_top1_circuits"])==88
     # Coverage and primary score precede the diagnostic on the five examples.
     def criterion(h):
@@ -66,7 +66,7 @@ def main():
                      "generator_sha256":sha(Path(__file__))}}
     target=HERE/"analisi_scelta.json"
     if target.exists():
-        if read(target)!=data:raise ValueError("Analisi precedente diversa.")
+        if read(target)!=data:raise ValueError('Previous analysis differs.')
     else:save(target,data)
     print(json.dumps({"selected_h":chosen,"primary_plateau":plateau,"verified_records":len(paths),
                       "analysis":str(target)},indent=2))

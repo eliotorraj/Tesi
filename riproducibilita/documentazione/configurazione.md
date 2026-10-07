@@ -1,202 +1,191 @@
-# Configurare una campagna senza modificare JSON
+# Configure a campaign without editing JSON
 
-Questo ricettario raccoglie i comandi per personalizzare il kit. Eseguili da `riproducibilita/`, dopo `source .venv/bin/activate`. Gli esempi usano `mia-prova`: sostituiscilo con il nome del tuo esperimento. Se stai iniziando, segui prima la [guida completa](guida.md).
+Run these recipes from `riproducibilita/` after `source .venv/bin/activate`. Replace the example name `my-trial` with your own. If this is your first run, start with the [complete guide](guida.md).
 
-`configura.py` ed `esperimento.py` sono script Python. Le parole che seguono, come `nuovo`, `mostra`, `prepara` o `dataset`, indicano l'azione da eseguire. In particolare, quando qui si dice «prima di `prepara`», si intende prima di lanciare `python esperimento.py --esperimento mia-prova prepara`. Quel comando controlla e conserva gli ingressi e le impostazioni di riferimento della prova. La [guida spiega la sintassi](guida.md#come-leggere-i-comandi-della-guida) e quando eseguirlo.
+`configura.py` changes settings; `esperimento.py` runs phases. Words such as `nuovo`, `mostra`, `prepara` and `dataset` are subcommands. “Before preparation” means before `python esperimento.py --esperimento my-trial prepara`, which freezes the experiment's inputs and settings. Command identifiers remain unchanged for compatibility.
 
-## Creare, conoscere e duplicare le impostazioni
+## Create, inspect and duplicate settings
 
 ```bash
-python configura.py nuovo mia-prova --profilo cpu
-python configura.py mostra mia-prova
+python configura.py nuovo my-trial --profilo cpu
+python configura.py mostra my-trial
 python configura.py elenca
 python configura.py --help
 python configura.py modello --help
 ```
 
-Il nuovo esperimento parte da Qwen e dai sistemi `llm_rag`, `llm_senza_rag`, `random`. Il catalogo contiene inizialmente tutti i cinque Target e le dodici configurazioni, con le tre temperature di riferimento. Il profilo modifica soltanto le risorse iniziali. Per specificare subito i candidati e i sistemi:
+A new experiment starts with Qwen and `llm_rag`, `llm_senza_rag`, `random`. The catalog initially includes all five Targets, twelve configurations and three reference temperatures. Profiles change initial resource settings only. To select models and methods immediately:
 
 ```bash
-python configura.py nuovo confronto-gpu --profilo gpu --modelli qwen phi gemma \
+python configura.py nuovo gpu-comparison --profilo gpu --modelli qwen phi gemma \
   --sistemi llm_rag llm_senza_rag random llm_recupero_random mqt
 ```
 
-I profili sono due: `cpu` esegue il LLM sulla CPU con i pesi in RAM; `gpu` richiede il trasferimento di tutti gli strati possibili sulla GPU, usando la VRAM e mantenendo anche l'uso di RAM e CPU. Entrambi partono da contesto 16.384, risposta massima 4.096, batch 128, microbatch 64 e un processo Qiskit. Contesto, processi e batch si modificano separatamente: il fisso usa anch'esso `gpu`, con le risorse dichiarate tramite i comandi. La [spiegazione dei profili](guida.md#se-usi-una-gpu-o-il-fisso) contiene anche gli esempi per il fisso.
+The `cpu` profile runs the LLM on CPU with weights in RAM. `gpu` requests all possible layers on the GPU, using VRAM while still requiring CPU and RAM. Both start with context 16,384, output budget 4,096, batch 128, microbatch 64 and one Qiskit worker. Configure context, batches and concurrency separately; a desktop uses `gpu` with explicit resources. See the [profile guide](guida.md#gpu-and-desktop-settings).
 
-Le impostazioni nominate sono sotto `configurazioni/esperimenti/<nome>/`. I JSON restano leggibili: ogni modifica crea una revisione e aggiorna atomicamente il punto d'ingresso `esperimento.json`. Un valore rifiutato lascia attiva la configurazione precedente. I comandi non cancellano revisioni, risultati o pesi e non pubblicano su GitHub.
+Named settings live under `configurazioni/esperimenti/<name>/`. Each change creates a readable JSON revision and atomically updates `esperimento.json`. Rejected values leave the prior revision active. Commands do not delete revisions, results or weights, or publish to GitHub.
 
-Dopo `prepara`, il configuratore rifiuta modifiche. Anche una preparazione parziale che abbia già creato il contratto protegge l'esecuzione. Per cambiare strada:
+Once preparation writes the contract, further configuration changes are refused, including after a partial preparation failure. Duplicate the settings instead:
 
 ```bash
-python configura.py duplica mia-prova mia-prova-02
-python configura.py mostra mia-prova-02
+python configura.py duplica my-trial my-trial-02
+python configura.py mostra my-trial-02
 ```
 
-La copia contiene le impostazioni, senza risultati; mantiene i riferimenti ai circuiti e ai GGUF. Se questi file vengono modificati, anche la nuova prova userà i nuovi contenuti al momento della preparazione. Le copie degli ingressi già congelati restano separate. Una configurazione preparata tramite `--output` è protetta anche quando gli output sono fuori dal kit.
+The copy includes settings and references to circuits/GGUFs, without results. If those source files change, the new experiment sees their contents at its own preparation time. Already frozen input copies remain separate. Protection also applies to prepared configurations using an external `--output` root.
 
-## Scegliere i sistemi Test
+## Select Test methods
 
 ```bash
 python configura.py disponibili sistemi
-python configura.py sistemi mia-prova llm_rag llm_senza_rag random
+python configura.py sistemi my-trial llm_rag llm_senza_rag random
 ```
 
-`sistemi` **sostituisce tutto l'elenco**. Non aggiunge implicitamente un metodo a quelli precedenti.
+`sistemi` replaces the entire list; it does not append implicitly.
 
-| Identificativo | Cosa confronta | Prerequisito specifico |
+| ID | Comparison | Additional prerequisite |
 | --- | --- | --- |
-| `llm_rag` | LLM con esempi recuperati dal train | Dataset RAG e selezione LLM |
-| `llm_senza_rag` | LLM senza esempi recuperati | Selezione LLM |
-| `random` | Scelta casuale di dispositivo e configurazione | Catalogo preparato |
-| `llm_recupero_random` | LLM con esempi train estratti casualmente | Dataset RAG e selezione LLM |
-| `mqt` | Selettore supervisionato e politiche RL | Addestramenti e `test tecnico-mqt` |
-| `llm_rag_k1`, `llm_rag_k10` | RAG con uno o dieci esempi | Train con esempi compatibili sufficienti |
-| `llm_wl`, `llm_wl_sintesi` | Recupero strutturale, con o senza sintesi del DAG | Anche `validation wl` |
+| `llm_rag` | LLM with retrieved train examples | RAG Dataset and LLM selection |
+| `llm_senza_rag` | LLM without retrieved examples | LLM selection |
+| `random` | Random allowed device/configuration pair | Prepared catalog |
+| `llm_recupero_random` | LLM with randomly sampled train examples | RAG Dataset and LLM selection |
+| `mqt` | Supervised selector and RL policies | Training and `test tecnico-mqt` |
+| `llm_rag_k1`, `llm_rag_k10` | RAG with one or ten examples | Enough eligible train examples |
+| `llm_wl`, `llm_wl_sintesi` | Structural retrieval, without/with DAG summary | `validation wl` |
 
-Il kit mantiene la sequenza Dataset → validation → selezione → Test. Attualmente anche una campagna che valuti soltanto Random o MQT richiede la selezione sulla validation prima di `test congela`. Se togli `mqt`, non servono i suoi addestramenti per il confronto. Se lo aggiungi, il comando registra l'intenzione ma non avvia né recupera automaticamente modelli addestrati.
+The kit follows Dataset → validation → selection → Test. Even a Random-only or MQT-only comparison currently requires validation selection before `test congela`. Omitting MQT removes its training prerequisite. Adding it declares intent; it neither starts training nor retrieves trained models automatically.
 
-## Cambiare i circuiti
+## Change the circuit corpus
 
 ```bash
-python configura.py circuiti mia-prova --cartella "$HOME/miei-circuiti" --crea
+python configura.py circuiti my-trial --cartella "$HOME/my-circuits" --crea
 ```
 
-Il comando collega una cartella e, con `--crea`, crea gli split mancanti. Inserisci tu i `.qasm` direttamente in `train/`, `validation/` e `test/`. Se hai già una suddivisione, ometti `--crea`. Non vengono cancellati file esistenti e non si generano o ripartiscono automaticamente i circuiti.
+This links a directory; `--crea` creates missing split directories. Place `.qasm` files directly under `train/`, `validation/` and `test/`. Omit `--crea` if the split already exists. Existing files are not removed, and the kit does not generate or divide circuits for you.
 
-Il percorso passato dal terminale è relativo alla directory corrente; il configuratore lo salva relativo al kit quando possibile, altrimenti assoluto. Sono supportati spazi nei percorsi, racchiudendoli fra virgolette. I campi degli schemi non devono essere modificati per cambiare il corpus.
+Terminal paths are relative to the current working directory. The configurator stores kit-relative paths when possible, otherwise absolute paths. Quote paths containing spaces. Changing the corpus does not require changing schema fields.
 
-## Selezionare o ampliare il catalogo Qiskit
+## Select or extend the Qiskit catalog
 
-Il catalogo descrive hardware **quantistico sintetico** e opzioni di compilazione. La GPU del PC si configura nella sezione risorse.
+The catalog describes synthetic quantum hardware and compiler options. Configure the host GPU under resources.
 
 ```bash
 python configura.py disponibili dispositivi
-python configura.py dispositivi mia-prova ibm_falcon_27 quantinuum_h2_56
+python configura.py dispositivi my-trial ibm_falcon_27 quantinuum_h2_56
 python configura.py disponibili compilazioni
-python configura.py compilazioni mia-prova o2_default_default o3_default_default o2_sabre_sabre
+python configura.py compilazioni my-trial o2_default_default o3_default_default o2_sabre_sabre
 ```
 
-Entrambi i comandi sostituiscono il rispettivo elenco. Il primo Target diventa quello predefinito; le sue impronte vengono riprese dal riferimento distribuito e verificate in `prepara`. Le configurazioni standard possono essere riaggiunte per ID anche dopo averle escluse.
+Both commands replace their lists. The first selected Target becomes the default. Target fingerprints come from the supplied reference and are checked during preparation. Standard configurations can be re-added by ID after exclusion.
 
-Per aggiungere una combinazione delle opzioni supportate:
+To add a supported combination:
 
 ```bash
-python configura.py aggiungi-compilazione mia-prova o3_dense_basic \
+python configura.py aggiungi-compilazione my-trial o3_dense_basic \
   --ottimizzazione 3 --layout dense --routing basic --studio routing
 ```
 
-L'ID deve essere nuovo, lungo al massimo 64 caratteri, e la combinazione non deve essere già presente. Sono accettati livelli 2 e 3; layout `default`, `sabre`, `dense`, `trivial`; routing `default`, `sabre`, `lookahead`, `basic`. `default` lascia la scelta a Qiskit, senza passare un metodo esplicito. `--studio` è un'etichetta di analisi fra `baseline`, `layout`, `routing`, non un parametro del compilatore.
+The new ID must be unique and no longer than 64 characters; the combination must not already exist. Supported optimization levels are 2 and 3; layouts are `default`, `sabre`, `dense`, `trivial`; routing methods are `default`, `sabre`, `lookahead`, `basic`. `default` leaves the method unspecified in Qiskit. `--studio` is an analysis label (`baseline`, `layout`, `routing`), not a compiler argument.
 
-Il comando non può inventare un Target, un plugin o un livello non previsto dagli schemi. Un sesto dispositivo o un metodo di compilazione fuori da questo insieme richiede l'estensione coerente di codice, schemi e prompt. Il kit lo segnala invece di produrre un catalogo apparentemente utilizzabile.
+A sixth Target or unsupported plugin/method requires coordinated code, schema and prompt changes. The configurator rejects unsupported choices. Custom combinations remain reusable while active; after excluding one with `compilazioni`, recreate it with `aggiungi-compilazione` to restore it. Its old definition remains in the revisions.
 
-Le combinazioni personalizzate sono riutilizzabili finché rimangono nel catalogo attivo; se le escludi con `compilazioni`, per riattivarle ricreale con `aggiungi-compilazione`. La definizione precedente resta nelle revisioni.
-
-## Scegliere i modelli già registrati
+## Select registered models
 
 ```bash
 python configura.py disponibili modelli
-python configura.py modelli mia-prova qwen phi
-python configura.py modello mia-prova qwen --file /disco/modelli/Qwen3.5-4B-Q8_0.gguf
+python configura.py modelli my-trial qwen phi
+python configura.py modello my-trial qwen --file /disk/models/Qwen3.5-4B-Q8_0.gguf
 ```
 
-`modelli` seleziona i candidati fra quelli registrati; gli altri diventano inattivi. I loro percorsi e parametri restano conservati e possono essere riattivati. I pesi dei candidati inattivi non sono richiesti da `verifica` o dal congelamento della validation.
+`modelli` activates the selected registered candidates and deactivates the others, retaining their paths and parameters. Verification and validation freezing do not require inactive candidates' weights.
 
-Cambiare il percorso di un modello di riferimento non ne cambia l'identità attesa. Se il file è diverso, la verifica dell'impronta fallisce. Per pesi diversi, inclusa un'altra quantizzazione dello stesso LLM, registra un nuovo ID.
+Changing a reference model's file path does not change its expected identity. Different contents fail the hash check. Register a new ID for different weights, including another quantization of the same model.
 
-## Registrare un altro LLM
+<a id="registrare-un-altro-llm"></a>
+## Register another LLM
 
-Recupera autonomamente un GGUF compatibile con il tuo llama.cpp, quindi registra provenienza, revisione e precisione:
+Obtain a GGUF compatible with your llama.cpp build, then record its source, revision and precision:
 
 ```bash
-python configura.py aggiungi-modello mia-prova mio-llm \
-  --file /disco/modelli/mio-modello.gguf \
-  --fonte 'URL o provenienza verificabile del file' \
+python configura.py aggiungi-modello my-trial my-llm \
+  --file /disk/models/my-model.gguf \
+  --fonte 'URL or verifiable source of the file' \
   --revisione 'identificativo-della-revisione' \
   --precisione Q4_K_M \
   --contesto 16384 --token-risposta 4096 --temperature 0 0.4
-python configura.py modelli mia-prova qwen mio-llm
+python configura.py modelli my-trial qwen my-llm
 ```
 
-Sostituisci i valori esemplificativi con quelli reali. Il programma richiede un file locale esistente e calcola SHA-256. `--repository` permette di dichiarare anche il repository del modello base, se conosciuto. Per un file prodotto localmente indica una versione locale riconoscibile e conserva il procedimento che lo ha generato; il programma non ricostruisce informazioni di provenienza mancanti.
+Replace placeholders with real values. Registration requires an existing local file and computes its SHA-256. Optional `--repository` records the base model repository when known. For locally produced weights, use an identifiable local revision and preserve the conversion procedure. The kit does not reconstruct missing provenance.
 
-Il nuovo candidato diventa attivo. Eredita le risorse del primo candidato attivo per i valori non specificati, senza ereditarne identità e impronta. Rivedi il riepilogo: un contesto valido per Qwen può non esserlo per un altro LLM. Il comando non carica il GGUF e non certifica compatibilità, qualità o memoria sufficiente.
+The candidate becomes active and inherits unspecified resources from the first active candidate, without inheriting its identity or hash. Review the summary: Qwen's context limit may not fit another model. Registration does not load the GGUF or certify compatibility, quality or memory capacity.
 
-Per cambiare i parametri di un candidato già registrato:
+To change a registered candidate:
 
 ```bash
-python configura.py modello mia-prova mio-llm \
+python configura.py modello my-trial my-llm \
   --contesto 8192 --token-risposta 2048 --temperature 0 0.2 \
   --timeout 1800 --url http://127.0.0.1:8090
 ```
 
-Il budget di risposta deve essere minore del contesto; le temperature devono essere finite, non negative e distinte. `--timeout` è in secondi. Sono supportati server locali con `transport` nativo o Windows, non provider remoti. La stessa porta può essere condivisa fra candidati eseguiti uno alla volta.
+The output budget must be smaller than context. Temperatures must be finite, non-negative and distinct; timeout is in seconds. Local native/Windows transports are supported, not remote providers. Sequential candidates can share a port.
 
-## Regolare CPU, GPU e cartella dei risultati
+## Set CPU, GPU and output resources
 
 ```bash
-python configura.py risorse mia-prova \
+python configura.py risorse my-trial \
   --processi 1 --timeout-compilazione 100 \
   --threads 4 --gpu-layers 0 --batch 128 --microbatch 64 \
-  --server-bin /percorso/llama-server \
+  --server-bin /path/to/llama-server \
   --risultati /disco/risultati
 ```
 
-`--processi` e `--timeout-compilazione` regolano la griglia Qiskit. Thread, strati GPU, batch e microbatch regolano il server di **tutti i candidati attivi**. Gli altri candidati mantengono le proprie impostazioni: quando li riattivi, rivedi il riepilogo. Il trainer del selettore MQT ha invece il proprio `--num-workers`.
+`--processi` and `--timeout-compilazione` control the Qiskit grid. Threads, GPU layers, batch and microbatch apply to all active model servers. Inactive candidates keep their prior settings; review them when reactivating. The MQT selector trainer uses its own `--num-workers`.
 
-Per una GPU disponibile:
+For a GPU backend:
 
 ```bash
-python esperimento.py --esperimento mia-prova server qwen --list-devices
-python configura.py risorse mia-prova --gpu-layers 999 --device ID_GPU
+python esperimento.py --esperimento my-trial server qwen --list-devices
+python configura.py risorse my-trial --gpu-layers 999 --device GPU_ID
 ```
 
-Usa l'ID restituito dal backend. `--device auto` lascia la scelta al backend; con zero strati GPU l'avviatore passa `--device none`. Un numero inferiore di strati può ridurre il carico sulla VRAM, ma la scelta dipende dal modello e dall'hardware. Non si sostituisce nel codice un nome di scheda fisso.
+Use the backend's reported device ID. `--device auto` delegates selection to the backend; zero GPU layers cause the launcher to pass `--device none`. Fewer offloaded layers can reduce VRAM use, depending on model and hardware. There is no hard-coded GPU name to replace.
 
-Se serve un'impostazione diversa per un solo candidato, usa le stesse opzioni con `modello`, per esempio `modello mia-prova qwen --threads 4 --gpu-layers 0`. Il comando `risorse` non cambia il contesto: si modifica con `modello --contesto`.
+Use the same resource options with `modello` for one candidate, such as `modello my-trial qwen --threads 4 --gpu-layers 0`. `risorse` does not change context; use `modello --contesto`.
 
-La radice risultati è memorizzata nella configurazione. I comandi successivi la ritrovano attraverso `--esperimento`; non occorre ripetere `--output`. Mantieni le risorse costanti durante la campagna. Gli argomenti diretti di `server`, come `--threads`, sono sostituzioni operative e vengono registrati nel comando di avvio; per condizioni pianificate usa il configuratore prima di `prepara`.
+The output root is saved in the configuration and found through `--esperimento`, so later commands need no repeated `--output`. Keep resources constant during the campaign. Direct server arguments are recorded operational overrides; planned conditions belong in the configuration before preparation.
 
-## Temperature, recupero, seed e selezione
+## Set temperatures, retrieval, seeds and selection
 
 ```bash
-python configura.py parametri mia-prova \
+python configura.py parametri my-trial \
   --temperature 0 0.4 0.7 --k 5 --passi-rl 100000 \
   --seed 20260913 --seed-test 0 --seed-random 20260927 \
   --seed-compilazione 0 1 2 --wl 1 2 3 4 5 \
   --criterio median_regret
 ```
 
-Puoi fornire soltanto le opzioni da cambiare. Le temperature vengono applicate a tutti i candidati attivi; `modello --temperature` permette una griglia specifica. `--k` accetta 1, 5 o 10; le varianti Test `llm_rag_k1` e `llm_rag_k10` mantengono il proprio k esplicito. WL recupera cinque esempi e seleziona la profondità fra i valori di `--wl`.
+Specify only the options you want to change. Global temperatures apply to active candidates; `modello --temperature` sets an individual grid. `--k` accepts 1, 5 or 10, while the explicit Test variants retain their own `k`. WL retrieves five examples and selects depth among the supplied `--wl` values.
 
-Il protocollo richiede esattamente tre seed di compilazione distinti. `--seed` controlla la generazione LLM; `--seed-test` e `--seed-random` i rispettivi percorsi di valutazione. Le scelte complete vanno conservate: fissare i seed non garantisce identità dei tempi o determinismo di ogni backend.
+The protocol requires exactly three distinct compilation seeds. `--seed` controls LLM generation; `--seed-test` and `--seed-random` control their evaluation paths. Preserve the full settings: fixed seeds do not guarantee identical timings or determinism in every backend.
 
-Il criterio può essere `median_regret` o `mean_regret`, sempre con priorità alla copertura. Le impostazioni di generazione di livello inferiore rimangono in `configurazioni/generazione_llm.json`; cambiarle è un intervento avanzato da fare prima delle campagne. Non è implementato un comando generico per modificare qualunque campo degli schemi.
+Selection supports `median_regret` or `mean_regret`, always prioritizing coverage. Lower-level generation settings remain in `configurazioni/generazione_llm.json`; editing them is an advanced operation to do before a campaign. There is no generic command to edit arbitrary schema fields.
 
-## Capire cosa manca senza avviare una prova
+## Check readiness without starting evaluation
 
 ```bash
-python configura.py mostra mia-prova
-python configura.py verifica mia-prova
-python esperimento.py --esperimento mia-prova stato
-python esperimento.py --esperimento mia-prova server qwen --controlla
+python configura.py mostra my-trial
+python configura.py verifica my-trial
+python esperimento.py --esperimento my-trial stato
+python esperimento.py --esperimento my-trial server qwen --controlla
 ```
 
-| Comando | Che cosa controlla |
+| Command | Checks |
 | --- | --- |
-| `mostra` | Impostazioni, percorsi, candidati, conteggi e carico massimo della griglia. Non calcola hash dei GGUF. |
-| `configura.py verifica` | Presenza degli ingressi attivi, nomi/duplicati byte-identici, hash GGUF e percorso del server. Non carica modelli. |
-| `esperimento.py verifica` | Installazione e componenti software del kit. |
-| `stato` | Artefatti presenti, integrità della preparazione quando disponibile ed esiti Test; suggerisce la fase successiva. |
-| `server ID --controlla` | Identità dei pesi e contesto del server già acceso, senza inferenza. |
+| `mostra` | Settings, paths, active candidates, counts and maximum grid workload; does not hash GGUF files. |
+| `configura.py verifica` | Active inputs, names, byte-identical duplicates, GGUF hashes and server path; does not load models. |
+| `esperimento.py verifica` | Kit installation and software components. |
+| `stato` | Artifacts, prepared-input integrity when available and Test outcomes; suggests a next phase. |
+| `server ID --controlla` | Identity and context of an already running server, without inference. |
 
-Errori frequenti:
-
-- **GGUF mancante:** scarica il file corretto o collega il suo percorso. Non è incluso nel clone.
-- **GGUF diverso dall'impronta:** recupera la revisione attesa oppure registra consapevolmente un nuovo modello; cambiare percorso non cambia l'identità.
-- **Split vuoto o nome duplicato:** sistema i circuiti nella suddivisione prima di preparare.
-- **Esperimento preparato:** usa `duplica` e un nuovo nome; non cancellare contratti o registri per sbloccare una prova.
-- **Server non trovato:** indica un eseguibile Linux con `--server-bin` e verifica i permessi di esecuzione.
-- **Server non pronto:** attendi il caricamento; se il processo termina, leggi `stderr.log` nella cartella mostrata all'avvio.
-- **Memoria o contesto insufficienti:** scegli un GGUF più piccolo, meno processi o un contesto diverso in una nuova configurazione. Il kit conserva l'esito della prova fallita.
-
-Per l'interfaccia tradizionale restano disponibili `esperimento.py --config FILE --output CARTELLA ...` e `modelli_llm/server.py`. Nel primo caso `--config` e `--output` precedono la fase; il server separato legge `RIPRO_CONFIG` e `RIPRO_OUTPUT`. Per l'uso ordinario preferisci il nome dell'esperimento, che evita di dover mantenere manualmente quei percorsi allineati.
+Use `--help` on a command for supported options. Resolve missing inputs before preparation. After freezing, duplicate the experiment to change conditions; do not remove contracts or records to unlock it. See the [guide](guida.md) for execution order and the [conditions](condizioni.md) for interpretation and preservation.

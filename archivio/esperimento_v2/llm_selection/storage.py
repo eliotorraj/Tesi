@@ -1,4 +1,4 @@
-"""Registri del server Windows su D; percorso logico del progetto conservato."""
+'Windows server logs on D; logical project path retained.'
 from pathlib import Path
 from .common import OUTPUT, append_jsonl, now, windows_path
 
@@ -8,7 +8,7 @@ def allocate_server_directory(logical_directory, events, *, native_root=None):
     logical_directory=Path(logical_directory)
     if native_root is None:
         if not Path("/mnt/d").is_mount():
-            raise ValueError("Disco D non montato in /mnt/d; nessun modello avviato")
+            raise ValueError('Drive D is not mounted at /mnt/d; no model started')
         native_root=NATIVE_SERVER_ROOT
     native_root=Path(native_root).resolve()
     name=logical_directory.name

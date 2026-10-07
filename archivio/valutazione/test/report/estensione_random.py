@@ -1,4 +1,4 @@
-"""Analisi descrittiva aggiunta dopo il Test: qubit, esempi e differenze."""
+'Descriptive analysis added after the Test: qubits, examples and differences.'
 from dati import number
 from impaginazione import fmt, table
 
@@ -13,12 +13,12 @@ def analyze(runs, manifest):
     for cid in sorted(qubits):
         values=[maps[m][cid]["score"] for m in maps]
         if not all(number(v) for v in values):
-            raise ValueError("Analisi per qubit richiede score presenti per le tre varianti LLM.")
+            raise ValueError('Qubit analysis requires scores for all three LLM variants.')
         a,b,c=values
         rows.append(dict(circuit_id=cid,num_qubits=qubits[cid],rag=a,random_rag=b,
                          no_rag=c,difference=a-b,identical=a==b,within_001=abs(a-b)<=0.01))
     groups=[]
-    for name,lo,hi in (("Fino a 5",0,5),("Da 6 a 16",6,16),("Oltre 16",17,float("inf"))):
+    for name,lo,hi in (('Up to 5',0,5),('6 to 16',6,16),('Over 16',17,float("inf"))):
         selected=[r for r in rows if lo<=r["num_qubits"]<=hi]
         n=len(selected)
         groups.append(dict(group=name,n=n,equal=sum(r["identical"] for r in selected),
@@ -32,46 +32,24 @@ def analyze(runs, manifest):
         relative_decrease=(a-b)/a,
         selected_examples=[r for r in rows if r["circuit_id"] in
             ("groundstate_medium_indep_tket_12","qpeexact_indep_qiskit_40")],
-        grouping_note="Fasce descrittive scelte dopo la lettura del Test; qubit dal manifest; nessuna equivalenza qubit/complessità.")
+        grouping_note='Descriptive groups chosen after reviewing the Test; qubits from the manifest; no equivalence between qubit count and complexity.')
 
 
 def conclusion(d):
-    body=r"\subsection{Il contributo della scelta degli esempi}"+"\n"
-    body+=(f"LLM + RAG ha score medio {fmt(d['mean_rag'],6)}, contro {fmt(d['mean_random'],6)} "
-        f"di LLM + Random RAG sui medesimi 90 circuiti riusciti. Il divario è {fmt(d['difference'],6)} "
-        f"di score: circa {fmt(100*d['difference'])} punti sulla scala percentuale 0--100, "
-        f"vicino ai cinque punti. In termini relativi, il recupero casuale è inferiore del {fmt(100*d['relative_decrease'])}\\%. "
-        "Sono due modi diversi di esprimere la differenza; non vanno confusi.\n\n"
-        "La media, da sola, nasconde differenze rilevanti fra circuiti. Per rendere concreta la lettura "
-        "distinguiamo tre fasce di qubit ricavate dal manifest. Le fasce sono descrittive, definite dopo "
-        "aver osservato i risultati. Il numero di qubit non misura da solo la complessità del circuito.\n")
+    body='\\subsection{The contribution of example selection}'+"\n"
+    body+=(f"LLM + RAG has a mean score of {fmt(d['mean_rag'], 6)}, compared with {fmt(d['mean_random'], 6)} for LLM + Random RAG on the same 90 successful circuits. The gap is {fmt(d['difference'], 6)} in score: approximately {fmt(100 * d['difference'])} points on the 0--100 percentage scale, close to five points. In relative terms, random retrieval is lower by {fmt(100 * d['relative_decrease'])}\\%. These are two different ways to express the difference and must not be confused.\n\nThe mean alone hides substantial differences between circuits. To make the interpretation concrete, we distinguish three qubit groups derived from the manifest. These are descriptive groups defined after observing the results. The number of qubits alone does not measure circuit complexity.\n\n")
     rows=[[g["group"],g["n"],f"{g['equal']}/{g['n']}",f"{g['close']}/{g['n']}",
            fmt(g["mean_rag"],4),fmt(g["mean_random"],4),fmt(g["mean_no_rag"],4)] for g in d["groups"]]
     body+=r"\begin{samepage}"+"\n"
-    body+=table(["Qubit","Casi","Identici",r"$|\Delta|\leq0{,}01$","RAG","Random RAG","No RAG"],rows,size="small")
+    body+=table(["Qubit",'Cases','Identical',r"$|\Delta|\leq0{,}01$","RAG","Random RAG","No RAG"],rows,size="small")
     body+=r"\end{samepage}"+"\n"
     g=d["groups"][0]
-    body+=(f"Fra i {g['n']} circuiti fino a 5 qubit, {g['close']} hanno score distanti al massimo 0,01 "
-        f"fra i due recuperi; solo {g['equal']} sono identici alla precisione conservata. "
-        f"Il divario medio è {fmt(g['mean_difference'],6)}. Anche LLM no RAG raggiunge in questa fascia "
-        f"uno score medio elevato ({fmt(g['mean_no_rag'],4)}. Questi dati suggeriscono un contributo "
-        "aggiuntivo ridotto della selezione degli esempi in molti casi piccoli, pur senza dimostrare "
-        "che tutti i circuiti con pochi qubit siano facili.\n\n")
+    body+=(f"Among the {g['n']} circuits with at most 5 qubits, {g['close']} have scores differing by at most 0.01 between retrieval methods; only {g['equal']} are identical at the stored precision. The mean gap is {fmt(g['mean_difference'], 6)}. LLM no RAG also achieves a high mean score in this group ({fmt(g['mean_no_rag'], 4)}. These data suggest a limited additional contribution from example selection in many small cases, without proving that all circuits with few qubits are easy.\n\n")
     for r in d["selected_examples"]:
-        body+=("Per "+r"\nolinkurl{"+r["circuit_id"]+"}, "
-            f"LLM + RAG ottiene {fmt(r['rag'],6)} e LLM + Random RAG {fmt(r['random_rag'],6)}. "
-            f"La differenza è {fmt(r['difference'],6)} di score, cioè {fmt(100*r['difference'])} "
-            "punti sulla scala 0--100. "
-            f"Il calo relativo rispetto a RAG è {fmt(100*r['difference']/r['rag'])}\\%.\n\n")
-    body+=("I due esempi mostrano che la scelta di casi pertinenti può accompagnarsi a proposte "
-        "molto migliori anche quando la differenza media complessiva sembra modesta. "
-        "Nel campione osservato il vantaggio medio è più ampio nelle fasce con più qubit. "
-        "Non è però una crescita uniforme: esistono parità, inversioni e circuiti grandi con score "
-        "basso per entrambi i recuperi. La lettura proposta è dunque che gli esempi pertinenti "
-        "possono aiutare soprattutto nei casi più impegnativi; non che un numero maggiore di qubit "
-        "garantisca un beneficio.\n\n"
-        "Questa è un'interpretazione esplorativa di una sola estrazione per circuito, non una prova "
-        "generale del rapporto fra complessità e utilità degli esempi. Più semi di recupero e misure "
-        "strutturali del circuito permetterebbero di verificarla meglio. Tutti i valori e le fasce "
-        "sono conservati nei CSV dell'analisi.\n\n")
+        body+=('For '+r"\nolinkurl{"+r["circuit_id"]+f"}}, LLM + RAG achieves {fmt(r['rag'], 6)} and LLM + Random RAG {fmt(r['random_rag'], 6)}. The difference is {fmt(r['difference'], 6)} in score, or {fmt(100 * r['difference'])} points on the 0--100 scale. The relative decrease from RAG is {fmt(100 * r['difference'] / r['rag'])}\\%.\n\n")
+    body+=("""The two examples show that choosing relevant cases can accompany much better proposals even when the overall mean difference seems modest. In the observed sample, the mean advantage is larger in groups with more qubits. The increase is not uniform: there are ties, reversals and large circuits with low scores for both retrieval methods. This suggests that relevant examples may help particularly with more demanding cases, not that more qubits guarantee a benefit.
+
+This is an exploratory interpretation of one draw per circuit, not general proof of a relationship between complexity and the usefulness of examples. More retrieval seeds and structural circuit measurements would help test it. All values and groups are preserved in the analysis CSV files.
+
+""")
     return body

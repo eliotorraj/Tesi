@@ -1,4 +1,4 @@
-"""Contratti deterministici per piani, decisioni e valutazione del protocollo v2."""
+'Deterministic contracts for v2 protocol plans, decisions and evaluation.'
 
 from __future__ import annotations
 
@@ -40,22 +40,22 @@ RESULT_SCHEMA_VERSION = "1.0.0"
 
 
 def stable_sha256(payload: Any) -> str:
-    """Calcola l'impronta di un oggetto JSON canonico."""
+    'Compute the fingerprint of a canonical JSON object.'
     import hashlib
 
     return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
 
 
 def load_json(path: Path) -> dict[str, Any]:
-    """Legge un oggetto JSON senza tollerare formati ambigui."""
+    'Read a JSON object without accepting ambiguous formats.'
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
-        raise ValueError(f"{path} non contiene un oggetto JSON.")
+        raise ValueError(f'{path} does not contain a JSON object.')
     return value
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
-    """Legge un JSONL completo e segnala anche una singola riga non valida."""
+    'Read complete JSONL and report even a single invalid line.'
     records: list[dict[str, Any]] = []
     with path.open(encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
@@ -64,15 +64,15 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
             try:
                 value = json.loads(line)
             except json.JSONDecodeError as error:
-                raise ValueError(f"{path}:{line_number}: JSON non valido.") from error
+                raise ValueError(f'{path}:{line_number}: invalid JSON.') from error
             if not isinstance(value, dict):
-                raise ValueError(f"{path}:{line_number}: record non oggetto.")
+                raise ValueError(f'{path}:{line_number}: record is not an object.')
             records.append(value)
     return records
 
 
 def atomic_json_write(path: Path, payload: Any) -> None:
-    """Scrive JSON mediante rinomina atomica."""
+    'Write JSON using an atomic rename.'
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -84,7 +84,7 @@ def atomic_json_write(path: Path, payload: Any) -> None:
 
 
 def atomic_jsonl_write(path: Path, records: Iterable[Mapping[str, Any]]) -> None:
-    """Scrive un JSONL completo mediante rinomina atomica."""
+    'Write complete JSONL through atomic rename.'
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -96,18 +96,18 @@ def atomic_jsonl_write(path: Path, records: Iterable[Mapping[str, Any]]) -> None
 
 
 def source_manifest(path: Path = SOURCE_MANIFEST_V2) -> dict[str, Any]:
-    """Carica il corpus v2 già verificato."""
+    'Load the already verified v2 corpus.'
     manifest = load_json(path)
     if manifest.get("experiment_id") != EXPERIMENT_ID:
-        raise ValueError("Manifest sorgente appartenente a un altro esperimento.")
+        raise ValueError('Source manifest belongs to another experiment.')
     if manifest.get("protocol_version") != PROTOCOL_VERSION:
-        raise ValueError("Versione del protocollo sorgente non conforme.")
+        raise ValueError('Source protocol version does not match.')
     circuits = manifest.get("circuits")
     if not isinstance(circuits, list):
-        raise ValueError("Manifest sorgente senza lista circuits.")
+        raise ValueError('Source manifest lacks a circuits list.')
     counts = Counter(str(record.get("split")) for record in circuits)
     if dict(counts) != EXPECTED_SPLIT_COUNTS:
-        raise ValueError(f"Conteggi split non conformi: {dict(counts)}.")
+        raise ValueError(f'Split counts do not match: {dict(counts)}.')
     return manifest
 
 
@@ -115,9 +115,9 @@ def split_circuits(
     split: str,
     manifest: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
-    """Restituisce l'universo ordinato di uno split."""
+    'Return the ordered universe of a split.'
     if split not in {"validation", "test"}:
-        raise ValueError("Il confronto confermativo ammette validation oppure test.")
+        raise ValueError('Confirmatory comparison accepts validation or Test.')
     records = [
         dict(record)
         for record in manifest.get("circuits", [])
@@ -125,21 +125,21 @@ def split_circuits(
     ]
     records.sort(key=lambda item: (str(item["circuit_id"]), str(item["source_sha256"])))
     if len(records) != EXPECTED_SPLIT_COUNTS[split]:
-        raise ValueError(f"Numero circuiti {split} non conforme: {len(records)}.")
+        raise ValueError(f'Circuit count {split} does not match: {len(records)}.')
     identities = [(item["circuit_id"], item["source_sha256"]) for item in records]
     if len(identities) != len(set(identities)):
-        raise ValueError(f"Identità duplicate nello split {split}.")
+        raise ValueError(f'Duplicate identities in split {split}.')
     circuit_ids = [str(item["circuit_id"]) for item in records]
     source_hashes = [str(item["source_sha256"]) for item in records]
     if len(circuit_ids) != len(set(circuit_ids)):
-        raise ValueError(f"circuit_id duplicati nello split {split}.")
+        raise ValueError(f'Duplicate circuit_id values in split {split}.')
     if len(source_hashes) != len(set(source_hashes)):
-        raise ValueError(f"source_sha256 duplicati nello split {split}.")
+        raise ValueError(f'Duplicate source_sha256 values in split {split}.')
     return records
 
 
 def device_capacities() -> dict[str, int]:
-    """Legge capacità e fingerprint dai Target congelati."""
+    'Read capacity and fingerprints from frozen Targets.'
     from mqt.bench.targets import get_device
     from scripts.mqt_predictor_protocol import target_sha256
 
@@ -149,8 +149,7 @@ def device_capacities() -> dict[str, int]:
         observed = target_sha256(target)
         if observed != FROZEN_TARGET_SHA256[device_id]:
             raise ValueError(
-                f"Target drift per {device_id}: "
-                f"atteso={FROZEN_TARGET_SHA256[device_id]}, osservato={observed}."
+                f'Target drift for {device_id}: expected={FROZEN_TARGET_SHA256[device_id]}, observed={observed}.'
             )
         result[device_id] = int(target.num_qubits)
     return result
@@ -161,7 +160,7 @@ def validate_method_configuration(
     *,
     require_frozen: bool,
 ) -> dict[str, Any]:
-    """Valida i parametri dei tre metodi LLM senza inventare modelli."""
+    "Validate the three LLM methods' parameters without inventing models."
     config = load_json(path)
     expected = {
         "schema_version": "1.0.0",
@@ -170,34 +169,32 @@ def validate_method_configuration(
     }
     for field, value in expected.items():
         if config.get(field) != value:
-            raise ValueError(f"{field} della configurazione metodi non conforme.")
+            raise ValueError(f'{field} in the method configuration does not match.')
     if require_frozen and config.get("status") != "frozen":
         raise ValueError(
-            "I modelli LLM non sono ancora congelati: impostare status='frozen' "
-            "solo dopo avere compilato provider, modello, revisione, prompt, "
-            "temperatura e budget."
+            "LLM models are not frozen: set status='frozen' only after supplying provider, model, revision, prompt, temperature and budget."
         )
     random_config = config.get("random_selection")
     if not isinstance(random_config, dict):
-        raise ValueError("Configurazione della baseline casuale mancante.")
+        raise ValueError('Random baseline configuration is missing.')
     if random_config.get("seed") != RANDOM_SELECTION_SEED:
-        raise ValueError("Seed della baseline casuale non conforme.")
+        raise ValueError('Random baseline seed does not match.')
     if random_config.get("algorithm") != "python_random_v3_mt19937_randrange":
-        raise ValueError("Algoritmo della baseline casuale non conforme.")
+        raise ValueError('Random baseline algorithm does not match.')
 
     methods = config.get("methods")
     if not isinstance(methods, dict) or set(methods) != set(LLM_METHOD_IDS):
-        raise ValueError("La configurazione deve contenere esattamente i tre metodi LLM.")
+        raise ValueError('The configuration must contain exactly the three LLM methods.')
     for method_id in LLM_METHOD_IDS:
         record = methods[method_id]
         if not isinstance(record, dict):
-            raise ValueError(f"Configurazione non valida per {method_id}.")
+            raise ValueError(f'Invalid configuration for {method_id}.')
         expected_attempts = 1 if method_id == "frontier_llm" else 3
         expected_rag = method_id == "llm_rag"
         if record.get("max_attempts") != expected_attempts:
-            raise ValueError(f"max_attempts non conforme per {method_id}.")
+            raise ValueError(f'max_attempts does not match for {method_id}.')
         if record.get("rag_enabled") is not expected_rag:
-            raise ValueError(f"rag_enabled non conforme per {method_id}.")
+            raise ValueError(f'rag_enabled does not match for {method_id}.')
         if require_frozen:
             for field in ("provider", "model_id", "model_revision", "prompt_version"):
                 value = record.get(field)
@@ -206,14 +203,14 @@ def validate_method_configuration(
                     or not value.strip()
                     or "replace" in value.lower()
                 ):
-                    raise ValueError(f"{method_id}.{field} non è congelato.")
+                    raise ValueError(f'{method_id}.{field} is not frozen.')
             prompt_sha256 = record.get("prompt_sha256")
             if (
                 not isinstance(prompt_sha256, str)
                 or len(prompt_sha256) != 64
                 or any(character not in "0123456789abcdef" for character in prompt_sha256)
             ):
-                raise ValueError(f"{method_id}.prompt_sha256 non è valido.")
+                raise ValueError(f'{method_id}.prompt_sha256 is invalid.')
             temperature = record.get("temperature")
             if (
                 isinstance(temperature, bool)
@@ -221,7 +218,7 @@ def validate_method_configuration(
                 or not math.isfinite(float(temperature))
                 or not 0 <= float(temperature) <= 2
             ):
-                raise ValueError(f"{method_id}.temperature non è valida.")
+                raise ValueError(f'{method_id}.temperature is invalid.')
             request_timeout = record.get("request_timeout_seconds")
             if (
                 isinstance(request_timeout, bool)
@@ -230,7 +227,7 @@ def validate_method_configuration(
                 or request_timeout <= 0
             ):
                 raise ValueError(
-                    f"{method_id}.request_timeout_seconds non è valido."
+                    f'{method_id}.request_timeout_seconds is invalid.'
                 )
             max_output_tokens = record.get("max_output_tokens")
             if (
@@ -239,7 +236,7 @@ def validate_method_configuration(
                 or max_output_tokens <= 0
             ):
                 raise ValueError(
-                    f"{method_id}.max_output_tokens non è valido."
+                    f'{method_id}.max_output_tokens is invalid.'
                 )
     if require_frozen:
         compared_fields = (
@@ -257,7 +254,7 @@ def validate_method_configuration(
             field: methods["llm_no_rag"].get(field) for field in compared_fields
         }
         if selected != without_rag:
-            raise ValueError("LLM + RAG e LLM senza RAG devono usare lo stesso modello.")
+            raise ValueError('LLM + RAG and no-RAG LLM must use the same model.')
     return config
 
 
@@ -269,7 +266,7 @@ def build_method_plan(
     capacities: Mapping[str, int],
     random_seed: int = RANDOM_SELECTION_SEED,
 ) -> dict[str, Any]:
-    """Congela richieste e tre estrazioni casuali senza leggere alcuno score."""
+    'Freeze requests and three random draws without reading scores.'
     circuits = split_circuits(split, manifest)
     generator = random.Random(random_seed)
     configuration_ids = [
@@ -288,7 +285,7 @@ def build_method_plan(
             for config_id in configuration_ids
         ]
         if not candidates:
-            raise ValueError(f"Nessun candidato per {circuit['circuit_id']}.")
+            raise ValueError(f"No candidate for {circuit['circuit_id']}.")
         repetitions = []
         for repetition_index, qiskit_seed in enumerate(catalog.seeds):
             selected_device, selected_config = candidates[
@@ -341,7 +338,7 @@ def validate_method_plan(
     manifest: Mapping[str, Any],
     capacities: Mapping[str, int],
 ) -> None:
-    """Ricalcola il piano per impedire modifiche alle estrazioni."""
+    'Recompute the plan to detect changes to random draws.'
     expected = build_method_plan(
         split,
         catalog,
@@ -349,7 +346,7 @@ def validate_method_plan(
         capacities=capacities,
     )
     if dict(plan) != expected:
-        raise ValueError("Il piano dei metodi non coincide con il piano congelato.")
+        raise ValueError('The method plan differs from the frozen plan.')
 
 
 def validate_llm_decisions(
@@ -363,9 +360,9 @@ def validate_llm_decisions(
     method_config: Mapping[str, Any],
     method_config_sha256: str,
 ) -> list[dict[str, Any]]:
-    """Accetta una sola decisione terminale per ogni circuito."""
+    'Accept one terminal decision per circuit.'
     if method_id not in LLM_METHOD_IDS:
-        raise ValueError(f"Metodo LLM sconosciuto: {method_id}.")
+        raise ValueError(f'Unknown LLM method: {method_id}.')
     circuits = split_circuits(split, manifest)
     expected = {
         (str(item["circuit_id"]), str(item["source_sha256"])): item
@@ -395,8 +392,7 @@ def validate_llm_decisions(
         record = dict(raw)
         if set(record) != required:
             raise ValueError(
-                f"Decisione {index}: campi mancanti/inattesi: "
-                f"{sorted(required - set(record))}/{sorted(set(record) - required)}."
+                f'Decision {index}: missing/unexpected fields: {sorted(required - set(record))}/{sorted(set(record) - required)}.'
             )
         if (
             record["schema_version"] != "1.0.0"
@@ -406,43 +402,43 @@ def validate_llm_decisions(
             or record["method_config_sha256"] != method_config_sha256
             or record["split"] != split
         ):
-            raise ValueError(f"Decisione {index}: identità del protocollo non conforme.")
+            raise ValueError(f'Decision {index}: protocol identity does not match.')
         key = (str(record["circuit_id"]), str(record["source_sha256"]))
         circuit = expected.get(key)
         if circuit is None or key in by_key:
-            raise ValueError(f"Decisione {index}: circuito fuori piano o duplicato.")
+            raise ValueError(f'Decision {index}: circuit is outside the plan or duplicated.')
         attempts = record["attempt_count"]
         if (
             isinstance(attempts, bool)
             or not isinstance(attempts, int)
             or not 1 <= attempts <= max_attempts
         ):
-            raise ValueError(f"Decisione {index}: attempt_count non valido.")
+            raise ValueError(f'Decision {index}: invalid attempt_count.')
         status = record["status"]
         if status == "success":
             device_id = record["selected_device_id"]
             config_id = record["selected_config_id"]
             if device_id not in catalog.supported_device_ids:
-                raise ValueError(f"Decisione {index}: device fuori catalogo.")
+                raise ValueError(f'Decision {index}: device outside the catalog.')
             if config_id not in catalog.by_id:
-                raise ValueError(f"Decisione {index}: configurazione fuori catalogo.")
+                raise ValueError(f'Decision {index}: configuration is outside the catalog.')
             if int(circuit["num_qubits"]) > int(capacities[str(device_id)]):
-                raise ValueError(f"Decisione {index}: device incompatibile.")
+                raise ValueError(f'Decision {index}: incompatible device.')
             if record["failure"] is not None:
-                raise ValueError(f"Decisione {index}: failure presente su success.")
+                raise ValueError(f'Decision {index}: failure is present on a successful outcome.')
         elif status in {"failure", "timeout"}:
             if (
                 record["selected_device_id"] is not None
                 or record["selected_config_id"] is not None
                 or not isinstance(record["failure"], dict)
             ):
-                raise ValueError(f"Decisione {index}: fallimento incoerente.")
+                raise ValueError(f'Decision {index}: inconsistent failure.')
         else:
-            raise ValueError(f"Decisione {index}: status non valido.")
+            raise ValueError(f'Decision {index}: invalid status.')
         by_key[key] = record
     if set(by_key) != set(expected):
         missing = sorted(set(expected) - set(by_key))
-        raise ValueError(f"Decisioni incomplete per {method_id}: {len(missing)} mancanti.")
+        raise ValueError(f'Incomplete decisions for {method_id}: {len(missing)} missing.')
     return [by_key[key] for key in sorted(by_key)]
 
 
@@ -453,7 +449,7 @@ def validate_qcompile_runs(
     manifest: Mapping[str, Any],
     expected_model_set_sha256: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Richiede tre esiti qcompile terminali e attestati per circuito."""
+    'Require three terminal qcompile outcomes with provenance per circuit.'
     circuits = split_circuits(split, manifest)
     expected = {
         (str(item["circuit_id"]), str(item["source_sha256"])): item
@@ -469,18 +465,18 @@ def validate_qcompile_runs(
             or record.get("method_id") != QCOMPILE_METHOD_ID
             or record.get("split") != split
         ):
-            raise ValueError(f"qcompile {index}: identità del protocollo non conforme.")
+            raise ValueError(f'qcompile {index}: protocol identity does not match.')
         key = (str(record.get("circuit_id")), str(record.get("source_sha256")))
         if key not in expected:
-            raise ValueError(f"qcompile {index}: circuito fuori split.")
+            raise ValueError(f'qcompile {index}: circuit is outside the split.')
         repetition = record.get("repetition_index")
         if isinstance(repetition, bool) or repetition not in {0, 1, 2}:
-            raise ValueError(f"qcompile {index}: ripetizione non valida.")
+            raise ValueError(f'qcompile {index}: invalid repetition.')
         if repetition in grouped[key]:
-            raise ValueError(f"qcompile {index}: ripetizione duplicata.")
+            raise ValueError(f'qcompile {index}: duplicate repetition.')
         provenance = record.get("provenance")
         if not isinstance(provenance, dict):
-            raise ValueError(f"qcompile {index}: provenienza mancante.")
+            raise ValueError(f'qcompile {index}: missing provenance.')
         model_hashes = provenance.get("model_hashes")
         if (
             provenance.get("source_manifest_sha256")
@@ -510,7 +506,7 @@ def validate_qcompile_runs(
                 != expected_model_set_sha256
             )
         ):
-            raise ValueError(f"qcompile {index}: provenienza non conforme.")
+            raise ValueError(f'qcompile {index}: provenance does not match.')
         expected_run_id = "mqt_run_" + stable_sha256(
             {
                 "experiment_id": EXPERIMENT_ID,
@@ -524,7 +520,7 @@ def validate_qcompile_runs(
             }
         )
         if record.get("run_id") != expected_run_id:
-            raise ValueError(f"qcompile {index}: run_id non conforme.")
+            raise ValueError(f'qcompile {index}: run_id does not match.')
         status = record.get("status")
         if status == "success":
             device_id = record.get("selected_device_id")
@@ -543,7 +539,7 @@ def validate_qcompile_runs(
                 or passes[-1] != "terminate"
                 or record.get("failure") is not None
             ):
-                raise ValueError(f"qcompile {index}: successo non attestato.")
+                raise ValueError(f'qcompile {index}: success lacks supporting evidence.')
         elif status in {"failure", "timeout"}:
             failure = record.get("failure")
             if (
@@ -556,13 +552,13 @@ def validate_qcompile_runs(
                     and failure.get("category") != "compilation_timeout"
                 )
             ):
-                raise ValueError(f"qcompile {index}: esito negativo incoerente.")
+                raise ValueError(f'qcompile {index}: inconsistent negative outcome.')
         else:
-            raise ValueError(f"qcompile {index}: status non terminale.")
+            raise ValueError(f'qcompile {index}: status is not terminal.')
         grouped[key][int(repetition)] = record
     for key in expected:
         if set(grouped.get(key, {})) != {0, 1, 2}:
-            raise ValueError(f"qcompile incompleto per {key[0]}.")
+            raise ValueError(f'Incomplete qcompile for {key[0]}.')
     return [
         grouped[key][repetition]
         for key in sorted(grouped)
@@ -582,7 +578,7 @@ def validate_qiskit_matrix(
     dict[tuple[str, str, str, int], dict[str, Any]],
     dict[tuple[str, str, str], dict[str, Any]],
 ]:
-    """Ricalcola matrice e aggregati Qiskit, rifiutando provenienza legacy."""
+    'Recompute the Qiskit matrix and aggregates, rejecting legacy provenance.'
     circuits = split_circuits(split, manifest)
     circuit_by_hash = {
         str(item["source_sha256"]): item for item in circuits
@@ -592,7 +588,7 @@ def validate_qiskit_matrix(
         or catalog.protocol_version != PROTOCOL_VERSION
         or dict(catalog.required_versions) != EXPECTED_PACKAGE_VERSIONS
     ):
-        raise ValueError("Catalogo Qiskit non conforme al protocollo v2.")
+        raise ValueError('Qiskit catalog does not match protocol v2.')
     expected_configurations = {
         configuration.config_id: {
             **configuration.to_dict(),
@@ -669,7 +665,7 @@ def validate_qiskit_matrix(
             or raw.get("ranking_metric")
             != "median_expected_fidelity_across_seeds"
         ):
-            raise ValueError(f"Aggregato Qiskit v2 non conforme: {key}.")
+            raise ValueError(f'Qiskit v2 aggregate does not match: {key}.')
         summary_index[key] = dict(raw)
 
     run_index: dict[tuple[str, str, str, int], dict[str, Any]] = {}
@@ -681,7 +677,7 @@ def validate_qiskit_matrix(
         configuration = raw.get("configuration") or {}
         seed = raw.get("seed_transpiler")
         if isinstance(seed, bool) or not isinstance(seed, int):
-            raise ValueError("Tentativo Qiskit v2 con seed non intero.")
+            raise ValueError('Qiskit v2 attempt has a non-integer seed.')
         key = (
             str(circuit.get("source_sha256")),
             str(device.get("device_id")),
@@ -743,7 +739,7 @@ def validate_qiskit_matrix(
             != dict(catalog.execution_policy)
             or provenance.get("generator") != "qiskit_dataset.generation"
         ):
-            raise ValueError(f"Tentativo Qiskit v2 non conforme: {key}.")
+            raise ValueError(f'Qiskit v2 attempt does not match: {key}.')
         status = raw.get("status")
         score = raw.get("score")
         failure = raw.get("failure")
@@ -759,7 +755,7 @@ def validate_qiskit_matrix(
                 or not isinstance(raw.get("compiled_circuit"), dict)
                 or failure is not None
             ):
-                raise ValueError(f"Tentativo Qiskit v2 incoerente: {key}.")
+                raise ValueError(f'Inconsistent Qiskit v2 attempt: {key}.')
         elif status in {"failure", "timeout"}:
             if (
                 score is not None
@@ -780,18 +776,18 @@ def validate_qiskit_matrix(
                     and failure.get("category") == "timeout"
                 )
             ):
-                raise ValueError(f"Tentativo Qiskit v2 incoerente: {key}.")
+                raise ValueError(f'Inconsistent Qiskit v2 attempt: {key}.')
         else:
             raise ValueError(
-                f"Tentativo Qiskit v2 con stato non terminale: {key}."
+                f'Qiskit v2 attempt has a nonterminal status: {key}.'
             )
         run_index[key] = dict(raw)
     if set(summary_index) != expected_summaries:
         raise ValueError(
-            f"Matrice aggregata incompleta: {len(summary_index)}/{len(expected_summaries)}."
+            f'Incomplete aggregate matrix: {len(summary_index)}/{len(expected_summaries)}.'
         )
     if set(run_index) != expected_runs:
-        raise ValueError(f"Matrice raw incompleta: {len(run_index)}/{len(expected_runs)}.")
+        raise ValueError(f'Incomplete raw matrix: {len(run_index)}/{len(expected_runs)}.')
     for key, summary in summary_index.items():
         linked_runs = [
             run_index[(*key, int(seed))]
@@ -854,7 +850,7 @@ def validate_qiskit_matrix(
             or not score_matches
         ):
             raise ValueError(
-                f"Aggregato Qiskit non allineato ai raw run: {key}."
+                f'Qiskit aggregate differs from raw runs: {key}.'
             )
     return run_index, summary_index
 
@@ -872,7 +868,7 @@ def _result(
     failure_category: str | None,
     provenance: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Crea il record condiviso da tutti i metodi."""
+    'Create the record shared by all methods.'
     return {
         "schema_version": RESULT_SCHEMA_VERSION,
         "experiment_id": EXPERIMENT_ID,
@@ -902,7 +898,7 @@ def _qiskit_repetitions(
     config_id: str,
     seeds: Sequence[int],
 ) -> list[dict[str, Any]]:
-    """Rende omogenee le tre ripetizioni Qiskit di una coppia."""
+    "Standardize a pair's three Qiskit repetitions."
     result = []
     for repetition_index, seed in enumerate(seeds):
         run = run_index[(source_hash, device_id, config_id, int(seed))]
@@ -921,7 +917,7 @@ def _qiskit_repetitions(
 def _incomplete_status(
     repetitions: Sequence[Mapping[str, Any]],
 ) -> tuple[str, str]:
-    """Distingue un timeout osservato da un altro fallimento terminale."""
+    'Distinguish an observed timeout from another terminal failure.'
     if any(item.get("status") == "timeout" for item in repetitions):
         return "timeout", "compilation_timeout"
     return "failure", "compilation_failure"
@@ -942,11 +938,11 @@ def evaluate_common_methods(
     llm_method_ids: Sequence[str] = LLM_METHOD_IDS,
     include_qcompile: bool = True,
 ) -> list[dict[str, Any]]:
-    """Produce record omogenei; la selezione validation può escludere MQT."""
+    'Produce uniform records; validation selection may exclude MQT.'
     if len(set(llm_method_ids)) != len(llm_method_ids) or not set(llm_method_ids).issubset(LLM_METHOD_IDS):
-        raise ValueError("Metodi LLM della valutazione non validi.")
+        raise ValueError('Invalid evaluation LLM methods.')
     if split == "test" and (tuple(llm_method_ids) != LLM_METHOD_IDS or not include_qcompile):
-        raise ValueError("Il test richiede tutti i metodi e qcompile.")
+        raise ValueError('Test requires all methods and qcompile.')
     run_index, summary_index = validate_qiskit_matrix(
         qiskit_runs,
         qiskit_summaries,
@@ -1287,7 +1283,7 @@ def summarize_results(
     split: str,
     input_fingerprints: Mapping[str, str],
 ) -> dict[str, Any]:
-    """Mantiene visibili fallimenti, non applicabilità e denominatori."""
+    'Keep failures, inapplicability and denominators visible.'
     by_method: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for record in results:
         by_method[str(record["method_id"])].append(record)

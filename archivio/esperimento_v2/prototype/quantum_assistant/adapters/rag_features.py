@@ -1,4 +1,4 @@
-"""Trasformazione train-only delle 49 feature e distanza Manhattan canonica."""
+'Train-only transformation of 49 features and canonical Manhattan distance.'
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from typing import Any
 
 from qiskit_dataset.experiment_v2 import stable_sha256
 
-# Ordine fissato, indipendente dalle chiavi JSON e dalle future API MQT.
+# Fixed order, independent of JSON keys and future MQT APIs.
 FEATURE_ORDER = (
     "gate_count_u3", "gate_count_u2", "gate_count_u1", "gate_count_cx",
     "gate_count_id", "gate_count_u0", "gate_count_u", "gate_count_p",
@@ -32,7 +32,7 @@ SCORE_REL_TOL = 1e-6
 
 
 class RetrievalIntegrityError(ValueError):
-    """Dati o raccolta incoerenti: non equivale a zero risultati."""
+    'Inconsistent data or collection: this is not an empty result.'
 
     code = "RAG_INTEGRITY_ERROR"
     retryable = False
@@ -45,24 +45,24 @@ def transform_unscaled(features: Mapping[str, Any]) -> tuple[float, ...]:
     if not isinstance(features, Mapping) or set(features) != set(FEATURE_ORDER):
         missing = sorted(set(FEATURE_ORDER) - set(features)) if isinstance(features, Mapping) else list(FEATURE_ORDER)
         extra = sorted(set(features) - set(FEATURE_ORDER)) if isinstance(features, Mapping) else []
-        raise RetrievalIntegrityError(f"Feature mancanti={missing}, inattese={extra}.")
+        raise RetrievalIntegrityError(f'Missing features={missing}, unexpected={extra}.')
     result = []
     for name in FEATURE_ORDER:
         raw = features[name]
         if isinstance(raw, bool) or not isinstance(raw, (int, float)):
-            raise RetrievalIntegrityError(f"Feature {name}: numero atteso.")
+            raise RetrievalIntegrityError(f'Feature {name}: expected a number.')
         try:
             value = float(raw)
         except OverflowError as error:
-            raise RetrievalIntegrityError(f"Feature {name}: valore troppo grande.") from error
+            raise RetrievalIntegrityError(f'Feature {name}: value too large.') from error
         if not math.isfinite(value) or value < 0:
-            raise RetrievalIntegrityError(f"Feature {name}: valore non finito o negativo.")
+            raise RetrievalIntegrityError(f'Feature {name}: non-finite or negative value.')
         if name in LOG_FEATURES:
             if not value.is_integer() or (name == "num_qubits" and value < 1):
-                raise RetrievalIntegrityError(f"Feature {name}: conteggio fuori dominio.")
+                raise RetrievalIntegrityError(f'Feature {name}: count outside the domain.')
             value = math.log1p(value)
         elif value > 1:
-            raise RetrievalIntegrityError(f"Feature {name}: indicatore fuori [0, 1].")
+            raise RetrievalIntegrityError(f'Feature {name}: indicator outside [0, 1].')
         result.append(value)
     return tuple(result)
 
@@ -73,13 +73,13 @@ class FeatureTransform:
 
     def __post_init__(self) -> None:
         if len(self.divisors) != 49 or any(not math.isfinite(x) or x <= 0 for x in self.divisors):
-            raise RetrievalIntegrityError("Divisori non validi.")
+            raise RetrievalIntegrityError('Invalid divisors.')
 
     @classmethod
     def fit_train(cls, features: Iterable[Mapping[str, Any]]) -> FeatureTransform:
         rows = [transform_unscaled(row) for row in features]
         if not rows:
-            raise RetrievalIntegrityError("Nessun esempio train per la trasformazione.")
+            raise RetrievalIntegrityError('No train examples available for the transformation.')
         return cls(tuple(max(abs(row[i]) for row in rows) or 1.0 for i in range(49)))
 
     def apply(self, features: Mapping[str, Any]) -> tuple[float, ...]:

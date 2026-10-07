@@ -1,4 +1,4 @@
-"""Controlli tecnici offline; non costituiscono valutazione sperimentale."""
+'Offline technical checks; not an experimental evaluation.'
 import json, tempfile, time, sys, argparse
 from pathlib import Path
 AREA = Path(__file__).resolve().parent
@@ -30,7 +30,7 @@ def check(full=True):
             queries+=1
     request,prompt,retrieval=prepare((ROOT/'examples/bell.qasm').read_text())
     view=model_input(prompt);device=view['compatible_hardware'][0]['id'];config=view['configuration_catalog'][0]['config_id']
-    answer={'selected_device':device,'config_id':config,'facts':[{'assertion':'selected_device_has_enough_qubits'}],'hypothesis':'Propongo questa configurazione come prova tecnica; la qualita sul circuito resta da valutare.'}
+    answer={'selected_device':device,'config_id':config,'facts':[{'assertion':'selected_device_has_enough_qubits'}],'hypothesis':'I propose this configuration as a technical check; its quality on the circuit remains to be evaluated.'}
     # Derive mandatory fields from actual contract rather than silently ignoring schema.
     print('checking offline facts and compilation',flush=True)
     checked=verify(answer,prompt)
@@ -53,7 +53,7 @@ def check(full=True):
     with tempfile.TemporaryDirectory(dir=AREA/'runtime') as temp:
         fake=Fake(overflow=True)
         try:decide(prompt,Path(temp),fake,16384)
-        except ValueError as error:assert 'Contesto insufficiente' in str(error)
+        except ValueError as error:assert 'Insufficient context' in str(error)
         else:raise AssertionError('Overflow accepted')
         assert fake.calls==0
     invalid=dict(answer,selected_device='not_a_device');assert not verify(invalid,prompt)['selection_valid']
@@ -64,7 +64,7 @@ def check(full=True):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--quick', action='store_true', help='Confronta cinque query RAG; verifica comunque tutte le caratteristiche train.')
+    parser.add_argument('--quick', action='store_true', help='Compare five RAG queries; still check every train feature.')
     args = parser.parse_args()
     try:
         print(json.dumps(check(full=not args.quick), indent=2))

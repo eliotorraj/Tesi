@@ -1,4 +1,4 @@
-"""Percorsi di una nuova esecuzione, indipendenti dall'archivio e dal prototipo."""
+'Paths for a new run, independent of the archive and prototype.'
 from pathlib import Path
 import os, json, re, hashlib
 KIT = Path(__file__).resolve().parents[1]
@@ -6,7 +6,7 @@ CONFIG_PATH = Path(os.environ.get("RIPRO_CONFIG", KIT/"configurazioni/esperiment
 CONFIG = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 EXPERIMENT_ID = CONFIG["experiment_id"]
 if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", EXPERIMENT_ID):
-    raise ValueError("experiment_id non valido")
+    raise ValueError('Invalid experiment_id')
 def input_path(value):
     p=Path(value).expanduser()
     return p.resolve() if p.is_absolute() else (KIT/p).resolve()
@@ -36,21 +36,21 @@ def save(path,value):
     temporary=path.with_name('.'+path.name+'.pending-'+uuid4().hex)
     with temporary.open("x",encoding="utf-8") as f:
         json.dump(value,f,ensure_ascii=False,indent=2,allow_nan=False);f.write("\n");f.flush();os.fsync(f.fileno())
-    # Pubblicazione atomica e senza sovrascrittura. Un'interruzione lascia la copia pending.
+    # Publish atomically without overwrite. Interruption leaves the pending copy.
     try:os.link(temporary,path)
     except BaseException:raise
     else:temporary.unlink()
 def same_or_save(path,value):
     path=Path(path)
     if path.exists():
-        if read(path)!=value:raise ValueError("Contenuto diverso: "+str(path)+"; usare un nuovo experiment_id")
+        if read(path)!=value:raise ValueError('Content differs: '+str(path)+'; use a new experiment_id')
     else:save(path,value)
 def model_registry():
     values=[m for m in read(REGISTRY_PATH)["models"] if m.get("enabled",True)]
     ids=[m["id"] for m in values]
-    if not values or len(ids)!=len(set(ids)):raise ValueError("Elenco modelli vuoto o ID duplicati")
+    if not values or len(ids)!=len(set(ids)):raise ValueError('Empty model list or duplicate IDs')
     for m in values:
-        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*",m["id"]):raise ValueError("ID modello non valido")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*",m["id"]):raise ValueError('Invalid model ID')
         p=Path(m["file"]).expanduser()
         m["path"]=str(p.resolve() if p.is_absolute() else (REGISTRY_PATH.parent/p).resolve())
     return {m["id"]:m for m in values}
@@ -67,10 +67,10 @@ def code_identity():
 def require_prepared():
     m=read(WORK/"manifest.json")
     expected={"config":CONFIG,"catalog_sha256":sha(CATALOG_TEMPLATE),"code":code_identity()}
-    if read(WORK/"contratto.json")!=expected:raise ValueError("Codice o configurazione cambiati: usare un nuovo experiment_id")
+    if read(WORK/"contratto.json")!=expected:raise ValueError('Code or configuration changed: use a new experiment_id')
     for name,expected_hash in read(WORK/"ingressi_sigillati.json").items():
-        if sha(WORK/name)!=expected_hash:raise ValueError("Ingresso congelato modificato: "+name)
+        if sha(WORK/name)!=expected_hash:raise ValueError('Frozen input modified: '+name)
     for row in m["circuits"]:
         p=WORK/row["source_ref"]
-        if sha(p)!=row["source_sha256"]:raise ValueError("Circuito congelato modificato: "+str(p))
+        if sha(p)!=row["source_sha256"]:raise ValueError('Frozen circuit modified: '+str(p))
     return m

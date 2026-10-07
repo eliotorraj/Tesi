@@ -1,4 +1,4 @@
-"""Conta testi nel runtime separato dei tokenizer, senza cambiare uv.lock."""
+'Count text in the separate tokenizer runtime without changing uv.lock.'
 from pathlib import Path
 import json
 import subprocess

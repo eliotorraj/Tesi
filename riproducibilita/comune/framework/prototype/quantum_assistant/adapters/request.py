@@ -1,4 +1,4 @@
-"""Legge la richiesta, analizza il QASM e ne controlla il significato."""
+'Read the request, parse QASM and check its meaning.'
 
 from __future__ import annotations
 
@@ -66,20 +66,20 @@ FEATURE_NAMES = tuple(
 
 
 def normalize_gate_id(value: str) -> str:
-    """Uniforma il nome di un gate e applica gli alias riconosciuti."""
+    'Normalize a gate name and apply recognized aliases.'
     normalized = value.strip().lower()
     return GATE_ALIASES.get(normalized, normalized)
 
 
 def _raise_issue(code: str, path: str, message: str) -> Never:
-    """Solleva un errore di richiesta con un solo problema strutturato."""
+    'Raise a request error with one structured issue.'
     raise RequestValidationError(
         ValidationReport((ValidationIssue(code, path, message),))
     )
 
 
 def _validate_qasm_includes(source: str) -> None:
-    """Ammette soltanto qelib1 fornita da Qiskit, senza cercare altri file."""
+    'Allow only the Qiskit-provided qelib1 without searching for other files.'
     without_comments = _BLOCK_COMMENT_PATTERN.sub("", source)
     without_comments = _LINE_COMMENT_PATTERN.sub("", without_comments)
     remainder = _ALLOWED_INCLUDE_PATTERN.sub("", without_comments)
@@ -87,17 +87,17 @@ def _validate_qasm_includes(source: str) -> None:
         _raise_issue(
             "QASM_INCLUDE_NOT_ALLOWED",
             "$.circuit.source",
-            "Sono ammessi soltanto include di qelib1.inc.",
+            'Only qelib1.inc includes are allowed.',
         )
 
 
 def _extract_feature_values(circuit: QuantumCircuit) -> tuple[float, ...]:
-    """Estrae dal circuito un vettore di caratteristiche valido e finito."""
+    'Extract a valid, finite feature vector from the circuit.'
     if circuit.num_qubits < 1:
         _raise_issue(
             "CIRCUIT_HAS_NO_QUBITS",
             "$.circuit.source",
-            "Il circuito deve dichiarare almeno un qubit.",
+            'The circuit must declare at least one qubit.',
         )
     try:
         raw_values = create_feature_vector(circuit)
@@ -107,8 +107,7 @@ def _extract_feature_values(circuit: QuantumCircuit) -> tuple[float, ...]:
             "CIRCUIT_FEATURE_EXTRACTION_FAILED",
             "$.circuit.source",
             (
-                "Impossibile estrarre le feature del circuito: "
-                f"{type(exc).__name__}: {exc}"
+                f'Cannot extract circuit features: {type(exc).__name__}: {exc}'
             ),
         )
     if len(feature_values) != len(FEATURE_NAMES):
@@ -116,21 +115,20 @@ def _extract_feature_values(circuit: QuantumCircuit) -> tuple[float, ...]:
             "CIRCUIT_FEATURE_VECTOR_SHAPE_INVALID",
             "$.circuit.source",
             (
-                f"Feature vector inatteso: {len(feature_values)} valori, "
-                f"attesi {len(FEATURE_NAMES)}."
+                f'Unexpected feature vector: {len(feature_values)} values, expected {len(FEATURE_NAMES)}.'
             ),
         )
     if any(not math.isfinite(value) for value in feature_values):
         _raise_issue(
             "CIRCUIT_FEATURES_INVALID",
             "$.circuit.source",
-            "L'estrazione ha prodotto feature non finite.",
+            'Extraction produced non-finite features.',
         )
     return feature_values
 
 
 def _constraints_from_mapping(raw: Mapping[str, Any]) -> HardwareConstraints:
-    """Converte i vincoli JSON nel modello interno dei vincoli hardware."""
+    'Convert JSON constraints into the internal hardware constraint model.'
     qubit_range_raw = raw.get("device_qubits")
     qubit_range = None
     if isinstance(qubit_range_raw, Mapping):
@@ -149,7 +147,7 @@ def _constraints_from_mapping(raw: Mapping[str, Any]) -> HardwareConstraints:
 
 
 def _user_request_from_mapping(raw: Mapping[str, Any]) -> UserRequest:
-    """Valida l'oggetto JSON e costruisce la richiesta dell'utente."""
+    'Validate the JSON object and build the user request.'
     issues = validate_instance(
         REQUEST_SCHEMA,
         raw,
@@ -175,18 +173,18 @@ def _user_request_from_mapping(raw: Mapping[str, Any]) -> UserRequest:
 
 
 def _legacy_request(submission: UiSubmission) -> UserRequest:
-    """Adatta il vecchio formato della schermata alla richiesta corrente."""
+    'Adapt the legacy screen format to the current request.'
     if submission.constraints:
         _raise_issue(
             "LEGACY_CONSTRAINT_NOT_SUPPORTED",
             "$.constraints",
-            "Il vecchio campo constraints non è più supportato.",
+            'The legacy constraints field is no longer supported.',
         )
     if not isinstance(submission.request_id, str) or not submission.request_id.strip():
         _raise_issue(
             "REQUEST_SCHEMA_INVALID",
             "$.request_id",
-            "request_id non può essere vuoto.",
+            'request_id cannot be empty.',
         )
     if (
         not isinstance(submission.qasm2, str)
@@ -196,7 +194,7 @@ def _legacy_request(submission: UiSubmission) -> UserRequest:
         _raise_issue(
             "REQUEST_SCHEMA_INVALID",
             "$.circuit.source",
-            "Il QASM legacy è vuoto o supera il limite ammesso.",
+            'Legacy QASM is empty or exceeds the allowed size.',
         )
     if (
         not isinstance(submission.circuit_name, str)
@@ -205,7 +203,7 @@ def _legacy_request(submission: UiSubmission) -> UserRequest:
         _raise_issue(
             "REQUEST_SCHEMA_INVALID",
             "$.circuit.name",
-            "Il nome circuito legacy deve contenere da 1 a 128 caratteri.",
+            'The legacy circuit name must contain 1 to 128 characters.',
         )
     allowed_devices = tuple(submission.allowed_devices)
     if (
@@ -220,7 +218,7 @@ def _legacy_request(submission: UiSubmission) -> UserRequest:
         _raise_issue(
             "REQUEST_SCHEMA_INVALID",
             "$.allowed_devices",
-            "La allowlist legacy contiene ID non validi o duplicati.",
+            'The legacy allowlist contains invalid or duplicate IDs.',
         )
     return UserRequest(
         schema_version=REQUEST_SCHEMA_VERSION,
@@ -239,15 +237,15 @@ def _legacy_request(submission: UiSubmission) -> UserRequest:
 
 
 class QasmRequestParser:
-    """Legge una richiesta rigorosa e calcola le proprietà del circuito."""
+    'Read a strict request and compute circuit properties.'
 
     def parse(self, submission: RequestInput) -> ParsedRequest:
-        """Converte l'ingresso supportato in una richiesta con QASM analizzato."""
+        'Convert supported input into a request with parsed QASM.'
         if isinstance(submission, UiSubmission):
             request = _legacy_request(submission)
         elif isinstance(submission, UserRequest):
-            # Un chiamante non può attivare il percorso storico impostando
-            # direttamente il marcatore interno del modello pubblico.
+            # A caller cannot enable the legacy path by setting
+            # the public model's internal marker directly.
             request = _user_request_from_mapping(submission.to_dict())
         else:
             try:
@@ -268,21 +266,20 @@ class QasmRequestParser:
             _raise_issue(
                 "FIGURE_OF_MERIT_NOT_SUPPORTED",
                 "$.figure_of_merit_id",
-                "Questa versione supporta soltanto expected_fidelity.",
+                'This version supports expected_fidelity only.',
             )
         if not request.circuit.source.strip():
             _raise_issue(
                 "REQUEST_SCHEMA_INVALID",
                 "$.circuit.source",
-                "Il circuito OpenQASM 2 è vuoto.",
+                'The OpenQASM 2 circuit is empty.',
             )
         if len(request.circuit.source.encode("utf-8")) > MAX_REQUEST_BYTES:
             _raise_issue(
                 "REQUEST_SCHEMA_INVALID",
                 "$.circuit.source",
                 (
-                    "Il circuito supera il limite UTF-8 di "
-                    f"{MAX_REQUEST_BYTES} byte."
+                    f'The circuit exceeds the UTF-8 limit of {MAX_REQUEST_BYTES} bytes.'
                 ),
             )
         _validate_qasm_includes(request.circuit.source)
@@ -298,7 +295,7 @@ class QasmRequestParser:
             _raise_issue(
                 "QASM_PARSE_FAILED",
                 "$.circuit.source",
-                f"OpenQASM 2 non valido: {type(exc).__name__}: {exc}",
+                f'Invalid OpenQASM 2: {type(exc).__name__}: {exc}',
             )
 
         feature_values = _extract_feature_values(circuit)
@@ -322,14 +319,14 @@ class QasmRequestParser:
 
 
 class RequestSemanticValidator:
-    """Controlla le regole legate al catalogo e uniforma i nomi dei gate."""
+    'Check catalog rules and normalize gate names.'
 
     def normalize(
         self,
         request: ParsedRequest,
         catalog: HardwareCatalogSnapshot,
     ) -> NormalizedRequest:
-        """Controlla la richiesta rispetto al catalogo e la rende canonica."""
+        'Check the request against the catalog and canonicalize it.'
         issues: list[ValidationIssue] = []
         constraints = request.hardware_constraints
         provider_ids = set(catalog.provider_ids)
@@ -345,7 +342,7 @@ class RequestSemanticValidator:
                 ValidationIssue(
                     "CATALOG_SNAPSHOT_MISMATCH",
                     "$.catalog_snapshot_id",
-                    "La richiesta non usa lo snapshot hardware corrente.",
+                    'The request does not use the current hardware snapshot.',
                     {
                         "actual": request.catalog_snapshot_id,
                         "expected": catalog.catalog_snapshot_id,
@@ -360,7 +357,7 @@ class RequestSemanticValidator:
                 ValidationIssue(
                     "FIGURE_OF_MERIT_NOT_SUPPORTED",
                     "$.figure_of_merit_id",
-                    "Figure of merit non supportata dal catalogo.",
+                    'Figure of merit not supported by the catalog.',
                 )
             )
 
@@ -372,7 +369,7 @@ class RequestSemanticValidator:
                     ValidationIssue(
                         "UNKNOWN_PROVIDER",
                         f"$.hardware_constraints.allowed_provider_ids[{index}]",
-                        f"Provider inesistente: {provider_id!r}.",
+                        f'Unknown provider: {provider_id!r}.',
                     )
                 )
 
@@ -385,7 +382,7 @@ class RequestSemanticValidator:
                             "$.hardware_constraints."
                             f"allowed_device_ids[{index}]"
                         ),
-                        f"Device inesistente: {device_id!r}.",
+                        f'Device does not exist: {device_id!r}.',
                     )
                 )
 
@@ -402,7 +399,7 @@ class RequestSemanticValidator:
                             "$.hardware_constraints."
                             f"required_native_gate_ids[{index}]"
                         ),
-                        f"Gate nativo inesistente: {gate_id!r}.",
+                        f'Unknown native gate: {gate_id!r}.',
                     )
                 )
 
@@ -419,7 +416,7 @@ class RequestSemanticValidator:
                     ValidationIssue(
                         "DUPLICATE_NORMALIZED_VALUE",
                         f"$.hardware_constraints.{field_name}",
-                        "Sono presenti duplicati dopo la normalizzazione.",
+                        'Duplicates remain after normalization.',
                     )
                 )
 
@@ -434,7 +431,7 @@ class RequestSemanticValidator:
                     ValidationIssue(
                         "INVALID_QUBIT_RANGE",
                         "$.hardware_constraints.device_qubits",
-                        "Il minimo non può superare il massimo.",
+                        'The minimum cannot exceed the maximum.',
                     )
                 )
             if (
@@ -445,7 +442,7 @@ class RequestSemanticValidator:
                     ValidationIssue(
                         "CIRCUIT_EXCEEDS_USER_MAX_QUBITS",
                         "$.hardware_constraints.device_qubits.max",
-                        "Il circuito supera il massimo hardware richiesto.",
+                        'The circuit exceeds the requested hardware maximum.',
                         {
                             "circuit_num_qubits": request.num_qubits,
                             "maximum": qubit_range.maximum,
@@ -471,8 +468,7 @@ class RequestSemanticValidator:
                                 f"allowed_device_ids[{index}]"
                             ),
                             (
-                                f"Il device {device_id!r} non appartiene "
-                                "a un provider ammesso."
+                                f'Device {device_id!r} does not belong to an allowed provider.'
                             ),
                         )
                     )

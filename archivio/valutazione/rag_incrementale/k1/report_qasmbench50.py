@@ -1,4 +1,4 @@
-"""Genera il report k=1 per qasmbench50, senza avviare decisioni."""
+'Generate the qasmbench50 k=1 report without starting decisions.'
 import sys
 from pathlib import Path
 sys.dont_write_bytecode = True

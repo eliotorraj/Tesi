@@ -1,4 +1,4 @@
-"""Costruisce il catalogo MQT e applica i vincoli hardware verificabili."""
+'Build the MQT catalog and apply verifiable hardware constraints.'
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ TARGET_UNAVAILABILITY_CODE = "TARGET_LOAD_FAILED"
 
 @dataclass(frozen=True)
 class DeviceDefinition:
-    """Descrive i dati hardware attesi per un dispositivo supportato."""
+    'Describe expected hardware data for a supported device.'
 
     provider_id: str
     native_gateset_id: str
@@ -86,7 +86,7 @@ PROVIDER_NAMES = {
 
 
 def _canonical_json(value: Any) -> str:
-    """Converte un valore in JSON stabile, adatto al calcolo delle impronte."""
+    'Convert a value to stable JSON suitable for fingerprinting.'
     return json.dumps(
         value,
         sort_keys=True,
@@ -97,12 +97,12 @@ def _canonical_json(value: Any) -> str:
 
 
 def _digest(value: Any) -> str:
-    """Calcola l'impronta SHA-256 della rappresentazione JSON canonica."""
+    'Compute the SHA-256 fingerprint of canonical JSON.'
     return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
 
 
 def _package_version(distribution: str) -> str:
-    """Legge la versione installata oppure restituisce un valore neutro."""
+    'Read the installed version or return a neutral value.'
     try:
         return version(distribution)
     except PackageNotFoundError:
@@ -110,7 +110,7 @@ def _package_version(distribution: str) -> str:
 
 
 def _configuration_material(catalog: ConfigurationCatalog) -> dict[str, Any]:
-    """Prepara i dati del catalogo di configurazione usati nell'impronta."""
+    'Prepare configuration catalog data for fingerprinting.'
     return {
         "schema_version": catalog.schema_version,
         "catalog_id": catalog.catalog_id,
@@ -133,33 +133,33 @@ def _configuration_material(catalog: ConfigurationCatalog) -> dict[str, Any]:
 
 
 def _coupling_kind(num_qubits: int, edges: tuple[tuple[int, int], ...]) -> str:
-    """Classifica una mappa di connessioni esplicita."""
+    'Classify an explicit connectivity map.'
     if len(edges) == num_qubits * (num_qubits - 1):
         return "explicit_complete"
     return "sparse_directed"
 
 
 def _validate_configuration_catalog(catalog: ConfigurationCatalog) -> None:
-    """Controlla che il catalogo Qiskit sia completo e coerente."""
+    'Check that the Qiskit catalog is complete and consistent.'
     objective_name = catalog.objective.get("name")
     if objective_name != "expected_fidelity":
         raise ValueError(
-            "Il catalogo Qiskit deve usare objective.name='expected_fidelity'."
+            "The Qiskit catalog must use objective.name='expected_fidelity'."
         )
     if not catalog.configurations:
-        raise ValueError("Il catalogo Qiskit deve contenere configurazioni.")
+        raise ValueError('The Qiskit catalog must contain configurations.')
     configuration_ids = tuple(
         configuration.config_id for configuration in catalog.configurations
     )
     if any(not config_id for config_id in configuration_ids):
-        raise ValueError("Gli ID di configurazione Qiskit non possono essere vuoti.")
+        raise ValueError('Qiskit configuration IDs cannot be empty.')
     if len(configuration_ids) != len(set(configuration_ids)):
-        raise ValueError("Il catalogo Qiskit contiene config_id duplicati.")
+        raise ValueError('The Qiskit catalog contains duplicate config_id values.')
     configuration_keys = tuple(
         configuration.key for configuration in catalog.configurations
     )
     if len(configuration_keys) != len(set(configuration_keys)):
-        raise ValueError("Il catalogo Qiskit contiene tuple Qiskit duplicate.")
+        raise ValueError('The Qiskit catalog contains duplicate Qiskit tuples.')
     supported_devices = tuple(catalog.supported_device_ids)
     if (
         not supported_devices
@@ -167,18 +167,18 @@ def _validate_configuration_catalog(catalog: ConfigurationCatalog) -> None:
         or len(supported_devices) != len(set(supported_devices))
     ):
         raise ValueError(
-            "supported_device_ids deve contenere ID unici e non vuoti."
+            'supported_device_ids must contain unique, nonempty IDs.'
         )
     if catalog.default_device_id not in supported_devices:
         raise ValueError(
-            "default_device_id deve appartenere a supported_device_ids."
+            'default_device_id must belong to supported_device_ids.'
         )
 
 
 def _copy_configuration_catalog(
     catalog: ConfigurationCatalog,
 ) -> ConfigurationCatalog:
-    """Copia il catalogo per non conservare strutture modificabili esterne."""
+    'Copy the catalog to avoid retaining external mutable structures.'
     return ConfigurationCatalog(
         schema_version=str(catalog.schema_version),
         catalog_id=str(catalog.catalog_id),
@@ -198,7 +198,7 @@ def _copy_configuration_catalog(
 
 
 class HardwareCatalogIntegrityError(RuntimeError):
-    """Indica che i dati dichiarati non coincidono con il Target caricato."""
+    'Indicate that declared data do not match the loaded Target.'
 
 
 def _validated_target_shape(
@@ -206,7 +206,7 @@ def _validated_target_shape(
     definition: DeviceDefinition,
     target_payload: dict[str, Any],
 ) -> tuple[int, tuple[str, ...], tuple[tuple[int, int], ...]]:
-    """Controlla dimensione, operazioni e connessioni del Target caricato."""
+    "Check the loaded Target's size, operations and connectivity."
     description = str(target_payload["device_id"])
     if description != device_id:
         raise HardwareCatalogIntegrityError(
@@ -215,19 +215,19 @@ def _validated_target_shape(
     num_qubits = int(target_payload["num_qubits"])
     if num_qubits != definition.expected_num_qubits:
         raise HardwareCatalogIntegrityError(
-            f"Qubit Target {num_qubits} != {definition.expected_num_qubits}."
+            f'Target qubits {num_qubits} != {definition.expected_num_qubits}.'
         )
     operation_names = tuple(target_payload["operation_names"])
     if len(operation_names) != len(set(operation_names)):
         raise HardwareCatalogIntegrityError(
-            "Il Target dichiara operation_names duplicate."
+            'The Target declares duplicate operation_names.'
         )
     missing_native = sorted(
         set(definition.native_gate_ids) - set(operation_names)
     )
     if missing_native:
         raise HardwareCatalogIntegrityError(
-            "Gate nativi mancanti nel Target: " + ", ".join(missing_native)
+            'Native gates missing from the Target: ' + ", ".join(missing_native)
         )
     edges = tuple(
         (int(source), int(destination))
@@ -241,13 +241,13 @@ def _validated_target_shape(
         for source, destination in edges
     ):
         raise HardwareCatalogIntegrityError(
-            "Il Target dichiara un coupling non valido o duplicato."
+            'The Target declares invalid or duplicate coupling entries.'
         )
     return num_qubits, operation_names, edges
 
 
 class MqtHardwareCatalog:
-    """Unisce i Target MQT e il catalogo Qiskit in un'unica vista stabile."""
+    'Combine MQT Targets and the Qiskit catalog in one stable view.'
 
     def __init__(
         self,
@@ -255,9 +255,9 @@ class MqtHardwareCatalog:
         *,
         configuration_catalog: ConfigurationCatalog | None = None,
     ) -> None:
-        """Controlla i dispositivi e prepara il catalogo di configurazione."""
+        'Check devices and prepare the configuration catalog.'
         if not device_names:
-            raise ValueError("Configurare almeno un device.")
+            raise ValueError('Configure at least one device.')
         self._device_names = tuple(sorted(dict.fromkeys(map(str, device_names))))
         source_catalog = (
             load_catalog(V2_CATALOG_PATH)
@@ -266,11 +266,11 @@ class MqtHardwareCatalog:
         )
         _validate_configuration_catalog(source_catalog)
         if source_catalog.target_fingerprint_schema_version not in (None, 2):
-            raise HardwareCatalogIntegrityError("Versione impronta Target non supportata.")
+            raise HardwareCatalogIntegrityError('Unsupported Target fingerprint version.')
         for package, expected in source_catalog.required_versions.items():
             if _package_version(package) != expected:
                 raise HardwareCatalogIntegrityError(
-                    f"Versione {package} diversa da quella richiesta dal catalogo."
+                    f'Version {package} differs from the catalog requirement.'
                 )
         self._configuration_catalog = _copy_configuration_catalog(
             source_catalog
@@ -280,7 +280,7 @@ class MqtHardwareCatalog:
         )
         if unsupported:
             raise ValueError(
-                "Device privi di definizione hardware esplicita: "
+                'Devices without an explicit hardware definition: '
                 + ", ".join(unsupported)
             )
         for device_id in self._device_names:
@@ -291,9 +291,7 @@ class MqtHardwareCatalog:
             declared_gates = tuple(sorted(definition.native_gate_ids))
             if registered_gates != declared_gates:
                 raise HardwareCatalogIntegrityError(
-                    f"Gate nativi statici non coerenti per {device_id}: "
-                    f"dichiarati={declared_gates!r}, "
-                    f"MQT={registered_gates!r}."
+                    f'Inconsistent static native gates for {device_id}: declared={declared_gates!r}, MQT={registered_gates!r}.'
                 )
         configured = set(
             self._configuration_catalog.supported_device_ids
@@ -303,13 +301,13 @@ class MqtHardwareCatalog:
         )
         if outside_configuration_catalog:
             raise ValueError(
-                "Device fuori dal catalogo Qiskit: "
+                'Device outside the Qiskit catalog: '
                 + ", ".join(outside_configuration_catalog)
             )
         self._snapshot: HardwareCatalogSnapshot | None = None
 
     def _profile(self, device_id: str) -> HardwareProfile:
-        """Costruisce il profilo verificato di un singolo dispositivo."""
+        'Build the verified profile of one device.'
         definition = DEVICE_DEFINITIONS[device_id]
         configuration_ids = tuple(
             configuration.config_id
@@ -346,7 +344,7 @@ class MqtHardwareCatalog:
             expected_hash = self._configuration_catalog.target_sha256.get(device_id)
             if expected_hash is not None and target_hash != expected_hash:
                 raise HardwareCatalogIntegrityError(
-                    f"Target {device_id} diverso dall'impronta congelata nel catalogo."
+                    f'Target {device_id} differs from the frozen catalog fingerprint.'
                 )
             instruction_properties_hash = _digest(
                 target_payload["instructions"]
@@ -394,7 +392,7 @@ class MqtHardwareCatalog:
             )
 
     def snapshot(self) -> HardwareCatalogSnapshot:
-        """Restituisce lo snapshot immutabile, costruendolo una sola volta."""
+        'Return the immutable snapshot, building it only once.'
         if self._snapshot is not None:
             return self._snapshot
 
@@ -467,13 +465,13 @@ class MqtHardwareCatalog:
                 f"{issue.path}: {issue.message}" for issue in issues
             )
             raise RuntimeError(
-                f"Catalogo hardware canonico non valido: {rendered}"
+                f'Invalid canonical hardware catalog: {rendered}'
             )
         self._snapshot = snapshot
         return snapshot
 
     def list_hardware(self) -> tuple[HardwareProfile, ...]:
-        """Espone i profili nel formato mantenuto per compatibilità."""
+        'Expose profiles in the format retained for compatibility.'
         return self.snapshot().devices
 
 
@@ -483,7 +481,7 @@ def _build_mask(
     *,
     catalog_snapshot_id: str,
 ) -> HardwareMaskResult:
-    """Applica tutti i vincoli e registra i motivi delle esclusioni."""
+    'Apply all constraints and record exclusion reasons.'
     constraints = request.hardware_constraints
     allowed_providers = set(constraints.allowed_provider_ids)
     allowed_devices = set(constraints.allowed_device_ids)
@@ -502,7 +500,7 @@ def _build_mask(
     if len(ordered_profiles) != len(
         {profile.device_id for profile in ordered_profiles}
     ):
-        raise ValueError("La maschera non accetta device_id duplicati.")
+        raise ValueError('The mask does not accept duplicate device_id values.')
 
     available: list[HardwareProfile] = []
     diagnostics: list[DeviceExclusionDiagnostic] = []
@@ -606,31 +604,31 @@ def _build_mask(
             f"{issue.path}: {issue.message}" for issue in issues
         )
         raise RuntimeError(
-            f"Maschera hardware canonica non valida: {rendered}"
+            f'Invalid canonical hardware mask: {rendered}'
         )
     return result
 
 
 class HardwareMaskBuilder:
-    """Costruisce la maschera dalla richiesta normalizzata e dallo snapshot."""
+    'Build the mask from the normalized request and snapshot.'
 
     def filter(
         self,
         request: NormalizedRequest,
         hardware: HardwareCatalogSnapshot,
     ) -> HardwareMaskResult:
-        """Verifica i tipi e costruisce la maschera sullo snapshot corrente."""
+        'Check types and build a mask over the current snapshot.'
         if not isinstance(request, NormalizedRequest):
             raise TypeError(
-                "HardwareMaskBuilder richiede una NormalizedRequest."
+                'HardwareMaskBuilder requires a NormalizedRequest.'
             )
         if not isinstance(hardware, HardwareCatalogSnapshot):
             raise TypeError(
-                "HardwareMaskBuilder richiede un HardwareCatalogSnapshot."
+                'HardwareMaskBuilder requires a HardwareCatalogSnapshot.'
             )
         if request.catalog_snapshot_id != hardware.catalog_snapshot_id:
             raise ValueError(
-                "La richiesta normalizzata e la maschera usano snapshot diversi."
+                'The normalized request and mask use different snapshots.'
             )
         return _build_mask(
             request,
@@ -640,10 +638,10 @@ class HardwareMaskBuilder:
 
 
 class WidthCompatibilityFilter(HardwareMaskBuilder):
-    """Mantiene il vecchio ingresso basato su una sequenza di profili.
+    """Retain the legacy entry point based on a sequence of profiles.
 
-    Il servizio corrente usa ``HardwareMaskBuilder``. Una sequenza restituisce
-    ancora il precedente ``CompatibilityReport``.
+    The current service uses ``HardwareMaskBuilder``. A sequence still returns
+    the earlier ``CompatibilityReport``.
     """
 
     def filter(
@@ -651,13 +649,13 @@ class WidthCompatibilityFilter(HardwareMaskBuilder):
         request: ParsedRequest,
         hardware: HardwareCatalogSnapshot | Sequence[HardwareProfile],
     ) -> HardwareMaskResult | CompatibilityReport:
-        """Usa il flusso corrente oppure adatta il vecchio formato hardware."""
+        'Use the current flow or adapt the legacy hardware format.'
         if isinstance(hardware, HardwareCatalogSnapshot):
             return super().filter(request, hardware)  # type: ignore[arg-type]
 
         profiles = tuple(hardware)
         if any(not isinstance(profile, HardwareProfile) for profile in profiles):
-            raise TypeError("Il filtro legacy accetta solo HardwareProfile.")
+            raise TypeError('The legacy filter accepts HardwareProfile only.')
         result = _build_mask(
             request,
             profiles,

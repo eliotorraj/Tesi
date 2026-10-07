@@ -1,4 +1,4 @@
-"""Controlli di selezione per contenuto, alias, copertura e array ML."""
+'Checks for content-based selection, aliases, coverage and ML arrays.'
 import json
 from pathlib import Path
 import sys
@@ -42,7 +42,7 @@ class DedupTests(unittest.TestCase):
             complete, missing = t.coverage_report(jobs, selected, {j.key for j in jobs})
             self.assertEqual(len(complete), 396)
             self.assertEqual(missing, [])
-            print(f"VERIFICA: 422 sorgenti, 396 hash, 26 alias, {len(jobs)} coppie compatibili; selezione {selection['sha256']}")
+            print(f"CHECK: 422 sources, 396 hashes, 26 aliases, {len(jobs)} compatible pairs; selection {selection['sha256']}")
         metadata = dict(training_sample_count=396, training_selection=selection)
         self.assertEqual(validate_selection_metadata(metadata, t.TRAINING_CIRCUITS_V2), [])
         self.assertTrue(validate_selection_metadata({}, t.TRAINING_CIRCUITS_V2))

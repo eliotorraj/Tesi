@@ -1,4 +1,4 @@
-"""Punto di ingresso della riproduzione: configurare, preparare, valutare, esportare."""
+'Reproduction entry point: configure, prepare, evaluate and export.'
 import argparse
 import json
 import os
@@ -9,33 +9,33 @@ import sys
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     selection=parser.add_mutually_exclusive_group()
-    selection.add_argument('--config',type=Path,help='Configurazione JSON; ingressi relativi alla cartella riproducibilita')
-    selection.add_argument('--esperimento',help='Nome creato con configura.py nuovo')
-    parser.add_argument('--output',type=Path,help='Radice degli artefatti; predefinita: riproducibilita')
+    selection.add_argument('--config',type=Path,help='JSON configuration; inputs are relative to riproducibilita')
+    selection.add_argument('--esperimento',help='Name created with configura.py nuovo')
+    parser.add_argument('--output',type=Path,help='Artifact root; default: riproducibilita')
     commands=parser.add_subparsers(dest='command',required=True)
     commands.add_parser('prepara',
-        help='Controlla e salva gli ingressi e le impostazioni di riferimento della prova',
-        description='Controlla versioni, circuiti e Target; salva copie dei QASM, manifest, catalogo e impronte sotto esecuzioni/NOME nella radice risultati. La scrittura del contratto blocca le modifiche della configurazione nominata. Dataset, addestramento e valutazione si eseguono con le fasi successive.',
-        epilog='Esempio: python esperimento.py --esperimento mia-prova prepara. Per cambiare condizioni dopo la preparazione: python configura.py duplica mia-prova nuova-prova.')
-    commands.add_parser('hardware',help='Mostra i Target sintetici e le loro impronte')
-    commands.add_parser('verifica',help='Controlla installazione e sorgenti; nessuna inferenza')
-    commands.add_parser('stato',help='Mostra artefatti presenti e prossimo passaggio, senza eseguire prove')
-    server=commands.add_parser('server',help='Avvia o controlla il server LLM con le impostazioni dell’esperimento')
+        help="Check and save the experiment's reference inputs and settings",
+        description='Check versions, circuits and Targets; save QASM copies, manifests, catalog and fingerprints under esecuzioni/NAME in the output root. Writing the contract locks the named configuration. Dataset generation, training and evaluation are separate later phases.',
+        epilog='Example: python esperimento.py --esperimento my-trial prepara. To change conditions after preparation: python configura.py duplica my-trial new-trial.')
+    commands.add_parser('hardware',help='Show synthetic Targets and their fingerprints')
+    commands.add_parser('verifica',help='Check installation and sources without inference')
+    commands.add_parser('stato',help='Show existing artifacts and the next step without executing experiments')
+    server=commands.add_parser('server',help='Start or check the LLM server using experiment settings')
     from comune.opzioni_server import add_arguments
     add_arguments(server)
-    d=commands.add_parser('dataset',help='Genera la matrice Qiskit e il Dataset RAG dal solo train')
+    d=commands.add_parser('dataset',help='Generate the Qiskit matrix and train-only RAG Dataset')
     d.add_argument('--split',action='append',choices=['train','validation'])
-    d.add_argument('--aggrega',action='store_true',help='Rilegge i tentativi già conservati')
-    m=commands.add_parser('mqt',help='Addestra RL o genera il Training set e addestra il selettore')
+    d.add_argument('--aggrega',action='store_true',help='Re-read saved attempts')
+    m=commands.add_parser('mqt',help='Train RL, or generate the Training set and train the selector')
     m.add_argument('fase',choices=['rl','selettore','verifica'])
-    m.add_argument('opzioni',nargs=argparse.REMAINDER,help='Opzioni del trainer; vedi mqt/README.md')
-    v=commands.add_parser('validation',help='Confronta i candidati senza utilizzare Test')
+    m.add_argument('opzioni',nargs=argparse.REMAINDER,help='Trainer options; see mqt/README.md')
+    v=commands.add_parser('validation',help='Compare candidates without using Test')
     v.add_argument('fase',choices=['congela','esegui','seleziona','report','wl'])
     v.add_argument('--modello')
-    t=commands.add_parser('test',help='Congela il piano e misura i metodi selezionati')
+    t=commands.add_parser('test',help='Freeze the plan and evaluate selected methods')
     t.add_argument('fase',choices=['congela','esegui','analizza','oracle','tecnico-mqt'])
     t.add_argument('--metodo')
-    e=commands.add_parser('esporta',help='Crea un nuovo prototipo autonomo dal Dataset e dal modello selezionato')
+    e=commands.add_parser('esporta',help='Create a standalone prototype from the Dataset and selected model')
     e.add_argument('destinazione',type=Path)
     a=parser.parse_args()
     if a.esperimento:
@@ -73,7 +73,7 @@ def main():
         result=assets() if a.fase=='verifica' else training(a.fase,a.opzioni)
     elif a.command=='validation':
         import seleziona
-        if a.fase=='esegui' and not a.modello:parser.error('validation esegui richiede --modello')
+        if a.fase=='esegui' and not a.modello:parser.error('validation esegui requires --modello')
         if a.fase=='wl':
             from wl import select
             result=select()
@@ -83,7 +83,7 @@ def main():
         else:result={'congela':seleziona.freeze,'seleziona':seleziona.select,'esegui':lambda:seleziona.run(a.modello)}[a.fase]()
     elif a.command=='test':
         import esegui
-        if a.fase=='esegui' and not a.metodo:parser.error('test esegui richiede --metodo')
+        if a.fase=='esegui' and not a.metodo:parser.error('test esegui requires --metodo')
         if a.fase=='analizza':
             from analizza import report
             result=report()
@@ -102,5 +102,5 @@ def main():
 if __name__=='__main__':
     try:main()
     except (ValueError,OSError,KeyError) as exc:
-        print(f'Errore: {exc}',file=sys.stderr)
+        print(f'Error: {exc}',file=sys.stderr)
         raise SystemExit(2)

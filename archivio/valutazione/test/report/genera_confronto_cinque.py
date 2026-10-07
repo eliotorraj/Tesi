@@ -1,4 +1,4 @@
-"""Nuovo confronto a cinque sistemi; conserva interamente il report precedente."""
+'New five-system comparison; preserves the previous report in full.'
 from __future__ import annotations
 import argparse
 import platform
@@ -25,27 +25,27 @@ def load_all(baseline,summary):
     contract_path=AREA/"preparazione/contratto_congelato.json"
     contract=read(contract_path)
     if sha(SOURCE)!=contract["source_sha256"]:
-        raise ValueError("Manifest diverso dalla fonte congelata.")
+        raise ValueError('Manifest differs from the frozen source.')
     expected={r["circuit_id"]:r["source_sha256"] for r in read(SOURCE)["circuits"] if r["split"]=="test"}
     runs=load_sources(AREA,expected,contract)
     old=read(baseline/"provenienza.json")
     for method in METHODS:
         if method not in runs:
-            raise ValueError("Manca un sistema originale: "+method)
+            raise ValueError('An original system is missing: '+method)
         r=runs[method]
         if r["summary"]!=read(baseline/"sistemi"/method/"riepilogo.json"):
-            raise ValueError("Misure diverse dal report di riferimento: "+method)
+            raise ValueError('Measurements differ from the reference report: '+method)
         if r["rows"]!=read(baseline/"sistemi"/method/"tabelle/episodi.json"):
-            raise ValueError("Episodi diversi dal report di riferimento: "+method)
+            raise ValueError('Episodes differ from the reference report: '+method)
         r["report_model_metadata"]=old["method_parameters"].get(method,{})
     runs[METHOD],random_contract=load_random(summary)
-    # Stesso contratto di generazione per RAG pertinente e RAG casuale.
+    # Use the same generation contract for relevant and random retrieval.
     settings=lambda m: [x["parameters"] for x in runs[m]["generation_settings"]]
     if settings("llm_rag")!=settings(METHOD):
-        raise ValueError("Parametri LLM diversi: aggiornare l'interpretazione.")
+        raise ValueError('LLM parameters differ: update the interpretation.')
     for k in ("model_sha256",):
         if runs["llm_rag"]["meta"]["server"].get(k)!=runs[METHOD]["meta"]["server"].get(k):
-            raise ValueError("Pesi del modello diversi.")
+            raise ValueError('Model weights differ.')
     runs[METHOD]["comparison_detail"]=analyze(runs,read(SOURCE))
     return runs,contract["plan"],random_contract
 
@@ -69,13 +69,13 @@ def build(baseline=BASELINE,summary=DEFAULT,output_root=None):
     fingerprint=digest(provenance)
     root=Path(output_root or AREA/"report_generati/confronto_cinque_sistemi").resolve()
     if root==baseline or baseline in root.parents:
-        raise ValueError("L'output deve essere separato dal report originale.")
+        raise ValueError('Output must be separate from the original report.')
     output=root/fingerprint[:16]
     if (output/"completato.json").exists():
         done=read(output/"completato.json")
         if all((output/p).is_file() and sha(output/p)==h for p,h in done["outputs"].items()):
             return output
-        raise ValueError("Versione conclusa alterata: usare una nuova cartella.")
+        raise ValueError('Completed version has changed: use a new directory.')
     output.mkdir(parents=True,exist_ok=True)
     write_json(output/"provenienza.json",provenance)
     (output/"generatore").mkdir(exist_ok=True)
@@ -91,30 +91,36 @@ def build(baseline=BASELINE,summary=DEFAULT,output_root=None):
     write_json(dest/"tabelle/analisi_qubit.json",detail)
     write_csv(dest/"tabelle/differenze_per_qubit.csv",detail["rows"])
     write_csv(dest/"tabelle/fasce_qubit.csv",detail["groups"])
-    print("Compilazione del confronto a cinque sistemi",flush=True)
+    print('Compile the five-system comparison',flush=True)
     body=comparison_body(dest,runs,comparison,plan)
-    body+=r"\par Per rigenerare questa estensione: \texttt{.venv/bin/python} \nolinkurl{archivio/valutazione/test/report/genera_confronto_cinque.py}."+"\n"
-    compile_document(dest,"Confronto di cinque sistemi sul Test",body)
-    (output/"README.md").write_text("# Confronto di cinque sistemi\n\n[Apri il PDF](confronto/latex/verifica.pdf).\n\n"
-        "Estensione separata del report 30dd5b4f737c058e. Aggiunge LLM + Random RAG "
-        "in tutte le tabelle e nei dieci gruppi di grafici, con il quinto pannello centrato "
-        "nella terza riga. Le conclusioni includono differenze appaiate e fasce descrittive di qubit.\n\n"
-        "Sorgenti LaTeX e CSV sono in confronto/. provenienza.json conserva le impronte "
-        "delle fonti e dell'intero report originale. generatore/ conserva il codice usato.\n",encoding="utf-8")
+    body+='\\par To regenerate this extension: \\texttt{.venv/bin/python} \\nolinkurl{archivio/valutazione/test/report/genera_confronto_cinque.py}.'+"\n"
+    compile_document(dest,'Five-system comparison on the Test',body)
+    (output/"README.md").write_text("""# Five-system comparison
+
+[Open the PDF](confronto/latex/verifica.pdf).
+
+Separate extension of report 30dd5b4f737c058e. Adds LLM + Random RAG to all tables and ten plot groups, with the fifth panel centered in the third row. Conclusions include paired differences and descriptive qubit groups.
+
+LaTeX sources and CSV files are in confronto/. provenienza.json preserves fingerprints of the sources and the entire original report. generatore/ preserves the code used.
+
+""",encoding="utf-8")
     after,_,_=load_all(baseline,summary)
     if tree_hashes(baseline)!=before:
-        raise RuntimeError("Report originale modificato durante la generazione.")
+        raise RuntimeError('Original report changed during generation.')
     if any(after[m]["input_files"]!=r["input_files"] or after[m]["source"]!=r["source"] for m,r in runs.items()):
-        raise RuntimeError("Fonti cambiate durante la generazione.")
+        raise RuntimeError('Sources changed during generation.')
     if any(sha(HERE/name)!=h for name,h in sources.items()) or any(sha(Path(p))!=h for p,h in supporting.items()):
-        raise RuntimeError("Generatore o fonti di supporto cambiati.")
+        raise RuntimeError('Generator or supporting sources changed.')
     write_json(output/"completato.json",dict(at=datetime.now(timezone.utc).isoformat(),
         fingerprint=fingerprint,pdf_available=True,baseline_unchanged=True,outputs=tree_hashes(output)))
     root.mkdir(exist_ok=True)
     write_json(root/"ultimo.json",dict(directory=str(output),pdf=str(dest/"latex/verifica.pdf")))
-    (root/"README.md").write_text("# Confronto esteso con recupero casuale\n\n"
-        "[Versione corrente]("+output.name+"/confronto/latex/verifica.pdf).\n"
-        "Il report originale resta nella cartella 30dd5b4f737c058e.\n",encoding="utf-8")
+    (root/"README.md").write_text("""# Extended comparison with random retrieval
+
+[Current version]("""+output.name+"""/confronto/latex/verifica.pdf).
+The original report remains in directory 30dd5b4f737c058e.
+
+""",encoding="utf-8")
     return output
 
 

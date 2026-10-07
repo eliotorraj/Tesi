@@ -1,4 +1,4 @@
-"""Congelamento locale e sigilli: nessuna lettura degli score in questo modulo."""
+'Local freezing and seals: this module never reads scores.'
 from __future__ import annotations
 import argparse
 from pathlib import Path

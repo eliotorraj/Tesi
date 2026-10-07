@@ -1,4 +1,4 @@
-"""Compila il report due volte e conserva log, metadati e anteprime PNG."""
+'Compile the report twice and preserve logs, metadata and PNG previews.'
 from pathlib import Path
 import hashlib,json,subprocess,sys
 HERE=Path(__file__).resolve().parent
@@ -25,7 +25,7 @@ def main():
     log=(HERE/"confronto_qasmbench.log").read_text(errors="replace")
     warnings=[x for x in log.splitlines() if "Overfull" in x or "Warning" in x or "Undefined" in x]
     print("WARNINGS",json.dumps(warnings))
-    # Tavola di contatto: si mantiene anche ogni pagina a 100 dpi.
+    # Contact sheet: also retain each page at 100 dpi.
     try:
         from PIL import Image,ImageOps,ImageDraw
         paths=sorted(preview.glob("pagina-*.png"))
@@ -38,6 +38,6 @@ def main():
             sheet.paste(im,(x,y));draw.text((x,y-18),str(i+1),fill="black")
         sheet.save(preview/"insieme.png")
     except ImportError:
-        print("Pillow non disponibile; usare le anteprime singole.")
+        print('Pillow unavailable; use the individual previews.')
     return 0
 if __name__=="__main__":raise SystemExit(main())

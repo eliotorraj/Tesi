@@ -1,4 +1,4 @@
-# Ambiente locale e strumenti degli assistenti.
+# Local environments and assistant tools.
 .venv/
 /archivio/esperimento_v2/.venv
 __pycache__/
@@ -8,13 +8,13 @@ __pycache__/
 /.codex/
 /graphify-out/
 /tesi/
-# Le esclusioni dei dati sperimentali sono conservate nell'archivio.
+# Historical experimental data exclusions are preserved in the archive.
 /prototipo/runtime/*
 !/prototipo/runtime/README.md
 /prototipo/runs/
 /prototipo/output/
 
-# Nuovi dati operativi: conservarli e trasferirli separatamente da Git.
+# New operational data: preserve and transfer separately from Git.
 /archivio/esperimento_v2/.venv-selettore/
 /archivio/valutazione/test/risultati/
 /archivio/valutazione/test/confronti/
@@ -30,7 +30,7 @@ __pycache__/
 /archivio/valutazione/addestramento/mqt/prove_tecniche/
 
 
-# Prova MQT esplorativa: artefatti conservati su disco, separati dal codice.
+# Exploratory MQT campaign: artifacts stay on disk, separate from source code.
 /archivio/valutazione/test_mqt_esplorativo/runtime/
 /archivio/valutazione/test_mqt_esplorativo/risultati/
 /archivio/valutazione/test_mqt_esplorativo/preparazione/
@@ -38,7 +38,7 @@ __pycache__/
 /archivio/valutazione/test_mqt_esplorativo/verifiche/*.log
 /archivio/valutazione/addestramento/mqt/importazioni/
 
-# Prove pregresse e nuovi controlli tecnici: dati locali, README versionati.
+# Earlier trials and new technical checks: local data, versioned README files.
 /archivio/valutazione/prove_prototipo/*
 !/archivio/valutazione/prove_prototipo/README.md
 /archivio/valutazione/verifiche_prototipo/runtime/
@@ -47,13 +47,13 @@ __pycache__/
 !/archivio/workspace_locale/README.md
 
 
-# Riorganizzazione del repository: conservare separatamente i dati locali e i file di configurazione.
+# Repository reorganization: preserve local data and configuration files separately.
 /archivio/riorganizzazione_2026_09_20/
 /archivio/riorganizzazione_2026_09_21/
 /archivio/riorganizzazione_2026_09_25/
 
 
-# Riproduzione: sorgenti e ingressi, non pesi e nuove esecuzioni.
+# Reproduction: track source code and inputs; keep weights and new runs local.
 node_modules/
 /riproducibilita/modelli_llm/**/*.gguf
 /riproducibilita/modelli_llm/**/*.safetensors
@@ -78,7 +78,7 @@ node_modules/
 !/archivio/riorganizzazione_2026_10_01/README.md
 !/archivio/riorganizzazione_2026_10_01/verifiche.json
 
-# Campagne storiche successive: il codice resta versionato, gli output restano locali.
+# Later historical campaigns: source code stays versioned; outputs stay local.
 /archivio/valutazione/**/esecuzioni/
 /archivio/valutazione/**/risultati/
 /archivio/valutazione/**/runtime/

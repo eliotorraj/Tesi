@@ -1,4 +1,4 @@
-"""Prova tecnica sintetica del trasporto, distinta dai circuiti e dalla selezione."""
+'Synthetic transport check, separate from circuits and model selection.'
 import sys
 from .common import OUTPUT, write_json, now
 from .gateway import audit_tokens, native_payload, generate

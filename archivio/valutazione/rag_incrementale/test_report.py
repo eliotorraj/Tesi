@@ -1,4 +1,4 @@
-"""Controlli dei confronti appaiati e delle figure; nessuna inferenza."""
+'Paired-comparison and figure checks without inference.'
 from comune import *
 import unittest
 import tempfile
@@ -23,7 +23,7 @@ class ReportTests(unittest.TestCase):
         baseline = comparison["summary"][0]
         self.assertEqual(baseline["n_common"], 78)
         self.assertEqual(baseline["complete_references"]+baseline["partial_references"], 78)
-        # Cambiare l'ordine di presentazione dei registri non cambia gli abbinamenti.
+        # Changing record presentation order does not change pairings.
         shuffled = copy.deepcopy(self.data)
         for item in shuffled["orders"].values():
             item["rows"].reverse()
@@ -63,8 +63,8 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(len((output/"confronti_appaiati.csv").read_text().splitlines()), 7)
             tex = (output/"rapporto.tex").read_text()
             self.assertNotIn("@@", tex)
-            self.assertIn("DATI SINTETICI", tex)
-            self.assertIn("90 circuiti Test MQT Bench", tex)
+            self.assertIn('SYNTHETIC DATA', tex)
+            self.assertIn('90 Test circuits from MQT Bench', tex)
 
     def test_oracle_summary_tampering_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -72,7 +72,7 @@ class ReportTests(unittest.TestCase):
             save(path, {"rag_path": str(BASELINE), "oracle_path": str(Path(tmp)/"analysis"),
                         "rows": [{"altered": True}]})
             with patch.object(self.charts, "_audit_reference", return_value=({"rows": []}, {})):
-                with self.assertRaisesRegex(ValueError, "diverso dagli esiti"):
+                with self.assertRaisesRegex(ValueError, 'differs from original outcomes'):
                     self.charts.load_reference(path, [])
 
     def test_qasmbench_reference_is_rejected(self):
@@ -80,7 +80,7 @@ class ReportTests(unittest.TestCase):
             path = Path(tmp)/"dati.json"
             save(path, {"rag_path": str(BASE/"qasmbench50")})
             with patch.object(self.charts, "_audit_reference") as audit:
-                with self.assertRaisesRegex(ValueError, "controllo storico MQT Bench"):
+                with self.assertRaisesRegex(ValueError, 'historical MQT Bench control'):
                     self.charts.load_reference(path, [])
                 audit.assert_not_called()
 

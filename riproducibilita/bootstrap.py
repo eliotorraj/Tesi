@@ -1,4 +1,4 @@
-"""Configura soltanto gli import; nessuna esecuzione al caricamento."""
+'Configure imports only; do not execute work during import.'
 from pathlib import Path
 import sys, os
 ROOT=Path(__file__).resolve().parent

@@ -1,4 +1,4 @@
-"""Prompt reversibile: nessun circuito, esempio, campo o valore viene eliminato."""
+'Reversible prompt: no circuit, example, field or value is removed.'
 from __future__ import annotations
 from collections import Counter
 import copy
@@ -59,7 +59,7 @@ def _tables(value):
     return value
 
 def encode(prompt):
-    """Restituisce dati per il modello e mappa locale; verifica ogni valore."""
+    'Return model data and a local map; verify every value.'
     graph = complete_graph.encode(prompt)
     strings = list(_strings(graph))
     occupied = set(strings)
@@ -142,7 +142,7 @@ def decode(encoded):
     return complete_graph.decode(_map(result, encoded["aliases"]))
 
 def model_input(encoded):
-    """Gli hash lunghi restano nel registro locale, fuori dal testo al modello."""
+    'Long hashes remain in the local record, outside the model text.'
     return {"shared_values": encoded["shared_values"], **encoded["prompt"]}
 
 def audit(prompt, encoded=None):
@@ -153,7 +153,7 @@ def audit(prompt, encoded=None):
             "roundtrip_verified": True, "rag_example_count": len(prompt.get("retrieved_labeled_examples", []))}
 
 def expand_response(raw, aliases):
-    """Ripristina soltanto identità note. Non corregge scelte, claim o relazioni."""
+    'Restore known identities only. Do not repair choices, claims or relationships.'
     from prototype.quantum_assistant.schema_validation import decode_json_object
     from prototype.quantum_assistant.adapters.validation import MAX_LLM_OUTPUT_BYTES
     try:

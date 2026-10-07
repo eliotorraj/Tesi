@@ -1,4 +1,4 @@
-"""Costruisce in modo deterministico le spiegazioni già validate."""
+'Build deterministic explanations from validated content.'
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from ..models import (
 
 
 def _ordered_unique(values: Sequence[str]) -> tuple[str, ...]:
-    """Rimuove i duplicati conservando l'ordine della prima occorrenza."""
+    'Remove duplicates while retaining first-occurrence order.'
     return tuple(dict.fromkeys(values))
 
 
@@ -26,17 +26,17 @@ def _required_parameter(
     parameters: ClaimParameters,
     field_name: str,
 ) -> str:
-    """Legge un parametro obbligatorio da un claim già validato."""
+    'Read a required parameter from an already validated claim.'
     value = getattr(parameters, field_name)
     if value is None:
         raise ValueError(
-            f"Il claim validato richiede il parametro {field_name}."
+            f'The validated claim requires parameter {field_name}.'
         )
     return value
 
 
 class DeterministicExplanationRenderer:
-    """Produce il testo per l'utente senza accettare prosa libera dall'LLM."""
+    'Produce user-facing text without accepting free-form LLM prose.'
 
     def render(
         self,
@@ -44,20 +44,20 @@ class DeterministicExplanationRenderer:
         evidence_references: Sequence[EvidenceReference],
         evidence_registry: EvidenceRegistry,
     ) -> RenderedExplanation:
-        """Trasforma claim e riferimenti validati in una spiegazione leggibile."""
+        'Convert validated claims and references into a readable explanation.'
         claim_values = tuple(claims)
         reference_values = tuple(evidence_references)
         if not claim_values:
-            raise ValueError("Serve almeno un claim validato da mostrare.")
+            raise ValueError('At least one validated claim is required for display.')
 
         claim_ids = tuple(claim.claim_id for claim in claim_values)
         reference_ids = tuple(
             reference.reference_id for reference in reference_values
         )
         if len(claim_ids) != len(set(claim_ids)):
-            raise ValueError("I claim validati devono avere ID unici.")
+            raise ValueError('Validated claims must have unique IDs.')
         if len(reference_ids) != len(set(reference_ids)):
-            raise ValueError("I riferimenti validati devono avere ID unici.")
+            raise ValueError('Validated references must have unique IDs.')
 
         references_by_id = {
             reference.reference_id: reference
@@ -68,7 +68,7 @@ class DeterministicExplanationRenderer:
             source = evidence_registry.resolve(reference)
             if source is None:
                 raise ValueError(
-                    "Un riferimento validato non appartiene al registro corrente."
+                    'A validated reference does not belong to the current registry.'
                 )
             resolved_sources[reference.reference_id] = source
 
@@ -81,7 +81,7 @@ class DeterministicExplanationRenderer:
         }
 
         def reference_key(reference: EvidenceReference) -> tuple[object, ...]:
-            """Crea la chiave stabile usata per ordinare un riferimento."""
+            'Create the stable sort key for a reference.'
             record = evidence_registry.find_record(reference.record_id)
             rank = record.rank if record is not None else 10**9
             return (
@@ -93,7 +93,7 @@ class DeterministicExplanationRenderer:
             )
 
         def claim_key(claim: SupportedClaim) -> tuple[object, ...]:
-            """Crea la chiave stabile usata per ordinare un claim."""
+            'Create the stable sort key for a claim.'
             source_keys = tuple(
                 sorted(
                     reference_key(references_by_id[reference_id])
@@ -128,7 +128,7 @@ class DeterministicExplanationRenderer:
                 )
             except KeyError as exc:
                 raise ValueError(
-                    "Un claim validato cita un riferimento assente."
+                    'A validated claim cites a missing reference.'
                 ) from exc
             used_reference_ids.extend(
                 reference.reference_id for reference in claim_references
@@ -147,9 +147,7 @@ class DeterministicExplanationRenderer:
                     "device_id",
                 )
                 explanation_parts.append(
-                    "I risultati dei circuiti storici "
-                    f"{rendered_records} sostengono la scelta del dispositivo "
-                    f"{device_id}."
+                    f'Results for historical circuits {rendered_records} support selecting device {device_id}.'
                 )
             elif (
                 claim.claim_type
@@ -164,9 +162,7 @@ class DeterministicExplanationRenderer:
                     "configuration_id",
                 )
                 explanation_parts.append(
-                    "I risultati dei circuiti storici "
-                    f"{rendered_records} sostengono la configurazione "
-                    f"{configuration_id} per il dispositivo {device_id}."
+                    f'Results for historical circuits {rendered_records} support configuration {configuration_id} for device {device_id}.'
                 )
             elif claim.claim_type is SupportedClaimType.LIVE_COMPATIBILITY:
                 device_id = _required_parameter(
@@ -174,34 +170,29 @@ class DeterministicExplanationRenderer:
                     "device_id",
                 )
                 explanation_parts.append(
-                    f"Il dispositivo {device_id} rispetta i vincoli "
-                    "verificati per la richiesta corrente."
+                    f'Device {device_id} satisfies the constraints checked for the current request.'
                 )
             elif claim.claim_type is SupportedClaimType.SCIENTIFIC_CAVEAT:
                 _required_parameter(claim.parameters, "caveat_id")
                 explanation_parts.append(
-                    "La raccomandazione tiene conto delle avvertenze "
-                    "scientifiche associate alle evidenze storiche."
+                    'The recommendation accounts for scientific caveats associated with the historical evidence.'
                 )
             elif (
                 claim.claim_type
                 is SupportedClaimType.HISTORICAL_EVIDENCE_UNAVAILABLE
             ):
                 explanation_parts.append(
-                    "Tra i circuiti più simili recuperati non sono "
-                    "disponibili risultati storici utilizzabili per sostenere "
-                    "la raccomandazione."
+                    'No usable historical results among the closest retrieved circuits support the recommendation.'
                 )
                 warnings.append(
-                    "La raccomandazione non dispone di evidenze storiche "
-                    "utilizzabili."
+                    'The recommendation has no usable historical evidence.'
                 )
-            else:  # pragma: no cover - l'enum viene controllata prima.
-                raise ValueError("Tipo di claim validato non supportato.")
+            else:  # pragma: no cover - the enum is checked earlier.
+                raise ValueError('Unsupported validated claim type.')
 
         if set(used_reference_ids) != set(reference_ids):
             raise ValueError(
-                "Ogni riferimento validato deve essere usato da un claim."
+                'Every validated reference must be used by a claim.'
             )
 
         rendered_source_ids: set[
@@ -227,21 +218,16 @@ class DeterministicExplanationRenderer:
             ):
                 if not isinstance(source, HistoricalEvidence):
                     raise ValueError(
-                        "Il riferimento storico non risolve un risultato."
+                        'The historical reference does not resolve to a result.'
                     )
                 has_historical_results = True
                 sample_text = (
-                    f", campioni={source.sample_count}"
+                    f', samples={source.sample_count}'
                     if source.sample_count is not None
                     else ""
                 )
                 evidence_lines.append(
-                    f"Circuito storico {reference.record_id}: "
-                    f"dispositivo={source.device_id}, "
-                    f"configurazione={source.configuration_id}, "
-                    "mediana della fedeltà attesa="
-                    f"{source.value:.12g}{sample_text} "
-                    f"(evidenza {source.evidence_id})."
+                    f'Historical circuit {reference.record_id}: device={source.device_id}, configuration={source.configuration_id}, median expected fidelity={source.value:.12g}{sample_text} (evidence {source.evidence_id}).'
                 )
                 record = evidence_registry.find_record(reference.record_id)
                 source_claim = (
@@ -252,13 +238,13 @@ class DeterministicExplanationRenderer:
                 )
                 if source_claim is None:
                     raise ValueError(
-                        "Il risultato validato non conserva il claim sorgente."
+                        'The validated result does not retain the source claim.'
                     )
                 for caveat_id in source_claim.caveat_ids:
                     caveat = record.find_caveat(caveat_id)
                     if caveat is None:
                         raise ValueError(
-                            "Il claim sorgente cita un'avvertenza assente."
+                            'The source claim cites a missing caveat.'
                         )
                     warnings.append(caveat.text)
             elif (
@@ -267,19 +253,16 @@ class DeterministicExplanationRenderer:
             ):
                 if not isinstance(source, ScientificCaveat):
                     raise ValueError(
-                        "Il riferimento scientifico non risolve "
-                        "un'avvertenza."
+                        'The scientific reference does not resolve to a caveat.'
                     )
                 evidence_lines.append(
-                    f"Circuito storico {reference.record_id}: "
-                    f"avvertenza {source.caveat_id}."
+                    f'Historical circuit {reference.record_id}: caveat {source.caveat_id}.'
                 )
                 warnings.append(source.text)
 
         if has_historical_results:
             warnings.append(
-                "Le evidenze riguardano compilazioni storiche di circuiti "
-                "simili e non misurano il risultato del circuito corrente."
+                "The evidence concerns historical compilations of similar circuits and does not measure the current circuit's result."
             )
 
         return RenderedExplanation(

@@ -1,9 +1,7 @@
-"""Controlla le impronte e la copertura registrata della revisione, senza eseguire esperimenti.
+"""Check recorded review hashes and coverage without running experiments.
 
-Uso dalla radice: python3 archivio/riorganizzazione_2026_09_21/revisione_script/verifica_copertura.py
-Il controllo verifica la tracciabilita del rapporto; non puo dimostrare da solo
-che una lettura umana sia stata corretta o che il programma sia privo di difetti.
-"""
+Run from the root: python3 archivio/riorganizzazione_2026_09_21/revisione_script/verifica_copertura.py
+This verifies report traceability; it cannot alone establish correct human review or absence of software defects."""
 from __future__ import annotations
 
 import hashlib
@@ -41,7 +39,7 @@ def verify() -> dict:
             errors.append({"path": name, "error": "sha256_mismatch"})
         if count != entry["lines"]:
             errors.append({"path": name, "error": "line_count_mismatch"})
-        # Unione degli intervalli: copertura esplicita, niente buchi o righe esterne.
+        # Union of intervals: explicit coverage without gaps or out-of-range lines.
         covered = set()
         for first, last in entry["manual_ranges"]:
             if first < 1 or last < first or last > count:

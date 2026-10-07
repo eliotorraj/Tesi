@@ -1,4 +1,4 @@
-"""Resoconto esplicativo post-selezione: nessuna nuova inferenza o scelta."""
+'Explanatory post-selection report without new inference or selection.'
 from __future__ import annotations
 import argparse
 import csv
@@ -52,29 +52,29 @@ def render(source, destination):
     totals = [value(models[m]["total_call_seconds"], 1/60) for m in MODELS]
     bars = axes[0].bar(x, totals, color=colors)
     axes[0].bar_label(bars, fmt="%.1f", padding=3)
-    axes[0].set(xticks=x, xticklabels=MODELS, ylabel="Minuti nelle chiamate di generazione",
-                title="Totale: 264 episodi per modello")
+    axes[0].set(xticks=x, xticklabels=MODELS, ylabel='Minutes in generation calls',
+                title='Total: 264 episodes per model')
     for j, c in enumerate(configs):
         values = [value(aggregate([r for r in rows if r["trial_id"] == m+"/"+c])["total_call_seconds"], 1/60) for m in MODELS]
         axes[1].bar(x+(j-1)*.24, values, width=.24, label=c)
-    axes[1].set(xticks=x, xticklabels=MODELS, ylabel="Minuti nelle chiamate di generazione",
-                title="Per temperatura: 88 episodi")
+    axes[1].set(xticks=x, xticklabels=MODELS, ylabel='Minutes in generation calls',
+                title='Per temperature: 88 episodes')
     axes[1].legend(fontsize=8)
     save(fig, "tempi_modelli")
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.3))
     for ax, key, unit, title in zip(axes, ("total_input_tokens", "total_output_tokens"),
-            (1e6, 1000), ("Ingresso: milioni di token", "Uscita: migliaia di token")):
+            (1e6, 1000), ('Input: millions of tokens', 'Output: thousands of tokens')):
         bars = ax.bar(x, [value(models[m][key], 1/unit) for m in MODELS], color=colors)
         ax.bar_label(bars, fmt="%.2f", padding=3)
-        ax.set(xticks=x, xticklabels=MODELS, ylabel=title, title="Totale: 264 episodi per modello")
+        ax.set(xticks=x, xticklabels=MODELS, ylabel=title, title='Total: 264 episodes per model')
     save(fig, "token_modelli")
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.3))
     for ax, key, unit, title in zip(axes, ("total_input_tokens", "total_output_tokens"),
-            (1e6, 1000), ("Ingresso: milioni di token", "Uscita: migliaia di token")):
+            (1e6, 1000), ('Input: millions of tokens', 'Output: thousands of tokens')):
         for j, c in enumerate(configs):
             vals = [value(aggregate([r for r in rows if r["trial_id"]==m+"/"+c])[key], 1/unit) for m in MODELS]
             ax.bar(x+(j-1)*.24, vals, width=.24, label=c)
-        ax.set(xticks=x, xticklabels=MODELS, ylabel=title, title="Per temperatura: 88 episodi")
+        ax.set(xticks=x, xticklabels=MODELS, ylabel=title, title='Per temperature: 88 episodes')
         ax.legend(fontsize=8)
     save(fig, "token_temperature")
 
@@ -112,118 +112,60 @@ def build(study_id):
     subprocess.run([str(runtime),str(Path(__file__).resolve()),"--render",
                     str(root/"analysis/episode_results.json"),str(out/"figures")],cwd=ROOT,check=True)
     text=(original/"validation_selection.tex").read_text()
-    text=text.replace("Fatti verificati & Correzioni", "Risposte verificate & Correzioni")
+    text=text.replace('Verified facts & Repairs', 'Verified responses & Repairs')
     for trial,g in trials.items():
         key=trial.replace("_",r"\_")
         verified=sum(r["facts_status"]=="verified" for r in g)
         repairs=sum(r["repair_count"] for r in g)
         text=text.replace(f"{key} & 88 & 88 & {verified} & {repairs}",
                           f"{key} & 88 & 88 & {verified}/88 & {repairs}")
-    explanation=r"""
-\paragraph{Come leggere la tabella.}
-Ogni riga riguarda 88 circuiti per una combinazione di modello e temperatura.
-Successi indica scelte valide con risultato di compilazione disponibile.
-Risposte verificate conta gli episodi in cui \emph{tutti} i fatti della risposta
-finale sono corretti; non conta i singoli fatti e non certifica l'ipotesi libera.
-Per esempio, Gemma a temperatura zero ha 52 risposte verificate su 88
-(59,1 per cento), mentre 36 sono state accettate con fatti ancora errati.
-Le correzioni sono chiamate aggiuntive dopo la prima risposta: un episodio
-può contribuire zero, una o due correzioni. Nella stessa riga, 29 episodi
-non richiedono correzioni, 18 ne richiedono una e 41 ne richiedono due:
-$18+2\cdot41=100$. In totale sono 188 chiamate. Il conteggio dei singoli fatti
-è distinto: 236 fatti verificati su 374 controllati in tutti i tentativi.
+    explanation="""
+\\paragraph{Reading the table.}
+Each row covers 88 circuits for one model/temperature combination. Successes counts valid choices with an available compilation result. Verified responses counts episodes in which \\emph{all} final-response facts are correct; it neither counts individual facts nor certifies the free hypothesis. For example, Gemma at temperature zero has 52 verified responses out of 88 (59.1 percent), while 36 were accepted with incorrect facts. Repairs are calls after the first response: an episode can contribute zero, one or two. In that row, 29 episodes need no repair, 18 need one and 41 need two: $18+2\\cdot41=100$, for 188 total calls. Individual-fact counts are separate: 236 verified facts out of 374 checked across all attempts.
 """
-    marker=r"\subsection{Qualità della scelta e selezione}"
+    marker='\\subsection{Decision quality and selection}'
     text=text.replace(marker,explanation+"\n"+marker)
-    old=r"\[R_{\mathrm{osservato}}(c)=\max_{p\in P_{\mathrm{riuscite}}(c)} \mathrm{mediana}(F_{p,0},F_{p,1},F_{p,2})-F_{\mathrm{scelta}}(c).\]"
-    new=r"""
-\[
- S(c,p)=\operatorname{mediana}_{s\in\{0,1,2\}} F(c,p,s), \qquad
- R_{\mathrm{osservato}}(c)=\max_{p\in P_{\mathrm{riuscite}}(c)}S(c,p)-S(c,p_{\mathrm{scelta}}).
-\]
-$c$ è il circuito; $p$ è la coppia dispositivo/configurazione.
-$F(c,p,s)$ è la expected fidelity ottenuta dalla compilazione con seed Qiskit $s$.
-La mediana dei tre seed è lo score rappresentativo della coppia, anche per
-quella scelta dal modello: attenua l'effetto di una compilazione isolata
-particolarmente favorevole o sfavorevole. Con tre valori è quello centrale;
-non è una stima di incertezza. Il massimo considera le coppie osservate
-con tutte e tre le compilazioni riuscite.
-Il regret è la differenza fra questo riferimento e lo score della scelta:
-zero significa pareggio col migliore risultato osservato; un valore maggiore
-indica una perdita maggiore. Esempio illustrativo: $0{,}90-0{,}82=0{,}08$.
-La mediana del regret nella tabella è un'altra aggregazione:
-si calcola dopo, sui risultati degli 88 circuiti, non sui tre seed.
+    old='\\[R_{\\mathrm{observed}}(c)=\\max_{p\\in P_{\\mathrm{successful}}(c)} \\mathrm{median}(F_{p,0},F_{p,1},F_{p,2})-F_{\\mathrm{selected}}(c).\\]'
+    new="""
+\\[S(c,p)=\\operatorname{median}_{s\\in\\{0,1,2\\}}F(c,p,s),\\qquad R_{\\mathrm{observed}}(c)=\\max_{p\\in P_{\\mathrm{successful}}(c)}S(c,p)-S(c,p_{\\mathrm{selected}}).\\]
+$c$ is the circuit and $p$ the device/configuration pair. $F(c,p,s)$ is expected fidelity after compilation with Qiskit seed $s$. The three-seed median represents the pair, including the model's choice, reducing the influence of one unusually favorable or unfavorable compilation. With three values it is the middle one, not an uncertainty estimate. The maximum includes observed pairs with three successful compilations. Regret is the reference minus the chosen pair's score: zero means a tie with the best observed result; a larger value means greater loss. An illustrative example is $0.90-0.82=0.08$. The table's median regret is a separate later aggregation across 88 circuits, not across the three seeds.
 """
     assert old in text
     text=text.replace(old,new)
-    details=r"""
-\paragraph{Perché alcune mediane sono zero.}
-Con 88 valori ordinati la mediana è la media del 44-esimo e del 45-esimo.
-Qwen e Phi hanno almeno 45 zeri in ogni configurazione: entrambi i valori
-centrali sono quindi esattamente zero, anche se altri circuiti hanno perdite.
-Non si tratta di zeri dovuti all'arrotondamento della tabella.
-Gemma ha due zeri su 88 per ciascuna temperatura e mediane positive.
-La media e il massimo descrivono anche gli errori che la mediana nasconde;
-sono aggiunte descrittive e non modificano il criterio di selezione congelato.
-
-\begin{center}\small
-\begin{tabular}{lrrrr}\toprule
-Prova & Zeri su 88 & Mediana & Media & Massimo\\\midrule
+    details="""
+\\paragraph{Why some medians are zero.}
+For 88 sorted values, the median averages the 44th and 45th. Qwen and Phi have at least 45 zeros in each setting, so both middle values are exactly zero despite losses on other circuits. These zeros are not caused by table rounding. Gemma has two zeros out of 88 per temperature and positive medians. Mean and maximum also describe errors hidden by the median; these descriptive additions do not change the frozen selection rule.
+\\begin{center}\\small\\begin{tabular}{lrrrr}\\toprule Trial & Zeros out of 88 & Median & Mean & Maximum\\\\\\midrule
 """
     for s in summaries:
         details+=" & ".join([s["trial_id"].replace("_",r"\_"),str(s["zero_regret"]),
                              f'{s["median_regret"]:.4f}',f'{s["mean_regret"]:.4f}',f'{s["max_regret"]:.4f}'])+r"\\"+"\n"
-    details+=r"""
-\bottomrule\end{tabular}\end{center}
-Il dispositivo Quantinuum appartiene al migliore risultato osservato in
-70 circuiti su 88. Qwen e Phi lo scelgono spesso, mentre Gemma non lo sceglie
-mai in questa validation. Questa è una differenza osservata nelle decisioni,
-non una prova del motivo interno per cui i modelli scelgono.
-In 72 circuiti più coppie raggiungono lo stesso score massimo osservato.
-Nessun riferimento osservato ha score zero.
+    details+="""
+\\bottomrule\\end{tabular}\\end{center}
+Quantinuum belongs to the best observed result on 70 of 88 circuits. Qwen and Phi often select it, whereas Gemma never does in this validation. This is an observed decision difference, not evidence of the models' internal reasons. Multiple pairs reach the same observed maximum on 72 circuits. No observed reference has a zero score.
 """
     marker=r"\begin{figure}[htbp]\centering"
     text=text.replace(marker,details+"\n"+marker,1)
-    text=text.replace("Regret osservato. Ogni punto statistico rappresenta un circuito; n indica i circuiti valutabili.",
-        "Regret osservato: rettangolo fra primo e terzo quartile (50 per cento centrale), linea arancione alla mediana. "
-        "I baffi arrivano ai valori estremi entro 1,5 volte la distanza fra quartili. "
-        "I puntini mostrano solo i circuiti oltre i baffi; non tutti gli 88 circuiti. Valori uguali possono sovrapporsi. "
-        "Un punto esterno non è automaticamente un errore nei dati. n indica i circuiti valutabili.")
-    cost=r"""
-\clearpage\subsection{Tempi e token per modello}
-Ogni modello ha affrontato 264 episodi: gli stessi 88 circuiti a tre temperature.
-I totali includono tutte le chiamate di generazione, comprese le correzioni;
-non rappresentano il costo di una sola risposta. Tutti i contatori qui usati
-sono disponibili per tutti gli episodi.
-Il tempo HTTP misura la durata delle chiamate e comprende eventuali pause
-dentro di esse. Non è il tempo totale trascorso dall'avvio alla fine
-dell'esperimento: caricamento, recupero esterno, preparazione dei contesti
-e chiamate tecniche di tokenizzazione sono esclusi da questo totale.
-I token di ingresso vengono contati per ogni chiamata, anche se il contesto
-viene ripetuto nelle correzioni o il server ne riusa parti in cache.
-I token di uscita comprendono tutte le risposte, anche quelle corrette
-successivamente. I modelli usano tokenizzatori diversi: il conteggio non
-corrisponde allo stesso numero di parole né a un costo monetario.
-I modelli sono eseguiti in sequenza sullo stesso computer: temperature,
-pause e cache possono influenzare i tempi. Non è una misura isolata
-della velocità intrinseca del modello.
-
-\begin{center}\small\begin{tabular}{lrrrr}\toprule
-Modello & Episodi & Minuti HTTP & Token ingresso & Token uscita\\\midrule
+    text=text.replace('Observed regret. Each statistical point represents a circuit; n counts evaluable circuits.',
+        'Observed regret: the box spans the first to third quartiles (central 50 percent), with an orange median line. Whiskers reach extreme values within 1.5 times the interquartile range. Dots show only circuits beyond the whiskers, not all 88. Equal values can overlap. An outside point is not automatically a data error. n counts evaluable circuits.')
+    cost="""
+\\clearpage\\subsection{Time and tokens by model}
+Each model evaluated 264 episodes: the same 88 circuits at three temperatures. Totals include every generation call and repair, not the cost of a single response. All counters used here are available for every episode. HTTP time includes pauses within calls. It is not total experiment elapsed time: loading, external recovery, context preparation and technical tokenization calls are excluded. Input tokens are counted for every call, even when repairs repeat the context or the server reuses cached parts. Output tokens include all responses, including those subsequently repaired. Different tokenizers mean counts represent neither equal word counts nor monetary costs. Models run sequentially on the same host; temperature, pauses and cache affect timings. These are not isolated measurements of intrinsic model speed.
+\\begin{center}\\small\\begin{tabular}{lrrrr}\\toprule Model & Episodes & HTTP minutes & Input tokens & Output tokens\\\\\\midrule
 """
     for m in model_costs:
         cost+=f'{m["model"]} & {m["episodes"]} & {m["total_call_seconds"]/60:.2f} & {m["total_input_tokens"]:,} & {m["total_output_tokens"]:,}'+r"\\"+"\n"
     cost+=r"\bottomrule\end{tabular}\end{center}"+"\n"
     for name,caption in [
-        ("tempi_modelli","Tempi misurati nelle chiamate: totale per modello e dettaglio per temperatura. Correzioni incluse."),
-        ("token_modelli","Token complessivi di ingresso e uscita per modello; 264 episodi ciascuno. Le due scale sono differenti."),
-        ("token_temperature","Token di ingresso e uscita per modello e temperatura; 88 episodi per barra.")]:
+        ("tempi_modelli",'Measured call times: totals by model and detail by temperature, including repairs.'),
+        ("token_modelli",'Total input and output tokens by model; 264 episodes each. The scales differ.'),
+        ("token_temperature",'Input and output tokens by model and temperature; 88 episodes per bar.')]:
         cost+=r"\begin{figure}[htbp]\centering"+"\n"+r"\includegraphics[width=\linewidth]{\ValidationFiguresPath "+name+r".png}"+"\n"+r"\caption{"+caption+r"}\end{figure}"+"\n"
-    marker=r"\clearpage\subsection{Provenienza e limiti}"
+    marker='\\clearpage\\subsection{Provenance and limitations}'
     text=text.replace(marker,cost+"\n"+marker)
-    text+="\nQuesto resoconto esplicativo è generato dopo la selezione dai dati già sigillati. "\
-          "I risultati, il vincitore e il codice congelato non sono modificati. "\
-          "Il rapporto originale resta nella cartella report; questa versione è in report\\_explained.\n"
+    text+="""
+This explanatory report is generated after selection from sealed data. Results, winner and frozen code remain unchanged. The original report stays under report; this version is under report\\_explained.
+"""
     (out/"validation_selection.tex").write_text(text)
     shutil.copy2(original/"standalone.tex",out/"standalone.tex")
     env=dict(os.environ,TECTONIC_CACHE_DIR=str(BASE/"runtime/tectonic-cache"))

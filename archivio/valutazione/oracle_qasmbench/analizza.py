@@ -1,4 +1,4 @@
-"""Confronto QASMBench RAG k=5: legge esiti esistenti, non avvia compilazioni."""
+'QASMBench RAG k=5 comparison: read existing outcomes without starting compilation.'
 from pathlib import Path
 from collections import Counter
 from datetime import datetime, timezone
@@ -39,78 +39,78 @@ def stats(rows):
 
 def audit_oracle(directory):
     directory=Path(directory).resolve();root=directory.parent.parent
-    require(directory.parent.name=='analisi','Indicare una cartella analisi della campagna.')
+    require(directory.parent.name=='analisi','Specify a campaign analysis directory.')
     sources={}
     def checked(path):
         value=read(path);sources[str(path)]=sha(path);return value
     oc=checked(root/'contratto.json');identity=oc['identity']
-    require(digest(identity)==oc['identity_sha256'],'Contratto oracle alterato.')
-    require(identity['schema']=='qasmbench50-oracle-max3-v1','Non è la campagna QASMBench50.')
-    require(identity['source_manifest_sha256']==SOURCE_SHA,'Manifest QASMBench diverso.')
-    require(len(identity['circuits'])==50 and identity['seeds']==[0,1,2],'Piano oracle diverso.')
+    require(digest(identity)==oc['identity_sha256'],'Oracle contract changed.')
+    require(identity['schema']=='qasmbench50-oracle-max3-v1','This is not the QASMBench50 campaign.')
+    require(identity['source_manifest_sha256']==SOURCE_SHA,'QASMBench manifest differs.')
+    require(len(identity['circuits'])==50 and identity['seeds']==[0,1,2],'Oracle plan differs.')
     summary=checked(directory/'riepilogo.json');refs=checked(directory/'oracle_test.json')
     pairs=checked(directory/'configurazioni.json');provenance=checked(directory/'provenienza.json')
-    require(summary['identity_sha256']==oc['identity_sha256'],'Analisi di un altro contratto.')
-    require(summary['plan']==plan_counts(identity)==oc['plan'],'Conteggi del piano incoerenti.')
+    require(summary['identity_sha256']==oc['identity_sha256'],'Analysis belongs to another contract.')
+    require(summary['plan']==plan_counts(identity)==oc['plan'],'Inconsistent plan counts.')
     jobmap={j['job_id']:j for j in jobs(identity)};records={}
     for rel,expected_hash in provenance.items():
         path=(root/rel).resolve()
-        require(path.is_relative_to(root/'tentativi') and path.name=='esito.json','Percorso esito non valido.')
-        require(sha(path)==expected_hash,'Esito alterato: '+rel)
+        require(path.is_relative_to(root/'tentativi') and path.name=='esito.json','Invalid outcome path.')
+        require(sha(path)==expected_hash,'Outcome was modified: '+rel)
         result=checked(path);jid=result['job_id']
-        require(jid in jobmap and jid not in records,'Esito duplicato o estraneo al piano.')
-        require(path==root/'tentativi'/jid/'esito.json','Percorso/identità esito incoerente.')
+        require(jid in jobmap and jid not in records,'Outcome is duplicated or outside the plan.')
+        require(path==root/'tentativi'/jid/'esito.json','Inconsistent outcome path/identity.')
         records[jid]=validate_result(jobmap[jid],result,path.parent)
     calculated_pairs,calculated_refs=aggregate_rows(identity,records)
-    require(calculated_pairs==pairs and calculated_refs==refs,'Massimi o copertura diversi dagli esiti originali.')
-    require(dict(Counter(r['status'] for r in records.values()))==summary['statuses'],'Stati incoerenti.')
-    require(summary['terminal']==len(records) and summary['pending']==len(jobmap)-len(records),'Copertura incoerente.')
-    require(summary['complete']==(len(records)==len(jobmap)),'Fine campagna incoerente.')
-    require(summary['circuits_with_reference']==sum(r['reference_score'] is not None for r in refs),'Riferimenti incoerenti.')
-    require(summary['circuits_with_exhaustive_reference']==sum(r['reference_is_exhaustive'] for r in refs),'Esaustività incoerente.')
+    require(calculated_pairs==pairs and calculated_refs==refs,'Maxima or coverage differ from original outcomes.')
+    require(dict(Counter(r['status'] for r in records.values()))==summary['statuses'],'Inconsistent states.')
+    require(summary['terminal']==len(records) and summary['pending']==len(jobmap)-len(records),'Inconsistent coverage.')
+    require(summary['complete']==(len(records)==len(jobmap)),'Inconsistent campaign completion.')
+    require(summary['circuits_with_reference']==sum(r['reference_score'] is not None for r in refs),'Inconsistent references.')
+    require(summary['circuits_with_exhaustive_reference']==sum(r['reference_is_exhaustive'] for r in refs),'Inconsistent exhaustiveness.')
     for row in identity['circuits']:
         path=root/'sorgenti'/(row['circuit_id']+'.qasm')
-        require(sha(path)==row['source_sha256'],'Copia QASM alterata.')
+        require(sha(path)==row['source_sha256'],'QASM copy changed.')
         sources[str(path)]=sha(path)
     return oc,summary,refs,pairs,sources,len(records)
 
 def audit_rag(rag_root,identity):
-    """Verifica i 50 registri già esistenti; nessun import del runner storico."""
+    'Verify the 50 existing records without importing the historical runner.'
     root=Path(rag_root).resolve();sources={}
     def checked(path):
         value=read(path);sources[str(path)]=sha(path);return value
     contract_path=root/'preparazione/contratto_congelato.json'
     contract=checked(contract_path);execution=checked(root/'risultati/llm_rag/esecuzione.json')
     manifest=checked(root/'manifest.json');plan=checked(root/'piano.json')
-    require(execution['contract_sha256']==sha(contract_path),'Contratto RAG alterato.')
-    require(execution['plan_sha256']==sha(root/'piano.json') and plan==contract['plan'],'Piano RAG alterato.')
-    require(identity['source_manifest_sha256']==contract['source_sha256']==sha(root/'manifest.json'),'Sorgenti RAG/oracle differenti.')
-    require(contract['plan']['qiskit_seed']==0 and execution['method']=='llm_rag','Metodo o seed RAG differenti.')
+    require(execution['contract_sha256']==sha(contract_path),'RAG contract changed.')
+    require(execution['plan_sha256']==sha(root/'piano.json') and plan==contract['plan'],'RAG plan changed.')
+    require(identity['source_manifest_sha256']==contract['source_sha256']==sha(root/'manifest.json'),'RAG/oracle sources differ.')
+    require(contract['plan']['qiskit_seed']==0 and execution['method']=='llm_rag','RAG method or seed differs.')
     hardware=execution['preflight']['checks']['software_targets']['details']
-    require(hardware['targets']==identity['catalog']['target_sha256'],'Target RAG/oracle differenti.')
+    require(hardware['targets']==identity['catalog']['target_sha256'],'RAG/oracle Targets differ.')
     for name in ('qiskit','mqt.bench','numpy'):
-        require(hardware['versions'][name]==identity['versions'][name],'Versione RAG/oracle differente: '+name)
+        require(hardware['versions'][name]==identity['versions'][name],'RAG/oracle version differs: '+name)
     expected={r['circuit_id']:r for r in identity['circuits']}
-    require(set(expected)=={r['circuit_id'] for r in manifest['circuits']},'Circuiti RAG/oracle differenti.')
+    require(set(expected)=={r['circuit_id'] for r in manifest['circuits']},'RAG/oracle circuits differ.')
     values={}
     for cid,row in expected.items():
         folder=root/'risultati/llm_rag/circuiti'/cid
         result=checked(folder/'esito.json');retrieval=checked(folder/'retrieval.json')
-        require(result['circuit_id']==cid and result['source_sha256']==row['source_sha256'],'Identità RAG diversa.')
-        require(result['method']=='llm_rag' and result['split']=='external_test','Esito estraneo al Test QASMBench.')
-        require(len(retrieval['records'])==5,'Recupero diverso da k=5.')
+        require(result['circuit_id']==cid and result['source_sha256']==row['source_sha256'],'RAG identity differs.')
+        require(result['method']=='llm_rag' and result['split']=='external_test','Outcome is outside the QASMBench Test.')
+        require(len(retrieval['records'])==5,'Retrieval differs from k=5.')
         original=root/'circuiti'/row['source_ref'];inp=folder/'input.qasm'
-        require(sha(original)==row['source_sha256'],'QASM originale RAG alterato.')
-        # Il runner storico normalizza CRLF: confronto del testo, conservando entrambi gli hash.
-        require(inp.read_text(encoding='utf-8')==original.read_text(encoding='utf-8'),'Input RAG differente.')
+        require(sha(original)==row['source_sha256'],'Original RAG QASM changed.')
+        # The historical runner normalizes CRLF: compare text while retaining both hashes.
+        require(inp.read_text(encoding='utf-8')==original.read_text(encoding='utf-8'),'RAG input differs.')
         sources[str(original)]=sha(original);sources[str(inp)]=sha(inp)
         if result['status']=='success':
             compiled=checked(folder/'compilazione/result.json');job=checked(folder/'compilazione/job.json')
             score=result['score']
-            require(isinstance(score,(int,float)) and not isinstance(score,bool) and math.isfinite(score) and 0<=score<=1,'Score RAG non valido.')
-            require(compiled['status']=='success' and compiled['score']==score and compiled['validation']['is_executable_on_target'],'Compilazione RAG incoerente.')
-            require(job['decision']['selected_device']==result['device'] and job['decision']['config_id']==result['config_id'],'Decisione RAG incoerente.')
-        else:require(result.get('score') is None,'Fallimento RAG con score presente.')
+            require(isinstance(score,(int,float)) and not isinstance(score,bool) and math.isfinite(score) and 0<=score<=1,'Invalid RAG score.')
+            require(compiled['status']=='success' and compiled['score']==score and compiled['validation']['is_executable_on_target'],'Inconsistent RAG compilation.')
+            require(job['decision']['selected_device']==result['device'] and job['decision']['config_id']==result['config_id'],'Inconsistent RAG decision.')
+        else:require(result.get('score') is None,'Failed RAG outcome has a score.')
         values[cid]=result
     return values,execution,sources
 
@@ -121,7 +121,7 @@ def build_rows(identity,refs,pairs,rag):
     for o in sorted(refs,key=lambda r:r['circuit_id']):
         cid=o['circuit_id'];r=rag[cid];score=r.get('score') if r['status']=='success' else None
         selected=pairmap.get((cid,r.get('device'),r.get('config_id')))
-        if score is not None:require(selected is not None and selected['compatible'],'Coppia RAG esterna alla griglia.')
+        if score is not None:require(selected is not None and selected['compatible'],'RAG pair is outside the grid.')
         best=selected['max_score'] if selected else None;ref=o['reference_score']
         gap=difference(ref,score);choice=difference(ref,best);seed=difference(best,score)
         seed0=selected['seed_scores']['0'] if selected else None
@@ -158,11 +158,11 @@ def summarize(rows):
 
 def compare(oracle,rag_root,output):
     output=Path(output)
-    require(not output.exists(),'Destinazione confronto già esistente: scegliere una cartella nuova.')
+    require(not output.exists(),'Comparison destination already exists: choose a new directory.')
     oc,summary,refs,pairs,sources,verified=audit_oracle(oracle)
     rag,execution,rag_sources=audit_rag(rag_root,oc['identity']);sources.update(rag_sources)
     rows=build_rows(oc['identity'],refs,pairs,rag);s=summarize(rows)
-    require(all(sha(Path(p))==h for p,h in sources.items()),'Una fonte è cambiata durante l’analisi.')
+    require(all(sha(Path(p))==h for p,h in sources.items()),'A source changed during analysis.')
     data=dict(created_at=datetime.now(timezone.utc).isoformat(),oracle_path=str(Path(oracle).resolve()),rag_path=str(Path(rag_root).resolve()),
         tolerance=TOL,summary=s,oracle_summary=summary,rows=rows,oracle_identity=oc['identity_sha256'],
         system_contract=execution['contract_sha256'],oracle_versions=oc['identity']['versions'],python=oc['identity']['python'],

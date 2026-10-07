@@ -1,4 +1,4 @@
-"""Riepiloghi riproducibili da esiti salvati; grafici scientifici con PGFPlots."""
+'Reproducible summaries from saved outcomes; scientific plots with PGFPlots.'
 from __future__ import annotations
 import csv
 import json
@@ -36,7 +36,7 @@ def generate(base):
     output=base/"analisi"/fingerprint[:16]
     if (output/"completato.json").exists():
         return output
-    # Ogni analisi ha un'identita; i dati originali e analisi precedenti restano.
+    # Each analysis has an identity; original data and earlier analyses are retained.
     output.mkdir(parents=True,exist_ok=True)
     report=summary(rows,expected)
     report.update(kind=meta["kind"],method=meta["method"],input_sha256=fingerprint,
@@ -51,39 +51,50 @@ def generate(base):
         writer=csv.DictWriter(stream,fieldnames=fields,extrasaction="ignore")
         writer.writeheader();writer.writerows(rows)
     graphs=output/"grafici";graphs.mkdir(exist_ok=True)
-    # CSV e sorgenti del grafico separati dal documento inseribile nella tesi.
+    # CSV and plot sources are separate from the thesis-ready document.
     with (graphs/"score.csv").open("w",newline="",encoding="utf-8") as stream:
         writer=csv.writer(stream);writer.writerow(["indice","score"])
         for i,row in enumerate(rows,1):
             if row["status"]=="success":
                 writer.writerow([i,row["score"]])
-    plot=r"""\begin{tikzpicture}
-\begin{axis}[width=0.95\linewidth,height=6cm,xlabel={Indice circuito},ylabel={Expected fidelity},
+    plot="""\\begin{tikzpicture}
+\\begin{axis}[width=0.95\\linewidth,height=6cm,xlabel={Circuit index},ylabel={Expected fidelity},
 ymin=0,ymax=1,grid=major]
-\addplot[only marks,mark=*,mark size=1.4pt] table[x=indice,y=score,col sep=comma]{../grafici/score.csv};
-\end{axis}
-\end{tikzpicture}
+\\addplot[only marks,mark=*,mark size=1.4pt] table[x=indice,y=score,col sep=comma]{../grafici/score.csv};
+\\end{axis}
+\\end{tikzpicture}
+
 """
     (graphs/"score.tex").write_text(plot,encoding="utf-8")
-    mean="non disponibile" if report["mean_score"] is None else f'{report["mean_score"]:.8g}'
-    body="\\section*{"+escaped({"random":"Random","llm_rag":"LLM + RAG","llm_senza_rag":"LLM senza RAG","mqt_predictor":"MQT Predictor"}[meta["method"]])+"}\n"
-    body+=("Prova tecnica su circuito sintetico. Non e una valutazione del Test.\n" if meta["kind"]=="technical"
-           else "Test indipendente su circuiti riservati. Nessuna matrice esaustiva richiesta.\n")
-    body+=f"Completati: {len(rows)}/{expected}. Successi: {len([r for r in rows if r['status']=='success'])}. "
-    body+=f"Fallimenti: {report['failures']}. Tentativi aggiuntivi: {report['retries']}.\n\n"
-    body+=f"Score medio sui soli {report['score_denominator']} successi: {mean}. "
-    body+="Una compilazione per circuito; seed Qiskit 0. Per MQT il seed interno non e controllato. "
-    body+="I fallimenti non vengono imputati. I tempi mancanti non sono zeri.\n\n"
-    body+=r"\par\medskip\noindent\begin{tabular}{lrr}\hline Misura & Somma nota & Casi misurati\\\hline"+"\n"
-    for label,key in [("Tempo totale (s)","total_seconds"),("Compilazione (s)","compilation_seconds"),
-                      ("Risposta LLM (s)","llm_response_seconds"),("Token LLM","total_tokens")]:
+    mean='unavailable' if report["mean_score"] is None else f'{report["mean_score"]:.8g}'
+    body="\\section*{"+escaped({"random":"Random","llm_rag":"LLM + RAG","llm_senza_rag":'LLM no RAG',"mqt_predictor":"MQT Predictor"}[meta["method"]])+"}\n"
+    body+=("""Technical check on a synthetic circuit. This is not a Test evaluation.
+
+""" if meta["kind"]=="technical"
+           else """Independent Test on held-out circuits. No exhaustive matrix is required.
+
+""")
+    body+=f"Completed: {len(rows)}/{expected}. Successes: {len([r for r in rows if r['status'] == 'success'])}. "
+    body+=f"Failures: {report['failures']}. Additional attempts: {report['retries']}.\n\n"
+    body+=f"Mean score only on the {report['score_denominator']} successes: {mean}. "
+    body+="One compilation per circuit; Qiskit seed 0. MQT's internal seed is not controlled. "
+    body+="""Failures are not imputed. Missing times are not zeros.
+
+"""
+    body+="""\\par\\medskip\\noindent\\begin{tabular}{lrr}\\hline Measurement & Known sum & Measured cases\\\\\\hline
+"""+"\n"
+    for label,key in [('Total time (s)',"total_seconds"),('Compilation (s)',"compilation_seconds"),
+                      ('LLM response (s)',"llm_response_seconds"),("Token LLM","total_tokens")]:
         m=report[key]
         amount=f"{m['sum_known']:.4g}" if m["measured_circuits"] else "--"
         body+=f"{label} & {amount} & {m['measured_circuits']}/{len(rows)}"+r"\\"+"\n"
     body+=r"\hline\end{tabular}"+"\n\n"+r"\input{../grafici/score.tex}"+"\n"
-    body+="\nLo score stima la fedelta su Target sintetici. La media sui successi non prova superiorita. "
-    body+="Il confronto tra metodi usa anche i circuiti comuni e i fallimenti. "
-    body+="Per ricostruire ogni caso consultare circuiti.csv e i registri originali.\n"
+    body+="""
+The score estimates fidelity on synthetic Targets. The mean over successes does not prove superiority. """
+    body+='The comparison between methods also uses shared circuits and failures. '
+    body+="""To reconstruct each case, consult circuiti.csv and the original records.
+
+"""
     latex=output/"latex";latex.mkdir(exist_ok=True)
     (latex/"risultati.tex").write_text(body,encoding="utf-8")
     standalone=r"""\documentclass[a4paper,11pt]{article}
@@ -103,6 +114,6 @@ ymin=0,ymax=1,grid=major]
                                cwd=latex,capture_output=True,timeout=90)
         (latex/"compilazione_latex.log").write_bytes(process.stdout+process.stderr)
         if process.returncode:
-            raise RuntimeError("Rapporto LaTeX non compilato: "+str(latex/"compilazione_latex.log"))
+            raise RuntimeError('LaTeX report not compiled: '+str(latex/"compilazione_latex.log"))
     save(output/"completato.json",{"at":now(),"input_sha256":fingerprint,"pdf_available":(latex/"verifica.pdf").exists()})
     return output

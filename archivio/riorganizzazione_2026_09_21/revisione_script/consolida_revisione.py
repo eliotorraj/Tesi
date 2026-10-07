@@ -1,4 +1,4 @@
-"""Unisce le schede nuove e le 14 letture pregresse, poi controlla impronte e copertura."""
+'Combine the new review records and 14 prior reads, then check fingerprints and coverage.'
 from __future__ import annotations
 
 import copy
@@ -21,20 +21,20 @@ def main() -> None:
         for row in rows:
             path = row["current_path"]
             if path in added or row.get("manual_or_static") != "manual_full":
-                raise ValueError(f"Scheda duplicata o lettura incompleta: {path}")
+                raise ValueError(f'Duplicate review record or incomplete reading: {path}')
             row = copy.deepcopy(row)
             row["findings"] = [copy.deepcopy(definitions[f]) if isinstance(f, str) else f for f in row.get("findings", [])]
             row["review_source"] = name
             row["review_date"] = "2026-09-21"
             added[path] = row
     if len(added) != 133:
-        raise ValueError(f"Attese 133 nuove letture; trovate {len(added)}")
+        raise ValueError(f'Expected 133 new reads; found {len(added)}')
     rows = []
     for old in previous["files"]:
         path = old["current_path"]
         if old["manual_or_static"] == "manual_full_plus_static":
             if path in added:
-                raise ValueError(f"Assegnazione inattesa di una scheda gia completa: {path}")
+                raise ValueError(f'Unexpected assignment of an already complete review record: {path}')
             row = copy.deepcopy(old)
             row["sha256"] = old.get("current_sha256", old["sha256"])
             row["manual_or_static"] = "manual_full"
@@ -45,22 +45,22 @@ def main() -> None:
             row = added.pop(path)
         rows.append(row)
     if added:
-        raise ValueError(f"File fuori dal perimetro originale: {sorted(added)}")
-    result = {"scope": "147 script operativi inventariati il 20 settembre, non le copie storiche diverse",
+        raise ValueError(f'File outside the original scope: {sorted(added)}')
+    result = {"scope": '147 operational scripts inventoried on 20 September, excluding distinct historical copies',
               "previous_complete": 14, "new_complete": 133,
-              "method": "Lettura integrale e analisi manuale; verifiche sintattiche pregresse; riproduzioni isolate documentate",
+              "method": 'Complete reading and manual analysis; prior syntax checks; documented isolated reproductions',
               "files": rows}
     (DIRECTORY / "inventario_completo.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     verification = verify()
     (DIRECTORY / "verifica_copertura.json").write_text(json.dumps(verification, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     if not verification["passed"]:
         raise ValueError(verification["errors"])
-    lines = ["# Rassegna completa dei 147 script", "", "Ogni riga rimanda al sorgente letto. Dettagli, invarianti, dipendenze e rilievi sono nelle schede JSON e nei tre rapporti del gruppo.", "", "Le 14 letture del 20 settembre sono conservate; le restanti 133 sono del 21 settembre. Le impronte attuali coincidono con il riferimento congelato.", "", "| File | Righe lette | Scopo | Rilievi |", "| --- | ---: | --- | --- |"]
+    lines = ['# Complete review of 147 scripts', "", 'Each row references the inspected source. Details, invariants, dependencies and findings are in JSON review records and the three group reports.', "", 'The 14 reviews from 20 September are retained; the remaining 133 are dated 21 September. Current hashes match the frozen reference.', "", '| File | Lines read | Purpose | Findings |', "| --- | ---: | --- | --- |"]
     for row in rows:
         path = row["current_path"]
         label = path.removeprefix("archivio/esperimento_v2/")
         purpose = str(row.get("purpose", "")).replace("|", "/").replace("\n", " ")
-        findings = ", ".join(str(f.get("id", f.get("title", "rilievo"))) if isinstance(f, dict) else str(f) for f in row.get("findings", [])) or "Nessun nuovo difetto dimostrato"
+        findings = ", ".join(str(f.get("id", f.get("title", "rilievo"))) if isinstance(f, dict) else str(f) for f in row.get("findings", [])) or 'No new demonstrated defect'
         lines.append(f"| [{label}](../../../{path}) | {row['lines']} | {purpose} | {findings} |")
     (DIRECTORY / "rassegna_147_script.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps(verification, indent=2))

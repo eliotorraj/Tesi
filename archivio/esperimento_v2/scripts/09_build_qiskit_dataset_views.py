@@ -1,4 +1,4 @@
-"""Costruisce gli aggregati e gli esempi RAG destinati all'addestramento."""
+'Build aggregates and RAG examples intended for training.'
 
 from __future__ import annotations
 
@@ -17,28 +17,28 @@ from qiskit_dataset.views import build_dataset_views
 
 
 def parse_args() -> argparse.Namespace:
-    """Legge le opzioni usate per costruire le viste del Dataset."""
+    'Read options for building Dataset views.'
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="full")
     parser.add_argument(
         "--catalog",
         type=Path,
         default=DEFAULT_CATALOG_PATH,
-        help="Catalogo v2; per i dati storici specificare quello in archivio/protocollo_v1/configs/.",
+        help='v2 catalog; for historical data, specify the catalog under archivio/protocollo_v1/configs/.',
     )
     parser.add_argument(
         "--device",
-        help="Device MQT Bench; se omesso usa il default del catalogo.",
+        help="MQT Bench device; defaults to the catalog's default device.",
     )
     parser.add_argument("--top-k", type=int, default=3)
     args = parser.parse_args()
     if not 1 <= args.top_k <= 3:
-        parser.error("--top-k deve essere compreso tra 1 e 3.")
+        parser.error('--top-k must be between 1 and 3.')
     return args
 
 
 def main() -> None:
-    """Costruisce le viste del dispositivo e ne mostra le statistiche."""
+    'Build device views and show statistics.'
     args = parse_args()
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)

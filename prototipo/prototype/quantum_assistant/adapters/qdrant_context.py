@@ -1,4 +1,4 @@
-"""Qdrant locale persistente: raccolta verificata e ricerca esatta filtrata."""
+'Persistent local Qdrant: verified collection and exact filtered search.'
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ INDEX_VERSION = "qdrant-local-circuit49/1"
 
 
 class RetrievalDatabaseError(RuntimeError):
-    """Un guasto del database non è un recupero senza evidenze."""
+    'A database failure is not an empty evidence retrieval.'
 
     code = "RAG_DATABASE_ERROR"
     retryable = False
@@ -55,7 +55,7 @@ def expected_manifest(corpus: RagCorpus) -> dict[str, Any]:
     pinned = dict(line.split("==") for line in lock_path.read_text().splitlines() if "==" in line and not line.startswith("#"))
     software = {name: version(name) for name in ("qdrant-client", "numpy", "mqt.bench", "qiskit", "portalocker", "networkx")}
     if any(pinned.get(name) != value for name, value in software.items()):
-        raise RetrievalIntegrityError("Versioni diverse da requirements.txt.")
+        raise RetrievalIntegrityError('Versions differ from requirements.txt.')
     core = {
         "index_version": INDEX_VERSION, "experiment_id": EXPERIMENT_ID,
         "collection": COLLECTION_NAME, "mode": "local_persistent", "search": "exact",
@@ -73,25 +73,25 @@ def expected_manifest(corpus: RagCorpus) -> dict[str, Any]:
 
 
 def verify_artifacts(index_dir: Path, corpus: RagCorpus) -> dict[str, Any]:
-    """Confronta anche i divisori ricalcolati esclusivamente sul train."""
+    'Also compare divisors recomputed exclusively on train.'
     expected = expected_manifest(corpus)
     for name, value in (("manifest.json", expected), ("transform.json", corpus.transform_artifact)):
         path = index_dir / name
         if not path.is_file() or stable_sha256(strict_json(path.read_text())) != stable_sha256(value):
-            raise RetrievalIntegrityError(f"Artefatto assente o incompatibile: {path}.")
+            raise RetrievalIntegrityError(f'Missing or incompatible artifact: {path}.')
     return expected
 
 
 def verify_collection(client: QdrantClient, corpus: RagCorpus) -> None:
     names = {c.name for c in client.get_collections().collections}
     if names != {COLLECTION_NAME}:
-        raise RetrievalIntegrityError("Raccolta assente o raccolte residue nel database RAG.")
+        raise RetrievalIntegrityError('Missing collection or residual collections in the RAG database.')
     info = client.get_collection(COLLECTION_NAME)
     params = info.config.params.vectors
     if not isinstance(params, models.VectorParams) or params.size != 49 or params.distance != models.Distance.MANHATTAN:
-        raise RetrievalIntegrityError("Dimensione o metrica Qdrant incompatibile.")
+        raise RetrievalIntegrityError('Incompatible Qdrant dimension or metric.')
     if client.count(COLLECTION_NAME, exact=True).count != len(corpus.records):
-        raise RetrievalIntegrityError("Raccolta Qdrant incompleta o con punti residui.")
+        raise RetrievalIntegrityError('Qdrant collection is incomplete or contains leftover points.')
     expected = {str(p.id): p for p in _points(corpus)}
     seen = set()
     offset = None
@@ -102,15 +102,15 @@ def verify_collection(client: QdrantClient, corpus: RagCorpus) -> None:
         for point in points:
             identifier = str(point.id)
             if identifier in seen or identifier not in expected:
-                raise RetrievalIntegrityError("ID Qdrant duplicato o inatteso.")
+                raise RetrievalIntegrityError('Duplicate or unexpected Qdrant ID.')
             seen.add(identifier)
             target = expected[identifier]
             if stable_sha256(point.payload) != stable_sha256(target.payload) or point.vector != target.vector:
-                raise RetrievalIntegrityError(f"Vettore o dati associati manomessi: {identifier}.")
+                raise RetrievalIntegrityError(f'Vector or payload was modified: {identifier}.')
         if offset is None:
             break
     if seen != set(expected):
-        raise RetrievalIntegrityError("La lettura Qdrant non contiene tutti i punti attesi.")
+        raise RetrievalIntegrityError('The Qdrant read does not contain all expected points.')
 
 
 @contextmanager
@@ -118,7 +118,7 @@ def verified_client(index_dir: Path, corpus: RagCorpus) -> Iterator[QdrantClient
     verify_artifacts(index_dir, corpus)
     database = index_dir / "qdrant"
     if not (database / "meta.json").is_file():
-        raise RetrievalIntegrityError(f"Database persistente assente: {database}.")
+        raise RetrievalIntegrityError(f'Persistent database missing: {database}.')
     try:
         with closing(QdrantClient(path=str(database))) as client:
             verify_collection(client, corpus)
@@ -126,11 +126,11 @@ def verified_client(index_dir: Path, corpus: RagCorpus) -> Iterator[QdrantClient
     except (RetrievalIntegrityError, RetrievalDatabaseError):
         raise
     except Exception as error:
-        raise RetrievalDatabaseError(f"Qdrant locale: {type(error).__name__}: {error}") from error
+        raise RetrievalDatabaseError(f'Local Qdrant: {type(error).__name__}: {error}') from error
 
 
 def prepare_index(corpus: RagCorpus, rag_root: Path = DEFAULT_RAG_ROOT) -> dict[str, Any]:
-    """Crea atomicamente; una raccolta esistente viene solo verificata."""
+    'Create atomically; only verify an existing collection.'
     rag_root = Path(rag_root)
     index_dir = rag_root / "index"
     if index_dir.exists():
@@ -139,7 +139,7 @@ def prepare_index(corpus: RagCorpus, rag_root: Path = DEFAULT_RAG_ROOT) -> dict[
     rag_root.mkdir(parents=True, exist_ok=True)
     staging = rag_root / f".index-build-{uuid4().hex}"
     staging.mkdir()
-    # In caso di errore la directory temporanea resta disponibile per la diagnosi.
+    # On failure, retain the temporary directory for diagnosis.
     with closing(QdrantClient(path=str(staging / "qdrant"))) as client:
         client.create_collection(
             COLLECTION_NAME, vectors_config=models.VectorParams(size=49, distance=models.Distance.MANHATTAN),
@@ -150,7 +150,7 @@ def prepare_index(corpus: RagCorpus, rag_root: Path = DEFAULT_RAG_ROOT) -> dict[
         verify_collection(client, corpus)
     atomic_json_write(staging / "transform.json", corpus.transform_artifact)
     atomic_json_write(staging / "manifest.json", expected_manifest(corpus))
-    # Riapertura reale prima di rendere disponibile l'indice.
+    # Actually reopen the index before making it available.
     with verified_client(staging, corpus):
         pass
     os.rename(staging, index_dir)
@@ -172,7 +172,7 @@ def query_exact(
 ) -> tuple[RetrievedExample, ...]:
     query = corpus.transform.apply(features)
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
-        raise ValueError("k deve essere un intero non negativo.")
+        raise ValueError('k must be a nonnegative integer.')
     candidates = matching_records(corpus, devices=devices, objective=objective, experiment_id=experiment_id)
     query_filter = models.Filter(must=[
         models.FieldCondition(key="experiment_id", match=models.MatchValue(value=experiment_id)),
@@ -180,28 +180,28 @@ def query_exact(
         models.FieldCondition(key="objective", match=models.MatchValue(value=objective)),
         models.FieldCondition(key="selected_device_id", match=models.MatchAny(any=list(devices))),
     ])
-    # La modalità locale è sempre esatta. SearchParams(exact=True) vi è ignorato.
-    # Tutti i candidati filtrati: nessuna parità al confine viene persa.
+    # Local mode is always exact; SearchParams(exact=True) is ignored there.
+    # Retrieve every filtered candidate so boundary ties are retained.
     results = client.query_points(
         COLLECTION_NAME, query=list(query), query_filter=query_filter,
         limit=max(1, len(corpus.records)), with_payload=True,
     ).points
     expected = {point_id(r["rag_id"]): r for r in candidates}
     if len(results) != len(expected) or {str(p.id) for p in results} != set(expected):
-        raise RetrievalIntegrityError("Qdrant ha restituito candidati mancanti o fuori filtro.")
+        raise RetrievalIntegrityError('Qdrant returned missing or out-of-filter candidates.')
     ranked = []
     max_score_error = 0.0
     for point in results:
         record = expected[str(point.id)]
         if stable_sha256(point.payload) != stable_sha256(point_payload(record)):
-            raise RetrievalIntegrityError("Dati del risultato diversi dalla fonte RAG.")
+            raise RetrievalIntegrityError('Result data differ from the RAG source.')
         distance = manhattan(query, corpus.transform.apply(record_features(record)))
         if not math.isfinite(point.score) or not math.isclose(
             point.score, distance, abs_tol=SCORE_ABS_TOL, rel_tol=SCORE_REL_TOL,
         ):
-            raise RetrievalIntegrityError(f"Distanza Qdrant fuori tolleranza per {record['rag_id']}.")
+            raise RetrievalIntegrityError(f"Qdrant distance outside tolerance for {record['rag_id']}.")
         max_score_error = max(max_score_error, abs(point.score - distance))
-        # Raffinamento float64 esplicito; nessun arrotondamento o gruppo di quasi-parità.
+        # Explicit float64 refinement without rounding or near-tie grouping.
         ranked.append(as_example(record, distance))
     ranked.sort(key=lambda item: (item.distance, item.record_id))
     if audit is not None:
@@ -223,7 +223,7 @@ class QdrantContextRetriever:
 
 
 class DisabledContextRetriever:
-    """Variante senza RAG, selezionata esplicitamente prima della richiesta."""
+    'Variant without RAG, explicitly selected before the request.'
 
     def __init__(self, dataset_path: Path = DEFAULT_DATASET, *, rag_root: Path = DEFAULT_RAG_ROOT) -> None:
         pass
@@ -233,7 +233,7 @@ class DisabledContextRetriever:
 
 
 class LocalReferenceContextRetriever:
-    """Riferimento esaustivo esplicito; usa gli stessi divisori train verificati."""
+    'Explicit exhaustive reference using the same verified train divisors.'
 
     def __init__(self, dataset_path: Path = DEFAULT_DATASET, *, rag_root: Path = DEFAULT_RAG_ROOT) -> None:
         self.dataset_path = Path(dataset_path)
@@ -243,7 +243,7 @@ class LocalReferenceContextRetriever:
         corpus = load_corpus(self.dataset_path)
         verify_artifacts(self.rag_root / "index", corpus)
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
-            raise ValueError("k deve essere un intero non negativo.")
+            raise ValueError('k must be a nonnegative integer.')
         query = corpus.transform.apply(request.features)
         candidates = matching_records(corpus, devices=compatibility.available_device_ids,
                                       objective=request.figure_of_merit, experiment_id=EXPERIMENT_ID)

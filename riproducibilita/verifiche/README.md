@@ -1,26 +1,16 @@
-# Collaudo del kit
+# Toolkit software checks
 
-Dopo il setup, da `riproducibilita/`, eseguire:
-
-```bash
-.venv/bin/python -B verifiche/checks.py
-```
-
-Il controllo copia il kit in una directory temporanea, genera piccoli QASM e avvia un server HTTP simulato. Prova Dataset, separazione train/validation/Test, selezione, varianti Test, ripresa, contratti ed esportazione. Se LaTeX è disponibile compila anche i report. Non richiede GPU o GGUF reali e non addestra politiche RL.
-
-La cartella dei risultati viene stampata e conservata; `--directory /percorso/nuovo` ne sceglie la destinazione. Il codec TOON deve essere installato e Node 22 raggiungibile. Il successo del collaudo verifica il software, non la disponibilità del backend GPU, i tempi della CPU o la qualità dei modelli. Per controllare l'inferenza reale seguire la [prima prova del prototipo](../../prototipo/docs/guida_passo_passo.md).
-
-## Configuratore e percorso nominato
-
-Da `riproducibilita/`, con l'ambiente attivato:
+After setup, activate the configured Python 3.12 environment and run from the toolkit root:
 
 ```bash
 python -B -m unittest discover -s verifiche -p test_configuratore.py -v
 python -B verifiche/checks.py --configuratore
 ```
 
-Le verifiche mirate controllano errori senza modifica parziale, revisioni, selezione dei candidati, impronte, percorsi con spazi, blocco dopo preparazione anche su output esterni e indipendenza fra configurazioni. Usano directory temporanee e nessun peso reale.
+Focused tests cover revisions, rejected edits, candidate selection, fingerprints, paths with spaces, preparation locks and independence between experiments.
 
-`--configuratore` estende il collaudo completo: crea una configurazione tramite CLI, avvia un eseguibile LLM sintetico per verificare gli argomenti CPU, controlla il server simulato e attraversa Dataset, validation, sei sistemi Test, report ed esportazione con piccoli circuiti reali. I registri si conservano nella directory stampata. Senza l'opzione resta disponibile il controllo dell'interfaccia tradizionale `--config`. Queste prove verificano il software, non la qualità di nuovi LLM o modelli MQT.
+`checks.py` copies the toolkit into a temporary directory, creates small QASM inputs and runs a simulated LLM server. It exercises Dataset generation, split separation, validation, Test variants, resumes, contracts, reports and export. `--configuratore` also covers named CLI configuration and CPU launcher arguments; without it, checks use explicit `--config`. Reports are compiled when LaTeX is available.
 
-Il collaudo tecnico limita a uno i processi Qiskit e i thread BLAS e usa timeout di 300 secondi per compilazione, per contenere il carico su macchine condivise. Questi limiti sono registrati nell’esito e non cambiano i valori distribuiti per gli esperimenti. Un timeout resta un esito fallito del collaudo: i registri non vengono cancellati per riprovare.
+The output directory is printed and retained; `--directory /path/to/new-directory` selects it. Node.js 22 and the installed TOON codec are required. No real GGUF, GPU or RL training is needed. Software checks do not establish model quality or hardware performance.
+
+Integration checks use one Qiskit worker, limited BLAS threads and a 300-second compilation timeout. A timeout remains a failed check with preserved records. For real inference, follow the [prototype guide](../../prototipo/docs/guida_passo_passo.md).

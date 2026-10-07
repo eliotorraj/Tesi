@@ -1,4 +1,4 @@
-"""Controlli tecnici su circuiti sintetici; nessuna inferenza o Test reale."""
+'Technical checks on synthetic circuits; no inference or real Test.'
 import copy
 import json
 from pathlib import Path
@@ -87,7 +87,7 @@ class KernelTests(unittest.TestCase):
 
     def test_short_index_refused_for_six_rounds(self):
         old=wl_counts(graph_from_qasm(A),max_h=3)
-        with self.assertRaisesRegex(ValueError,"Istogrammi"):
+        with self.assertRaisesRegex(ValueError,"histograms"):
             similarity(old,old,30)
 
     def test_invalid_h(self):
@@ -132,7 +132,7 @@ class PipelineTests(unittest.TestCase):
         directory=Path(tempfile.mkdtemp())
         response={"selected_device":"quantinuum_h2_56","config_id":"o2_default_default",
                   "facts":[{"assertion_type":"selected_device_has_enough_qubits"}],
-                  "hypothesis":"Proposta tecnica, da verificare."}
+                  "hypothesis":'Technical proposal, to be verified.'}
         # Discover exact field name from the frozen schema, do not change schema.
         from prototype.prompting.facts import response_schema
         props=response_schema()["properties"]["facts"]["items"]["properties"]

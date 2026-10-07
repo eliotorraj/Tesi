@@ -1,4 +1,4 @@
-"""Compilazione documentale e verifiche finali; nessuna compilazione quantistica."""
+'Document compilation and final checks; no quantum compilation.'
 from pathlib import Path
 import subprocess,json,hashlib,csv
 HERE=Path(__file__).resolve().parent
@@ -32,7 +32,7 @@ def main():
    source_files_unchanged=len(p["source_sha256"]),all_scores_in_pdf=True,no_overfull_boxes=True,
    compiler="pdflatex (TeX Live 2025/Debian)",native_compiler_error="Unable to find standard directories for platform",
    real_quantum_compilations_started=0,
-   development_notes=["Due tentativi di composizione del generatore rifiutati per quoting JavaScript, senza scritture.","Corretta una parentesi nella stringa delle etichette prima della generazione.","Librerie grafiche Python non disponibili: usati grafici vettoriali TikZ senza installazioni."],
+   development_notes=['Two generator composition attempts were rejected for JavaScript quoting, without writes.','An unmatched parenthesis in the label string was corrected before generation.','Python plotting libraries were unavailable; TikZ vector plots were used without installation.'],
    script_sha256={f.name:sha(f) for f in HERE.glob("*.py")},
    output_sha256={str(f.relative_to(OUT)):sha(f) for f in OUT.rglob("*") if f.is_file() and f.suffix in [".pdf",".tex",".csv",".json"] and f.name!="verifica.json"})
  (OUT/"verifica.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2)+"\n")

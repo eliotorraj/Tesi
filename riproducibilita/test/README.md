@@ -1,11 +1,17 @@
-# Test delle impostazioni selezionate
+# Evaluation of selected settings
 
-`esegui.py` congela il piano e valuta un metodo per volta. `score.py` calcola la metrica; `analizza.py` produce JSON, CSV e LaTeX; `oracle.py` genera una griglia facoltativa separata dai decisori. Gli esiti sono in `risultati/<id>/`.
+`esegui.py` freezes the plan and executes one method at a time. `score.py` computes the metric. `analizza.py` produces JSON, CSV and LaTeX summaries. `oracle.py` runs an optional exhaustive reference grid separate from decision makers. [risultati/](risultati/README.md) links to the Test evaluation documentation.
 
-I metodi disponibili sono `llm_rag`, `llm_senza_rag`, `random`, `llm_recupero_random`, `mqt`, `llm_rag_k1`, `llm_rag_k10`, `llm_wl`, `llm_wl_sintesi`. Dichiarare l'elenco prima di `prepara`. WL richiede la propria selezione; MQT modelli verificati e prove Bell riuscite. Tutti i metodi previsti devono soddisfare i prerequisiti prima del congelamento.
+Available IDs: `llm_rag`, `llm_senza_rag`, `random`, `llm_recupero_random`, `mqt`, `llm_rag_k1`, `llm_rag_k10`, `llm_wl`, `llm_wl_sintesi`. Declare methods before preparation. WL requires a validation selection; MQT requires verified models and successful technical checks. All planned methods must satisfy prerequisites before freezing.
 
-Da `riproducibilita/` usare `.venv/bin/python -B esperimento.py test congela`, poi `test esegui --metodo ID` e `test analizza`. Per gli LLM mantenere server e contesto concordati con il registro. Eseguire in sequenza se si confrontano i tempi. Errori e timeout restano conservati; la ripresa non rigenera casi iniziati e gli score mancanti non diventano zero. Vedere la [guida](../documentazione/guida.md).
+From the toolkit root:
 
-## Oracle dei 50 QASMBench già valutati
+```bash
+python esperimento.py --esperimento my-trial test congela
+python esperimento.py --esperimento my-trial test esegui --metodo llm_rag
+python esperimento.py --esperimento my-trial test analizza
+```
 
-[oracle_qasmbench/](oracle_qasmbench/README.md) prepara una campagna separata con la stessa griglia dell'oracle dei 90 Test. Scrive all'esterno della repository e, dopo la generazione manuale, produce il confronto con gli esiti RAG QASMBench conservati. Non avvia il Test del kit, non modifica il Dataset e non importa codice dall'archivio.
+Run every planned method before final comparison. Match LLM server identity/context and run sequentially for timing comparisons. Errors and timeouts remain recorded. Resume does not silently repeat started cases; missing scores do not become zero. See the [guide](../documentazione/guida.md).
+
+The completed QASMBench comparison and its oracle records are in [archivio/valutazione/](../../archivio/valutazione/README.md), separate from newly generated toolkit results.

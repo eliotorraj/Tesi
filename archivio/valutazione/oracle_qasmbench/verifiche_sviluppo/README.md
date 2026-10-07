@@ -1,9 +1,7 @@
-# Verifiche della preparazione
+# QASMBench oracle preparation checks
 
-`verifiche.json` riassume i controlli e le impronte degli script; `controllo_preliminare.json` conserva il risultato di `avvia.sh --verifica`.
+`verifiche.json` summarizes source hashes and checks; `controllo_preliminare.json` records the initial launcher verification.
 
-I 14 test del motore e gli 8 del confronto sono riusciti. Le prove hanno usato dati e compilazioni simulati. Il controllo di integrazione legge i 50 registri RAG storici e li confronta soltanto con esiti oracle fittizi conservati in una cartella temporanea.
+The recorded preparation passed 14 engine tests and eight comparison tests using simulated outcomes. Its seven-page preview was checked with the installed WSL LaTeX compiler. These preparation records do not themselves represent a completed scientific oracle campaign.
 
-L'anteprima LaTeX fittizia è stata compilata con pdflatex e controllata su tutte le sette pagine. È contrassegnata su ogni pagina e non rappresenta risultati sperimentali. I file grafici di collaudo restano locali, esclusi da Git.
-
-Il compilatore integrato non si è inizializzato; è stato usato quello già installato in WSL. Non è stato installato software. Nessuna generazione oracle reale è stata avviata e il grafo non è stato aggiornato.
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

@@ -53,10 +53,10 @@ SECOND_OTHER_EVIDENCE_ID = "evidence_" + "5" * 64
 
 CAVEAT_ID = "expected_fidelity_is_estimate"
 CAVEAT_TEXT = (
-    "Expected fidelity e una stima offline, non una misura su hardware reale."
+    'Expected fidelity is an offline estimate, not a physical-hardware measurement.'
 )
 OTHER_CAVEAT_ID = "closed_candidate_set"
-OTHER_CAVEAT_TEXT = "Il risultato vale soltanto nel gruppo storico valutato."
+OTHER_CAVEAT_TEXT = 'The result applies only to the evaluated historical group.'
 
 
 def _qasm2() -> str:
@@ -421,7 +421,7 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
         self.root = Path(self.temp_dir.name)
         self.submission = UiSubmission(
             request_id="request-claim-evidence",
-            user_text="Scegli una configurazione valida.",
+            user_text='Choose a valid configuration.',
             qasm2=_qasm2(),
         )
         self.service = self._service(lambda prompt: "{}")
@@ -841,12 +841,11 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
         self.assertEqual(
             recommendation.warnings,
             (
-                "La raccomandazione non dispone di evidenze storiche "
-                "utilizzabili.",
+                'The recommendation has no usable historical evidence.',
             ),
         )
         self.assertIn(
-            "non sono disponibili risultati storici utilizzabili",
+            'No usable historical results',
             recommendation.explanation,
         )
 
@@ -877,32 +876,21 @@ class ClaimEvidenceValidationTests(unittest.TestCase):
         self.assertEqual(
             recommendation.explanation,
             (
-                f"I risultati dei circuiti storici {RECORD_ID} sostengono "
-                f"la scelta del dispositivo {DEVICE_ID}. "
-                f"I risultati dei circuiti storici {RECORD_ID} sostengono "
-                f"la configurazione {CONFIGURATION_ID} per il dispositivo "
-                f"{DEVICE_ID}. Il dispositivo {DEVICE_ID} rispetta i vincoli "
-                "verificati per la richiesta corrente. La raccomandazione "
-                "tiene conto delle avvertenze scientifiche associate alle "
-                "evidenze storiche."
+                f'Results for historical circuits {RECORD_ID} support selecting device {DEVICE_ID}. Results for historical circuits {RECORD_ID} support configuration {CONFIGURATION_ID} for device {DEVICE_ID}. Device {DEVICE_ID} satisfies the constraints checked for the current request. The recommendation accounts for scientific caveats associated with the historical evidence.'
             ),
         )
         self.assertEqual(
             recommendation.evidence,
             (
-                f"Circuito storico {RECORD_ID}: dispositivo={DEVICE_ID}, "
-                f"configurazione={CONFIGURATION_ID}, "
-                "mediana della fedeltà attesa=0.91, campioni=3 "
-                f"(evidenza {EVIDENCE_ID}).",
-                f"Circuito storico {RECORD_ID}: avvertenza {CAVEAT_ID}.",
+                f'Historical circuit {RECORD_ID}: device={DEVICE_ID}, configuration={CONFIGURATION_ID}, median expected fidelity=0.91, samples=3 (evidence {EVIDENCE_ID}).',
+                f'Historical circuit {RECORD_ID}: caveat {CAVEAT_ID}.',
             ),
         )
         self.assertEqual(
             recommendation.warnings,
             (
                 CAVEAT_TEXT,
-                "Le evidenze riguardano compilazioni storiche di circuiti "
-                "simili e non misurano il risultato del circuito corrente.",
+                "The evidence concerns historical compilations of similar circuits and does not measure the current circuit's result.",
             ),
         )
 

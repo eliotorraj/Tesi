@@ -1,4 +1,4 @@
-"""Avvio separato: LLM + RAG Manhattan con 10 esempi train."""
+'Separate launcher: Manhattan LLM + RAG with 10 train examples.'
 from pathlib import Path
 import sys
 

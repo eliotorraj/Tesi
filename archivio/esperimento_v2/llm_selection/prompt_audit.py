@@ -1,4 +1,4 @@
-"""Verifica/esporta prompt senza inferenza. Non apre gli score di validation."""
+'Check/export prompts without inference or access to validation scores.'
 from __future__ import annotations
 import argparse
 import hashlib
@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--label", required=True)
     parser.add_argument("--verify-retrieval", action="store_true")
-    parser.add_argument("--all-splits", action="store_true", help="Include i prompt validation già preparati; mai il test")
+    parser.add_argument("--all-splits", action="store_true", help='Include already prepared validation prompts; never Test')
     args = parser.parse_args()
     import re
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", args.label):

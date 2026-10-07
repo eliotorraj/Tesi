@@ -1,103 +1,70 @@
-# Chat manuale con Qwen, Phi o Gemma
+# Manual chat with Qwen, Phi or Gemma
 
-Questa guida spiega l'avvio di uno dei tre modelli locali e la conservazione
-delle prove manuali sul train. La chat non avvia la validation.
-Il riferimento scientifico resta il [protocollo](../protocollo_sperimentale.md).
+This guide describes the archived local-chat launcher and preservation of manual train checks. Chat does not start validation. For the selected standalone system, use the [current prototype guide](../../../../prototipo/docs/guida_passo_passo.md); for a new experiment, use the [reproduction toolkit](../../../../riproducibilita/README.md). The [archived protocol](../protocollo_sperimentale.md) explains the historical procedure.
 
-## Scegliere il modello
+## Choose a model
 
-Da Ubuntu, nella radice del progetto, usare **uno** di questi comandi:
+Run these commands from `archivio/esperimento_v2/`, using the existing pinned Python environment. The examples use the repository-root `.venv`; substitute its path if the environment is elsewhere. Model weights and the historical Windows server installation are external prerequisites.
 
 ```bash
-.venv/bin/python -m llm_selection.chat --model qwen
-.venv/bin/python -m llm_selection.chat --model phi
-.venv/bin/python -m llm_selection.chat --model gemma
+../../.venv/bin/python -m llm_selection.chat --model qwen
+../../.venv/bin/python -m llm_selection.chat --model phi
+../../.venv/bin/python -m llm_selection.chat --model gemma
 ```
 
-Senza `--model` continua ad avviarsi Qwen.
-Il comando verifica i pesi e avvia il server. Quando compare il messaggio di
-pronto, aprire [la chat locale](http://127.0.0.1:8089) nel browser Windows.
+Run one launcher at a time. Qwen remains the default when `--model` is omitted. The command checks weights and starts the server. When it reports readiness, open the [local chat](http://127.0.0.1:8089) in the Windows browser.
 
-Il terminale deve restare aperto. Ctrl+C chiude il server posseduto da quella
-sessione; chiudere la sola pagina non spegne il server.
-Una sessione già presente non viene sostituita automaticamente.
+Keep the terminal open. Ctrl+C closes the server owned by that session; closing the browser page does not. An existing session is not automatically replaced.
 
-Per controllare soltanto file e profilo, senza avviare il modello:
+To check only the file and profile:
 
 ```bash
-.venv/bin/python -m llm_selection.chat --model phi --check
+../../.venv/bin/python -m llm_selection.chat --model phi --check
 ```
 
-`--check` non legge tutti i pesi per ricalcolarne l'impronta, non invia richieste
-al server e non dimostra che il profilo sia sostenibile. L'impronta viene
-verificata al vero avvio.
+`--check` does not read all weights to recompute their fingerprint, send server requests or establish that the profile fits the available resources. The fingerprint is checked at actual startup.
 
-## Profili iniziali
+## Initial historical profiles
 
-| Modello | Pesi | Contesto | Cache |
+| Model | Weights | Context | Cache |
 | --- | --- | ---: | --- |
-| Qwen3.5-4B | Q8_0 | 147.456 | q8_0 |
-| Phi-4-mini-instruct | Q8_0 | 114.688 | q4_0 |
-| Gemma 4 E4B-it | Q8_0 | 131.072 | q4_0 |
+| Qwen3.5-4B | Q8_0 | 147456 | q8_0 |
+| Phi-4-mini-instruct | Q8_0 | 114688 | q4_0 |
+| Gemma 4 E4B-it | Q8_0 | 131072 | q4_0 |
 
-Sono profili per cominciare le prove manuali, non configurazioni finali
-selezionate sulla validation. Il profilo Qwen conserva i valori dell'avvio
-precedente, senza dipendere dal suo file di registro.
-Le soglie del monitor restano quelle comuni definite in `hardware.py`.
+These were starting profiles for manual checks, not the final validation-selected configurations. Qwen retained the earlier launch settings without depending on that launch's log. Monitor thresholds are defined in `llm_selection/hardware.py`.
 
-È possibile scegliere precisione dei pesi, contesto e cache:
+You can select weight precision, context and cache:
 
 ```bash
-.venv/bin/python -m llm_selection.chat --model phi \
+../../.venv/bin/python -m llm_selection.chat --model phi \
   --precision Q8_0 --context 32768 --cache-type q4_0
 ```
 
-I pesi della precisione richiesta devono già essere presenti. Il programma
-rifiuta contesti non positivi o superiori al limite nativo dichiarato per
-quel modello. Tutti i livelli sono assegnati alla GPU con i parametri di
-lotto già comuni al progetto.
+The requested weights must already exist. The launcher rejects nonpositive contexts and contexts above the model's declared native limit. These historical profiles assign all layers to the GPU with the project's shared batch settings.
 
-## Usare il prompt ridotto dell'esperimento
+## Use the reduced experimental prompt
 
-La prova tecnica automatica prepara e invia direttamente il prompt compatto.
-Nella chat manuale aprire invece un file `prompt_chat.txt`, selezionare tutto
-e incollarlo in una nuova conversazione. Un esempio già conservato è:
+Automated technical checks prepare and submit the compact prompt directly. For manual chat, open a preserved `prompt_chat.txt` and paste its full contents into a new conversation. One historical example is:
 
 ```text
 artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/prompt_audits/lossless-v2-check-01/train/dj_indep_tket_2/prompt_chat.txt
 ```
 
-Contiene circuito DJ, metrica, cinque esempi RAG e istruzioni.
-L'esportatore `llm_selection.prompt_audit` usa la
-[compattazione comune](compattazione_prompt.md). I conteggi del vecchio audit
-sono riferiti al tokenizer Qwen; non sono conteggi misurati per Phi o Gemma.
+This path is relative to the archived experiment root. It contains the DJ circuit, metric, five RAG examples and instructions. `llm_selection.prompt_audit` uses the [shared compaction](compattazione_prompt.md). Counts in the older audit use the Qwen tokenizer and are not measured Phi or Gemma counts.
 
-Il browser applica il formato e le impostazioni della propria chat.
-Incollare uno schema nel testo non attiva automaticamente la generazione
-vincolata o il validatore semantico dell'esperimento. Per confronti tecnici
-registrare temperatura, ragionamento e limite di uscita effettivamente usati.
+The browser applies its own chat template and settings. Pasting a schema does not activate constrained generation or the experiment's semantic validator. Record the actual temperature, reasoning setting and output limit when making technical comparisons.
 
-## Conservare la prova
+## Preserve the session
 
-Il nome predefinito contiene modello, data e ora UTC. Per indicarne uno nuovo
-usare, per esempio, `--label phi-chat-personale-01`.
+The default name includes the model and UTC timestamp. Supply a fresh label, for example `--label phi-manual-chat-01`, to choose another name.
 
-Gli artefatti sono sotto `llm_selection/manual_chats/NOME/` nella cartella
-dell'esperimento. `request.json` registra modello, profilo e versione dei
-valori predefiniti; provenienza, eventi e misure delle risorse vengono
-conservati come nelle precedenti chat.
+Artifacts are under `llm_selection/manual_chats/NAME/` within the experiment's artifact directory. `request.json` records the model, profile and defaults version. Provenance, events and resource measurements are retained alongside it.
 
-Il programma di avvio non intercetta automaticamente la conversazione nel
-browser. Esportare messaggi e impostazioni nella cartella della sessione.
-Non aprire contemporaneamente la chat e una prova automatica sullo stesso server.
+The launcher does not automatically capture the browser conversation. Export messages and settings into the session directory. Do not run manual chat and an automated check against the same server concurrently.
 
-## Prove precedenti
+## Earlier evidence
 
-Il [resoconto del prompt compatto](../resoconti/2026-09-15_prompt_compatto.md)
-contiene misure, errori e risposte Qwen già ottenute. La
-[diagnosi precedente](../resoconti/2026-09-15_diagnosi_qwen.md) conserva il
-percorso di analisi delle prime risposte.
+The [compact-prompt report](../resoconti/2026-09-15_prompt_compatto.md) preserves Qwen measurements, errors and responses. The [earlier diagnosis](../resoconti/2026-09-15_diagnosi_qwen.md) records analysis of the first responses. These are historical records in their original language.
 
-La selezione del modello in questa guida viene controllata con avvii simulati.
-Il caricamento reale dei tre modelli resta una prova distinta dai controlli
-del programma.
+Launcher selection was checked with simulated starts. Loading the real models is separate from those software checks.

@@ -1,4 +1,4 @@
-"""Regressioni su dati sintetici: isolamento, errori, ripresa, metriche e score."""
+'Regression checks on synthetic data: isolation, errors, resume, metrics and scores.'
 import ast
 import json
 from pathlib import Path
@@ -23,7 +23,7 @@ class TestProtocol(unittest.TestCase):
         self.assertIn("exactly one fact",messages(prompt)[0]["content"])
         choice={"selected_device":view["compatible_hardware"][0]["id"],
                 "config_id":view["configuration_catalog"][0]["config_id"],
-                "facts":[{"assertion":"selected_device_has_enough_qubits"}],"hypothesis":"Prova tecnica."}
+                "facts":[{"assertion":"selected_device_has_enough_qubits"}],"hypothesis":'Technical check.'}
         result=verify(choice,prompt)
         self.assertTrue(result["schema_valid"] and result["selection_valid"])
         self.assertEqual(result["facts_status"],"verified")

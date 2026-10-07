@@ -1,22 +1,7 @@
-# Piani del confronto
+# Historical comparison plans
 
-[Indice dell’esperimento](../README.md)
+`validation_method_plan.json` and `test_method_plan.json` record the original planned comparisons. `history/` preserves previous plans and alignment records. Plans fix device/configuration choices, seeds, repetition rules and sampled random decisions.
 
-I piani fissano il lavoro previsto prima di osservare gli esiti.
-Servono anche a ritrovare le stesse scelte dopo una ripresa.
+A plan is not evidence that every listed method ran. Later executed comparisons and their actual conditions are documented under `archivio/valutazione/`; local LLM selection has its own study contracts.
 
-| File o gruppo | Funzione |
-| --- | --- |
-| `validation_method_plan.json` | Piano riferito agli 88 circuiti validation. |
-| `test_method_plan.json` | Piano riferito ai 90 circuiti test, ancora soggetto alla procedura di apertura. |
-| `history/*.json` | Copie dei piani precedenti, conservate quando sono state riallineate le condizioni operative. |
-| `history/*.alignment.json` | Traccia del riallineamento e delle impronte coinvolte. |
-
-I piani registrano dispositivi, configurazioni, seed Qiskit, ripetizioni
-qcompile, condizioni di esecuzione e scelte casuali già estratte.
-La presenza di un piano non significa che sia stato eseguito.
-
-La selezione locale dei modelli LLM ha un ambito proprio, definito dal
-[protocollo](../../../../docs/protocollo_sperimentale.md).
-Il piano storico del confronto finale non impone di eseguire tutti i metodi
-durante quella selezione.
+[Parent directory](../README.md) · [Current repository guide](../../../../../../README.md)

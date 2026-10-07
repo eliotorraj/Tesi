@@ -1,4 +1,4 @@
-"""Validation del recupero sugli 88 casi, senza LLM e senza compilazioni."""
+'Retrieval validation on 88 cases, without an LLM or compilations.'
 from __future__ import annotations
 import argparse
 import csv
@@ -39,13 +39,13 @@ def code_identity():
 
 def validation_rows():
     if sha(SOURCE) != "c599eab17b6f64528067016e3d175cbfed597334f779ef8e515cf8787a788f53":
-        raise ValueError("Manifest sorgenti cambiato.")
+        raise ValueError('Source manifest changed.')
     rows = sorted((r for r in read(SOURCE)["circuits"] if r["split"] == "validation"), key=lambda r:r["circuit_id"])
     if len(rows) != 88 or len({r["circuit_id"] for r in rows}) != 88:
-        raise ValueError("Attesi esattamente 88 validation.")
+        raise ValueError('Exactly 88 validation circuits expected.')
     for r in rows:
         if sha(source_path(r)) != r["source_sha256"]:
-            raise ValueError("QASM validation cambiato.")
+            raise ValueError('Validation QASM changed.')
     return rows
 
 def aggregate_hash():
@@ -53,11 +53,11 @@ def aggregate_hash():
     frozen = read(STUDY/"frozen_study.json")
     expected = {**frozen["input_hashes"], **frozen["evaluation_input_hashes"]}[key]
     if sha(AGGREGATES) != expected:
-        raise ValueError("Aggregati diversi dalla fonte congelata.")
+        raise ValueError('Aggregates differ from the frozen source.')
     return expected
 
 def load_scores(rows):
-    """Filtra lo split prima di usare score; nessun risultato test viene consultato."""
+    'Filter the split before using scores; no test result is consulted.'
     known = {r["circuit_id"]:r for r in rows}
     tables = {cid:{} for cid in known}
     with AGGREGATES.open() as handle:
@@ -67,22 +67,22 @@ def load_scores(rows):
                 continue
             c = r["circuit"]
             if c["circuit_id"] not in known or c["source_sha256"] != known[c["circuit_id"]]["source_sha256"]:
-                raise ValueError("Provenienza aggregato validation incoerente.")
+                raise ValueError('Inconsistent validation aggregate provenance.')
             key = (r["device"]["device_id"], r["configuration"]["config_id"])
             table = tables[c["circuit_id"]]
             if key in table:
-                raise ValueError("Coppia validation duplicata.")
+                raise ValueError('Duplicate validation pair.')
             valid = (r["eligible_for_ranking"] and r["seeds"]["successful"] == [0,1,2]
                      and r["attempts"]["success_count"] == 3)
             score = r["score_statistics"]["median"] if valid else None
             if score is not None and not 0 <= score <= 1:
-                raise ValueError("Score fuori intervallo.")
+                raise ValueError('Score outside the allowed range.')
             table[key] = {"score": score, "summary_id": r["summary_id"],
                           "successful_seeds": r["seeds"]["successful"],
                           "timeout_count": r["attempts"]["timeout_count"],
                           "failure_count": r["attempts"]["failure_count"]}
     if any(not t for t in tables.values()):
-        raise ValueError("Matrice validation assente.")
+        raise ValueError('Validation matrix missing.')
     return tables
 
 def transfer_metrics(chosen, table, devices):
@@ -100,7 +100,7 @@ def transfer_metrics(chosen, table, devices):
                 pairs.add((c["device_id"], config))
     eligible = {k:v["score"] for k,v in table.items() if k[0] in devices and v["score"] is not None}
     if not eligible:
-        raise ValueError("Nessun riferimento osservato disponibile.")
+        raise ValueError('No observed reference available.')
     reference = max(eligible.values())
     transferred = eligible.get(first)
     measured = [eligible[p] for p in sorted(pairs) if p in eligible]
@@ -143,7 +143,7 @@ def summarize(records):
             "common_top1_circuits":[r["circuit_id"] for r in common],
             "incomplete_validation_matrices":sum(not r["methods"]["manhattan"]["transfer"]["reference_is_exhaustive"] for r in records if r["status"]=="success"),
             "methods":methods, "selected_h":None, "selection_pending":True,
-            "note":"Misura indiretta del recupero, non una valutazione dell'LLM. Mediane su seed 0,1,2 storici."}
+            "note":'Indirect retrieval measurement, not an LLM evaluation. Medians over historical seeds 0,1,2.'}
 
 def validation_check():
     from gates import software_targets, rag_integrity, selection_v2
@@ -158,28 +158,28 @@ def validation_check():
     return {"ready":all(v["ok"] for v in checks.values()),"checks":checks}
 
 def load_selection(path):
-    """Usato dai due Test: nessun h implicito e nessun congelamento automatico."""
+    'Used by both Tests: no implicit h and no automatic freezing.'
     value = read(path)
     core = {k:v for k,v in value.items() if k != "sha256"}
     if digest(core) != value.get("sha256") or (type(value["h"]) is not int or value["h"] not in SUPPORTED_H) or value["k"] != 5:
-        raise ValueError("Selezione WL non valida.")
+        raise ValueError('Invalid WL selection.')
     if value["design"] != DESIGN or value["code"] != code_identity():
-        raise ValueError("Codice o rappresentazione cambiati dopo la selezione WL.")
+        raise ValueError('Code or representation changed after WL selection.')
     report_path = BASE/"esecuzioni"/value["run_id"]/"riepilogo.json"
     if sha(report_path) != value["validation_report_sha256"]:
-        raise ValueError("Risultato validation diverso dalla selezione.")
+        raise ValueError('Validation result differs from the selection.')
     report = read(report_path)
     if report["successes"] != 88 or report["recorded"] != 88:
-        raise ValueError("Selezione richiede 88 validation riusciti.")
+        raise ValueError('Selection requires 88 successful validation cases.')
     run = report_path.parent
     contract = read(run/"contratto.json")
     if sha(run/"contratto.json") != report["contract_sha256"] or contract["design"] != DESIGN or contract["code"] != code_identity():
-        raise ValueError("Contratto validation modificato.")
+        raise ValueError('Validation contract changed.')
     for relative, expected in report["record_hashes"].items():
         if sha(run/relative) != expected:
-            raise ValueError("Esiti validation modificati.")
+            raise ValueError('Validation outcomes changed.')
     if contract["aggregate_sha256"] != aggregate_hash() or contract["source_sha256"] != sha(SOURCE):
-        raise ValueError("Fonti della validation cambiate.")
+        raise ValueError('Validation sources changed.')
     return value
 
 def cli(argv=None):
@@ -187,33 +187,33 @@ def cli(argv=None):
     group = ap.add_mutually_exclusive_group(required=True)
     group.add_argument("--verifica", action="store_true")
     group.add_argument("--esegui", action="store_true")
-    group.add_argument("--congela", action="store_true", help="Solo dopo aver discusso i risultati")
+    group.add_argument("--congela", action="store_true", help='Only after discussing the results')
     ap.add_argument("--run-id", default=DEFAULT_RUN_ID)
     ap.add_argument("--h", type=int, choices=SUPPORTED_H)
     ap.add_argument("--motivazione")
     args = ap.parse_args(argv)
     import re
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", args.run_id):
-        ap.error("run-id deve contenere solo lettere, numeri, _ e -.")
+        ap.error('run-id must contain only letters, numbers, _ and -.')
     run = BASE/"esecuzioni"/args.run_id
     if args.congela:
         if args.h is None or not args.motivazione:
-            ap.error("--congela richiede --h e --motivazione.")
+            ap.error('--congela requires --h and --motivazione.')
         report = read(run/"riepilogo.json")
         if report["successes"] != 88 or report["recorded"] != 88:
-            raise ValueError("Completare tutti gli 88 casi senza errori tecnici.")
+            raise ValueError('Complete all 88 cases without technical errors.')
         contract = read(run/"contratto.json")
         if contract["code"] != code_identity() or contract["design"] != DESIGN:
-            raise ValueError("Codice cambiato dalla validation.")
+            raise ValueError('Code changed since validation.')
         for relative, expected in report["record_hashes"].items():
             if sha(run/relative) != expected:
-                raise ValueError("Record validation modificato.")
+                raise ValueError('Validation record changed.')
         value = {"h":args.h,"k":5,"run_id":args.run_id,"at":now(),"motivation":args.motivazione,
                  "design":DESIGN,"code":code_identity(),"validation_report_sha256":sha(run/"riepilogo.json")}
         value["sha256"] = digest(value)
         destination = BASE/"selezioni"/args.run_id/f"wl_h{args.h}.json"
         save(destination, value)
-        print("Configurazione congelata: "+str(destination))
+        print('Frozen configuration: '+str(destination))
         return 0
     check = validation_check()
     save(BASE/"verifiche"/(uuid4().hex+".json"),check)
@@ -271,7 +271,7 @@ def cli(argv=None):
                 retrieval = {}
                 for method,(values,elapsed) in rankings.items():
                     if len(values)<5:
-                        raise ValueError("Meno di cinque candidati.")
+                        raise ValueError('Fewer than five candidates.')
                     retrieval[method] = {
                         "ranking_seconds":elapsed,
                         "score_kind":"distance_ascending" if method=="manhattan" else "similarity_descending",
@@ -300,7 +300,7 @@ def cli(argv=None):
         output["record_hashes"] = {str(p.relative_to(run)):sha(p) for p in sorted((run/"circuiti").rglob("*.json"))}
         if (run/"riepilogo.json").exists():
             if read(run/"riepilogo.json") != output:
-                raise ValueError("Riepilogo precedente diverso.")
+                raise ValueError('Previous summary differs.')
         else:
             save(run/"riepilogo.json",output)
         csv_path = run/"confronto.csv"
@@ -312,13 +312,13 @@ def cli(argv=None):
                     common=v["top1_regret_common"]
                     writer.writerow([m,v["circuits_retrieved"],v["top1_score"]["n"],common["n"],common["mean"],common["median"],v["ranking_seconds"]["mean"]])
         write_latex(run, output)
-        print("Risultati da discutere: "+str(run/"riepilogo.json"))
-        print("Nessuna configurazione scelta automaticamente; Test non avviati.")
+        print('Results to discuss: '+str(run/"riepilogo.json"))
+        print('No configuration selected automatically; Tests not started.')
     return 0
 
 
 def write_latex(run, result):
-    """Sorgente autonomo rigenerabile: i numeri derivano dal riepilogo."""
+    'Regenerable standalone source: numbers come from the summary.'
     labels = {"manhattan":"Manhattan", **{f"wl_h{h}": f"WL, h={h}" for h in SUPPORTED_H}}
     rows, coords = [], []
     def number(x):
@@ -329,69 +329,69 @@ def write_latex(run, result):
         rows.append(f'{labels[method]} & {value["top1_score"]["n"]}/88 & {common["n"]} & {number(common["mean"])} & {number(common["median"])} '+r'\\')
         if method != "manhattan" and common["mean"] is not None:
             coords.append(f'({i},{common["mean"]:.12g})')
-    doc = r"""\documentclass[a4paper,11pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[italian]{babel}
-\usepackage[margin=2.3cm]{geometry}
-\usepackage{booktabs,longtable,pgfplots,hyperref}
-\pgfplotsset{compat=1.18}
-\title{Validation del recupero di esempi con DAG e WL}
-\author{}\date{}
-\begin{document}\maketitle
-Confrontiamo Manhattan e Weisfeiler--Lehman (WL) con un numero di iterazioni da 1 a 30,
-sempre con cinque esempi dai 396 record train. I circuiti validation sono 88.
-Non sono state effettuate chiamate LLM o nuove compilazioni.
-La rappresentazione usa DAGCircuit originale, archi diretti con ruoli locali
-degli operandi e parametri numerici discretizzati a $\pi/8$.
-Il kernel normalizzato somma i contributi da 0 a $h$.
-\section*{Misura}
-Trasferiamo la prima coppia dispositivo/configurazione del primo esempio.
-Lo score e la sua osservabilita derivano dalle compilazioni validation gia
-conservate. Sono ammesse solo coppie con tutti i seed 0, 1 e 2 riusciti.
-Il regret e la differenza dal migliore score mediano osservato per quel
-circuito. Un valore minore indica un trasferimento migliore.
-Gli score mancanti restano mancanti; non diventano zero.
-Le medie e mediane comuni usano gli stessi circuiti per tutti i metodi.
-{\small
-\begin{longtable}{lrrrr}\toprule
-Metodo & Osservabili & Casi comuni & Regret medio & Mediano\\\midrule\endhead
+    doc = """\\documentclass[a4paper,11pt]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage[english]{babel}
+\\usepackage[margin=2.3cm]{geometry}
+\\usepackage{booktabs,longtable,pgfplots,hyperref}
+\\pgfplotsset{compat=1.18}
+\\title{Validation of example retrieval with DAG and WL}
+\\author{}\\date{}
+\\begin{document}\\maketitle
+We compare Manhattan and Weisfeiler--Lehman (WL) with 1 to 30 iterations,
+always using five examples from the 396 train records. There are 88 validation circuits.
+No LLM calls or new compilations were performed.
+The representation uses the original DAGCircuit, directed edges with local
+operand roles and numerical parameters discretized to $\\pi/8$.
+The normalized kernel sums contributions from 0 to $h$.
+\\section*{Measurement}
+We transfer the first device/configuration pair from the first example.
+The score and its observability come from preserved validation compilations.
+Only pairs with successful seeds 0, 1 and 2 are allowed.
+Regret is the difference from the best observed median score for that
+circuit. Lower values indicate better transfer.
+Missing scores remain missing; they do not become zero.
+Shared means and medians use the same circuits for every method.
+{\\small
+\\begin{longtable}{lrrrr}\\toprule
+Method & Observable & Shared cases & Mean regret & Median\\\\\\midrule\\endhead
 @@ROWS@@
-\bottomrule\end{longtable}}
-\begin{center}
-\begin{tikzpicture}
-\begin{axis}[width=.95\linewidth,height=7cm,ymin=0,xmin=1,xmax=30,
-xtick={1,5,10,15,20,25,30},xlabel={Iterazioni WL},
-ylabel={Regret medio sui casi comuni},legend pos=north east]
-\addplot+[mark=*,blue] coordinates {@@COORDS@@};
-\addlegendentry{WL}
+\\bottomrule\\end{longtable}}
+\\begin{center}
+\\begin{tikzpicture}
+\\begin{axis}[width=.95\\linewidth,height=7cm,ymin=0,xmin=1,xmax=30,
+xtick={1,5,10,15,20,25,30},xlabel={WL iterations},
+ylabel={Mean regret on shared cases},legend pos=north east]
+\\addplot+[mark=*,blue] coordinates {@@COORDS@@};
+\\addlegendentry{WL}
 @@BASELINE@@
-\end{axis}\end{tikzpicture}
-\end{center}
-\section*{Limiti e scelta}
-La misura riguarda il recupero: non e lo score del sistema LLM.
-@@INCOMPLETE@@ matrici validation sono incomplete: il riferimento e il migliore
-osservato, non necessariamente il migliore assoluto.
-Il riepilogo JSON conserva anche la migliore coppia osservata fra tutte quelle
-mostrate dai cinque esempi, inclusi i pareggi. Questo indicatore e ottimistico
-e non descrive una decisione disponibile al modello.
-Le graduatorie sono salvate prima dell'analisi degli score.
-I tempi di costruzione/verifica dell'indice sono separati dai confronti.
-Il tempo Manhattan qui esclude l'infrastruttura Qdrant.
-La griglia e stata estesa dopo aver letto i risultati con $h=1,\ldots,6$.
-Questa e una validation adattiva sugli stessi 88 casi.
-La configurazione WL resta da scegliere esplicitamente dopo la discussione
-di copertura, regret sui casi comuni e costi. A risultati equivalenti si
-preferisce il minor numero di iterazioni.
-I successivi Test usano un corpus gia esposto e non costituiscono una nuova
-conferma indipendente.
-\section*{Riproducibilita}
-Contratto, impronte delle fonti, grafi, ordinamenti ed esiti sono conservati
-accanto a questo documento. Nessun risultato Test entra nella selezione.
-Fonte dell'algoritmo:
-\url{https://jmlr.org/papers/v12/shervashidze11a.html}.
-L'adattamento diretto con ruoli degli archi e una scelta di questa campagna.
-\end{document}
+\\end{axis}\\end{tikzpicture}
+\\end{center}
+\\section*{Limitations and selection}
+The measurement concerns retrieval, not the LLM system's score.
+@@INCOMPLETE@@ validation matrices are incomplete: the reference is the best
+observed result, not necessarily the absolute best.
+The JSON summary also preserves the best observed pair among all those
+shown by the five examples, including ties. This is an optimistic indicator
+and does not describe a decision available to the model.
+Rankings are saved before score analysis.
+Index construction/verification times are separate from comparisons.
+Manhattan time here excludes Qdrant infrastructure.
+The grid was extended after reviewing results for $h=1,\\ldots,6$.
+This is adaptive validation on the same 88 cases.
+The WL configuration must still be explicitly selected after discussing
+coverage, regret on shared cases and costs. Equivalent results favor
+fewer iterations.
+Subsequent Tests use an already exposed corpus and do not provide new
+independent confirmation.
+\\section*{Reproducibility}
+The contract, source fingerprints, graphs, rankings and outcomes are preserved
+alongside this document. No Test result enters selection.
+Algorithm source:
+\\url{https://jmlr.org/papers/v12/shervashidze11a.html}.
+The directed adaptation with edge roles is a choice made for this campaign.
+\\end{document}
 """
     doc = doc.replace("@@ROWS@@","\n".join(rows)).replace("@@COORDS@@"," ".join(coords)).replace("@@INCOMPLETE@@",str(result["incomplete_validation_matrices"]))
     baseline = result["methods"]["manhattan"]["top1_regret_common"]["mean"]
@@ -402,7 +402,7 @@ L'adattamento diretto con ruoli degli archi e una scelta di questa campagna.
     target = run/"report_validation.tex"
     if target.exists():
         if target.read_text() != doc:
-            raise ValueError("Report LaTeX preesistente diverso.")
+            raise ValueError('Existing LaTeX report differs.')
     else:
         with target.open("x") as handle:
             handle.write(doc)

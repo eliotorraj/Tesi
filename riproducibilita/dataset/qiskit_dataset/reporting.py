@@ -1,4 +1,4 @@
-"""Crea statistiche leggibili per i Dataset Qiskit pilot e full."""
+'Create readable statistics for pilot and full Qiskit Datasets.'
 
 from __future__ import annotations
 
@@ -55,18 +55,18 @@ common_transpile_mean_s common_transpile_p95_s common_transpile_max_s
 
 
 def _json(path: Path) -> dict[str, Any]:
-    """Legge un oggetto JSON, oppure restituisce un oggetto vuoto se manca."""
+    'Read a JSON object, returning an empty object if the file is missing.'
     if not path.is_file():
         return {}
     with path.open(encoding="utf-8") as handle:
         value = json.load(handle)
     if not isinstance(value, dict):
-        raise ValueError(f"{path} non contiene un oggetto JSON.")
+        raise ValueError(f'{path} does not contain a JSON object.')
     return value
 
 
 def _finite(values: Iterable[Any]) -> list[float]:
-    """Mantiene soltanto i valori numerici finiti."""
+    'Keep finite numeric values only.'
     result: list[float] = []
     for value in values:
         if value is None or isinstance(value, bool):
@@ -78,7 +78,7 @@ def _finite(values: Iterable[Any]) -> list[float]:
 
 
 def _percentile(values: Sequence[float], fraction: float) -> float | None:
-    """Calcola un percentile con interpolazione tra i valori vicini."""
+    'Compute a percentile by interpolating adjacent values.'
     if not values:
         return None
     ordered = sorted(values)
@@ -91,7 +91,7 @@ def _percentile(values: Sequence[float], fraction: float) -> float | None:
 
 
 def _stats(values: Iterable[Any]) -> dict[str, Any]:
-    """Calcola le statistiche usate nei riepiloghi numerici."""
+    'Compute statistics for numerical summaries.'
     finite = _finite(values)
     if not finite:
         return dict.fromkeys(("min", "median", "mean", "p95", "max"), None) | {
@@ -108,7 +108,7 @@ def _stats(values: Iterable[Any]) -> dict[str, Any]:
 
 
 def _success_times(runs: Iterable[Mapping[str, Any]]) -> list[float]:
-    """Estrae i tempi di compilazione dei soli tentativi riusciti."""
+    'Extract compilation times for successful attempts only.'
     return _finite(
         run.get("timings_seconds", {}).get("transpilation")
         for run in runs
@@ -117,17 +117,17 @@ def _success_times(runs: Iterable[Mapping[str, Any]]) -> list[float]:
 
 
 def _statuses(runs: Iterable[Mapping[str, Any]]) -> Counter[str]:
-    """Conta i tentativi per stato finale."""
+    'Count attempts by final status.'
     return Counter(str(run.get("status", "unknown")) for run in runs)
 
 
 def _rate(numerator: int, denominator: int) -> float | None:
-    """Calcola un rapporto senza dividere per zero."""
+    'Compute a ratio without dividing by zero.'
     return numerator / denominator if denominator else None
 
 
 def _num(value: Any, digits: int = 3) -> str:
-    """Formatta un numero per una tabella leggibile."""
+    'Format a number for a readable table.'
     if value is None:
         return "-"
     if isinstance(value, int):
@@ -137,15 +137,15 @@ def _num(value: Any, digits: int = 3) -> str:
 
 
 def _pct(value: Any) -> str:
-    """Formatta un rapporto come percentuale."""
+    'Format a ratio as a percentage.'
     return "-" if value is None else f"{100 * float(value):.1f}%"
 
 
 def _table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
-    """Costruisce una tabella Markdown a partire da intestazioni e righe."""
+    'Build a Markdown table from headers and rows.'
 
     def clean(value: Any) -> str:
-        """Evita che un valore rompa la struttura della tabella."""
+        'Prevent values from breaking the table structure.'
         return str(value).replace("|", "\\|").replace("\n", " ")
 
     lines = [
@@ -160,7 +160,7 @@ def _table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
 
 
 def _csv(path: Path, rows: Sequence[Mapping[str, Any]], fields: Sequence[str]) -> None:
-    """Scrive una vista CSV usando soltanto le colonne richieste."""
+    'Write a CSV view using the requested columns only.'
     stream = StringIO(newline="")
     writer = csv.DictWriter(
         stream,
@@ -183,7 +183,7 @@ def _configuration_rows(
     runs: Sequence[Mapping[str, Any]],
     summaries: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Prepara una riga di riepilogo per ogni configurazione."""
+    'Prepare one summary row per configuration.'
     by_config: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     summary_by_config: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     eligible_by_circuit: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
@@ -258,7 +258,7 @@ def _circuit_rows(
     runs: Sequence[Mapping[str, Any]],
     summaries: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Prepara una riga di riepilogo per ogni circuito compatibile."""
+    'Prepare one summary row per compatible circuit.'
     by_circuit: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     summary_by_circuit: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for run in runs:
@@ -318,7 +318,7 @@ def _timeout_diagnostics(
     run: Mapping[str, Any],
     failure: Mapping[str, Any],
 ) -> Mapping[str, Any]:
-    """Recupera la diagnosi del timeout o la ricostruisce dai dati disponibili."""
+    'Read the timeout diagnosis or reconstruct it from available data.'
     existing = failure.get("timeout_diagnostics")
     if isinstance(existing, Mapping):
         return existing
@@ -340,7 +340,7 @@ def failure_detail_rows(
     runs: Sequence[Mapping[str, Any]],
     device_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Prepara righe di errore dettagliate mantenendo il formato esistente."""
+    'Prepare detailed error rows while retaining the existing format.'
     rows: list[dict[str, Any]] = []
     for run in runs:
         if run.get("status") == "success":
@@ -427,14 +427,14 @@ def write_failure_csv(
     runs: Sequence[Mapping[str, Any]],
     device_id: str | None = None,
 ) -> int:
-    """Scrive la vista degli errori e restituisce il numero di righe."""
+    'Write the error view and return its row count.'
     rows = failure_detail_rows(runs, device_id)
     _csv(path, rows, FAILURE_FIELDS)
     return len(rows)
 
 
 def _failure_breakdown(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Raggruppa gli errori per fase, categoria e tipo di eccezione."""
+    'Group errors by stage, category and exception type.'
     counts = Counter(
         (
             str(row.get("phase") or "unknown"),
@@ -455,20 +455,20 @@ def _failure_breakdown(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]
 
 
 def _run_policy(run: Mapping[str, Any]) -> Mapping[str, Any]:
-    """Legge i parametri originali conservati nel singolo tentativo."""
+    'Read original parameters preserved in each attempt.'
     return (run.get("provenance") or {}).get("execution_policy") or {}
 
 
 def _execution_policies(
     runs: Sequence[Mapping[str, Any]], status_policy: Mapping[str, Any]
 ) -> dict[str, Any]:
-    """Distingue i parametri osservati da quelli dell'ultima invocazione."""
+    "Distinguish observed parameters from the latest invocation's parameters."
     counts = Counter(
         (_run_policy(run).get("workers"), _run_policy(run).get("timeout_seconds"))
         for run in runs
     )
     known = [pair for pair in counts if pair != (None, None)]
-    # I vecchi tentativi pilot non registravano i parametri nel singolo record.
+    # Earlier pilot attempts did not record parameters in each record.
     from_records = bool(known)
     policies = [
         {"workers": workers, "timeout_seconds": timeout, "attempts": count}
@@ -495,7 +495,7 @@ def _execution_policies(
 
 
 def _timeout_sensitivity(runs: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Distingue i timeout certi dai casi censurati a una soglia inferiore."""
+    'Distinguish known timeouts from cases censored at a lower threshold.'
     totals = _finite(
         run.get("timings_seconds", {}).get("total")
         for run in runs
@@ -521,7 +521,7 @@ def _timeout_sensitivity(runs: Sequence[Mapping[str, Any]]) -> list[dict[str, An
 
 
 def _dataset_markdown(summary: Mapping[str, Any]) -> str:
-    """Trasforma il riepilogo del Dataset in un documento Markdown."""
+    'Turn the Dataset summary into a Markdown document.'
     coverage = summary["circuit_coverage"]
     execution = summary["execution"]
     attempts = summary["attempts"]
@@ -529,64 +529,57 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
     ranking = summary["ranking"]
     versions = summary["provenance"]["versions"]
     lines = [
-        f"# Dataset Qiskit {summary['dataset_scope']} — {summary['device']['device_id']}",
+        f"# Qiskit Dataset {summary['dataset_scope']} — {summary['device']['device_id']}",
         "",
         (
-            "Scheda generata automaticamente dagli artefatti del Dataset. I tempi "
-            "descrivono soltanto i tentativi riusciti e sono censurati dai timeout."
+            'Report generated automatically from Dataset artifacts. Times cover successful attempts only and are censored by timeouts.'
         ),
         "",
-        "## Impostazione",
+        '## Settings',
         "",
         _table(
-            ("Campo", "Valore"),
+            ('Field', 'Value'),
             (
                 ("Figure of merit", summary["objective"]),
-                ("Qubit device", summary["device"].get("num_qubits")),
-                ("Hash target", summary["device"].get("target_sha256")),
+                ('Device qubits', summary["device"].get("num_qubits")),
+                ('Target hash', summary["device"].get("target_sha256")),
                 ("Qiskit", versions.get("qiskit", "-")),
                 ("MQT Bench", versions.get("mqt.bench", "-")),
                 ("MQT Predictor", versions.get("mqt.predictor", "-")),
-                ("Circuiti totali", coverage["total"]),
-                ("Circuiti compatibili", coverage["compatible"]),
-                ("Circuiti incompatibili", coverage["incompatible"]),
-                ("Configurazioni", summary["configuration_count"]),
+                ('Total circuits', coverage["total"]),
+                ('Compatible circuits', coverage["compatible"]),
+                ('Incompatible circuits', coverage["incompatible"]),
+                ('Configurations', summary["configuration_count"]),
                 ("Seed", ", ".join(map(str, summary["seeds"]))),
-                ("Worker nei risultati", ", ".join(map(str, execution["observed_workers"])) or "-"),
-                ("Timeout nei risultati (s)", ", ".join(map(str, execution["observed_timeout_seconds"])) or "-"),
-                ("Fonte dei parametri", execution["policy_source"]),
+                ('Workers in results', ", ".join(map(str, execution["observed_workers"])) or "-"),
+                ('Timeout in results (s)', ", ".join(map(str, execution["observed_timeout_seconds"])) or "-"),
+                ('Parameter source', execution["policy_source"]),
                 ("Cache hit", execution.get("cache_hits", "-")),
                 (
-                    "Durata invocazione",
+                    'Invocation duration',
                     _num(execution.get("wall_clock_seconds_this_invocation")) + " s",
                 ),
             ),
         ),
         "",
         (
-            "La durata invocazione riguarda il comando corrente. Se Cache hit "
-            "è maggiore di zero, i record conservano i tempi delle esecuzioni "
-            "originali e non sono stati ricompilati. I parametri nei risultati "
-            "provengono dai singoli tentativi, quando disponibili; per i vecchi "
-            "dati senza questa informazione si usa lo stato della generazione."
+            'Invocation duration describes the current command. If Cache hit exceeds zero, records retain original execution times and were not recompiled. Execution parameters come from individual attempts when available; older records without them use the generation state.'
         ),
         "",
         (
-            "Attenzione: i risultati comprendono parametri di esecuzione diversi. "
-            "Tempi e tassi di successo non costituiscono un confronto a parità "
-            "di timeout e risorse."
+            'Warning: results include different execution parameters. Timings and success rates are not comparisons under equal timeouts and resources.'
             if execution["mixed_execution_policies"] else ""
         ),
         "",
-        "## Esito complessivo",
+        '## Overall outcome',
         "",
         _table(
-            ("Tentativi", "N", "Percentuale su osservati"),
+            ('Attempts', "N", 'Percentage of observed attempts'),
             (
-                ("Pianificati", attempts["planned"], "-"),
-                ("Osservati", attempts["observed"], "100.0%"),
-                ("Mancanti", attempts["missing"], "-"),
-                ("Successi", attempts["success"], _pct(attempts["success_rate"])),
+                ('Planned', attempts["planned"], "-"),
+                ('Observed', attempts["observed"], "100.0%"),
+                ('Missing', attempts["missing"], "-"),
+                ('Successes', attempts["success"], _pct(attempts["success_rate"])),
                 (
                     "Failure",
                     attempts["failure"],
@@ -600,10 +593,10 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
             ),
         ),
         "",
-        "## Tempi di transpilation dei successi",
+        '## Transpilation times for successful attempts',
         "",
         _table(
-            ("Gruppo", "N", "Min s", "Mediana s", "Media s", "P95 s", "Max s"),
+            ('Group', "N", "Min s", 'Median s', 'Mean s', "P95 s", "Max s"),
             (
                 (
                     label,
@@ -615,35 +608,34 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
                     _num(values["max"]),
                 )
                 for label, values in (
-                    ("Tutti", timing["all"]),
-                    ("Non-lookahead", timing["non_lookahead"]),
+                    ('All', timing["all"]),
+                    ('Non-lookahead', timing["non_lookahead"]),
                     ("Lookahead", timing["lookahead"]),
                 )
             ),
         ),
         "",
         (
-            "I timeout non hanno un tempo di transpilation concluso e non entrano "
-            "nella tabella: il timeout rate va sempre letto insieme ai tempi."
+            'Timeouts have no completed transpilation time and are excluded from the table: always read the timeout rate alongside timings.'
         ),
         "",
-        "## Configurazioni",
+        '## Configurations',
         "",
         _table(
             (
                 "Config",
-                "Studio",
+                'Study',
                 "O",
                 "Layout",
                 "Routing",
                 "Ok/Obs",
                 "Timeout",
-                "Mediana s",
+                'Median s',
                 "P95 s",
                 "Max s",
-                "Eleggibili",
-                "Vittorie",
-                "Co-vittorie",
+                'Eligible',
+                'Wins',
+                'Shared wins',
                 "Top 3",
             ),
             (
@@ -668,24 +660,23 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
         ),
         "",
         (
-            "Le vittorie applicano il tie-break del catalogo; le co-vittorie "
-            "considerano score uguali con rel_tol=1e-12 e abs_tol=1e-15."
+            'Wins apply the catalog tie-break; shared wins use score equality with rel_tol=1e-12 and abs_tol=1e-15.'
         ),
         "",
-        "## Circuiti",
+        '## Circuits',
         "",
         _table(
             (
-                "Circuito",
+                'Circuit',
                 "Split",
                 "Qubit",
                 "Ok/Obs",
                 "Timeout",
-                "Mediana s",
+                'Median s',
                 "P95 s",
                 "Max s",
-                "Config eleggibili",
-                "Migliore",
+                'Eligible configurations',
+                'Best',
             ),
             (
                 (
@@ -704,13 +695,13 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
             ),
         ),
         "",
-        "## Failure e timeout",
+        '## Failures and timeouts',
         "",
     ]
     if summary["failure_breakdown"]:
         lines.append(
             _table(
-                ("Fase", "Categoria", "Eccezione", "N"),
+                ('Stage', 'Category', 'Exception', "N"),
                 (
                     (
                         row["phase"],
@@ -723,18 +714,18 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
             )
         )
     else:
-        lines.append("Nessun failure o timeout osservato.")
+        lines.append('No failures or timeouts observed.')
     lines += [
         "",
-        "## Sensibilità a soglie alternative",
+        '## Sensitivity to alternative thresholds',
         "",
         _table(
             (
-                "Soglia s",
-                "Successi sopra soglia",
-                "Timeout già osservati",
-                "Esito ignoto alla soglia",
-                "Minimo timeout stimato",
+                'Threshold s',
+                'Successes above threshold',
+                'Previously observed timeouts',
+                'Unknown outcome at the threshold',
+                'Estimated minimum timeout',
             ),
             (
                 (
@@ -749,26 +740,22 @@ def _dataset_markdown(summary: Mapping[str, Any]) -> str:
         ),
         "",
         (
-            "La stima è conservativa: un run già interrotto è censurato e non "
-            "rivela se sarebbe terminato con una soglia più alta. Questi casi "
-            "restano ignoti e non sono inclusi nel minimo stimato. La stima "
-            "usa i tempi osservati e non prevede l'effetto di cambiare i worker."
+            'This estimate is conservative: an interrupted run is censored and does not reveal whether it would finish under a higher limit. Such cases remain unknown and are excluded from the estimated minimum. The estimate uses observed times and does not predict the effect of changing workers.'
         ),
         "",
-        "## Copertura ranking",
+        '## Ranking coverage',
         "",
         _table(
-            ("Aggregati", "N"),
+            ('Aggregates', "N"),
             (
-                ("Eleggibili", ranking["eligible_aggregates"]),
-                ("Non eleggibili", ranking["ineligible_aggregates"]),
-                ("Esempi RAG", ranking["rag_examples"]),
+                ('Eligible', ranking["eligible_aggregates"]),
+                ('Ineligible', ranking["ineligible_aggregates"]),
+                ('RAG examples', ranking["rag_examples"]),
             ),
         ),
         "",
         (
-            "La expected_fidelity è una stima deterministica sul Target sintetico "
-            "di MQT Bench, non una misura raccolta su hardware quantistico reale."
+            'expected_fidelity is a deterministic estimate on a synthetic MQT Bench Target, not a measurement on real quantum hardware.'
         ),
         "",
     ]
@@ -783,9 +770,9 @@ def build_device_comparison(
     catalog: ConfigurationCatalog | None = None,
     output_root: Path | None = None,
 ) -> dict[str, Any]:
-    """Confronta i dispositivi disponibili senza modificare i dati sorgente."""
+    'Compare available devices without modifying source data.'
     if scope not in {"pilot", "full"}:
-        raise ValueError("scope deve essere pilot oppure full.")
+        raise ValueError('scope must be pilot or full.')
     paths = (
         [scope_root / device_id / "reports" / f"{scope}_summary.json" for device_id in device_ids]
         if device_ids is not None
@@ -861,15 +848,13 @@ def build_device_comparison(
     _csv(csv_path, rows, COMPARISON_FIELDS)
     markdown = "\n".join(
         [
-            f"# Confronto Dataset Qiskit {scope} per dispositivo",
+            f'# Qiskit Dataset comparison {scope} per device',
             "",
             (
-                "La prima tabella usa tutti i circuiti compatibili con ciascun "
-                "device. La seconda usa soltanto l'intersezione comune di "
-                f"{len(common)} circuiti."
+                f'The first table uses all circuits compatible with each device. The second uses only the common intersection of {len(common)} circuits.'
             ),
             "",
-            "## Tutti i circuiti compatibili",
+            '## All compatible circuits',
             "",
             _table(
                 (
@@ -877,14 +862,14 @@ def build_device_comparison(
                     "Qubit",
                     "Worker",
                     "Timeout s",
-                    "Circuiti",
+                    'Circuits',
                     "Ok/Obs",
                     "Timeout",
-                    "Successo",
-                    "Mediana s",
+                    'Success',
+                    'Median s',
                     "P95 s",
                     "Max s",
-                    "Aggregati eleggibili",
+                    'Eligible aggregates',
                 ),
                 (
                     (
@@ -905,17 +890,17 @@ def build_device_comparison(
                 ),
             ),
             "",
-            "## Sottoinsieme comune",
+            '## Shared subset',
             "",
             _table(
                 (
                     "Device",
-                    "Circuiti",
+                    'Circuits',
                     "Ok/Obs",
                     "Failure",
                     "Timeout",
-                    "Successo",
-                    "Mediana s",
+                    'Success',
+                    'Median s',
                     "P95 s",
                     "Max s",
                 ),
@@ -939,10 +924,7 @@ def build_device_comparison(
             ),
             "",
             (
-                "Per tempi confrontabili, usare lo stesso timeout e numero di "
-                "worker ed evitare altre compilazioni concorrenti. Con soglie diverse "
-                "(per esempio 300 s e 100 s), anche sul sottoinsieme comune i tempi "
-                "e i tassi di successo non sono un confronto a parità di condizioni."
+                'For comparable timings, use the same timeout and worker count and avoid concurrent compilations. With different limits, such as 300 s and 100 s, even common-case timings and success rates do not represent equal conditions.'
             ),
             "",
         ]
@@ -958,13 +940,13 @@ def build_device_comparison(
 def build_dataset_report(
     output_root: Path, catalog: ConfigurationCatalog, *, write: bool = True
 ) -> dict[str, Any]:
-    """Genera il riepilogo e i file di consultazione del Dataset pilot o full."""
+    'Generate the summary and readable files for a pilot or full Dataset.'
     manifest = _json(output_root / "split_manifest.json")
     if not manifest:
         raise FileNotFoundError(output_root / "split_manifest.json")
     scope = manifest.get("dataset_scope")
     if scope not in {"pilot", "full"}:
-        raise ValueError("Il report richiede un manifest scope=pilot oppure full.")
+        raise ValueError('The report requires a manifest with scope=pilot or full.')
 
     runs = read_jsonl(output_root / "qiskit_runs.jsonl")
     summaries = read_jsonl(
@@ -1093,7 +1075,7 @@ def build_dataset_report(
 def build_pilot_report(
     output_root: Path, catalog: ConfigurationCatalog
 ) -> dict[str, Any]:
-    """Mantiene il punto di ingresso storico per i report pilot."""
+    'Retain the historical pilot-report entry point.'
     if _json(output_root / "split_manifest.json").get("dataset_scope") != "pilot":
-        raise ValueError("Il report pilot richiede un manifest scope=pilot.")
+        raise ValueError('The pilot report requires a manifest with scope=pilot.')
     return build_dataset_report(output_root, catalog)

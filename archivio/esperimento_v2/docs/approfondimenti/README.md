@@ -1,16 +1,7 @@
-# Guide tecniche
+# Historical component guides
 
-Qui si trovano i dettagli utili per usare e comprendere l'implementazione.
-Per l'orientamento generale usare il [README principale](../../README.md).
+`prototipo_architettura.md` explains the earlier assistant and validation flow. `selezione_llm.md` covers model preparation, studies, recovery and reports. `compattazione_prompt.md` explains prompt representation changes. `chat_locale.md` describes recorded manual model trials.
 
-| Guida | Contenuto |
-| --- | --- |
-| [prototipo_architettura.md](prototipo_architettura.md) | Dettagli del prototipo, richieste, controlli, evidenze e compilazione. Il documento conserva anche passaggi storici segnalati. |
-| [selezione_llm.md](selezione_llm.md) | Preparazione, prove tecniche, selezione, ripresa e produzione delle analisi LLM. |
-| [compattazione_prompt.md](compattazione_prompt.md) | Codifica condivisa, comando tecnico, registri e verifiche della centralizzazione. |
-| [chat_locale.md](chat_locale.md) | Scelta di Qwen, Phi o Gemma nella chat manuale e conservazione delle prove. |
-| [../protocollo_sperimentale.md](../protocollo_sperimentale.md) | Regole scientifiche e comandi dell'esperimento corrente. |
+Read these for implementation history. Current startup and new-run instructions belong to the root-level prototype and toolkit guides; archived commands may require the original environment and artifacts.
 
-Le guide non fissano un secondo protocollo. In caso di differenze, verificare
-il protocollo corrente e il codice; gli esiti di singole prove sono nei
-[resoconti](../resoconti/README.md).
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

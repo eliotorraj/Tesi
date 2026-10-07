@@ -1,4 +1,4 @@
-"""Prototipo di compilazione quantistica assistita da un LLM."""
+'Prototype for LLM-assisted quantum compilation.'
 
 from .adapters.context import EvidenceRegistryDataError
 from .controller import PrototypeController

@@ -1,40 +1,39 @@
-# Prototipo: dal circuito alla compilazione
+# QAdviser prototype
 
-Il prototipo usa Qwen3.5-4B Q8_0 a temperatura 0 per scegliere un dispositivo quantistico sintetico e una configurazione Qiskit. Parte da un circuito OpenQASM 2, recupera esempi train, controlla la risposta e, con `--compile`, produce il circuito compilato. Non invia lavori a hardware quantistico e non richiede modelli MQT addestrati.
+This standalone prototype uses Qwen3.5-4B Q8_0 at temperature 0 to select a synthetic quantum device and a Qiskit configuration. It reads OpenQASM 2, retrieves train examples, checks the response and optionally compiles the circuit. It does not submit quantum hardware jobs or require trained MQT models.
 
-## Prima prova
+## First run
 
-La [guida passo passo](docs/guida_passo_passo.md) contiene due percorsi completi: **Linux senza GPU**, per un nuovo utente con almeno 16 GB di RAM e sufficiente memoria libera, e **fisso di Elio**, con client WSL e server Windows sulla Radeon RX 6750 XT. Una GPU compatibile è consigliata; CPU e memoria limitate non garantiscono che ogni richiesta sia eseguibile.
+Follow the [step-by-step guide](docs/guida_passo_passo.md) for Python 3.12, Node.js 22/npm, Python dependencies, llama.cpp b10930 and the exact GGUF file. It covers Linux CPU use and the original WSL client with a Windows AMD GPU server. A machine with 16 GB RAM is a starting point for the small CPU example, not a guarantee for every circuit or a full campaign.
 
-Su Linux servono Python 3.12, Node.js 22/npm, llama.cpp b10930 e il GGUF esatto. Dopo aver seguito installazione e avvio del server CPU nella guida, da questa cartella:
+After following the setup guide, activate the configured Python environment and start the server. Then run from this directory:
 
 ```bash
-.venv/bin/python -B app.py check
-.venv/bin/python -B app.py run examples/bell.qasm \
+python -B app.py check
+python -B app.py run examples/bell.qasm \
   --profile cpu --transport native --timeout 3600 \
   --device ibm_falcon_27 --compile
 ```
 
-`check` verifica il client, non il server. L'esempio Bell e il filtro Falcon 27 permettono una prima richiesta contenuta. Senza `--compile` si riceve soltanto una raccomandazione. Per una GPU Linux diversa da quella del fisso seguire [installazione e runtime](docs/installazione_e_runtime.md#gpu-su-linux).
+`check` checks the client installation. Start the server separately. Without `--compile`, `run` returns a recommendation only. See [installation and runtime](docs/installazione_e_runtime.md) for other GPUs, transport and logs.
 
-## Dove trovare le parti
+## Directory map
 
-| Elemento | Funzione |
+| Entry | Purpose |
 | --- | --- |
-| `app.py` | Prepara l'indice, controlla il client e coordina una nuova richiesta. |
-| `server.py`, `setup.sh` | Avvio server e preparazione client Linux. |
-| `setup.ps1`, `server-*.ps1`, `verify-model.ps1`, `AmdSensors.cs` | Strumenti Windows conservati per il fisso; i controlli termici desktop sono specifici AMD. |
-| [prototype/](prototype/README.md) | Lettura QASM, recupero RAG, prompt, controlli e compilazione. |
-| [data/](data/README.md) | 396 esempi train unici, QASM, trasformazione e manifest delle 422 sorgenti. |
-| [configs/](configs/README.md), `config.json` | Catalogo Qiskit, identità Qwen e parametri fissati. |
-| [schemas/](schemas/README.md) | Contratti delle richieste e risposte. |
-| [qiskit_dataset/](qiskit_dataset/README.md), [scripts/](scripts/README.md) | Catalogo e verifiche di integrità. |
-| `portable_features.py` | Estrattore delle 49 caratteristiche; licenza MQT conservata accanto al codice. |
-| `examples/bell.qasm` | Circuito tecnico per iniziare. |
-| [runtime/](runtime/README.md) | Eseguibili, indice derivato, pesi e log server locali. |
-| `runs/` | Registri client delle singole richieste; generati e non versionati. |
-| [docs/](docs/README.md) | Guide, spiegazione dei moduli e protocollo scientifico corrente. |
+| `app.py` | Prepare the retrieval index, check installation and process a circuit. |
+| `setup.sh`, `server.py` | Linux client setup and server startup. |
+| `setup.ps1`, `server-*.ps1`, `verify-model.ps1`, `AmdSensors.cs` | Windows utilities; desktop thermal monitoring is AMD-specific. |
+| [prototype/](prototype/README.md) | Circuit input, retrieval, prompts, validation and compilation. |
+| [data/](data/README.md) | 396 unique train examples, circuits, transformation and the 422-source manifest. |
+| [configs/](configs/README.md), `config.json` | Device catalog, Qiskit configurations and selected model settings. |
+| [schemas/](schemas/README.md) | Framework and response contracts. |
+| [qiskit_dataset/](qiskit_dataset/README.md), [scripts/](scripts/README.md) | Catalog loading and integrity helpers. |
+| `portable_features.py`, `LICENSE-MQT-Predictor` | The 49-feature extractor and its attribution. |
+| `examples/` | Bell circuit for a technical check. |
+| [runtime/](runtime/README.md) | Runtime setup documentation. |
+| [docs/](docs/README.md) | Guides, architecture and current scientific protocol. |
 
-Il programma è autonomo: non legge `archivio/` o `riproducibilita/`. I pesi non sono nel clone. I fatti verificabili sono controllati sui dati forniti; l'ipotesi libera del modello non è certificata. Al terzo tentativo una coppia ammessa può essere accettata con fatti non verificati, dichiarandolo nel risultato.
+The client checks verifiable facts against supplied data; the free hypothesis is not semantically certified. On the third attempt, an allowed, structurally valid pair may be accepted with unverified facts, which is recorded.
 
-Per scegliere altri modelli, rigenerare il Dataset, fare validation/Test o esportare un altro prototipo usare [riproducibilita/](../riproducibilita/README.md). L'archivio conserva le evidenze concluse, senza essere una dipendenza dell'avvio.
+For other models, Dataset generation, validation/Test or prototype export, use [riproducibilita/](../riproducibilita/README.md). This prototype runs without reading the toolkit or archive.

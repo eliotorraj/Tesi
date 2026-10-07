@@ -1,27 +1,13 @@
-# Verifiche della procedura incrementale
+# Incremental-procedure development checks
 
-Le prove di sviluppo sono separate dalle campagne sui 90 circuiti.
-Le risposte LLM sono simulate. Una prova compila realmente Bell per controllare
-salvataggio, score e ammissione nella memoria.
+`verifiche.json` and `provenienza.json` record the original procedure checks. Dated report-check JSON files cover later summaries, retrieval displays and percentages. The report-format subdirectory preserves the October 3 MQT Bench layout revision.
 
-Esito della consegna del 2 ottobre: **11 verifiche automatiche superate**. Le quattro campagne sono preparate, con 90 circuiti ciascuna e zero esiti sperimentali. Il report sintetico e i due grafici autonomi compilano; le due pagine del documento sono state controllate visivamente.
+Procedure tests use simulated LLM responses; one technical Bell compilation checks saving, scoring and memory admission. The initial October 2 record reports 11 successful checks and prepared campaigns with no decisions at that date. Later campaign completion is documented by run records, not by this initial check.
 
-I controlli riguardano:
+## Subdirectories
 
-- collegamento nativo o Windows al server e identità del modello;
-- corrispondenza con tutti i 90 recuperi storici quando la memoria è vuota;
-- quattro permutazioni riproducibili;
-- esclusione del circuito corrente e delle osservazioni future;
-- distinzione tra una singola osservazione e una migliore configurazione;
-- codec TOON e controllo dei fatti;
-- separazione delle memorie e ripresa senza ripetere esiti;
-- conservazione di interruzioni, errori e score zero validi;
-- rilevazione di registri modificati;
-- medie appaiate e denominatori dei dati mancanti.
+| Directory | Contents |
+| --- | --- |
+| [report_mqtbench90_formato_qasmbench50_20261003/](report_mqtbench90_formato_qasmbench50_20261003/README.md) | MQT Bench report layout revision. |
 
-`test_incrementale.py` esegue i controlli automatici.
-`verifica_report.py --pdf` genera l'anteprima con dati interamente sintetici
-in `temporanei/`, distinta dai report delle campagne.
-
-Le verifiche sono prove tecniche; non dimostrano un miglioramento degli score.
-I registri riassuntivi di questa consegna sono conservati accanto a questo README.
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

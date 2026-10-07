@@ -1,49 +1,60 @@
-# Mappa del funzionamento
+# Module and data-flow map
 
-`configura.py` offre i comandi di personalizzazione; `comune/configuratore.py` valida e conserva le revisioni, `configuratore_cli.py` interpreta le opzioni e `configuratore_info.py` mostra riepiloghi e controlli.
+Use this map to locate the implementation of a workflow step. The [guide](guida.md) explains execution order; the [configuration cookbook](configurazione.md) explains available settings.
 
-`esperimento.py` sceglie la fase e importa il modulo necessario. `bootstrap.py` prepara gli import. `comune/settings.py` risolve configurazione e percorsi: è il primo punto da leggere per capire dove finiscono ingressi e risultati.
+## Entry points
 
-| Domanda | Punto di partenza | Collegamento |
+- `configura.py` delegates to `comune/configuratore.py`, `configuratore_cli.py` and `configuratore_info.py`: validation, CLI parsing, summaries and atomic configuration revisions.
+- `esperimento.py` dispatches campaign phases and selects a named configuration or explicit config/output paths.
+- `comune/bootstrap.py` prepares local imports. Shared settings and path helpers resolve each experiment's output areas.
+
+## Responsibilities
+
+| Operation | Main implementation | Purpose |
 | --- | --- | --- |
-| Come si vede cosa manca? | `comune/stato.py` | Artefatti, integrità e passaggio successivo; non avvia esperimenti. |
-| Come si avvia Qwen o un altro LLM? | `modelli_llm/server.py` e `modelli.json` | Backend CPU/GPU, `--list-devices`, contesto e trasporto Linux/Windows. |
-| Come si preparano i circuiti? | `comune/corpus.py` | Caratteristiche in `dataset/qiskit_dataset/core.py`, integrità in `comune/scripts/mqt_predictor_protocol.py`. |
-| Quali dispositivi/configurazioni? | `configurazioni/catalogo.json` | Validazione in `catalog.py` e `mqt/gestione.py`. |
-| Come si addestra RL? | `mqt/addestra_rl.py` | Ambiente MQT, limiti delle azioni, checkpoint e metadati. |
-| Come nasce il Training set? | `mqt/addestra_selettore.py` | `deduplica.py`, `motore_ml.py`, compilazioni, array e classificatore. |
-| Come nasce un esempio RAG? | `dataset/genera.py` | Processo `worker.py`, compilazione `generation.py`, mediane ed esempi `views.py`. |
-| Come si crea il prompt? | `comune/framework/app.py:prepare` | Parsing, maschera hardware, recupero Qdrant, contesto e TOON. |
-| Dove si verifica la risposta? | `comune/framework/app.py:decide` | `prototype/prompting/facts.py` e schemi di risposta. |
-| Perché vince un candidato? | `validation/seleziona.py` | Decisioni sigillate, matrice validation e tabella dei criteri. |
-| Come cambia il recupero? | `comune/llm.py` | Qdrant, campionamento casuale, oppure `validation/dag_wl_core.py`. |
-| Come si esegue Test? | `test/esegui.py` | Scelta, processo isolato, esito e `test/analizza.py`. |
-| Come si evitano sovrascritture? | `comune/settings.py`, `comune/processi.py` | Contratti, scritture atomiche senza sostituzione, esiti terminali. |
-| Come si esporta? | `comune/esporta.py` | Framework autonomo con solo train, catalogo e scelta congelata. |
+| Status | `comune/stato.py` | Inspect artifacts and integrity, summarize outcomes and suggest the next step without executing it. |
+| LLM server | `modelli_llm/server.py` | Read the registry and launch/check the configured local runtime and CPU/GPU resources. |
+| Corpus preparation | `comune/corpus.py`, `dataset/qiskit_dataset/core.py` and protocol helpers | Parse circuits, extract features, preserve provenance and check frozen inputs. |
+| Catalog | `configurazioni/` and catalog helpers | Validate synthetic Targets and compiler configurations. |
+| RL training | `mqt/addestra_rl.py` | Train device policies with checkpoints and action limits. |
+| Supervised Training set | `mqt/addestra_selettore.py`, `mqt/` helpers | Compile circuit/device pairs, deduplicate sources, build arrays and train the selector. |
+| Qiskit Dataset | `dataset/genera.py`, `dataset/qiskit_dataset/` | Run isolated attempts, aggregate medians and build train retrieval views. |
+| Prompt preparation | `comune/framework/app.py:prepare` | Parse input, apply hardware eligibility, retrieve examples and encode the context. |
+| Decision | `comune/framework/app.py:decide` | Call the LLM and validate the selected pair and facts. |
+| Validation selection | `validation/seleziona.py` | Join sealed decisions with their evaluation matrix and apply the declared selection rule. |
+| Retrieval variants | `comune/llm.py` and structural-retrieval helpers | Support Manhattan, random and WL retrieval and optional DAG summaries. |
+| Test | `test/esegui.py`, worker and analysis modules | Execute declared methods and report terminal outcomes with explicit denominators. |
+| Process and record handling | `comune/` | Enforce timeouts, atomic writes, frozen settings and terminal resume behavior. |
+| Export | `comune/esporta.py` | Assemble the selected framework, catalog and train data as a standalone prototype. |
+
+See the individual [folder READMEs](../README.md) for file-level navigation. Historical source snapshots in `archivio/` are not runtime dependencies of this kit.
+
+## Data flow
 
 ```text
-configura.py: esperimento nominato
-             |
-Circuiti + catalogo + versioni
-             |
-           prepara
-             |
-       +-----+---------------------+
-       |                           |
-   RL per device              Dataset Qiskit
-       |                      train + validation
-  Training set MQT                 |
-       |                      Dataset RAG train
-  selettore + Bell                 |
-       |                    validation candidati
-       |                           |
-       +-------------------- modello selezionato
-                                   |
-                         congela ed esegui Test
-                                   |
-                         report e nuovo prototipo
+named configuration + circuits + catalog + software versions
+                         |
+                       prepare
+                         |
+             frozen inputs and experiment contract
+                         |
+        +----------------+---------------------+
+        |                                      |
+  MQT RL policies                      Qiskit train/validation grid
+        |                                      |
+  circuit/device Training set          train RAG Dataset + score matrix
+        |                                      |
+  supervised selector                  LLM validation decisions
+        |                                      |
+  technical Bell checks                frozen model/retrieval selection
+        |                                      |
+        +----------------+---------------------+
+                         |
+                  frozen Test methods
+                         |
+                outcomes and derived reports
+                         |
+             optional standalone prototype export
 ```
 
-Train costruisce modelli ed evidenze; validation sceglie impostazioni; Test misura scelte già fissate. Gli score validation e Test non entrano nel prompt della decisione sullo stesso circuito.
-
-La CPU/GPU del PC ospita il server LLM e non coincide con i Target quantistici. Le condizioni della prima prova sono nella [guida](guida.md); per usare il prototipo già selezionato su Linux CPU o sul fisso partire dalla [guida dedicata](../../prototipo/docs/guida_passo_passo.md). I file del kit sono autonomi rispetto a quel prototipo.
+MQT training is required only when that method is selected. Validation and Test scores never enter the prompt for the same decision. The host GPU runs the LLM; the synthetic quantum Targets describe the compilation destination. These are separate kinds of hardware.

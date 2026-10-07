@@ -1,4 +1,4 @@
-"""Riunisce i seed e crea gli esempi RAG riservati all'addestramento."""
+'Aggregate seeds and create train-only RAG examples.'
 
 from __future__ import annotations
 
@@ -28,38 +28,32 @@ SCIENTIFIC_CAVEATS = (
     {
         "caveat_id": "expected_fidelity_is_estimate",
         "text": (
-            "Expected fidelity è una stima offline calcolata dal Target "
-            "sintetico MQT Bench, non una misura ottenuta su hardware reale."
+            'Expected fidelity is an offline estimate computed from the synthetic MQT Bench Target, not a measurement on real hardware.'
         ),
     },
     {
         "caveat_id": "ranking_is_not_causal",
         "text": (
-            "Il ranking descrive risultati osservati con catalogo, versioni e "
-            "seed fissati; non dimostra che una feature del circuito abbia "
-            "causato la scelta."
+            'The ranking describes observed results under fixed catalog, versions and seeds; it does not establish that a circuit feature caused the choice.'
         ),
     },
     {
         "caveat_id": "closed_candidate_set",
         "text": (
-            "L'etichetta vale soltanto tra device compatibili e configurazioni "
-            "effettivamente valutati in questo protocollo."
+            'The label applies only among compatible devices and configurations actually evaluated in this protocol.'
         ),
     },
     {
         "caveat_id": "constraints_not_applied",
         "text": (
-            "Gli esempi offline non applicano vincoli utente; al retrieval i "
-            "vincoli devono filtrare candidati e configurazioni senza "
-            "riscrivere la ground truth."
+            'Offline examples do not apply user constraints; retrieval must filter candidates and configurations without rewriting ground truth.'
         ),
     },
 )
 
 
 def _number_statistics(values: Iterable[float]) -> dict[str, float | int | None]:
-    """Calcola le statistiche descrittive di una serie di numeri."""
+    'Compute descriptive statistics for a numeric sequence.'
     finite = [float(value) for value in values if math.isfinite(float(value))]
     if not finite:
         return {
@@ -85,36 +79,36 @@ def _validate_run(
     catalog: ConfigurationCatalog,
     expected_device_id: str,
 ) -> None:
-    """Controlla che un tentativo rispetti catalogo e dispositivo."""
+    'Check that an attempt matches the catalog and device.'
     status = run.get("status")
     if status not in {"success", "failure", "timeout"}:
-        raise ValueError(f"Stato tentativo non valido: {status!r}.")
+        raise ValueError(f'Invalid attempt status: {status!r}.')
     objective = run.get("objective")
     if (
         not isinstance(objective, Mapping)
         or objective.get("name") != catalog.objective["name"]
     ):
-        raise ValueError("Figure of merit del tentativo non coerente.")
+        raise ValueError('Attempt figure of merit is inconsistent.')
     device = run.get("device")
     if (
         not isinstance(device, Mapping)
         or device.get("device_id") != expected_device_id
     ):
-        raise ValueError("Hardware del tentativo fuori catalogo.")
+        raise ValueError('Attempt hardware is outside the catalog.')
     configuration = run.get("configuration")
     if not isinstance(configuration, Mapping):
-        raise ValueError("Configurazione assente nel tentativo.")
+        raise ValueError('Configuration missing from the attempt.')
     allowed = catalog.require_allowed(
         int(configuration["optimization_level"]),
         configuration.get("layout_method"),
         configuration.get("routing_method"),
     )
     if allowed.config_id != configuration.get("config_id"):
-        raise ValueError("config_id non coerente con la tupla Qiskit.")
+        raise ValueError('config_id does not match the Qiskit tuple.')
     if configuration.get("catalog_id") != catalog.catalog_id:
-        raise ValueError("catalog_id del tentativo non coerente.")
+        raise ValueError('Attempt catalog_id is inconsistent.')
     if run.get("seed_transpiler") not in catalog.seeds:
-        raise ValueError("Seed del tentativo fuori dal piano sperimentale.")
+        raise ValueError('Attempt seed is outside the experimental plan.')
     if status == "success":
         score = run.get("score")
         if (
@@ -122,24 +116,24 @@ def _validate_run(
             or not isinstance(score, (int, float))
             or not math.isfinite(float(score))
         ):
-            raise ValueError("Tentativo success senza score finito.")
+            raise ValueError('Successful attempt has no finite score.')
         validation = run.get("target_validation")
         if (
             not isinstance(validation, Mapping)
             or validation.get("is_executable_on_target") is not True
         ):
-            raise ValueError("Tentativo success senza validazione target positiva.")
+            raise ValueError('Successful attempt lacks positive Target validation.')
         if run.get("failure") is not None:
-            raise ValueError("Tentativo success con oggetto failure.")
+            raise ValueError('Successful attempt contains a failure object.')
     else:
         if run.get("score") is not None:
-            raise ValueError("Tentativo fallito con score valorizzato.")
+            raise ValueError('Failed attempt has a score.')
         if not isinstance(run.get("failure"), Mapping):
-            raise ValueError("Tentativo fallito senza dettagli failure.")
+            raise ValueError('Failed attempt has no failure details.')
 
 
 def _failure_breakdown(runs: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Raggruppa gli errori per fase, categoria e tipo di eccezione."""
+    'Group errors by stage, category and exception type.'
     counts: Counter[tuple[str, str, str]] = Counter()
     for run in runs:
         if run.get("status") == "success":
@@ -171,12 +165,12 @@ def _summary_record(
     target_record: Mapping[str, Any],
     scope: str,
 ) -> dict[str, Any]:
-    """Riunisce i seed di una coppia circuito-configurazione."""
+    'Aggregate seeds for a circuit/configuration pair.'
     runs = sorted(runs, key=lambda run: int(run["seed_transpiler"]))
     observed_seeds = [int(run["seed_transpiler"]) for run in runs]
     if len(observed_seeds) != len(set(observed_seeds)):
         raise ValueError(
-            f"Seed duplicati per {circuit['circuit_id']}/{configuration.config_id}."
+            f"Duplicate seeds for {circuit['circuit_id']}/{configuration.config_id}."
         )
     successes = [run for run in runs if run["status"] == "success"]
     failures = [run for run in runs if run["status"] == "failure"]
@@ -273,20 +267,20 @@ def aggregate_runs(
     catalog: ConfigurationCatalog,
     target_record: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
-    """Costruisce gli aggregati di tutte le coppie circuito-configurazione."""
+    'Build aggregates for every circuit/configuration pair.'
     identifiers = [str(run.get("run_id")) for run in runs]
     if len(identifiers) != len(set(identifiers)):
-        raise ValueError("run_id duplicati nel JSONL dei tentativi.")
+        raise ValueError('Duplicate run_id values in attempt JSONL.')
     expected_device_id = str(target_record["device_id"])
     if manifest.get("catalog_id") != catalog.catalog_id:
-        raise ValueError("Catalogo del manifest non coerente con quello caricato.")
+        raise ValueError('Manifest catalog does not match the loaded catalog.')
     if list(manifest.get("seeds", [])) != list(catalog.seeds):
-        raise ValueError("Seed del manifest non coerenti con il catalogo.")
+        raise ValueError('Manifest seeds do not match the catalog.')
     if manifest.get("objective") != catalog.objective:
-        raise ValueError("Objective del manifest non coerente con il catalogo.")
+        raise ValueError('Manifest objective does not match the catalog.')
     if manifest.get("device_id") not in {None, expected_device_id}:
         raise ValueError(
-            "Device del target incoerente con quello dichiarato nel manifest."
+            "Target device differs from the manifest's declared device."
         )
     circuits_by_id = {
         str(circuit["circuit_id"]): circuit
@@ -299,23 +293,23 @@ def aggregate_runs(
             expected = target_record.get(field)
             if expected is not None and device.get(field) != expected:
                 raise ValueError(
-                    f"{field} del target non coerente tra i tentativi."
+                    f'{field} of the Target is inconsistent across attempts.'
                 )
         circuit_id = str(run["circuit"]["circuit_id"])
         expected_circuit = circuits_by_id.get(circuit_id)
         if expected_circuit is None:
             raise ValueError(
-                f"Tentativo riferito a circuito fuori manifest: {circuit_id}."
+                f'Attempt references a circuit outside the manifest: {circuit_id}.'
             )
         if run.get("dataset_scope") != manifest["dataset_scope"]:
-            raise ValueError("Scope del tentativo non coerente con il manifest.")
+            raise ValueError('Attempt scope does not match the manifest.')
         if run.get("split") != expected_circuit["split"]:
-            raise ValueError("Split del tentativo non coerente con il manifest.")
+            raise ValueError('Attempt split does not match the manifest.')
         if (
             run["circuit"].get("source_sha256")
             != expected_circuit["source_sha256"]
         ):
-            raise ValueError("Hash sorgente del tentativo non coerente.")
+            raise ValueError('Attempt source hash is inconsistent.')
 
     grouped: dict[tuple[str, str], list[Mapping[str, Any]]] = defaultdict(list)
     for run in runs:
@@ -389,7 +383,7 @@ def _retrieval_text(
     device_ids: Sequence[str],
     objective_name: str,
 ) -> str:
-    """Crea il testo stabile usato per cercare circuiti simili."""
+    'Create stable text for finding similar circuits.'
     features = circuit["features"]["values"]
     feature_text = "; ".join(
         f"{name}={features[name]:.12g}" for name in sorted(features)
@@ -404,7 +398,7 @@ def _retrieval_text(
 
 
 def _device_order_map(device_order: Sequence[str] | None) -> dict[str, int]:
-    """Associa a ogni dispositivo la sua posizione nel catalogo."""
+    'Map each device to its position in the catalog.'
     return {
         str(device_id): index
         for index, device_id in enumerate(device_order or ())
@@ -415,7 +409,7 @@ def _global_summary_key(
     summary: Mapping[str, Any],
     order: Mapping[str, int],
 ) -> tuple[Any, ...]:
-    """Costruisce la chiave che ordina i risultati di tutti i dispositivi."""
+    'Build the ordering key for results across devices.'
     device_id = str(summary["device"]["device_id"])
     rank = summary.get("rank")
     return (
@@ -432,7 +426,7 @@ def _evidence_record(
     selected_best: Mapping[str, Any],
     rank_within_selected_device: int | None,
 ) -> dict[str, Any]:
-    """Trasforma un aggregato nella prova strutturata usata dai claim."""
+    'Convert an aggregate into structured evidence for claims.'
     summary_id = str(summary["summary_id"])
     score = float(summary["ranking_score"])
     selected_score = float(selected_best["ranking_score"])
@@ -502,10 +496,10 @@ def build_rag_label(
     top_k: int = 3,
     device_order: Sequence[str] | None = None,
 ) -> dict[str, Any]:
-    """Crea un'etichetta motivata dai risultati di tutti i dispositivi."""
+    'Create a label supported by results across devices.'
     if not 1 <= top_k <= MAX_RAG_CONFIGURATIONS:
         raise ValueError(
-            f"top_k deve essere compreso tra 1 e {MAX_RAG_CONFIGURATIONS}."
+            f'top_k must be between 1 and {MAX_RAG_CONFIGURATIONS}.'
         )
     eligible = [
         summary
@@ -514,7 +508,7 @@ def build_rag_label(
         and summary.get("ranking_score") is not None
     ]
     if not eligible:
-        raise ValueError("Nessun aggregato eleggibile per l'esempio RAG.")
+        raise ValueError('No eligible aggregate for the RAG example.')
 
     order = _device_order_map(device_order)
     eligible.sort(key=lambda item: _global_summary_key(item, order))
@@ -612,33 +606,19 @@ def build_rag_label(
         selection_reason = "device_specific_configuration_ranking"
         comparison_margin = None
         device_claim_text = (
-            f"Nel mini-Dataset device-specifico {selected_device_id} è l'unico "
-            "hardware candidato: l'etichetta device non è un confronto tra "
-            f"hardware. La migliore configurazione è "
-            f"{selected_best['configuration']['config_id']} con mediana "
-            f"{best_score:.12g}."
+            f"In the device-specific mini-Dataset {selected_device_id} is the only candidate device: its label is not a hardware comparison. The best configuration is {selected_best['configuration']['config_id']} with median {best_score:.12g}."
         )
     elif len(best_by_device) == 1:
         selection_reason = "only_eligible_device"
         comparison_margin = None
         device_claim_text = (
-            f"Tra {len(evaluated_device_ids)} device compatibili valutati, "
-            f"{selected_device_id} è l'unico con almeno una configurazione "
-            "completa ed eleggibile secondo il protocollo; non è quindi "
-            "possibile un confronto di score con gli altri device. La sua "
-            f"migliore configurazione è "
-            f"{selected_best['configuration']['config_id']} con mediana "
-            f"{best_score:.12g}."
+            f"Among {len(evaluated_device_ids)} compatible devices evaluated, {selected_device_id} is the only device with at least one complete, eligible configuration under the protocol; score comparison with other devices is therefore unavailable. Its best configuration is {selected_best['configuration']['config_id']} with median {best_score:.12g}."
         )
     elif len(tied_device_ids) > 1:
         selection_reason = "tie_break_catalog_order"
         comparison_margin = 0.0
         device_claim_text = (
-            f"{selected_device_id} è l'etichetta deterministica dopo una "
-            f"parità a mediana {best_score:.12g} tra "
-            f"{', '.join(tied_device_ids)}; il tie-break segue l'ordine del "
-            "catalogo e i dati non dimostrano superiorità tra i device a pari "
-            "score."
+            f"{selected_device_id} is the deterministic label after a tie at median {best_score:.12g} among {', '.join(tied_device_ids)}; the tie-break follows catalog order, and the data do not establish superiority among tied devices."
         )
     else:
         selection_reason = "best_observed_median"
@@ -646,12 +626,7 @@ def build_rag_label(
         runner_score = float(runner_up["ranking_score"])
         comparison_margin = best_score - runner_score
         device_claim_text = (
-            f"{selected_device_id} è l'etichetta tra i device compatibili: "
-            f"{selected_best['configuration']['config_id']} ottiene mediana "
-            f"{best_score:.12g}, contro {runner_score:.12g} del miglior "
-            f"candidato {runner_up['device']['device_id']} "
-            f"({runner_up['configuration']['config_id']}), con margine "
-            f"{comparison_margin:.12g}."
+            f"{selected_device_id} is the label among compatible devices: {selected_best['configuration']['config_id']} achieves a median of {best_score:.12g}, compared with {runner_score:.12g} of the best candidate {runner_up['device']['device_id']} ({runner_up['configuration']['config_id']}), with margin {comparison_margin:.12g}."
         )
     claims = [
         {
@@ -700,22 +675,11 @@ def build_rag_label(
         ]
         if len(tied_score_config_ids) > 1:
             configuration_claim_text = (
-                f"Per {selected_device_id}, "
-                f"{summary['configuration']['config_id']} è la "
-                f"configurazione in posizione {rank}: mediana "
-                f"{score:.12g}, regret {best_score - score:.12g}. "
-                f"Condivide lo stesso score con "
-                f"{', '.join(other_tied_config_ids)}; la posizione segue "
-                "l'ordine deterministico del catalogo e non dimostra "
-                "superiorità tra le configurazioni a pari score."
+                f"For {selected_device_id}, {summary['configuration']['config_id']} is the configuration at rank {rank}: median {score:.12g}, regret {best_score - score:.12g}. It shares the same score with {', '.join(other_tied_config_ids)}; ranking follows the deterministic catalog order and does not establish superiority among tied configurations."
             )
         else:
             configuration_claim_text = (
-                f"Per {selected_device_id}, "
-                f"{summary['configuration']['config_id']} è la "
-                f"configurazione in posizione {rank}: mediana "
-                f"{score:.12g}, regret {best_score - score:.12g} rispetto "
-                "alla migliore etichettata."
+                f"For {selected_device_id}, {summary['configuration']['config_id']} is the configuration at rank {rank}: median {score:.12g}, regret {best_score - score:.12g} relative to the best labeled configuration."
             )
         claims.append(
             {
@@ -787,10 +751,10 @@ def build_rag_examples(
     top_k: int = 3,
     device_order: Sequence[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Crea gli esempi RAG dai soli circuiti di addestramento validi."""
+    'Create RAG examples from valid train circuits only.'
     if not 1 <= top_k <= MAX_RAG_CONFIGURATIONS:
         raise ValueError(
-            f"top_k deve essere compreso tra 1 e {MAX_RAG_CONFIGURATIONS}."
+            f'top_k must be between 1 and {MAX_RAG_CONFIGURATIONS}.'
         )
     by_circuit: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for summary in summaries:
@@ -871,8 +835,7 @@ def build_rag_examples(
                         "evidence",
                     ],
                     "label_semantics": (
-                        "Device con la migliore configurazione eleggibile, poi "
-                        "top configurazioni sul device selezionato."
+                        'Device with the best eligible configuration, followed by top configurations on that device.'
                     ),
                 },
                 "objective": dict(first["objective"]),
@@ -928,8 +891,7 @@ def build_rag_examples(
                 "evidence": label["evidence"],
                 "scientific_caveats": label["scientific_caveats"],
                 "retrieval_document": (
-                    f"{retrieval_text} Esempio empirico etichettato: "
-                    f"{claims_text}"
+                    f'{retrieval_text} Empirically labeled example: {claims_text}'
                 ),
             }
         )
@@ -942,7 +904,7 @@ def _load_target_record(
     device_id: str,
     manifest: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Recupera il dispositivo dai tentativi, dallo stato o dal manifest."""
+    'Recover the device from attempts, state or manifest.'
     if runs:
         device = runs[0].get("device")
         if isinstance(device, Mapping):
@@ -974,7 +936,7 @@ def build_dataset_views(
     top_k: int = 3,
     device_id: str | None = None,
 ) -> dict[str, Any]:
-    """Genera aggregati, esempi RAG, statistiche e report dello scope."""
+    'Generate aggregates, RAG examples, statistics and scope reports.'
     objective_name = str(catalog.objective["name"])
     selected_device_id = catalog.require_device(device_id)
     output_root = dataset_scope_root(

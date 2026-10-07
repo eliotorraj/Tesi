@@ -1,4 +1,4 @@
-"""Inventario breve del runtime isolato, senza caricare i modelli."""
+'Brief isolated-runtime inventory without loading models.'
 import importlib.util
 import importlib.metadata
 import json

@@ -1,4 +1,4 @@
-"""Genera le matrici train/validation e il Dataset RAG con le funzioni originali."""
+'Generate train/validation matrices and the RAG Dataset using the original functions.'
 from pathlib import Path
 import json, shutil
 import settings as s
@@ -20,7 +20,7 @@ def generate(splits=("train","validation")):
     from qiskit_dataset.catalog import load_catalog
     from concurrent.futures import ThreadPoolExecutor
     manifest=s.require_prepared();catalog=load_catalog()
-    if set(splits)-{"train","validation"}:raise ValueError("La generazione Dataset non legge Test")
+    if set(splits)-{"train","validation"}:raise ValueError('Dataset generation does not read Test')
     import portalocker
     s.DATASET.mkdir(parents=True,exist_ok=True)
     with portalocker.Lock(str(s.DATASET/".lock"),timeout=0):
@@ -61,21 +61,21 @@ def aggregate():
                     runs.append(value)
         m={"catalog_id":catalog.catalog_id,"seeds":list(catalog.seeds),"objective":dict(catalog.objective),"circuits":rows,"dataset_scope":"full"}
         summaries.extend(aggregate_runs(m,runs,catalog,manifest["targets"][device]))
-    if missing:return {"status":"incomplete","missing_attempts":len(missing),"message":"Completare train e validation prima di sigillare il Dataset"}
+    if missing:return {"status":"incomplete","missing_attempts":len(missing),"message":'Complete train and validation before sealing the Dataset'}
     s.same_or_save(s.DATASET/"aggregati.json",summaries)
     examples=build_rag_examples(summaries,device_order=catalog.supported_device_ids)
-    if not examples:raise ValueError("Nessun esempio RAG eleggibile")
+    if not examples:raise ValueError('No eligible RAG examples')
     data=s.WORK/"data";data.mkdir(parents=True,exist_ok=True)
     text="".join(json.dumps(x,ensure_ascii=False,allow_nan=False)+"\n" for x in examples)
     destination=data/"rag_examples.jsonl"
-    if destination.exists() and destination.read_text()!=text:raise ValueError("Dataset già sigillato diverso")
+    if destination.exists() and destination.read_text()!=text:raise ValueError('A different Dataset is already sealed')
     if not destination.exists():destination.write_text(text,encoding="utf-8")
     train=[r for r in manifest["circuits"] if r["split"]=="train"]
     s.same_or_save(data/"train_manifest.json",{"experiment_id":s.EXPERIMENT_ID,"circuits":train})
     for row in train:
         target=data/row["source_ref"];target.parent.mkdir(parents=True,exist_ok=True)
         if target.exists():
-            if s.sha(target)!=row["source_sha256"]:raise ValueError("Copia train alterata")
+            if s.sha(target)!=row["source_sha256"]:raise ValueError('Train copy changed')
         else:shutil.copy2(s.WORK/row["source_ref"],target)
     transform=FeatureTransform.fit_train(record_features(x) for x in examples)
     s.same_or_save(data/"transform.json",transform.artifact(source_sha256=s.sha(destination),experiment_id=s.EXPERIMENT_ID))

@@ -1,4 +1,4 @@
-"""TOON ufficiale: vista reversibile, valori controllati dopo la decodifica."""
+'Official TOON: reversible view with values checked after decoding.'
 from __future__ import annotations
 import copy
 from functools import lru_cache
@@ -39,7 +39,7 @@ def _codec(job):
 
 
 def project(view):
-    """Raggruppa solo forme ricostruibili esattamente; nessuna feature è scartata."""
+    'Group only exactly reconstructible structures; no feature is discarded.'
     value = copy.deepcopy(view)
     for device in value.get("compatible_hardware", []):
         edges = device.get("coupling_edges")
@@ -73,7 +73,7 @@ def project(view):
 
 
 def restore(value):
-    """Ricostruisce la vista JSON minima, compreso l'ordine degli archi."""
+    'Reconstruct the minimal JSON view, including edge order.'
     value = copy.deepcopy(value)
     for device in value.get("compatible_hardware", []):
         if "coupling_adjacency" in device:

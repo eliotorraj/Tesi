@@ -120,7 +120,8 @@ class GlobalDatasetAggregationTests(unittest.TestCase):
                 )
                 if len(configuration["tied_score_config_ids"]) > 1:
                     self.assertIn(
-                        "non dimostra superiorità",
+                        # Exact wording in the frozen historical Dataset.
+                        'non dimostra superiorità',
                         claims_by_id[str(configuration["claim_id"])]["text"],
                     )
             for evidence in evidence_by_id.values():

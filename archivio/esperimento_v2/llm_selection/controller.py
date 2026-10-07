@@ -1,4 +1,4 @@
-"""Supervisore sequenziale: un solo modello, registri persistenti, ripresa esplicita."""
+'Sequential supervisor: one model, persistent records, explicit resume.'
 from __future__ import annotations
 import argparse
 import fcntl
@@ -20,7 +20,7 @@ def ps_command(script, *arguments):
             "-File",windows_path(ROOT/"llm_selection"/script),*map(str,arguments)]
 
 class ExperimentStopped(RuntimeError):
-    """Arresto operativo già documentato, da mostrare senza traceback generico."""
+    'Documented operational stop, displayed without a generic traceback.'
 
 def log_tail(path, limit=6000):
     path=Path(path)
@@ -39,15 +39,19 @@ def failure_message(server_dir, log_path):
             launch=read_json(server_dir/"launch.json")
             available=sample.get("system_available_bytes")
             threshold=launch["guards"]["minimum_available_bytes"]
-            measured=f"{available/2**30:.2f} GiB" if available is not None else "non disponibile"
-            message=f"Prova fermata per RAM libera insufficiente: {measured}; soglia {threshold/2**30:.2f} GiB."
+            measured=f"{available/2**30:.2f} GiB" if available is not None else 'unavailable'
+            message=f'Run stopped because free RAM is insufficient: {measured}; threshold {threshold / 2 ** 30:.2f} GiB.'
         else:
-            message="Prova fermata dal monitor delle risorse: "+str(reason)+"."
-        return message+"\nDettagli: "+str(abort_path)+"\nI risultati già salvati restano conservati; gli altri circuiti sono in attesa."
+            message='Run stopped by the resource monitor: '+str(reason)+"."
+        return message+"""
+Details: """+str(abort_path)+"""
+Saved results are preserved; other circuits remain pending."""
     monitor_path=server_dir/"monitor_error.json"
     if monitor_path.exists():
-        return "Errore del monitor: "+str(read_json(monitor_path).get("error"))+"\nRegistro: "+str(monitor_path)
-    return "Il processo delle prove si è fermato.\nRegistro: "+str(log_path)+"\n"+log_tail(log_path)
+        return 'Monitor error: '+str(read_json(monitor_path).get("error"))+"""
+Record: """+str(monitor_path)
+    return """The experiment process stopped.
+Log: """+str(log_path)+"\n"+log_tail(log_path)
 
 def health():
     result=subprocess.run([CURL,"--silent","--fail","--max-time","5",BASE+"/health"],
@@ -67,8 +71,8 @@ def launch(model,profile,server_dir,log,events):
     model_path=Path(manifest["local_path"])
     from .storage import allocate_server_directory
     allocation=allocate_server_directory(server_dir,events)
-    print("Registri del server su "+allocation["windows_directory"],flush=True)
-    print(model+": verifica SHA-256 nativa Windows dei pesi; può richiedere alcuni minuti.",flush=True)
+    print('Server records on '+allocation["windows_directory"],flush=True)
+    print(model+': native Windows SHA-256 verification of weights; this may take several minutes.',flush=True)
     append_jsonl(events,{"at":now(),"event":"weight_hash_check_started","model":model})
     from .weights import verify_weights
     verify_weights(manifest,events.parent/(model+"_weight_verification.json"))
@@ -83,7 +87,7 @@ def launch(model,profile,server_dir,log,events):
             if (server_dir/"resource_abort.json").exists(): raise RuntimeError("Resource guard stopped model loading")
             if (server_dir/"launch.json").exists() and health()=={"status":"ok"}:
                 append_jsonl(events,{"at":now(),"event":"server_ready","model":model,"startup_wall_seconds":time.monotonic()-started,"run_directory":str(server_dir)})
-                print(model+": server pronto; avvio delle prove.",flush=True)
+                print(model+': server ready; starting evaluation.',flush=True)
                 return process
             time.sleep(2)
         raise TimeoutError("Model loading exceeded 600 seconds")

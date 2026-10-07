@@ -1,1 +1,1 @@
-"""Contratto dei facts per un solo esempio."""
+'Facts contract for one example.'

@@ -1,11 +1,13 @@
-# Report del Test
+# Generated Test reports
 
-Ultima analisi: `30dd5b4f737c058e`.
+`30dd5b4f737c058e/` contains the original four-system report, individual system documents, tables, figures, provenance and a fact supplement. `confronto_cinque_sistemi/` contains the extension with random retrieval. `controlli/` stores report verification records; `ultimo.json` identifies the indexed original generation.
 
-- [Rapporto complessivo](30dd5b4f737c058e/confronto/latex/verifica.pdf)
-- [LLM + RAG](30dd5b4f737c058e/sistemi/llm_rag/latex/verifica.pdf)
-- [LLM senza RAG](30dd5b4f737c058e/sistemi/llm_senza_rag/latex/verifica.pdf)
-- [MQT Predictor (espl.)](30dd5b4f737c058e/sistemi/mqt_predictor/latex/verifica.pdf)
-- [Random](30dd5b4f737c058e/sistemi/random/latex/verifica.pdf)
+Reports read saved outcomes and do not represent new executions. Open each report's README for its source revision and limitations; preserve versioned outputs rather than overwriting earlier documents.
 
-Sorgenti LaTeX, tabelle, grafici e provenienza sono conservati accanto ai PDF.
+## Subdirectories
+
+| Directory | Contents |
+| --- | --- |
+| [confronto_cinque_sistemi/](confronto_cinque_sistemi/README.md) | Five-system report index. |
+
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

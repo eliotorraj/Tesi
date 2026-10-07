@@ -1,157 +1,84 @@
-# Prompt essenziale dell'assistente
+# Minimal assistant prompt: historical v3 design
 
-Dal 18 settembre 2026 chat del prototipo, prove automatiche ed esportazione
-usano la vista essenziale. Dal 19 settembre la revisione corrente è
-`minimal-v3-toon1-20260919`: i dati del prompt usano TOON, mentre lo schema
-e la risposta richiesta restano JSON.
-Il confronto precedente, riportato sotto, riguarda la riduzione dei contenuti
-in JSON. Il [resoconto TOON](../resoconti/2026-09-19_prompt_toon.md) misura
-anche il risparmio aggiuntivo sui cinque circuiti train per tutti i tre modelli.
+This guide documents the prompt introduced on 18 September 2026 and its TOON revision, `minimal-v3-toon1-20260919`. The selected prototype subsequently adopted the v4 `facts`/`hypothesis` response. Use the [current architecture guide](../../../../prototipo/docs/architettura_e_flusso.md) for that system and the [v2 selection guide](../../llm_selection/v2/README.md) for the later study.
 
-## Che cosa vede il modello
+The earlier measurements below concern reducing JSON content. The [TOON report](../resoconti/2026-09-19_prompt_toon.md) measures the additional encoding savings on five train circuits for all three models. Prompt data use TOON; the response schema and required response remain JSON.
 
-Il programma prepara ancora la richiesta completa. Conserva QASM, identificativi
-originali, manifest e registro delle evidenze nei dati dell'esperimento.
-Prima dell'invio produce una vista più piccola:
+## What the model sees
 
-- circuito corrente con tutte le caratteristiche numeriche originali;
-- obiettivo e vincoli normalizzati;
-- un catalogo dei dispositivi compatibili e delle configurazioni ammesse;
-- cinque esempi nello stesso ordine del recupero;
-- per ciascun esempio: circuito e caratteristiche, nomi dei dispositivi
-  compatibili, dispositivo vincente e prime tre configurazioni ordinate,
-  con associazione al dispositivo, mediana storica e parità già registrate.
+The program still prepares the complete request and preserves QASM, original identifiers, manifests and the evidence registry. It derives a smaller view before transmission:
 
-Le feature non sono arrotondate e gli zeri restano presenti. Il modello non
-riceve QASM, hash, manifest, versioni dei dati, copie del registro delle evidenze
-o descrizioni hardware ripetute dentro gli esempi. I risultati storici non
-sono nuove misure del circuito da valutare.
+- The current circuit with all original numerical features.
+- The normalized objective and constraints.
+- Compatible devices and allowed configurations.
+- Five examples in retrieval order.
+- For each example: circuit and features, compatible device names, winning device and the first three ranked configurations, including their device association, historical median and recorded ties.
 
-La topologia completa è indicata esplicitamente come tale, senza elencare
-tutti gli archi. Le altre topologie conservano tutti i collegamenti diretti.
-Nel testo TOON possono essere raggruppati per qubit sorgente, solo quando
-la trasformazione conserva anche l'ordine originale degli archi.
-Le feature sono una tabella con colonne per circuito corrente ed esempi;
-la conversione viene decodificata e confrontata automaticamente con la vista
-essenziale prima di inviare il prompt.
-Se tutti i dispositivi ammettono le configurazioni del catalogo, non si ripete
-l'elenco completo per ogni dispositivo; eventuali restrizioni restano esplicite.
+Features are not rounded, and zeros remain present. The model does not receive QASM, hashes, manifests, data versions, duplicate evidence registries or repeated hardware descriptions inside examples. Historical results are not measurements of the current circuit.
 
-## Risposta e controlli
+Complete topology is represented explicitly without listing every edge. Other topologies retain all directed links. TOON may group links by source qubit only when the transformation also preserves original edge order. Features become a table with columns for the current circuit and examples. The encoding is decoded and compared with the minimal view before transmission. A full per-device configuration list is omitted when every device accepts the catalog; restrictions remain explicit.
 
-La risposta ha quattro campi:
+## Historical v3 response and checks
+
+The v3 response has four fields:
 
 ```json
 {
   "selected_device": "ibm_falcon_27",
   "config_id": "o2_default_default",
-  "claim": "Motivazione breve delle due scelte, basata sugli esempi citati.",
+  "claim": "A brief explanation of both choices, based on the cited examples.",
   "evidence": ["E2", "E4"]
 }
 ```
 
-È un esempio di formato, non una risposta prodotta da Qwen.
-La versione 3.0.0 è registrata dal programma; il modello non deve ricopiarla.
-Il programma ricava i parametri Qiskit dal catalogo e usa il primo seed del
-protocollo, attualmente 0. Non corregge silenziosamente le scelte.
+This is a format example, not a Qwen response. The program records version 3.0.0; the model does not repeat it. Qiskit parameters come from the catalog, using the protocol's first seed, 0. Choices are not silently repaired.
 
-E1...E5 sono riferimenti locali, assegnati nell'ordine del recupero.
-La mappa resta uguale durante le correzioni della stessa richiesta e non viene
-inviata al modello. Il contesto delle citazioni contiene anche l'identità
-della richiesta, il catalogo e impronte del registro e della richiesta effettiva.
-Controlla sorgente, obiettivo, vincoli e feature, evitando di riutilizzare
-una mappa appartenente a un'altra richiesta.
+E1–E5 are local aliases assigned in retrieval order. Their mapping stays fixed during repairs and is not sent to the model. Citation context also binds the request identity, catalog, registry fingerprint and actual request fingerprint. It checks sources, objective, constraints and features so a mapping from another request cannot be reused.
 
-Il validatore verifica formato, dispositivo compatibile, configurazione ammessa
-e appartenenza delle citazioni agli esempi forniti. Rifiuta riferimenti
-sconosciuti e duplicati. Con risultati storici richiede almeno una citazione;
-senza RAG richiede una lista vuota. Lo stesso esempio può motivare entrambe le
-scelte. Non servono identificativi separati di claim o caveat.
+The validator checks format, device compatibility, allowed configuration and membership of citations in the supplied examples. Unknown and duplicate references are rejected. Historical results require at least one citation; no-RAG requests require an empty list. One example can support both choices. Separate claim and caveat identifiers are unnecessary in v3.
 
-**La risoluzione della citazione non verifica semanticamente il testo libero
-e non dimostra che il modello abbia causalmente usato quell'esempio.**
-Questo limite è registrato anche nella raccomandazione e nelle avvertenze.
-Le vecchie verifiche multilivello non sono applicate al nuovo claim libero.
-La compilazione rimane protetta: occorrono una raccomandazione emessa e
-validata dal servizio e la conferma dell'utente.
+**Resolving a citation does not verify free-text semantics or prove that the model causally used that example.** Recommendations and caveats record this limitation. The earlier multilevel checks do not apply to v3's free claim. Compilation still requires a recommendation issued and validated by the service and explicit confirmation.
 
-## File e registri
+## Files and records
 
-La vista è in `prototype/prompting/minimal.py`; i messaggi in
-`prototype/prompting/rendering.py`. Il contratto esterno è
-`schemas/llm_recommendation_v3.schema.json`.
-Lo stesso schema usato nelle istruzioni vincola la generazione.
+The view is implemented in `prototype/prompting/minimal.py`, and rendering in `prototype/prompting/rendering.py`. The external contract is `schemas/llm_recommendation_v3.schema.json`. The schema shown in instructions also constrains generation.
 
-Ogni tentativo conserva `prompt.json` completo, `encoding.json` con
-revisione e corrispondenze, richiesta effettiva e risposta originale.
-La raccomandazione validata conserva sia gli alias sia gli ID originali risolti.
-Dalla revisione `minimal-v3-repair1-20260918`, gli errori rimandati al modello
-sono frasi brevi in `previous_validation_errors`, senza codici lunghi o copie
-della risposta precedente. Ogni tipo di errore compare una sola volta:
+Each attempt preserves the complete `prompt.json`, `encoding.json` with revision and mappings, the actual request and the original response. The validated recommendation retains aliases and resolved original IDs.
 
-- Dispositivo non ammesso: scegliere `selected_device` dagli ID di `compatible_hardware`.
-- Configurazione non ammessa: scegliere `config_id` da `configuration_catalog`,
-  rispettando i vincoli del dispositivo.
-- Evidence non valida: usare gli ID di `retrieved_labeled_examples`, senza
-  duplicati e con almeno un riferimento. Senza esempi storici usare `[]`.
+From `minimal-v3-repair1-20260918`, feedback uses short sentences in `previous_validation_errors`, without long codes or copies of the previous response. Each error type appears once:
 
-Una sola frase finale chiede di restituire l'intero JSON per il circuito corrente.
-Gli altri errori di formato ricevono un richiamo allo schema.
-Il programma reinvia il contesto ridotto completo, con gli stessi esempi e alias;
-il primo tentativo resta identico. Nei registri canonici rimangono i codici
-e i dettagli originali. Nessun valore arbitrario della risposta errata viene
-reinserito nel prompt.
-Le prove avviate con una revisione diversa non possono essere riprese con le
-nuove correzioni, anche se il testo del primo tentativo è uguale.
-Nuove istruzioni richiedono un nuovo nome della prova; gli esiti precedenti
-non vengono sovrascritti.
+- Choose `selected_device` from the compatible hardware IDs.
+- Choose `config_id` from the configuration catalog, respecting the selected device's constraints.
+- Use valid, distinct example IDs for evidence, with at least one reference when history is supplied; otherwise use `[]`.
 
-Il formato v2 rimane leggibile con `compact.py`, `legacy_rendering.py`
-e il validatore storico. Il parametro `legacy_contract=True` del costruttore
-serve soltanto alla riproduzione esplicita delle prove precedenti.
-Il percorso ordinario usa v3. Non è richiesta la ricostruzione del documento
-canonico a partire dalla vista ridotta.
+A final sentence asks for the complete JSON for the current circuit. Other format errors refer to the schema. Repairs resend the full reduced context with unchanged examples and aliases; the first attempt remains unchanged. Canonical logs preserve original codes and details. Arbitrary values from an invalid response are not inserted back into the prompt.
 
-## Misure del 18 settembre
+Runs from a different revision cannot resume under the new feedback, even if their first prompt matches. Changed instructions require a fresh run name; earlier outcomes are not overwritten.
 
-Sono stati confrontati tre casi train, senza inferenza:
+The v2 format remains readable through `compact.py`, `legacy_rendering.py` and its historical validator. `legacy_contract=True` explicitly reconstructs earlier checks. At this stage, the normal path used v3; reconstructing the canonical document from the reduced view was unnecessary.
 
-| Circuito | Token prima | Token dopo | Riduzione |
+## Measurements from 18 September
+
+Three train cases were compared without inference:
+
+| Circuit | Tokens before | Tokens after | Reduction |
 | --- | ---: | ---: | ---: |
-| dj_indep_tket_2 | 34.318 | 11.667 | 66,00% |
-| ae_indep_qiskit_60 | 75.193 | 11.382 | 84,86% |
-| portfoliovqe_indep_qiskit_6 | 36.265 | 12.692 | 65,00% |
+| dj_indep_tket_2 | 34318 | 11667 | 66.00% |
+| ae_indep_qiskit_60 | 75193 | 11382 | 84.86% |
+| portfoliovqe_indep_qiskit_6 | 36265 | 12692 | 65.00% |
 
-Conteggi ottenuti con `llama-tokenize.exe` b10930 e lo stesso GGUF Qwen Q8_0
-del caso di riferimento. Il formato nativo è ripreso dalla richiesta
-archiviata: un messaggio utente, nessuno strumento, ragionamento disattivato.
-Per il primo caso è verificata l'uguaglianza dell'intera sequenza degli ID dei
-token con quella prodotta dal server originale, non solo del numero.
+Counts use `llama-tokenize.exe` b10930 and the same Qwen Q8_0 GGUF as the reference. The native template reproduces the archived request: one user message, no tools and reasoning disabled. For the first case, the entire token-ID sequence was checked against the original server output, not just the count.
 
-Il primo riferimento è una richiesta effettivamente inviata in passato.
-Gli altri due riferimenti sono ricostruiti con il formato v2.
-Le richieste nuove sono preparate e contate, non inviate al modello.
-Lo schema leggibile fa parte del testo contato; `json_schema` passato
-separatamente a llama.cpp vincola la generazione e non aggiunge token al prompt.
-I conteggi delle singole sezioni sono diagnostici e non necessariamente additivi.
+The first reference was an actually submitted request. The other two were reconstructed using v2. New requests were prepared and counted, not submitted. The readable schema is included in the counted text; the separately supplied `json_schema` constrains llama.cpp generation without adding prompt tokens. Section counts are diagnostic and need not be additive.
 
-Non sono misure di qualità, latenza o memoria. Alcuni esempi train includono
-lo stesso circuito: queste prove non dimostrano generalizzazione.
-Non sono stati avviati selezione sulla validation o accesso al test.
+These are not quality, latency or memory measurements. Some train examples include the same circuit, so the checks do not demonstrate generalization. This audit did not start validation selection or open the Test.
 
-Dati, richieste e log sono in
-`artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/`.
-Le procedure riproducibili sono `llm_selection/minimal_audit.py` e
-`llm_selection/tokenize_files.ps1`: preparazione, conteggio locale e
-conclusione del controllo sono passaggi separati. Usare sempre una nuova
-cartella di destinazione.
+Data, requests and logs are preserved under:
 
-La precedente centralizzazione del 16 settembre e la codifica reversibile
-restano documentate nei loro artefatti storici. I loro risultati non sono
-attribuiti a questa revisione.
+```text
+artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection/analyses/prompt_minimal_v3/
+```
 
-Il recupero reale e la compatibilità dei vecchi prompt train sono stati
-verificati per tutti e tre i casi. Risposte di esempio costruite dalle
-etichette storiche superano il nuovo validatore; non sono nuove risposte LLM.
-La suite completa ha superato 236 test. I log comprendono anche gli errori
-iniziali, corretti prima della consegna.
+The path is relative to `archivio/esperimento_v2/`. Reproduction tools are `llm_selection/minimal_audit.py` and `llm_selection/tokenize_files.ps1`. Preparation, local token counting and audit completion are separate steps. Use a new destination directory.
+
+The earlier 16 September centralization and reversible encoding remain documented in their own artifacts; their results are not attributed to this revision. Real retrieval and old train-prompt compatibility were checked for all three cases. Responses constructed from historical labels passed the validator; they were not new LLM responses. The historical delivery reported 236 passing tests and retained the initial failures corrected before delivery.

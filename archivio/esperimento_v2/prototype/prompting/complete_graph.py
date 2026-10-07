@@ -1,4 +1,4 @@
-"""Rappresentazione esatta e breve dei soli grafi completi di connettività."""
+'Exact compact representation of fully connected hardware graphs only.'
 import copy
 import json
 NOTE=("For coupling_edges only, {representation: complete_directed_without_self_loops, "

@@ -1,4 +1,4 @@
-"""Fissa il vincitore locale senza configurare il modello di frontiera o aprire il test."""
+'Freeze the local winner without configuring a frontier model or opening Test.'
 from pathlib import Path
 from qiskit_dataset.experiment_v2 import summarize_results
 from scripts.mqt_predictor_protocol import METHOD_CONFIG_V2, METHOD_RESULTS_DIR_V2, file_sha256

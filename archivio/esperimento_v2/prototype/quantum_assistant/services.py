@@ -1,4 +1,4 @@
-"""Coordinamento della raccomandazione e della compilazione approvata."""
+'Coordinate recommendations and approved compilation.'
 
 from __future__ import annotations
 
@@ -30,22 +30,22 @@ from .ports import (
 
 
 class NoCompatibleHardwareError(RuntimeError):
-    """Base mantenuta per i chiamanti delle versioni precedenti."""
+    'Base class retained for callers of earlier versions.'
 
 
 class NoEligibleDeviceError(NoCompatibleHardwareError):
-    """Segnala che nessun dispositivo soddisfa una richiesta valida."""
+    'Report that no device satisfies a valid request.'
 
     code = NO_ELIGIBLE_DEVICE_CODE
     retryable = False
 
     def __init__(self, mask_result: HardwareMaskResult) -> None:
-        """Conserva la maschera che spiega l'esito negativo."""
+        'Retain the mask explaining the negative outcome.'
         self.mask_result = mask_result
         super().__init__(NO_ELIGIBLE_DEVICE_MESSAGE)
 
     def to_dict(self) -> dict[str, object]:
-        """Restituisce l'errore e la diagnostica in forma strutturata."""
+        'Return the error and diagnostics in structured form.'
         return {
             "code": self.code,
             "retryable": self.retryable,
@@ -55,7 +55,7 @@ class NoEligibleDeviceError(NoCompatibleHardwareError):
 
 
 class LlmValidationExhaustedError(RuntimeError):
-    """Segnala l'esaurimento dei tentativi per output LLM non validi."""
+    'Report exhausted attempts for invalid LLM output.'
 
     code = "LLM_OUTPUT_VALIDATION_EXHAUSTED"
     retryable = False
@@ -65,20 +65,20 @@ class LlmValidationExhaustedError(RuntimeError):
         attempts: int,
         issues: tuple[ValidationIssue, ...],
     ) -> None:
-        """Conserva il numero di tentativi e gli ultimi errori trovati."""
+        'Retain attempt count and the most recent errors.'
         if attempts <= 0 or not issues:
             raise ValueError(
-                "L'esaurimento richiede tentativi positivi e almeno un errore."
+                'Exhaustion requires a positive attempt count and at least one error.'
             )
         self.attempts = attempts
         self.issues = tuple(issues)
         self.errors = tuple(issue.message for issue in self.issues)
         super().__init__(
-            f"Nessuna risposta LLM valida dopo {attempts} tentativi."
+            f'No valid LLM response after {attempts} attempts.'
         )
 
     def to_dict(self) -> dict[str, object]:
-        """Restituisce un errore stabile adatto alla UI."""
+        'Return a stable UI-suitable error.'
         return {
             "code": self.code,
             "retryable": self.retryable,
@@ -96,34 +96,33 @@ class LlmValidationExhaustedError(RuntimeError):
 
 
 class ConfirmationRequiredError(RuntimeError):
-    """Segnala che manca la conferma esplicita dell'utente."""
+    'Report missing explicit user confirmation.'
 
 
 class UnvalidatedRecommendationError(RuntimeError):
-    """Rifiuta un risultato che non è stato validato da questo servizio."""
+    'Reject a result not validated by this service.'
 
     code = "RECOMMENDATION_NOT_ISSUED"
     retryable = False
 
     def __init__(self) -> None:
-        """Prepara il messaggio stabile restituito al chiamante."""
+        'Prepare the stable message returned to the caller.'
         super().__init__(
-            "La compilazione richiede una raccomandazione validata "
-            "dall'istanza corrente del servizio."
+            'Compilation requires a recommendation validated by this service instance.'
         )
 
 
 def _default_semantic_validator() -> SemanticRequestValidator:
-    """Crea il validatore semantico usato in assenza di un sostituto."""
-    # L'import locale mantiene la dipendenza dalle porte verso gli adattatori.
+    'Create the default semantic validator when none is supplied.'
+    # The local import retains the dependency from ports to adapters.
     from .adapters.request import RequestSemanticValidator
 
     return RequestSemanticValidator()
 
 
 def _default_evidence_registry_builder() -> EvidenceRegistryBuilder:
-    """Crea il costruttore predefinito del registro delle evidenze."""
-    # L'import locale mantiene la dipendenza dalle porte verso gli adattatori.
+    'Create the default evidence-registry builder.'
+    # The local import retains the dependency from ports to adapters.
     from .adapters.context import StructuredEvidenceRegistryBuilder
 
     return StructuredEvidenceRegistryBuilder()
@@ -131,7 +130,7 @@ def _default_evidence_registry_builder() -> EvidenceRegistryBuilder:
 
 @dataclass
 class PrototypeService:
-    """Coordina i componenti applicativi usati da ogni controllore UI."""
+    'Coordinate the application components used by each UI controller.'
 
     parser: RequestParser
     hardware_catalog: HardwareCatalog
@@ -156,17 +155,17 @@ class PrototypeService:
     )
 
     def __post_init__(self) -> None:
-        """Controlla i limiti configurati per tentativi e recupero."""
+        'Check configured attempt and retrieval limits.'
         if self.max_llm_attempts <= 0:
-            raise ValueError("max_llm_attempts deve essere positivo.")
+            raise ValueError('max_llm_attempts must be positive.')
         if self.retrieval_limit < 0:
-            raise ValueError("retrieval_limit non può essere negativo.")
+            raise ValueError('retrieval_limit cannot be negative.')
 
     def prepare_request(
         self,
         submission: RequestInput,
     ) -> PreparedRequestContext:
-        """Prepara richiesta, catalogo e maschera senza chiamare l'LLM."""
+        'Prepare request, catalog and mask without calling the LLM.'
         parsed = self.parser.parse(submission)
         catalog = self.hardware_catalog.snapshot()
         request = self.semantic_validator.normalize(parsed, catalog)
@@ -178,7 +177,7 @@ class PrototypeService:
         )
 
     def recommend(self, submission: RequestInput) -> RecommendationResult:
-        """Recupera il contesto e ripete solo gli output LLM non validi."""
+        'Retrieve context and retry only invalid LLM outputs.'
         prepared = self.prepare_request(submission)
         if not prepared.can_recommend:
             raise NoEligibleDeviceError(prepared.mask_result)
@@ -237,10 +236,10 @@ class PrototypeService:
         self,
         command: ApprovedCompilation,
     ) -> CompilationArtifact:
-        """Compila solo una raccomandazione validata e confermata."""
+        'Compile only a validated, confirmed recommendation.'
         if not command.user_confirmed:
             raise ConfirmationRequiredError(
-                "La compilazione richiede una conferma esplicita dell'utente."
+                'Compilation requires explicit user confirmation.'
             )
         result = command.recommendation_result
         if not any(

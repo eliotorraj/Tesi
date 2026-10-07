@@ -1,41 +1,42 @@
-# Installazione, server e profili
+# Installation, server and profiles
 
-Per la sequenza completa usare la [guida passo passo](guida_passo_passo.md). Questo documento spiega quali impostazioni cambiano tra CPU, GPU Linux e fisso WSL/Windows.
+Use the [step-by-step guide](guida_passo_passo.md) for the complete sequence. This document explains CPU, Linux GPU and original WSL/Windows settings.
 
-## Componenti distinti
+## Client and server
 
-Il **client Python** estrae caratteristiche, recupera il Dataset train, costruisce il prompt e compila con Qiskit. `setup.sh` prepara Python 3.12 e le versioni di `requirements.txt`, installa il codec TOON 4.1.1 con Node.js 22/npm e verifica l'indice. Può usare Python fornito da uv. Non installa Torch, CUDA o modelli MQT.
+The **Python client** extracts features, retrieves train examples, builds prompts and compiles with Qiskit. `setup.sh` prepares Python 3.12 with `requirements.txt`, the TOON 4.1.1 codec through Node.js 22/npm, and the retrieval index. Python can come from uv. Client setup does not install Torch, CUDA or trained MQT models.
 
-Il **server llama.cpp** carica Qwen e risponde via HTTP locale. Si compila separatamente per CPU o per il backend della GPU. `server.py` avvia un eseguibile Linux; gli script `.ps1` rimangono gli avviatori Windows. Non copiare `.venv` o un eseguibile compilato per un altro sistema operativo.
+The **llama.cpp server** loads Qwen and serves local HTTP requests. Build it separately for CPU or your GPU backend. `server.py` launches Linux binaries; `.ps1` files launch the Windows runtimes. Environments and binaries must match their operating system.
 
-I pesi distribuiti separatamente sono Qwen3.5-4B Q8_0, 4.482.403.488 byte, SHA-256 `10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1`. Revisioni e URL sono in `config.json`; il campo `local_path` conserva provenienza, mentre il percorso operativo è quello passato all'avviatore. La [guida](guida_passo_passo.md#a5-procurarsi-il-gguf-esatto) mostra il download.
+The selected GGUF is Qwen3.5-4B Q8_0, **4,482,403,488 bytes**, SHA-256 `10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1`. `config.json` records revision and URL. Its `local_path` is provenance; the launcher argument selects the operational file. See the [download instructions](guida_passo_passo.md#a5-obtain-the-exact-gguf).
 
-## Profili concordati fra server e client
+## Match client and server profiles
 
-| Profilo | Uso | Contesto | Batch / microbatch | Accelerazione |
+| Profile | Intended use | Context | Batch / microbatch | Acceleration |
 | --- | --- | ---: | --- | --- |
-| `cpu` | Prima prova su Linux senza GPU | 16.384 | 128 / 64 | Nessuna; device `none`, zero strati GPU |
-| `gpu` | Prima prova con GPU Linux compatibile | 16.384 | 128 / 64 | Strati su GPU, selezionabili |
-| `desktop` | Fisso o macchina adeguata al contesto completo | 60.000 | 512 / 128 | GPU |
-| `laptop` | Nome accettato dal client per l'avviatore Windows CPU | 16.384 | 128 / 64 nel relativo `.ps1` | CPU |
+| `cpu` | First Linux CPU trial | 16,384 | 128 / 64 | `device=none`, zero GPU layers |
+| `gpu` | First compatible Linux GPU trial | 16,384 | 128 / 64 | Configurable GPU offload |
+| `desktop` | Hardware supporting the full context | 60,000 | 512 / 128 | GPU |
+| `laptop` | Client-compatible name for the Windows CPU launcher | 16,384 | 128 / 64 in its PowerShell script | CPU |
 
-Tutti mantengono pesi Q8_0, temperatura 0, cache q8_0 e massimo 4.096 token di risposta. Scegliere lo stesso profilo nel server Linux e in `app.py run`. Il client non reimposta il contesto del server. Se input e budget di risposta eccedono il limite, interrompe prima della generazione senza tagliare esempi.
+All retain Q8_0 weights, temperature 0, q8_0 cache and a 4,096-token response budget. Choose matching profiles on client and server; the client cannot resize server context. If input plus output budget does not fit, the client stops before generation without dropping examples.
 
-`--transport native` collega al server Linux, anche se Linux è in WSL. `--transport windows` usa `curl.exe` da WSL verso il server Windows. `auto`, valore predefinito mantenuto per gli avvii esistenti, sceglie Windows in WSL e HTTP nativo altrove. Le guide specificano il trasporto per evitare ambiguità.
+`native` transport uses Linux HTTP, including within WSL. `windows` uses `curl.exe` from WSL to Windows. The compatibility default `auto` selects Windows in WSL and native HTTP elsewhere; explicit transport avoids ambiguity.
 
-## Memoria e tempi sulla CPU
+## CPU memory and timing
 
-Occorrono almeno 16 GB installati per tentare la prova ridotta. Il controllo Linux legge `MemAvailable` da `/proc/meminfo`: richiede 9 GiB liberi prima dell'avvio CPU e arresta il proprio server dopo tre rilevazioni consecutive sotto 2 GiB. In WSL questi valori riguardano la macchina virtuale. Lo swap non viene conteggiato come RAM.
+At least 16 GB installed RAM is an indicative starting point for the small trial. The Linux launcher reads `MemAvailable` from `/proc/meminfo`, requires 9 GiB available before CPU startup, and stops its own server after three consecutive readings below 2 GiB. WSL readings apply to the virtual machine. Swap is excluded.
 
-I soli pesi occupano circa 4,18 GiB; cache, calcolo, client e sistema richiedono altro spazio. Il margine è prudenziale e non certifica che ogni richiesta entri in memoria. Anche un circuito piccolo può generare un prompt lungo per il catalogo e gli esempi. La guida limita esplicitamente i candidati a Falcon 27 per iniziare. Il profilo desktop a 60.000 token non è il percorso CPU proposto per 16 GB.
+Weights alone occupy about 4.18 GiB; cache, computation, client and OS need more. These checks do not guarantee that every request fits. Even a small circuit can create a long catalog/example prompt. The first-run guide filters to Falcon 27. A 60,000-token desktop context is not the proposed 16 GB CPU setup.
 
-Il timeout HTTP predefinito del client è 600 secondi; la prima prova CPU usa esplicitamente 3.600. La durata effettiva dipende dalla macchina e non è garantita. Una GPU compatibile è consigliata soprattutto per ridurre l'attesa nella lettura del prompt.
+The client defaults to a 600-second HTTP timeout; the first CPU example explicitly uses 3,600 seconds. Actual duration depends on the machine. GPU acceleration is especially useful for prompt processing.
 
-## GPU su Linux
+<a id="gpu-su-linux"></a>
+## Linux GPU
 
-La GPU deve essere visibile al backend di llama.cpp, con driver adeguati. I nomi AMD del fisso non vengono incorporati nell'avviatore Linux. Per AMD/Intel/NVIDIA compatibili si può usare **Vulkan**; con NVIDIA è disponibile anche **CUDA**. Questi backend e le istruzioni di compilazione sono documentati nel [progetto llama.cpp](https://github.com/ggml-org/llama.cpp/blob/b10930/docs/build.md).
+The GPU needs a working driver and must be visible to the llama.cpp backend. The Linux launcher does not hard-code the original desktop's AMD device. Compatible AMD, Intel or NVIDIA systems may use Vulkan; NVIDIA also supports CUDA. Use the pinned revision's [build documentation](https://github.com/ggml-org/llama.cpp/blob/b10930/docs/build.md).
 
-Per Vulkan, su Ubuntu/Debian, dopo i prerequisiti della guida:
+After cloning llama.cpp as in guide A4, Vulkan setup on Ubuntu/Debian is:
 
 ```bash
 sudo apt install libvulkan-dev glslc spirv-headers vulkan-tools
@@ -47,9 +48,9 @@ cmake --build runtime/llama.cpp/build-vulkan --config Release --target llama-ser
   --bin runtime/llama.cpp/build-vulkan/bin/llama-server --list-devices
 ```
 
-Prima occorre aver clonato llama.cpp come nel passo A4. I pacchetti di sviluppo non installano automaticamente un driver adatto a ogni scheda: se `vulkaninfo` mostra soltanto un renderer software, non si sta usando la GPU fisica. In WSL verificare anche il supporto del backend nella propria configurazione; sul fisso il percorso Windows già funzionante rimane disponibile.
+Development packages do not provide every device's driver. If `vulkaninfo` reports only a software renderer, the physical GPU is not being used. Check backend support in your particular WSL configuration; the original desktop can continue using its working Windows server.
 
-L'elenco di llama.cpp mostra gli identificativi utilizzabili, per esempio `Vulkan0`. Sono esempi, non nomi universali: scegliere quello realmente restituito dalla propria macchina con `--device`. Per una prima prova GPU, da `prototipo/`:
+Use identifiers returned by `--list-devices`, such as `Vulkan0`, rather than assuming universal names. For a first GPU trial from `prototipo/`:
 
 ```bash
 .venv/bin/python -B server.py \
@@ -57,7 +58,7 @@ L'elenco di llama.cpp mostra gli identificativi utilizzabili, per esempio `Vulka
   --model runtime/models/Qwen3.5-4B-Q8_0.gguf --profile gpu
 ```
 
-Nel secondo terminale:
+In a second terminal:
 
 ```bash
 curl --fail http://127.0.0.1:8089/health
@@ -65,9 +66,9 @@ curl --fail http://127.0.0.1:8089/health
   --profile gpu --transport native --timeout 3600 --device ibm_falcon_27 --compile
 ```
 
-L'avviatore richiede tutti gli strati sulla GPU; con memoria video insufficiente si può scegliere un numero inferiore con `--gpu-layers N`, trasferendo altro lavoro alla CPU e alla RAM. Non esiste una soglia VRAM garantita per tutte le GPU: verificare allocazioni e strati effettivamente caricati in `stderr.log`. Passare a `desktop` su entrambi i comandi solo con memoria sufficiente per il contesto maggiore.
+The launcher requests all GPU layers. With insufficient VRAM, `--gpu-layers N` can offload fewer layers, increasing CPU/RAM work. Check actual allocations and loaded layers in `stderr.log`; there is no universal guaranteed VRAM threshold. Select `desktop` on both commands only with resources for the larger context.
 
-Per CUDA occorrono driver NVIDIA e CUDA Toolkit compatibili; la guida non li installa automaticamente. Con questi prerequisiti usare una directory separata:
+CUDA requires compatible NVIDIA drivers and the CUDA Toolkit. With those installed, use a separate build directory:
 
 ```bash
 cmake -S runtime/llama.cpp -B runtime/llama.cpp/build-cuda \
@@ -75,18 +76,18 @@ cmake -S runtime/llama.cpp -B runtime/llama.cpp/build-cuda \
 cmake --build runtime/llama.cpp/build-cuda --config Release --target llama-server -j 2
 ```
 
-Passare poi `runtime/llama.cpp/build-cuda/bin/llama-server` a `--bin`. `--list-devices` e `--device` funzionano attraverso il backend, senza nomi fissi di schede. L'avviatore registra versione, impronta dell'eseguibile, dispositivi esposti e argomenti. L'interfaccia è quella del [server llama.cpp b10930](https://github.com/ggml-org/llama.cpp/blob/b10930/tools/server/README.md).
+Pass `runtime/llama.cpp/build-cuda/bin/llama-server` to `--bin`. Backend discovery supplies `--list-devices`/`--device`. The launcher records binary version/hash, exposed devices and arguments. Its interface targets [llama.cpp b10930](https://github.com/ggml-org/llama.cpp/blob/b10930/tools/server/README.md).
 
-## Sensori e avviatori del fisso
+## Original desktop monitoring
 
-`server-desktop.ps1`, `server-desktop-internal.ps1`, `server-laptop.ps1`, `setup.ps1` e `verify-model.ps1` sono conservati. Il percorso desktop dipende da Windows, Vulkan, PsSuspend verificato e `AmdSensors.cs`; le soglie termiche sono quelle della macchina configurata. Non sono impostazioni da copiare indistintamente su un'altra scheda.
+`server-desktop.ps1`, `server-desktop-internal.ps1`, `server-laptop.ps1`, `setup.ps1` and `verify-model.ps1` support the original Windows setup. Desktop operation depends on Vulkan, verified PsSuspend and `AmdSensors.cs`. Its thermal thresholds are machine-specific.
 
-Il nuovo `server.py` Linux usa il rilevamento GPU del backend e controlla la RAM disponibile. **Non misura temperatura, consumo o memoria GPU e non implementa la pausa termica AMD.** Il log lo dichiara. Le protezioni del driver restano attive, ma non equivalgono al monitor applicativo del fisso. Per misure o pause termiche su altre GPU serve un adattatore appropriato ai sensori esposti dal sistema; non occorre modificare gli script personali per una prima prova Linux.
+The Linux launcher discovers GPU devices and checks available RAM. It **does not measure GPU temperature, GPU memory or energy, and does not implement AMD thermal pausing**. Driver protections are separate from application monitoring. Supporting thermal pauses on other GPUs would require an appropriate sensor adapter.
 
-## Controlli e registri
+## Checks and records
 
-`server.py --dry-run` con gli stessi argomenti dell'avvio verifica GGUF, eseguibile e margine RAM, poi mostra il comando senza caricare Qwen. `--list-devices` non richiede pesi. `/health` con `status: ok` conferma che il server è pronto; `app.py check` conferma soltanto client e dati.
+With normal startup arguments, `server.py --dry-run` verifies GGUF, binary and RAM headroom and prints the command without loading Qwen. `--list-devices` needs no weights. `/health` returning `status: ok` indicates server readiness; `app.py check` checks the client and its data.
 
-I log Linux sono in `runtime/server-runs/<id>/`: `launch.json`, `stdout.log`, `stderr.log`, `resources.jsonl` ed `exit.json`. Il controllore termina solo il processo che ha avviato. I `.ps1` stampano la propria destinazione Windows. I registri del client sono invece in `runs/`, con input, prompt, risposte, verifiche e compilazione.
+Linux records are in `runtime/server-runs/<id>/`: `launch.json`, `stdout.log`, `stderr.log`, `resources.jsonl` and `exit.json`. The controller terminates only the process it started. PowerShell launchers print their Windows log locations. Client decisions are recorded separately in `runs/`.
 
-La prova CPU o GPU su un'altra macchina non garantisce risultati e tempi identici a una campagna scientifica. Per tali confronti conservare risorse, software, contesto e criteri nel [kit di riproducibilità](../../riproducibilita/README.md).
+Running on another host does not guarantee identical results or timings. For a scientific comparison, declare resources, versions, context and criteria through the [reproduction toolkit](../../riproducibilita/README.md).

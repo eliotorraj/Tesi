@@ -1,4 +1,4 @@
-"""Verifiche offline: nessuna chiamata LLM e nessuna campagna sui 90 Test."""
+'Offline checks without LLM calls or a campaign on the 90 Test circuits.'
 from __future__ import annotations
 from comune import *
 import tempfile
@@ -24,7 +24,7 @@ class FakeHttp:
         self.response = response or {
             "selected_device": "ibm_falcon_27", "config_id": "o2_default_default",
             "facts": [{"assertion": "selected_device_has_enough_qubits"}],
-            "hypothesis": "Configurazione proposta per il circuito fornito.",
+            "hypothesis": 'Proposed configuration for the supplied circuit.',
         }
 
     def __call__(self, endpoint, payload, directory):
@@ -162,7 +162,7 @@ class IncrementalTests(unittest.TestCase):
             self.assertNotIn("median_score", seen[0]["observed_configuration"])
             chosen = {"selected_device": "ibm_falcon_27", "config_id": "o2_default_default",
                       "facts": [{"assertion": "selected_pair_among_reported_best", "example_id": seen[0]["id"]}],
-                      "hypothesis": "Proposta da controllare."}
+                      "hypothesis": 'Proposal to check.'}
             self.assertEqual(facts.verify(chosen, prompt)["facts_status"], "unverified")
             chosen["facts"][0]["assertion"] = "selected_device_matches_example"
             self.assertEqual(facts.verify(chosen, prompt)["facts_status"], "verified")
@@ -226,7 +226,7 @@ class IncrementalTests(unittest.TestCase):
             save(base / "memoria_incrementale/records/001.json", observation)
             self.assertEqual(replay(base, contract)[0], [])
             run_campaign(base, contract, self.corpus, args,
-                         evaluator=lambda *a, **kw: self.fail("Nessuna nuova decisione consentita"))
+                         evaluator=lambda *a, **kw: self.fail('No new decision is allowed'))
             self.assertEqual(len(replay(base, contract)[0]), 1)
 
     def test_failed_and_zero_score_admission(self):
@@ -257,7 +257,7 @@ class IncrementalTests(unittest.TestCase):
         self.assertEqual(result["facts_status"], "verified")
         http = FakeHttp({"selected_device": "ibm_falcon_27", "config_id": "o2_default_default",
                          "facts": [{"assertion": "same_qubit_count_as_example", "example_id": "E5"}],
-                         "hypothesis": "Proposta."})
+                         "hypothesis": 'Proposal.'})
         # Force an unsupported fact independently of the retrieved circuit sizes.
         http.response["facts"] = [{"assertion": "selected_device_has_enough_qubits", "example_id": "E1"}]
         with tempfile.TemporaryDirectory() as tmp:
@@ -325,7 +325,7 @@ class IncrementalTests(unittest.TestCase):
         self.assertEqual(facts.response_schema()["properties"]["facts"]["items"]["properties"]["example_id"]["pattern"], "^E1$")
         invalid = {"selected_device": "ibm_falcon_27", "config_id": "o2_default_default",
                    "facts": [{"assertion": "selected_device_matches_example", "example_id": "E2"}],
-                   "hypothesis": "Proposta da verificare."}
+                   "hypothesis": 'Proposal to verify.'}
         self.assertFalse(facts.verify(invalid, prompt)["schema_valid"])
         duplicated = __import__("copy").deepcopy(prompt)
         duplicated["retrieved_labeled_examples"].append(duplicated["retrieved_labeled_examples"][0])

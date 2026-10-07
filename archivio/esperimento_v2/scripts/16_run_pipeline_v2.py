@@ -1,9 +1,6 @@
-"""Orchestra le fasi lunghe del protocollo MQT Predictor 2.4-v2.
+"""Orchestrate long MQT Predictor 2.4-v2 protocol phases.
 
-Training, compilazione e aggregazione restano implementati negli script
-numerati. Questo file li richiama con i parametri congelati, così i comandi
-operativi sono brevi senza creare una seconda implementazione del protocollo.
-"""
+Training, compilation and aggregation remain implemented in numbered scripts. This runner calls them with frozen parameters, keeping operational commands short without creating a second protocol implementation."""
 
 from __future__ import annotations
 
@@ -50,15 +47,15 @@ RL_SEED = 0
 QISKIT_TIMEOUT_SECONDS = COMPILATION_TIMEOUT_SECONDS
 ML_CANARY_CIRCUITS = 10
 
-# Questi nomi descrivono soltanto la ripartizione operativa tra due computer.
-# Non sono dati scientifici e non cambiano il protocollo dei modelli.
+# These names describe only the operational division between two computers.
+# These are not scientific data and do not change the model protocol.
 RL_GROUPS: dict[str, tuple[str, ...]] = {
     "models": FROZEN_DEVICES,
 }
 
 
 def numbered_script(name: str, *arguments: object) -> list[str]:
-    """Usa lo stesso interprete Python con cui è stato avviato il runner."""
+    'Use the same Python interpreter that started the runner.'
     return [
         sys.executable,
         str(SCRIPTS_DIR / name),
@@ -67,7 +64,7 @@ def numbered_script(name: str, *arguments: object) -> list[str]:
 
 
 def run_checked(command: Sequence[str]) -> None:
-    """Esegue uno script numerato preservandone output e codice di uscita."""
+    'Run a numbered script, preserving its output and exit code.'
     print(f"\n>>> {shlex.join(str(part) for part in command)}", flush=True)
     completed = subprocess.run(list(command), cwd=PROJECT_ROOT, check=False)
     if completed.returncode:
@@ -75,18 +72,18 @@ def run_checked(command: Sequence[str]) -> None:
 
 
 def rl_run_name(device_name: str) -> str:
-    """Nome deterministico della run condiviso dai due computer."""
+    'Deterministic run name shared by both computers.'
     return f"v2-{device_name.replace('_', '-')}-seed{RL_SEED}"
 
 
 def canonical_rl_problems(device_name: str) -> tuple[Path, list[str]]:
-    """Controlla un modello finale esistente prima di saltarlo."""
+    'Check an existing final model before skipping it.'
     model = CANONICAL_RL_MODEL_DIR_V2 / rl_model_filename(device_name)
     metadata = model.with_suffix(".metadata.json")
     if not model.exists() and not metadata.exists():
         return model, []
     if not model.is_file():
-        return model, ["archivio canonico mancante ma metadati presenti"]
+        return model, ['canonical archive is missing but metadata is present']
 
     _archive_metadata, errors = validate_rl_archive(model)
     _training_metadata, metadata_errors = validate_rl_training_metadata(
@@ -101,7 +98,7 @@ def canonical_rl_problems(device_name: str) -> tuple[Path, list[str]]:
 
 
 def checkpoint_problems(path: Path, device_name: str) -> tuple[int, list[str]]:
-    """Valida un checkpoint candidato e restituisce gli step completati."""
+    'Validate a candidate checkpoint and return completed timesteps.'
     _archive_metadata, errors = validate_rl_archive(path)
     metadata_path = path.with_suffix(".metadata.json")
     metadata, metadata_errors = validate_rl_training_metadata(
@@ -112,34 +109,32 @@ def checkpoint_problems(path: Path, device_name: str) -> tuple[int, list[str]]:
     )
     errors.extend(metadata_errors)
     if metadata.get("seed") != RL_SEED:
-        errors.append(f"seed non conforme: {metadata.get('seed')!r}")
+        errors.append(f"seed does not match: {metadata.get('seed')!r}")
     if metadata.get("target_timesteps") != RL_TRAINING_TIMESTEPS:
         errors.append(
-            "target_timesteps non conforme: "
-            f"{metadata.get('target_timesteps')!r}"
+            f"target_timesteps does not match: {metadata.get('target_timesteps')!r}"
         )
     if SOURCE_MANIFEST_V2.is_file():
         expected_manifest = file_sha256(SOURCE_MANIFEST_V2)
         if metadata.get("training_manifest_sha256") != expected_manifest:
-            errors.append("manifest dei circuiti train non conforme")
+            errors.append('train circuit manifest does not match')
     try:
         steps = int(metadata.get("num_timesteps"))
     except (TypeError, ValueError):
         steps = -1
     if "interrupted" in path.stem:
-        errors.append("snapshot di emergenza non riprendibile")
+        errors.append('emergency snapshot cannot be resumed')
     if steps % RL_ROLLOUT_STEPS:
-        errors.append("checkpoint non allineato a un rollout PPO completo")
+        errors.append('checkpoint is not aligned with a complete PPO rollout')
     if steps >= RL_TRAINING_TIMESTEPS:
         errors.append(
-            "checkpoint già al target finale: controlla perché manca "
-            "il modello canonico"
+            'checkpoint already reached final timesteps: investigate the missing canonical model'
         )
     return steps, errors
 
 
 def latest_valid_checkpoint(device_name: str) -> Path | None:
-    """Trova il checkpoint compatibile più avanzato nella run prevista."""
+    'Find the most advanced compatible checkpoint in the planned run.'
     directory = (
         EXPERIMENT_ROOT
         / "checkpoints"
@@ -161,52 +156,51 @@ def latest_valid_checkpoint(device_name: str) -> Path | None:
             valid.append((steps, path))
     if not valid:
         if rejected and all(
-            "snapshot di emergenza non riprendibile" in item
+            'emergency snapshot cannot be resumed' in item
             for item in rejected
         ):
-            print("Nessun rollout PPO completo salvato: ripartenza da zero.")
+            print('No complete PPO rollout saved: restarting from zero.')
             return None
         details = "\n  - ".join(rejected)
         raise SystemExit(
-            f"La directory {directory} contiene checkpoint, ma nessuno è "
-            f"compatibile:\n  - {details}"
+            f'The directory {directory} contains checkpoints, but none is compatible:\n  - {details}'
         )
     valid.sort(key=lambda item: (item[0], item[1].name))
     return valid[-1][1]
 
 
 def parse_resume_specs(values: Sequence[str]) -> dict[str, Path]:
-    """Legge gli override ripetibili DEVICE=CHECKPOINT."""
+    'Read repeatable DEVICE=CHECKPOINT overrides.'
     result: dict[str, Path] = {}
     for value in values:
         device_name, separator, raw_path = value.partition("=")
         if not separator or not device_name or not raw_path:
             raise SystemExit(
-                "--resume-from richiede DEVICE=PERCORSO_DEL_CHECKPOINT.zip"
+                '--resume-from requires DEVICE=CHECKPOINT_PATH.zip'
             )
         if device_name not in FROZEN_DEVICES:
-            raise SystemExit(f"Device fuori protocollo: {device_name}")
+            raise SystemExit(f'Device outside the protocol: {device_name}')
         if device_name in result:
-            raise SystemExit(f"--resume-from duplicato per {device_name}")
+            raise SystemExit(f'Duplicate --resume-from for {device_name}')
         path = Path(raw_path).expanduser()
         if not path.is_absolute():
             path = PROJECT_ROOT / path
         if not path.is_file():
-            raise SystemExit(f"Checkpoint non trovato: {path}")
+            raise SystemExit(f'Checkpoint not found: {path}')
         result[device_name] = path.resolve()
     return result
 
 
 def selected_rl_devices(args: argparse.Namespace) -> tuple[str, ...]:
-    """Risolve un gruppo nominato oppure una sequenza esplicita."""
+    'Resolve a named group or explicit sequence.'
     devices = RL_GROUPS[args.group] if args.group else tuple(args.devices)
     if len(set(devices)) != len(devices):
-        raise SystemExit("La selezione RL contiene device duplicati.")
+        raise SystemExit('RL selection contains duplicate devices.')
     return devices
 
 
 def rl_training_command(device_name: str, resume_from: Path | None) -> list[str]:
-    """Costruisce il comando RL con tutti i parametri congelati espliciti."""
+    'Build the RL command with every frozen parameter explicit.'
     command = numbered_script(
         "03_train_rl_model.py",
         "--device",
@@ -236,42 +230,42 @@ def rl_training_command(device_name: str, resume_from: Path | None) -> list[str]
 
 
 def run_rl(args: argparse.Namespace) -> None:
-    """Allena un gruppo in sequenza, saltando o riprendendo in sicurezza."""
+    'Train a group sequentially, safely skipping or resuming work.'
     if not TRAINING_CIRCUITS_V2.is_dir() or not SOURCE_MANIFEST_V2.is_file():
         raise SystemExit(
-            "Sorgenti v2 non preparate. Esegui prima il sottocomando prepare."
+            'v2 sources are not prepared. Run the prepare subcommand first.'
         )
     devices = selected_rl_devices(args)
     explicit_resumes = parse_resume_specs(args.resume_from)
     unused = sorted(set(explicit_resumes) - set(devices))
     if unused:
         raise SystemExit(
-            "--resume-from indicato per device non selezionati: "
+            '--resume-from supplied for unselected devices: '
             + ", ".join(unused)
         )
 
-    print("Device RL selezionati: " + ", ".join(devices))
+    print('Selected RL devices: ' + ", ".join(devices))
     for device_name in devices:
         model, problems = canonical_rl_problems(device_name)
         if problems:
             raise SystemExit(
-                f"Artefatto canonico presente ma non conforme: {model}\n  - "
+                f'Canonical artifact exists but does not match: {model}\n  - '
                 + "\n  - ".join(problems)
             )
         if model.exists():
-            print(f"\nGià completo e conforme, salto: {device_name}")
+            print(f'\nAlready complete and conforming; skipping: {device_name}')
             continue
 
         resume_from = explicit_resumes.get(device_name)
         if resume_from is None and not args.no_auto_resume:
             resume_from = latest_valid_checkpoint(device_name)
             if resume_from is not None:
-                print(f"Ripresa automatica di {device_name} da {resume_from}")
+                print(f'Automatic resume of {device_name} da {resume_from}')
         run_checked(rl_training_command(device_name, resume_from))
 
 
 def run_prepare(_args: argparse.Namespace) -> None:
-    """Controlla ambiente e prepara le sorgenti con script idempotenti."""
+    'Check the environment and prepare sources through idempotent scripts.'
     commands = (
         numbered_script("01_check_install.py", "--require-frozen-targets"),
         numbered_script("06_prepare_experiment_v2.py", "--check-only"),
@@ -284,7 +278,7 @@ def run_prepare(_args: argparse.Namespace) -> None:
 
 
 def run_ml_canary(args: argparse.Namespace) -> None:
-    """Compila un lotto train riutilizzabile per calibrare il timeout ML."""
+    'Compile a reusable train batch to calibrate the ML timeout.'
     commands = (
         numbered_script(
             "05_sync_models.py", "install", "--component", "rl", "--overwrite"
@@ -316,7 +310,7 @@ def run_ml_canary(args: argparse.Namespace) -> None:
 
 
 def run_ml(args: argparse.Namespace) -> None:
-    """Installa le policy, crea il Training set, allena ML e prova qcompile."""
+    'Install policies, build the Training set, train ML and check qcompile.'
     commands = (
         numbered_script(
             "05_sync_models.py", "install", "--component", "rl", "--overwrite"
@@ -361,7 +355,7 @@ def run_ml(args: argparse.Namespace) -> None:
 
 
 def qiskit_prepare_command(device_name: str) -> list[str]:
-    """Comando di preparazione full per un device."""
+    'Full preparation command for one device.'
     return numbered_script(
         "07_prepare_qiskit_dataset.py",
         "--scope",
@@ -381,9 +375,9 @@ def qiskit_generate_command(
     timeout_seconds: int,
     limit_runs: int | None = None,
 ) -> list[str]:
-    """Comando di generazione; questo runner vieta lo split test."""
+    'Generation command; this runner forbids the Test split.'
     if split not in ("train", "validation"):
-        raise ValueError(f"Split non ammesso dall'orchestratore: {split}")
+        raise ValueError(f'Split is not allowed by the orchestrator: {split}')
     command = numbered_script(
         "08_generate_qiskit_dataset.py",
         "--scope",
@@ -405,7 +399,7 @@ def qiskit_generate_command(
 
 
 def qiskit_view_command(device_name: str) -> list[str]:
-    """Comando per le viste full di un device."""
+    "Command for a device's full views."
     return numbered_script(
         "09_build_qiskit_dataset_views.py",
         "--scope",
@@ -420,7 +414,7 @@ def qiskit_view_command(device_name: str) -> list[str]:
 
 
 def qiskit_aggregate_command() -> list[str]:
-    """Comando di aggregazione stretta dei cinque mini-Dataset."""
+    'Strict aggregation command for the five mini-Datasets.'
     return numbered_script(
         "10_aggregate_qiskit_dataset.py",
         "--scope",
@@ -434,7 +428,7 @@ def qiskit_aggregate_command() -> list[str]:
 
 
 def run_qiskit_canary(args: argparse.Namespace) -> None:
-    """Esegue un tentativo train mancante per ciascun device."""
+    'Run one missing train attempt per device.'
     for device_name in FROZEN_DEVICES:
         run_checked(qiskit_prepare_command(device_name))
         run_checked(
@@ -449,7 +443,7 @@ def run_qiskit_canary(args: argparse.Namespace) -> None:
 
 
 def run_qiskit_full(args: argparse.Namespace) -> None:
-    """Popola train e validation, crea le viste e aggrega i device."""
+    'Populate train and validation, create views and aggregate devices.'
     for device_name in FROZEN_DEVICES:
         run_checked(qiskit_prepare_command(device_name))
         for split in ("train", "validation"):
@@ -466,7 +460,7 @@ def run_qiskit_full(args: argparse.Namespace) -> None:
 
 
 def print_plan(_args: argparse.Namespace) -> None:
-    """Mostra gruppi e percorsi principali senza modificare file."""
+    'Show groups and main paths without modifying files.'
     payload = {
         "rl_groups": {name: list(devices) for name, devices in RL_GROUPS.items()},
         "canonical_rl_models": str(CANONICAL_RL_MODEL_DIR_V2),
@@ -487,10 +481,10 @@ def print_plan(_args: argparse.Namespace) -> None:
 
 
 def positive_int(value: str) -> int:
-    """Tipo argparse per controlli interi positivi."""
+    'argparse type for positive-integer checks.'
     converted = int(value)
     if converted <= 0:
-        raise argparse.ArgumentTypeError("deve essere un intero positivo")
+        raise argparse.ArgumentTypeError('must be a positive integer')
     return converted
 
 
@@ -504,22 +498,22 @@ def add_qiskit_runtime_options(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Costruisce l'interfaccia a sottocomandi."""
+    'Build the subcommand interface.'
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="phase", required=True)
 
-    plan = subparsers.add_parser("plan", help="Mostra gruppi e percorsi.")
+    plan = subparsers.add_parser("plan", help='Show groups and paths.')
     plan.set_defaults(handler=print_plan)
 
     prepare = subparsers.add_parser(
         "prepare",
-        help="Controlla ambiente e prepara le sorgenti v2.",
+        help='Check the environment and prepare v2 sources.',
     )
     prepare.set_defaults(handler=run_prepare)
 
     rl = subparsers.add_parser(
         "rl",
-        help="Allena un gruppo RL e riprende i checkpoint.",
+        help='Train an RL group and resume checkpoints.',
     )
     selection = rl.add_mutually_exclusive_group(required=True)
     selection.add_argument("--group", choices=tuple(RL_GROUPS))
@@ -529,18 +523,18 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         metavar="DEVICE=CHECKPOINT.zip",
-        help="Override ripetibile; di norma basta rilanciare il comando.",
+        help='Repeatable override; normally rerunning the command is sufficient.',
     )
     rl.add_argument(
         "--no-auto-resume",
         action="store_true",
-        help="Non cercare automaticamente il checkpoint più avanzato.",
+        help='Do not search automatically for the most advanced checkpoint.',
     )
     rl.set_defaults(handler=run_rl)
 
     ml_canary = subparsers.add_parser(
         "ml-canary",
-        help="Crea checkpoint train riutilizzabili per calibrare il timeout ML.",
+        help='Create reusable train checkpoints to calibrate the ML timeout.',
     )
     ml_canary.add_argument("--timeout", type=positive_int, default=COMPILATION_TIMEOUT_SECONDS)
     ml_canary.add_argument("--startup-timeout", type=positive_int, default=240)
@@ -555,7 +549,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ml = subparsers.add_parser(
         "ml",
-        help="Crea il Training set, allena ML e valida qcompile.",
+        help='Build the Training set, train ML and validate qcompile.',
     )
     ml.add_argument("--timeout", type=positive_int, default=COMPILATION_TIMEOUT_SECONDS)
     ml.add_argument("--startup-timeout", type=positive_int, default=240)
@@ -566,14 +560,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     qiskit_canary = subparsers.add_parser(
         "qiskit-canary",
-        help="Esegue un tentativo train mancante per ogni device.",
+        help='Run one missing train attempt for each device.',
     )
     add_qiskit_runtime_options(qiskit_canary)
     qiskit_canary.set_defaults(handler=run_qiskit_canary)
 
     qiskit_full = subparsers.add_parser(
         "qiskit-full",
-        help="Popola train+validation e aggrega il Dataset full.",
+        help='Populate train/validation and aggregate the full Dataset.',
     )
     add_qiskit_runtime_options(qiskit_full)
     qiskit_full.set_defaults(handler=run_qiskit_full)
@@ -581,22 +575,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Esegue una fase e rende concisa una fermata riprendibile."""
+    'Run a phase and report resumable stops concisely.'
     args = build_parser().parse_args(argv)
     try:
         args.handler(args)
     except subprocess.CalledProcessError as error:
         print(
-            f"\nFase fermata: lo script numerato è uscito con codice "
-            f"{error.returncode}. Correggi la causa e rilancia lo stesso "
-            "comando; gli output durevoli validi saranno riutilizzati.",
+            f'\nPhase stopped: numbered script exited with code {error.returncode}. Fix the cause and rerun the same command; valid durable outputs will be reused.',
             file=sys.stderr,
         )
         return int(error.returncode) or 1
     except KeyboardInterrupt:
         print(
-            "\nInterruzione richiesta. Attendi il messaggio di salvataggio "
-            "del checkpoint, poi rilancia lo stesso comando.",
+            """
+Interruption requested. Wait for the checkpoint-save message, then rerun the same command.""",
             file=sys.stderr,
         )
         return 130

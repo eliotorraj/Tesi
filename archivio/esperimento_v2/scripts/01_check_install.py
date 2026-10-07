@@ -43,12 +43,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--require-models",
         action="store_true",
-        help="Fallisce se i cinque modelli RL e il selettore ML non sono pronti e sincronizzati.",
+        help='Fail unless the five RL policies and ML selector are ready and synchronized.',
     )
     parser.add_argument(
         "--require-frozen-targets",
         action="store_true",
-        help="Fallisce se i Target differiscono dai fingerprint congelati del protocollo migrato 2.4-v2.",
+        help="Fail when Targets differ from the migrated 2.4-v2 protocol's frozen fingerprints.",
     )
     return parser.parse_args()
 
@@ -73,8 +73,7 @@ def validate_model_pair(
         runtime_digest = file_sha256(runtime)
         if canonical_digest != runtime_digest:
             problems.append(
-                "copia runtime diversa dal modello canonico: "
-                f"{canonical_digest} != {runtime_digest}"
+                f'runtime copy differs from canonical model: {canonical_digest} != {runtime_digest}'
             )
         elif kind == "rl" and device_name is not None:
             _metadata, metadata_errors = validate_rl_training_metadata(
@@ -85,7 +84,7 @@ def validate_model_pair(
                 expected_num_timesteps=RL_FINAL_TIMESTEPS,
             )
             problems.extend(
-                f"metadati: {message}" for message in metadata_errors
+                f'metadata: {message}' for message in metadata_errors
             )
         elif kind == "ml":
             _metadata, metadata_errors = validate_ml_training_metadata(
@@ -93,10 +92,10 @@ def validate_model_pair(
                 model_sha256=canonical_digest,
             )
             problems.extend(
-                f"metadati: {message}" for message in metadata_errors
+                f'metadata: {message}' for message in metadata_errors
             )
     if problems:
-        print(f"{label:<44} NON PRONTO")
+        print(f'{label:<44} NOT READY')
         for problem in problems:
             print(f"  - {problem}")
     else:
@@ -109,51 +108,54 @@ def main() -> int:
     args = parse_args()
     installation_errors: list[str] = []
 
-    print("=== Ambiente Python ===")
+    print('=== Python environment ===')
     print(f"Python:      {platform.python_version()}")
-    print(f"Eseguibile:  {sys.executable}")
-    print(f"Sistema:     {platform.platform()}")
+    print(f'Executable: {sys.executable}')
+    print(f'System:     {platform.platform()}')
     if sys.version_info[:2] != (3, 12):
         installation_errors.append(
-            f"Python deve essere 3.12, trovato {platform.python_version()}."
+            f'Python 3.12 is required; found {platform.python_version()}.'
         )
     if platform.system() != "Linux":
-        installation_errors.append("La pipeline robusta è supportata soltanto su Linux/WSL.")
+        installation_errors.append('The robust pipeline supports Linux/WSL only.')
 
-    print("\n=== Versioni fissate da MQT Predictor 2.4.0 ===")
+    print("""
+=== Versions pinned by MQT Predictor 2.4.0 ===""")
     packages_available = True
     for package, expected in EXPECTED_PACKAGES.items():
         try:
             observed = version(package)
         except PackageNotFoundError:
-            observed = "MANCANTE"
+            observed = 'MISSING'
             packages_available = False
-        status = "OK" if observed == expected else f"ATTESO {expected}"
+        status = "OK" if observed == expected else f'EXPECTED {expected}'
         print(f"{package:<24} {observed:<18} {status}")
         if observed != expected:
             installation_errors.append(
-                f"Versione non conforme per {package}: attesa={expected}, osservata={observed}."
+                f'Version mismatch for {package}: expected={expected}, observed={observed}.'
             )
 
     if not packages_available:
-        print("\nInstallazione incompleta; salto Target e modelli.", file=sys.stderr)
+        print("""
+Incomplete installation; skipping Targets and models.""", file=sys.stderr)
         return 1
 
     from mqt.bench.targets import get_available_device_names, get_device
     from mqt.predictor.ml.helper import get_path_training_data as get_ml_training_data
     from mqt.predictor.rl.helper import get_path_trained_model as get_rl_model_dir
 
-    print("\n=== Protocollo sperimentale congelato ===")
-    print(f"Protocollo:       {PROTOCOL_ID}")
-    print(f"Schema Target:    v{TARGET_FINGERPRINT_SCHEMA_VERSION}")
+    print("""
+=== Frozen experimental protocol ===""")
+    print(f'Protocol:         {PROTOCOL_ID}')
+    print(f'Target schema:    v{TARGET_FINGERPRINT_SCHEMA_VERSION}')
     print(f"Figure of merit: {FIGURE_OF_MERIT}")
     available_names = set(get_available_device_names())
     target_mismatches = 0
     legacy_target_drifts = 0
     for device_name in FROZEN_DEVICES:
         if device_name not in available_names:
-            installation_errors.append(f"Device MQT Bench mancante: {device_name}.")
-            print(f"{device_name:<24} MANCANTE")
+            installation_errors.append(f'Missing MQT Bench device: {device_name}.')
+            print(f'{device_name:<24} MISSING')
             continue
         target = get_device(device_name)
         observed_hash = target_sha256(target)
@@ -164,44 +166,36 @@ def main() -> int:
         target_mismatches += int(not matches)
         legacy_target_drifts += int(legacy_comparable_hash != legacy_hash)
         print(
-            f"{device_name:<24} qubit={target.num_qubits:<3} "
-            f"fingerprint={'OK' if matches else 'DIVERSO'}"
+            f"{device_name:<24} qubit={target.num_qubits:<3} fingerprint={('OK' if matches else 'DIFFERENT')}"
         )
-        print(f"  protocollo 2.4-v2:       {expected_hash}")
-        print(f"  ambiente corrente:       {observed_hash}")
-        print(f"  legacy registrato:       {legacy_hash}")
-        print(f"  corrente schema legacy:  {legacy_comparable_hash}")
+        print(f'  protocol 2.4-v2:        {expected_hash}')
+        print(f'  current environment:    {observed_hash}')
+        print(f'  recorded legacy:        {legacy_hash}')
+        print(f'  current legacy schema:  {legacy_comparable_hash}')
         if str(target.description) != device_name:
             installation_errors.append(
-                f"Descrizione Target inattesa per {device_name}: {target.description}."
+                f'Unexpected Target description for {device_name}: {target.description}.'
             )
 
     if legacy_target_drifts:
         schema_only_targets = len(FROZEN_DEVICES) - legacy_target_drifts
         schema_verb = "differisce" if schema_only_targets == 1 else "differiscono"
         print(
-            "\nMIGRAZIONE TARGET ATTESA: "
-            f"{legacy_target_drifts}/{len(FROZEN_DEVICES)} Target MQT Bench 2.2.3 "
-            "differiscono nei dati nativi dalle impronte MQT Bench 2.0.0 del branch "
-            "qiskit_dataset, dopo avere normalizzato schema e control-flow. "
-            f"{schema_only_targets} Target {schema_verb} "
-            "soltanto per rappresentazione/schema. Poiché cambia anche la versione "
-            "Qiskit, rigenera comunque per tutti i device Qiskit default/random e "
-            "gli score oracle nell'ambiente 2.4.0 prima del confronto finale."
+            f"\nEXPECTED TARGET MIGRATION: {legacy_target_drifts}/{len(FROZEN_DEVICES)} MQT Bench 2.2.3 Targets differ in native data from the qiskit_dataset branch's MQT Bench 2.0.0 fingerprints after schema and control-flow normalization. {schema_only_targets} Target {schema_verb} only in representation/schema. Because Qiskit also changed, regenerate Qiskit default/random and oracle scores for every device in the 2.4.0 environment before the final comparison."
         )
 
     if target_mismatches:
         print(
-            "\nATTENZIONE: i Target dell'ambiente corrente non coincidono con "
-            "i fingerprint congelati del protocollo migrato 2.4-v2. "
-            "Non produrre risultati pubblicabili finché il drift non è stato risolto."
+            """
+WARNING: current Targets differ from the migrated 2.4-v2 protocol's frozen fingerprints. Resolve drift before producing publishable results."""
         )
         if args.require_frozen_targets:
             installation_errors.append(
-                f"{target_mismatches} Target differiscono dal protocollo migrato 2.4-v2."
+                f'{target_mismatches} Targets differ from migrated protocol 2.4-v2.'
             )
 
-    print("\n=== Artefatti richiesti da qcompile ===")
+    print("""
+=== Artifacts required by qcompile ===""")
     runtime_rl = get_rl_model_dir()
     runtime_ml = get_ml_training_data() / "trained_model"
     model_problems: list[str] = []
@@ -227,22 +221,23 @@ def main() -> int:
 
     if model_problems:
         print(
-            "\nI pacchetti possono essere installati correttamente anche prima del "
-            "training. Per rendere obbligatori gli artefatti usa --require-models."
+            """
+Packages may be installed correctly before training. Use --require-models to require trained artifacts."""
         )
         if args.require_models:
             installation_errors.append(
-                f"Artefatti qcompile non pronti: {len(model_problems)} problemi."
+                f'qcompile artifacts are not ready: {len(model_problems)} problems.'
             )
 
     if installation_errors:
-        print("\n=== ESITO: NON CONFORME ===", file=sys.stderr)
+        print("""
+=== OUTCOME: NONCONFORMING ===""", file=sys.stderr)
         for error in installation_errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    readiness = "completa" if not model_problems else "ambiente pronto, modelli da completare"
-    print(f"\n=== ESITO: installazione 2.4.0 conforme ({readiness}) ===")
+    readiness = "completa" if not model_problems else 'environment ready; models incomplete'
+    print(f'\n=== OUTCOME: conforming 2.4.0 installation ({readiness}) ===')
     return 0
 
 

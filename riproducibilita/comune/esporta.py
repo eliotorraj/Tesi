@@ -1,4 +1,4 @@
-"""Esporta il train e il framework scelto in una nuova directory, mai sopra prototipo/."""
+'Export train data and the selected framework into a new directory, never over prototipo/.'
 from pathlib import Path
 import inspect
 import json
@@ -12,11 +12,11 @@ def export(destination):
     from llm import verify_server
     selection=verify_selection();corpus=load_corpus(verify_features=True)
     dest=Path(destination).expanduser().resolve()
-    if dest.exists():raise ValueError('La destinazione deve essere nuova: '+str(dest))
+    if dest.exists():raise ValueError('The destination must be new: '+str(dest))
     if dest.is_relative_to(s.KIT) and not dest.is_relative_to(s.OUTPUT/'esportazioni'):
-        raise ValueError('Dentro riproducibilita usare esportazioni/; oppure scegliere una directory esterna')
+        raise ValueError('Inside riproducibilita, use esportazioni/; otherwise choose an external directory')
     if dest.is_relative_to(s.KIT.parent/'prototipo') or dest.is_relative_to(s.KIT.parent/'archivio'):
-        raise ValueError('Non esportare dentro prototipo o archivio')
+        raise ValueError('Do not export inside prototipo or archivio')
     dest.mkdir(parents=True)
     ignore=shutil.ignore_patterns('__pycache__','node_modules','runtime','runs')
     shutil.copytree(s.KIT/'comune/framework',dest,dirs_exist_ok=True,ignore=ignore)
@@ -49,5 +49,12 @@ def export(destination):
     (dest/'setup.sh').write_text('#!/usr/bin/env bash\nset -euo pipefail\ncd -- "$(dirname -- "${BASH_SOURCE[0]}")"\npython3.12 -m venv .venv\n.venv/bin/python -m pip install -r requirements.txt\nnpm --prefix prototype/prompting/toon_runtime ci --ignore-scripts\n.venv/bin/python app.py check\n')
     s.save(dest/'provenienza.json',{'experiment_id':s.EXPERIMENT_ID,'selection':selection,'dataset_sha256':corpus.source_sha256,'code':s.code_identity(),'weights_included':False})
     (dest/'.gitignore').write_text('.venv/\nruntime/\nruns/\nnode_modules/\n__pycache__/\n*.gguf\n')
-    (dest/'README.md').write_text('# Prototipo generato\n\nQuesto framework usa il Dataset train della nuova esecuzione e il modello scelto sulla validation. Non legge archivio o riproducibilita.\n\nServono Python 3.12, Node.js 22/npm e un server llama.cpp compatibile. Eseguire `bash setup.sh`, inserire il GGUF selezionato in `modelli/modello.gguf` e avviare il server con il contesto e i parametri in `configurazioni/generazione_llm.json`. I pesi non sono copiati; l’impronta viene verificata prima dell’inferenza.\n\nUso: `.venv/bin/python app.py run /percorso/circuito.qasm --compile`. L’opzione `--model-path` accetta un GGUF già disponibile altrove. `app.py check` controlla installazione e dati; `app.py prepare` costruisce l’indice RAG. I registri si trovano in `runs/`. La temperatura selezionata è applicata anche quando è diversa da zero.\n')
+    (dest/'README.md').write_text("""# Generated prototype
+
+This framework uses the new run's train Dataset and the model selected on validation. It does not read the archive or reproduction toolkit.
+
+Requirements: Python 3.12, Node.js 22/npm and a compatible llama.cpp server. Run `bash setup.sh`, place the selected GGUF in `modelli/modello.gguf` and start the server with the context and parameters in `configurazioni/generazione_llm.json`. Weights are not copied; their fingerprint is checked before inference.
+
+Usage: `.venv/bin/python app.py run /path/to/circuit.qasm --compile`. `--model-path` accepts a GGUF already available elsewhere. `app.py check` checks installation and data; `app.py prepare` builds the RAG index. Request records are in `runs/`. The selected temperature is applied even when nonzero.
+""")
     return {'directory':str(dest),'train_records':len(corpus.records),'weights_copied':False,'model':model['id'],'temperature':model['temperature']}

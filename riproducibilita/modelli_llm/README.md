@@ -1,29 +1,22 @@
-# Modelli LLM e avvio del server
+# LLM registry and server startup
 
-`qwen/`, `phi/` e `gemma/` sono destinazioni predisposte per GGUF forniti dall'utente. Il clone non contiene pesi. `modelli.json` fornisce i candidati iniziali; `provenienza_originale.json` conserva URL, revisioni e impronte dei file di riferimento.
+`modelli.json` defines candidates; `provenienza_originale.json` records reference URLs, revisions and hashes. `server.py` launches or checks llama.cpp.
 
-Per un esperimento nominato, seleziona i candidati e collega i file tramite il configuratore. Esempi da `riproducibilita/`, con ambiente attivato:
-
-```bash
-python configura.py modelli mia-prova qwen
-python configura.py modello mia-prova qwen --file /percorso/Qwen3.5-4B-Q8_0.gguf
-python configura.py risorse mia-prova --server-bin /percorso/llama-server --gpu-layers 0
-python configura.py verifica mia-prova
-```
-
-Gli altri candidati diventano inattivi, mantenendo le proprie impostazioni; i loro pesi non sono richiesti. Per un LLM nuovo o una quantizzazione diversa usa `aggiungi-modello`: servono un GGUF locale, provenienza, revisione e precisione. Il programma ne calcola SHA-256 senza caricarlo. Cambiare il percorso di Qwen non sostituisce la sua impronta con quella di qualunque altro file. I dettagli sono nel [ricettario](../documentazione/configurazione.md#registrare-un-altro-llm).
-
-L'avviatore legge il registro dell'esperimento e le risorse salvate:
+From the toolkit root after setup:
 
 ```bash
-python esperimento.py --esperimento mia-prova server qwen --list-devices
-python esperimento.py --esperimento mia-prova server qwen
+python configura.py modelli my-trial qwen
+python configura.py modello my-trial qwen --file /path/to/Qwen3.5-4B-Q8_0.gguf
+python configura.py risorse my-trial --server-bin /path/to/llama-server --gpu-layers 0
+python configura.py verifica my-trial
+python esperimento.py --esperimento my-trial server qwen --list-devices
+python esperimento.py --esperimento my-trial server qwen
 ```
 
-Il server mantiene occupato il terminale. Da un secondo terminale, con lo stesso ambiente, `server qwen --controlla` verifica identità e contesto senza inferenza. Ctrl+C ferma il server avviato. Sono richiesti gli endpoint llama.cpp `/props`, `/apply-template`, `/tokenize` e `/completion` con schema JSON; `/health` permette anche il controllo manuale del caricamento.
+Use another terminal with the same environment for `server qwen --controlla`. Ctrl+C stops the launched process. The checker needs identity/context endpoints; inference uses `/apply-template`, `/tokenize` and JSON-schema-constrained `/completion`.
 
-Il profilo CPU usa zero strati GPU e passa `device=none`; i profili GPU chiedono accelerazione. `--list-devices` espone gli identificativi del backend, senza nomi Radeon incorporati. La compatibilità dipende da modello, memoria, driver e backend. I profili non garantiscono che una campagna completa entri in 16 GB.
+Unselected candidates keep their settings but need no weights. Register a different model or quantization with `aggiungi-modello`, providing a local GGUF, source, revision and precision. Changing a reference model's path does not change its expected hash. See the [recipes](../documentazione/configurazione.md).
 
-Versione, impronte, dispositivi, comando e log sono in `esecuzioni/<nome>/servers/`, sotto la radice risultati scelta. L'avviatore non misura temperatura, energia o memoria GPU. Le opzioni dirette `--bin`, `--gpu-layers`, `--device`, `--threads` prevalgono sui valori salvati e sono registrate; per condizioni pianificate configura prima di `prepara`.
+CPU uses zero GPU layers and `device=none`. GPU profiles request acceleration; `--list-devices` shows backend identifiers. Check drivers and memory locally.
 
-Il server Linux usa `native`, anche in WSL. Sul fisso puoi mantenere il server Windows con `modello NOME qwen --trasporto windows`, `curl.exe` e un GGUF accessibile da WSL. I `.ps1` del prototipo restano conservati. L'avvio Windows è esterno a questo script; `server qwen --controlla` verifica anche quel trasporto. Per l'interfaccia tradizionale resta `modelli_llm/server.py`, con `RIPRO_CONFIG` e `RIPRO_OUTPUT` se servono configurazioni diverse da quella distribuita.
+Linux servers use `native` transport, including in WSL. For the original externally started Windows server, configure `--trasporto windows`; the client uses `curl.exe`. Direct launch overrides are recorded, but planned resources should be fixed before preparation.

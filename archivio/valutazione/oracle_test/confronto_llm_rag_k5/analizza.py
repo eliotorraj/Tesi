@@ -1,4 +1,4 @@
-"""Analisi in sola lettura del Test RAG k=5 contro oracle max3. Nessuna compilazione."""
+'Read-only analysis of RAG k=5 Test against max3 oracle. No compilation.'
 from pathlib import Path
 import argparse, csv, hashlib, json, statistics
 from collections import Counter, defaultdict
@@ -13,7 +13,7 @@ def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,allow_nan=F
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--oracle",type=Path,default=DEFAULT); ap.add_argument("--output",type=Path,default=HERE/"risultati")
     a=ap.parse_args(); out=a.output
-    if (out/"dati.json").exists(): raise SystemExit("Cartella già analizzata: usare --output con una cartella nuova.")
+    if (out/"dati.json").exists(): raise SystemExit('Directory already analyzed: use --output with a new directory.')
     sources={}
     def read(p):
         sources[str(p)]=sha(p)
@@ -36,7 +36,7 @@ def main():
     assert len(pairs)==5400
     pairmap={(p["circuit_id"],p["device"],p["config_id"]):p for p in pairs}
     assert len(pairmap)==5400
-    # Rilegge tutti gli esiti originari e ricostruisce i massimi, non si fida solo dei riepiloghi.
+    # Re-read original outcomes and reconstruct maxima rather than trusting summaries alone.
     statuses=Counter(); seeds_by_pair=defaultdict(dict)
     for rel,h in prov.items():
         p=root/rel; b=p.read_bytes(); assert hashlib.sha256(b).hexdigest()==h, str(p)
@@ -102,7 +102,7 @@ def main():
       tolerance=TOL,summary=s,oracle_summary=summary,rows=rows,
       oracle_identity=oc["identity_sha256"],system_contract=execution["contract_sha256"],
       oracle_versions=identity["versions"],model_sha256=execution["server"]["model_sha256"])
-    # Le fonti rimangono esterne ai generatori e alle pipeline di decisione.
+    # Sources remain external to generators and decision pipelines.
     assert all(sha(Path(p))==h for p,h in sources.items())
     out.mkdir(parents=True,exist_ok=True)
     save(out/"dati.json",data)

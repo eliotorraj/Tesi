@@ -1,168 +1,80 @@
-> **Resoconto conservato il 15 settembre 2026.** Questo testo raccoglie i dettagli
-> dell’architettura e gli aggiornamenti presenti nel precedente README. Alcuni
-> riferimenti allo stato dei lavori descrivono il momento in cui furono scritti.
-> Per il funzionamento attuale leggere la [guida del prototipo](../../prototype/README.md);
-> per lo stato complessivo leggere il [README del progetto](../../README.md).
+# Historical quantum assistant architecture
 
-# Prototipo dell'assistente quantistico
-<img width="1444" height="736" alt="Gemini_Generated_Image_uxvjltuxvjltuxvj" src="https://github.com/user-attachments/assets/74cb16d9-e73e-4484-ab68-6f6494885862" />
+This guide describes the typed-claim architecture recorded on 15 September 2026, including the 9 September v2 alignment. It explains the archived implementation and its decisions. The selected standalone prototype uses the later facts/hypothesis contract: see the [current architecture guide](../../../../prototipo/docs/architettura_e_flusso.md). For repository navigation, use the [main README](../../../../README.md).
 
-Il riferimento scientifico e operativo è il
-[protocollo unico](../protocollo_sperimentale.md). Il Dataset da usare è
-`datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/global/rag_examples.jsonl`.
+<img width="1444" height="736" alt="Historical quantum assistant architecture" src="https://github.com/user-attachments/assets/74cb16d9-e73e-4484-ab68-6f6494885862" />
 
-## 1. Spiegazione generale
-
-Il prototipo prepara una raccomandazione di compilazione per un circuito
-quantistico. L'utente invia un circuito OpenQASM 2, sceglie la misura da
-ottimizzare e può restringere i dispositivi utilizzabili.
-
-Il sistema controlla la richiesta con regole deterministiche. Poi legge
-un'istantanea del catalogo hardware e costruisce una maschera dei dispositivi
-ammessi. Solo dopo questi controlli può cercare esempi nel Dataset e interrogare
-il modello linguistico.
-
-Il flusso completo previsto dal codice è:
+The [archived protocol](../protocollo_sperimentale.md) documents the historical rules. The Dataset source, relative to `archivio/esperimento_v2/`, is:
 
 ```text
-richiesta strutturata
-  -> controllo del formato e del circuito
-  -> controllo dei vincoli hardware
-  -> maschera dei dispositivi utilizzabili
-       -> nessun dispositivo: arresto del flusso
-       -> almeno un dispositivo: ricerca nel Dataset
-  -> registro immutabile dei primi esempi recuperati
-  -> richiesta all'LLM
-  -> controllo della risposta JSON e delle evidenze
-       -> risposta errata e tentativi disponibili: nuovo tentativo
-       -> limite raggiunto: arresto con errore
-       -> risposta valida: conferma dell'utente
-  -> compilazione deterministica con Qiskit
+datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/global/rag_examples.jsonl
 ```
 
-Il modello propone un dispositivo, una configurazione Qiskit, affermazioni
-tipizzate e riferimenti alle evidenze. Non scrive la spiegazione mostrata
-all'utente, non genera codice da eseguire e non compila direttamente il
-circuito. La spiegazione viene costruita dal prototipo dopo la validazione. La
-compilazione avviene in un passaggio separato e solo dopo la conferma
-dell'utente.
+## Purpose and flow
 
-La preparazione della richiesta, il catalogo, la maschera hardware e il
-controllo della risposta sono completi. Il codice comprende anche la ricerca
-locale nel Dataset, la costruzione della richiesta per il modello e la
-compilazione finale. L'intero flusso può quindi essere provato con un
-collegamento simulato. La factory usa Qdrant locale persistente e la nuova
-distanza Manhattan. Restano il collegamento a un LLM reale e la valutazione
-della qualità delle sue raccomandazioni sulla validation.
-
-## 2. Struttura della directory e compito dei file
+The assistant prepares a compilation recommendation for an OpenQASM 2 circuit. The user chooses a metric and may restrict eligible devices. Deterministic checks validate the request before Dataset retrieval or LLM access.
 
 ```text
-prototype/
-  README.md
-  __init__.py
-  quantum_assistant/
-    __init__.py
-    controller.py
-    errors.py
-    factory.py
-    models.py
-    ports.py
-    schema_validation.py
-    services.py
-    adapters/
-      __init__.py
-      compilation.py
-      context.py
-      explanations.py
-      hardware.py
-      llm.py
-      parsing.py
-      request.py
-      validation.py
+structured request
+  → format and circuit checks
+  → hardware constraint checks
+  → eligible-device mask
+       → no eligible device: stop
+       → eligible devices: search the Dataset
+  → immutable registry of retrieved examples
+  → LLM request
+  → JSON response and evidence checks
+       → invalid response with attempts left: retry
+       → exhausted attempts: stop with an error
+       → valid response: user confirmation
+  → deterministic Qiskit compilation
 ```
 
-- `prototype/__init__.py` rende il prototipo importabile dal progetto.
-- `quantum_assistant/models.py` definisce le strutture della richiesta, del
-  catalogo, della maschera, del registro delle evidenze, della raccomandazione e
-  della compilazione.
-- `quantum_assistant/ports.py` definisce i confini tra le diverse parti del
-  sistema. In questo modo catalogo, ricerca e modello linguistico possono essere
-  sostituiti senza cambiare il coordinamento generale.
-- `quantum_assistant/errors.py` raccoglie gli errori strutturati della richiesta.
-- `quantum_assistant/schema_validation.py` controlla localmente gli schemi JSON
-  usati dal prototipo.
-- `quantum_assistant/services.py` coordina preparazione, ricerca,
-  raccomandazione e compilazione.
-- `quantum_assistant/controller.py` espone le operazioni utili a una futura
-  interfaccia utente e conserva le raccomandazioni già controllate.
-- `quantum_assistant/factory.py` collega le implementazioni locali e lascia
-  sostituibile il collegamento all'LLM.
-- `quantum_assistant/__init__.py` espone le classi pubbliche del modulo.
+In this historical contract, the model proposes a device, Qiskit configuration, typed claims and evidence references. It does not generate executable code, compile the circuit or write the explanation displayed to the user. The application renders that explanation from validated content. Compilation is a separate confirmed step.
 
-La directory `adapters/` contiene le implementazioni concrete:
+At the time of this record, request preparation, catalog, masking, response checks, retrieval and compilation were implemented and could be tested with a simulated gateway. Connecting a real LLM and assessing recommendation quality were still future steps. Later studies and the selected prototype are documented separately; these historical statuses must not be read as the current project status.
 
-- `request.py` legge il JSON, controlla OpenQASM 2, calcola le caratteristiche
-  del circuito e normalizza i vincoli;
-- `hardware.py` costruisce il catalogo MQT e la maschera hardware;
-- `context.py` costruisce il registro immutabile e prepara il contenuto per il modello;
-- `rag_features.py` definisce ordine, trasformazione train e Manhattan;
-- `rag_dataset.py` verifica l'unico JSONL ammesso, la provenienza e le evidenze;
-- `qdrant_context.py` prepara e verifica il database locale, cerca i vicini e offre
-  il riferimento esaustivo esplicito;
-- `rag_checks.py` prova gli 88 validation fino alla costruzione del prompt;
-- `explanations.py` costruisce la spiegazione finale a partire dai soli dati già
-  validati;
-- `llm.py` definisce un collegamento configurabile al modello linguistico;
-- `validation.py` legge in modo rigoroso la risposta JSON e ne controlla
-  schema, catalogo, maschera, configurazione, affermazioni ed evidenze;
-- `compilation.py` esegue `qiskit.transpile` dopo la conferma e controlla il
-  circuito prodotto;
-- `parsing.py` conserva le importazioni usate dalla versione precedente del
-  prototipo;
-- `__init__.py` raccoglie gli adattatori pubblici.
+## Files and responsibilities
 
-Quattro schemi nella directory principale `schemas/` fanno parte dello stesso
-modulo:
+Paths below are relative to `archivio/esperimento_v2/`.
 
-- `assistant_request.schema.json` descrive la richiesta dell'utente;
-- `hardware_catalog.schema.json` descrive l'istantanea del catalogo;
-- `hardware_mask_result.schema.json` descrive la maschera e la diagnostica dei
-  dispositivi;
-- `llm_recommendation.schema.json` descrive dispositivo, piano Qiskit,
-  affermazioni strutturate e riferimenti alle evidenze. Non accetta una
-  spiegazione libera.
+| File or directory | Responsibility |
+| --- | --- |
+| `prototype/__init__.py` | Makes the prototype importable. |
+| `prototype/quantum_assistant/models.py` | Request, catalog, mask, evidence, recommendation and compilation data structures. |
+| `prototype/quantum_assistant/ports.py` | Interfaces between components, allowing catalog, retrieval and LLM implementations to change independently. |
+| `prototype/quantum_assistant/errors.py` | Structured request errors. |
+| `prototype/quantum_assistant/schema_validation.py` | Local JSON schema checks. |
+| `prototype/quantum_assistant/services.py` | Preparation, retrieval, recommendation and compilation coordination. |
+| `prototype/quantum_assistant/controller.py` | Operations for a UI and storage of validated recommendations. |
+| `prototype/quantum_assistant/factory.py` | Local component wiring and replaceable LLM connection. |
+| `prototype/quantum_assistant/__init__.py` | Public exports. |
 
-I controlli principali si trovano in `tests/test_request_constraints.py`. Le
-prove dell'intero flusso si trovano in
-`tests/test_prototype_architecture.py`. I casi dedicati alla risposta del
-modello e ai nuovi tentativi si trovano in
-`tests/test_llm_output_validation.py`. I controlli sulle affermazioni storiche
-e sulle evidenze si trovano in `tests/test_claim_evidence_validation.py`.
+Concrete implementations are in `prototype/quantum_assistant/adapters/`:
 
-## 3. Implementazione
+| File | Responsibility |
+| --- | --- |
+| `request.py` | JSON and OpenQASM 2 parsing, circuit features and normalized constraints. |
+| `hardware.py` | MQT catalog and hardware mask. |
+| `context.py` | Immutable evidence registry and model context. |
+| `rag_features.py` | Feature order, train-fitted transformation and Manhattan distance. |
+| `rag_dataset.py` | Permitted JSONL source, provenance and evidence checks. |
+| `qdrant_context.py` | Persistent local database, nearest examples and explicit exhaustive reference implementation. |
+| `rag_checks.py` | Checks all 88 validation cases through prompt construction. |
+| `explanations.py` | Deterministic explanation from validated material. |
+| `llm.py` | Configurable LLM gateway. |
+| `validation.py` | Strict JSON, schema, catalog, mask, configuration, claim and evidence checks. |
+| `compilation.py` | Confirmed `qiskit.transpile` call and output checks. |
+| `parsing.py` | Imports retained for compatibility with the earlier prototype. |
+| `__init__.py` | Public adapter exports. |
 
-### 3.1 Richiesta strutturata
+The related schemas are `assistant_request.schema.json`, `hardware_catalog.schema.json`, `hardware_mask_result.schema.json` and the historical `llm_recommendation.schema.json`. They describe the request, catalog snapshot, mask diagnostics and typed-claim recommendation. The last schema does not accept a free-form explanation.
 
-L'utente non scrive i vincoli in una frase libera. Li sceglie tramite campi
-predefiniti, popolati con il catalogo restituito dal sistema.
+Request checks are covered by `tests/test_request_constraints.py`; full-flow checks by `test_prototype_architecture.py`; response and retry checks by `test_llm_output_validation.py`; historical evidence checks by `test_claim_evidence_validation.py`.
 
-I vincoli disponibili sono:
+## Structured request
 
-- fornitori ammessi;
-- dispositivi ammessi;
-- numero minimo e massimo di qubit fisici;
-- gate nativi obbligatori.
-
-`allowed_device_ids` è l'unica lista che restringe direttamente i dispositivi.
-Il prototipo non accetta una lista complementare di dispositivi vietati. Se un
-vincolo non serve, il campo corrispondente viene omesso. Se una lista è
-presente, deve contenere almeno un valore e non può avere duplicati.
-
-La misura viene scelta a parte. La versione corrente supporta solo
-`expected_fidelity`.
-
-Esempio di richiesta:
+Constraints are predefined fields populated from the catalog, not a free-text sentence. They allow provider and device restrictions, minimum and maximum physical qubit counts, and required native gates. `allowed_device_ids` is the only direct device allowlist; a complementary denylist is not accepted. Omit unused constraints. Present lists must be nonempty and unique. The supported metric is `expected_fidelity`.
 
 ```json
 {
@@ -178,241 +90,70 @@ Esempio di richiesta:
   "hardware_constraints": {
     "allowed_provider_ids": ["ibm"],
     "allowed_device_ids": ["ibm_falcon_127"],
-    "device_qubits": {
-      "min": 50,
-      "max": 150
-    },
+    "device_qubits": {"min": 50, "max": 150},
     "required_native_gate_ids": ["cx"]
   }
 }
 ```
 
-L'identificativo mostrato nell'esempio è solo un segnaposto. La richiesta reale
-deve usare il `catalog_snapshot_id` restituito dal catalogo corrente.
+The snapshot ID above is a placeholder. A real request must use the ID returned by the current catalog.
 
-### 3.2 Controllo e normalizzazione
+The first check requires one valid JSON object, with no duplicate keys, nonfinite values or unknown fields. Identifiers, types and lists must match the closed schema. The circuit must be valid OpenQASM 2 with at least one qubit, restricted includes and complete finite features.
 
-Il primo controllo riguarda la forma della richiesta. Verifica, tra le altre
-cose:
+The second check compares providers, devices, gates, metric, qubit range and snapshot identity with the catalog. Gate aliases are normalized; collisions are reported. Errors contain a code, field path and message. Invalid requests stop before Dataset or LLM access.
 
-- che il contenuto sia un singolo oggetto JSON valido;
-- che non ci siano chiavi duplicate, valori non finiti o campi sconosciuti;
-- che identificativi, tipi e liste rispettino lo schema;
-- che il circuito sia OpenQASM 2 valido e usi almeno un qubit;
-- che gli `include` non leggano file arbitrari dal sistema;
-- che le caratteristiche del circuito siano complete e finite.
+## Catalog and hardware mask
 
-Lo schema è chiuso. Per questo ogni campo non previsto viene rifiutato,
-invece di essere ignorato.
+The catalog combines MQT Bench Targets with twelve Qiskit configurations. It records provider, qubit count, native operations, connectivity, Target availability, supported metric, usable configurations, versions and source fingerprints. Validation and masking use the same snapshot.
 
-Il secondo controllo confronta la richiesta con l'istantanea corrente del
-catalogo. Verifica che fornitori, dispositivi, gate e misura esistano. Controlla
-anche l'intervallo dei qubit, l'appartenenza dei dispositivi ai fornitori
-ammessi e la corrispondenza dell'identificativo del catalogo.
+The mask combines every constraint, including the circuit's actual qubit count, which the user cannot reduce. A true entry means the device is eligible. `excluded_devices` contains diagnostics, not another user constraint. Reasons include an excluded provider/device, insufficient qubits, missing gates or an unavailable Target. An entirely false mask produces `NO_ELIGIBLE_DEVICE` without retrieval or an LLM call.
 
-Gli alias dei gate vengono trasformati nel nome comune. Eventuali collisioni
-create dalla normalizzazione vengono segnalate. Gli errori sono restituiti con
-un codice, il percorso del campo e un messaggio. Il flusso si ferma prima del
-Dataset e del modello linguistico.
+## Retrieval, recommendation and compilation
 
-### 3.3 Catalogo e maschera hardware
+Default retrieval uses persistent local Qdrant on the v2 train JSONL only. It filters experiment, objective and allowed winning devices before selecting `k`. Manhattan distance uses 49 features: `log1p` for counts, depth and qubits, identity for indicators, followed by division by each train maximum absolute value, or 1 when that maximum is zero. There is no centering, clipping or L2 normalization. Validation and user requests do not refit divisors.
 
-Il catalogo unisce i Target di MQT Bench al catalogo delle dodici
-configurazioni Qiskit. Per ciascun dispositivo conserva:
+Qdrant distances are checked against the float64 formula with absolute tolerance `1e-5` or relative tolerance `1e-6`. All filtered candidates are retrieved and sorted by canonical distance and RAG ID, including ties at the `k` boundary. Embedded search is exhaustive, without HNSW or payload-index acceleration.
 
-- fornitore e numero di qubit;
-- operazioni e gate nativi selezionabili;
-- connettività;
-- disponibilità del Target;
-- misura supportata;
-- configurazioni Qiskit utilizzabili;
-- versioni e impronta dei dati da cui deriva il Target.
+The model context includes the circuit and features, objective, eligible hardware, retrieved examples, citable evidence registry, twelve permitted configurations and response contract. A concrete model connection is injected. Local simulated and explicitly unconfigured gateways support technical checks.
 
-L'impronta rende l'istantanea stabile e collegabile ai risultati storici del
-Dataset. La stessa istantanea viene usata dalla validazione e dalla maschera, in
-modo che le due fasi non lavorino su cataloghi diversi.
+The historical response must match the request, schema version and catalog snapshot; choose a masked-in device; use `expected_fidelity`; and select a configuration allowed for that device. Reasons are typed claims, parameters and evidence IDs. After validation and confirmation, `qiskit.transpile` runs the selected plan. The output must respect the Target's operations and connectivity.
 
-La maschera applica insieme tutti i vincoli. Tiene conto anche del numero di
-qubit usati dal circuito, che non può essere ridotto dall'utente.
+## Response checks and retries
 
-```text
-1 = dispositivo utilizzabile
-0 = dispositivo non utilizzabile
-```
+The gateway may return JSON text, UTF-8 bytes or a parsed object. Text must contain exactly one JSON object. Extra prose, Markdown fences, multiple objects, duplicate keys and nonfinite values are rejected. Nested `qiskit_plan`, `claims` and `evidence_refs` are also closed schemas.
 
-L'uscita contiene `excluded_devices`, ma questo campo non è un vincolo
-dell'utente. È solo la diagnostica dei dispositivi ai quali la maschera ha
-assegnato zero. Le cause possono essere, per esempio, dispositivo fuori
-dall'elenco ammesso, fornitore diverso, qubit insufficienti, gate mancante o
-Target non disponibile.
+The immutable evidence registry is built once from the retrieved examples. It retains complete labeled records, historical results, configurations, source claims and scientific caveats. Earlier-format records can provide context but cannot support typed historical claims.
 
-Se tutti i valori sono zero, il sistema restituisce l'esito terminale
-`NO_ELIGIBLE_DEVICE`. In questo caso non avvia né la ricerca né il modello
-linguistico.
+Each response reference must resolve the full record/source-claim/evidence relationship and match the recommended device and configuration. References cannot be invented, duplicated, unused or shared by multiple output claims. With historical results, the response must support both choices and include one current-compatibility claim. Without history, only current compatibility and structured evidence-unavailability claims are permitted.
 
-### 3.4 Ricerca, raccomandazione e compilazione
+`explanations.py` renders the final explanation exclusively from validated references and claims. Caveats identify results as observations on historical circuits, not measurements of the current request.
 
-La ricerca predefinita usa Qdrant locale persistente sul solo JSONL train v2.
-Filtra esperimento, obiettivo e dispositivo vincente ammesso dalla maschera
-prima di scegliere i primi `k`. Usa Manhattan sulle 49 feature: log1p per
-conteggi, profondità e qubit, identità per gli indicatori; ogni coordinata è
-divisa per il massimo assoluto train, o per 1 se quel massimo è zero.
-Non applica centraggio, clipping o normalizzazione L2. I divisori non cambiano
-con validation o richieste degli utenti.
+Repair feedback contains only code, path and message. Claim/reference errors can trigger retries, up to three total attempts by default. Invalid requests, inconsistent Dataset/catalog data, no eligible devices and gateway failures do not enter this retry policy. Exhaustion returns `LLM_OUTPUT_VALIDATION_EXHAUSTED`. The normalized request, mask, retrieved examples and registry remain unchanged between attempts. Compilation accepts only a validated recommendation issued by the same service instance.
 
-Le distanze Qdrant sono controllate contro la formula float64, con tolleranza
-assoluta 1e-5 o relativa 1e-6. Si recuperano tutti i candidati filtrati e si
-ordinano per distanza canonica e identificativo RAG. Questo risolve anche
-le parità al confine di `k`. La modalità incorporata è esaustiva, senza HNSW
-né accelerazione tramite indici dei dati associati.
+## v2 alignment decisions
 
-La richiesta per il modello contiene:
+The parser accepts the Dataset pipeline's OpenQASM instructions, including `u`, `cry` and `cp`. Includes are limited to Qiskit's `qelib1.inc`. Default components use `configs/qiskit_dataset_configurations_v2.json`; an explicit catalog can still be supplied. Target hashes use the v2 pipeline function and are checked against frozen values. Version or Target mismatches stop the service.
 
-- circuito e caratteristiche;
-- misura da ottimizzare;
-- soli dispositivi utilizzabili;
-- esempi storici recuperati;
-- il registro delle fonti storiche che possono essere citate;
-- le dodici configurazioni Qiskit consentite;
-- il formato atteso della risposta.
+The hardware catalog contract became `2.0.0`, with snapshot fingerprint schema `assistant-hardware-catalog/3` and Target schema `qiskit-dataset-target/2`. Requests remained `1.0.0`, but must acquire a new snapshot after this change.
 
-Il collegamento a un modello concreto viene fornito dall'esterno. Il prototipo
-include anche un adattatore locale utile per le prove e un adattatore che
-segnala chiaramente quando nessun modello è stato configurato.
+Manhattan replaced the earlier mean of `abs(q[i]-c[i])/(1+max(abs(q[i]),abs(c[i])))`. These formulas are not equivalent; the old formula is not a fallback. The default five examples are distinct from the three configurations stored for each winning device.
 
-La risposta deve riportare la versione dello schema, l'identificativo della
-richiesta e l'impronta del catalogo. Deve inoltre scegliere un dispositivo
-rimasto nella maschera, usare `expected_fidelity` e proporre una configurazione
-Qiskit consentita dal dispositivo. Le motivazioni sono espresse tramite tipi di
-affermazione, parametri e identificativi delle evidenze, non con prosa libera.
+Examples retain the winning device only; other devices are not added to balance labels. If constraints exclude every historical winner, the registry remains empty. This does not mean the requested device is unusable.
 
-Dopo una risposta valida, il sistema attende la conferma dell'utente. Solo
-allora esegue la configurazione già controllata con `qiskit.transpile`. Infine
-verifica che il circuito rispetti operazioni e connettività del Target.
+The 396 train examples were retained. `realamprandom_indep_qiskit_2` and `realamprandom_indep_tket_2` share a semantic fingerprint and both belong to train. This can double-weight that precedent in retrieval; the recorded design accepted that redundancy. File-hash, semantic-hash and circuit-group separation checks remain active. This is not a completed general audit of all equivalent or nearly equivalent circuits.
 
-### 3.5 Validazione della risposta e nuovi tentativi
+## Qdrant commands
 
-Il collegamento al modello può restituire testo JSON, byte UTF-8 oppure un
-oggetto già letto. Il testo viene accettato solo se contiene un singolo oggetto
-JSON. Prosa aggiuntiva, blocchi Markdown, oggetti multipli, chiavi duplicate e
-valori non finiti vengono rifiutati.
-
-Lo schema è chiuso anche dentro `qiskit_plan`, `claims` ed `evidence_refs`.
-Controlla campi obbligatori, tipi, intervalli e valori enumerati. Il controllo
-semantico verifica poi la richiesta, l'istantanea del catalogo, l'esistenza del
-dispositivo, la maschera e l'appartenenza della configurazione alle alternative
-consentite.
-
-Il registro delle evidenze viene costruito una sola volta dai primi `k` esempi
-recuperati. Conserva soltanto i record etichettati completi, insieme a risultati
-storici, configurazioni, affermazioni sorgente e limiti scientifici. I record del
-formato precedente restano utili come contesto, ma non possono sostenere
-affermazioni storiche.
-
-Ogni riferimento della risposta deve appartenere al registro corrente. Il
-validatore controlla il legame completo tra record, affermazione sorgente ed
-evidenza. Controlla inoltre che il dispositivo e la configurazione citati
-coincidano con quelli raccomandati. I riferimenti non possono essere inventati,
-duplicati, lasciati inutilizzati o riusati per più affermazioni.
-
-Quando il registro contiene risultati storici, la risposta deve sostenere sia
-la scelta del dispositivo sia la configurazione. Deve anche dichiarare una sola
-affermazione sulla compatibilità corrente, che viene verificata dal prototipo.
-Quando il registro è vuoto, sono ammesse soltanto questa compatibilità e la
-dichiarazione strutturata che le evidenze storiche non sono disponibili.
-
-Dopo questi controlli, `explanations.py` costruisce la spiegazione. Usa soltanto
-il registro, le affermazioni e i riferimenti validati. Le avvertenze precisano
-che i risultati appartengono a circuiti storici simili e non sono misure del
-circuito corrente.
-
-Ogni errore destinato al nuovo tentativo contiene soltanto codice, percorso e
-messaggio. Gli errori nelle affermazioni e nei riferimenti sono correggibili e
-attivano un nuovo tentativo. Il limite predefinito è di tre tentativi totali ed
-è configurabile. Richiesta non valida, Dataset incoerente, catalogo incoerente,
-assenza di dispositivi ed errori del collegamento non attivano questa politica.
-Dopo l'ultimo rifiuto viene restituito l'errore stabile
-`LLM_OUTPUT_VALIDATION_EXHAUSTED`.
-
-La richiesta normalizzata, la maschera, gli esempi recuperati e il registro non
-cambiano tra i tentativi. Una raccomandazione entra nella conferma e nella
-compilazione solo dopo avere superato tutti i controlli. La compilazione accetta
-soltanto un risultato validato ed emesso dalla stessa istanza del servizio.
-
-### 3.6 Stato e sviluppi successivi
-
-La base applicativa è quindi funzionante dall'ingresso strutturato fino alla
-compilazione confermata. Prima dell'esperimento finale restano da completare:
-
-1. collegamento e congelamento del modello linguistico scelto;
-2. valutazione delle raccomandazioni sulla validation;
-3. valutazione comune di qualità, errori, tempi e costi.
-
-
-## Allineamento alla v2 e decisioni prima del RAG (9 settembre 2026)
-
-Il parser accetta le stesse istruzioni OpenQASM usate dalla pipeline del
-Dataset, comprese `u`, `cry` e `cp`. Gli include restano limitati alla copia
-Qiskit di `qelib1.inc`; non vengono letti file arbitrari dal computer.
-
-Il servizio e i suoi componenti usano per impostazione predefinita
-`configs/qiskit_dataset_configurations_v2.json`. Il catalogo può ancora essere
-passato esplicitamente. Le impronte dei Target sono calcolate con la stessa
-funzione della pipeline v2 e confrontate con quelle congelate. Una differenza
-nelle versioni richieste o nel Target ferma il servizio.
-
-Il contratto JSON del catalogo hardware passa alla versione `2.0.0`.
-L'impronta dello snapshot usa `assistant-hardware-catalog/3`; quella del
-Target usa `qiskit-dataset-target/2`. La richiesta resta alla versione `1.0.0`.
-Dopo l'aggiornamento occorre acquisire il nuovo snapshot per le richieste.
-
-La successiva integrazione Qdrant sostituisce la vecchia media
-`abs(q[i]-c[i])/(1+max(abs(q[i]),abs(c[i])))` con la Manhattan descritta sopra.
-Le due formule non sono equivalenti e la vecchia non è un ripiego.
-Il limite predefinito resta 5 esempi, distinto dalle tre configurazioni
-conservate per il dispositivo vincente.
-
-Gli esempi continuano a contenere il solo dispositivo vincente, con le sue
-configurazioni. Non aggiungiamo altri dispositivi per bilanciare le etichette.
-Se il vincolo hardware esclude tutti i vincitori storici, il registro resta
-vuoto e il sistema dichiara l'assenza di evidenze. Questo non significa che il
-dispositivo richiesto sia inutilizzabile.
-
-Conserviamo i 396 esempi train. Tra questi, `realamprandom_indep_qiskit_2` e
-`realamprandom_indep_tket_2` hanno la stessa impronta semantica. Sono entrambi
-in train: non aggiungono osservazioni a validation o test. La loro presenza
-può dare doppio peso a quel precedente nel recupero; accettiamo questa
-ridondanza per la versione corrente. Restano attivi i controlli di separazione
-per hash del file, hash semantico e gruppo del circuito. Non dichiariamo
-completato un controllo generale di tutte le equivalenze o quasi-equivalenze.
-
-## Uso del recupero Qdrant
-
-Dalla radice del progetto:
+From `archivio/esperimento_v2/`, with the repository-root environment:
 
 ```bash
-.venv/bin/python scripts/17_rag_v2.py prepare
-.venv/bin/python scripts/17_rag_v2.py verify
-.venv/bin/python scripts/17_rag_v2.py validation
-.venv/bin/python scripts/17_rag_v2.py query --qasm PERCORSO.qasm --k 5
-.venv/bin/python scripts/17_rag_v2.py query --qasm PERCORSO.qasm --k 5 --backend reference
+../../.venv/bin/python scripts/17_rag_v2.py prepare
+../../.venv/bin/python scripts/17_rag_v2.py verify
+../../.venv/bin/python scripts/17_rag_v2.py validation
+../../.venv/bin/python scripts/17_rag_v2.py query --qasm /path/to/circuit.qasm --k 5
+../../.venv/bin/python scripts/17_rag_v2.py query --qasm /path/to/circuit.qasm --k 5 --backend reference
 ```
 
-La factory `build_default_service` accetta `retrieval_backend="qdrant"`
-(predefinito), `"reference"` o `"none"`. `retrieval_limit` cambia `k`.
-`none` disattiva deliberatamente il recupero per la variante senza RAG.
-Il parametro storico `dataset_required` resta accettato per compatibilità:
-nel recupero attivo una fonte assente produce sempre errore.
-Non si torna automaticamente al riferimento locale se Qdrant fallisce.
+`build_default_service` accepts `retrieval_backend="qdrant"` (default), `"reference"` or `"none"`; `retrieval_limit` sets `k`. `none` deliberately disables retrieval. The historical `dataset_required` argument remains accepted for compatibility, but missing active-retrieval inputs always fail. A Qdrant error does not silently select the reference implementation.
 
-Il JSONL resta la fonte. Manifest, trasformazione e database sono sotto
-`artifacts/experiments/<identificativo>/rag/index/`.
-La ripetizione di `prepare` verifica una raccolta esistente senza aggiungere
-punti. Una raccolta incoerente deve essere conservata e ricostruita
-esplicitamente. Per trasferimenti tra computer e ricostruzione seguire la
-sezione RAG del [protocollo unico](../protocollo_sperimentale.md).
-
-Il registro è costruito solo dai primi `k` risultati. Mantiene gli stessi
-controlli sui riferimenti e resta immutabile tra i tentativi dell'LLM.
-Zero esempi compatibili è un esito normale; errore del database e raccolta
-alterata fermano il flusso. Le prove tecniche non misurano la qualità LLM.
+JSONL remains the source. Manifest, transformation and database are under `artifacts/experiments/<experiment_id>/rag/index/`. Repeated `prepare` checks an existing collection without adding points. Preserve an inconsistent collection before explicitly rebuilding it. Consult the archived protocol for its transfer procedure; use the autonomous toolkit for new campaigns. Zero compatible examples is a valid outcome; database errors and altered collections stop the flow. These technical checks do not measure LLM quality.

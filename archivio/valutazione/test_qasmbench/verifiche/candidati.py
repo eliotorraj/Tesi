@@ -1,4 +1,4 @@
-"""Verifica statica dei candidati scaricati, senza score o modelli."""
+'Static checks of downloaded candidates, without scores or models.'
 import sys,json,hashlib
 from pathlib import Path
 from datetime import datetime,timezone
@@ -14,9 +14,9 @@ for path in sorted((area/"circuiti").rglob("*.qasm")):
         measured=set()
         for item in flat.data:
             if item.operation.name in ("reset","if_else","while_loop","for_loop") or getattr(item.operation,"condition",None) is not None:
-                raise ValueError("operazioni dinamiche")
+                raise ValueError('dynamic operations')
             if item.operation.name=="measure": measured.update(item.qubits)
-            elif item.operation.name!="barrier" and measured.intersection(item.qubits): raise ValueError("misure intermedie")
+            elif item.operation.name!="barrier" and measured.intersection(item.qubits): raise ValueError('mid-circuit measurements')
         row.update(ok=True,qubits=qc.num_qubits,operations=qc.size())
     except Exception as exc: row.update(ok=False,error=type(exc).__name__,message=str(exc))
     records.append(row)

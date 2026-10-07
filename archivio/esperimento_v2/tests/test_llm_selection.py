@@ -1,4 +1,4 @@
-"""Verifiche delle proprietà scientifiche e della ripresa, con soli dati sintetici."""
+'Scientific-property and resume checks using synthetic data only.'
 import tempfile
 import unittest
 from dataclasses import dataclass
@@ -50,7 +50,7 @@ class SelectionTests(unittest.TestCase):
             loader.assert_not_called()
 
     def test_test_methods_cannot_be_reduced(self):
-        with self.assertRaisesRegex(ValueError,"test richiede"):
+        with self.assertRaisesRegex(ValueError,'Test requires'):
             evaluate_common_methods(split="test",catalog=None,manifest=None,plan=None,capacities=None,
                 qiskit_runs=[],qiskit_summaries=[],llm_decisions={},qcompile_runs=[],
                 method_config_sha256="",llm_method_ids=("llm_rag",),include_qcompile=False)

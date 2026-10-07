@@ -1,4 +1,4 @@
-"""Avvia o riprende RAG fisso e quattro ordini incrementali k=1: qasmbench50."""
+'Start/resume fixed RAG and four incremental k=1 orderings on qasmbench50.'
 import sys
 from pathlib import Path
 sys.dont_write_bytecode = True

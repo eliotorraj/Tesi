@@ -1,7 +1,7 @@
-# Documentazione della preparazione precedente
+# Earlier setup documentation
 
-Questi documenti descrivono le verifiche e gli avvii manuali del 20–21 settembre 2026. Sono conservati integralmente per ricostruire il lavoro.
+`comandi_verifica_manuale.md` records machine-specific checks; `copia_desktop_nativa.md` describes the original Windows copy; `verifica_tecnica.json` records their outcomes. They document September 20–21 setup, including paths and Test status at that time.
 
-`comandi_verifica_manuale.md` contiene comandi legati al computer originale, `copia_desktop_nativa.md` descrive la copia Windows e `verifica_tecnica.json` registra gli esiti di allora. Percorsi, stato del Test e risultati descritti possono essere superati.
+Use the root-level prototype guides for current startup instructions. These historical records do not establish a fresh verification of the present system.
 
-Per le istruzioni attuali usare la [documentazione del prototipo](../../../prototipo/docs/README.md). Non interpretare questi file come una nuova verifica del sistema.
+[Parent directory](../README.md) · [Current repository guide](../../../README.md)

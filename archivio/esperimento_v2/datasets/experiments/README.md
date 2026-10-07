@@ -1,10 +1,11 @@
-# Esperimenti del Dataset
+# Dataset experiments
 
-Ogni sottocartella identifica un esperimento e impedisce di mescolare dati
-prodotti con versioni o condizioni diverse.
+The five-device v2 directory contains the expected-fidelity Dataset produced with MQT Predictor 2.4.0 and its associated Qiskit environment. Experiment identifiers keep versions and conditions separate. Older measurements remain in the protocol v1 archive; new toolkit outputs have their own identifiers.
 
-| Cartella | Significato |
+## Subdirectories
+
+| Directory | Contents |
 | --- | --- |
-| [qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2](qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/README.md) | Esperimento corrente: MQT Predictor 2.4.0, cinque dispositivi, obiettivo `expected_fidelity`. |
+| [qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/](qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/README.md) | Five-device expected-fidelity Dataset. |
 
-I risultati della versione precedente sono nell’[archivio](../../archivio/README.md).
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

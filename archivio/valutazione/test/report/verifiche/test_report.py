@@ -1,4 +1,4 @@
-"""Regressioni con dati inventati. Non avviano il Test o i compilatori quantistici."""
+'Regression checks using synthetic data. Do not run the Test or quantum compilers.'
 import copy
 import sys
 import tempfile

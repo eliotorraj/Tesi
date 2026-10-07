@@ -1,4 +1,4 @@
-"""Controlli su dati invariati, fonti inventate, errori reali e ripresa."""
+'Checks for unchanged data, invented sources, real errors and resume.'
 import copy
 import json
 import tempfile
@@ -91,7 +91,7 @@ class CompactPromptTests(unittest.TestCase):
     def test_real_error_is_sent_to_repair_and_changed_prompt_cannot_reuse_result(self):
         f = self.fixture
         valid = {"selected_device": fixtures.DEVICE_ID, "config_id": fixtures.CONFIGURATION_ID,
-                 "claim": "Scelta basata sull'esempio.", "evidence": ["E1"]}
+                 "claim": 'Choice based on the example.', "evidence": ["E1"]}
         invalid = {**valid, "evidence": ["E5"]}
         responses = [{"content": json.dumps(value), "transport_success": True, "elapsed_seconds": 2.75}
                      for value in (invalid, valid)]

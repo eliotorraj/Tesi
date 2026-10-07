@@ -1,4 +1,4 @@
-"""Esporta una tabella della selezione e conserva i controlli preliminari."""
+'Export a selection table and preserve preliminary checks.'
 import csv,json,sys
 from pathlib import Path
 from uuid import uuid4

@@ -1,4 +1,4 @@
-"""Analisi riproducibile dei soli registri: non avvia modelli o compilazioni quantistiche."""
+'Reproducible analysis of records only: does not start models or quantum compilations.'
 from __future__ import annotations
 import csv, hashlib, json, math, statistics, sys
 from collections import Counter
@@ -27,7 +27,7 @@ def analyze():
     manifest=read(AREA/"manifest.json")
     contract=read(AREA/"preparazione/contratto_congelato.json")
     rows, results, sources = collect()
-    assert len(rows)==50 and len(results)==100, "Campagna incompleta"
+    assert len(rows)==50 and len(results)==100, 'Incomplete campaign'
     assert Counter(r["size_group"] for r in rows)=={"small":30,"medium":15,"large":5}
     cfg=contract["plan"]["analysis"]
     groups=summarize(rows,results,cfg["bootstrap_draws"],cfg["bootstrap_seed"])
@@ -42,7 +42,7 @@ def analyze():
             folder=AREA/"risultati"/method/"circuiti"/r["circuit_id"]
             original=AREA/"circuiti"/r["source_ref"]
             assert sha(original)==r["source_sha256"]
-            # Il runner legge e riscrive testo UTF-8: normalizza CRLF in LF.
+            # The runner reads/writes UTF-8 text, normalizing CRLF to LF.
             assert (folder/"input.qasm").read_text()==original.read_text()
             sources[str(original.relative_to(AREA))]=sha(original)
             if value["status"]=="success":
@@ -57,7 +57,7 @@ def analyze():
                     q=read(p)
                     requests.append({k:q.get(k) for k in ("temperature","seed","n_predict","top_p","top_k","min_p","cache_prompt")})
                 assert len(calls)<=contract["plan"]["llm_max_completed_attempts"]
-            # Impronte dei registri originali, inclusi tentativi, prompt, risposte e circuiti compilati.
+            # Fingerprints cover original attempts, prompts, responses and compiled circuits.
             for p in folder.rglob("*"):
                 if p.is_file(): sources[str(p.relative_to(AREA))]=sha(p)
             detail.append({**r,**value})
@@ -102,7 +102,7 @@ def analyze():
          "calls_histogram":dict(Counter(str(v["llm_calls"]) for v in a)),
          "configs":dict(Counter(v["config_id"] for v in a)),
          "request_parameters":req,"request_count":len(requests)}
-    # Confronto con l'analisi gia conservata: stessa procedura e stessi intervalli.
+    # Compare with the preserved analysis using the same procedure and intervals.
     old=AREA/"report/generati/2026-09-30T09-00-35.872388+00-00-a7fd4923/riepilogo.json"
     if old.exists():
         for group in GROUPS:

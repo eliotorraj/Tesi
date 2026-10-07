@@ -1,4 +1,4 @@
-"""Episodi v4. Le interruzioni fisiche non consumano tentativi logici."""
+'v4 episodes. Physical interruptions do not consume logical attempts.'
 from __future__ import annotations
 import argparse
 import fcntl

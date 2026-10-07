@@ -1,4 +1,4 @@
-"""Controlla parsing e maschera hardware senza RAG, inferenza o compilazioni."""
+'Check parsing and hardware masking without RAG, inference or compilations.'
 import sys,json
 from pathlib import Path
 from uuid import uuid4
@@ -19,7 +19,7 @@ for row in read(SOURCE)["circuits"]:
         request=QasmRequestParser().parse(UiSubmission(request_id=row["circuit_id"],user_text="",qasm2=source_path(row).read_text()))
         request=RequestSemanticValidator().normalize(request,hardware)
         mask=HardwareMaskBuilder().filter(request,hardware)
-        if not mask.available_device_ids: raise ValueError("Nessun dispositivo compatibile")
+        if not mask.available_device_ids: raise ValueError('No compatible device')
         result.update(ok=True,devices=list(mask.available_device_ids),feature_count=len(request.features))
     except Exception as exc:
         result.update(ok=False,error=type(exc).__name__,message=str(exc))

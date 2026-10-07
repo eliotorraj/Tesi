@@ -1,8 +1,5 @@
-# Cache delle prime prove
+# Early compilation cache
 
-`qiskit_dataset_cache/expected_fidelity/` conserva i prodotti intermedi
-delle compilazioni Qiskit precedenti. Le sottocartelle separano ambito,
-dispositivo, circuito e impostazioni.
+`qiskit_dataset_cache/expected_fidelity/` contains intermediate Qiskit results from the first experiments. Subdirectories separate scope, device, circuit and configuration. These files reconstruct earlier attempts; later v2 cache records are kept separately under the archived experiment's `artifacts/experiments/` tree.
 
-Servono a ricostruire quelle prove. La cache corrente è sotto
-[artifacts/experiments/](../../../artifacts/README.md) e rimane separata.
+[Parent directory](../README.md) · [Current repository guide](../../../../../README.md)

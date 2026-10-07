@@ -1,13 +1,13 @@
-"""Controlli del selettore senza imporre vincitori inesistenti."""
+'Check the selector without requiring nonexistent winning classes.'
 from pathlib import Path
 
 def validate_labels(classes, allowed, observed=None):
     values=list(map(str,classes))
     errors=[]
     if not values or len(values)!=len(set(values)) or not set(values).issubset(set(allowed)):
-        errors.append("Classi ML vuote, duplicate o estranee ai dispositivi ammessi")
+        errors.append('ML classes are empty, duplicated or outside the allowed device set')
     if observed is not None and set(values)!=set(map(str,observed)):
-        errors.append("Classi ML diverse dalle etichette osservate nel Training set")
+        errors.append('ML classes differ from the labels observed in the Training set')
     return errors
 
 def validate_ml_classifier(path: Path, observed=None):
@@ -24,12 +24,12 @@ def validate_ml_classifier(path: Path, observed=None):
                        classifier_type=type(model).__module__+"."+type(model).__qualname__)
         errors.extend(validate_labels(classes,FROZEN_DEVICES,observed))
         if width!=EXPECTED_FEATURE_COUNT:
-            errors.append("Numero di caratteristiche ML non valido")
+            errors.append('Invalid ML feature count')
         if not errors:
             probs=np.asarray(model.predict_proba(np.zeros((1,EXPECTED_FEATURE_COUNT))),dtype=float)
             if (probs.shape!=(1,len(classes)) or not np.isfinite(probs).all()
                 or (probs<0).any() or (probs>1).any() or not np.allclose(probs.sum(axis=1),1)):
-                errors.append("Probabilita ML non valide")
+                errors.append('Invalid ML probabilities')
     except Exception as exc:
-        errors.append("Classificatore non caricabile: "+type(exc).__name__+": "+str(exc))
+        errors.append('Cannot load classifier: '+type(exc).__name__+": "+str(exc))
     return details,errors

@@ -1,4 +1,4 @@
-"""Valida e congela decisioni LLM terminali senza consultare gli score."""
+'Validate and freeze terminal LLM decisions without reading scores.'
 
 from __future__ import annotations
 
@@ -76,11 +76,11 @@ def main() -> int:
     )
     if output.exists() and load_jsonl(output) != validated:
         raise SystemExit(
-            f"Decisioni già congelate e diverse; file non modificato: {output}"
+            f'Decisions are already frozen and differ; file left unchanged: {output}'
         )
     if not output.exists():
         atomic_jsonl_write(output, validated)
-    print(f"Decisioni congelate: {output} ({len(validated)} circuiti)")
+    print(f'Frozen decisions: {output} ({len(validated)} circuits)')
     return 0
 
 

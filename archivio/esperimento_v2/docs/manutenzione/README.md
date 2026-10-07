@@ -1,20 +1,11 @@
-# Manutenzione del repository
+# Repository maintenance records
 
-Questa cartella documenta interventi su Git, conservazione e trasferimento dei
-file. Non contiene prove di qualità dei modelli.
+This directory groups dated Git, storage and transfer work. The September 15 LFS removal record includes inventories and verification results. These are repository maintenance records, not experiments measuring model quality.
 
-| Cartella | Contenuto |
+## Subdirectories
+
+| Directory | Contents |
 | --- | --- |
-| [rimozione_lfs_2026-09-15/](rimozione_lfs_2026-09-15/README.md) | Rimozione di Git LFS dalla cronologia e istruzioni per trasferire separatamente i dati pesanti. |
+| [rimozione_lfs_2026-09-15/](rimozione_lfs_2026-09-15/README.md) | Git LFS removal: September 15, 2026. |
 
-Dentro l'intervento del 15 settembre:
-
-| File | Funzione |
-| --- | --- |
-| `README.md` | Motivo, operazioni, controlli e trasferimento sull'altro computer. |
-| `oggetti_lfs.json` | Inventario degli oggetti LFS. |
-| `percorsi_esclusi.txt` | Percorsi rimossi dalla cronologia. |
-| `verifica_cronologia.json` | Risultati dei controlli sulla cronologia riscritta. |
-| `richiesta_supporto.md` | Testo predisposto per il supporto GitHub; la presenza del file non implica l'invio. |
-
-Il solo clone del repository non ricostruisce i dati e i modelli esterni.
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

@@ -1,4 +1,4 @@
-"""Prepara, verifica e prova il recupero RAG senza LLM né compilazioni."""
+'Prepare, verify and test RAG retrieval without an LLM or compilation.'
 
 from __future__ import annotations
 
@@ -29,10 +29,10 @@ def main() -> int:
     parser.add_argument("--devices", nargs="+", choices=FROZEN_DEVICES)
     args = parser.parse_args()
     if args.k < 0:
-        parser.error("--k deve essere non negativo.")
+        parser.error('--k must be non-negative.')
     if args.action == "query":
         if args.qasm is None:
-            parser.error("query richiede --qasm.")
+            parser.error('query requires --qasm.')
         service = build_default_service(device_names=FROZEN_DEVICES, llm_gateway=UnconfiguredLlmGateway(),
                                         retrieval_limit=args.k, retrieval_backend=args.backend)
         report = prepare_prompt(service, args.qasm, devices=args.devices)

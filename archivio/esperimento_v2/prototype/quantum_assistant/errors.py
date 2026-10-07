@@ -1,4 +1,4 @@
-"""Errori strutturati prodotti durante la preparazione della richiesta."""
+'Structured errors produced during request preparation.'
 
 from __future__ import annotations
 
@@ -6,12 +6,12 @@ from .models import ValidationReport
 
 
 class RequestValidationError(ValueError):
-    """Segnala una richiesta non valida prima del recupero dei dati."""
+    'Report an invalid request before data retrieval.'
 
     retryable = False
 
     def __init__(self, report: ValidationReport) -> None:
-        """Conserva il rapporto e prepara un messaggio leggibile."""
+        'Retain the report and prepare a readable message.'
         self.report = report
         self.code = (
             report.issues[0].code if report.issues else "REQUEST_VALIDATION_FAILED"
@@ -19,10 +19,10 @@ class RequestValidationError(ValueError):
         message = "; ".join(
             f"{issue.path}: {issue.message}" for issue in report.issues
         )
-        super().__init__(message or "Richiesta non valida.")
+        super().__init__(message or 'Invalid request.')
 
     def to_dict(self) -> dict[str, object]:
-        """Restituisce l'errore in un formato adatto alla UI."""
+        'Return the error in a UI-ready format.'
         return {
             "code": self.code,
             "retryable": self.retryable,

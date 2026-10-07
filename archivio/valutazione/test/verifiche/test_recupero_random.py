@@ -1,4 +1,4 @@
-"""Verifiche tecniche: nessuna inferenza e nessun circuito Test eseguito."""
+'Technical checks: no inference and no Test circuit executed.'
 from pathlib import Path
 import sys
 import tempfile
@@ -40,17 +40,17 @@ class RandomRetrievalTests(unittest.TestCase):
         chosen, meta = select_records(self.corpus, [device], "expected_fidelity", "x", 1)
         self.assertEqual(meta["candidate_count"], len(expected))
         self.assertTrue(all(r["selected_device"]["device_id"] == device for r in chosen))
-        # Meno di cinque candidati: nessun ripiego su altri split o dispositivi.
+        # Fewer than five candidates: no fallback to other splits or devices.
         with self.assertRaises(ValueError):
             select_records(replace(self.corpus, records=tuple(expected[:4])), [device],
                            "expected_fidelity", "x", 1)
 
     def test_bell_prompt_preserves_aliases_and_validator_without_qdrant(self):
-        with patch("app.prepare_index", side_effect=AssertionError("Indice vietato")), \
+        with patch("app.prepare_index", side_effect=AssertionError('Index forbidden')), \
              patch("prototype.quantum_assistant.adapters.qdrant_context.manhattan",
-                   side_effect=AssertionError("Distanza vietata")), \
+                   side_effect=AssertionError('Distance forbidden')), \
              patch("prototype.quantum_assistant.adapters.qdrant_context.query_exact",
-                   side_effect=AssertionError("Ricerca vietata")):
+                   side_effect=AssertionError('Retrieval forbidden')):
             _, prompt, log = prepare_random((ROOT/"examples/bell.qasm").read_text(), seed=1)
         view = model_input(prompt)
         self.assertEqual(len(view["retrieved_labeled_examples"]), 5)
@@ -61,7 +61,7 @@ class RandomRetrievalTests(unittest.TestCase):
         example = view["retrieved_labeled_examples"][0]
         response = {"selected_device": example["selected_device"], "config_id": "o2_default_default",
                     "facts": [{"assertion": "selected_device_matches_example", "example_id": "E1"}],
-                    "hypothesis": "Proposta tecnica non verificata."}
+                    "hypothesis": 'Unverified technical proposal.'}
         self.assertEqual(verify(response, prompt)["facts_status"], "verified")
 
     def test_contract_refuses_mixed_resume_and_preserves_bytes(self):
@@ -93,7 +93,7 @@ class RandomRetrievalTests(unittest.TestCase):
                 "config_id": "o2_default_default", "facts": [], "hypothesis": "Synthetic stub"},
                 "facts_status": "verified"}
         with tempfile.TemporaryDirectory() as directory, \
-             patch("app.prepare", side_effect=AssertionError("Preparazione standard vietata")), \
+             patch("app.prepare", side_effect=AssertionError('Standard preparation forbidden')), \
              patch("app.decide", side_effect=decide), \
              patch.object(runner, "compile_job", return_value={"status": "success", "score": 0.5}):
             folder = Path(directory)

@@ -1,4 +1,4 @@
-"""Registro eseguibile della derivazione iniziale; rifiuta strumenti gia presenti."""
+'Executable record of the initial derivation; rejects existing tools.'
 import hashlib,json
 from pathlib import Path
 AREA=Path(__file__).resolve().parents[1]
@@ -9,7 +9,7 @@ def put(name,text):
     path.parent.mkdir(parents=True,exist_ok=True)
     with path.open("x",encoding="utf-8") as out: out.write(text)
 def change(text,old,new):
-    if old not in text: raise ValueError("Fonte inattesa: "+old[:100])
+    if old not in text: raise ValueError('Unexpected source: '+old[:100])
     return text.replace(old,new)
 sources={}
 for name in ("common.py","runner.py","gates.py","mqt_gate.py","score.py","worker.py"):
@@ -32,37 +32,39 @@ for name in ("common.py","runner.py","gates.py","mqt_gate.py","score.py","worker
 '''
     elif name=="runner.py":
         text=text.replace('"test"','"external_test"')
-        text=change(text,'Esegue/riprende i 90 circuiti Test','Esegue/riprende i 50 circuiti QASMBench')
+        text=change(text,'Run/resume the 90 Test circuits','Run/resume the 50 QASMBench circuits')
         text=change(text,'else 90,','else 50,')
-        text=change(text,'from report import generate\n        output=generate(base)\n        print("Risultati e rapporto: "+str(output))',
-                    'print("Risultati: "+str(base)+". Analisi separata: analizza.py")')
+        text=change(text,"""from report import generate
+        output=generate(base)
+        print(\"Results and report: \"+str(output))""",
+                    'print("Results: "+str(base)+". Separate analysis: analizza.py")')
         text=change(text,'"method":method,\n              "retries"', '"method":method,"size_group":row.get("size_group"),\n              "retries"')
     elif name=="gates.py":
         start=text.index('def corpus():')
         end=text.index('def software_targets():')
-        corpus='''def corpus():
+        corpus="""def corpus():
     manifest=read(SOURCE)
-    if sha(SOURCE)!=read(PLAN)["manifest_sha256"]:
-        raise ValueError("Manifest QASMBench cambiato.")
-    rows=manifest["circuits"]
-    if len(rows)!=50 or Counter(r["size_group"] for r in rows)!={"small":30,"medium":15,"large":5}:
-        raise ValueError("Richiesti 30 piccoli, 15 medi, 5 grandi.")
-    if len({r["circuit_id"] for r in rows})!=50 or len({r["source_sha256"] for r in rows})!=50:
-        raise ValueError("Identita o contenuti duplicati.")
-    original=read(EXPERIMENT/"manifests/source_circuits_v2.json")
-    previous={r["source_sha256"] for r in original["circuits"]}
+    if sha(SOURCE)!=read(PLAN)[\"manifest_sha256\"]:
+        raise ValueError(\"QASMBench manifest changed.\")
+    rows=manifest[\"circuits\"]
+    if len(rows)!=50 or Counter(r[\"size_group\"] for r in rows)!={\"small\":30,\"medium\":15,\"large\":5}:
+        raise ValueError(\"30 small, 15 medium and 5 large circuits are required.\")
+    if len({r[\"circuit_id\"] for r in rows})!=50 or len({r[\"source_sha256\"] for r in rows})!=50:
+        raise ValueError(\"Duplicate identities or contents.\")
+    original=read(EXPERIMENT/\"manifests/source_circuits_v2.json\")
+    previous={r[\"source_sha256\"] for r in original[\"circuits\"]}
     for row in rows:
-        if row["split"]!="external_test" or sha(source_path(row))!=row["source_sha256"]:
-            raise ValueError("Sorgente o partizione cambiati: "+row["circuit_id"])
-        if row["source_sha256"] in previous:
-            raise ValueError("Sovrapposizione byte-identica col corpus MQT.")
-    verify_files(AREA/"circuiti",manifest["support_files"])
-    return {"source_sha256":sha(SOURCE),"counts":manifest["counts"],"revision":manifest["revision"]}
+        if row[\"split\"]!=\"external_test\" or sha(source_path(row))!=row[\"source_sha256\"]:
+            raise ValueError(\"Source or split changed: \"+row[\"circuit_id\"])
+        if row[\"source_sha256\"] in previous:
+            raise ValueError(\"Byte-identical overlap with the MQT corpus.\")
+    verify_files(AREA/\"circuiti\",manifest[\"support_files\"])
+    return {\"source_sha256\":sha(SOURCE),\"counts\":manifest[\"counts\"],\"revision\":manifest[\"revision\"]}
 
-'''
+"""
         text=text[:start]+corpus+text[end:]
         text=change(text,'plan["circuits"]==90','plan["circuits"]==50')
-        # Requisiti separati: ML/RL richiesti solo da MQT, selezione LLM/RAG solo da LLM.
+        # Separate requirements: ML/RL only for MQT, LLM/RAG selection only for LLM methods.
         text=change(text,'for name, fn in (("local_llm_v2",selection_v2),("corpus",corpus),("software_targets",software_targets),\n                     ("rag_train_integrity",rag_integrity)):',
            'tasks=[("corpus",corpus),("software_targets",software_targets)]\n    if method=="llm_rag": tasks += [("local_llm_v2",selection_v2),("rag_train_integrity",rag_integrity)]\n    for name, fn in tasks:')
     elif name=="worker.py":
@@ -71,13 +73,7 @@ for name in ("common.py","runner.py","gates.py","mqt_gate.py","score.py","worker
         text=change(text,'rl_compile(circuit, device=device,','rl_compile(circuit, device=selected,')
     put("strumenti/"+name,text)
 for method in ("llm_rag","mqt_predictor"):
-    put(method+".py",f'''"""Avvio indipendente QASMBench: {method}."""
-import sys
-from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))
-from runner import cli
-if __name__=="__main__": raise SystemExit(cli("{method}"))
-''')
+    put(method+".py",f'"""Independent QASMBench launch: {method}."""\nimport sys\nfrom pathlib import Path\nsys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))\nfrom runner import cli\nif __name__=="__main__": raise SystemExit(cli("{method}"))\n')
 plan=json.loads((AREA.parent/"test/piano.json").read_text())
 plan.update(test_id="qasmbench-independent-v1",methods=["llm_rag","mqt_predictor"],
     split="external_test",circuits=50,manifest_sha256=sha(AREA/"manifest.json"),
@@ -88,13 +84,13 @@ for key in ("no_rag_policy","frontier_model"): plan.pop(key,None)
 put("piano.json",json.dumps(plan,ensure_ascii=False,indent=2)+"\n")
 put("provenienza_codice.json",json.dumps(sources,indent=2)+"\n")
 put(".gitignore","__pycache__/\nrisultati/\npreparazione/\nprove_tecniche/\nreport/generati/\n")
-# Conserva i quattro candidati esclusi fuori dai cinquanta circuiti del manifest.
+# Preserve the four excluded candidates outside the manifest's fifty circuits.
 selected={r["source_ref"] for r in json.loads((AREA/"manifest.json").read_text())["circuits"]}
 for path in (AREA/"circuiti").rglob("*.qasm"):
     rel=path.relative_to(AREA/"circuiti")
     if rel.as_posix() not in selected:
         target=(AREA/"verifiche/esclusi"/rel).resolve()
-        if not target.is_relative_to(AREA.resolve()): raise ValueError("Percorso esterno")
+        if not target.is_relative_to(AREA.resolve()): raise ValueError('External path')
         target.parent.mkdir(parents=True,exist_ok=True)
         path.rename(target)
-print("Strumenti indipendenti predisposti.")
+print('Independent tools prepared.')

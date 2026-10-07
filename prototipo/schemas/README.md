@@ -1,5 +1,5 @@
-# Contratti JSON
+# JSON contracts
 
-Gli schemi descrivono richieste, evidenze e risposte ammesse. Il comando pubblico usa `llm_recommendation_v4.schema.json` tramite `prototype/prompting/facts.py`; altri schemi sono necessari alle strutture intermedie del framework.
+The schemas describe requests, evidence and accepted responses. The public client uses `llm_recommendation_v4.schema.json` through `prototype/prompting/facts.py`. Other schemas cover intermediate structures.
 
-Un JSON sintatticamente valido non basta: si controllano anche appartenenza al catalogo, compatibilità del dispositivo e fatti rispetto al prompt. Le impronte dei contratti fanno parte dell'integrità del pacchetto. Per il significato dei controlli leggere [architettura e flusso](../docs/architettura_e_flusso.md).
+Checks include catalog membership, device compatibility and facts matched against prompt evidence. Contract hashes are part of package integrity. See [architecture and data flow](../docs/architettura_e_flusso.md).

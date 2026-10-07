@@ -1,4 +1,4 @@
-"""Campagna sequenziale su 50 circuiti QASMBench; nessuna inferenza senza --esegui."""
+'Sequential campaign on 50 QASMBench circuits; no inference without --esegui.'
 from __future__ import annotations
 import argparse
 import platform
@@ -10,29 +10,29 @@ def preflight():
     from gates import software_targets
     from prototype.quantum_assistant.adapters.rag_dataset import load_corpus
     from common import STUDY
-    # Verifica gli artefatti selezionati effettivamente usati. I vecchi prompt
-    # di validation non sono dipendenze di questa nuova campagna.
+    # Check the selected artifacts actually used. Earlier validation prompts
+    # are not dependencies of this new campaign.
     selected = read(STUDY / "final_configuration.json")
     current = read(PROTOTIPO / "config.json")
     if current.get("source_sha256") != sha(STUDY / "final_configuration.json"):
-        raise ValueError("Provenienza della configurazione selezionata cambiata.")
+        raise ValueError('Selected configuration provenance changed.')
     for key in ("study_id", "winner", "configuration", "fixed"):
         if current[key] != selected[key]:
-            raise ValueError("Configurazione diversa dalla selezione: " + key)
+            raise ValueError('Configuration differs from selection: ' + key)
     for key, value in current["profile"].items():
         if selected["profile"].get(key) != value:
-            raise ValueError("Profilo diverso dalla selezione: " + key)
+            raise ValueError('Profile differs from selection: ' + key)
     if current["winner"] != "qwen/p0_t0":
-        raise ValueError("Questa campagna richiede Qwen selezionato a temperatura zero.")
+        raise ValueError('This campaign requires selected Qwen at temperature zero.')
     plan = read(BASE / "piano.json")
     fixed = {"metric": "expected_fidelity", "initial_examples": 396, "circuits": 50,
              "k": 5, "qiskit_seed": 0, "max_completed_llm_attempts": 3,
              "temperature": 0, "context": 60000, "order_ids": list(ORDERS)}
     if any(plan.get(key) != value for key, value in fixed.items()):
-        raise ValueError("Il piano dichiara impostazioni non supportate da questa procedura.")
+        raise ValueError('The plan declares settings unsupported by this procedure.')
     for key in ("llm_timeout_seconds", "compilation_timeout_seconds"):
         if type(plan.get(key)) is not int or plan[key] <= 0:
-            raise ValueError("Timeout non valido: " + key)
+            raise ValueError('Invalid timeout: ' + key)
     targets = software_targets()
     rows = test_rows()
     corpus = load_corpus(verify_features=True)
@@ -42,7 +42,7 @@ def preflight():
         "selected_configuration": {"ok": True, "sha256": current["source_sha256"]},
         "train": {"ok": True, "records": len(corpus.records)},
         "test": {"ok": True, "circuits": len(rows)}}}
-    # Nessun risultato oracle è aperto da questo modulo o dall'adattatore.
+    # Neither this module nor the adapter opens oracle outcomes.
     return check, rows, corpus, baseline
 
 
@@ -84,7 +84,7 @@ def run_campaign(base, contract, corpus, args, *, evaluator=None):
             continue
         folder = step_folder(base, position, row)
         if (folder / "esito.json").exists():
-            pass  # Esito pubblicato prima dell'interruzione: completare solo l'ammissione.
+            pass  # Outcome published before interruption: complete admission only.
         elif folder.exists():
             recover_interruption(folder, row, position)
         else:
@@ -97,10 +97,9 @@ def run_campaign(base, contract, corpus, args, *, evaluator=None):
             if not (folder / "esito.json").exists():
                 if pending:
                     raise pending
-                raise ValueError("Valutatore terminato senza esito.")
+                raise ValueError('Evaluator ended without an outcome.')
             records, previous = finish_step(base, contract, position, row, records, previous)
-            print(f"{contract['order']} {position}/{len(contract['rows'])}: {row['circuit_id']} "
-                  f"{read(folder / 'esito.json')['status']}; memoria={len(records)}", flush=True)
+            print(f"{contract['order']} {position}/{len(contract['rows'])}: {row['circuit_id']} {read(folder / 'esito.json')['status']}; memory={len(records)}", flush=True)
             if pending:
                 raise pending
             continue
@@ -110,17 +109,17 @@ def run_campaign(base, contract, corpus, args, *, evaluator=None):
 
 
 def verify_server(args):
-    """Verifica GGUF e contesto usando lo stesso trasporto delle richieste LLM."""
+    'Verify GGUF and context using the same transport as LLM requests.'
     import subprocess
     import urllib.request
     from pathlib import PureWindowsPath
     from app import CONFIG, PROFILES, Http
     model = args.model_path
     if model is None or not model.is_file():
-        raise ValueError("--model-path deve indicare il GGUF usato dal server.")
+        raise ValueError('--model-path must identify the GGUF served by the server.')
     artifact = CONFIG["profile"]["artifact"]
     if model.stat().st_size != artifact["size_bytes"] or sha(model) != artifact["gguf_sha256"]:
-        raise ValueError("Il GGUF non coincide con il modello selezionato.")
+        raise ValueError('GGUF does not match the selected model.')
     http = Http(args.url, timeout=20, transport=args.transport)
     if http.transport == "windows":
         process = subprocess.run(
@@ -134,16 +133,16 @@ def verify_server(args):
     requested = PROFILES["desktop"]
     allocated = ((requested + 255) // 256) * 256
     if type(context) is not int or context not in (requested, allocated):
-        raise ValueError(f"Contesto server diverso da {requested} ({allocated} dopo allineamento): {context}")
+        raise ValueError(f'Server context differs from {requested} ({allocated} after alignment): {context}')
     served = props.get("model_path", "")
     if PureWindowsPath(served).name != model.name and Path(served).name != model.name:
-        raise ValueError("Nome del modello servito diverso dal GGUF fornito.")
+        raise ValueError('Served model name differs from the supplied GGUF.')
     served_path = Path(served)
     if os.name == "posix" and PureWindowsPath(served).drive:
         win = PureWindowsPath(served)
         served_path = Path("/mnt") / win.drive[0].lower() / Path(*win.parts[1:])
     if not served_path.is_file() or sha(served_path) != artifact["gguf_sha256"]:
-        raise ValueError("Impossibile verificare il GGUF dichiarato dal server: " + served)
+        raise ValueError("Cannot verify the server's declared GGUF: " + served)
     return {"model_sha256": artifact["gguf_sha256"], "props": props, "url": http.url,
             "context_requested": requested, "context_reported": context, "transport": http.transport}
 
@@ -151,11 +150,11 @@ def verify_server(args):
 def cli(argv=None, default_order=None):
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--verifica", action="store_true", help="Controlli offline; nessuna inferenza")
-    mode.add_argument("--prepara", action="store_true", help="Congela quattro ordini e memorie vuote")
-    mode.add_argument("--esegui", action="store_true", help="Avvia o riprende le nuove decisioni")
+    mode.add_argument("--verifica", action="store_true", help='Offline checks without inference')
+    mode.add_argument("--prepara", action="store_true", help='Freeze four orderings and empty memories')
+    mode.add_argument("--esegui", action="store_true", help='Start or resume new decisions')
     parser.add_argument("--ordine", choices=ORDERS, default=default_order)
-    parser.add_argument("--tutti", action="store_true", help="Esegue i quattro ordini in sequenza")
+    parser.add_argument("--tutti", action="store_true", help='Run the four orderings sequentially')
     parser.add_argument("--experiment-id", default=DEFAULT_ID)
     parser.add_argument("--url", default="http://127.0.0.1:8089")
     parser.add_argument("--model-path", type=Path)
@@ -163,19 +162,19 @@ def cli(argv=None, default_order=None):
     args = parser.parse_args(argv)
     import signal
     def stop(signum, frame):
-        raise KeyboardInterrupt("Arresto richiesto con SIGTERM; esiti conservati.")
+        raise KeyboardInterrupt('SIGTERM stop requested; outcomes preserved.')
     signal.signal(signal.SIGTERM, stop)
     if args.ordine and args.tutti:
-        parser.error("Scegli --ordine oppure --tutti.")
+        parser.error('Choose --ordine or --tutti.')
     if args.esegui and not (args.ordine or args.tutti):
-        parser.error("--esegui richiede --ordine oppure --tutti.")
+        parser.error('--esegui requires --ordine or --tutti.')
     if not args.url.startswith(("http://127.0.0.1:", "http://localhost:")):
-        parser.error("Serve un server locale.")
+        parser.error('A local server is required.')
     selected = [args.ordine] if args.ordine else list(ORDERS)
     for order in selected:
         campaign_path(args.experiment_id, order)
     import portalocker
-    # Il server e le misure temporali non sono condivisi fra avvii simultanei.
+    # Concurrent launches must not share the server or timing measurements.
     with portalocker.Lock(str(BASE / ".campaign.lock"), timeout=0):
         check, rows, corpus, baseline = preflight()
         if args.verifica:

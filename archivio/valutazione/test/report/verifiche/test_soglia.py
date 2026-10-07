@@ -1,4 +1,4 @@
-"""Controlli della nuova soglia descrittiva, senza avviare il Test."""
+'Checks for the new descriptive threshold, without running the Test.'
 import sys
 import unittest
 from pathlib import Path

@@ -149,7 +149,7 @@ class ModelArtifactTests(unittest.TestCase):
             expected_num_timesteps=200_000,
         )
         self.assertTrue(
-            any("num_timesteps non conforme" in error for error in errors)
+            any('num_timesteps mismatch' in error for error in errors)
         )
 
         payload["model_sha256"] = "different"
@@ -183,7 +183,7 @@ class ModelArtifactTests(unittest.TestCase):
         incomplete = self.root / "incomplete.joblib"
         joblib.dump(DummyClassifier(FROZEN_DEVICES[:1]), incomplete)
         _metadata, errors = validate_ml_classifier(incomplete)
-        self.assertTrue(any("classi non conformi" in error for error in errors))
+        self.assertTrue(any('classes do not match' in error for error in errors))
 
     def test_atomic_copy_refuses_different_destination_without_overwrite(self) -> None:
         source = self.root / "source.zip"
@@ -232,17 +232,17 @@ class QcompileAuditTests(unittest.TestCase):
             truncated=True,
         )
         self.assertIn(
-            "trace non terminato da terminate",
+            'trace does not end with terminate',
             QCOMPILE_AUDIT.strict_result_problems(truncated),
         )
         self.assertIn(
-            "episodio RL troncato",
+            'truncated RL episode',
             QCOMPILE_AUDIT.strict_result_problems(truncated),
         )
 
         invalid_target = dict(valid, validation={"is_executable_on_target": False})
         self.assertIn(
-            "circuito non eseguibile sul Target",
+            'circuit is not executable on the Target',
             QCOMPILE_AUDIT.strict_result_problems(invalid_target),
         )
 
@@ -256,7 +256,7 @@ class QcompileAuditTests(unittest.TestCase):
         }
         self.assertTrue(
             any(
-                "device fuori protocollo" in problem
+                'device outside the protocol' in problem
                 for problem in QCOMPILE_AUDIT.strict_result_problems(result)
             )
         )

@@ -1,4 +1,4 @@
-"""Esecuzione riprendibile. Questo modulo non carica la matrice degli score."""
+'Resumable execution. This module does not load the score matrix.'
 from __future__ import annotations
 import argparse
 import copy

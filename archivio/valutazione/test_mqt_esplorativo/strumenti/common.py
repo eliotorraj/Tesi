@@ -1,4 +1,4 @@
-"""Percorsi, scritture atomiche e identita del Test indipendente."""
+'Paths, atomic writes and identity of the independent Test.'
 from __future__ import annotations
 import hashlib
 import json
@@ -36,7 +36,7 @@ def sha(path):
     return h.hexdigest()
 
 def save(path, value):
-    """Un record pubblicato non viene mai sovrascritto."""
+    'Never overwrite a published record.'
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name("." + path.name + "." + uuid4().hex + ".tmp")
@@ -53,7 +53,7 @@ def save(path, value):
 def contained(root, name):
     p = (root / name).resolve()
     if not p.is_relative_to(root.resolve()):
-        raise ValueError("Percorso esterno alla fonte: " + str(name))
+        raise ValueError('Path outside the source: ' + str(name))
     return p
 
 def source_path(record):
@@ -61,10 +61,10 @@ def source_path(record):
     return contained(ARCHIVE / "archivio/protocollo_v1", record["source_ref"])
 
 def code_files():
-    """Legge le due aree mantenendo le chiavi logiche precedenti al trasloco.
+    """Read both areas while retaining the logical keys used before the move.
 
-    Le impronte cambiate restano visibili: freeze() rifiuta la ripresa di un
-    contratto precedente, senza riscriverlo o mescolare revisioni del codice.
+    Changed fingerprints remain visible: freeze() rejects resuming a previous
+    contract without rewriting it or mixing code revisions.
     """
     paths = [ROOT / "config.json", PLAN, ROOT / "requirements.txt", ROOT / "docs/protocollo_sperimentale.md"]
     for root, folders in ((ROOT, ("prototype", "qiskit_dataset", "scripts", "schemas")),

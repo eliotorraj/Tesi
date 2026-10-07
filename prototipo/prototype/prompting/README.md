@@ -1,7 +1,12 @@
-# Prompt, TOON e risposta facts v4
+# Prompts, TOON and facts v4
 
-`minimal.py` costruisce la vista del circuito, dei Target e degli esempi train. `toon.py` la codifica tramite il codec ufficiale e controlla che la decodifica ricostruisca gli stessi dati. `facts.py` prepara le istruzioni, definisce lo schema v4 e verifica coppia e fatti dichiarati dal modello.
+| Entry | Purpose |
+| --- | --- |
+| `minimal.py` | Build circuit, device and train-example views. |
+| `toon.py` | Encode the view and verify a round trip. |
+| `facts.py` | Build instructions and check choices and declared facts. |
+| [toon_runtime/](toon_runtime/README.md) | Locked Node.js codec used by Python. |
 
-La risposta contiene dispositivo, configurazione, uno o due fatti e un'ipotesi libera. Il comando può chiedere fino a tre risposte complete. Al terzo tentativo una coppia strutturalmente valida e ammessa può essere accettata con fatti non verificati, registrandolo. L'ipotesi libera non riceve una certificazione semantica.
+Responses contain a device, a configuration, one or two facts and a free hypothesis. The client allows up to three complete responses. On the final attempt an allowed, structurally valid pair may be accepted with unverified facts, recorded explicitly. The hypothesis is not semantically certified.
 
-`toon_runtime/` richiede Node.js 22 e installazione npm dal lock. Lo prepara `setup.sh` su Linux. La stessa preparazione Python/TOON serve sia al percorso CPU sia al client del fisso: il server llama.cpp è separato. Per il dettaglio leggere [architettura e flusso](../../docs/architettura_e_flusso.md).
+Node.js 22 must be available in the client environment even when Qwen runs elsewhere. See [architecture and data flow](../../docs/architettura_e_flusso.md).

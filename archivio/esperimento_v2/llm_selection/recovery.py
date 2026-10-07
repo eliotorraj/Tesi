@@ -1,4 +1,4 @@
-"""Ispezione delle scritture interrotte; conserva sempre i file originali."""
+'Inspect interrupted writes while always preserving original files.'
 import json
 from pathlib import Path
 from .common import OUTPUT, now, write_json

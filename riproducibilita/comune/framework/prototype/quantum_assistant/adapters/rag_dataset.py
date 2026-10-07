@@ -1,4 +1,4 @@
-"""Fonte RAG unica, provenienza train ed evidenze verificate."""
+'Single RAG source with verified train provenance and evidence.'
 
 from __future__ import annotations
 
@@ -26,11 +26,11 @@ DEFAULT_RAG_ROOT = ROOT / "runtime/rag"
 
 def assert_records_belong_to_split(records, *, allowed_split, manifest):
     if any(r.get("split") != allowed_split for r in records):
-        raise RetrievalIntegrityError("Corpus fuori train.")
+        raise RetrievalIntegrityError('Corpus outside train.')
 
 SCHEMA_PATH = SCHEMAS / "qiskit_rag_example.schema.json"
 COLLECTION_NAME = "circuit49_manhattan_v1"
-# Impronta del manifest v2 già congelata nel protocollo, non una nuova partizione.
+# v2 manifest fingerprint already frozen in the protocol, not a new split.
 FROZEN_SOURCE_MANIFEST_SHA256 = "c599eab17b6f64528067016e3d175cbfed597334f779ef8e515cf8787a788f53"
 
 
@@ -39,12 +39,12 @@ def strict_json(text: str) -> Any:
         result = {}
         for key, value in items:
             if key in result:
-                raise RetrievalIntegrityError(f"Chiave JSON duplicata: {key}.")
+                raise RetrievalIntegrityError(f'Duplicate JSON key: {key}.')
             result[key] = value
         return result
 
     def invalid(value: str) -> None:
-        raise RetrievalIntegrityError(f"Numero JSON non finito: {value}.")
+        raise RetrievalIntegrityError(f'Non-finite JSON number: {value}.')
 
     return json.loads(text, object_pairs_hook=pairs, parse_constant=invalid)
 
@@ -79,9 +79,9 @@ def validate_records(records: list[dict[str, Any]], manifest: Mapping[str, Any])
     schema = strict_json(SCHEMA_PATH.read_text())
     ensure_supported_schema(schema)
     if not records:
-        raise RetrievalIntegrityError("Il Dataset RAG è vuoto.")
+        raise RetrievalIntegrityError('The RAG Dataset is empty.')
     if manifest.get("experiment_id") != EXPERIMENT_ID:
-        raise RetrievalIntegrityError("Manifest di un altro esperimento.")
+        raise RetrievalIntegrityError('Manifest belongs to another experiment.')
     assert_records_belong_to_split(records, allowed_split="train", manifest=manifest)
     allowed = {(r["source_sha256"], r["circuit_id"]): r for r in manifest["circuits"] if r["split"] == "train"}
     seen_ids, seen_hashes = set(), set()
@@ -89,40 +89,40 @@ def validate_records(records: list[dict[str, Any]], manifest: Mapping[str, Any])
     for record in records:
         issues = validate_instance(schema, record)
         if issues:
-            raise RetrievalIntegrityError(f"Schema RAG: {issues[0]}")
+            raise RetrievalIntegrityError(f'RAG schema: {issues[0]}')
         if (record.get("experiment_id") != EXPERIMENT_ID or record.get("protocol_version") != PROTOCOL_VERSION
                 or record["split"] != "train" or record["view_scope"] not in ("global_multi_device", "device_specific")):
-            raise RetrievalIntegrityError("Record RAG fuori esperimento, versione, vista o split.")
+            raise RetrievalIntegrityError('RAG record has the wrong experiment, version, view or split.')
         circuit = record["retrieval_input"]["circuit"]
         source_hash = circuit["source_sha256"]
         if record["rag_id"] in seen_ids or source_hash in seen_hashes:
-            raise RetrievalIntegrityError("Identificativo RAG o hash sorgente duplicato.")
+            raise RetrievalIntegrityError('Duplicate RAG identifier or source hash.')
         seen_ids.add(record["rag_id"])
         seen_hashes.add(source_hash)
         original = allowed.get((source_hash, circuit["circuit_id"]))
         if original is None or circuit["num_qubits"] != original["num_qubits"]:
-            raise RetrievalIntegrityError("Identità del circuito diversa dal manifest train.")
+            raise RetrievalIntegrityError('Circuit identity differs from the train manifest.')
         expected_ref = f"circuits/train/{original['file_name']}"
         if circuit["source_ref"] != expected_ref:
-            raise RetrievalIntegrityError("Riferimento sorgente fuori train o incoerente.")
+            raise RetrievalIntegrityError('Source reference outside train or inconsistent.')
         features = record_features(record)
         transform_unscaled(features)
         if (circuit["features"].get("dimension") != 49
                 or circuit["features"].get("extractor") != "mqt.predictor.ml.helper.create_feature_vector"
                 or features["num_qubits"] != circuit["num_qubits"] or features["depth"] != circuit["depth"]):
-            raise RetrievalIntegrityError("Metadati delle feature incoerenti.")
+            raise RetrievalIntegrityError('Inconsistent feature metadata.')
         devices = record["retrieval_input"]["compatible_devices"]
         ids = [d["device_id"] for d in devices]
         if len(set(ids)) != len(ids) or record["selected_device"]["device_id"] not in ids:
-            raise RetrievalIntegrityError("Dispositivo vincente non presente nei candidati.")
+            raise RetrievalIntegrityError('Winning device not among the candidates.')
         for device in devices:
             if device["target_sha256"] != FROZEN_TARGET_SHA256.get(device["device_id"]):
-                raise RetrievalIntegrityError("Impronta Target incoerente.")
+                raise RetrievalIntegrityError('Inconsistent Target fingerprint.')
         for evidence in record["evidence"]:
             provenance = evidence["provenance"]
             if (provenance["source_sha256"] != source_hash
                     or provenance["target_sha256"] != FROZEN_TARGET_SHA256.get(evidence["device_id"])):
-                raise RetrievalIntegrityError("Provenienza delle evidenze incoerente.")
+                raise RetrievalIntegrityError('Inconsistent evidence provenance.')
         registry.build((as_example(record, 0.0),))
 
 
@@ -141,21 +141,21 @@ class RagCorpus:
 def load_corpus(dataset_path: Path = DEFAULT_DATASET, *, verify_features: bool = False) -> RagCorpus:
     path=Path(dataset_path).resolve()
     if path != DEFAULT_DATASET.resolve():
-        raise RetrievalIntegrityError("Usare esclusivamente il train distribuito col prototipo.")
+        raise RetrievalIntegrityError('Use only the train data distributed with the prototype.')
     seal=strict_json((ROOT/"data/seal.json").read_text())
     for relative, expected in seal["files"].items():
         if file_sha256(ROOT/relative) != expected:
-            raise RetrievalIntegrityError(f"File modificato: {relative}")
+            raise RetrievalIntegrityError(f'Modified file: {relative}')
     records=[strict_json(line) for line in path.read_text().splitlines() if line.strip()]
     if len(records) != seal["record_count"]:
-        raise RetrievalIntegrityError("Numero esempi diverso dal sigillo della nuova esecuzione.")
+        raise RetrievalIntegrityError("Example count differs from the new run's seal.")
     manifest=strict_json((ROOT/"data/train_manifest.json").read_text())
     validate_records(records,manifest)
     transform=FeatureTransform.fit_train(record_features(r) for r in records)
     source_hash=file_sha256(path)
     artifact=transform.artifact(source_sha256=source_hash, experiment_id=EXPERIMENT_ID)
     if artifact != strict_json((ROOT/"data/transform.json").read_text()):
-        raise RetrievalIntegrityError("Divisori diversi dalla trasformazione train originale.")
+        raise RetrievalIntegrityError('Divisors differ from the original train transformation.')
     if verify_features:
         from .request import QasmRequestParser
         from ..models import UiSubmission
@@ -163,5 +163,5 @@ def load_corpus(dataset_path: Path = DEFAULT_DATASET, *, verify_features: bool =
             c=record["retrieval_input"]["circuit"]
             parsed=QasmRequestParser().parse(UiSubmission(request_id=c["circuit_id"],qasm2=(ROOT/"data"/c["source_ref"]).read_text(),user_text=""))
             if dict(parsed.features) != dict(record_features(record)):
-                raise RetrievalIntegrityError("Feature diverse: "+c["circuit_id"])
+                raise RetrievalIntegrityError('Features differ: '+c["circuit_id"])
     return RagCorpus(tuple(records),transform,source_hash,{"portable_seal_sha256":file_sha256(ROOT/"data/seal.json")})

@@ -1,4 +1,4 @@
-"""Prova tecnica con score inventati: non avvia campagne, server o compilazioni quantistiche."""
+'Technical check with synthetic scores; no campaigns, servers or quantum compilation.'
 from pathlib import Path
 import argparse
 import json
@@ -15,13 +15,13 @@ def main():
     sys.path.insert(0, str(root / args.benchmark))
     from verifica_report import synthetic_data
     module, data = synthetic_data()
-    # Usa il testo completo dei limiti per verificare anche la pagina più fitta.
-    # L'identificativo riservato non deve avere registri sperimentali.
+    # Use the full limitations text to check the most crowded page too.
+    # The reserved identifier must not have experimental records.
     from unittest.mock import patch
     with patch.object(module, "test_rows", return_value=data["circuits"]):
         limits = module.collect("VERIFICA_IMPAGINAZIONE", None)["limitations"]
     data["limitations"] = limits
-    data["limitations"][0] = "Dati interamente sintetici: nessuna valutazione sperimentale eseguita."
+    data["limitations"][0] = 'Entirely synthetic data: no experimental evaluation performed.'
     output = root / "verifiche_sviluppo/temporanei" / (
         args.benchmark + "_" + module.uuid4().hex[:8])
     module.write_report(data, output, pdf=True)

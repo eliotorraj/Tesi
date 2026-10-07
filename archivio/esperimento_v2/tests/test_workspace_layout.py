@@ -74,7 +74,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
             self.assertEqual(protocol.file_sha256(copied), record["source_sha256"])
             self.assertEqual(prepare.materialize_split(manifest, "train", destination), 1)
             copied.write_text("modified")
-            with self.assertRaisesRegex(RuntimeError, "incoerente"):
+            with self.assertRaisesRegex(RuntimeError, "inconsistent"):
                 prepare.materialize_split(manifest, "train", destination)
 
     def test_relocation_rejects_traversal_and_symlink_escape(self) -> None:

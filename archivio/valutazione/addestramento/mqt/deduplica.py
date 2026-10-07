@@ -1,4 +1,4 @@
-"""Un rappresentante per contenuto QASM; nessuna modifica al corpus congelato."""
+'One representative per QASM content; no changes to the frozen corpus.'
 import hashlib
 import json
 from pathlib import Path
@@ -19,7 +19,7 @@ def select_unique(source_dir: Path, *, frozen: bool = True):
                             aliases=[p.stem for p in paths[1:]]))
     count = sum(1 + len(r["aliases"]) for r in records)
     if frozen and (count != 422 or len(records) != 396):
-        raise ValueError(f"Train inatteso: {count} sorgenti, {len(records)} hash; attesi 422 e 396")
+        raise ValueError(f'Unexpected train: {count} sources, {len(records)} hashes; expected 422 and 396')
     selection = dict(profile=PROFILE, source_circuit_count=count,
                      unique_circuit_count=len(records), alias_count=count-len(records),
                      representative_rule="lexicographically-smallest-filename", groups=records)
@@ -29,13 +29,13 @@ def select_unique(source_dir: Path, *, frozen: bool = True):
 def validate_training_names(names, expected):
     names = list(map(str, names))
     if len(names) != len(set(names)) or set(names) != set(expected):
-        raise ValueError("Campioni ML diversi dai rappresentanti selezionati; rigenerare gli array")
+        raise ValueError('ML samples differ from the selected representatives; regenerate the arrays')
 
 def validate_selection_metadata(metadata, source_dir):
     _, expected = select_unique(source_dir)
     errors = []
     if metadata.get("training_selection") != expected:
-        errors.append("Selezione ML non conforme ai 396 hash train; rigenerare il selettore")
+        errors.append('ML selection differs from the 396 train hashes; regenerate the selector')
     if metadata.get("training_sample_count") != expected["unique_circuit_count"]:
-        errors.append("Numero di campioni ML non conforme: attesi 396")
+        errors.append('ML sample count does not match: expected 396')
     return errors

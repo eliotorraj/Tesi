@@ -1,4 +1,4 @@
-"""Percorsi, scritture atomiche e identita del Test indipendente."""
+'Paths, atomic writes and identity of the independent Test.'
 from __future__ import annotations
 import hashlib
 import json
@@ -36,7 +36,7 @@ def sha(path):
     return h.hexdigest()
 
 def save(path, value):
-    """Un record pubblicato non viene mai sovrascritto."""
+    'Never overwrite a published record.'
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name("." + path.name + "." + uuid4().hex + ".tmp")
@@ -53,11 +53,11 @@ def save(path, value):
 def contained(root, name):
     p = (root / name).resolve()
     if not p.is_relative_to(root.resolve()):
-        raise ValueError("Percorso esterno alla fonte: " + str(name))
+        raise ValueError('Path outside the source: ' + str(name))
     return p
 
 def source_path(record):
-    # Riferimenti QASMBench relativi alla sola raccolta esterna.
+    # QASMBench references are relative to the external collection only.
     return contained(AREA / "circuiti", record["source_ref"])
 
 def code_files():

@@ -1,4 +1,4 @@
-"""Cinque esempi train uniformi, senza distanze o indice Qdrant."""
+'Five uniformly sampled train examples, without distances or a Qdrant index.'
 from __future__ import annotations
 import hashlib
 import random
@@ -24,7 +24,7 @@ def select_records(corpus, devices, objective, source_sha256, seed):
     candidates = sorted(matching_records(corpus, devices=devices, objective=objective,
                                         experiment_id=EXPERIMENT_ID), key=lambda r: r["rag_id"])
     if len(candidates) < POLICY["k"]:
-        raise ValueError("Servono almeno cinque esempi train compatibili.")
+        raise ValueError('At least five compatible train examples are required.')
     derived = int(digest({"seed": seed, "source_sha256": source_sha256}), 16)
     chosen = random.Random(derived).sample(candidates, POLICY["k"])
     return chosen, {"seed": seed, "derived_seed": derived, "source_sha256": source_sha256,
@@ -45,14 +45,14 @@ def prepare_random(qasm, *, seed):
     request = RequestSemanticValidator().normalize(parsed, hardware)
     mask = HardwareMaskBuilder().filter(request, hardware)
     if not mask.available_device_ids:
-        raise ValueError("Nessun dispositivo compatibile.")
+        raise ValueError('No compatible device.')
     rag_started = time.perf_counter()
     corpus = load_corpus()
     chosen, sampling = select_records(corpus, mask.available_device_ids, request.figure_of_merit,
                                      hashlib.sha256(qasm.encode("utf-8")).hexdigest(), seed)
-    # Il registro comune richiede un numero finito: 0.0 e solo un segnaposto.
-    # Non viene usato per ordinare e model_input lo omette. Il registro del
-    # recupero dichiara distance=null e rende esplicita questa convenzione.
+    # The shared record requires a finite number; 0.0 is only a placeholder.
+    # It is not used for ordering and model_input omits it. The retrieval record
+    # declares distance=null to make this convention explicit.
     examples = tuple(as_example(record, 0.0) for record in chosen)
     rag_seconds = time.perf_counter() - rag_started
     registry = StructuredEvidenceRegistryBuilder(configuration_catalog=catalog).build(examples)

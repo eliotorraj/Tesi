@@ -1,4 +1,4 @@
-"""Chat manuale: scelta modello, controlli e isolamento dei processi (avvii simulati)."""
+'Manual chat: model choice, checks and process isolation with mocked launches.'
 import contextlib
 import io
 import json
@@ -75,7 +75,7 @@ class ManualChatTests(unittest.TestCase):
 
     def test_active_server_is_not_replaced_or_stopped(self):
         self.health.return_value = {"status": "ok"}
-        with self.assertRaisesRegex(RuntimeError, "risponde già"):
+        with self.assertRaisesRegex(RuntimeError, 'already responds'):
             chat.main(["--model", "phi", "--label", "occupied-port"])
         self.launch.assert_not_called()
         self.stop.assert_not_called()

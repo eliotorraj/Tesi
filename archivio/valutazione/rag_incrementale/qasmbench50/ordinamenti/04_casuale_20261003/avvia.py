@@ -1,4 +1,4 @@
-"""Avvio autonomo dell'ordinamento 04_casuale_20261003."""
+'Standalone launcher for ordering 04_casuale_20261003.'
 import sys
 from pathlib import Path
 sys.dont_write_bytecode = True

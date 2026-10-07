@@ -1,5 +1,7 @@
-# Decisioni e selezione validation
+# Validation reference
 
-Candidati, decisioni, sigilli, criteri di selezione e report; include gli esiti sfavorevoli. Ogni campagna crea una sottocartella con il proprio `experiment_id`.
+Validation selects model settings before Test evaluation. Optional WL validation selects the structural retrieval settings.
 
-Questi contenuti sono generati dai comandi del kit, esclusi da Git e da salvare separatamente. Il clone conserva questo segnaposto. Non copiare qui risultati precedenti per presentarli come nuove misure e non riusare lo stesso identificativo dopo aver cambiato gli ingressi congelati.
+[Validation commands and implementation](../README.md)
+
+[Toolkit guide](../../documentazione/guida.md)

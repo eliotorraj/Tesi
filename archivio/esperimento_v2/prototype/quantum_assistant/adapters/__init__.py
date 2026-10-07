@@ -1,4 +1,4 @@
-"""Espone gli adattatori locali usati dal prototipo."""
+'Expose local adapters used by the prototype.'
 
 from .compilation import QiskitDeterministicCompiler
 from .context import (

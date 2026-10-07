@@ -1,4 +1,4 @@
-"""Compila con Qiskit dopo la conferma esplicita dell'utente."""
+'Compile with Qiskit after the user explicitly requests compilation.'
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def _validate_compiled_circuit(
     circuit: QuantumCircuit,
     target: Any,
 ) -> dict[str, Any]:
-    """Controlla che il circuito compilato sia eseguibile sul dispositivo."""
+    'Check whether the compiled circuit can run on the device.'
     errors: list[str] = []
     unsupported = sorted(
         set(map(str, circuit.count_ops()))
@@ -60,21 +60,20 @@ def _validate_compiled_circuit(
 
 
 class QiskitDeterministicCompiler:
-    """Compila usando solo i parametri già controllati della raccomandazione."""
+    "Compile using only the recommendation's validated parameters."
 
     def compile(
         self,
         request: ParsedRequest,
         recommendation: Recommendation,
     ) -> CompilationArtifact:
-        """Compila il circuito secondo la raccomandazione validata."""
+        'Compile the circuit according to the validated recommendation.'
         if recommendation.figure_of_merit != request.figure_of_merit:
-            raise ValueError("La recommendation usa una figure of merit diversa.")
+            raise ValueError('The recommendation uses a different figure of merit.')
         target = get_device(recommendation.selected_device)
         if request.num_qubits > target.num_qubits:
             raise ValueError(
-                f"Il circuito usa {request.num_qubits} qubit, "
-                f"ma {target.description} ne supporta {target.num_qubits}."
+                f'The circuit uses {request.num_qubits} qubits, but {target.description} supports {target.num_qubits}.'
             )
 
         circuit = QuantumCircuit.from_qasm_str(request.qasm2)
@@ -93,8 +92,7 @@ class QiskitDeterministicCompiler:
         validation = _validate_compiled_circuit(compiled, target)
         if not validation["is_executable_on_target"]:
             raise RuntimeError(
-                "Qiskit ha prodotto un circuito non valido per il target: "
-                f"{validation}"
+                f'Qiskit produced a circuit incompatible with the Target: {validation}'
             )
 
         stream = StringIO()

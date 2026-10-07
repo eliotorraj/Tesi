@@ -186,7 +186,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
                     objective={"name": "unsupported_metric"},
                 ),
             )
-        with self.assertRaisesRegex(ValueError, "config_id duplicati"):
+        with self.assertRaisesRegex(ValueError, 'duplicate config_id'):
             MqtHardwareCatalog(
                 ("ibm_falcon_27",),
                 configuration_catalog=replace(
@@ -262,7 +262,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
             )
 
     def test_catalog_rejects_devices_without_an_explicit_definition(self) -> None:
-        with self.assertRaisesRegex(ValueError, "definizione hardware"):
+        with self.assertRaisesRegex(ValueError, "hardware definition"):
             MqtHardwareCatalog(("not_a_device",))
 
     def test_valid_json_request_is_parsed_and_tied_to_snapshot(self) -> None:
@@ -292,7 +292,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
 
     def test_request_schema_is_closed_and_rejects_bad_types(self) -> None:
         unknown_field = request_payload(self.catalog.catalog_snapshot_id)
-        unknown_field["free_text"] = "scegli IBM"
+        unknown_field["free_text"] = 'choose IBM'
         with self.assertRaises(RequestValidationError) as captured:
             self.parser.parse(unknown_field)
         self.assertIn("REQUEST_SCHEMA_INVALID", self.issue_codes(captured.exception))
@@ -570,7 +570,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             replace(result, mask=tuple(not value for value in result.mask))
-        with self.assertRaisesRegex(ValueError, "booleani"):
+        with self.assertRaisesRegex(ValueError, "booleans"):
             replace(
                 result,
                 mask=tuple(1 if value else 0 for value in result.mask),
@@ -622,7 +622,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
 
         def should_not_run(prompt):
             llm_calls.append(prompt)
-            raise AssertionError("L'LLM non deve essere chiamato.")
+            raise AssertionError('The LLM must not be called.')
 
         service = build_default_service(
             device_names=("quantinuum_h2_56",),
@@ -651,8 +651,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
                 "code": "NO_ELIGIBLE_DEVICE",
                 "retryable": False,
                 "message": (
-                    "Nessun device soddisfa contemporaneamente tutti i "
-                    "vincoli hard."
+                    'No device satisfies all hard constraints.'
                 ),
             },
         )
@@ -670,7 +669,7 @@ class PhaseTwoRequestTests(unittest.TestCase):
     def test_legacy_adapter_ignores_text_and_rejects_generic_constraints(self) -> None:
         legacy = UiSubmission(
             request_id="legacy-request",
-            user_text="testo libero che non deve entrare nel prompt",
+            user_text='free text that must not enter the prompt',
             qasm2=TWO_QUBIT_QASM,
             allowed_devices=("ibm_falcon_27",),
         )

@@ -1,4 +1,4 @@
-"""Avvio autonomo dell'ordinamento 02_inverso."""
+'Standalone launcher for ordering 02_inverso.'
 import sys
 from pathlib import Path
 sys.dont_write_bytecode = True

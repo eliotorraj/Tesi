@@ -1,4 +1,4 @@
-"""Prove del confronto con score fittizi: mai avviare il compilatore."""
+'Comparison checks with synthetic scores: never start the compiler.'
 import copy
 import json
 import tempfile
@@ -35,7 +35,7 @@ def preview_data():
     s=a.summarize(rows)
     return {'rows':rows,'summary':s,'oracle_summary':{'statuses':{'success':7500,'timeout':1000,'failure':104,'incompatible':396},
         'plan':{'matrix_cells':9000,'incompatible_cells':396,'compilations':8604},'complete':True,'pending':0,
-        'circuits_with_reference':49,'terminal':9000},'system_started_at':'COLLAUDO CON DATI FITTIZI','oracle_versions':{'qiskit':'2.5.0','mqt.predictor':'2.4.0'},
+        'circuits_with_reference':49,'terminal':9000},'system_started_at':'SYNTHETIC DATA CHECK','oracle_versions':{'qiskit':'2.5.0','mqt.predictor':'2.4.0'},
         'python':'3.12.13','oracle_path':'/DATI_FITTIZI/oracle','rag_path':'/DATI_FITTIZI/rag','synthetic':True}
 
 
@@ -67,7 +67,7 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(a.summarize([row])['partial']['n'],0)
 
     def test_original_result_tamper_and_aggregate_tamper(self):
-        # 50 sorgenti sintetiche, due dispositivi e una configurazione per velocità.
+        # Use 50 synthetic sources, two devices and one configuration for speed.
         ident=identity();ident.update(schema='qasmbench50-oracle-max3-v1',source_manifest_sha256=c.SOURCE_SHA)
         source=b'synthetic qasm placeholder, not parsed';h=c.hashlib.sha256(source).hexdigest()
         ident['circuits']=[dict(circuit_id=f'synthetic_{i}',source_sha256=h,num_qubits=2,size_group='small') for i in range(50)]
@@ -91,9 +91,9 @@ class ComparisonTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             directory=Path(tmp);(directory/'dati.json').write_text(json.dumps(data))
             tex=report.render(directory).read_text()
-            self.assertEqual(tex.count(r'\titolo{Score e scarto per circuito:'),2)
-            self.assertEqual(tex.count(r'\titolo{Tabella completa:'),2)
-            self.assertIn('DATI FITTIZI',tex)
+            self.assertEqual(tex.count('\\titolo{Score and gap per circuit:'),2)
+            self.assertEqual(tex.count(r'\titolo{Full table:'),2)
+            self.assertIn('SYNTHETIC DATA',tex)
             self.assertLess(report.gap_scale(data['rows'])[0],0)
             with self.assertRaises(ValueError):report.render(directory)
 
@@ -104,7 +104,7 @@ class ComparisonTests(unittest.TestCase):
             c.publish(root/'contratto.json',{'identity':ident,'identity_sha256':c.digest(ident),'plan':c.plan_counts(ident)})
             for row in ident['circuits']:
                 c.publish_bytes(root/'sorgenti'/(row['circuit_id']+'.qasm'),c.source_path(row).read_bytes())
-            # Soltanto esiti inventati: nessun worker viene avviato.
+            # Synthetic outcomes only: no worker is started.
             for job in c.jobs(ident):
                 value=rag[job['circuit_id']]
                 if (job['device'],job['config_id'])!=(value['device'],value['config_id']):continue
@@ -120,7 +120,7 @@ class ComparisonTests(unittest.TestCase):
             self.assertEqual(data['oracle_summary']['terminal'],150)
             data['synthetic']=True
             (output/'dati.json').write_text(json.dumps(data))
-            self.assertIn('DATI FITTIZI',report.render(output).read_text())
+            self.assertIn('SYNTHETIC DATA',report.render(output).read_text())
 
     def test_no_compilation_entrypoint_from_readonly_actions(self):
         import archivio.valutazione.oracle_qasmbench.genera_oracle_test as cli

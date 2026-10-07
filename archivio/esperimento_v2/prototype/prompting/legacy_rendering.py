@@ -1,4 +1,4 @@
-"""Solo confronto e lettura storica dei prompt v2; non usare per nuove inferenze."""
+'Historical v2 prompt reading and comparison only; do not use for new inference.'
 import json
 
 BASE_INSTRUCTION = (

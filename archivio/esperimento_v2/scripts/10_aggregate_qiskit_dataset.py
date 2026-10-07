@@ -1,4 +1,4 @@
-"""Unisce le viste dei dispositivi in un Dataset generale senza modificarle."""
+'Merge device views into a global Dataset without changing them.'
 
 from __future__ import annotations
 
@@ -17,42 +17,41 @@ from qiskit_dataset.catalog import DEFAULT_CATALOG_PATH, load_catalog
 
 
 def parse_args() -> argparse.Namespace:
-    """Legge e controlla le opzioni dell'aggregazione generale."""
+    'Read and check global aggregation options.'
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="full")
     parser.add_argument(
         "--catalog",
         type=Path,
         default=DEFAULT_CATALOG_PATH,
-        help="Catalogo v2; per i dati storici specificare quello in archivio/protocollo_v1/configs/.",
+        help='v2 catalog; for historical data, specify the catalog under archivio/protocollo_v1/configs/.',
     )
     parser.add_argument(
         "--devices",
         nargs="+",
         help=(
-            "Subset esplicito; se omesso aggrega tutti i mini-Dataset "
-            "completi disponibili."
+            'Explicit subset; otherwise aggregate all available complete mini-Datasets.'
         ),
     )
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument(
         "--require-all-supported",
         action="store_true",
-        help="Fallisce se manca anche uno dei device supportati dal catalogo.",
+        help='Fail if any catalog-supported device is missing.',
     )
     parser.add_argument(
         "--check-only",
         action="store_true",
-        help="Valida e calcola le statistiche senza scrivere la vista globale.",
+        help='Validate and compute statistics without writing the global view.',
     )
     args = parser.parse_args()
     if not 1 <= args.top_k <= 3:
-        parser.error("--top-k deve essere compreso tra 1 e 3.")
+        parser.error('--top-k must be between 1 and 3.')
     return args
 
 
 def main() -> None:
-    """Controlla o costruisce la vista generale e mostra le statistiche."""
+    'Check or build the global view and show statistics.'
     args = parse_args()
     catalog = load_catalog(args.catalog)
     statistics = aggregate_device_datasets(

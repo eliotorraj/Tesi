@@ -1,4 +1,4 @@
-"""Controllore per la UI con raccomandazioni conservate lato servizio."""
+'UI controller with recommendations retained on the service side.'
 
 from __future__ import annotations
 
@@ -11,28 +11,25 @@ from .services import PrototypeService
 
 
 class PrototypeController:
-    """Espone il prototipo a una futura UI REST, desktop o da terminale.
+    """Expose the prototype to a future REST, desktop or terminal UI.
 
-    Le raccomandazioni validate restano sul lato servizio. In questo modo la
-    compilazione non accetta dati modificati dal client. In produzione questa
-    memoria temporanea potrà essere sostituita da una memoria persistente.
-    """
+Validated recommendations remain on the service side, so compilation does not accept client-modified data. Production deployment can replace this temporary storage with persistent storage."""
 
     def __init__(self, service: PrototypeService) -> None:
-        """Collega il controllore al servizio applicativo."""
+        'Connect the controller to the application service.'
         self._service = service
         self._recommendations: dict[str, RecommendationResult] = {}
 
     def get_hardware_catalog(self) -> dict[str, Any]:
-        """Restituisce il catalogo usato sia dalla UI sia dal servizio."""
+        'Return the catalog shared by the UI and service.'
         return self._service.hardware_catalog.snapshot().to_dict()
 
     def prepare_request(self, submission: RequestInput) -> dict[str, Any]:
-        """Prepara la richiesta senza interrogare Dataset o LLM."""
+        'Prepare the request without querying the Dataset or LLM.'
         return self._service.prepare_request(submission).to_dict()
 
     def request_recommendation(self, submission: RequestInput) -> dict[str, Any]:
-        """Genera e conserva una raccomandazione già validata."""
+        'Generate and retain an already validated recommendation.'
         result = self._service.recommend(submission)
         self._recommendations[result.request.request_id] = result
         return {
@@ -59,12 +56,12 @@ class PrototypeController:
         *,
         user_confirmed: bool,
     ) -> dict[str, Any]:
-        """Compila una raccomandazione conservata dopo la conferma."""
+        'Compile a retained recommendation after confirmation.'
         try:
             result = self._recommendations[request_id]
         except KeyError as exc:
             raise KeyError(
-                f"Nessuna recommendation validata per request_id={request_id!r}."
+                f'No validated recommendation for request_id={request_id!r}.'
             ) from exc
         artifact = self._service.compile_approved(
             ApprovedCompilation(

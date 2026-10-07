@@ -1,4 +1,4 @@
-"""Istruzioni esplicite delle regole già applicate dal validatore."""
+'Explicit instructions for rules already enforced by the validator.'
 RULES = (
     "Output the same full recommendation object required by response_contract; do not omit fields or simplify it. "
     "claim_id identifies a new output claim; reference_id identifies a new output reference. "

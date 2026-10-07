@@ -1,4 +1,4 @@
-"""Controlli di provenienza e coerenza del report, senza nuovi esperimenti."""
+'Report provenance and consistency checks without new experiments.'
 from pathlib import Path
 import hashlib,json,sys
 BASE=Path(__file__).resolve().parent

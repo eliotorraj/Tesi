@@ -113,7 +113,7 @@ class QiskitReportingTests(unittest.TestCase):
             rows = {row["device_id"]: row for row in csv.DictReader(handle)}
         self.assertEqual(rows[devices[0]]["timeout_seconds"], "300")
         self.assertEqual(rows[devices[1]]["timeout_seconds"], "100")
-        self.assertIn("non sono un confronto a parità di condizioni", (destination / "device_comparison.md").read_text())
+        self.assertIn('do not represent equal conditions', (destination / "device_comparison.md").read_text())
         self.assertEqual(before, {str(path): sha256_file(path) for path in sources})
         self.assertFalse((first / "reports").exists())
         self.assertFalse((second / "reports").exists())
@@ -128,7 +128,7 @@ class QiskitReportingTests(unittest.TestCase):
         self.assertIsNone(execution["workers"])
         self.assertEqual(execution["observed_timeout_seconds"], [100, 300])
         self.assertTrue(execution["mixed_execution_policies"])
-        self.assertIn("parametri di esecuzione diversi", (output_root / "reports/full_report.md").read_text())
+        self.assertIn('different execution parameters', (output_root / "reports/full_report.md").read_text())
 
     def test_timeout_at_100_is_unknown_at_300(self) -> None:
         rows = _timeout_sensitivity([

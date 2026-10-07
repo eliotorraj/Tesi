@@ -1,18 +1,7 @@
-# Identità del corpus
+# Frozen corpus identity
 
-[Indice dell’esperimento](../README.md)
+`source_circuits_v2.json` identifies 600 circuits: 422 train, 88 validation and 90 Test. It records source hashes, split/group membership, software versions and the five Target fingerprints.
 
-`source_circuits_v2.json` è il riferimento congelato per riconoscere
-i circuiti dell’esperimento. Registra:
+Historical paths are logical references resolved to the preserved original corpus. Do not rewrite the manifest merely to reflect current folder locations. Split references document provenance; evaluation must follow the contract associated with a run.
 
-- identificativo e impronte dei sorgenti;
-- partizione train, validation o test e gruppi usati per evitare contaminazioni;
-- versioni del software e impronte dei cinque Target.
-
-Il corpus comprende 600 circuiti: 422 train, 88 validation e 90 test.
-La presenza dei riferimenti test nel manifest non autorizza a usarne i risultati.
-
-I percorsi storici registrati sono riferimenti logici.
-Il codice li risolve verso il corpus originale conservato
-nell’[archivio](../../../../archivio/README.md): non vanno riscritti
-per adeguarli alla disposizione attuale delle cartelle.
+[Parent directory](../README.md) · [Current repository guide](../../../../../../README.md)

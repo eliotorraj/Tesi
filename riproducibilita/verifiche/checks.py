@@ -1,4 +1,4 @@
-"""Collaudo isolato: copia del kit, QASM piccoli, server finto, nessun peso reale."""
+'Isolated check: kit copy, small QASM files, mock server, no real weights.'
 from pathlib import Path
 import argparse
 import hashlib
@@ -17,8 +17,8 @@ KIT=Path(__file__).resolve().parents[1]
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--directory',type=Path,help='Directory nuova in cui conservare il collaudo')
-    parser.add_argument('--configuratore',action='store_true',help='Crea e usa un esperimento nominato attraverso i nuovi comandi')
+    parser.add_argument('--directory',type=Path,help='New directory in which to preserve check results')
+    parser.add_argument('--configuratore',action='store_true',help='Create and use a named experiment through the new commands')
     a=parser.parse_args()
     root=a.directory.resolve() if a.directory else Path(tempfile.mkdtemp(prefix='ripro-check-'))
     if a.directory:root.mkdir(parents=True,exist_ok=False)
@@ -52,7 +52,7 @@ def main():
                 Handler.calls+=1
                 answer={'selected_device':'ibm_falcon_27','config_id':'o2_default_default',
                     'facts':[{'assertion':'selected_device_has_enough_qubits'}],
-                    'hypothesis':'Risposta sintetica esclusivamente per il collaudo software.'}
+                    'hypothesis':'Synthetic response used only for software checks.'}
                 if data['temperature']!=0:answer['config_id']='not_allowed'
                 self.send({'content':json.dumps(answer),'stop':True,'stop_type':'eos','tokens_predicted':50,'timings':{'prompt_n':3,'predicted_n':50}})
             else:self.send({'error':'endpoint not supported'})
@@ -89,7 +89,7 @@ def main():
         configure('aggiungi-modello','technical-check','synthetic','--file',str(model),'--fonte','software-check-only','--revisione','fixture-v1','--precisione','synthetic',
                   '--url',f'http://127.0.0.1:{server.server_port}','--contesto','60000','--temperature','0','0.4')
         configure('modelli','technical-check','synthetic')
-        # Eseguibile simulato: il vero avviatore costruisce e registra il comando CPU.
+        # Simulated executable: the real launcher builds and records the CPU command.
         fake=root/'fake-llama-server'
         fake.write_text('#!'+sys.executable+'\nimport sys\nprint("synthetic llama executable", sys.argv[1:])\n')
         fake.chmod(0o755)
@@ -116,7 +116,7 @@ def main():
             configure('duplica','technical-check','next-check')
             configure('parametri','next-check','--temperature','0')
             assert 'dataset' in run('stato').stdout
-        # Una sovrapposizione fra split va rifiutata prima di congelare altre esecuzioni.
+        # Reject split overlap before freezing additional runs.
         leakage=root/'circuits/test/test_6.qasm';original=leakage.read_text();leakage.write_text((root/'circuits/train/train_0.qasm').read_text())
         run('prepara',ok=False);leakage.write_text(original)
         run('dataset');seal=read(work/'data/seal.json');assert seal['record_count']==5
@@ -137,15 +137,15 @@ def main():
         assert all(r['status']=='success' and r['score'] is not None for r in results),results
         count=Handler.calls;run('test','esegui','--metodo','llm_rag');assert Handler.calls==count
         run('test','oracle');run('test','analizza')
-        if a.configuratore:assert '1/1 esiti registrati' in run('stato').stdout
+        if a.configuratore:assert '1/1 outcomes recorded' in run('stato').stdout
         exported=root/'exported';run('esporta',str(exported));assert not list(exported.rglob('*.gguf'))
-        # Le dipendenze JS sono installate separatamente dal sorgente esportato.
+        # Install JS dependencies separately from exported source.
         shutil.copytree(kit/'comune/framework/prototype/prompting/toon_runtime/node_modules',exported/'prototype/prompting/toon_runtime/node_modules')
         checked=subprocess.run([sys.executable,'-B',str(exported/'app.py'),'check'],env=env,cwd=exported,capture_output=True,text=True)
         assert checked.returncode==0,checked.stderr
         used=subprocess.run([sys.executable,'-B',str(exported/'app.py'),'run',str(root/'circuits/test/test_6.qasm'),'--model-path',str(model),'--compile'],env=env,cwd=exported,capture_output=True,text=True)
         assert used.returncode==0,used.stderr
-        # Dopo il congelamento, una modifica della configurazione deve essere rifiutata.
+        # Reject configuration changes after freezing.
         cfg['seed']+=1;config.write_text(json.dumps(cfg));run('test','congela',ok=False)
         latex=[]
         if shutil.which('pdflatex'):
@@ -160,5 +160,5 @@ def main():
     finally:
         server.shutdown()
         (root/'comandi.json').write_text(json.dumps(outcomes,indent=2))
-        print('Registri conservati:',root,flush=True)
+        print('Records preserved:',root,flush=True)
 if __name__=='__main__':main()

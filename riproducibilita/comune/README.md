@@ -1,15 +1,19 @@
-# Componenti condivisi del kit
+# Shared toolkit components
 
-| Modulo | Responsabilità |
+| Module or directory | Purpose |
 | --- | --- |
-| `settings.py` | Risolve percorsi, configurazione, output e contratti. |
-| `corpus.py` | Verifica e congela i circuiti. |
-| `processi.py` | Isola i lavori e conserva timeout, errori e riprese. |
-| `llm.py` | Controlla identità del server, esegue decisioni e raccoglie misure. |
-| `relazioni.py` | Genera documenti e tabelle dai risultati salvati. |
-| `esporta.py` | Costruisce un prototipo autonomo con train e configurazione selezionata. |
-| `controlli.py` | Verifica l'installazione del kit. |
+| `settings.py` | Resolve configuration, paths, output roots and contracts. |
+| `configuratore.py`, `configuratore_cli.py`, `configuratore_info.py` | Create, revise and inspect named experiments. |
+| `corpus.py` | Check and freeze circuit inputs. |
+| `processi.py` | Isolate jobs and record timeouts, failures and resumes. |
+| `llm.py`, `opzioni_server.py` | Validate server identity, execute decisions and resolve options. |
+| `relazioni.py` | Generate reports and tables. |
+| `esporta.py` | Package standalone prototypes. |
+| `controlli.py`, `stato.py` | Check installation and summarize phases. |
+| `framework/` | Toolkit-local assistant and prompt code. |
+| `scripts/` | MQT support code. |
+| `template_export/` | Runtime components for exported prototypes. |
 
-`framework/` contiene i moduli dell'assistente usati dal kit; `scripts/` il supporto MQT; `template_export/` i componenti per i prototipi generati. Non sono collegamenti al prototipo distribuito o all'archivio. Il trasporto è `native` per server Linux e `windows` per il server del fisso raggiunto da WSL. Vedere la [mappa del flusso](../documentazione/mappa.md).
+These are local implementations. Linux servers use `native` transport; the original Windows server can be reached from WSL with explicit `windows` transport. See the [module map](../documentazione/mappa.md).
 
-La configurazione guidata da comandi è in `configuratore.py`, `configuratore_cli.py` e `configuratore_info.py`. `stato.py` riepiloga le fasi presenti. Le configurazioni nominate sono escluse dall’impronta globale del codice; ogni esecuzione mantiene il proprio contratto, evitando che creare un’altra configurazione invalidi quella in corso.
+Named configurations do not change other experiments' global source fingerprints. Each run has its own contract; executable source changes remain subject to integrity checks.

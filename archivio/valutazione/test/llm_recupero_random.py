@@ -1,4 +1,4 @@
-"""Avvio separato: LLM con cinque esempi train estratti a caso."""
+'Separate launcher: LLM with five randomly sampled train examples.'
 from __future__ import annotations
 import argparse
 from functools import partial
@@ -20,7 +20,7 @@ BASE = AREA / "recupero_random"
 def ensure_contract(path, contract):
     if path.exists():
         if read(path) != contract:
-            raise ValueError("Ripresa incompatibile: codice, dati, piano o seme cambiati. Conservare la prova precedente.")
+            raise ValueError('Incompatible resume: code, data, plan or seed changed. Preserve the earlier run.')
     else:
         save(path, contract)
     return sha(path)
@@ -28,15 +28,15 @@ def ensure_contract(path, contract):
 def cli(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     mode = ap.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--verifica", action="store_true", help="Controlli senza Test e senza inferenza")
-    mode.add_argument("--tecnico", action="store_true", help="Solo Bell sintetico, con server LLM")
-    mode.add_argument("--esegui", action="store_true", help="Nuova estensione sui 90 casi Test gia esposti")
-    ap.add_argument("--seed", type=int, default=20260927, help="Seme del recupero; distinto dal seme LLM")
+    mode.add_argument("--verifica", action="store_true", help='Checks without Test or inference')
+    mode.add_argument("--tecnico", action="store_true", help='Synthetic Bell only, with an LLM server')
+    mode.add_argument("--esegui", action="store_true", help='New extension on the 90 already exposed Test cases')
+    ap.add_argument("--seed", type=int, default=20260927, help='Retrieval seed, separate from the LLM seed')
     ap.add_argument("--url", default="http://127.0.0.1:8089")
     ap.add_argument("--model-path", type=Path)
     args = ap.parse_args(argv)
     if not args.url.startswith(("http://127.0.0.1:", "http://localhost:")):
-        ap.error("Il server deve essere locale.")
+        ap.error('The server must be local.')
     campaign = BASE / ("seed_" + str(args.seed))
     check = preflight(METHOD)
     save(campaign / "preparazione/verifiche" / (uuid4().hex + ".json"), check)
@@ -59,7 +59,7 @@ def cli(argv=None):
     with portalocker.Lock(str(base / ".lock"), timeout=0):
         contract = {
             "kind": "technical" if args.tecnico else "exploratory_test_extension",
-            "note": "Estensione decisa dopo la lettura del Test; non una nuova conferma indipendente.",
+            "note": 'Extension designed after reading Test, not fresh independent confirmation.',
             "method": METHOD, "retrieval": {**POLICY, "seed": args.seed},
             "parent_plan_sha256": sha(PLAN),
             "environment": {"python": sys.version, "platform": platform.platform()},
@@ -71,7 +71,7 @@ def cli(argv=None):
                   "contract_sha256": contract_sha, "expected_circuits": 1 if args.tecnico else 90}
         if begin.exists():
             if any(read(begin).get(k) != v for k, v in config.items()):
-                raise ValueError("Ripresa incompatibile con il registro di esecuzione.")
+                raise ValueError('Resume is incompatible with the execution record.')
         else:
             save(begin, {**config, "at": now(), "server": server, "code": code_files(),
                          "cpu_count": os.cpu_count(), "memory_measurement": "not collected"})
@@ -84,7 +84,7 @@ def cli(argv=None):
             rows = sorted((r for r in read(SOURCE)["circuits"] if r["split"] == "test"),
                           key=lambda r: r["circuit_id"])
             if len(rows) != 90:
-                raise ValueError("Attesi 90 circuiti Test.")
+                raise ValueError('Expected 90 Test circuits.')
         for i, row in enumerate(rows, 1):
             folder = base / "circuiti" / row["circuit_id"]
             if (folder / "esito.json").exists():
@@ -96,7 +96,7 @@ def cli(argv=None):
                     evaluate(row, folder, METHOD, args.url, args.tecnico,
                              prepare_fn=partial(prepare_random, seed=args.seed))
                 except LlmTransportError as exc:
-                    print(f"Esecuzione fermata; tentativo conservato: {exc}", file=sys.stderr)
+                    print(f'Run stopped; attempt preserved: {exc}', file=sys.stderr)
                     return 1
             print(f"{METHOD}: {i}/{len(rows)} {row['circuit_id']}", flush=True)
         from report import summary
@@ -108,7 +108,7 @@ def cli(argv=None):
                       sources={str(p.relative_to(base)): sha(p) for p in paths})
         output = base / "analisi" / (uuid4().hex + ".json")
         save(output, result)
-        print("Riepilogo: " + str(output))
+        print('Summary: ' + str(output))
     return 0
 
 if __name__ == "__main__":

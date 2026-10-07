@@ -67,7 +67,7 @@ VF2_LAYOUT_CALL_LIMIT = 10_000
 
 
 class AtomicCheckpointCallback(BaseCallback):
-    """Salva checkpoint e provenienza senza esporre file parziali."""
+    'Save checkpoints and provenance without exposing partial files.'
 
     def __init__(
         self,
@@ -101,8 +101,7 @@ class AtomicCheckpointCallback(BaseCallback):
         rolling = self.save_dir / f"{self.name_prefix}_latest_rollout.zip"
         saved_rolling = self._save(rolling, num_timesteps)
         print(
-            f"Snapshot di ripresa aggiornato ({num_timesteps} step): "
-            f"{saved_rolling}",
+            f'Resume snapshot updated ({num_timesteps} step): {saved_rolling}',
             flush=True,
         )
         if num_timesteps % self.save_freq == 0:
@@ -111,7 +110,7 @@ class AtomicCheckpointCallback(BaseCallback):
                 / f"{self.name_prefix}_{num_timesteps}_steps.zip"
             )
             saved_checkpoint = self._save(checkpoint, num_timesteps)
-            print(f"Checkpoint periodico: {saved_checkpoint}", flush=True)
+            print(f'Periodic checkpoint: {saved_checkpoint}', flush=True)
 
     def _on_step(self) -> bool:
         return True
@@ -140,7 +139,7 @@ def bqskit_action_timeout(seconds: float) -> Iterator[None]:
     def on_alarm(signum: int, frame: Any) -> None:
         del signum, frame
         raise BQSKitActionTimeoutError(
-            f"Azione BQSKit interrotta dopo {seconds:.1f}s."
+            f'BQSKit action interrupted after {seconds:.1f}s.'
         )
 
     previous_handler = signal.signal(signal.SIGALRM, on_alarm)
@@ -207,14 +206,14 @@ def configure_vf2_layout_runtime(environment: PredictorEnv, seed: int = 0) -> di
         # entry, so other environments and inference retain their own settings.
         environment.action_set[index] = replace(action, transpile_pass=bounded_passes)
         return vf2_layout_metadata(seed)
-    raise ValueError("L'ambiente RL non contiene l'azione VF2Layout.")
+    raise ValueError('The RL environment does not contain the VF2Layout action.')
 
 
 def configure_qubit_observation_space(environment: PredictorEnv) -> dict[str, Any]:
-    """Include tutti i qubit fisici senza cambiare gli spazi già sufficienti."""
+    'Include every physical qubit without changing already sufficient spaces.'
     space = environment.observation_space["num_qubits"]
     if not isinstance(space, Discrete) or int(space.start) != 0:
-        raise ValueError("Lo spazio num_qubits deve essere Discrete con inizio 0.")
+        raise ValueError('The num_qubits space must be Discrete starting at 0.')
 
     # MQT 2.4 declares Discrete(128), but layout can expand a small input to
     # all 133/156 Heron qubits. Discrete's upper bound is exclusive. Keep the
@@ -236,10 +235,7 @@ def load_model_or_exit(checkpoint: Path, **kwargs: Any) -> MaskablePPO:
     except RuntimeError as error:
         if "PytorchStreamReader failed locating file" in str(error):
             raise SystemExit(
-                "Checkpoint non caricabile, probabilmente per salvataggio interrotto o incompleto:\n"
-                f"  {checkpoint}\n"
-                "Riprendi da un checkpoint periodico precedente *_steps.zip.\n"
-                f"Dettaglio PyTorch: {error}"
+                f'Cannot load checkpoint, possibly due to an interrupted or incomplete save:\n  {checkpoint}\nResume from an earlier periodic *_steps.zip checkpoint.\nPyTorch details: {error}'
             ) from error
         raise
 
@@ -278,59 +274,58 @@ def write_training_metadata(path: Path, metadata: dict[str, Any]) -> None:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--device", required=True, help="Per esempio ibm_falcon_27.")
+    parser.add_argument("--device", required=True, help='For example, ibm_falcon_27.')
     parser.add_argument("--metric", choices=("expected_fidelity", "critical_depth"), default="expected_fidelity")
     parser.add_argument("--timesteps", type=int, default=RL_TRAINING_TIMESTEPS)
     parser.add_argument(
         "--training-circuits",
         type=Path,
         default=TRAINING_CIRCUITS_V2,
-        help="Directory contenente esattamente i 422 circuiti train congelati.",
+        help='Directory containing exactly the 422 frozen train circuits.',
     )
     parser.add_argument(
         "--source-manifest",
         type=Path,
         default=SOURCE_MANIFEST_V2,
-        help="Manifest v2 usato per provare split e hash dei circuiti.",
+        help='v2 manifest used to verify circuit splits and hashes.',
     )
     parser.add_argument(
         "--checkpoint-every",
         type=int,
         default=RL_CHECKPOINT_EVERY,
-        help="Salva un checkpoint ogni N step.",
+        help='Save a checkpoint every N steps.',
     )
     parser.add_argument(
         "--max-steps",
         type=int,
         default=64,
-        help="Numero massimo di azioni per episodio RL; evita policy che non terminano.",
+        help='Maximum actions per RL episode; prevents nonterminating policies.',
     )
     parser.add_argument(
         "--bqskit-action-timeout",
         type=float,
         default=60.0,
-        help="Timeout in secondi per una singola azione BQSKit durante il training.",
+        help='Timeout in seconds for one BQSKit action during training.',
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=0,
-        help="Seed condiviso da PPO, ambiente e BQSKit per run riproducibili.",
+        help='Seed shared by PPO, the environment and BQSKit for reproducible runs.',
     )
     parser.add_argument(
         "--run-name",
         help=(
-            "Identificatore della run usato per isolare checkpoint e log; "
-            "se omesso viene generato da timestamp UTC e seed."
+            'Run identifier isolating checkpoints and logs; defaults to a UTC timestamp and seed.'
         ),
     )
     parser.add_argument(
         "--allow-target-drift",
         action="store_true",
-        help="Consenti un Target diverso dal fingerprint congelato del protocollo 2.4-v2.",
+        help='Allow a Target differing from the frozen 2.4-v2 protocol fingerprint.',
     )
-    parser.add_argument("--resume-from", type=Path, help="Checkpoint .zip da cui riprendere il training.")
-    parser.add_argument("--allow-overwrite", action="store_true", help="Consenti di sovrascrivere un modello esistente.")
+    parser.add_argument("--resume-from", type=Path, help='Checkpoint .zip from which to resume training.')
+    parser.add_argument("--allow-overwrite", action="store_true", help='Allow overwriting an existing model.')
     return parser.parse_args()
 
 
@@ -338,18 +333,17 @@ def main() -> int:
     """Train the RL policy using MQT Predictor's production PPO settings."""
     args = parse_args()
     if args.timesteps <= 0:
-        raise SystemExit("--timesteps deve essere positivo.")
+        raise SystemExit('--timesteps must be positive.')
     if args.checkpoint_every <= 0:
-        raise SystemExit("--checkpoint-every deve essere positivo.")
+        raise SystemExit('--checkpoint-every must be positive.')
     if args.checkpoint_every % RL_ROLLOUT_STEPS:
         raise SystemExit(
-            "--checkpoint-every deve essere un multiplo del rollout PPO "
-            f"({RL_ROLLOUT_STEPS})."
+            f'--checkpoint-every must be a multiple of the PPO rollout ({RL_ROLLOUT_STEPS}).'
         )
     if args.max_steps <= 0:
-        raise SystemExit("--max-steps deve essere positivo.")
+        raise SystemExit('--max-steps must be positive.')
     if args.bqskit_action_timeout <= 0:
-        raise SystemExit("--bqskit-action-timeout deve essere positivo.")
+        raise SystemExit('--bqskit-action-timeout must be positive.')
     expected_final_timesteps = (
         (args.timesteps + RL_ROLLOUT_STEPS - 1)
         // RL_ROLLOUT_STEPS
@@ -357,16 +351,16 @@ def main() -> int:
     )
     if args.run_name and re.fullmatch(r"[A-Za-z0-9_.-]+", args.run_name) is None:
         raise SystemExit(
-            "--run-name può contenere soltanto lettere, numeri, punto, trattino e underscore."
+            '--run-name accepts only letters, numbers, dots, hyphens and underscores.'
         )
     if args.training_circuits and not args.training_circuits.is_dir():
-        raise SystemExit(f"Directory QASM non trovata: {args.training_circuits}")
+        raise SystemExit(f'QASM directory not found: {args.training_circuits}')
     if args.resume_from and not args.resume_from.is_file():
-        raise SystemExit(f"Checkpoint non trovato: {args.resume_from}")
+        raise SystemExit(f'Checkpoint not found: {args.resume_from}')
 
     version_errors = package_version_mismatches()
     if version_errors:
-        raise SystemExit(f"Versioni non conformi al protocollo v2: {version_errors}.")
+        raise SystemExit(f'Versions do not match the v2 protocol: {version_errors}.')
     try:
         training_partition = verify_circuit_directory(
             args.training_circuits,
@@ -374,7 +368,7 @@ def main() -> int:
             manifest_path=args.source_manifest,
         )
     except (FileNotFoundError, ValueError) as error:
-        raise SystemExit(f"Training set RL rifiutato: {error}") from error
+        raise SystemExit(f'RL Training set rejected: {error}') from error
 
     device = get_device(args.device)
     current_target = target_record(device)
@@ -389,12 +383,10 @@ def main() -> int:
         target_matches_frozen_protocol = observed_target_hash == expected_target_hash
         if not target_matches_frozen_protocol and not args.allow_target_drift:
             raise SystemExit(
-                "Target diverso dal protocollo migrato 2.4-v2: "
-                f"atteso={expected_target_hash}, osservato={observed_target_hash}. "
-                "Usa --allow-target-drift soltanto come bypass temporaneo del gate."
+                f'Target differs from migrated protocol 2.4-v2: expected={expected_target_hash}, observed={observed_target_hash}. Use --allow-target-drift only as a temporary check bypass.'
             )
     if uses_frozen_protocol and not target_matches_frozen_protocol:
-        print("ATTENZIONE: il modello risultante sarà marcato come fuori protocollo.")
+        print('WARNING: the resulting model will be marked as outside the protocol.')
     started_at = datetime.now(UTC)
     run_name = args.run_name or started_at.strftime("%Y%m%dT%H%M%SZ") + f"-seed{args.seed}"
     model_name = f"model_{args.metric}_{device.description}"
@@ -406,7 +398,7 @@ def main() -> int:
         )
         if not compatible_name:
             raise SystemExit(
-                f"Checkpoint incompatibile con device/metrica richiesti: {resume_name}"
+                f'Checkpoint is incompatible with the requested device/metric: {resume_name}'
             )
         metadata_path = args.resume_from.with_suffix(".metadata.json")
         from mqt_model_artifacts import validate_rl_training_metadata
@@ -422,28 +414,28 @@ def main() -> int:
         except (TypeError, ValueError):
             resume_timesteps = -1
         if resume_metadata.get("training_manifest_sha256") != training_partition["manifest_sha256"]:
-            metadata_errors.append("manifest dei circuiti di training diverso")
+            metadata_errors.append('training circuit manifest differs')
         if resume_metadata.get("training_split") != "train":
-            metadata_errors.append("checkpoint non legato esclusivamente allo split train")
+            metadata_errors.append('checkpoint is not exclusively tied to the train split')
         if resume_metadata.get("seed") != args.seed:
-            metadata_errors.append("seed del checkpoint diverso dalla run richiesta")
+            metadata_errors.append('checkpoint seed differs from the requested run')
         if resume_metadata.get("qiskit_vf2_layout") != vf2_layout_metadata(args.seed):
-            metadata_errors.append("profilo VF2Layout diverso o assente nel checkpoint")
+            metadata_errors.append('VF2Layout profile differs or is missing in the checkpoint')
         if "interrupted" in args.resume_from.stem:
-            metadata_errors.append("snapshot di emergenza non riprendibile")
+            metadata_errors.append('emergency snapshot cannot be resumed')
         if resume_timesteps % RL_ROLLOUT_STEPS:
-            metadata_errors.append("checkpoint non allineato a un rollout PPO completo")
+            metadata_errors.append('checkpoint is not aligned with a complete PPO rollout')
         if metadata_errors:
             raise SystemExit(
-                "Checkpoint di ripresa privo di provenienza v2 compatibile:\n  - "
+                """Resume checkpoint lacks compatible v2 provenance:
+  - """
                 + "\n  - ".join(metadata_errors)
             )
     canonical_model = CANONICAL_MODEL_DIR / filename
     runtime_model = get_path_trained_model() / filename
     if canonical_model.exists() and not args.allow_overwrite:
         raise SystemExit(
-            f"Il modello canonico esiste gia: {canonical_model}\n"
-            "Usa --allow-overwrite solo se vuoi davvero sostituirlo."
+            f'The canonical model already exists: {canonical_model}\nUse --allow-overwrite only to deliberately replace it.'
         )
     checkpoint_root = Path("/mnt/d/RL_Models_Tesi/MODELLI NUOVI")
     checkpoint_dir = (
@@ -462,29 +454,23 @@ def main() -> int:
         unexpected_names = sorted(existing_names - restart_safe_names)
         if unexpected_names:
             raise SystemExit(
-                f"La directory della run contiene già file: {checkpoint_dir}\n"
-                "Scegli un altro --run-name oppure usa --resume-from."
+                f'The run directory already contains files: {checkpoint_dir}\nChoose another --run-name or use --resume-from.'
             )
         if existing_names:
-            print("Nessun rollout completo disponibile: la run riparte da zero.")
+            print('No complete rollout available: the run restarts from zero.')
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     tensorboard_dir = EXPERIMENT_ROOT / "logs" / "rl" / model_name / run_name
     tensorboard_dir.mkdir(parents=True, exist_ok=True)
 
     print(
-        f"Training RL: device={device.description}, metrica={args.metric}, "
-        f"target={args.timesteps} step, max_steps={args.max_steps}, seed={args.seed}, "
-        f"bqskit_action_timeout={args.bqskit_action_timeout}s, "
-        f"contatore finale atteso={expected_final_timesteps}"
+        f'Training RL: device={device.description}, metric={args.metric}, target={args.timesteps} step, max_steps={args.max_steps}, seed={args.seed}, bqskit_action_timeout={args.bqskit_action_timeout}s, expected final counter={expected_final_timesteps}'
     )
     print(f"Run: {run_name}")
-    print(f"Checkpoint: {checkpoint_dir} (ogni {args.checkpoint_every} step)")
+    print(f'Checkpoint: {checkpoint_dir} (every {args.checkpoint_every} step)')
     set_random_seed(args.seed)
     configure_bqskit_runtime(args.seed, args.bqskit_action_timeout)
     print(
-        "BQSKit: profilo locale leggero, "
-        "max_synthesis_size=3 con gate a tre qubit, altrimenti 2 "
-        f"(override runtime, seed={args.seed}, timeout={args.bqskit_action_timeout}s)"
+        f'BQSKit: lightweight local profile, max_synthesis_size=3 for three-qubit gates, otherwise 2 (runtime override, seed={args.seed}, timeout={args.bqskit_action_timeout}s)'
     )
     predictor = Predictor(
         device=device,
@@ -495,13 +481,11 @@ def main() -> int:
 
     vf2_metadata = configure_vf2_layout_runtime(predictor.env, args.seed)
     print(
-        f"VF2Layout: ricerca limitata a {VF2_LAYOUT_CALL_LIMIT} estensioni "
-        f"(seed={args.seed})."
+        f'VF2Layout: search limited to {VF2_LAYOUT_CALL_LIMIT} extensions (seed={args.seed}).'
     )
     observation_metadata = configure_qubit_observation_space(predictor.env)
     print(
-        "Osservazione RL: numero di qubit ammesso da 0 a "
-        f"{observation_metadata['num_qubits_n'] - 1} (incluso)."
+        f"RL observation: allowed qubit count from 0 to {observation_metadata['num_qubits_n'] - 1} (inclusive)."
     )
 
     # Keep the previous episode log, including the interrupted rollout, for
@@ -523,9 +507,9 @@ def main() -> int:
         remaining_timesteps = args.timesteps - completed_timesteps
         if remaining_timesteps <= 0:
             raise SystemExit(
-                f"Il checkpoint contiene gia {completed_timesteps} step, almeno quanto il target {args.timesteps}."
+                f'The checkpoint already contains {completed_timesteps} steps, at least the target of {args.timesteps}.'
             )
-        print(f"Ripresa da {args.resume_from}: completati={completed_timesteps}, restanti={remaining_timesteps}")
+        print(f'Resuming from {args.resume_from}: completed={completed_timesteps}, remaining={remaining_timesteps}')
     else:
         model = MaskablePPO(
             MaskableMultiInputActorCriticPolicy,
@@ -605,8 +589,7 @@ def main() -> int:
             metadata_for(saved_path, int(model.num_timesteps)),
         )
         print(
-            "\nTraining interrotto. Snapshot diagnostico di emergenza "
-            f"(non usato per la ripresa): {saved_path}"
+            f'\nTraining interrupted. Emergency diagnostic snapshot (not used for resume): {saved_path}'
         )
         return 130
 
@@ -619,9 +602,9 @@ def main() -> int:
         metadata_path,
         metadata_for(saved_path, int(model.num_timesteps)),
     )
-    print(f"Modello canonico: {saved_path}")
-    print(f"Copia runtime installata: {runtime_model}")
-    print(f"Metadati training: {metadata_path}")
+    print(f'Canonical model: {saved_path}')
+    print(f'Runtime copy installed: {runtime_model}')
+    print(f'Training metadata: {metadata_path}')
     return 0
 
 

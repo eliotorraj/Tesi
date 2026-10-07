@@ -101,10 +101,10 @@ class PipelineRunnerTests(unittest.TestCase):
         self.assertEqual(aligned_steps, 2_048)
         self.assertEqual(aligned_errors, [])
         self.assertTrue(
-            any("non allineato" in error for error in unaligned_errors)
+            any('not aligned' in error for error in unaligned_errors)
         )
         self.assertTrue(
-            any("emergenza" in error for error in emergency_errors)
+            any("emergency" in error for error in emergency_errors)
         )
 
     def test_ml_canary_is_compile_only_and_reusable(self) -> None:

@@ -1,17 +1,31 @@
-# Tesi — LLM e compilazione quantistica
+# QAdviser
 
-Il progetto studia la scelta di dispositivo e configurazione per compilare circuiti quantistici, usando un LLM e gli esempi recuperati dal train. La repository separa l'uso del framework, la riproduzione e la storia degli esperimenti.
+QAdviser is an LLM + RAG system that recommends a quantum device and a Qiskit compilation configuration for an OpenQASM 2 circuit. It retrieves train examples, checks the model's response and can compile the circuit locally. This repository also supplies tools for new experiments and an archive of the experiments behind the thesis.
 
-| Cartella | Da usare per |
+## Where to start
+
+| Your goal | Start here |
 | --- | --- |
-| [prototipo/](prototipo/README.md) | Usare il framework selezionato, con i dati train distribuiti e Qwen3.5-4B Q8_0 a temperatura 0. |
-| [riproducibilita/](riproducibilita/README.md) | Ripartire dai circuiti, addestrare MQT, generare il Dataset, scegliere altri LLM, fare validation/Test ed esportare un nuovo prototipo. |
-| [archivio/](archivio/README.md) | Consultare sviluppo, decisioni, riorganizzazioni, sorgenti congelati ed evidenze degli esperimenti precedenti. |
+| Try the selected QAdviser prototype | [Prototype guide](prototipo/docs/guida_passo_passo.md) |
+| Change circuits or models and run a new experiment | [Toolkit guide](riproducibilita/documentazione/guida.md) |
+| Find completed experiments, reports and provenance | [Experiment archive](archivio/README.md) |
+| Understand the experimental rules | [Current scientific protocol](prototipo/docs/protocollo_sperimentale.md) |
 
-Per usare l'assistente partire dalla [guida del prototipo](prototipo/docs/guida_passo_passo.md). Per rifare il percorso sperimentale partire dalla [guida alla riproduzione](riproducibilita/documentazione/guida.md). Il [protocollo corrente](prototipo/docs/protocollo_sperimentale.md) resta il riferimento scientifico; la nuova guida dichiara condizioni e differenze operative dei nuovi avviatori.
+## Repository layout
 
-`prototipo/` e `riproducibilita/` funzionano senza leggere l'archivio. Il kit include sorgenti, schemi, lock e ingressi, ma non GGUF o modelli già addestrati. Ambienti, pesi e nuove esecuzioni richiedono un backup separato. **Dataset** indica gli esempi RAG/LLM; **Training set** indica i dati del selettore MQT.
+| Directory | Contents |
+| --- | --- |
+| [prototipo/](prototipo/README.md) | Standalone selected prototype, train examples, setup scripts and current documentation. |
+| [riproducibilita/](riproducibilita/README.md) | New circuits, MQT training, Dataset generation, LLM validation, Test evaluation and prototype export. |
+| [archivio/](archivio/README.md) | Historical sources, frozen inputs, results, development checks and reorganization records. |
+| [.vscode/](.vscode/README.md) | Optional editor settings and task definitions. |
 
-I sorgenti della tesi, se presenti in `tesi/`, e l'indice locale `graphify-out/` sono strumenti di lavoro separati, esclusi da Git. I README spiegano dove cercare ogni funzione.
+The prototype and toolkit each carry their own runtime components. Neither imports code from the archive. New toolkit results are grouped by `experiment_id`; archived outcomes document earlier runs.
 
-La [riorganizzazione del 1 ottobre](archivio/riorganizzazione_2026_10_01/README.md) documenta la separazione. Copie congelate di sorgenti e corpus restano nell'archivio per preservare manifest, hash e provenienza degli esiti storici.
+The current experiment uses Python 3.12 and MQT Predictor 2.4.0. Follow the installation guide and dependency lock for the component you need.
+
+## Conventions
+
+**Dataset** means RAG/LLM examples. **Training set** means circuit/device samples for the MQT selector. Train, validation and Test have separate roles. Catalog Targets are synthetic quantum device descriptions; the CPU/GPU running the LLM is a separate resource.
+
+Documentation, maintained comments and program messages use English. Existing paths, command names and stored identifiers remain stable. Raw historical observations and frozen source snapshots retain their original provenance.

@@ -1,5 +1,7 @@
-# Modelli e Training set MQT
+# MQT training reference
 
-Politiche RL, selettore, Training set, cache, checkpoint e metadati delle prove. Ogni campagna crea una sottocartella con il proprio `experiment_id`.
+The MQT workflow covers RL policies, the Training set and the supervised device selector.
 
-Questi contenuti sono generati dai comandi del kit, esclusi da Git e da salvare separatamente. Il clone conserva questo segnaposto. Non copiare qui risultati precedenti per presentarli come nuove misure e non riusare lo stesso identificativo dopo aver cambiato gli ingressi congelati.
+[MQT commands and implementation](../README.md)
+
+[Toolkit guide](../../documentazione/guida.md)

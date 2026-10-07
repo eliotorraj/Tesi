@@ -1,4 +1,4 @@
-"""Esegue i tentativi Qiskit con salvataggio, limite di tempo e ripresa."""
+'Run Qiskit attempts with durable records, time limits and resume.'
 
 from __future__ import annotations
 
@@ -19,15 +19,14 @@ from scripts.mqt_predictor_protocol import COMPILATION_TIMEOUT_SECONDS, QISKIT_W
 
 
 def parse_args() -> argparse.Namespace:
-    """Legge e controlla le opzioni della generazione."""
+    'Read and check generation options.'
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("pilot", "full"), default="full")
     parser.add_argument(
         "--split",
         choices=("train", "validation", "test"),
         help=(
-            "Limita l'esecuzione a uno split. Con il catalogo v2 il default "
-            "sicuro è train; test richiede il gate di apertura."
+            'Restrict execution to one split. The v2 catalog defaults to train; Test requires its opening check.'
         ),
     )
     parser.add_argument(
@@ -37,42 +36,42 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--device",
-        help="Device MQT Bench; se omesso usa il default del catalogo.",
+        help="MQT Bench device; defaults to the catalog's default device.",
     )
     parser.add_argument("--workers", type=int, default=QISKIT_WORKERS)
     parser.add_argument("--timeout-seconds", type=float, default=COMPILATION_TIMEOUT_SECONDS)
     parser.add_argument(
         "--limit-runs",
         type=int,
-        help="Esegue solo i primi N tentativi mancanti; utile per smoke test.",
+        help='Run only the first N missing attempts; useful for smoke tests.',
     )
     parser.add_argument(
         "--retry-failures",
         action="store_true",
-        help="Riesegue i record failure/timeout gia in cache.",
+        help='Rerun failure/timeout records already in the cache.',
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Ignora la cache per i tentativi selezionati.",
+        help='Ignore cached results for the selected attempts.',
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Mostra soltanto la cardinalita pianificata.",
+        help='Show the planned count only.',
     )
     args = parser.parse_args()
     if args.workers <= 0:
-        parser.error("--workers deve essere positivo.")
+        parser.error('--workers must be positive.')
     if args.timeout_seconds <= 0:
-        parser.error("--timeout-seconds deve essere positivo.")
+        parser.error('--timeout-seconds must be positive.')
     if args.limit_runs is not None and args.limit_runs <= 0:
-        parser.error("--limit-runs deve essere positivo.")
+        parser.error('--limit-runs must be positive.')
     return args
 
 
 def main() -> None:
-    """Mostra il piano oppure genera i tentativi ancora necessari."""
+    'Show the plan or generate outstanding attempts.'
     args = parse_args()
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)

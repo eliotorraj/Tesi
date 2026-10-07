@@ -1,377 +1,229 @@
-# Selezione locale LLM: guida operativa
+# Historical local LLM selection: operational guide
 
-> **Seconda validation, 19 settembre 2026:** la nuova procedura con fatti strutturati, temperature 0/0,4/0,7 e recupero delle interruzioni è descritta nella [guida v2](../../llm_selection/v2/README.md). I comandi sotto documentano la procedura storica v1.
+This guide covers the archived v1 procedure. The second validation study, introduced on 19 September 2026 with structured facts, temperatures 0/0.4/0.7 and interrupted-call recovery, is documented in [llm_selection/v2/](../../llm_selection/v2/README.md). The completed selection is preserved in the archive. **For new campaigns, use the [reproduction toolkit](../../../../riproducibilita/README.md).**
 
-Questa guida contiene i comandi per preparare ed eseguire la selezione degli LLM.
-Per capire il ruolo dei programmi partire da [llm_selection/README.md](../../llm_selection/README.md).
-Il riferimento scientifico resta [il protocollo](../protocollo_sperimentale.md).
-Lo [stato generale del progetto](../../README.md) distingue ciò che è già concluso dalle fasi successive.
+The [module README](../../llm_selection/README.md) explains the programs. The [archived protocol](../protocollo_sperimentale.md) records the historical rules. At the 15 September checkpoint, train technical checks were still in progress, the study was not frozen and no local winner had been selected. The [compact-prompt report](../resoconti/2026-09-15_prompt_compatto.md) preserves the failed DJ check and its measurements. Input prompt verification was not validation-based selection.
 
-**Punto di ripresa, 15 settembre 2026.** Siamo ancora nelle prove tecniche sul train.
-Lo studio non è congelato e non esiste un vincitore locale. Prima della validation
-occorre completare le prove tecniche richieste e ottenere risposte valide.
-Il [resoconto del prompt compatto](../resoconti/2026-09-15_prompt_compatto.md)
-conserva le misure e l'esito negativo della prova DJ. La verifica dei prompt
-train e validation controlla i dati di ingresso; non equivale alla selezione sulla validation.
+Commands below explain the historical workflow and require its external weights and Windows server installation. `doctor`, `status` and `technical-summary` inspect existing state. Launch commands load models and may occupy CPU, GPU and memory for long periods. A changed source revision cannot resume a frozen historical run.
 
-I comandi di avvio qui sotto sono istruzioni per le prossime prove.
-Caricano modelli e possono impegnare a lungo CPU, GPU e memoria.
-I comandi `doctor`, `status` e `technical-summary` consultano invece lo stato esistente.
+## 1. Inspect the environment
 
-## 1. Aprire Ubuntu e controllare la preparazione
-
-Usare il terminale Ubuntu/WSL. Tutti i comandi seguenti partono da questa cartella:
+Use Ubuntu/WSL. Paths below assume the archived experiment as the working directory and the pinned environment at the repository root:
 
 ```bash
-cd /home/elio/Tesi-mqt-2.4-v2
+cd /home/elio/Tesi-mqt-2.4-v2/archivio/esperimento_v2
 LLM_OUTPUT="$PWD/artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/llm_selection"
-.venv/bin/python -m llm_selection.cli doctor
-.venv/bin/python -m llm_selection.cli status
+../../.venv/bin/python -m llm_selection.cli doctor
+../../.venv/bin/python -m llm_selection.cli status
 ```
 
-Il primo comando controlla la presenza dei file; non ricalcola le impronte dei
-pesi e non certifica la sostenibilità dei prompt. Le impronte SHA-256 vengono
-controllate prima del caricamento, direttamente da Windows sul percorso dei pesi,
-per evitare di leggerli attraverso la cache WSL. Anche questa operazione può
-richiedere minuti. La prova registra metodo, impronta, dimensione e durata.
+`doctor` checks file presence; it does not rehash weights or prove that long prompts fit available resources. Before loading, SHA-256 is checked directly from Windows on the weights path, avoiding WSL cache reads. This may take minutes and records the method, fingerprint, size and duration.
 
-Sono già conservati BF16 e Q8_0 per Qwen3.5-4B, Phi-4-mini-instruct e Gemma 4
-E4B-it. Il collegamento `"$LLM_OUTPUT/models"` punta a:
+The historical workstation kept BF16 and Q8_0 weights for Qwen3.5-4B, Phi-4-mini-instruct and Gemma 4 E4B-it. These are not clone contents. Its `models` link pointed to:
 
 ```text
 D:\Tesi-mqt\llm-selection\qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2\models
 ```
 
-Le risposte restano nella cartella degli artefatti del progetto. I nuovi registri
-scritti dal server e dal monitor Windows risiedono su D, sotto la cartella
-`server_logs` accanto a `models`. Un collegamento per esecuzione mantiene il percorso
-`servers/NOME-MODELLO` nel progetto. I vecchi registri non vengono spostati.
-Questo evita le scritture con salvataggio forzato da Windows alla condivisione WSL.
-Lo spazio del disco D: e il limite di RAM assegnato a WSL sono cose diverse.
-Non cancellare checkpoint, pesi in quarantena o vecchi registri per fare spazio.
-Controllare lo spazio, se necessario, con `df -h . /mnt/c /mnt/d`.
+Responses stayed in project artifacts. New Windows server/monitor logs used `server_logs` beside `models` on drive D, with per-run links at `servers/NAME-MODEL` in the project. Older records were not moved. This avoided durable Windows writes to the WSL share. D: disk capacity and WSL's assigned RAM are different resources. Preserve checkpoints, quarantined weights and earlier logs; inspect disk capacity with `df -h . /mnt/c /mnt/d` when needed.
 
-Il motore usa Windows, Vulkan e la RX 6750 XT da 12 GB. Il codice MQT continua
-a usare `.venv` e le versioni di `uv.lock`. Un solo modello viene caricato alla volta.
+The original engine used Windows, Vulkan and a 12 GB Radeon RX 6750 XT. MQT used the pinned Python environment. Only one LLM was loaded at a time.
 
+## 2. Check hardware profiles on train
 
-## 2. Provare i profili hardware sul train
+Technical commands submit the [shared compact prompt](compattazione_prompt.md), including repairs. For manual interaction, use the [chat guide](chat_locale.md).
 
-I comandi tecnici inviano automaticamente il [prompt compatto comune](compattazione_prompt.md),
-comprese le eventuali correzioni. Per la chat manuale scegliere il modello
-come descritto nella [guida della chat](chat_locale.md).
-
-Ogni comando seguente esegue cinque circuiti train preparati per le prove tecniche.
-Non legge gli score della validation. I nomi delle esecuzioni devono essere nuovi.
-
-**I profili seguenti sono punti di partenza da verificare, non configurazioni
-finali già validate.** Qwen BF16 ha già incontrato il limite operativo di RAM.
-Per Phi si propone una prima prova con pesi BF16 e cache ridotta; se fallisce,
-provare Q8_0 con un nome diverso. Gemma BF16 occupa circa 15 GB solo per i pesi:
-la prova iniziale usa Q8_0. La qualità finale si sceglie soltanto con la validation.
-
-Eseguire uno alla volta, attendendo la fine di ciascun comando. Le variabili
-creano nomi nuovi con data e ora: conservarli per identificare i risultati.
-Non usare i nomi delle prove storiche già presenti.
+Each command below processes five prepared train circuits without reading validation scores. Use fresh run names and run one command at a time. The profiles are starting points for checks, not final validated configurations. Qwen BF16 encountered the RAM limit. Phi initially considered BF16 with reduced cache, then Q8_0 under a new label if necessary. Gemma BF16 requires about 15 GB for weights alone, so its initial profile used Q8_0.
 
 ```bash
-QWEN_PROVA="qwen-tecnica-$(date +%Y%m%d-%H%M%S)"
-.venv/bin/python -m llm_selection.controller --technical \
-  --model qwen --label "$QWEN_PROVA" \
+QWEN_TRIAL="qwen-technical-$(date +%Y%m%d-%H%M%S)"
+../../.venv/bin/python -m llm_selection.controller --technical \
+  --model qwen --label "$QWEN_TRIAL" \
   --precision Q8_0 --context 147456
 ```
 
 ```bash
-PHI_PROVA="phi-tecnica-$(date +%Y%m%d-%H%M%S)"
-.venv/bin/python -m llm_selection.controller --technical \
-  --model phi --label "$PHI_PROVA" \
+PHI_TRIAL="phi-technical-$(date +%Y%m%d-%H%M%S)"
+../../.venv/bin/python -m llm_selection.controller --technical \
+  --model phi --label "$PHI_TRIAL" \
   --precision BF16 --context 114688 --cache-type q4_0
 ```
 
 ```bash
-GEMMA_PROVA="gemma-tecnica-$(date +%Y%m%d-%H%M%S)"
-.venv/bin/python -m llm_selection.controller --technical \
-  --model gemma --label "$GEMMA_PROVA" \
+GEMMA_TRIAL="gemma-technical-$(date +%Y%m%d-%H%M%S)"
+../../.venv/bin/python -m llm_selection.controller --technical \
+  --model gemma --label "$GEMMA_TRIAL" \
   --precision Q8_0 --context 131072 --cache-type q4_0
 ```
 
-`--precision` riguarda i pesi. `--cache-type` riguarda la memoria delle sequenze
-già elaborate; sono due scelte diverse. Una cache Q4 non significa pesi Q4.
-Il parametro `--gpu-layers` permette di provare un numero minore di livelli sulla
-GPU, ma aumenta il lavoro sulla CPU e può aumentare la RAM necessaria.
-Non cambiare questi parametri dopo il congelamento.
+`--precision` selects weight precision; `--cache-type` selects sequence-cache precision. A Q4 cache does not imply Q4 weights. Fewer `--gpu-layers` shift work to the CPU and may increase RAM needs. Profiles cannot change after freezing.
 
-Il limite predefinito è 3600 secondi per chiamata, incluse le pause del processo.
-Le prove tecniche possono usare `--technical-timeout`, ma un timeout tecnico
-diverso non cambia automaticamente quello della validation.
-`--circuit dj_indep_tket_2` permette una singola prova iniziale; da sola non basta
-per congelare lo studio. Per il profilo scelto vanno completati tutti e cinque
-i casi tecnici, con almeno una risposta valida. Anche i fallimenti devono restare.
+The default timeout is 3600 seconds per call, including process pauses. `--technical-timeout` affects technical checks without automatically changing the validation timeout. `--circuit dj_indep_tket_2` supports a single initial check, but freezing requires all five technical cases for the selected profile and at least one valid response. Preserve failures as well.
 
-Durante il comando viene mostrata una riga di avanzamento ogni circa 30 secondi.
-`prompt processing` indica la lettura del prompt prima della produzione della
-risposta. `progress = 0.19` significa il 19% di quel prompt, non il 19% delle
-cinque prove. Il numero di token non è un numero di parole. La velocità indicata
-è la media della fase fino a quel momento. Il supervisore ripete l’ultima riga
-se il server non ne ha prodotta una nuova, anche durante le pause termiche.
-Per esaminare gli esiti, da un secondo terminale nella stessa cartella:
+Progress appears approximately every 30 seconds. `prompt processing` describes input processing before response generation. `progress = 0.19` means 19% of that prompt, not 19% of the five checks. Tokens are not words. Speed is the phase average so far. The supervisor repeats the latest line when the server produces no new output, including during thermal pauses.
+
+Inspect results from another terminal in the same directory:
 
 ```bash
-.venv/bin/python -m llm_selection.cli technical-summary
-.venv/bin/python -m llm_selection.cli status
+../../.venv/bin/python -m llm_selection.cli technical-summary
+../../.venv/bin/python -m llm_selection.cli status
 ```
 
-Il riepilogo include esiti, chiamate e arresti registrati. I dettagli sono in
-`controllers/NOME/`, `servers/NOME-MODELLO/` e `technical_episodes/NOME/`.
-Se il server si arresta, i casi ancora da elaborare restano in attesa.
-Un caso già concluso non viene ripetuto sotto lo stesso identificativo.
+Summaries include outcomes, calls and recorded stops. Details are under `controllers/NAME/`, `servers/NAME-MODEL/` and `technical_episodes/NAME/`. If the server stops, unprocessed cases remain pending. Completed cases are not repeated under the same identifier.
 
-Se compare un arresto per RAM, il supervisore mostra la memoria libera misurata,
-la soglia e il percorso del registro. Chiudere i programmi non necessari prima
-della nuova prova. Il 14 settembre `qwen-prova-01` è stato fermato con 1,02 GiB liberi,
-sotto il limite di 1,5 GiB, prima di qualsiasi generazione. Il processo Python
-aveva raggiunto un picco di circa 1,67 GiB. La temperatura hotspot era 52 °C.
-Questi dati sono un problema di sostenibilità della prova, non un giudizio sulla
-qualità della risposta del modello. Il tentativo resta conservato.
+A RAM stop reports measured free memory, threshold and log path. The historical `qwen-prova-01` stopped on 14 September with 1.02 GiB free, below its 1.5 GiB limit, before generation. Python peaked at about 1.67 GiB and hotspot temperature was 52 °C. These observations concern feasibility, not response quality; the attempt remains preserved.
 
-Se un profilo tecnico fallisce, si può cambiare precisione/cache e usare un
-nome nuovo, aggiornando anche `PHI_PROVA` se si sceglie il nuovo profilo. Conservare e motivare entrambe le prove.
-Per riprendere invece lo stesso profilo dopo una pausa, usare `--episode-label`,
-come spiegato nel punto 5.
+After a failed profile, change precision/cache only under a fresh name, update the corresponding trial variable and document both attempts. To resume an unchanged profile after a pause, use `--episode-label` as described below.
 
-La codifica storica manteneva circuito ed evidenze completi. Dal 18 settembre
-la [vista essenziale](compattazione_prompt.md) conserva le feature ma omette
-QASM, provenienza e ripetizioni dal testo LLM; gli originali restano nei registri. I conteggi
-esplorativi sono in `preparation/complete_graph_token_probe.json`. Nelle prime misure alcuni prompt di Gemma superavano il contesto nativo.
-Il prompt è stato poi compattato: la compatibilità corrente va misurata di nuovo
-per ogni tokenizer e profilo. Un superamento del contesto produce un fallimento
-con zero chiamate di generazione. Il controllo usa il formato di chat effettivo
-e riserva anche lo spazio per l'uscita.
+The initial encoding retained complete circuits and evidence. From 18 September, the minimal view retained features while omitting QASM, provenance and repetition from model text; originals stayed in records. Early measurements in `preparation/complete_graph_token_probe.json` included Gemma prompts exceeding native context. After compaction, each tokenizer/profile required new measurements. Context overflow fails before generation, reserving room for output and using the actual chat template.
 
-Gemma E2B resta un'alternativa da valutare se E4B non è sostenibile, ma non è
-installata né selezionata automaticamente da questa procedura. In quel caso
-il catalogo sperimentale va aggiornato e documentato prima del congelamento.
+Gemma E2B was an alternative to consider if E4B could not fit. This procedure did not install or select it automatically. Such a change required an updated experimental catalog before freezing.
 
-## 3. Fissare i profili prima di leggere gli score
+## 3. Freeze profiles before scores
 
-Quando le prove tecniche sono concluse, assegnare alle tre variabili i nomi
-delle esecuzioni realmente scelte. Se si è cambiato terminale, reimpostarle
-leggendo i registri; non generare nuovi nomi in questa fase.
+Assign the trial variables to the actual selected run names. When returning to a new terminal, read them from records rather than generating new names at this stage.
 
 ```bash
-.venv/bin/python -m llm_selection.cli profiles \
-  --qwen "$QWEN_PROVA" --phi "$PHI_PROVA" --gemma "$GEMMA_PROVA" \
+../../.venv/bin/python -m llm_selection.cli profiles \
+  --qwen "$QWEN_TRIAL" --phi "$PHI_TRIAL" --gemma "$GEMMA_TRIAL" \
   --output "$LLM_OUTPUT/profiles_to_freeze.json"
 ```
 
-Controllare `profiles_to_freeze.json`. Il campo `precision_reason` va completato
-con la motivazione concreta: precisioni provate, consumo di memoria, eventuali
-arresti e motivo della scelta. Gli altri campi devono corrispondere ai registri
-delle prove. Il file non viene sovrascritto se esiste già.
+Review the file and complete `precision_reason` with tried precisions, memory use, stops and reasons for the choice. Other fields must match technical records. An existing file is not overwritten.
 
-Il congelamento controlla i cinque casi tecnici per ogni famiglia, la presenza
-di una risposta valida, gli 88 prompt e le impronte dei pesi. Non accetta uno
-studio già congelato o decisioni di validation raccolte prima del congelamento.
+Freezing checks five technical cases per family, a valid response, all 88 prompts and weight fingerprints. It rejects an already frozen study and validation decisions collected before freezing.
 
 ```bash
-.venv/bin/python -m llm_selection.study freeze \
+../../.venv/bin/python -m llm_selection.study freeze \
   --id local-llm-v1 --profiles "$LLM_OUTPUT/profiles_to_freeze.json"
 ```
 
-Da questo momento non modificare codice, prompt, catalogo, indice RAG, parametri
-o dipendenze MQT. I controlli rilevano le modifiche e bloccano la prosecuzione.
-Il congelamento è intenzionalmente vincolante: non cancellarlo per rilanciare
-una selezione dopo averne visto gli score.
+The frozen study binds code, prompt, catalog, RAG index, parameters and dependencies. Do not delete its seal to rerun selection after observing scores.
 
-La griglia comune è:
-
-| Identificativo | Istruzioni | Temperatura |
+| ID | Instructions | Temperature |
 | --- | --- | ---: |
-| p0_t0 | Prompt base | 0 |
-| p0_t07 | Stesso prompt base | 0,7 |
-| p1_t0 | Controlli espliciti aggiuntivi | 0 |
+| p0_t0 | Base prompt | 0 |
+| p0_t07 | Same base prompt | 0.7 |
+| p1_t0 | Additional explicit checks | 0 |
 
-Restano comuni: cinque esempi RAG, uscita massima 4096 token (valore presente
-alla ripresa del 15 settembre; 2048 nelle prime prove), timeout 3600 s,
-al massimo tre chiamate, top_p 0,95, top_k 40, min_p 0 e seed 20260913.
-Il ragionamento esteso è disabilitato. Tutti gli altri valori sono nel file
-congelato. Contesto, precisione e memoria vengono invece documentati per modello.
+Shared settings were five examples, at most three calls, timeout 3600 s, `top_p=0.95`, `top_k=40`, `min_p=0`, seed `20260913` and extended reasoning disabled. The output budget at the 15 September checkpoint was 4096 tokens, increased from 2048 in initial checks. Context, weight precision and memory settings were documented per model; the frozen record is authoritative.
 
-## 4. Avviare l'intera validation
+## 4. Run validation
 
 ```bash
-.venv/bin/python -m llm_selection.controller --label "validation-avvio-$(date +%Y%m%d-%H%M%S)"
+../../.venv/bin/python -m llm_selection.controller \
+  --label "validation-start-$(date +%Y%m%d-%H%M%S)"
 ```
 
-Sono 792 episodi: 3 modelli × 3 configurazioni × 88 circuiti.
-Ogni episodio ha al massimo tre chiamate. La prima risposta valida è definitiva;
-le altre chiamate servono solo a correggere risposte non conformi.
-I problemi di trasporto non causano ripetizioni automatiche.
+The grid has 792 episodes: three models × three settings × 88 circuits. Each allows at most three calls. The first valid response is final; subsequent calls repair invalid responses. The v1 procedure does not automatically retry transport failures.
 
-Il supervisore esegue i modelli in sequenza. Al termine sigilla tutte le decisioni,
-legge la matrice Qiskit già disponibile, calcola le metriche, fissa il vincitore
-locale e genera relazione e figure. Se una fase fallisce, i dati precedenti restano.
+The supervisor runs models sequentially, seals decisions, reads the existing Qiskit matrix, computes metrics, selects the local winner and generates reports. Earlier data remain if a phase fails.
 
-Il primo criterio è il numero di scelte valide e compilabili sugli 88 casi.
-A parità si sceglie il regret assoluto mediano più basso sullo stesso insieme di
-circuiti confrontabili. Seguono JSON valido alla prima chiamata, numero di
-chiamate, tempi e token misurati. Le misure mancanti non diventano zero.
-Se tutti falliscono non viene inventato un vincitore.
+Selection first maximizes valid, compilable choices on 88 cases. Ties use the lowest median absolute regret on the same comparable circuits, followed by first-call JSON validity, call count, measured time and tokens. Missing measurements do not become zero. No winner is invented if every candidate fails.
 
-Questo comando può durare molte ore o giorni: non è disponibile una stima
-affidabile prima delle prove tecniche complete. Le pause per temperatura
-contribuiscono alla durata. Non serve tenere una conversazione AI in attesa.
+Runs may take hours or days; thermal pauses contribute to elapsed time. Technical checks are needed before estimating duration.
 
-## 5. Controllare, mettere in pausa e riprendere
+## 5. Inspect, pause and resume
 
-Da un secondo terminale Ubuntu nella cartella del progetto:
+From another terminal:
 
 ```bash
-.venv/bin/python -m llm_selection.cli status
-.venv/bin/python -m llm_selection.cli stop
+../../.venv/bin/python -m llm_selection.cli status
+../../.venv/bin/python -m llm_selection.cli stop
 ```
 
-`stop` completa il circuito in corso, comprese le sue configurazioni e correzioni,
-poi chiude il server. Può quindi non essere immediato. Aspettare che `status`
-mostri `active_processes: []` e che il comando principale restituisca il prompt.
+`stop` finishes the current circuit, including its configurations and repairs, then closes the server. Wait until `status` shows `active_processes: []` and the main command returns.
 
-Per riprendere la validation:
+Resume validation with a fresh supervisor label:
 
 ```bash
-.venv/bin/python -m llm_selection.cli clear-stop
-.venv/bin/python -m llm_selection.controller --label "validation-ripresa-$(date +%Y%m%d-%H%M%S)"
+../../.venv/bin/python -m llm_selection.cli clear-stop
+../../.venv/bin/python -m llm_selection.controller \
+  --label "validation-resume-$(date +%Y%m%d-%H%M%S)"
 ```
 
-Usare un nuovo nome per ogni avvio del supervisore. Lo studio resta lo stesso.
-I modelli già sigillati e gli episodi conclusi vengono saltati.
-
-Per riprendere le prove tecniche dello stesso profilo:
+The study stays the same; sealed models and completed episodes are skipped. To resume an unchanged technical profile:
 
 ```bash
-.venv/bin/python -m llm_selection.cli clear-stop
-.venv/bin/python -m llm_selection.controller --technical \
-  --model qwen --label "qwen-ripresa-$(date +%Y%m%d-%H%M%S)" --episode-label "$QWEN_PROVA" \
-  --precision Q8_0 --context 147456
+../../.venv/bin/python -m llm_selection.cli clear-stop
+../../.venv/bin/python -m llm_selection.controller --technical \
+  --model qwen --label "qwen-resume-$(date +%Y%m%d-%H%M%S)" \
+  --episode-label "$QWEN_TRIAL" --precision Q8_0 --context 147456
 ```
 
-Mantenere tutti i parametri hardware originali. La ripresa riempie i casi mancanti;
-non ripete quelli già conclusi. Se si cambia profilo, iniziare invece una nuova
-prova tecnica senza `--episode-label`.
+Keep all original hardware settings. Resume fills missing cases; it does not repeat completed ones. A changed profile requires a new technical run without `--episode-label`.
 
-`Ctrl+C` interrompe subito il supervisore e richiede l'arresto del server.
-Una chiamata senza esito certo resta un'interruzione documentata e non viene
-rilanciata di nascosto. Se la risposta completa era già salvata, viene recuperata
-e validata. Dopo uno spegnimento riprendere con un nome nuovo: non eliminare file
-incompleti. I controlli di provenienza possono richiedere un esame degli artefatti
-se una scrittura è stata danneggiata.
+Ctrl+C interrupts the supervisor and requests server shutdown. An uncertain call remains a documented interruption rather than being silently repeated. An already saved complete response can be recovered and validated. After shutdown, use a new supervisor name and preserve incomplete files. Damaged writes may require artifact inspection.
 
-Il monitor applica le soglie del profilo registrato. Al controllo del 15 settembre
-2026, i valori predefiniti in `llm_selection/hardware.py` e `serve.ps1` sono:
-pausa a 105 °C di hotspot, ripresa sotto 100 °C, arresto a 108 °C di hotspot
-o 95 °C del sensore edge. La soglia di RAM libera è 1,5 GiB per tre campioni
-consecutivi. Il campionamento è circa una volta al secondo.
+On 15 September, the recorded defaults were hotspot pause at 105 °C, resume below 100 °C, stop at 108 °C hotspot or 95 °C edge, and free RAM below 1.5 GiB for three consecutive samples, sampled approximately once per second. Earlier 14 September instructions used different thresholds. Resume always uses the saved profile, not a later default. These are operational limits, not manufacturer specifications or a shutdown diagnosis. The monitor does not change voltage, clocks or fans. Later v2 settings are documented separately.
 
-Le prime istruzioni del 14 settembre riportavano 80/65 °C per pausa e ripresa
-e 95/85 °C per arresto: descrivono i precedenti valori, non quelli attuali.
-Per riprendere una prova contano sempre i valori salvati nel suo profilo.
-Questi limiti sono operativi, non specifiche del produttore né una diagnosi dello
-spegnimento. Il monitor non modifica tensioni, frequenze o ventole.
+## 6. Rerun analysis only
 
-## 6. Rilanciare soltanto le analisi
-
-Se i tre modelli sono conclusi ma manca l'analisi, ad esempio dopo un errore
-di installazione del compilatore LaTeX:
+After all models complete, if analysis was interrupted:
 
 ```bash
-.venv/bin/python -m llm_selection.study seal
-.venv/bin/python -m llm_selection.cli analyze
+../../.venv/bin/python -m llm_selection.study seal
+../../.venv/bin/python -m llm_selection.cli analyze
 ```
 
-Il sigillo fallisce se mancano decisioni o se gli artefatti sono cambiati.
-`analyze` riusa i dati e non richiama i modelli. I JSON analitici sono immutabili:
-se una nuova analisi produce numeri diversi, viene rifiutata.
+Sealing rejects missing decisions or changed artifacts. `analyze` reuses data without model calls. Analytical JSON is immutable; a new analysis producing different numbers is rejected.
 
-Per rigenerare solo la relazione e le figure dopo una selezione conclusa:
+To regenerate report sources and figures after selection:
 
 ```bash
-.venv/bin/python -m llm_selection.report
+../../.venv/bin/python -m llm_selection.report
 ```
 
-`--sources-only` evita la compilazione PDF, ma richiede comunque i pacchetti
-dei grafici. La relazione non viene prodotta con numeri fittizi prima delle prove.
+`--sources-only` skips PDF compilation but still needs plotting packages. The report is not populated with invented results before runs.
 
-## 7. Dove trovare i dati della tesi
+## 7. Locate results and provenance
 
-Tutti i percorsi seguenti sono relativi a `"$LLM_OUTPUT"`.
+Paths are relative to `$LLM_OUTPUT`:
 
-| Percorso | Contenuto |
+| Path | Contents |
 | --- | --- |
-| models/ | Pesi, provenienza, revisioni, precisione, impronte |
-| preparation/, technical/, incidents/ | Preparazione, prove iniziali e interruzioni storiche |
-| technical_episodes/ | Prove train, comprese quelle scartate |
-| controllers/, servers/ | Comandi, tempi di avvio, memoria, temperature, pause e arresti |
-| code_snapshots/ | Copie del codice usato nelle diverse esecuzioni |
-| frozen_study.json | Regole, parametri e impronte fissate prima degli score |
-| studies/ID/MODELLO/CONFIG/CIRCUITO/ | Input, evidenze, tentativi, risposta e decisione |
-| studies/ID/analysis/episodes.csv | Una riga per episodio, incluse le mancate riuscite |
-| studies/ID/analysis/trials.csv | Riepilogo delle nove combinazioni |
-| studies/ID/analysis/selection.json | Criteri applicati, denominatori e scelta |
-| report/groups.csv | Risultati per famiglia di circuito e numero di qubit |
-| report/technical_episodes.csv, report/server_runs.csv | Prove tecniche, configurazioni scartate e arresti |
-| report/paired_uncertainty.json | Confronti appaiati e intervalli descrittivi |
-| report/figures/ | Grafici PNG e SVG rigenerabili |
-| report/validation_selection.tex | Sorgente inseribile nella tesi |
-| report/standalone.tex, report/standalone.pdf | Documento autonomo di verifica |
-| report/preview/ | Immagini delle pagine da controllare visivamente |
-| final_configuration.json | Configurazione locale scelta |
-| selection_complete.json | Prova verificabile della selezione conclusa |
+| `models/` | External weights, provenance, revisions, precision and fingerprints. |
+| `preparation/`, `technical/`, `incidents/` | Preparation, initial checks and historical interruptions. |
+| `technical_episodes/` | Train checks, including rejected profiles. |
+| `controllers/`, `servers/` | Commands, startup times, memory, temperatures, pauses and stops. |
+| `code_snapshots/` | Exact sources used by runs. |
+| `frozen_study.json` | Rules, settings and fingerprints fixed before scores. |
+| `studies/ID/MODEL/CONFIG/CIRCUIT/` | Inputs, evidence, attempts, responses and decisions. |
+| `studies/ID/analysis/episodes.csv` | One row per episode, including failures. |
+| `studies/ID/analysis/trials.csv` | Nine-setting summary. |
+| `studies/ID/analysis/selection.json` | Selection criteria, denominators and outcome. |
+| `report/groups.csv` | Results by circuit family and qubit count. |
+| `report/technical_episodes.csv`, `report/server_runs.csv` | Technical checks, rejected settings and stops. |
+| `report/paired_uncertainty.json` | Paired comparisons and descriptive intervals. |
+| `report/figures/` | Regenerable PNG/SVG plots. |
+| `report/validation_selection.tex` | Thesis-ready fragment. |
+| `report/standalone.tex`, `report/standalone.pdf` | Standalone source and PDF. |
+| `report/preview/` | Page images for visual review. |
+| `final_configuration.json` | Selected local configuration. |
+| `selection_complete.json` | Verifiable selection-completion record. |
 
-I registri originali JSON/JSONL conservano prompt e risposte complete, evidenze,
-errori, numero di chiamate, correzioni, token, tempi, risorse e provenienza.
-I campi mancanti restano `null` o vuoti nei CSV. I massimi di memoria sono
-campionati; il massimo Python è cumulativo del processo, non esclusivo della
-singola chiamata. I tempi Qiskit storici sono indicati come riutilizzati.
-Il consumo energetico dell'intero PC non viene dedotto dal solo sensore ASIC.
+Original JSON/JSONL retains complete prompts and responses, evidence, errors, calls, repairs, tokens, times, resources and provenance. Missing fields stay null or blank. Memory maxima are sampled; Python's peak is cumulative for the process, not exclusive to one call. Reused Qiskit times are labeled historical. Whole-PC energy is not inferred from the ASIC sensor alone.
 
+This selection updates local LLM roles only. It does not configure a frontier model, run validation `qcompile` or open the Test. The later no-RAG comparison and final evaluation have their own records.
 
-La selezione aggiorna solo i ruoli locali con e senza RAG. Non configura il modello
-di frontiera, non esegue qcompile sulla validation e non apre il test.
-L'ablazione senza RAG e il confronto finale rimangono fasi successive del protocollo.
+## Historical checks and LaTeX setup
 
-## Verifiche storiche della consegna del 14 settembre
+The 14 September delivery recorded 21 synthetic selection tests and four focused protocol checks, plus Python syntax, five PowerShell scripts and `git diff --check`. The report test generated temporary synthetic sources without real Test circuits, PDF compilation or plotting. Long-run feasibility and the real PDF were separate checks.
 
-Il 14 settembre 2026 sono passati 21 test sintetici di `test_llm_selection.py`
-e quattro test mirati del protocollo: matrice Qiskit, timeout qcompile,
-configurazione LLM non definita e limiti di generazione. Sono stati controllati
-anche la sintassi Python, i cinque script PowerShell e `git diff --check`.
-Il test del resoconto genera sorgenti in una cartella temporanea con dati sintetici;
-non compila PDF e non esegue i grafici. Nessun circuito del test reale è stato
-usato per questi controlli. La sostenibilità delle prove lunghe e l'aspetto del
-PDF finale restano da verificare attraverso le esecuzioni dell'utente.
-
-## Preparare la relazione LaTeX
-
-Questo comando scarica e installa i componenti del resoconto. Può richiedere tempo:
+The historical report setup command downloads reporting dependencies:
 
 ```bash
-.venv/bin/python -m llm_selection.setup_report
+../../.venv/bin/python -m llm_selection.setup_report
 ```
 
-Installa Matplotlib e PyMuPDF nell'ambiente separato degli artefatti e Tectonic
-nella stessa cartella. Non modifica le dipendenze MQT. Il compilatore e i pacchetti
-sono registrati con versione e provenienza. La prima compilazione può scaricare
-ulteriori componenti TeX. È consigliabile eseguire questo passaggio prima della
-validation, così la relazione finale potrà essere generata automaticamente.
+It installs Matplotlib, PyMuPDF and Tectonic in a separate artifact environment without changing MQT dependencies. Versions and provenance are recorded; the first compilation may download more TeX components.
 
-Per inserire la relazione nella tesi, copiare il sorgente e la cartella delle
-figure. Servono i pacchetti `graphicx`, `booktabs`, `amsmath`, `seqsplit` e `hyperref`.
-Nel preambolo si può impostare il percorso delle figure, poi includere il testo:
+To include a generated fragment, copy its source and figures and load `graphicx`, `booktabs`, `amsmath`, `seqsplit` and `hyperref`:
 
 ```latex
-\newcommand{\ValidationFiguresPath}{capitoli/validation/figures/}
-% Nel corpo della tesi:
-\input{capitoli/validation/validation_selection.tex}
+\newcommand{\ValidationFiguresPath}{chapters/validation/figures/}
+% In the document body:
+\input{chapters/validation/validation_selection.tex}
 ```
 
-Controllare il PDF e tutte le anteprime prima dell'inserimento. La compilazione
-e la verifica visiva del documento reale restano da effettuare dopo le prove.
+Inspect the compiled PDF and page previews before inclusion. Historical delivery checks do not replace verification of a newly generated document.

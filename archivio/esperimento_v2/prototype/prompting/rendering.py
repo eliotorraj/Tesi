@@ -1,9 +1,9 @@
-"""Messaggi essenziali condivisi da chat, prove e tentativi correttivi."""
+'Compact messages shared by chat, evaluation and repair attempts.'
 import json
 from .minimal import NOTE, model_input, response_schema
 
 BASE_INSTRUCTION = NOTE
-REPAIR_INSTRUCTION = "Rispondi nuovamente con l’intero JSON richiesto per il circuito corrente."
+REPAIR_INSTRUCTION = 'Respond again with the complete required JSON for the current circuit.'
 CHECKLIST = (
     "Check that the device is compatible, config_id is allowed for it, and every cited "
     "example ID was supplied. Do not report a measured score for the new circuit."

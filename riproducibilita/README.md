@@ -1,41 +1,39 @@
-# Ricreare l'esperimento o costruire un nuovo prototipo
+# Reproduction and new experiments
 
-Questa è l'area operativa Linux per nuove esecuzioni: si scelgono circuiti e modelli, si generano dati, si selezionano le impostazioni sulla validation e si valutano sul Test. Gli strumenti non importano codice da `prototipo/` o `archivio/`. Pesi LLM e modelli MQT addestrati non sono inclusi.
+This Linux toolkit prepares circuits, trains MQT models, generates a Qiskit Dataset, selects LLM settings on validation, evaluates fixed methods on Test and exports standalone prototypes. It carries its own runtime components and does not import code from `prototipo/` or `archivio/`.
 
-Per **provare subito il prototipo selezionato**, anche su un PC Linux senza GPU, partire dalla [guida del prototipo](../prototipo/docs/guida_passo_passo.md). Per **rifare le fasi o scegliere altri modelli**, seguire la [guida di questa area](documentazione/guida.md). Sono obiettivi diversi: i 16 GB indicativi per la prova CPU non garantiscono le risorse per tutta la campagna.
+To try the already selected QAdviser system, use the [prototype guide](../prototipo/docs/guida_passo_passo.md). For new experiments, follow this toolkit's [complete guide](documentazione/guida.md) and [configuration recipes](documentazione/configurazione.md).
 
-Per configurare senza modificare JSON, da questa cartella e dopo il setup:
+After setup, activate the configured Python environment and run from this directory:
 
 ```bash
-source .venv/bin/activate
-python configura.py nuovo prova-cpu --profilo cpu
-python configura.py mostra prova-cpu
+python configura.py nuovo trial-cpu --profilo cpu
+python configura.py mostra trial-cpu
 python configura.py disponibili sistemi
+python esperimento.py --esperimento trial-cpu stato
 ```
 
-`configura.py` permette di scegliere circuiti, LLM, sistemi Test, Target, opzioni Qiskit e risorse. `nuovo` parte da Qwen e tre sistemi senza MQT; tutti i Target e le configurazioni restano disponibili finché non li riduci. Prima di eseguire una campagna completa segui la [guida](documentazione/guida.md); per una modifica specifica consulta il [ricettario dei comandi](documentazione/configurazione.md). `esperimento.py --esperimento NOME stato` aiuta a ritrovare il punto raggiunto.
+`nuovo` initially selects Qwen and three methods without MQT. All catalog devices and compilation configurations remain selected until narrowed down. `prepara` freezes inputs and settings before generation or training. Duplicate a prepared experiment under a new name to change those conditions. Existing command and option names retain their spelling; help text is in English.
 
-I nomi `nuovo`, `mostra`, `prepara` e `dataset` sono azioni dei rispettivi script. Per esempio, `python esperimento.py --esperimento prova-cpu prepara` controlla gli ingressi e conserva copie dei circuiti, catalogo e impostazioni della prova. È il passaggio che fissa le condizioni prima di generare il Dataset o addestrare; la guida indica quando eseguirlo e come iniziare una prova diversa.
+## Directory map
 
-Una GPU compatibile è consigliata per l'inferenza. Il kit usa un eseguibile llama.cpp Linux configurabile, senza dipendere dalla Radeon del fisso. Il fisso può continuare a usare il proprio server Windows da WSL con trasporto esplicito. Le differenze di hardware e contesto vanno dichiarate prima delle prove.
-
-| Cartella | Funzione |
+| Directory | Purpose |
 | --- | --- |
-| [circuiti/](circuiti/README.md) | Ingressi train, validation e test sostituibili; 600 QASM distribuiti e 50 QASMBench separati. |
-| [mqt/](mqt/README.md) | Target quantistici, politiche RL, Training set e selettore supervisionato. |
-| [dataset/](dataset/README.md) | Griglia Qiskit, schemi, aggregati e Dataset RAG del solo train. |
-| [modelli_llm/](modelli_llm/README.md) | Registro, cartelle per GGUF e avvio server CPU/GPU. |
-| [validation/](validation/README.md) | Scelta di modello, temperatura e profondità WL. |
-| [test/](test/README.md) | Metodi fissati, esiti e confronti. |
-| [configurazioni/](configurazioni/README.md) | Identità, percorsi, dispositivi, parametri, seed e metodi. |
-| [comune/](comune/README.md) | Integrità, processi, framework, report ed esportazione. |
-| [verifiche/](verifiche/README.md) | Collaudi software con piccoli circuiti e server simulato. |
-| [documentazione/](documentazione/README.md) | Sequenza operativa, condizioni e mappa dei moduli. |
-| [esecuzioni/](esecuzioni/README.md) | Ingressi congelati, contratti e registri per identificativo. |
-| [esportazioni/](esportazioni/README.md) | Nuovi prototipi autonomi, generati su richiesta. |
+| [circuiti/](circuiti/README.md) | 600 train/validation/Test inputs and a separate 50-circuit QASMBench collection. |
+| [mqt/](mqt/README.md) | Quantum Targets, RL policies, Training set and supervised selector. |
+| [dataset/](dataset/README.md) | Qiskit grid execution, aggregation, schemas and train-only RAG examples. |
+| [modelli_llm/](modelli_llm/README.md) | Model registry, GGUF locations and CPU/GPU server launcher. |
+| [validation/](validation/README.md) | Model/temperature selection and optional WL retrieval selection. |
+| [test/](test/README.md) | Frozen evaluation plans, methods, comparisons and optional oracle. |
+| [configurazioni/](configurazioni/README.md) | Named experiments, catalog, seeds, resources and generation settings. |
+| [comune/](comune/README.md) | Configuration, integrity, framework, processes, reports and export. |
+| [verifiche/](verifiche/README.md) | Software checks with small circuits and a simulated LLM server. |
+| [documentazione/](documentazione/README.md) | Operational guide, recipes, module map and conditions. |
+| [esecuzioni/](esecuzioni/README.md) | Experiment lifecycle reference. |
+| [esportazioni/](esportazioni/README.md) | Standalone prototype export instructions. |
 
-`setup.sh`, `pyproject.toml`, `uv.lock` e `.python-version` preparano l'ambiente dedicato. `configura.py --help` elenca le modifiche disponibili; `esperimento.py --help` elenca le fasi. Le configurazioni nominate sono in `configurazioni/esperimenti/`; dopo la preparazione si duplicano per iniziare una prova diversa. Tutti i risultati sono separati per `experiment_id`; i segnaposto sono nel clone, mentre pesi, ambienti e dati generati devono essere conservati separatamente da Git.
+`setup.sh`, `pyproject.toml`, `uv.lock` and `.python-version` define the Python environment; TOON has its own npm lock. Setup does not download weights or train models. `configura.py --help` lists configuration actions; `esperimento.py --help` lists phases.
 
-**Dataset** significa esempi per RAG/LLM. **Training set** significa dati circuito/dispositivo per MQT. Non è implementato il fine-tuning degli LLM. `esporta` costruisce un altro prototipo con train e configurazione selezionata, senza sovrascrivere quello distribuito.
+CPU/GPU profiles concern LLM inference; catalog Targets describe quantum hardware. Check resources and backend support on the actual machine. The small prototype CPU example does not establish the requirements for a full campaign. Read the [conditions](documentazione/condizioni.md) for operational differences from the historical experiment, including selection criteria and MQT coverage requirements.
 
-[provenienza_sorgenti.json](provenienza_sorgenti.json) identifica le origini dei componenti. Non introduce dipendenze operative dall'archivio. Per limiti e condizioni scientifiche leggere [condizioni](documentazione/condizioni.md).
+**Dataset** means RAG/LLM examples; **Training set** means MQT circuit/device samples. LLM fine-tuning is not implemented. `provenienza_sorgenti.json` records origins without adding archive runtime dependencies.

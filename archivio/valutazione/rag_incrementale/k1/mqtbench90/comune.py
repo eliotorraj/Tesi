@@ -1,4 +1,4 @@
-"""Percorsi e registri della sola campagna incrementale."""
+'Paths and records for the incremental campaign only.'
 from __future__ import annotations
 import hashlib
 import json
@@ -48,12 +48,12 @@ def valid_score(row):
 
 def campaign_path(experiment_id, order):
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", experiment_id):
-        raise ValueError("Identificativo esperimento non valido.")
+        raise ValueError('Invalid experiment ID.')
     if order not in SYSTEMS:
-        raise ValueError("Ordinamento sconosciuto.")
+        raise ValueError('Unknown ordering.')
     path = ((BASE / "rag_fisso") if order == FIXED else (BASE / "ordinamenti" / order)) / "campagne" / experiment_id
     if not path.resolve().is_relative_to(BASE.resolve()):
-        raise ValueError("La campagna deve restare nella nuova area di archivio.")
+        raise ValueError('The campaign must remain in the new archive area.')
     return path
 
 
@@ -65,21 +65,21 @@ def order_rows(rows, order):
     elif order in ORDERS and ORDERS[order] is not None:
         random.Random(ORDERS[order]).shuffle(result)
     elif order not in ("01_manifest", FIXED):
-        raise ValueError("Ordinamento sconosciuto.")
+        raise ValueError('Unknown ordering.')
     return result
 
 
 def test_rows():
     if sha(SOURCE) != "c599eab17b6f64528067016e3d175cbfed597334f779ef8e515cf8787a788f53":
-        raise ValueError("Manifest originale del corpus modificato.")
+        raise ValueError('Original corpus manifest was modified.')
     rows = [r for r in read(SOURCE)["circuits"] if r["split"] == "test"]
     if len(rows) != 90 or len({r["circuit_id"] for r in rows}) != 90:
-        raise ValueError("Attesi i 90 identificativi Test del manifest.")
+        raise ValueError("Expected the manifest's 90 Test IDs.")
     for row in rows:
         if not re.fullmatch(r"[A-Za-z0-9_.-]+", row["circuit_id"]):
-            raise ValueError("Identificativo circuito non sicuro.")
+            raise ValueError('Unsafe circuit ID.')
         if sha(source_path(row)) != row["source_sha256"]:
-            raise ValueError("Circuito originale modificato: " + row["circuit_id"])
+            raise ValueError('Original circuit was modified: ' + row["circuit_id"])
     return rows
 
 
@@ -92,7 +92,7 @@ def step_folder(base, position, row):
 
 
 def frozen_files():
-    """Impronte dei sorgenti effettivamente riutilizzati; nessun risultato futuro."""
+    'Hashes of sources actually reused; no future results.'
     paths = [SOURCE, PROTOTIPO / "config.json", PROTOTIPO / "requirements.txt",
              PROTOTIPO / "app.py", PROTOTIPO / "portable_features.py",
              REPO / "archivio/valutazione/test/piano.json", BASE / "piano.json"]
@@ -113,23 +113,23 @@ def verify_hashes(files):
     for relative, expected in files.items():
         path = (REPO / relative).resolve()
         if not path.is_relative_to(REPO.resolve()) or sha(path) != expected:
-            raise ValueError("Fonte cambiata: " + relative)
+            raise ValueError('Source changed: ' + relative)
 
 
 def check_contract(base, expected=None, *, verify_runtime=True):
     path = base / "contratto.json"
     contract = read(path)
     if expected is not None and contract != expected:
-        raise ValueError("Contratto incompatibile. Usare un nuovo --experiment-id.")
+        raise ValueError('Incompatible contract. Use a new --experiment-id.')
     if contract.get("revision") != "mqtbench90-rag-k1-v1":
-        raise ValueError("Revisione della campagna non supportata.")
+        raise ValueError('Unsupported campaign revision.')
     if verify_runtime:
         verify_hashes(contract["files"])
     if contract.get("benchmark") != BENCHMARK or contract.get("plan", {}).get("k") != 1:
-        raise ValueError("Contratto estraneo a questo esperimento k=1.")
+        raise ValueError('Contract does not belong to this k=1 experiment.')
     order = contract.get("order")
     if order not in SYSTEMS or contract.get("strategy") != strategy_for(order):
-        raise ValueError("Strategia del contratto non valida.")
+        raise ValueError('Invalid contract strategy.')
     return contract
 
 
@@ -141,17 +141,17 @@ def path_hashes(base, folder):
 def validate_relative_file(base, relative, expected):
     path = (base / relative).resolve()
     if not path.is_relative_to(base.resolve()) or sha(path) != expected:
-        raise ValueError("Registro alterato o percorso esterno: " + relative)
+        raise ValueError('Modified record or external path: ' + relative)
     return path
 
 
 def strategy_for(order):
     if order not in SYSTEMS:
-        raise ValueError("Sistema sconosciuto.")
+        raise ValueError('Unknown system.')
     return "fixed" if order == FIXED else "incremental"
 
 
 def method_for(strategy):
     if strategy not in ("fixed", "incremental"):
-        raise ValueError("Strategia sconosciuta.")
+        raise ValueError('Unknown strategy.')
     return "llm_rag_fisso_k1" if strategy == "fixed" else "llm_rag_incrementale_k1"

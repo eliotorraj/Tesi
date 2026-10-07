@@ -1,4 +1,4 @@
-"""Prepara le suddivisioni riproducibili dei circuiti del Dataset Qiskit."""
+'Prepare reproducible circuit splits for the Qiskit Dataset.'
 
 from __future__ import annotations
 
@@ -17,13 +17,13 @@ from qiskit_dataset.core import prepare_dataset
 
 
 def parse_args() -> argparse.Namespace:
-    """Legge le opzioni per preparare il campione o il Dataset completo."""
+    'Read options for preparing the sample or full Dataset.'
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--scope",
         choices=("pilot", "full", "both"),
         default="full",
-        help="Pilot da 10 circuiti, corpus completo da 600, oppure entrambi.",
+        help='10-circuit pilot, full 600-circuit corpus, or both.',
     )
     parser.add_argument(
         "--catalog",
@@ -32,23 +32,23 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--device",
-        help="Device MQT Bench; se omesso usa il default del catalogo.",
+        help="MQT Bench device; defaults to the catalog's default device.",
     )
     parser.add_argument(
         "--source-circuits",
         type=Path,
-        help="Override opzionale della cartella con i 600 QASM MQT.",
+        help='Optional directory override for the 600 MQT QASM files.',
     )
     parser.add_argument(
         "--include-test",
         action="store_true",
-        help="Aggiunge il test solo dopo un record di apertura v2 valido.",
+        help='Include Test only after a valid v2 opening record.',
     )
     return parser.parse_args()
 
 
 def main() -> None:
-    """Prepara gli insiemi richiesti e ne mostra le informazioni principali."""
+    'Prepare the requested sets and show their main information.'
     args = parse_args()
     catalog = load_catalog(args.catalog)
     device_id = catalog.require_device(args.device)

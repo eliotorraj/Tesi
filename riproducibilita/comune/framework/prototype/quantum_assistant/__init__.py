@@ -1,1 +1,1 @@
-"""Componenti autonomi del prototipo."""
+'Standalone prototype components.'

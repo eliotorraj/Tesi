@@ -1,4 +1,4 @@
-"""Avvia una chat locale Qwen, Phi o Gemma, separata dalle prove sperimentali."""
+'Start a local Qwen, Phi or Gemma chat, separate from experimental runs.'
 from __future__ import annotations
 
 import argparse
@@ -14,8 +14,8 @@ from .hardware import DEFAULT_BATCH, DEFAULT_GUARDS, DEFAULT_MICRO_BATCH, server
 from .provenance import capture
 from .study import MODEL_KEYS, NATIVE_CONTEXT
 
-# Profili iniziali per la chat; non attestano qualità o sostenibilità del modello.
-# Qwen conserva i valori del precedente avvio qwen-prova-07.
+# Initial chat profiles do not establish model quality or resource feasibility.
+# Qwen retains the settings from the earlier qwen-prova-07 launch.
 CHAT_DEFAULTS = {
     "qwen": {"context": 147456, "cache_type": "q8_0"},
     "phi": {"context": 114688, "cache_type": "q4_0"},
@@ -25,7 +25,7 @@ PROFILE_REVISION = "manual-chat-defaults-v1"
 
 
 def profile_for_model(model, *, precision="Q8_0", context=None, cache_type=None):
-    """Costruisce un profilo esplicito senza dipendere da vecchi registri."""
+    'Build an explicit profile without relying on old records.'
     if model not in MODEL_KEYS:
         raise ValueError("Unknown chat model")
     if precision not in ("BF16", "Q8_0"):
@@ -51,17 +51,17 @@ def profile_for_model(model, *, precision="Q8_0", context=None, cache_type=None)
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=MODEL_KEYS, default="qwen",
-                        help="Modello della chat; predefinito: qwen.")
-    parser.add_argument("--label", default=None, help="Nome nuovo; predefinito con modello, data e ora UTC.")
+                        help='Chat model; default: qwen.')
+    parser.add_argument("--label", default=None, help='New name; defaults to model and UTC timestamp.')
     parser.add_argument("--precision", choices=("BF16", "Q8_0"), default="Q8_0")
-    parser.add_argument("--context", type=int, help="Contesto; predefinito specifico del modello.")
+    parser.add_argument("--context", type=int, help='Context; model-specific default.')
     parser.add_argument("--cache-type", choices=("f16", "q8_0", "q4_0"),
-                        help="Precisione della cache; predefinita per modello.")
-    parser.add_argument("--check", action="store_true", help="Controlla file e profilo senza caricare il modello.")
+                        help='Cache precision; model-specific default.')
+    parser.add_argument("--check", action="store_true", help='Check files and profile without loading the model.')
     args = parser.parse_args(argv)
     label = args.label or args.model + "-chat-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     if not re.fullmatch(r"[a-z0-9_-]+", label):
-        parser.error("Il nome deve contenere solo lettere minuscole, cifre, - e _.")
+        parser.error('The name may contain only lowercase letters, digits, - and _.')
     try:
         profile = profile_for_model(args.model, precision=args.precision,
                                     context=args.context, cache_type=args.cache_type)
@@ -81,24 +81,23 @@ def main(argv=None):
     if not model_path.is_file():
         raise FileNotFoundError(str(model_path))
     if args.check:
-        print(f"File e profilo presenti. {args.model}: pesi {profile['weight_precision']}; "
-              f"contesto {profile['context']}; cache {profile['cache_type']}.")
-        print("Nessun server avviato, nessuna inferenza. SHA-256 verificato al vero avvio.")
+        print(f"File and profile found. {args.model}: weights {profile['weight_precision']}; context {profile['context']}; cache {profile['cache_type']}.")
+        print('No server started or inference performed. SHA-256 is checked at actual startup.')
         return
     session = OUTPUT / "manual_chats" / label
     server_dir = OUTPUT / "servers" / label
     if session.exists() or server_dir.exists() or server_dir.is_symlink():
-        raise FileExistsError("Nome già usato: scegliere un nuovo --label.")
+        raise FileExistsError('Name already used: choose a new --label.')
     OUTPUT.mkdir(parents=True, exist_ok=True)
     with (OUTPUT / "execution.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         if health() is not None:
-            raise RuntimeError("Un server risponde già sulla porta 8089; chiuderlo prima.")
+            raise RuntimeError('A server already responds on port 8089; stop it first.')
         session.mkdir(parents=True, exist_ok=False)
         write_json(session / "request.json", {
             "at": now(), "phase": "train_manual_chat", "model": args.model,
             "profile": profile, "profile_revision": PROFILE_REVISION,
-            "note": "Server e risorse registrati. Esportare dalla chat messaggi e impostazioni: non sono catturati automaticamente da questo avvio.",
+            "note": 'Server and resources recorded. Export chat messages and settings: this launcher does not capture them automatically.',
         })
         capture(session)
         events = session / "events.jsonl"
@@ -106,18 +105,19 @@ def main(argv=None):
             process = None
             try:
                 process = launch(args.model, profile, server_dir, log, events)
-                print(f"\nChat {args.model}. Apri nel browser Windows: http://127.0.0.1:8089", flush=True)
-                print("Per spegnere il server: Ctrl+C in questo terminale.", flush=True)
-                print("Registri della sessione:", session, flush=True)
-                print("Esporta messaggi e impostazioni della chat prima di chiuderla.", flush=True)
+                print(f'\nChat {args.model}. Open in the Windows browser: http://127.0.0.1:8089', flush=True)
+                print('To stop the server: Ctrl+C in this terminal.', flush=True)
+                print('Session records:', session, flush=True)
+                print('Export chat messages and settings before closing it.', flush=True)
                 while process.poll() is None:
                     time.sleep(1)
                 if (server_dir / "resource_abort.json").exists() or (server_dir / "monitor_error.json").exists():
                     raise RuntimeError(failure_message(server_dir, Path(log.name)))
                 if process.returncode:
-                    raise RuntimeError("Il server si è fermato: consultare " + str(log.name))
+                    raise RuntimeError('The server stopped: consult ' + str(log.name))
             except KeyboardInterrupt:
-                print("\nChiusura della chat locale...", flush=True)
+                print("""
+Closing local chat...""", flush=True)
             finally:
                 if process is not None:
                     stop(server_dir, "manual_chat_closed", log)

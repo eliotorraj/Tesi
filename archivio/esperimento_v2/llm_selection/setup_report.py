@@ -1,4 +1,4 @@
-"""Installazione esplicita del solo compilatore LaTeX e del lettore PDF isolato."""
+'Explicit installation of the isolated LaTeX compiler and PDF reader only.'
 import argparse
 import hashlib
 import json
@@ -50,5 +50,5 @@ def main():
     frozen=subprocess.check_output(["uv","pip","freeze","--python",str(python)],text=True)
     write_json(root/"installed.json",{"at":now(),"tectonic_version":version,"binary_sha256":hashlib.sha256(binary).hexdigest(),
                                      "renderer_requirement":info["renderer_requirement"],"plotting_requirement":info["plotting_requirement"],"isolated_environment":frozen})
-    print("Compilatore e lettore PDF pronti. L'ambiente MQT non è stato modificato.")
+    print('Compiler and PDF reader ready. The MQT environment was not changed.')
 if __name__=="__main__": main()

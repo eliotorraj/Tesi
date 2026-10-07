@@ -1,4 +1,4 @@
-"""Report riproducibile da registri conclusi; non avvia LLM o compilazioni quantistiche."""
+'Reproducible report from completed records without LLM or quantum compilation.'
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -57,18 +57,18 @@ def collect(experiment_id, oracle_path=None):
             "created_at": now(), "kind": "measured_results", "orders": {}, "sources": {}, "oracle": None,
             "circuits": circuits, "baseline": {}, "references": {},
             "limitations": [
-                "Cinque nuove esecuzioni con k=1: un RAG fisso e quattro ordinamenti incrementali.",
-                "I sistemi sono eseguiti in sequenza; carico e caching del server possono influenzare i tempi.",
-                "Recupero esatto Manhattan e trasformazione train fissa per tutti i sistemi.",
-                "Il prompt distingue le singole osservazioni incrementali dagli esempi train confrontati.",
-                "Quattro ordini degli stessi circuiti; le misure non sono repliche indipendenti.",
-                "Test già esaminati; la campagna valuta il comportamento sequenziale.",
-                "Gli oracle sono massimi osservati sulla griglia Qiskit e possono essere parziali.",
-                "Fallimenti e misure mancanti non valgono zero. Energia e memoria di picco non misurate."]}
+                'Five new k=1 runs: one fixed RAG and four incremental orderings.',
+                'Systems run sequentially; server load and caching may affect timings.',
+                'Exact Manhattan retrieval and fixed train preprocessing for every system.',
+                'The prompt distinguishes individual incremental observations from compared train examples.',
+                'Four orderings of the same circuits; measurements are not independent replicates.',
+                'Previously examined Test circuits; the campaign evaluates sequential behavior.',
+                'Oracles are observed Qiskit-grid maxima and may be partial.',
+                'Failures and missing measurements are not zero. Energy and peak memory were not measured.']}
     if oracle_path:
         references, info, sources = oracoli.load_reference(oracle_path, circuits)
-        # I vecchi score k=5 servono soltanto alla verifica storica dell'oracle.
-        # Il controllo di questo report deriva esclusivamente dalla nuova esecuzione k=1.
+        # Earlier k=5 scores are used only for historical oracle verification.
+        # This report's control comes exclusively from the new k=1 run.
         data["references"] = {
             cid: {key: row[key] for key in ("circuit_id", "source_sha256", "oracle_score", "exhaustive")}
             for cid, row in references.items()}
@@ -84,18 +84,18 @@ def collect(experiment_id, oracle_path=None):
         contract = check_contract(base, verify_runtime=False)
         if (contract["experiment_id"] != experiment_id or contract["order"] != order
                 or contract["rows"] != order_rows(manifest, order)):
-            raise ValueError("Sequenza o identità diversa dalla campagna k=1 richiesta.")
+            raise ValueError('Sequence or identity differs from the requested k=1 campaign.')
         settings = {key: contract[key] for key in (
             "plan", "train_count", "transform", "targets", "versions", "model", "initial_source_hashes", "python")}
         if compatible is not None and settings != compatible:
-            raise ValueError("Impostazioni diverse fra RAG fisso e varianti incrementali k=1.")
+            raise ValueError('Settings differ between fixed RAG and incremental k=1 variants.')
         compatible = settings
         if data["oracle"]:
             if contract["targets"] != data["oracle"]["targets"]:
-                raise ValueError("Target diversi dall'oracle.")
+                raise ValueError('Targets differ from the oracle.')
             for name in ("qiskit", "mqt.bench", "numpy"):
                 if contract["versions"][name] != data["oracle"]["versions"][name]:
-                    raise ValueError("Versione diversa dall'oracle: " + name)
+                    raise ValueError('Version differs from the oracle: ' + name)
         _, commits, _ = replay(base, contract)
         data["sources"][str(base / "contratto.json")] = sha(base / "contratto.json")
         for position, commit in enumerate(commits, 1):
@@ -132,7 +132,7 @@ def collect(experiment_id, oracle_path=None):
             control = baseline["score"]
             reference = data["references"].get(source["circuit_id"])
             if reference and reference["source_sha256"] != source["source_sha256"]:
-                raise ValueError("Oracle relativo a una sorgente diversa.")
+                raise ValueError('Oracle refers to a different source.')
             oracle_score = reference["oracle_score"] if reference else None
             delta = score-control if score is not None and control is not None else None
             if delta is not None:
@@ -177,15 +177,15 @@ def number(value, digits=4):
 
 
 def order_label(order):
-    return {"01_manifest": "Manifest", "02_inverso": "Inverso",
-            "03_casuale_20261002": "Casuale 1", "04_casuale_20261003": "Casuale 2"}.get(order, order)
+    return {"01_manifest": "Manifest", "02_inverso": 'Reverse',
+            "03_casuale_20261002": 'Random 1', "04_casuale_20261003": 'Random 2'}.get(order, order)
 
 
 def plot(data, field, ylabel, *, scale=1):
     palette = ["blue!70!black", "orange!90!black", "green!50!black", "purple"]
     lines = [
         r"\begin{tikzpicture}\begin{axis}[width=0.98\linewidth,height=3.9cm,grid=major,",
-        r"xmin=1,xmax=90,xtick={1,10,20,30,40,50,60,70,80,90},xlabel={Posizione nel flusso},ylabel={" + ylabel + r"},",
+        'xmin=1,xmax=90,xtick={1,10,20,30,40,50,60,70,80,90},xlabel={Stream position},ylabel={' + ylabel + r"},",
         r"legend style={font=\scriptsize,at={(0.5,0)},yshift=-32pt,anchor=north,legend columns=4},",
         r"tick label style={font=\small},label style={font=\small},scaled y ticks=false]",
     ]
@@ -198,7 +198,7 @@ def plot(data, field, ylabel, *, scale=1):
             lines += [r"\addplot+[mark=none,thick,color=" + color + "] coordinates {" + coords + "};",
                       r"\addlegendentry{" + tex_escape(order_label(order)) + "}"]
     lines.append(r"\end{axis}\end{tikzpicture}")
-    return "\n".join(lines) if count else r"\emph{Nessuna misura disponibile per questo grafico.}"
+    return "\n".join(lines) if count else '\\emph{No measurements available for this plot.}'
 
 
 def render_tex(data):
@@ -235,14 +235,14 @@ def write_report(data, output, pdf=False):
     charts.mkdir()
     chart_specs = [
         ("qualita", "cumulative_mean_delta", r"$\overline{\Delta}$ (\%)", 100),
-        ("memoria", "memory_after", "Osservazioni ammesse", 1),
+        ("memoria", "memory_after", 'Admitted observations', 1),
     ]
     specs = [(name, plot(data, field, label, scale=scale).replace(r"width=0.98\linewidth", "width=24cm"))
              for name, field, label, scale in chart_specs] + oracoli.figure_specs(data)
     figure_paths = []
     for name, body in specs:
         figure = charts / (name + ".tex")
-        banner = r"\textbf{DATI SINTETICI - SOLO VERIFICA SOFTWARE}\par " if data["kind"] == "synthetic_verification" else ""
+        banner = '\\textbf{SYNTHETIC DATA - SOFTWARE CHECK ONLY}\\par ' if data["kind"] == "synthetic_verification" else ""
         figure.write_text(
             r"\documentclass[border=5pt]{standalone}\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}"
             r"\usepackage{pgfplots}\pgfplotsset{compat=1.18}\begin{document}"
@@ -269,14 +269,14 @@ def write_report(data, output, pdf=False):
                                   cwd=output, capture_output=True, text=True, timeout=90)
             (output / f"compilazione_{attempt}.txt").write_text(proc.stdout + proc.stderr, encoding="utf-8")
             if proc.returncode:
-                raise RuntimeError("Compilazione LaTeX fallita; sorgente e log conservati.")
+                raise RuntimeError('LaTeX compilation failed; source and log preserved.')
         for figure in figure_paths:
             proc = subprocess.run(["pdflatex", "-no-shell-escape", "-halt-on-error",
                                    "-interaction=nonstopmode", figure.name],
                                   cwd=charts, capture_output=True, text=True, timeout=90)
             (charts / (figure.stem + "_compilazione.txt")).write_text(proc.stdout + proc.stderr, encoding="utf-8")
             if proc.returncode:
-                raise RuntimeError("Compilazione del grafico fallita; log conservato.")
+                raise RuntimeError('Plot compilation failed; log preserved.')
     save(output / "provenienza.json", {
         "generator_sha256": sha(Path(__file__)), "synthesis_module_sha256": sha(Path(sintesi.__file__)), "oracle_module_sha256": sha(Path(oracoli.__file__)), "sources": data["sources"],
         "oracle": data.get("oracle"), "kind": data["kind"],
@@ -288,9 +288,9 @@ def write_report(data, output, pdf=False):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--experiment-id", default=DEFAULT_ID)
-    ap.add_argument("--oracle", type=Path, default=ORACLE, help="dati.json del confronto oracle MQT Bench verificabile")
-    ap.add_argument("--senza-oracle", action="store_true", help="Report esplicitamente privo del riferimento oracle")
-    ap.add_argument("--pdf", action="store_true", help="Compila con pdfLaTeX già installato")
+    ap.add_argument("--oracle", type=Path, default=ORACLE, help='verifiable MQT Bench oracle-comparison dati.json')
+    ap.add_argument("--senza-oracle", action="store_true", help='Report explicitly without an oracle reference')
+    ap.add_argument("--pdf", action="store_true", help='Compile using an already installed pdfLaTeX')
     args = ap.parse_args(argv)
     data = collect(args.experiment_id, None if args.senza_oracle else args.oracle)
     output = BASE / "report/risultati" / args.experiment_id / (

@@ -1,5 +1,5 @@
-# Utility di integrità
+# Integrity utilities
 
-`mqt_predictor_protocol.py` fornisce identificativi, impronte dei Target e funzioni di verifica. Catalogo e RAG lo usano durante l'esecuzione Linux e nel client del fisso.
+`mqt_predictor_protocol.py` provides identifiers, Target fingerprints and checks used by the catalog and retrieval components. It does not require trained MQT models.
 
-Questo modulo non richiede modelli MQT addestrati. L'addestramento RL e del selettore ML ha strumenti dedicati in [riproducibilita/mqt](../../riproducibilita/mqt/README.md).
+RL and supervised selector training are separate operations in [riproducibilita/mqt/](../../riproducibilita/mqt/README.md).

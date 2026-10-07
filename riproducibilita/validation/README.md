@@ -1,9 +1,16 @@
-# Validation delle impostazioni
+# Validation and selection
 
-`seleziona.py` congela i candidati, registra le decisioni e sceglie modello/temperatura sui circuiti comuni. `wl.py` seleziona la profondità del recupero strutturale con `dag_wl_core.py`. I report vengono generati da `comune/relazioni.py`; i risultati sono in `risultati/<id>/`.
+`seleziona.py` freezes candidates, records decisions and selects model/temperature settings on common observable circuits. `wl.py` selects structural retrieval depth using `dag_wl_core.py`. Reports use `comune/relazioni.py`; [risultati/](risultati/README.md) links to the validation documentation.
 
-Dopo la generazione Dataset usare, da `riproducibilita/`, `.venv/bin/python -B esperimento.py validation congela`, poi `validation esegui --modello ID` con il server corrispondente, `validation seleziona` e `validation report`. `validation wl` è richiesto soltanto per le varianti WL.
+After Dataset generation, from the toolkit root:
 
-Gli score validation vengono letti dopo il sigillo delle decisioni e non entrano nel prompt. Contesto ridotto, CPU, GPU, timeout e griglia dei modelli sono condizioni da fissare prima della prova. I 16 GB della prima prova del prototipo non garantiscono che questa campagna completa sia praticabile. Criteri e denominatori sono descritti nelle [condizioni](../documentazione/condizioni.md).
+```bash
+python esperimento.py --esperimento my-trial validation congela
+python esperimento.py --esperimento my-trial validation esegui --modello qwen
+python esperimento.py --esperimento my-trial validation seleziona
+python esperimento.py --esperimento my-trial validation report
+```
 
-Per selezionare candidati e temperature senza editare JSON usa `configura.py modelli`, `modello` e `parametri`, prima di `prepara`. Nei comandi delle fasi aggiungi `--esperimento NOME` prima di `validation`; lo stesso nome va usato per `server ID` e `server ID --controlla`.
+Run every configured model with its corresponding server before selection. `validation wl` is needed only for WL variants. Choose candidates and temperatures before preparation with `configura.py modelli`, `modello` and `parametri`.
+
+Validation scores are read after decisions are sealed and never enter their prompts. The toolkit defaults to `median_regret`; the [conditions](../documentazione/condizioni.md) explain differences from the historical experiment. Fix context, hardware, timeouts and criterion before the campaign.

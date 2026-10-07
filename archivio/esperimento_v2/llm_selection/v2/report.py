@@ -1,4 +1,4 @@
-"""Rapporto tecnico o di validation, con sorgenti LaTeX e figure."""
+'Technical or validation report with LaTeX sources and figures.'
 from __future__ import annotations
 import os
 import subprocess
@@ -57,54 +57,41 @@ def build_report(study_id, *, technical=False, compile_pdf=True):
                           "source_hashes": [r["source_sha256"] for r in common],
                           **bootstrap([reference[r["source_sha256"]]["regret_absolute"] - r["regret_absolute"] for r in common])})
     write_json(directory / "paired_uncertainty.json", pairs)
-    title = "Prove tecniche sul train" if technical else "Seconda selezione dei modelli locali sulla validation"
+    title = 'Technical checks on train' if technical else 'Second local-model selection on validation'
     parts = [
         r"\providecommand{\ValidationFiguresPath}{figures/}",
         r"\section{" + title + "}",
-        "Studio " + tex(study_id) + ". Contratto di risposta 4.0.0. "
-        + ("Queste prove verificano il funzionamento su cinque circuiti di train; non misurano la generalizzazione. "
-           "Il recupero tecnico può includere lo stesso circuito di train, come documentato nei prompt."
-           if technical else "Sono confrontate nove combinazioni sugli stessi 88 circuiti. Il test resta separato."),
-        r"\subsection{Dati, impostazioni e controlli}",
-        "Qwen, Phi e Gemma usano lo stesso prompt, derivato dalla precedente checklist, alle temperature 0, 0,4 e 0,7. "
-        "Si recuperano cinque esempi dal train, con distanza Manhattan sulle 49 caratteristiche e trasformazioni fissate sul train. "
-        "Il formato del prompt è TOON e la risposta è JSON. Nella validation gli score del circuito corrente non entrano nel prompt né nei messaggi correttivi.",
-        "La risposta contiene una coppia ammessa, da uno a due fatti strutturati e un'ipotesi libera fino a 1000 caratteri. "
-        "I quattro fatti riguardano la presenza della coppia nei risultati mostrati, il dispositivo storico, "
-        "l'uguaglianza del numero di qubit o la capacità del dispositivo. Il testo dell'ipotesi non viene verificato semanticamente.",
-        "Si consentono tre tentativi logici. Dopo il terzo, una risposta conforme con coppia ammessa viene accettata "
-        "anche se i fatti restano errati. Questo successo operativo non certifica la spiegazione o la qualità della compilazione. "
-        "Le chiamate interrotte sono conservate, annullate nel conteggio logico e ripetute al recupero delle risorse.",
-        "La GPU è una Radeon RX 6750 XT. Limite hotspot 110 gradi, pausa a 105 e ripresa a 100; limite edge 95 gradi. "
-        "Soglia RAM disponibile 1 GiB. Sono impostazioni operative richieste, non una garanzia specifica del produttore. "
-        "Il monitor campiona RAM, VRAM e temperature; i massimi campionati possono perdere picchi istantanei.",
-        r"\begin{center}\begin{tabular}{lrr}\toprule Modello & Contesto & Micro-batch\\\midrule"]
+        'Study ' + tex(study_id) + '. Response contract 4.0.0. '
+        + ('These checks verify operation on five train circuits, not generalization. Technical retrieval may include the train input itself, as documented in prompts.'
+           if technical else 'Nine combinations are compared on the same 88 circuits. Test remains separate.'),
+        '\\subsection{Data, settings and checks}',
+        "Qwen, Phi and Gemma use the same prompt, derived from the previous checklist, at temperatures 0, 0.4 and 0.7. Five train examples are retrieved by Manhattan distance on 49 features with train-fitted transformations. Prompts use TOON and responses use JSON. The current circuit's validation scores never enter its prompt or repair messages.",
+        "The response contains an allowed pair, one or two structured facts and a free hypothesis up to 1000 characters. The four fact types concern the pair's presence in shown results, the historical device, equal qubit count or device capacity. The hypothesis text is not checked semantically.",
+        'Three logical attempts are allowed. After the third, a conforming response with an allowed pair is accepted even if facts remain incorrect. This operational success does not certify explanation or compilation quality. Interrupted calls are preserved, excluded from the logical count and repeated after resources recover.',
+        'The GPU is a Radeon RX 6750 XT. Hotspot limit is 110 degrees, pause at 105 and resume at 100; edge limit is 95 degrees. Available-RAM threshold is 1 GiB. These are requested operating settings, not a manufacturer guarantee. The monitor samples RAM, VRAM and temperatures; sampled maxima can miss instantaneous peaks.',
+        '\\begin{center}\\begin{tabular}{lrr}\\toprule Model & Context & Microbatch\\\\\\midrule']
     for name, p in profiles.items():
         parts.append(tex(name) + " & " + str(p["context"]) + " & " + str(p["micro_batch"]) + r"\\")
     parts += [r"\bottomrule\end{tabular}\end{center}",
-              "Pesi Q8\\_0; revisioni, hash, hardware, dipendenze e dati di provenienza sono conservati nei manifest dello studio.",
-              r"\begin{center}\begin{tabular}{lr}\toprule Parametro & Valore\\\midrule"]
+              'Q8\\_0 weights; revisions, hashes, hardware, dependencies and provenance are preserved in study manifests.',
+              '\\begin{center}\\begin{tabular}{lr}\\toprule Parameter & Value\\\\\\midrule']
     for key in ("max_tokens", "top_p", "top_k", "min_p", "seed"):
         parts.append(tex(key) + " & " + str(FIXED[key]) + r"\\")
     parts += [r"\bottomrule\end{tabular}\end{center}",
-              r"\subsection{Risultati}",
-              r"\begin{center}\small\begin{tabular}{lrrrr}\toprule Prova & Casi & Successi & Fatti verificati & Correzioni\\\midrule"]
+              '\\subsection{Results}',
+              '\\begin{center}\\small\\begin{tabular}{lrrrr}\\toprule Trial & Cases & Successes & Verified facts & Repairs\\\\\\midrule']
     for name, s in summaries.items():
         parts.append(" & ".join([tex(name), str(s["circuits"]), str(s["valid_and_compilable"]),
                                  str(s["final_facts_verified"]), str(s["repairs"])]) + r"\\")
     parts += [r"\bottomrule\end{tabular}\end{center}"]
     if not technical:
         parts += [
-            r"\subsection{Qualità della scelta e selezione}",
-            r"\[R_{\mathrm{osservato}}(c)=\max_{p\in P_{\mathrm{riuscite}}(c)} \mathrm{mediana}(F_{p,0},F_{p,1},F_{p,2})-F_{\mathrm{scelta}}(c).\]",
-            "Si riusano le compilazioni Qiskit. Il riferimento considera solo coppie con tre ripetizioni riuscite. "
-            "Copre 88 circuiti; 70 matrici sono incomplete e quindi questo riferimento non certifica il massimo esaustivo. "
-            "L'oracle completo sui 18 circuiti resta un'analisi aggiuntiva. Uno score mancante resta null.",
-            "La selezione ordina completezza, regret mediano sui circuiti comuni, correzioni, chiamate fisiche, tempi e token. "
-            "Il circuito è l'unità statistica. Gli intervalli appaiati al 95 per cento usano 2000 ricampionamenti e seed 20260913; "
-            "sono descrittivi e non correggono la selezione tra candidati.",
-            "Vincitore: " + tex(selection["winner"]) + ". Passaggi e denominatori sono in selection.json.",
-            r"\begin{center}\small\begin{tabular}{lrr}\toprule Prova & Regret n & Mediana regret\\\midrule"]
+            '\\subsection{Decision quality and selection}',
+            '\\[R_{\\mathrm{observed}}(c)=\\max_{p\\in P_{\\mathrm{successful}}(c)} \\mathrm{median}(F_{p,0},F_{p,1},F_{p,2})-F_{\\mathrm{selected}}(c).\\]',
+            'Qiskit compilations are reused. The reference includes only pairs with three successful repetitions. It covers 88 circuits; 70 matrices are incomplete, so it does not certify an exhaustive maximum. The complete oracle on 18 circuits remains a supplementary analysis. Missing scores remain null.',
+            'Selection ranks completeness, median regret on common circuits, repairs, physical calls, time and tokens. The circuit is the statistical unit. Paired 95-percent intervals use 2000 resamples and seed 20260913; they are descriptive and do not adjust for candidate selection.',
+            'Winner: ' + tex(selection["winner"]) + '. Steps and denominators are in selection.json.',
+            '\\begin{center}\\small\\begin{tabular}{lrr}\\toprule Trial & Regret n & Median regret\\\\\\midrule']
         for name, s in summaries.items():
             parts.append(tex(name) + " & " + str(s["regret_available"]) + " & " + fmt(s["median_regret_absolute"]) + r"\\")
         parts += [r"\bottomrule\end{tabular}\end{center}"]
@@ -112,26 +99,22 @@ def build_report(study_id, *, technical=False, compile_pdf=True):
         parts += [r"\begin{figure}[htbp]\centering",
                   r"\includegraphics[width=\linewidth]{\ValidationFiguresPath " + fig["name"] + ".png}",
                   r"\caption{" + tex(fig["caption"]) + r"}\end{figure}"]
-    parts += [r"\clearpage\subsection{Provenienza e limiti}",
-              "Questa versione è stata progettata dopo aver esaminato la prima validation. Le due versioni restano separate. "
-              "La correttezza dei fatti strutturati non misura la correttezza del testo libero né dimostra un rapporto causale "
-              "fra motivazione e scelta. La presenza di un precedente storico non garantisce prestazioni sul nuovo circuito.",
-              "I tempi HTTP includono le pause dentro la chiamata; attese di recupero e caricamenti sono registrati separatamente. "
-              "I token mancanti restano espliciti. Tutti i tentativi, anche interrotti, restano disponibili.",
-              "Le istruzioni per rigenerare sorgenti e figure sono nella guida dello studio. CSV, JSON e JSONL conservano i dati delle analisi. "
-              "Ogni risultato di validation viene letto soltanto dopo i sigilli. Nessun dato del test è utilizzato."]
+    parts += ['\\clearpage\\subsection{Provenance and limitations}',
+              'This version was designed after reviewing the first validation. The two versions remain separate. Correct structured facts do not measure free-text correctness or demonstrate a causal link between explanation and choice. A historical precedent does not guarantee performance on a new circuit.',
+              'HTTP timings include pauses inside a call; recovery waits and loading are recorded separately. Missing tokens remain explicit. All attempts, including interruptions, remain available.',
+              'The study guide explains source and figure regeneration. CSV, JSON and JSONL preserve analysis data. Validation results are read only after sealing. No Test data is used.']
     source = directory / "validation_selection.tex"
     source.write_text("\n\n".join(parts) + "\n")
-    standalone = r"""\documentclass[11pt,a4paper]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[italian]{babel}
-\usepackage[margin=2cm]{geometry}
-\usepackage{graphicx,booktabs,amsmath,microtype}
-\usepackage[hidelinks]{hyperref}
-\begin{document}
-\input{validation_selection.tex}
-\end{document}
+    standalone = """\\documentclass[11pt,a4paper]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage[english]{babel}
+\\usepackage[margin=2cm]{geometry}
+\\usepackage{graphicx,booktabs,amsmath,microtype}
+\\usepackage[hidelinks]{hyperref}
+\\begin{document}
+\\input{validation_selection.tex}
+\\end{document}
 """
     (directory / "standalone.tex").write_text(standalone)
     if compile_pdf:

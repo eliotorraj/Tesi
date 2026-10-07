@@ -1,4 +1,4 @@
-"""Narrazione e tabelle del confronto finale, derivate dagli esiti conservati."""
+'Final-comparison narrative and tables derived from preserved outcomes.'
 from pathlib import Path
 from dati import METHODS, number
 from impaginazione import esc, fmt, table
@@ -10,12 +10,12 @@ HERE=Path(__file__).resolve().parent
 def label(method, runs):
     value=PANEL_LABELS[method]
     if runs.get(method,{}).get('source',{}).get('exploratory'):
-        value+=' (espl.)'
+        value+=' (expl.)'
     return esc(value)
 
 
 def discrete(value):
-    # Una media non intera di repliche resta una media: non viene troncata.
+    # A noninteger replicate mean remains a mean; do not truncate it.
     if number(value) and float(value).is_integer():
         return fmt(value,0)
     return fmt(value,2)
@@ -33,38 +33,36 @@ def headers(methods, runs):
 
 def matrix(rows, runs, methods=None):
     methods=methods or [m for m in method_order(runs) if m in runs]
-    # Nomi completi e stessa posizione per le colonne di ogni riepilogo.
+    # Use full names and consistent column positions in each summary.
     spec=r'>{\raggedright\arraybackslash}p{5.0cm}' + r'>{\centering\arraybackslash}p{1.9cm}'*len(methods) if len(methods)==5 else r'>{\raggedright\arraybackslash}p{5.8cm}' + r'>{\centering\arraybackslash}p{2.2cm}'*len(methods)
-    return table(['Misura']+headers(methods,runs),rows,spec=spec,size='small')
+    return table(['Measurement']+headers(methods,runs),rows,spec=spec,size='small')
 
 
 def mqt_details(runs):
     run=runs.get('mqt_predictor',{})
     if not run:
-        return 'I risultati MQT non sono ancora disponibili in questa versione.\n'
+        return """MQT results are not yet available in this version.
+
+"""
     detail=''
     md=run.get('report_model_metadata',{})
     classifier=md.get('classifier',{})
     if classifier:
-        detail+=('Il selettore è una Random Forest con '+str(classifier['n_estimators'])+
-                 ' alberi, pesi delle classi bilanciati, seme '+str(classifier['random_state'])+
-                 ' e '+str(classifier['n_jobs'])+' processi. ')
+        detail+=('The selector is a Random Forest with '+str(classifier['n_estimators'])+
+                 ' trees, balanced class weights, seed '+str(classifier['random_state'])+
+                 ' e '+str(classifier['n_jobs'])+' processes. ')
         if classifier.get('hyperparameter_search') is False:
-            detail+='Questi parametri sono stati fissati senza una ricerca degli iperparametri sulla validation. '
+            detail+='These parameters were fixed without validation hyperparameter search. '
         detail+='\n\n'
     source=run.get('source',{})
     if source.get('exploratory'):
         d=source['details']
-        detail+=(r'\textbf{La prova MQT qui riportata è esplorativa.} '
-            f"Il selettore usa {d['training_samples']} dei {d['expected_training_samples']} campioni train previsti; "
-            f"{d['excluded_samples']} sono esclusi. La raccolta contiene "
-            f"{d['successful_compilations']} compilazioni riuscite su {d['required_compilations']} coppie previste. ")
+        detail+=(f"\\textbf{{The MQT run reported here is exploratory.}} Its selector uses {d['training_samples']} of {d['expected_training_samples']} planned train samples; {d['excluded_samples']} are excluded. Collection contains {d['successful_compilations']} successful compilations out of {d['required_compilations']} expected pairs. ")
         if md.get('learned_classes'):
-            detail+=f"Le classi apprese sono {len(md['learned_classes'])}: Falcon 127, Heron 133, Heron 156 e Quantinuum H2-56. Falcon 27 non compare fra i vincitori del Training set, pur avendo la propria politica RL. "
-        detail+=('La raccolta comprende tentativi a 100 secondi e recuperi a 300 secondi. '
-            'Il Test mantiene invece il limite di 100 secondi e il comportamento RL originale. '
-            'Questa prova usa un contratto separato e non completa la valutazione conforme al contratto originale. '
-            'Il confronto con MQT va letto entro questo limite; quelli fra gli altri tre sistemi mantengono il piano originale.\n')
+            detail+=f"The learned classes are {len(md['learned_classes'])}: Falcon 127, Heron 133, Heron 156 and Quantinuum H2-56. Falcon 27 does not appear among the Training set winners, although it has its own RL policy. "
+        detail+=("""Collection includes 100-second attempts and 300-second recovery runs, whereas Test retains 100 seconds and original RL behavior. This separate-contract run does not complete the original-contract evaluation. Interpret MQT comparison within that limit; the other three systems retain the original plan.
+
+""")
     return detail
 
 
@@ -74,95 +72,92 @@ def summary_tables(runs, comparison, plan):
     def count(key):return [s[key] for s in (summaries[m] for m in methods)]
     def stat(key,which='mean',digits=3):
         return [fmt(summaries[m]['metrics'].get(key,{}).get(which),digits) for m in methods]
-    body=r'\clearpage\section{Risultati}'+'\n'+r'\subsection{Riuscita e qualità: i dati di insieme}'+'\n'
-    body+=('Le tabelle raccolgono prima i risultati principali. Ogni circuito ha lo stesso peso. '
-           'Lo score medio considera soltanto le compilazioni riuscite: quando cambiano i successi, '
-           'cambia anche l’insieme su cui è calcolato. Un fallimento non riceve uno score uguale a zero. '
-           'Per un confronto diretto della qualità useremo quindi i circuiti riusciti per entrambi i sistemi.\n\n')
-    rows=[['Circuiti previsti']+count('expected_circuits'),['Circuiti conclusi']+count('completed_circuits'),
-          ['Compilazioni riuscite']+count('successes'),['Fallimenti']+count('failures'),['Circuiti pendenti']+count('pending'),
-          ['Score medio sui successi']+stat('score',digits=6),
-          ['Score mediano sui successi']+stat('score','median',6)]
+    body='\\clearpage\\section{Results}'+'\n'+'\\subsection{Success and quality: aggregate results}'+'\n'
+    body+=("""Tables first summarize the main results, giving each circuit equal weight. Mean score includes only successful compilations: changing success counts also changes the evaluated set. Failures are not assigned zero scores. Direct quality comparison therefore uses circuits successful for both systems.
+
+""")
+    rows=[['Expected circuits']+count('expected_circuits'),['Completed circuits']+count('completed_circuits'),
+          ['Successful compilations']+count('successes'),['Failures']+count('failures'),['Pending circuits']+count('pending'),
+          ['Mean score on successful compilations']+stat('score',digits=6),
+          ['Median score on successful compilations']+stat('score','median',6)]
     body+=matrix(rows,runs)
     thresholds={m:threshold_counts(runs[m]) for m in methods}
-    body+=('La soglia 0,8 offre una seconda lettura: quanti dei circuiti previsti ottengono '
-           'una compilazione valida con score almeno pari a questo valore. Il denominatore comprende '
-           'anche i fallimenti; i casi senza score restano distinti dai successi sotto soglia. '
-           'È una descrizione aggiunta per questo report, non una soglia scelta prima del Test.\n')
+    body+=("""The 0.8 threshold adds another view: how many planned circuits yield valid compilations at or above that score. The denominator includes failures; missing scores remain separate from below-threshold successes. This descriptive threshold was added for the report, not chosen before Test.
+
+""")
     body+=matrix([
-        [r'Circuiti con score $\geq 0{,}8$']+[f"{thresholds[m]['high']}/{thresholds[m]['total']}" for m in methods],
-        ['Percentuale sul Test']+[fmt(100*thresholds[m]['high']/thresholds[m]['total'],1)+r'\%' if thresholds[m]['total'] else '--' for m in methods]
+        ['Circuits with score $\\geq 0{,}8$']+[f"{thresholds[m]['high']}/{thresholds[m]['total']}" for m in methods],
+        ['Percentage of Test circuits']+[fmt(100*thresholds[m]['high']/thresholds[m]['total'],1)+r'\%' if thresholds[m]['total'] else '--' for m in methods]
     ],runs)
     failures=[label(m,runs)+': '+str(summaries[m]['failures']) for m in methods if summaries[m]['failures']]
     if failures:
-        body+='I fallimenti osservati sono '+', '.join(failures)+'. '
+        body+='The observed failures are '+', '.join(failures)+'. '
         if all(set(summaries[m]['failure_causes']) <= {'process_timeout'} for m in methods):
-            body+='In tutti questi casi il processo ha superato il limite di tempo. '
-    body+='I dettagli e le misure mancanti rimangono visibili nell’appendice.\n'
+            body+='In every such case, the process exceeded its time limit. '
+    body+="""Details and missing measurements remain visible in the appendix.
+"""
 
-    body+=r'\clearpage\subsection{Tempi e costo delle risposte}'+'\n'
-    body+=('Il tempo totale misura il percorso dal circuito all’esito, compresi scelta, risposte, '
-           'correzioni e compilazione. Il tempo interno riguarda soltanto il lavoro del compilatore. '
-           'Il tempo del processo comprende anche avvio e controlli. I timeout entrano nel tempo totale '
-           'e nel tempo del processo quando misurati, ma non ricevono una durata interna inventata.\n')
+    body+='\\clearpage\\subsection{Time and response costs}'+'\n'
+    body+=("""Total time covers input circuit to outcome, including selection, responses, repairs and compilation. Internal time measures compiler work only; process time includes startup and checks. Measured timeouts enter total/process time but receive no invented internal duration.
+
+""")
     rows=[]
-    for key,title in [('total_seconds','Tempo totale'),('compilation_seconds','Compilazione interna'),
-                      ('compilation_process_seconds','Processo di compilazione'),('choice_seconds','Preparazione e scelta')]:
-        rows.extend([[title+' medio (s)']+stat(key,digits=2),
-                     [title+' mediano (s)']+stat(key,'median',2),
-                     ['Circuiti con misura']+[f"{summaries[m]['metrics'][key]['n']}/{summaries[m]['completed_circuits']}" for m in methods]])
+    for key,title in [('total_seconds','Total time'),('compilation_seconds','Internal compilation'),
+                      ('compilation_process_seconds','Compilation process'),('choice_seconds','Preparation and selection')]:
+        rows.extend([[title+' mean (s)']+stat(key,digits=2),
+                     [title+' median (s)']+stat(key,'median',2),
+                     ['Circuits with measurements']+[f"{summaries[m]['metrics'][key]['n']}/{summaries[m]['completed_circuits']}" for m in methods]])
     body+=matrix(rows,runs)
     llms=[m for m in methods if m.startswith('llm')]
     if llms:
-        body+=('I token sommano ingresso e uscita di tutte le chiamate, comprese le correzioni. '
-               'Una correzione è una richiesta aggiuntiva al modello, non una nuova compilazione. '
-               'Questi costi non si applicano a MQT e Random.\n')
-        rows=[]
-        for key,title in [('input_tokens','Token in ingresso'),('output_tokens','Token in uscita'),
-                          ('total_tokens','Token complessivi'),('llm_calls','Chiamate'),('retries','Correzioni')]:
-            rows.append([title+' (somma)']+[discrete(summaries[m]['metrics'][key]['sum_known']) for m in llms])
-        rows.append(['Circuiti con correzioni']+[summaries[m]['episodes_with_retry'] for m in llms])
-        rows.append(['Accettati con fatti non verificati']+[summaries[m]['accepted_with_unverified_facts'] for m in llms])
-        rows.append(['Tempo medio delle risposte (s)']+[fmt(summaries[m]['metrics']['llm_response_seconds']['mean']) for m in llms])
-        rows.append(['Circuiti con misura dei token']+[f"{summaries[m]['metrics']['total_tokens']['n']}/{summaries[m]['completed_circuits']}" for m in llms])
-        body+=matrix(rows,runs,llms)
-        body+='Le medie non intere dei conteggi, quando riportate, restano medie; i conteggi effettivi sono scritti come interi.\n'
+        body+=("""Tokens sum input/output of every call, including repairs. A repair is an additional model request, not a new compilation. These costs do not apply to MQT or Random.
 
-    body+=r'\clearpage\subsection{Confronti sugli stessi circuiti}'+'\n'
-    body+=('Per confrontare LLM + RAG con ciascun concorrente consideriamo solo i circuiti con '
-           'score disponibile per entrambi. La differenza è lo score RAG meno lo score dell’altro sistema. '
-           'Un valore positivo indica una qualità stimata maggiore per RAG. '
-           'Questa analisi non sostituisce il conteggio dei fallimenti.\n')
+""")
+        rows=[]
+        for key,title in [('input_tokens','Input tokens'),('output_tokens','Output tokens'),
+                          ('total_tokens','Total tokens'),('llm_calls','Calls'),('retries','Repairs')]:
+            rows.append([title+' (sum)']+[discrete(summaries[m]['metrics'][key]['sum_known']) for m in llms])
+        rows.append(['Circuits with repairs']+[summaries[m]['episodes_with_retry'] for m in llms])
+        rows.append(['Accepted with unverified facts']+[summaries[m]['accepted_with_unverified_facts'] for m in llms])
+        rows.append(['Mean response time (s)']+[fmt(summaries[m]['metrics']['llm_response_seconds']['mean']) for m in llms])
+        rows.append(['Circuits with token measurements']+[f"{summaries[m]['metrics']['total_tokens']['n']}/{summaries[m]['completed_circuits']}" for m in llms])
+        body+=matrix(rows,runs,llms)
+        body+="""Non-integer count means remain means; actual counts are shown as integers.
+
+"""
+
+    body+='\\clearpage\\subsection{Comparisons on the same circuits}'+'\n'
+    body+=("""Each LLM + RAG comparison uses circuits with scores available for both systems. Difference is RAG minus the other system; positive means higher estimated quality for RAG. This does not replace failure counts.
+
+""")
     pairs=comparison['pairs'];others=[m for m in method_order(runs) if m in pairs]
     spec=r'>{\raggedright\arraybackslash}p{5.0cm}'+r'>{\centering\arraybackslash}p{2.4cm}'*len(others)
     rows=[
-        ['Circuiti riusciti in comune']+[pairs[m]['n'] for m in others],
-        ['Score medio LLM + RAG']+[fmt(pairs[m]['mean_left'],6) for m in others],
-        ['Score medio del sistema in colonna']+[fmt(pairs[m]['mean_right'],6) for m in others],
-        ['Differenza media (RAG meno altro)']+[fmt(pairs[m]['mean_difference'],6) for m in others],
-        ['Limite inferiore, intervallo 95\\%']+[fmt(pairs[m]['paired_bootstrap_95'][0],6) if pairs[m]['paired_bootstrap_95'] else '--' for m in others],
-        ['Limite superiore, intervallo 95\\%']+[fmt(pairs[m]['paired_bootstrap_95'][1],6) if pairs[m]['paired_bootstrap_95'] else '--' for m in others],
-        ['RAG ha score maggiore']+[pairs[m]['wins'] for m in others],
-        ['Score uguale']+[pairs[m]['ties'] for m in others],
-        ['RAG ha score minore']+[pairs[m]['losses'] for m in others]]
+        ['Shared successful circuits']+[pairs[m]['n'] for m in others],
+        ['Mean LLM + RAG score']+[fmt(pairs[m]['mean_left'],6) for m in others],
+        ['Mean score of the column system']+[fmt(pairs[m]['mean_right'],6) for m in others],
+        ['Mean difference (RAG minus other)']+[fmt(pairs[m]['mean_difference'],6) for m in others],
+        ['Lower bound, 95\\% interval']+[fmt(pairs[m]['paired_bootstrap_95'][0],6) if pairs[m]['paired_bootstrap_95'] else '--' for m in others],
+        ['Upper bound, 95\\% interval']+[fmt(pairs[m]['paired_bootstrap_95'][1],6) if pairs[m]['paired_bootstrap_95'] else '--' for m in others],
+        ['RAG has a higher score']+[pairs[m]['wins'] for m in others],
+        ['Equal score']+[pairs[m]['ties'] for m in others],
+        ['RAG has a lower score']+[pairs[m]['losses'] for m in others]]
     if others:
-        body+=table(['Confronto con LLM + RAG']+headers(others,runs),rows,spec=spec,size='small')
-    body+=(f"L’intervallo descrive la variazione fra i circuiti osservati: usa {plan['analysis']['bootstrap_draws']} "
-           f"ricampionamenti delle coppie, con seme {plan['analysis']['bootstrap_seed']}, "
-           'e i percentili 2,5 e 97,5. Non è una prova confermativa di superiorità '
-           'e non misura la variabilità di nuove esecuzioni.\n\n')
+        body+=table(['Comparison with LLM + RAG']+headers(others,runs),rows,spec=spec,size='small')
+    body+=(f"The interval describes variation across observed circuits: it uses {plan['analysis']['bootstrap_draws']} pair resamples with seed {plan['analysis']['bootstrap_seed']} and percentiles 2.5 and 97.5. This is neither a confirmatory superiority test nor a measure of variability across new runs.\n\n")
     common=len(comparison['all_common_successes'])
-    body+=f"I successi comuni a tutti i sistemi presenti sono {common}. Le medie su questo stesso insieme sono:\n"
-    body+=matrix([['Score medio sui successi comuni']+[fmt(comparison['all_common_means'].get(m),6) for m in methods]],runs)
-    body+=('I grafici che seguono mantengono sempre lo stesso ordine: LLM + RAG in alto a sinistra, '
-           'LLM no RAG in alto a destra, MQT in basso a sinistra e Random in basso a destra. '
-           'Nei grafici per circuito, la posizione orizzontale segue l’ordine alfabetico dei nomi in appendice. '
-           'Gli assi usano la stessa scala nei quattro pannelli e una misura assente non diventa zero.\n')
+    body+=f'Common successes across all available systems: {common}. Means on this same set are:\n\n'
+    body+=matrix([['Mean score on shared successes']+[fmt(comparison['all_common_means'].get(m),6) for m in methods]],runs)
+    body+=("""Plots keep LLM + RAG top-left, no-RAG LLM top-right, MQT bottom-left and Random bottom-right. Per-circuit horizontal positions follow appendix alphabetical order. Four panels share axis scales; missing measurements are not zero.
+
+""")
     if 'llm_recupero_random' in runs:
-        body=body.replace('MQT in basso a sinistra e Random in basso a destra.',
-            'MQT nella seconda riga a sinistra, Random nella seconda riga a destra e LLM + Random RAG centrato nella terza riga.')
-        body=body.replace('nei quattro pannelli','nei cinque pannelli')
-        body+='Il confronto con gli esempi casuali è esplorativo: la variante è stata aggiunta dopo la lettura del Test, con un solo seme di recupero.\n'
+        body=body.replace('MQT at the bottom left and Random at the bottom right.',
+            'MQT on the left of the second row, Random on the right of the second row and LLM + Random RAG centered in the third row.')
+        body=body.replace('in the four panels','in the five panels')
+        body+="""Random-example comparison is exploratory: it was added after Test inspection with one retrieval seed.
+
+"""
     return body
 
 
@@ -172,86 +167,60 @@ def chart_pages(output,runs):
         return figure_page(*args, five='llm_recupero_random' in runs)
     body=''
     reliability_grid(output,runs)
-    text=('La riuscita mostra se il sistema arriva a un circuito compilato valido. '
-          'Le barre distinguono successi, fallimenti e casi ancora pendenti. '
-          'Il confronto riguarda tutti i circuiti previsti, quindi rende visibili anche i casi '
-          'che non entrano nelle medie dello score.')
+    text=('Success means reaching a valid compiled circuit. Bars distinguish successes, failures and pending cases across all planned circuits, including those excluded from score means.')
     if all(m in s for m in METHODS):
-        text+=f" I due LLM completano {s['llm_rag']['successes']} e {s['llm_senza_rag']['successes']} compilazioni; MQT ne completa {s['mqt_predictor']['successes']} e Random {s['random']['successes']}."
+        text+=f" The two LLM systems complete {s['llm_rag']['successes']} e {s['llm_senza_rag']['successes']} compilations; MQT completes {s['mqt_predictor']['successes']} and Random {s['random']['successes']}."
     if 'llm_recupero_random' in s:
-        text+=f" LLM + Random RAG completa {s['llm_recupero_random']['successes']} compilazioni."
-    body+=page('esiti','Quanti circuiti arrivano a una compilazione valida',text,
-                      'Riuscita sui circuiti previsti. MQT indica la prova esplorativa quando così specificato nel pannello.')
+        text+=f" LLM + Random RAG completes {s['llm_recupero_random']['successes']} compilations."
+    body+=page('esiti','Circuits reaching valid compilation',text,
+                      'Success over planned circuits. MQT denotes the exploratory run where the panel specifies it.')
     threshold_grid(output,runs)
     counts={m:threshold_counts(r) for m,r in runs.items()}
-    text=('Ogni torta rappresenta l’intero Test, con '+str(next(iter(counts.values()))['total'])+
-          ' circuiti. Il blu indica uno score almeno pari a 0,8; l’arancione uno score inferiore; '
-          'il grigio un caso senza score. Un caso pendente, se presente, è indicato separatamente. '
-          'In questo modo qualità e copertura si leggono con lo stesso denominatore. ')
+    text=('Each pie represents the whole Test with '+str(next(iter(counts.values()))['total'])+
+          ' circuits. Blue means score at least 0.8; orange means lower score; gray means no score. Pending cases, if any, are separate. Quality and coverage thus share a denominator. ')
     text+='; '.join(PANEL_LABELS[m]+f": {c['high']}/{c['total']}" for m,c in counts.items())+'.'
-    body+=page('soglia_score_080','Quanti circuiti raggiungono uno score di almeno 0,8',text,
-                      'Percentuali sui circuiti previsti, senza assegnare uno score ai fallimenti. La soglia è descrittiva.')
+    body+=page('soglia_score_080','Circuits reaching score at least 0.8',text,
+                      'Percentages of planned circuits without assigning failure scores. The threshold is descriptive.')
     charts=[
-        ('score','Qualità delle compilazioni','Score',
-         'Ogni punto mostra lo score di un circuito riuscito. La separazione in quattro pannelli permette di osservare '
-         'la distribuzione dei valori senza sovrapporre i sistemi. Le posizioni prive di un punto corrispondono a uno '
-         'score non disponibile; non indicano qualità nulla. Per stabilire quante volte RAG migliora una scelta '
-         'valgono i confronti appaiati delle tabelle precedenti.',
-         'Score sui successi; scala comune da 0 a 1.'),
-        ('total_seconds','Tempo necessario per arrivare all’esito','Tempo totale (s)',
-         'Il tempo totale è il costo di esecuzione osservato per ciascun circuito e comprende anche i fallimenti. '
-         'I casi vicini al limite di tempo rendono visibili le attese più onerose. Media e mediana aiutano a distinguere '
-         'il costo complessivo da quello tipico di un circuito.',
-         'Tempi totali misurati in secondi, inclusi i casi falliti.'),
-        ('compilation_seconds','Tempo impiegato dal compilatore','Compilazione interna (s)',
-         'Qui isoliamo il tempo interno del compilatore, lasciando fuori la scelta del dispositivo e la risposta LLM. '
-         'Per un processo interrotto dal limite esterno può mancare questa misura. I punti assenti di MQT e Random '
-         'non devono quindi essere letti come compilazioni istantanee, né confrontati come se tutti i sistemi '
-         'avessero completato gli stessi casi.',
-         'Durata interna sulle sole misure disponibili; i timeout senza misura restano assenti.'),
-        ('compilation_process_seconds','Durata del processo di compilazione','Processo di compilazione (s)',
-         'Il processo comprende l’avvio, il lavoro del compilatore e i controlli finali. A differenza della misura '
-         'interna, questa durata rende visibili anche i timeout registrati dall’esterno. La differenza rispetto '
-         'al grafico precedente aiuta a capire quanto pesano i casi che non producono una compilazione valida.',
-         'Durata del processo in secondi, compresi i timeout misurati.'),
-        ('total_tokens','Quantità di testo elaborata dagli LLM','Token totali',
-         'Il conteggio somma i token di ingresso e uscita di tutte le chiamate relative allo stesso circuito. '
-         'Gli esempi del RAG aumentano il testo in ingresso; le richieste di correzione aggiungono ulteriori chiamate. '
-         'I token descrivono il volume di testo elaborato, non un costo monetario. Per MQT e Random questa misura '
-         'non si applica.',
-         'Token complessivi per circuito; le celle non applicabili restano nella posizione prevista.'),
-        ('llm_response_seconds','Attesa delle risposte degli LLM','Tempo delle risposte (s)',
-         'Per ciascun circuito sommiamo il tempo trascorso fra invio e ricezione completa di tutte le risposte LLM. '
-         'Il grafico separa così questa attesa dalla compilazione e dal recupero degli esempi. La presenza del RAG '
-         'si accompagna a risposte mediamente più lente in questa esecuzione, ma il Test non permette di attribuire '
-         'tutta la differenza a una singola causa.',
-         'Tempo cumulativo delle risposte in secondi; nessuna misura LLM per MQT e Random.'),
-        ('retries','Richieste di correzione prima della compilazione','Correzioni',
-         'Una correzione è una chiamata oltre la prima nello stesso caso. Serve a ottenere una risposta accettabile '
-         'e non ripete la compilazione quantistica. I picchi mostrano dove aumentano le chiamate e, di conseguenza, '
-         'anche token e attesa. La riuscita della compilazione non certifica comunque la spiegazione libera del modello.',
-         'Numero di correzioni per circuito; zero significa che è bastata la prima risposta.')
+        ('score','Compilation quality','Score',
+         "Each point is one successful circuit's score. Four panels show distributions without overlapping systems. Missing points mean unavailable scores, not zero quality. Use the earlier paired tables to count how often RAG improves a choice.",
+         'Scores on successful compilations; shared scale from 0 to 1.'),
+        ('total_seconds','Time to reach an outcome','Total time (s)',
+         "Total time is each circuit's observed execution cost, including failures. Near-timeout cases show costly waits. Mean and median distinguish aggregate from typical-circuit cost.",
+         'Measured total seconds, including failed cases.'),
+        ('compilation_seconds','Compiler time','Internal compilation (s)',
+         "This isolates the compiler's internal time, excluding device selection and the LLM response. This measurement may be missing when an external timeout stops the process. Missing MQT and Random points must therefore not be read as instantaneous compilations or compared as though all systems completed the same cases.",
+         'Internal duration for available measurements only; timeouts without a measurement remain missing.'),
+        ('compilation_process_seconds','Compilation process duration','Compilation process (s)',
+         'The process includes startup, compiler work and final checks. Unlike the internal measurement, this duration also shows externally recorded timeouts. The difference from the previous plot helps show the impact of cases that do not produce a valid compilation.',
+         'Process duration in seconds, including measured timeouts.'),
+        ('total_tokens','Text volume processed by the LLMs','Total tokens',
+         'The count sums input and output tokens from all calls for the same circuit. RAG examples increase the input text; repair requests add further calls. Tokens describe the volume of processed text, not a monetary cost. This measurement does not apply to MQT or Random.',
+         'Total tokens per circuit; non-applicable cells retain their expected positions.'),
+        ('llm_response_seconds','Waiting for LLM responses','Response time (s)',
+         'For each circuit, we sum the time between sending each request and receiving its complete LLM response. The plot separates this wait from compilation and example retrieval. RAG is associated with slower responses on average in this run, but the Test does not attribute the entire difference to a single cause.',
+         'Cumulative response time in seconds; no LLM measurement for MQT or Random.'),
+        ('retries','Repair requests before compilation','Repairs',
+         "A repair is a call after the first call for the same case. It seeks an acceptable response and does not repeat quantum compilation. Peaks show where calls increase, together with tokens and waiting time. Successful compilation does not certify the model's free-text explanation.",
+         'Repairs per circuit; zero means the first response was sufficient.')
     ]
     if 'llm_rag' in s and 'llm_senza_rag' in s:
         a=s['llm_rag']['metrics']['total_seconds']['mean'];b=s['llm_senza_rag']['metrics']['total_seconds']['mean']
         if number(a) and number(b) and b:
             charts[1]=(charts[1][0],charts[1][1],charts[1][2],
-                       charts[1][3]+f" RAG richiede in media {fmt(a)} s contro {fmt(b)} s senza esempi: circa {fmt(a/b)} volte tanto.",
+                       charts[1][3]+f' RAG takes an average of {fmt(a)} s compared with {fmt(b)} s without examples: approximately {fmt(a / b)} times as much.',
                        charts[1][4])
     for metric,title,ylabel,prose,caption in charts:
         if metric in ('total_tokens','llm_response_seconds','retries') and not any(m.startswith('llm') for m in runs):
             continue
         metric_grid(output,runs,metric,ylabel)
         if 'llm_recupero_random' in runs:
-            prose=prose.replace('quattro pannelli','cinque pannelli')
+            prose=prose.replace('four panels','five panels')
         body+=page(metric,title,prose,caption)
     ecdf_grid(output,runs)
-    body+=page('distribuzione_score','Come si distribuiscono gli score',
-         'La curva indica la quota di compilazioni riuscite con score non superiore al valore letto sull’asse orizzontale. '
-         'Un aumento vicino a 1 segnala molti risultati di qualità stimata elevata. Ogni pannello considera soltanto '
-         'i successi del proprio sistema: i denominatori sono scritti sugli assi e possono essere diversi. '
-         'Questa figura descrive la forma delle distribuzioni; non sostituisce il confronto sugli stessi circuiti.',
-         'Distribuzioni cumulative sui successi, con scale comuni.')
+    body+=page('distribuzione_score','Score distributions',
+         'The curve gives the proportion of successful compilations with scores no greater than the horizontal value. A rise near 1 indicates many high estimated-quality results. Each panel uses its own successes, with potentially different denominators shown on axes. This describes distribution shape and does not replace same-circuit comparison.',
+         'Cumulative distributions on successes with shared scales.')
     return body
 
 
@@ -261,57 +230,37 @@ def conclusions(runs, comparison):
     if 'llm_senza_rag' in pairs and 'random' in pairs:
         a,b=pairs['llm_senza_rag'],pairs['random']
         positive=a['wins']>a['n']/2 and b['wins']>b['n']/2
-        body+=('L’esito è positivo per l’obiettivo di usare esempi di compilazione a supporto del modello linguistico. '
-               if positive else 'I confronti appaiati permettono di valutare il contributo degli esempi al modello linguistico. ')
-        body+=(f"LLM + RAG ottiene uno score maggiore in {a['wins']} dei {a['n']} confronti con LLM no RAG "
-               f"e in {b['wins']} degli {b['n']} confronti con Random. ")
+        body+=('The outcome supports the goal of using compilation examples to assist the LLM. '
+               if positive else "Paired comparisons allow us to assess the examples' contribution to the LLM. ")
+        body+=(f"LLM + RAG achieves a higher score in {a['wins']} of {a['n']} comparisons with LLM no RAG and in {b['wins']} of the {b['n']} comparisons with Random. ")
         if positive:
-            body+='Gli esempi migliorano quindi la qualità stimata nella maggior parte dei confronti osservati. '
-        body+='Questo risultato riguarda i circuiti confrontabili e va letto insieme ai fallimenti riportati separatamente.\n\n'
+            body+='The examples therefore improve estimated quality in most observed comparisons. '
+        body+="""This concerns comparable circuits and must be read alongside separately reported failures.
+
+"""
     s={m:r['summary'] for m,r in runs.items()}
     if 'mqt_predictor' in pairs:
         p=pairs['mqt_predictor'];a=s['llm_rag'];b=s['mqt_predictor']
-        body+=(f"Sui {p['n']} successi comuni, RAG ha score medio {fmt(p['mean_left'],4)} "
-               f"e MQT {fmt(p['mean_right'],4)}. "
-               f"RAG produce però {a['successes']} compilazioni valide su {a['expected_circuits']} circuiti, "
-               f"contro {b['successes']} di MQT. ")
+        body+=(f"On the {p['n']} shared successes, RAG has a mean score of {fmt(p['mean_left'], 4)} and MQT {fmt(p['mean_right'], 4)}. However, RAG produces {a['successes']} valid compilations out of {a['expected_circuits']} circuits, compared with {b['successes']} for MQT. ")
         if a['successes']>b['successes']:
-            body+='Offre dunque una maggiore copertura nel campione osservato. '
-        body+='La riuscita su tutti i casi osservati, quando presente, è un’indicazione di affidabilità pratica, non una garanzia su qualsiasi circuito futuro.\n\n'
+            body+='It therefore offers greater coverage in the observed sample. '
+        body+="""Success on every observed case, where achieved, suggests practical reliability but does not guarantee every future circuit.
+
+"""
         ta=a['metrics']['total_seconds'];tb=b['metrics']['total_seconds']
-        body+=(f"Anche il tempo medio totale è diverso: {fmt(ta['mean'])} s per RAG e {fmt(tb['mean'])} s per MQT. "
-               f"La mediana è invece {fmt(ta['median'])} s per RAG e {fmt(tb['median'])} s per MQT. "
-               'È quindi corretto descrivere il costo medio e l’effetto dei timeout, evitando di estendere '
-               'la graduatoria a ogni circuito o a tutte le statistiche dei tempi. ')
+        body+=(f"Mean total time also differs: {fmt(ta['mean'])} s for RAG and {fmt(tb['mean'])} s for MQT. The median is {fmt(ta['median'])} s for RAG and {fmt(tb['median'])} s for MQT. It is therefore appropriate to describe mean cost and the effect of timeouts without extending this ranking to every circuit or every timing statistic. ")
         if runs['mqt_predictor']['source'].get('exploratory'):
-            body+='Inoltre questi risultati MQT provengono dalla prova esplorativa con Training set incompleto descritta nella seconda sezione.'
+            body+='These MQT results also come from the exploratory run with an incomplete Training set described in the second section.'
         body+='\n\n'
     if 'llm_rag' in s and 'llm_senza_rag' in s:
         a=s['llm_rag']['metrics']['total_seconds']['mean'];b=s['llm_senza_rag']['metrics']['total_seconds']['mean']
         if number(a) and number(b) and b:
-            body+=(f"Il miglioramento rispetto al modello senza esempi ha un costo: il tempo medio di RAG è {fmt(a/b)} "
-                   'volte quello di LLM no RAG. Gli esempi, le correzioni e le compilazioni scelte contribuiscono '
-                   'al percorso complessivo. Il Test mostra questo compromesso, senza isolare sperimentalmente '
-                   'il peso causale di ciascuna componente.\n\n')
-    body+=('LLM + RAG opera oggi entro un catalogo di sole dodici configurazioni Qiskit. '
-           'Ampliare il catalogo e il Dataset potrebbe includere esempi e casi con compilazioni migliori. '
-           'È una possibilità da verificare, non un miglioramento già dimostrato: aumenterebbero anche '
-           'il costo della raccolta e la complessità della scelta.\n\n'
-           'Un altro elemento da considerare è il criterio di qualità. La fedeltà attesa è una metrica '
-           'integrata in MQT ed è anche l’obiettivo delle sue politiche di compilazione. Esiste quindi '
-           'una coerenza fra addestramento e valutazione che aiuta a contestualizzare i risultati. '
-           'La stessa metrica viene comunque applicata a tutti i sistemi e guida anche la valutazione '
-           'degli esempi Qiskit: la sua origine, da sola, non dimostra una distorsione del confronto. '
-           'Altre metriche o prove su hardware reale potrebbero produrre una graduatoria diversa.\n\n'
-           'Il risultato è incoraggiante anche dal punto di vista della preparazione del sistema. '
-           'Il RAG riusa un modello linguistico già disponibile e costruisce il proprio Dataset '
-           'da compilazioni Qiskit, senza addestrare una politica RL per ogni dispositivo. '
-           'MQT richiede invece le politiche RL e il Training set del selettore supervisionato. '
-           'Questa differenza riduce gli oneri di addestramento specifici del nostro approccio, '
-           'ma i tempi del Test non misurano il costo complessivo delle due preparazioni. '
-           'Possiamo quindi sostenere la maggiore semplicità della preparazione, senza assegnarle '
-           'un risparmio numerico non misurato. Nel perimetro descritto, il RAG rappresenta una '
-           'soluzione promettente per combinare qualità delle scelte e riuscita della compilazione.\n')
+            body+=(f"The improvement over the model without examples has a cost: RAG's mean time is {fmt(a / b)} times that of LLM no RAG. Examples, repairs and the selected compilations contribute to the overall process. The Test shows this tradeoff without experimentally isolating each component's causal contribution.\n\n")
+    body+=("""LLM + RAG currently chooses from twelve Qiskit configurations. Expanding the catalog and Dataset might include better compilation examples, but this is unproven and would increase collection cost and selection complexity.
+Expected fidelity is integrated into MQT and is its policy-training objective. This alignment between training and evaluation helps contextualize results. The same metric evaluates every system and Qiskit example; its origin alone does not demonstrate bias. Other metrics or physical-hardware tests could rank systems differently.
+Preparation is also relevant: LLM + RAG reuses an existing LLM and builds examples from Qiskit compilation without device-specific RL training. MQT needs RL policies and a supervised Training set. This reduces approach-specific training requirements, but Test timing does not measure either full preparation cost. Simpler preparation is supported; unmeasured numerical savings are not. Within this scope, LLM + RAG is promising for combining decision quality and compilation coverage.
+
+""")
     if 'llm_recupero_random' in runs:
         from estensione_random import conclusion
         body+=conclusion(runs['llm_recupero_random']['comparison_detail'])
@@ -320,31 +269,28 @@ def conclusions(runs, comparison):
 
 
 def circuit_appendix(runs):
-    body=r'\clearpage\appendix\section{Statistiche per circuito}'+'\n'
-    body+=('Ogni tabella riporta il nome completo del circuito, nello stesso ordine alfabetico dei grafici. '
-           'Le colonne mantengono i nomi dei sistemi. Le misure sono separate in tabelle dedicate per evitare '
-           'colonne troppo fitte. Tutti i tempi sono in secondi; token, chiamate e correzioni sono conteggi. '
-           'Il simbolo -- indica un valore mancante. Le misure LLM non si applicano a MQT e Random.\n\n'
-           'Il piano corrente prevede un episodio per circuito. Qualora siano presenti repliche, le misure '
-           'sono prima mediate per circuito, lo score sui soli successi; una media non intera resta tale. '
-           'I file CSV conservano i valori completi e le coperture di ciascuna misura.\n')
+    body='\\clearpage\\appendix\\section{Per-circuit statistics}'+'\n'
+    body+=("""Tables give full circuit names in plot alphabetical order and retain system names. Separate measurement tables avoid crowded columns. All times are seconds; tokens, calls and repairs are counts. -- means missing data; LLM measurements do not apply to MQT or Random.
+The plan has one episode per circuit. If replicates exist, measurements are first averaged per circuit, with score restricted to successes; non-integer means stay non-integer. CSV retains complete values and coverage for every measurement.
+
+""")
     methods=[m for m in method_order(runs) if m in runs]
     maps={m:{c['circuit_id']:c for c in r['circuits']} for m,r in runs.items()}
     ids=sorted(set.union(*(set(v) for v in maps.values())))
     definitions=[
-        ('status','Esito della compilazione','Riuscito indica una compilazione valida; fallito un esito terminale senza risultato. Pendenti e casi misti sono espliciti.'),
-        ('score','Score','Score delle compilazioni riuscite, a sei decimali per la lettura. I valori a dieci decimali sono conservati nei CSV. Un fallimento non vale zero.'),
-        ('total_seconds','Tempo totale (secondi)','Comprende il percorso dal circuito all’esito, incluse eventuali correzioni e fallimenti.'),
-        ('compilation_seconds','Tempo interno del compilatore (secondi)','Una misura assente dopo un timeout resta -- e non viene sostituita con 100 secondi.'),
-        ('compilation_process_seconds','Tempo del processo di compilazione (secondi)','Comprende avvio, compilazione e controlli, inclusi i timeout misurati.'),
-        ('choice_seconds','Preparazione e scelta (secondi)','Tempo precedente alla compilazione, secondo la misura conservata dal sistema.'),
-        ('input_tokens','Token in ingresso','Somma dei token in ingresso di tutte le chiamate del caso.'),
-        ('output_tokens','Token in uscita','Somma dei token prodotti in tutte le chiamate del caso.'),
-        ('total_tokens','Token complessivi','Ingresso più uscita, comprese le richieste di correzione.'),
-        ('llm_response_seconds','Tempo delle risposte LLM (secondi)','Somma delle attese delle risposte complete.'),
-        ('retries','Richieste di correzione','Chiamate aggiuntive oltre la prima, prima dell’unica compilazione prevista.'),
-        ('llm_calls','Numero di chiamate LLM','Comprende la prima risposta e le eventuali correzioni.'),
-        ('rag_seconds','Tempo di recupero degli esempi (secondi)','Tempo del recupero registrato. Per LLM no RAG il recupero è disattivato.')]
+        ('status','Compilation outcome','Successful means a valid compilation; failed means a terminal outcome without a result. Pending and mixed cases are explicit.'),
+        ('score','Score','Scores of successful compilations, shown to six decimal places for readability. CSV files preserve ten decimal places. A failure is not a zero score.'),
+        ('total_seconds','Total time (seconds)','Includes the path from the circuit to the outcome, including any repairs and failures.'),
+        ('compilation_seconds','Internal compiler time (seconds)','A measurement missing after a timeout remains -- and is not replaced with 100 seconds.'),
+        ('compilation_process_seconds','Compilation process time (seconds)','Includes startup, compilation and checks, including measured timeouts.'),
+        ('choice_seconds','Preparation and selection (seconds)','Time before compilation, according to the measurement preserved by the system.'),
+        ('input_tokens','Input tokens','Input tokens summed across all calls for the case.'),
+        ('output_tokens','Output tokens','Output tokens summed across all calls for the case.'),
+        ('total_tokens','Total tokens','Input plus output, including repair requests.'),
+        ('llm_response_seconds','LLM response time (seconds)','Sum of waits for complete responses.'),
+        ('retries','Repair requests','Additional calls after the first, before the single planned compilation.'),
+        ('llm_calls','Number of LLM calls','Includes the first response and any repairs.'),
+        ('rag_seconds','Example retrieval time (seconds)','Recorded retrieval time. Retrieval is disabled for LLM no RAG.')]
     for key,title,description in definitions:
         cols=methods if key in ('status','score','total_seconds','compilation_seconds','compilation_process_seconds','choice_seconds') else [m for m in methods if m.startswith('llm')]
         if not cols:continue
@@ -355,7 +301,7 @@ def circuit_appendix(runs):
             for m in cols:
                 c=maps[m].get(cid,{})
                 if key=='status':
-                    value={'success':'Riuscito','failure':'Fallito','pending':'Pendente','mixed':'Misto'}.get(c.get(key),'--')
+                    value={'success':'Successful','failure':'Failed','pending':'Pending','mixed':'Mixed'}.get(c.get(key),'--')
                 elif key in ('input_tokens','output_tokens','total_tokens','retries','llm_calls'):
                     value=discrete(c.get(key))
                 else:
@@ -363,30 +309,21 @@ def circuit_appendix(runs):
                 row.append(value)
             rows.append(row)
         spec=r'>{\raggedright\arraybackslash}p{6.0cm}'+r'>{\centering\arraybackslash}p{1.75cm}'*len(cols)
-        body+=table(['Circuito']+headers(cols,runs),rows,spec=spec,long=True,size='small')
-    body+=r'\clearpage\section{Fonti e criteri di lettura}'+'\n'
-    body+=('Questo documento è ricavato dai registri delle esecuzioni già concluse. '
-           'La rigenerazione controlla l’identità dei circuiti e i contratti, senza avviare '
-           'modelli o nuove compilazioni quantistiche. I rapporti precedenti e gli esiti originali restano conservati.\n\n'
-           'Il protocollo corrente è in '+r'\nolinkurl{prototipo/docs/protocollo_sperimentale.md}'+
-           '. Le impostazioni LLM sono in '+r'\nolinkurl{prototipo/config.json}'+
-           '. La prova MQT separata conserva il proprio piano, il contratto e i metadati del selettore '
-           'nella cartella '+r'\nolinkurl{archivio/valutazione/test_mqt_esplorativo/}'+'.\n\n'
-           'Accanto al documento, '+r'\texttt{provenienza.json}'+
-           ' raccoglie versioni, impronte, parametri inviati e riferimenti alle fonti. '
-           'La cartella '+r'\texttt{generatore/}'+
-           ' conserva i sorgenti usati; le cartelle delle tabelle e dei grafici contengono i dati '
-           'da cui derivano le immagini. Questi dettagli permettono di ricostruire l’analisi '
-           'senza appesantire la lettura del testo principale.\n\n'
-           'I confronti di qualità usano gli stessi circuiti riusciti per entrambi i metodi. '
-           'I costi includono tutti gli esiti con misura disponibile. Le somme riguardano gli episodi '
-           'osservati; le medie danno uguale peso ai circuiti. Una misura ignota resta mancante, '
-           'non viene sostituita con zero. Il conteggio dei token considera il testo completo in ingresso '
-           'anche quando il server riusa la cache.\n\n'
-           'Per la descrizione dell’architettura MQT il riferimento locale è '
-           r'\nolinkurl{archivio/esperimento_v2/knowledge/MQT-Predictor.pdf}'
-           ', relativo al lavoro del 2025. Il precedente articolo del 2023 tratta invece '
-           'la previsione delle opzioni di compilazione e non va confuso con la sequenza ML e RL qui usata.\n')
+        body+=table(['Circuit']+headers(cols,runs),rows,spec=spec,long=True,size='small')
+    body+='\\clearpage\\section{Sources and interpretation criteria}'+'\n'
+    body+=("""This document is derived from records of completed runs. Regeneration checks circuit identities and contracts without starting models or new quantum compilations. Previous reports and original outcomes remain preserved.
+
+The current protocol is in """+r'\nolinkurl{prototipo/docs/protocollo_sperimentale.md}'+
+           '. LLM settings are in '+r'\nolinkurl{prototipo/config.json}'+
+           '. The separate MQT run preserves its own plan, contract and selector metadata in the directory '+r'\nolinkurl{archivio/valutazione/test_mqt_esplorativo/}'+""".
+
+Alongside the document, """+r'\texttt{provenienza.json}'+
+           ' collects versions, fingerprints, submitted parameters and source references. The directory '+r'\texttt{generatore/}'+
+           """ preserves the sources used; table and plot directories contain the data behind figures. These details support reconstruction without burdening the main text.
+Quality comparisons use common successful circuits. Costs include every outcome with available measurements. Sums concern observed episodes; means give circuits equal weight. Unknown measurements remain missing, not zero. Input-token counts include the full text even when the server reuses cache.
+The local MQT architecture reference is \\nolinkurl{archivio/esperimento_v2/knowledge/MQT-Predictor.pdf}, the 2025 work. The 2023 paper predicts compilation options and must not be confused with this ML/RL sequence.
+
+""")
     return body
 
 
@@ -395,16 +332,19 @@ def comparison_body(output,runs,comparison,plan):
     five='llm_recupero_random' in runs
     body=(HERE/('introduzione_cinque.tex' if five else 'introduzione.tex')).read_text(encoding='utf-8-sig')
     if comparison['missing_methods']:
-        body+='\nRisultati non ancora disponibili: '+', '.join(PANEL_LABELS[m] for m in comparison['missing_methods'])+'. Il confronto è parziale.\n'
-    body+=r'\clearpage'+'\n'+(HERE/('procedura_cinque.tex' if five else 'procedura.tex')).read_text(encoding='utf-8-sig').replace('%%MQT_DETAILS%%',mqt_details(runs).replace('gli altri tre sistemi','i tre sistemi del piano originale'))
+        body+="""
+Results not yet available: """+', '.join(PANEL_LABELS[m] for m in comparison['missing_methods'])+""". The comparison is partial.
+"""
+    body+=r'\clearpage'+'\n'+(HERE/('procedura_cinque.tex' if five else 'procedura.tex')).read_text(encoding='utf-8-sig').replace('%%MQT_DETAILS%%',mqt_details(runs).replace('the other three systems','the three systems in the original plan'))
     body+=summary_tables(runs,comparison,plan)
     body+=chart_pages(output,runs)
     body+=conclusions(runs,comparison)
     body+=circuit_appendix(runs)
     if five:
-        body=body.replace('Il migliore fra i quattro sistemi osservati','Il migliore fra i cinque sistemi osservati')
-        body+=('\nLa campagna con esempi casuali e il suo contratto separato sono in '
-               r'\nolinkurl{archivio/valutazione/test/recupero_random/seed_20260927/}'
-               '. Le fasce di qubit e le differenze sono ricavate dal manifest e dagli esiti conservati.\n')
+        body=body.replace('The best of the four observed systems','The best of the five observed systems')
+        body+=("""
+The random-example campaign and separate contract are under \\nolinkurl{archivio/valutazione/test/recupero_random/seed_20260927/}. Qubit groups and differences derive from the manifest and preserved outcomes.
+
+""")
     return body
 

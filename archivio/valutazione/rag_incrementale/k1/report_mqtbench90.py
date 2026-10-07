@@ -1,4 +1,4 @@
-"""Genera il report k=1 per mqtbench90, senza avviare decisioni."""
+'Generate the mqtbench90 k=1 report without starting decisions.'
 import sys
 from pathlib import Path
 sys.dont_write_bytecode = True

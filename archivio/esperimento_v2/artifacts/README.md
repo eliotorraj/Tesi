@@ -1,16 +1,11 @@
-# Artefatti
+# Archived experiment artifacts
 
-Questa cartella conserva ciò che serve a ricostruire il lavoro:
-modelli, compilazioni, registri delle esecuzioni, configurazioni, errori e
-prove di controllo.
+This tree preserves compilation attempts, execution logs, configurations and checks, including errors and incomplete attempts. `experiments/` groups them by experimental identity. The sibling `datasets/` directory exposes the aggregated data and RAG examples derived from those attempts.
 
-Il [Dataset](../datasets/README.md) espone i dati riuniti da consultare.
-Gli artefatti conservano anche i materiali intermedi e la storia dei tentativi.
+## Subdirectories
 
-- [Esperimenti](experiments/README.md): indice delle cartelle operative.
-- [Protocollo](../docs/protocollo_sperimentale.md): regole correnti.
-- [Documentazione](../docs/README.md): spiegazioni e resoconti del progetto.
+| Directory | Contents |
+| --- | --- |
+| [experiments/](experiments/README.md) | Artifact sets by experiment. |
 
-Le sottocartelle generate possono contenere molti file. Le guide descrivono
-i gruppi, senza modificare i singoli risultati o i manifest congelati.
-Modelli e registri vanno conservati anche se un tentativo fallisce.
+[Parent directory](../README.md) · [Current repository guide](../../../README.md)

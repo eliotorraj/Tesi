@@ -1,13 +1,13 @@
-# Preparazione dei modelli di confronto
+# Comparison-model preparation
 
-Questa cartella raccoglie gli strumenti sperimentali per addestrare i modelli
-usati come termine di confronto. Non serve per avviare il framework Qwen.
+`mqt/` contains selector preparation: unique train-circuit selection, RL compilation collection, Training set construction and supervised training. It also preserves imports, technical trials and failures.
 
-[mqt/](mqt/README.md) contiene il selettore supervisionato MQT: selezione dei
-circuiti train distinti, compilazioni con i modelli RL, costruzione del
-Training set, addestramento e controlli. Conserva anche importazioni dal
-portatile, prove, errori e artefatti necessari a ricostruire il lavoro.
+The original RL models and sources belong to `archivio/esperimento_v2/`. These training tools are separate from QAdviser inference. The current scientific protocol explains the difference between the originally planned complete Training set and the reduced-coverage selector used in the recorded comparisons.
 
-Le fonti e i modelli RL congelati restano in `archivio/esperimento_v2/`.
-Il [protocollo corrente](../../../prototipo/docs/protocollo_sperimentale.md)
-distingue la procedura conforme dalla prova esplorativa con copertura ridotta.
+## Subdirectories
+
+| Directory | Contents |
+| --- | --- |
+| [mqt/](mqt/README.md) | Archived MQT selector training. |
+
+[Parent directory](../README.md) · [Current repository guide](../../../README.md)

@@ -1,4 +1,4 @@
-"""Valuta tutti i metodi sullo stesso split dopo avere sigillato le scelte."""
+'Evaluate all methods on the same split after sealing their choices.'
 
 from __future__ import annotations
 
@@ -73,8 +73,8 @@ def main() -> int:
         capacities=capacities,
     )
 
-    # Le decisioni e gli esiti qcompile vengono validati prima di aprire la
-    # matrice Qiskit che contiene l'oracle.
+    # Validate decisions and qcompile outcomes before opening the
+    # Qiskit matrix containing the oracle.
     decision_paths = {
         method_id: METHOD_RESULTS_DIR_V2
         / args.split
@@ -100,7 +100,8 @@ def main() -> int:
     model_report, model_errors = validate_model_set(expected_max_steps=64)
     if model_errors:
         raise SystemExit(
-            "Modelli MQT non conformi alla valutazione:\n  - "
+            """MQT models do not match evaluation requirements:
+  - """
             + "\n  - ".join(model_errors)
         )
     model_hashes = {
@@ -156,13 +157,12 @@ def main() -> int:
     summary_path = output_dir / "evaluation_summary.json"
     if not args.overwrite and (result_path.exists() or summary_path.exists()):
         raise SystemExit(
-            f"Output già presente: {output_dir}. Usa --overwrite solo per una "
-            "rigenerazione dagli stessi input congelati."
+            f'Output already exists: {output_dir}. Use --overwrite only to regenerate from the same frozen inputs.'
         )
     atomic_jsonl_write(result_path, results)
     atomic_json_write(summary_path, summary)
-    print(f"Risultati comuni: {result_path}")
-    print(f"Riepilogo: {summary_path}")
+    print(f'Common results: {result_path}')
+    print(f'Summary: {summary_path}')
     return 0
 
 

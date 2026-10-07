@@ -1,4 +1,4 @@
-"""Massimo osservato nella griglia Test, separato dai suggerimenti al modello."""
+'Maximum observed in the Test grid, separate from model suggestions.'
 from genera import task
 from processi import execute
 import settings as s

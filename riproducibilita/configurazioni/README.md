@@ -1,16 +1,16 @@
-# Impostazioni dell'esperimento
+# Experiment settings
 
-Il punto di ingresso consigliato è `configura.py`, dalla cartella `riproducibilita/`. Crea un esperimento con un nome e cambia le impostazioni tramite comandi controllati, senza editare schemi JSON:
+Use `configura.py` from the toolkit root for checked configuration commands:
 
 ```bash
-python configura.py nuovo mia-prova --profilo cpu
-python configura.py sistemi mia-prova llm_rag llm_senza_rag random
-python configura.py dispositivi mia-prova ibm_falcon_27
-python configura.py mostra mia-prova
+python configura.py nuovo my-trial --profilo cpu
+python configura.py sistemi my-trial llm_rag llm_senza_rag random
+python configura.py dispositivi my-trial ibm_falcon_27
+python configura.py mostra my-trial
 ```
 
-[esperimenti/](esperimenti/README.md) conserva configurazioni nominate e revisioni. `esperimento.json` e `catalogo.json` qui alla radice restano i valori distribuiti, usati anche dall'interfaccia tradizionale. `generazione_llm.json` contiene prompt e parametri comuni di basso livello; modificarlo richiede una scelta avanzata prima delle campagne.
+[esperimenti/](esperimenti/README.md) stores named configurations and revisions. `esperimento.json` and `catalogo.json` are the distributed defaults for the explicit `--config` interface. `generazione_llm.json` contains shared prompt and generation settings; change it only as an explicit pre-campaign choice.
 
-Il catalogo descrive Target quantistici, configurazioni Qiskit, seed e processi. CPU e GPU del PC si impostano invece con `risorse` e `modello`. I due profili `cpu` e `gpu` scelgono dove eseguire il LLM e partono dalle stesse altre impostazioni. Contesto, batch e processi si regolano separatamente; il fisso usa anch’esso `gpu`. La disponibilità e la memoria della scheda vanno verificate sul computer utilizzato.
+The catalog defines quantum Targets, Qiskit configurations, seeds and workers. `risorse` and `modello` configure host CPU/GPU and LLM resources. CPU/GPU profiles start with the same context and batch settings; check memory and backend support locally.
 
-Dopo `prepara` le modifiche sono bloccate; `configura.py duplica ORIGINE NUOVO_NOME` conserva le impostazioni e separa i nuovi risultati. Leggi il [ricettario](../documentazione/configurazione.md) per tutti i comandi e la [guida](../documentazione/guida.md) per la sequenza completa.
+After `prepara`, use `configura.py duplica SOURCE NEW_NAME` for new conditions. See the [recipes](../documentazione/configurazione.md) and [guide](../documentazione/guida.md).

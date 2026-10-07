@@ -191,7 +191,7 @@ class QiskitCatalogTests(unittest.TestCase):
     def test_prototype_validator_uses_complete_tuple_membership(self) -> None:
         submission = UiSubmission(
             request_id="request-catalog",
-            user_text="Compila",
+            user_text='Compilation',
             qasm2=_qasm2(),
             figure_of_merit="expected_fidelity",
         )
@@ -243,7 +243,7 @@ class QiskitCatalogTests(unittest.TestCase):
         )
         self.assertFalse(result.is_valid)
         self.assertTrue(
-            any("12 configurazioni" in error for error in result.errors)
+            any('12 allowed Qiskit configurations' in error for error in result.errors)
         )
 
 
@@ -573,8 +573,8 @@ class QiskitAggregationTests(unittest.TestCase):
             for claim in example["claims"]
             if claim["claim_type"] == "selected_device"
         )
-        self.assertIn("parità", device_claim["text"])
-        self.assertIn("non dimostrano superiorità", device_claim["text"])
+        self.assertIn('tie', device_claim["text"])
+        self.assertIn('do not establish superiority', device_claim["text"])
 
     def test_rag_rejects_more_than_three_labeled_configurations(self) -> None:
         summaries = aggregate_runs(

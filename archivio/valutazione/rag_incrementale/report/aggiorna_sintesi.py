@@ -1,8 +1,7 @@
-"""Rigenera in posto la sola presentazione di un report, conservando misure e versione precedente.
+"""Regenerate only report presentation in place, preserving measurements and the previous version.
 
-Uso: python aggiorna_sintesi.py PERCORSO_DEL_REPORT
-Il percorso deve contenere dati.json e provenienza.json già generati.
-"""
+Usage: python aggiorna_sintesi.py REPORT_PATH
+The path must contain previously generated dati.json and provenienza.json."""
 from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
@@ -26,7 +25,7 @@ def update(output):
     output = output.resolve()
     generator = output.parents[2] / "genera.py"
     if not generator.is_file():
-        raise ValueError("Il report deve essere in report/risultati/<esperimento>/<versione>.")
+        raise ValueError('The report must be under report/risultati/<experiment>/<version>.')
     data_file = output / "dati.json"
     data = json.loads(data_file.read_text(encoding="utf-8"))
     previous_provenance = sha(output / "provenienza.json")
@@ -50,7 +49,7 @@ def update(output):
         module.write_report(data, stage, pdf=True)
         for name, fingerprint in before.items():
             if not (stage / name).is_file() or sha(stage / name) != fingerprint:
-                raise ValueError("La rigenerazione cambierebbe le misure: " + name)
+                raise ValueError('Regeneration would change measurements: ' + name)
         for source in stage.rglob("*"):
             if not source.is_file() or source.name in before or source.name == "provenienza.json":
                 continue
@@ -59,7 +58,7 @@ def update(output):
             shutil.copy2(source, destination)
         revision = {
             "kind": "editorial_revision_only", "at": datetime.now(timezone.utc).isoformat(),
-            "description": "Introduzione breve, grafici oracle con croci rosse, conclusioni sui campioni.",
+            "description": 'Brief introduction, oracle plots with red crosses, and sample-specific conclusions.',
             "previous_provenance_sha256": previous_provenance,
             "previous_report_archive": backup.relative_to(output).as_posix(),
             "previous_report_archive_sha256": sha(backup),

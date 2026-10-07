@@ -1,4 +1,4 @@
-# Indicizzare sorgenti, documentazione e fonti, senza librerie installate o copie duplicate.
+# Index code, documentation and references, excluding installed libraries and duplicates.
 .venv/
 .venv-*/
 __pycache__/
@@ -10,7 +10,8 @@ site-packages/
 /archivio/workspace_locale/
 /archivio/riorganizzazione_2026_09_25/prima/
 /tesi/build/
-# Registri generati: restano nei dati originali e nei rapporti, non sono sorgenti.
+/tesi/ufficiale/build/
+# Generated records remain available as original data and reports, outside the source index.
 **/qiskit_dataset_cache/
 **/attempt_*/
 **/report_generati/
@@ -18,7 +19,7 @@ site-packages/
 **/servers/
 **/risultati/*/circuiti/
 
-# Kit: sorgenti, senza nuovi artefatti e copie degli ingressi.
+# Toolkit source code, excluding generated artifacts and copied inputs.
 /riproducibilita/esecuzioni/
 /riproducibilita/esportazioni/
 /riproducibilita/mqt/artefatti/
@@ -28,5 +29,5 @@ site-packages/
 /riproducibilita/circuiti/
 /archivio/riorganizzazione_2026_10_01/
 
-# Configurazioni personali e revisioni dei comandi.
+# User configurations and command revision records.
 /riproducibilita/configurazioni/esperimenti/

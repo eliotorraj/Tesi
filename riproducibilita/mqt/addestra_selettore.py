@@ -1,6 +1,6 @@
-"""Avvio ufficiale: verifica gli RL e addestra il selettore sui QASM train unici.
+"""Official entry point: verify RL models and train the selector on unique train QASM.
 
-Il motore usa worker spawn senza fork e connessioni BQSKit per circuito.
+The engine uses spawned workers without fork and per-circuit BQSKit connections.
 """
 from pathlib import Path
 import sys
@@ -14,18 +14,18 @@ def sync_rl(dry_run):
         name=f"model_expected_fidelity_{device}.zip"
         source=trainer.CANONICAL_RL_MODELS_DIR/name
         if not source.is_file():
-            raise SystemExit("Trasferire il modello RL canonico: "+str(source))
+            raise SystemExit('Transfer the canonical RL model: '+str(source))
         info,errors=validate_rl_archive(source)
         _,meta_errors=trainer.validate_rl_training_metadata(source.with_suffix(".metadata.json"),
             device_name=device,model_sha256=trainer.file_sha256(source),expected_max_steps=64,
             expected_num_timesteps=trainer.RL_FINAL_TIMESTEPS)
         if errors or meta_errors:
-            raise SystemExit(f"Modello RL non conforme: {device}: {errors+meta_errors}")
+            raise SystemExit(f'RL model does not match requirements: {device}: {errors + meta_errors}')
         target=trainer.get_rl_model_dir()/name
         if target.exists() and trainer.file_sha256(target)==trainer.file_sha256(source):
             continue
         if dry_run:
-            print("Da sincronizzare nel runtime: "+name)
+            print('To synchronize into the runtime: '+name)
             continue
         if target.exists():
             backup=trainer.ACTIVE_ROOT/"precedenti"/trainer.file_sha256(target)/target.name
@@ -42,12 +42,12 @@ if __name__=="__main__":
         sync_rl(True)
         trainer.verify_circuit_directory(trainer.TRAINING_CIRCUITS_V2, allowed_splits=("train",), manifest_path=trainer.SOURCE_MANIFEST_V2)
         _, selection = trainer.select_unique(trainer.TRAINING_CIRCUITS_V2)
-        print(f"Train verificato: {selection['source_circuit_count']} sorgenti, {selection['unique_circuit_count']} campioni unici, {selection['alias_count']} alias")
-        # Il controllo completo del trainer richiede le copie runtime.
+        print(f"Verified train: {selection['source_circuit_count']} sources, {selection['unique_circuit_count']} unique samples, {selection['alias_count']} alias")
+        # The full trainer check requires runtime copies.
         missing=[d for d in trainer.FROZEN_DEVICES
                  if not (trainer.get_rl_model_dir()/f"model_expected_fidelity_{d}.zip").is_file()]
         if missing:
-            print("I modelli RL canonici sono verificati. L'avvio effettivo li copiera nel runtime.")
+            print('Canonical RL models are verified. Execution will copy them into the runtime.')
             raise SystemExit(0)
     import portalocker
     trainer.ACTIVE_ROOT.mkdir(parents=True,exist_ok=True)

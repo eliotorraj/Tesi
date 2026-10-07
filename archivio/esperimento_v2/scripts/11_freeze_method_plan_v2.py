@@ -1,4 +1,4 @@
-"""Congela il piano dei metodi e le estrazioni casuali senza leggere gli score."""
+'Freeze the method plan and random draws without reading scores.'
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--align-execution-policy",
         action="store_true",
-        help="Archivia il piano 300s/2 e lo riallinea a 100s/6 senza cambiare le estrazioni.",
+        help='Archive the 300s/2 plan and realign it to 100s/6 without changing draws.',
     )
     return parser.parse_args()
 
@@ -46,17 +46,17 @@ def freeze_method_plan(
     align_execution_policy: bool = False,
     release_record: Path = TEST_RELEASE_RECORD,
 ) -> str:
-    """Salva il piano o riallinea solo la politica precedente, conservandola."""
+    'Save the plan or realign only the earlier policy while preserving it.'
     previous = load_json(output) if output.exists() else None
     if previous == plan:
-        return "già congelato e identico"
+        return 'already frozen and identical'
     if release_record.exists():
-        raise ValueError("Il test è già aperto: il piano non può essere modificato.")
+        raise ValueError('Test is already open: the plan cannot change.')
     if previous is None:
         atomic_json_write(output, plan)
         return "congelato"
     if not align_execution_policy:
-        raise ValueError(f"Il piano esistente è diverso e non verrà sovrascritto: {output}")
+        raise ValueError(f'The existing plan differs and will not be overwritten: {output}')
 
     old_core = {key: value for key, value in previous.items() if key != "plan_sha256"}
     new_core = {key: value for key, value in plan.items() if key != "plan_sha256"}
@@ -64,7 +64,7 @@ def freeze_method_plan(
         previous.get("plan_sha256") != stable_sha256(old_core)
         or plan.get("plan_sha256") != stable_sha256(new_core)
     ):
-        raise ValueError("Impronta del piano non valida: riallineamento rifiutato.")
+        raise ValueError('Invalid plan hash: realignment refused.')
     if (
         old_core.pop("qiskit_execution_policy", None)
         != {"timeout_seconds": 300, "workers": 2}
@@ -73,8 +73,7 @@ def freeze_method_plan(
         or old_core != new_core
     ):
         raise ValueError(
-            "È consentito soltanto il passaggio 300s/2 a 100s/6; "
-            "estrazioni, circuiti e altri parametri devono restare identici."
+            'Only the 300s/2 to 100s/6 transition is allowed; draws, circuits and other parameters must remain identical.'
         )
 
     previous_bytes = output.read_bytes()
@@ -84,7 +83,7 @@ def freeze_method_plan(
     history.mkdir(parents=True, exist_ok=True)
     if archive.exists():
         if archive.read_bytes() != previous_bytes:
-            raise ValueError(f"Archivio precedente diverso: {archive}")
+            raise ValueError(f'Earlier archive differs: {archive}')
     else:
         with archive.open("xb") as stream:
             stream.write(previous_bytes)
@@ -93,7 +92,7 @@ def freeze_method_plan(
         history / f"{output.stem}.{plan['plan_sha256']}.alignment.json",
         {
             "schema_version": "1.0.0",
-            "reason": "Allineamento alla politica Qiskit approvata: 100 secondi, 6 processi.",
+            "reason": 'Alignment with the approved Qiskit policy: 100 seconds, 6 workers.',
             "previous_plan_sha256": previous["plan_sha256"],
             "current_plan_sha256": plan["plan_sha256"],
             "previous_file_sha256": previous_file_hash,
@@ -103,7 +102,7 @@ def freeze_method_plan(
             "test_released": False,
         },
     )
-    return "riallineato a 100s/6; piano precedente archiviato"
+    return 'aligned to 100s/6; previous plan archived'
 
 
 def main() -> int:
@@ -124,7 +123,7 @@ def main() -> int:
         )
     except ValueError as error:
         raise SystemExit(str(error)) from error
-    print(f"Piano {status}: {output}")
+    print(f'Plan {status}: {output}')
     print(
         json.dumps(
             {

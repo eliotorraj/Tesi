@@ -1,4 +1,4 @@
-"""Inventario e prompt train/validation; non legge punteggi di validation."""
+'Train/validation inventory and prompts; does not read validation scores.'
 from __future__ import annotations
 import json
 import platform
@@ -49,7 +49,7 @@ def prepare():
             if destination.exists():
                 saved = read_json(destination)
                 if saved["source_sha256"] != row["source_sha256"]:
-                    raise ValueError("Prompt esistente di un altro circuito.")
+                    raise ValueError('Existing prompt belongs to another circuit.')
                 continue
             prepared = prepare_prompt(service, directory / row["file_name"])
             prepared["circuit_metadata"] = row

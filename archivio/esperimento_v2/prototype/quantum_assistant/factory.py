@@ -1,4 +1,4 @@
-"""Costruzione del prototipo locale con gli adattatori predefiniti."""
+'Build the local prototype with default adapters.'
 
 from __future__ import annotations
 
@@ -37,10 +37,10 @@ def build_default_service(
     dataset_required: bool = False,
     configuration_catalog_path: Path = V2_CATALOG_PATH,
 ) -> PrototypeService:
-    """Costruisce il servizio lasciando sostituibile il collegamento all'LLM."""
+    'Build the service with a replaceable LLM gateway.'
     backends = {"qdrant": QdrantContextRetriever, "reference": LocalReferenceContextRetriever, "none": DisabledContextRetriever}
     if retrieval_backend not in backends:
-        raise ValueError("retrieval_backend deve essere qdrant, reference oppure none.")
+        raise ValueError('retrieval_backend must be qdrant, reference or none.')
     configuration_catalog = load_catalog(configuration_catalog_path)
     hardware_catalog = MqtHardwareCatalog(
         device_names,

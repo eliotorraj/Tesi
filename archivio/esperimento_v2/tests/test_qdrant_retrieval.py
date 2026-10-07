@@ -1,4 +1,4 @@
-"""Ricerca reale Qdrant locale, precisione, persistenza e integrità train."""
+'Real local Qdrant retrieval: precision, persistence and train integrity.'
 
 from __future__ import annotations
 
@@ -253,7 +253,7 @@ class RealLocalQdrantTests(unittest.TestCase):
         self.assertFalse(database.exists())
 
 
-@unittest.skipUnless(DEFAULT_DATASET.is_file(), "Dataset generato non presente su questa macchina")
+@unittest.skipUnless(DEFAULT_DATASET.is_file(), 'Generated Dataset is unavailable on this machine')
 class DatasetContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -264,7 +264,7 @@ class DatasetContractTests(unittest.TestCase):
     def test_frozen_manifest_cannot_be_repartitioned(self):
         from prototype.quantum_assistant.adapters.rag_dataset import load_corpus
         with patch("prototype.quantum_assistant.adapters.rag_dataset.file_sha256", return_value="0"*64):
-            with self.assertRaisesRegex(RetrievalIntegrityError, "congelato"):
+            with self.assertRaisesRegex(RetrievalIntegrityError, "frozen"):
                 load_corpus()
 
     def test_current_record_and_duplicate_source_detection(self):

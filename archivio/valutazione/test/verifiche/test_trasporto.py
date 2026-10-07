@@ -1,4 +1,4 @@
-"""Server non disponibile: conserva il tentativo e lascia intatti i casi successivi."""
+'Server unavailable: preserve the attempt and leave subsequent cases untouched.'
 import io
 import sys
 import tempfile
@@ -35,7 +35,7 @@ class TestTrasporto(unittest.TestCase):
                  patch("app.shutil.which", return_value="curl.exe"), \
                  patch("app.subprocess.run", return_value=SimpleNamespace(
                      returncode=56, stdout=b"", stderr=b"Connection was reset")):
-                with self.assertRaisesRegex(LlmTransportError, "curl: 56"):
+                with self.assertRaisesRegex(LlmTransportError, "curl transport error: 56"):
                     Http("http://localhost:8089")("/completion", {}, folder)
             self.assertEqual((folder / "stderr.txt").read_text(), "Connection was reset")
             self.assertFalse(read(folder / "failure.json")["completed_logical_attempt"])

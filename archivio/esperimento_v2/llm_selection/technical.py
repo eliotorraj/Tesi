@@ -1,4 +1,4 @@
-"""Riepilogo delle prove train e degli arresti, senza score di validation."""
+'Summary of train checks and stops without validation scores.'
 from collections import Counter
 from pathlib import Path
 from .common import OUTPUT, ROOT, read_json

@@ -1,4 +1,4 @@
-"""Riepiloghi e controlli preliminari senza avviare esperimenti."""
+'Summaries and preliminary checks without starting experiments.'
 from collections import defaultdict
 from pathlib import Path
 import shutil
@@ -10,33 +10,33 @@ def show(name):
     corpus = c.input_path(config["corpus"])
     counts = {s: len(list((corpus / s).glob("*.qasm"))) for s in ("train", "validation", "test")}
     models = [m for m in registry["models"] if m.get("enabled", True)]
-    print(f"Esperimento: {name} ({'preparato; duplicare per modificarlo' if c.frozen(name, config) else 'modificabile'})")
-    print("Configurazione:", c.config_path(name))
+    print(f"Experiment: {name} ({('prepared; duplicate to make changes' if c.frozen(name, config) else 'editable')})")
+    print('Configuration:', c.config_path(name))
     print("Corpus:", corpus)
-    print("Circuiti:", ", ".join(f"{s}={n}" for s, n in counts.items()))
-    print("Risultati:", c.input_path(config.get("output", ".")), f"(sottocartelle separate per {name})")
-    print("Target quantistici:", ", ".join(catalog["supported_device_ids"]))
-    print("Configurazioni Qiskit:", ", ".join(x["config_id"] for x in catalog["configurations"]))
-    print("Sistemi Test:", ", ".join(config["test_methods"]))
-    print("Risorse Qiskit:", catalog["execution_policy"]["workers"], "processi; timeout", catalog["execution_policy"]["timeout_seconds"], "secondi")
-    print(f"Recupero: k={config['retrieval_k']}; passi RL={config['rl_timesteps']}; criterio={config['validation_criterion']}")
-    print("LLM attivi:")
+    print('Circuits:', ", ".join(f"{s}={n}" for s, n in counts.items()))
+    print('Results:', c.input_path(config.get("output", ".")), f'(separate subdirectories for {name})')
+    print('Quantum Targets:', ", ".join(catalog["supported_device_ids"]))
+    print('Qiskit configurations:', ", ".join(x["config_id"] for x in catalog["configurations"]))
+    print('Test methods:', ", ".join(config["test_methods"]))
+    print('Qiskit resources:', catalog["execution_policy"]["workers"], 'workers; timeout', catalog["execution_policy"]["timeout_seconds"], 'seconds')
+    print(f"Retrieval: k={config['retrieval_k']}; RL timesteps={config['rl_timesteps']}; criterion={config['validation_criterion']}")
+    print('Active LLMs:')
     for m in models:
         server = m.get("server", {})
         path = Path(m["file"])
-        print(f"  {m['id']}: contesto={m['context']}, risposta={m['max_output_tokens']}, temperature={m.get('temperatures', config['temperatures'])}")
-        print(f"    GGUF: {path} ({'presente; impronta da controllare con verifica' if path.is_file() else 'MANCANTE'})")
-        print(f"    {m.get('transport', 'native')}, {m['url']}; strati GPU={server.get('gpu_layers', 999)}, thread={server.get('threads', 6)}, batch={server.get('batch_size', 512)}, microbatch={server.get('ubatch_size', 128)}")
-        print(f"    server: {server.get('binary', 'llama-server nel PATH')}; dispositivo={server.get('device') or 'automatico (none in CPU)'}")
+        print(f"  {m['id']}: context={m['context']}, output={m['max_output_tokens']}, temperature={m.get('temperatures', config['temperatures'])}")
+        print(f"    GGUF: {path} ({('present; check the fingerprint with verifica' if path.is_file() else 'MISSING')})")
+        print(f"    {m.get('transport', 'native')}, {m['url']}; GPU layers={server.get('gpu_layers', 999)}, thread={server.get('threads', 6)}, batch={server.get('batch_size', 512)}, microbatch={server.get('ubatch_size', 128)}")
+        print(f"    server: {server.get('binary', 'llama-server on PATH')}; device={server.get('device') or 'automatic (none on CPU)'}")
     inactive = [m["id"] for m in registry["models"] if not m.get("enabled", True)]
-    if inactive: print("LLM non selezionati (riattivabili con modelli):", ", ".join(inactive))
+    if inactive: print('Unselected LLMs (reactivate with modelli):', ", ".join(inactive))
     upper = (counts["train"] + counts["validation"]) * len(catalog["supported_device_ids"]) * len(catalog["configurations"]) * len(catalog["seeds"])
-    print(f"Dataset: fino a {upper} compilazioni prima dei filtri di compatibilità; non è una stima del tempo.")
-    print("Validation:", sum(len(m.get("temperatures", config["temperatures"])) for m in models), "candidati modello/temperatura.")
-    if "mqt" in config["test_methods"]: print("Previsti addestramento RL, Training set, selettore e prova tecnica MQT.")
-    if set(config["test_methods"]) & {"llm_wl", "llm_wl_sintesi"}: print("Prevista selezione WL sulla validation.")
-    print(f"Controllo ingressi: python configura.py verifica {name}")
-    print(f"Stato della pipeline: python esperimento.py --esperimento {name} stato")
+    print(f'Dataset: up to {upper} compilations before compatibility filtering; this is not a time estimate.')
+    print("Validation:", sum(len(m.get("temperatures", config["temperatures"])) for m in models), 'model/temperature candidates.')
+    if "mqt" in config["test_methods"]: print('RL training, Training set, selector and MQT technical check are required.')
+    if set(config["test_methods"]) & {"llm_wl", "llm_wl_sintesi"}: print('WL selection on validation is required.')
+    print(f'Input check: python configura.py verifica {name}')
+    print(f'Pipeline status: python esperimento.py --esperimento {name} stato')
 
 
 def check(name):
@@ -46,43 +46,44 @@ def check(name):
     corpus = c.input_path(config["corpus"])
     names = set()
     hashes = defaultdict(set)
-    print("Controllo dei circuiti (gli stessi controlli semantici di prepara restano necessari):", flush=True)
+    print('Circuit checks (prepara still performs the required semantic checks):', flush=True)
     for split in ("train", "validation", "test"):
         files = sorted((corpus / split).glob("*.qasm"))
         print(f"  {split}: {len(files)} QASM")
-        if not files: problems.append(f"Aggiungere file .qasm direttamente in {corpus / split}")
+        if not files: problems.append(f'Add .qasm files directly under {corpus / split}')
         for path in files:
-            if path.stem in names: problems.append("Nome circuito duplicato tra split: " + path.stem)
+            if path.stem in names: problems.append('Duplicate circuit name across splits: ' + path.stem)
             names.add(path.stem)
             hashes[c.file_hash(path)].add(split)
     if any(len(splits) > 1 for splits in hashes.values()):
-        problems.append("Contenuti QASM identici in split diversi; mantenere train, validation e test separati")
-    print("Controllo dei candidati attivi e dei server:", flush=True)
+        problems.append('Identical QASM contents in different splits; keep train, validation and Test separate')
+    print('Active-candidate and server checks:', flush=True)
     for model in registry["models"]:
         if not model.get("enabled", True): continue
         file = Path(model["file"])
         if not file.is_file():
-            problems.append(f"{model['id']}: GGUF mancante: {file}")
+            problems.append(f"{model['id']}: missing GGUF: {file}")
         else:
-            print(f"  {model['id']}: calcolo SHA-256...", flush=True)
+            print(f"  {model['id']}: computing SHA-256...", flush=True)
             sha = c.file_hash(file)
             if model.get("sha256") and sha != model["sha256"]:
-                problems.append(f"{model['id']}: GGUF diverso dall'impronta registrata; per pesi diversi usare aggiungi-modello con un nuovo ID")
+                problems.append(f"{model['id']}: GGUF differs from the registered fingerprint; register different weights with aggiungi-modello and a new ID")
             elif not model.get("sha256"):
-                print("    impronta da congelare in validation:", sha)
+                print('    fingerprint to freeze during validation:', sha)
             else:
-                print("    impronta corrispondente")
+                print('    fingerprint matches')
         if model.get("transport", "native") == "native":
             binary = model.get("server", {}).get("binary", "llama-server")
             if not shutil.which(binary):
-                problems.append(f"{model['id']}: eseguibile Linux assente o non eseguibile: {binary}; indicarlo con risorse --server-bin")
+                problems.append(f"{model['id']}: Linux executable missing or not executable: {binary}; set it with risorse --server-bin")
         elif not shutil.which("curl.exe"):
-            problems.append(f"{model['id']}: trasporto Windows richiede curl.exe disponibile da WSL")
+            problems.append(f"{model['id']}: Windows transport requires curl.exe available from WSL")
     if problems:
-        print("\nDa sistemare prima della campagna:")
+        print("""
+Resolve before starting the campaign:""")
         for issue in problems: print("-", issue)
-        print("Nessun esperimento è stato avviato o modificato.")
+        print('No experiment was started or modified.')
         return 2
-    print("Ingressi e percorsi disponibili. Questo controllo non certifica RAM/VRAM, compatibilità GGUF o qualità scientifica.")
-    print(f"Prossimo passo: python esperimento.py --esperimento {name} prepara")
+    print('Inputs and paths are available. This check does not certify RAM/VRAM, GGUF compatibility or scientific quality.')
+    print(f'Next step: python esperimento.py --esperimento {name} prepara')
     return 0

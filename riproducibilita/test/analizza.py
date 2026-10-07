@@ -1,4 +1,4 @@
-"""Tabelle, denominatori e documento LaTeX dai soli risultati conservati."""
+'Tables, denominators and LaTeX from saved outcomes only.'
 from collections import Counter
 from statistics import mean,median
 import csv,io
@@ -28,11 +28,8 @@ def report():
         csv_path=dest/'circuiti.csv'
         if not csv_path.exists():csv_path.write_text(buf.getvalue())
     from relazioni import table_report
-    table_report(dest,'Confronto dei sistemi',
-        'Le medie comprendono soltanto gli score disponibili. Errori e timeout non diventano zero. '
-        'I denominatori appaiati e gli esiti originali sono nel riepilogo JSON. '
-        'Le durate sono in secondi; token non misurabili restano vuoti. '
-        'Lo score expected_fidelity si riferisce ai Target sintetici e non a esecuzioni su hardware quantistico.',
-        ['Sistema','Esiti','Score disponibili','Media'],
+    table_report(dest,'Method comparison',
+        'Means include available scores only. Errors and timeouts do not become zero. Paired denominators and original outcomes are in the JSON summary. Durations are in seconds; unmeasured token counts remain empty. expected_fidelity refers to synthetic Targets, not quantum hardware executions.',
+        ['System','Outcomes','Available scores','Mean'],
         [[m,v['recorded'],v['score_denominator'],f"{v['mean_score']:.6f}" if v['mean_score'] is not None else '--'] for m,v in summary.items()])
     return {"directory":str(dest),"summary":summary}

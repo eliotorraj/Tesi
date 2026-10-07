@@ -1,4 +1,4 @@
-"""Serializzazione tabellare senza perdita: campi e valori restano ricostruibili."""
+'Lossless tabular serialization: fields and values remain reconstructible.'
 from __future__ import annotations
 import json
 MARKER_KEYS={"$columns","$rows"}

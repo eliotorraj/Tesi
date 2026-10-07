@@ -1,4 +1,4 @@
-"""Nuovo contratto: contenuti minimi, citazioni locali e controlli applicativi."""
+'New contract: minimal content, local citations and application checks.'
 import copy
 from dataclasses import replace
 import json
@@ -45,7 +45,7 @@ class MinimalPromptTests(unittest.TestCase):
 
     def response(self, **changes):
         return {"selected_device": fixtures.DEVICE_ID, "config_id": fixtures.CONFIGURATION_ID,
-                "claim": "Il dispositivo e la configurazione sono suggeriti dagli esempi citati.",
+                "claim": 'The cited examples suggest the device and configuration.',
                 "evidence": ["E2", "E4"], **changes}
 
     def validate(self, response, **kwargs):
@@ -135,7 +135,7 @@ class MinimalPromptTests(unittest.TestCase):
         prompt = self.f.service.prompt_builder.build(
             self.f.prepared.request, self.f.prepared.mask_result, (), evidence_registry=registry).payload
         context = citation_context(prompt)
-        self.assertTrue(self.validate(self.response(evidence=[], claim="Scelta senza supporto storico."),
+        self.assertTrue(self.validate(self.response(evidence=[], claim='Choice without historical support.'),
                                       registry=registry, context=context).is_valid)
         self.assertFalse(self.validate(self.response(), registry=registry, context=context).is_valid)
         self.assertEqual(response_schema(prompt)["properties"]["evidence"]["maxItems"], 0)
@@ -161,12 +161,12 @@ class MinimalPromptTests(unittest.TestCase):
 
     def test_correction_messages_cover_validator_errors_without_repeating_context(self):
         cases = [
-            (self.response(selected_device="ibm_falcon_156"), "Dispositivo non ammesso"),
-            (self.response(config_id="invented"), "Configurazione non ammessa"),
-            (self.response(evidence=["E6"]), "Evidence non valida"),
-            (self.response(evidence=["E1", "E1"]), "Evidence non valida"),
-            (self.response(evidence=[]), "Evidence non valida"),
-            ("not json", "Risposta non conforme allo schema"),
+            (self.response(selected_device="ibm_falcon_156"), 'Device not allowed'),
+            (self.response(config_id="invented"), 'Configuration not allowed'),
+            (self.response(evidence=["E6"]), 'Invalid evidence'),
+            (self.response(evidence=["E1", "E1"]), 'Invalid evidence'),
+            (self.response(evidence=[]), 'Invalid evidence'),
+            ("not json", 'The response does not conform to the schema'),
         ]
         self.assertNotIn(REPAIR_INSTRUCTION, messages(self.prompt, "base")[0]["content"])
         for response, expected in cases:
@@ -201,7 +201,7 @@ class MinimalPromptTests(unittest.TestCase):
             self.response(), self.f.prepared.request, compatibility,
             self.f.prepared.hardware_catalog, evidence_registry=self.registry, citation_context=self.context)
         prompt["previous_validation_errors"] = [i.to_dict() for i in result.issues]
-        self.assertIn("vincoli del dispositivo", model_input(prompt)["previous_validation_errors"][0])
+        self.assertIn("device's constraints", model_input(prompt)["previous_validation_errors"][0])
         short_prompt = self.f.service.prompt_builder.build(
             self.f.prepared.request, self.f.prepared.mask_result, (self.f.example,),
             evidence_registry=self.f.registry).payload
@@ -218,7 +218,7 @@ class MinimalPromptTests(unittest.TestCase):
         errors = model_input(empty_prompt)["previous_validation_errors"]
         self.assertEqual(len(errors), 1)
         self.assertIn("evidence: []", errors[0])
-        self.assertNotIn("almeno un riferimento", errors[0])
+        self.assertNotIn('at least one reference', errors[0])
 
     def test_service_repairs_with_stable_aliases_and_compilation_gate(self):
         service = self.f.service
@@ -234,7 +234,7 @@ class MinimalPromptTests(unittest.TestCase):
         self.assertEqual(result.attempts, 2)
         self.assertEqual(citation_context(sent[0]), citation_context(sent[1]))
         self.assertTrue(sent[1]["previous_validation_errors"])
-        self.assertIn("Evidence non valida", messages(sent[1], "base")[0]["content"])
+        self.assertIn('Invalid evidence', messages(sent[1], "base")[0]["content"])
         self.assertIn(REPAIR_INSTRUCTION, messages(sent[1], "base")[0]["content"])
         service.context_retriever.retrieve.assert_called_once()
         service.compiler.compile.assert_not_called()
@@ -281,7 +281,7 @@ class MinimalPromptTests(unittest.TestCase):
                 sent_first = generate.call_args_list[0].args[0]["messages"][0]["content"]
                 sent_repair = generate.call_args_list[1].args[0]["messages"][0]["content"]
                 self.assertNotIn(REPAIR_INSTRUCTION, sent_first)
-                self.assertIn("Evidence non valida", sent_repair)
+                self.assertIn('Invalid evidence', sent_repair)
                 self.assertEqual(sent_repair.count(REPAIR_INSTRUCTION), 1)
                 with patch.object(run, "REVISION", "another-repair-policy"):
                     for terminal in (True, False):

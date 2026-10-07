@@ -50,7 +50,7 @@ def _target_operation_name(target: Any, operation: Any) -> str:
             continue
         if registered is operation:
             return str(candidate)
-    raise ValueError(f"Operazione Target senza nome stabile: {operation!r}")
+    raise ValueError(f'Target operation has no stable name: {operation!r}')
 
 def target_payload(target: Any) -> dict[str, Any]:
     """Return the canonical Target payload used by the frozen protocol."""

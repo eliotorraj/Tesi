@@ -14,7 +14,7 @@ artifacts/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor
 
 tesi/
 AGENTS.md
-# Materiale storico dopo il riordino del 9 settembre 2026.
+# Historical material following the September 9, 2026 reorganization.
 /archivio/protocollo_v1/datasets/expected_fidelity/full/ibm_heron_156/generation_status.json
 /archivio/protocollo_v1/datasets/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
 /archivio/sviluppo/
@@ -22,7 +22,7 @@ AGENTS.md
 
 llm_selection/Latex.md
 llm_selection/GITHUB.md
-# Dati esterni a Git: trasferire con Drive nei percorsi originali.
+# Data outside Git: transfer through Drive to the original locations.
 /.lfs-maintenance/
 /artifacts/checkpoints/ibm_falcon_127/model_expected_fidelity_ibm_falcon_127_2048_steps.zip
 /artifacts/checkpoints/ibm_falcon_127/model_expected_fidelity_ibm_falcon_127_4096_steps.zip
@@ -127,12 +127,12 @@ llm_selection/GITHUB.md
 /datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/ibm_heron_156/qiskit_runs.jsonl
 /datasets/experiments/qiskit-dataset-five-device-expected-fidelity-mqt-predictor-2.4-v2/expected_fidelity/full/quantinuum_h2_56/qiskit_runs.jsonl
 
-# Strumenti locali e cache rigenerabili (20 settembre 2026).
+# Local tools and reproducible caches (September 20, 2026).
 /.codex/
 /artifacts/experiments/*/llm_selection/runtime/tectonic-cache/
 /artifacts/experiments/*/llm_selection/runtime/toon/node-v*/
 /artifacts/experiments/*/llm_selection/runtime/toon/node-v*.tar.xz
 
-# Vecchi pesi RL conservati fuori da Git; copie locali preservate.
+# Earlier RL weights stored outside Git; local copies are preserved.
 /artifacts/models/rl/*.zip
 /artifacts/checkpoints/rl/**/*.zip

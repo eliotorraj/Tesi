@@ -1,4 +1,4 @@
-"""Lettura dei registri della campagna, senza esecuzioni sperimentali."""
+'Read campaign records without experimental runs.'
 import json,sys,hashlib,statistics
 from pathlib import Path
 from collections import Counter

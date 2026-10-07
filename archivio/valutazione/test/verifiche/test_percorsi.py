@@ -1,4 +1,4 @@
-"""Riorganizzazione: percorsi reali, identita logiche e contratti immutabili."""
+'Reorganization: physical paths, logical identities and immutable contracts.'
 import importlib.util
 from pathlib import Path
 import sys
@@ -67,7 +67,7 @@ class PercorsiTest(unittest.TestCase):
             before = path.read_bytes()
             changed = {"code": {"test/strumenti/runner.py": "changed"}}
             with patch.object(gates, "AREA", area), patch.object(gates, "frozen_contract", return_value=changed):
-                with self.assertRaisesRegex(ValueError, "Contratto cambiato"):
+                with self.assertRaisesRegex(ValueError, 'Contract changed'):
                     gates.freeze()
             self.assertEqual(path.read_bytes(), before)
 

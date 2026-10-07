@@ -1,4 +1,4 @@
-"""Un processo nuovo per compilazione, con esito durevole e timeout esterno."""
+'A fresh process per compilation, with a durable outcome and external timeout.'
 from __future__ import annotations
 import os
 import sys
@@ -20,7 +20,7 @@ def main(job_path):
         passes = []
         choice_seconds = 0.0
         if job["method"] == "mqt_predictor":
-            # Stesse due chiamate di qcompile 2.4.0, separate per misurare le fasi.
+            # The same two qcompile 2.4.0 calls, separated to measure phases.
             from mqt.predictor.ml import predict_device_for_figure_of_merit
             from mqt.predictor.rl import rl_compile
             started = time.perf_counter()
@@ -32,7 +32,7 @@ def main(job_path):
             seconds = time.perf_counter() - started
             passes = [str(p) for p in passes]
             if not passes or passes[-1] != "terminate":
-                raise ValueError("La politica RL non ha terminato.")
+                raise ValueError('The RL policy did not terminate.')
         else:
             from qiskit_dataset.catalog import load_catalog
             device = job["decision"]["selected_device"]
@@ -45,7 +45,7 @@ def main(job_path):
         target = get_device(device)
         validation = _validate_compiled_circuit(compiled, target)
         if not validation["is_executable_on_target"]:
-            raise ValueError("Circuito non eseguibile sul Target: " + str(validation))
+            raise ValueError('Circuit is not executable on the Target: ' + str(validation))
         metrics = expected_fidelity(compiled, target)
         qasm2.dump(compiled, folder / "compiled.qasm")
         save(folder / "result.json", dict(status="success", at=now(), device=device,

@@ -55,34 +55,33 @@ DEFAULT_OUTPUT = EXPERIMENT_ROOT / "logs" / "qcompile" / "validation_report.json
 def parse_args() -> argparse.Namespace:
     """Parse canary controls."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--circuit", type=Path, help="QASM2 canary appartenente allo split train; usa il primo train se omesso.")
+    parser.add_argument("--circuit", type=Path, help='QASM2 canary from train; defaults to the first train circuit.')
     parser.add_argument("--source-manifest", type=Path, default=SOURCE_MANIFEST_V2)
     parser.add_argument(
         "--timeout",
         type=int,
         default=COMPILATION_TIMEOUT_SECONDS,
-        help="Timeout totale per ciascun processo.",
+        help='Total timeout for each process.',
     )
-    parser.add_argument("--max-steps", type=int, default=64, help="Limite azioni per i canary RL diretti.")
+    parser.add_argument("--max-steps", type=int, default=64, help='Action limit for direct RL canaries.')
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--skip-qcompile", action="store_true", help="Esegue solo i cinque canary RL diretti.")
+    parser.add_argument("--skip-qcompile", action="store_true", help='Run only the five direct RL canaries.')
     parser.add_argument(
         "--allow-target-drift",
         action="store_true",
-        help="Esegue i canary anche se i Target differiscono dal protocollo migrato 2.4-v2.",
+        help='Run canaries even if Targets differ from the migrated 2.4-v2 protocol.',
     )
     args = parser.parse_args()
     if args.timeout <= 0:
-        parser.error("--timeout deve essere positivo.")
+        parser.error('--timeout must be positive.')
     if args.timeout != COMPILATION_TIMEOUT_SECONDS:
         parser.error(
-            "il protocollo v2 richiede "
-            f"--timeout {COMPILATION_TIMEOUT_SECONDS}."
+            f'protocol v2 requires --timeout {COMPILATION_TIMEOUT_SECONDS}.'
         )
     if args.max_steps <= 0:
-        parser.error("--max-steps deve essere positivo.")
+        parser.error('--max-steps must be positive.')
     if args.circuit is not None and not args.circuit.is_file():
-        parser.error(f"Circuito non trovato: {args.circuit}")
+        parser.error(f'Circuit not found: {args.circuit}')
     return args
 
 
@@ -115,7 +114,7 @@ def training_qasm(path: Path | None, manifest_path: Path) -> tuple[str, str]:
     observed_hash = file_sha256(chosen)
     if observed_hash not in allowed_hashes:
         raise ValueError(
-            f"Il canary non appartiene allo split train congelato: {chosen}"
+            f'Canary is outside the frozen train split: {chosen}'
         )
     return chosen.name, chosen.read_text(encoding="utf-8")
 
@@ -124,27 +123,27 @@ def strict_result_problems(result: dict[str, Any]) -> list[str]:
     """Return reasons why a canary is not a successful MQT RL compilation."""
     problems: list[str] = []
     if result.get("status") != "success":
-        problems.append(str(result.get("error", result.get("status", "esito mancante"))))
+        problems.append(str(result.get("error", result.get("status", 'missing outcome'))))
         return problems
     device_name = result.get("device")
     if device_name not in FROZEN_DEVICES:
-        problems.append(f"device fuori protocollo: {device_name}")
+        problems.append(f'device outside the protocol: {device_name}')
     passes = result.get("passes")
     if not isinstance(passes, list) or not passes:
-        problems.append("trace azioni vuoto")
+        problems.append('empty action trace')
     elif passes[-1] != "terminate":
-        problems.append("trace non terminato da terminate")
+        problems.append('trace does not end with terminate')
     if result.get("mode") == "rl":
         if result.get("terminated") is not True:
-            problems.append("episodio RL non terminato")
+            problems.append('RL episode did not terminate')
         if result.get("truncated") is not False:
-            problems.append("episodio RL troncato")
+            problems.append('truncated RL episode')
     validation = result.get("validation")
     if not isinstance(validation, dict) or not validation.get("is_executable_on_target"):
-        problems.append("circuito non eseguibile sul Target")
+        problems.append('circuit is not executable on the Target')
     score = result.get("expected_fidelity")
     if not isinstance(score, (int, float)) or not math.isfinite(float(score)):
-        problems.append("expected_fidelity non finita")
+        problems.append('non-finite expected_fidelity')
     return problems
 
 
@@ -201,7 +200,7 @@ def _canary_worker(
                 )
             if environment.error_occurred:
                 raise RuntimeError(
-                    str(info.get("Truncated because of error") or "errore RL")
+                    str(info.get("Truncated because of error") or 'RL error')
                 )
             compiled = environment.state
             selected_device = device_name
@@ -214,7 +213,7 @@ def _canary_worker(
             )
             target = get_device(selected_device)
         else:
-            raise ValueError(f"Modalità sconosciuta: {mode}")
+            raise ValueError(f'Unknown mode: {mode}')
 
         from mqt_predictor_protocol import validate_compiled_circuit
 
@@ -327,7 +326,7 @@ def run_isolated_canary(
                 "status": "timeout",
                 "mode": mode,
                 "device": device_name,
-                "error": f"superato timeout totale di {timeout}s",
+                "error": f'total timeout exceeded: {timeout}s',
             }
         elif result is None:
             process.join(timeout=1)
@@ -335,7 +334,7 @@ def run_isolated_canary(
                 "status": "failed",
                 "mode": mode,
                 "device": device_name,
-                "error": f"processo terminato senza risultato (exit code {process.exitcode})",
+                "error": f'process ended without a result (exit code {process.exitcode})',
             }
     finally:
         receive.close()
@@ -426,15 +425,15 @@ def main() -> int:
     """Run readiness gates followed by five direct RL and one qcompile canary."""
     args = parse_args()
     if os.name != "posix":
-        raise SystemExit("Il canary isolato richiede Linux/WSL.")
+        raise SystemExit('The isolated canary requires Linux/WSL.')
 
     version_errors = package_version_mismatches()
     if version_errors:
-        raise SystemExit(f"Versioni non conformi al protocollo v2: {version_errors}.")
+        raise SystemExit(f'Versions do not match the v2 protocol: {version_errors}.')
     try:
         circuit_name, qasm = training_qasm(args.circuit, args.source_manifest)
     except (FileNotFoundError, IndexError, KeyError, ValueError) as error:
-        raise SystemExit(f"Canary rifiutato: {error}") from error
+        raise SystemExit(f'Canary rejected: {error}') from error
     from mqt.bench.targets import get_device
 
     targets = {name: get_device(name) for name in FROZEN_DEVICES}
@@ -479,21 +478,21 @@ def main() -> int:
         report["status"] = "blocked_before_canary"
         report["target_drift"] = target_drift
         atomic_json_write(args.output, report)
-        print(f"Verifica bloccata; report: {args.output}")
+        print(f'Verification blocked; report: {args.output}')
         if artifact_problems:
-            print("Artefatti non pronti:")
+            print('Artifacts are not ready:')
             for problem in artifact_problems:
                 print(f"  - {problem}")
         if target_drift and not args.allow_target_drift:
             print(
-                "Target diversi dal protocollo: "
+                'Targets differ from the protocol: '
                 + ", ".join(target_drift)
-                + ". Usa --allow-target-drift solo dopo aver deciso come riallineare i competitor."
+                + '. Use --allow-target-drift only after deciding how to realign the compared systems.'
             )
         return 1
 
     for device_name in FROZEN_DEVICES:
-        print(f"Canary RL diretto: {device_name}")
+        print(f'Direct RL canary: {device_name}')
         result = run_isolated_canary(
             "rl",
             qasm,
@@ -502,7 +501,7 @@ def main() -> int:
             timeout=args.timeout,
         )
         report["results"].append(result)
-        print("  OK" if result["strict_success"] else "  FALLITO: " + "; ".join(result["problems"]))
+        print("  OK" if result["strict_success"] else '  FAILED: ' + "; ".join(result["problems"]))
 
     if not args.skip_qcompile:
         print("Canary end-to-end: qcompile")
@@ -514,7 +513,7 @@ def main() -> int:
             timeout=args.timeout,
         )
         report["results"].append(result)
-        print("  OK" if result["strict_success"] else "  FALLITO: " + "; ".join(result["problems"]))
+        print("  OK" if result["strict_success"] else '  FAILED: ' + "; ".join(result["problems"]))
 
     report["status"] = (
         "success"
@@ -522,7 +521,7 @@ def main() -> int:
         else "failed"
     )
     atomic_json_write(args.output, report)
-    print(f"Report canary: {args.output}")
+    print(f'Canary report: {args.output}')
     return 0 if report["status"] == "success" else 1
 
 

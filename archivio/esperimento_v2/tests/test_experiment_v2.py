@@ -116,7 +116,7 @@ class ExperimentV2Tests(unittest.TestCase):
                 json.dumps({"circuits": circuits}),
                 encoding="utf-8",
             )
-            with self.assertRaisesRegex(ValueError, "Leakage tra split"):
+            with self.assertRaisesRegex(ValueError, 'Cross-split leakage'):
                 verify_source_manifest(
                     manifest_path,
                     require_frozen_file_hash=False,
@@ -152,7 +152,7 @@ class ExperimentV2Tests(unittest.TestCase):
             }
             manifest_path = root / "v2.json"
             manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "non previsti"):
+            with self.assertRaisesRegex(ValueError, 'unexpected'):
                 verify_circuit_directory(
                     directory,
                     allowed_splits=("train",),
@@ -172,7 +172,7 @@ class ExperimentV2Tests(unittest.TestCase):
             allowed_split="train",
             manifest=manifest,
         )
-        with self.assertRaisesRegex(ValueError, "fuori split"):
+        with self.assertRaisesRegex(ValueError, 'outside the split'):
             assert_records_belong_to_split(
                 [{"split": "test", "source_sha256": "c" * 64}],
                 allowed_split="train",
@@ -196,7 +196,7 @@ class ExperimentV2Tests(unittest.TestCase):
 
     def test_v2_generation_rejects_a_different_execution_policy(self) -> None:
         catalog = load_catalog(V2_CATALOG)
-        with self.assertRaisesRegex(ValueError, "Politica di esecuzione"):
+        with self.assertRaisesRegex(ValueError, 'Execution policy'):
             generate_dataset(
                 "full",
                 catalog,
@@ -204,7 +204,7 @@ class ExperimentV2Tests(unittest.TestCase):
                 timeout_seconds=100,
                 split="train",
             )
-        with self.assertRaisesRegex(ValueError, "Politica di esecuzione"):
+        with self.assertRaisesRegex(ValueError, 'Execution policy'):
             generate_dataset(
                 "full",
                 catalog,
@@ -237,7 +237,7 @@ class ExperimentV2Tests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            with self.assertRaisesRegex(ValueError, "file congelato mancante"):
+            with self.assertRaisesRegex(ValueError, 'missing frozen file'):
                 validate_test_release_record(path)
 
     def test_v2_catalog_freezes_the_complete_stack_and_methodology(self) -> None:
@@ -404,7 +404,7 @@ class ExperimentV2Tests(unittest.TestCase):
             for index in range(88)
         ]
         circuits[1]["source_sha256"] = circuits[0]["source_sha256"]
-        with self.assertRaisesRegex(ValueError, "source_sha256 duplicati"):
+        with self.assertRaisesRegex(ValueError, 'Duplicate source_sha256'):
             split_circuits("validation", {"circuits": circuits})
 
     def test_qiskit_matrix_recomputes_run_and_summary_contracts(self) -> None:
@@ -558,7 +558,7 @@ class ExperimentV2Tests(unittest.TestCase):
 
         resume_contract = runs[0]["provenance"]["resume_contract_sha256"]
         runs[0]["provenance"]["resume_contract_sha256"] = "0" * 64
-        with self.assertRaisesRegex(ValueError, "Tentativo Qiskit v2"):
+        with self.assertRaisesRegex(ValueError, "Qiskit v2 attempt"):
             validate_qiskit_matrix(
                 runs,
                 summaries,
@@ -570,7 +570,7 @@ class ExperimentV2Tests(unittest.TestCase):
         runs[0]["provenance"]["resume_contract_sha256"] = resume_contract
 
         summaries[0]["ranking_score"] = 0.25
-        with self.assertRaisesRegex(ValueError, "non allineato ai raw run"):
+        with self.assertRaisesRegex(ValueError, 'differs from raw runs'):
             validate_qiskit_matrix(
                 runs,
                 summaries,
@@ -582,7 +582,7 @@ class ExperimentV2Tests(unittest.TestCase):
 
     def test_unconfigured_llm_models_block_protocol_freeze(self) -> None:
         validate_method_configuration(METHOD_CONFIG, require_frozen=False)
-        with self.assertRaisesRegex(ValueError, "non sono ancora congelati"):
+        with self.assertRaisesRegex(ValueError, 'are not frozen'):
             validate_method_configuration(METHOD_CONFIG, require_frozen=True)
 
     def test_frozen_llm_configuration_requires_real_budget_values(self) -> None:
@@ -642,7 +642,7 @@ class ExperimentV2Tests(unittest.TestCase):
             },
             "configuration": {"config_id": catalog.configurations[0].config_id},
         }
-        with self.assertRaisesRegex(ValueError, "v2 non conforme"):
+        with self.assertRaisesRegex(ValueError, 'v2 aggregate does not match'):
             validate_qiskit_matrix(
                 [],
                 [legacy_summary],

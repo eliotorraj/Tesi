@@ -1,4 +1,4 @@
-"""Report autonomo del recupero casuale: legge gli esiti, senza avviare prove."""
+'Standalone random retrieval report: reads outcomes without starting runs.'
 from __future__ import annotations
 import argparse
 import hashlib
@@ -24,7 +24,7 @@ def equal(actual, expected, label):
     else:
         ok = actual == expected
     if not ok:
-        raise ValueError(f"Riepilogo incoerente ({label}): {actual!r} != {expected!r}")
+        raise ValueError(f'Inconsistent summary ({label}): {actual!r} != {expected!r}')
 
 
 def validate_summary(saved, run):
@@ -49,7 +49,7 @@ def load_random(summary_path):
     summary_path = Path(summary_path).resolve()
     base = summary_path.parent.parent
     if summary_path.parent.name != "analisi" or base.name != METHOD:
-        raise ValueError("Il riepilogo deve appartenere ad analisi/ del metodo casuale.")
+        raise ValueError("The summary must belong to the random method's analisi/ directory.")
     saved = read(summary_path)
     contract_path = base/"contratto_congelato.json"
     contract = read(contract_path)
@@ -58,28 +58,28 @@ def load_random(summary_path):
     seed = contract["retrieval"]["seed"]
     for name, obj in (("contratto", contract), ("esecuzione", meta), ("riepilogo", saved)):
         if obj.get("method") != METHOD or obj.get("kind") != KIND:
-            raise ValueError("Identità errata: "+name)
+            raise ValueError('Incorrect identity: '+name)
     for obj in (meta, saved):
         if obj.get("seed") != seed or obj.get("contract_sha256") != contract_hash:
-            raise ValueError("Seme o contratto diverso dalla fonte congelata.")
+            raise ValueError('Seed or contract differs from the frozen source.')
     plan_path = AREA/"piano.json"
     plan = read(plan_path)
     if sha(plan_path) != contract["parent_plan_sha256"] or plan != contract["inputs"]["plan"]:
-        raise ValueError("Piano diverso dalla fonte congelata.")
+        raise ValueError('Plan differs from the frozen source.')
     if sha(SOURCE) != contract["inputs"]["source_sha256"]:
-        raise ValueError("Manifest diverso dalla fonte congelata.")
+        raise ValueError('Manifest differs from the frozen source.')
     expected = {r["circuit_id"]:r["source_sha256"] for r in read(SOURCE)["circuits"] if r["split"]=="test"}
     if len(expected) != plan["circuits"]:
-        raise ValueError("Numerosità del Test incoerente.")
+        raise ValueError('Inconsistent Test size.')
     policy = {k:v for k,v in contract["retrieval"].items() if k != "seed"}
     if policy.get("revision") != "random-examples-v1" or policy.get("k") != 5 or policy.get("sampling") != "uniform_without_replacement" or policy.get("distance") != "not_computed":
-        raise ValueError("Politica di recupero non supportata dal testo del report.")
+        raise ValueError('Retrieval policy is not supported by the report text.')
     run = load_run(base, expected, contract_hash, None, expected_kind=KIND)
     outcomes = {k:v for k,v in run["input_files"].items() if k.endswith("/esito.json")}
     if outcomes != saved.get("sources"):
-        raise ValueError("Gli esiti non corrispondono alle impronte del riepilogo richiesto.")
+        raise ValueError("Outcomes do not match the requested summary's fingerprints.")
     if len(run["rows"]) != len(expected) or len({r["circuit_id"] for r in run["rows"]}) != len(expected):
-        raise ValueError("Richiesto esattamente un esito per ogni circuito Test.")
+        raise ValueError('Exactly one outcome per Test circuit is required.')
     retrieval_rows = []
     for row in run["rows"]:
         path = base/row["episode_source"]
@@ -88,12 +88,12 @@ def load_random(summary_path):
                              sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()
         derived = int(hashlib.sha256(encoded).hexdigest(), 16)
         if retrieval.get("policy") != policy or retrieval.get("seed") != seed or retrieval.get("derived_seed") != derived or retrieval.get("source_sha256") != row["source_sha256"]:
-            raise ValueError("Registro del recupero incoerente: "+row["circuit_id"])
+            raise ValueError('Inconsistent retrieval record: '+row["circuit_id"])
         records = retrieval["records"]
         if (len(records)!=5 or len({r["rag_id"] for r in records})!=5
                 or [r["example_id"] for r in records]!=["E1","E2","E3","E4","E5"]
                 or any(r.get("distance") is not None for r in records)):
-            raise ValueError("Esempi o distanze incoerenti: "+row["circuit_id"])
+            raise ValueError('Inconsistent examples or distances: '+row["circuit_id"])
         retrieval_rows.extend(dict(circuit_id=row["circuit_id"], seed=seed,
             candidate_count=retrieval["candidate_count"], **r) for r in records)
     validate_summary(saved, run)
@@ -119,7 +119,7 @@ def build(summary_path=DEFAULT, output_root=None, compile_pdf=True):
         complete = read(output/"completato.json")
         if all((output/p).is_file() and sha(output/p)==v for p,v in complete["outputs"].items()) and (not compile_pdf or complete["pdf_available"]):
             return output
-        raise ValueError("Report concluso alterato o senza PDF: usare una diversa cartella --output.")
+        raise ValueError('Completed report changed or PDF missing: use a different --output directory.')
     output.mkdir(parents=True,exist_ok=True)
     write_json(output/"provenienza.json",provenance)
     snapshot = output/"generatore"
@@ -133,37 +133,43 @@ def build(summary_path=DEFAULT, output_root=None, compile_pdf=True):
     write_csv(dest/"tabelle/circuiti.csv",run["circuits"])
     write_csv(dest/"tabelle/esempi_recuperati.csv",run["retrieval_rows"])
     body = method_body(dest,run).replace(
-        "Il confronto completo documenta procedura, appaiamento e limiti comuni.",
-        "Questo report descrive soltanto il recupero casuale. Le ipotesi del modello non sono verificate e non vanno considerate affermazioni vere.")
-    body += r"\FloatBarrier\section{Provenienza e riproduzione}"+"\n"
-    body += "Identità dell’analisi: "+r"\nolinkurl{"+fingerprint+"}.\n\n"
-    body += ("Gli esiti dei 90 circuiti sono stati verificati rispetto alle impronte del riepilogo richiesto, "
-        "al manifest Test e al contratto separato. Il riepilogo è stato ricalcolato dagli esiti. "
-        "I 90 registri del recupero contengono ciascuno cinque identificativi distinti, con alias E1--E5, "
-        "seme coerente e distanza assente. Questa verifica dei registri non misura la qualità dei fatti.\n\n")
-    body += ("La cartella del report conserva provenienza.json, copia del generatore, CSV dei circuiti, "
-        "episodi ed esempi recuperati, grafici e sorgenti LaTeX. "
-        "I parametri effettivi delle chiamate e i metadati del server sono nella provenienza.\n\n")
-    body += "Dalla radice del progetto, per rigenerare il report:\n"
+        'The full comparison documents the procedure, pairing and shared limitations.',
+        "This report describes random retrieval only. The model's hypotheses are not verified and must not be treated as true statements.")
+    body += '\\FloatBarrier\\section{Provenance and reproduction}'+"\n"
+    body += 'Analysis identity: '+r"\nolinkurl{"+fingerprint+"}.\n\n"
+    body += ("""Outcomes for the 90 circuits were checked against fingerprints in the requested summary, the Test manifest and the separate contract. The summary was recomputed from outcomes. Each of the 90 retrieval records contains five distinct identifiers, with aliases E1--E5, a consistent seed and no distance. This record check does not measure fact quality.
+
+""")
+    body += ("""The report directory preserves provenienza.json, a generator copy, CSV files for circuits, episodes and retrieved examples, plots and LaTeX sources. Actual call parameters and server metadata are in the provenance.
+
+""")
+    body += """To regenerate the report from the repository root:
+
+"""
     body += r"\begin{quote}\small\texttt{.venv/bin/python} \nolinkurl{archivio/valutazione/test/report/genera_recupero_random.py}"+r"\end{quote}"+"\n"
-    body += "Per un altro riepilogo della stessa variante si usa l’opzione "+r"\texttt{--riepilogo}"+". Il comando legge soltanto i risultati e non avvia il Test.\n"
-    print("Compilazione report del recupero casuale",flush=True)
-    compile_document(dest,"Test: LLM + recupero casuale",body,compile_pdf, subtitle="Report indipendente sui 90 circuiti Test")
+    body += 'For another summary of the same variant, use the option '+r"\texttt{--riepilogo}"+""". The command reads results only and does not start the Test.
+
+"""
+    print('Compile the random retrieval report',flush=True)
+    compile_document(dest,'Test: LLM + random retrieval',body,compile_pdf, subtitle='Independent report on the 90 Test circuits')
     (output/"README.md").write_text(
-        "# Report indipendente: LLM + recupero casuale\n\n"
-        "[Apri il PDF](sistemi/llm_recupero_random/latex/verifica.pdf).\n\n"
-        "Estensione esplorativa con cinque esempi train e seme "+str(contract["retrieval"]["seed"])+
-        ". Il report non modifica il confronto originale.\n\n"
-        "Nella cartella sistemi/llm_recupero_random: riepilogo.json, tabelle CSV, grafici e sorgenti LaTeX. "
-        "Per includere risultati.tex nella tesi, caricare i pacchetti di preambolo.tex "
-        "e impostare TestReportPath alla cartella del sistema, con barra finale.\n",
+        """# Independent report: LLM + random retrieval
+
+[Open the PDF](sistemi/llm_recupero_random/latex/verifica.pdf).
+
+Exploratory extension with five train examples and seed """+str(contract["retrieval"]["seed"])+
+        """. The report does not change the original comparison.
+
+The sistemi/llm_recupero_random directory contains riepilogo.json, CSV tables, plots and LaTeX sources. To include risultati.tex in the thesis, load the packages in preambolo.tex and set TestReportPath to the system directory, with a trailing slash.
+
+""",
         encoding="utf-8")
-    # Non certificare un documento se le fonti sono cambiate durante la generazione.
+    # Do not certify a document if its sources changed during generation.
     after, _ = load_random(summary_path)
     if after["input_files"] != run["input_files"] or after["source"] != run["source"]:
-        raise RuntimeError("Fonti modificate durante la generazione.")
+        raise RuntimeError('Sources changed during generation.')
     if any(sha(HERE/name)!=value for name,value in sources.items()):
-        raise RuntimeError("Generatore modificato durante la generazione.")
+        raise RuntimeError('Generator changed during generation.')
     hashes = {str(p.relative_to(output)):sha(p) for p in sorted(output.rglob("*")) if p.is_file() and p.name!="completato.json"}
     write_json(output/"completato.json",dict(at=datetime.now(timezone.utc).isoformat(),
         fingerprint=fingerprint,pdf_available=compile_pdf,outputs=hashes))

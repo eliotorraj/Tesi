@@ -1,4 +1,4 @@
-"""Verifica il corpus congelato e prepara solo train/validation per il protocollo v2."""
+'Verify the frozen corpus and prepare train/validation only for protocol v2.'
 
 from __future__ import annotations
 
@@ -34,12 +34,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
-    """Legge le opzioni della preparazione senza aprire il test."""
+    'Read preparation options without opening Test.'
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--source-manifest",
         type=Path,
-        help="Manifest 1.0 da verificare; se omesso usa quello full congelato.",
+        help='Manifest 1.0 to check; defaults to the frozen full manifest.',
     )
     parser.add_argument(
         "--output-manifest",
@@ -49,18 +49,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--check-only",
         action="store_true",
-        help="Esegue tutti i controlli senza scrivere manifest o copie.",
+        help='Run all checks without writing manifests or copies.',
     )
     parser.add_argument(
         "--without-validation",
         action="store_true",
-        help="Materializza soltanto i 422 circuiti di training.",
+        help='Materialize only the 422 training circuits.',
     )
     return parser.parse_args()
 
 
 def atomic_json_write(path: Path, payload: dict[str, Any]) -> None:
-    """Scrive un JSON completo mediante rinomina atomica."""
+    'Write complete JSON through atomic rename.'
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -76,7 +76,7 @@ def materialize_split(
     split: str,
     destination: Path,
 ) -> int:
-    """Copia in modo atomico uno split e rifiuta file estranei o incoerenti."""
+    'Copy a split atomically and reject unrelated or inconsistent files.'
     records = [
         record
         for record in manifest["circuits"]
@@ -91,7 +91,7 @@ def materialize_split(
     )
     if unexpected:
         raise RuntimeError(
-            f"La directory {destination} contiene QASM fuori protocollo: {unexpected}."
+            f'The directory {destination} contains QASM outside the protocol: {unexpected}.'
         )
 
     for record in records:
@@ -100,13 +100,13 @@ def materialize_split(
         expected_sha256 = str(record["source_sha256"])
         if target.exists():
             if not target.is_file() or file_sha256(target) != expected_sha256:
-                raise RuntimeError(f"Copia esistente ma incoerente: {target}.")
+                raise RuntimeError(f'Existing copy is inconsistent: {target}.')
             continue
         temporary = target.with_name(f".{target.name}.{os.getpid()}.tmp")
         try:
             shutil.copy2(source, temporary)
             if file_sha256(temporary) != expected_sha256:
-                raise RuntimeError(f"Copia corrotta: {target}.")
+                raise RuntimeError(f'Corrupted copy: {target}.')
             os.replace(temporary, target)
         finally:
             temporary.unlink(missing_ok=True)
@@ -114,15 +114,15 @@ def materialize_split(
 
 
 def main() -> int:
-    """Verifica ambiente, Target, corpus e prepara le directory consentite."""
+    'Verify environment, Targets and corpus; prepare allowed directories.'
     args = parse_args()
     version_errors = package_version_mismatches()
     if version_errors:
         raise SystemExit(
-            "Versioni non conformi al lock 2.4.0:\n"
+            """Versions differ from the 2.4.0 lock:
+"""
             + "\n".join(
-                f"  - {name}: attesa={values['expected']}, "
-                f"osservata={values['observed']}"
+                f"  - {name}: expected={values['expected']}, observed={values['observed']}"
                 for name, values in sorted(version_errors.items())
             )
         )
@@ -133,10 +133,10 @@ def main() -> int:
     target_errors = frozen_target_mismatches(targets)
     if target_errors:
         raise SystemExit(
-            "Target diversi dal protocollo v2:\n"
+            """Targets differ from the v2 protocol:
+"""
             + "\n".join(
-                f"  - {name}: atteso={values['expected']}, "
-                f"osservato={values['observed']}"
+                f"  - {name}: expected={values['expected']}, observed={values['observed']}"
                 for name, values in sorted(target_errors.items())
             )
         )

@@ -1,4 +1,4 @@
-"""Griglia piccola comune; la selezione viene sigillata solo dopo le prove train."""
+'Small shared grid; selection is sealed only after train checks.'
 import copy
 CONFIGURATIONS = [
     {"id":"p0_t0","prompt_variant":"base","temperature":0.0},
@@ -14,7 +14,7 @@ FIXED = {
     "chat_template_kwargs":{"enable_thinking":False},
     "reasoning_effort":"none", "reasoning_format":"none",
 }
-# Limite operativo comune dal 14 settembre: il prototipo deve rispondere in minuti.
+# Shared operational limit since September 14: the prototype should respond within minutes.
 TIMEOUT_SECONDS = 3600
 MAX_ATTEMPTS = 3
 

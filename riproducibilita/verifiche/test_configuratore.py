@@ -1,7 +1,6 @@
-"""Controlli isolati del configuratore; nessun peso, training o server LLM reale.
+"""Isolated configurator checks without weights, training or a real LLM server.
 
-Eseguire da riproducibilita/: python -B -m unittest discover -s verifiche -p test_configuratore.py -v
-"""
+Run from riproducibilita/: python -B -m unittest discover -s verifiche -p test_configuratore.py -v"""
 from contextlib import redirect_stdout
 from copy import deepcopy
 from io import StringIO
@@ -80,7 +79,7 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual([x["config_id"] for x in c.load("prova")[1]["configurations"]], ["mia", "o3_default_default"])
 
     def test_add_model_hash_identity_and_preservation(self):
-        path = self.root / "file con spazi.gguf"; path.write_bytes(b"synthetic fixture, not real GGUF")
+        path = self.root / 'file with spaces.gguf'; path.write_bytes(b"synthetic fixture, not real GGUF")
         self.run_cli("aggiungi-modello", "prova", "locale", "--file", str(path), "--fonte", "fixture", "--revisione", "fixture-v1", "--precisione", "synthetic")
         self.run_cli("modelli", "prova", "locale")
         local = next(m for m in c.load("prova")[2]["models"] if m["id"] == "locale")
@@ -91,7 +90,7 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(local, next(m for m in c.load("prova")[2]["models"] if m["id"] == "locale"))
         path.write_bytes(b"changed")
         code, output = self.run_cli("verifica", "prova")
-        self.assertEqual(code, 2); self.assertIn("impronta registrata", output)
+        self.assertEqual(code, 2); self.assertIn('registered fingerprint', output)
 
     def test_freeze_guard_covers_external_output_and_duplication(self):
         config = c.read(c.config_path("prova"))
@@ -113,21 +112,21 @@ class ConfigurationTests(unittest.TestCase):
         work = self.root / "outside/esecuzioni/prova"
         with self.assertRaises(ValueError):
             with c.preparation_guard(c.config_path("prova"), cfg, work):
-                # La destinazione è persistita prima della creazione del contratto.
+                # Persist the destination before creating the contract.
                 self.assertEqual(c.read(c.config_path("prova").parent / ".congelato.json")["work"], str(work))
                 raise ValueError("preflight failure")
         self.run_cli("sistemi", "prova", "random")
         self.assertFalse(c.frozen("prova", c.load("prova")[0]))
-        # Simula un contratto lasciato da un processo terminato bruscamente.
+        # Simulate a contract left by a process that terminated abruptly.
         work.mkdir(parents=True)
         c.write_json(work / "contratto.json", {"fixture": True})
         with self.assertRaises(ValueError): self.run_cli("sistemi", "prova", "llm_rag")
 
     def test_missing_inputs_are_reported_together(self):
-        self.run_cli("circuiti", "prova", "--cartella", str(self.root / "nuovi circuiti"), "--crea")
+        self.run_cli("circuiti", "prova", "--cartella", str(self.root / 'new circuits'), "--crea")
         code, output = self.run_cli("verifica", "prova")
         self.assertEqual(code, 2)
-        self.assertTrue(all(name in output for name in ("train", "validation", "test", "GGUF mancante")))
+        self.assertTrue(all(name in output for name in ("train", "validation", "test", 'missing GGUF')))
         self.assertFalse(c.frozen("prova", c.load("prova")[0]))
 
     def test_concurrent_edit_and_invalid_names_are_rejected(self):
@@ -138,7 +137,7 @@ class ConfigurationTests(unittest.TestCase):
 
     def test_other_experiments_do_not_change_code_identity(self):
         env = {**os.environ, "RIPRO_CONFIG": str(c.config_path("prova")), "PYTHONDONTWRITEBYTECODE": "1"}
-        # Esegue il vero settings.py con KIT in una copia isolata, senza dipendenze scientifiche.
+        # Run the real settings.py against an isolated KIT copy without scientific dependencies.
         common = self.root / "comune"; common.mkdir()
         (common / "settings.py").write_bytes((self.original / "comune/settings.py").read_bytes())
         snippet = "import sys,json;sys.path.insert(0,sys.argv[1]);import settings;print(json.dumps(settings.code_identity(),sort_keys=True));print(settings.OUTPUT)"

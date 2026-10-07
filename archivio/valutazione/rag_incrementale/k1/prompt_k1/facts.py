@@ -1,4 +1,4 @@
-"""Contratto v4: fatti controllabili e ipotesi libera, senza score di valutazione."""
+'v4 contract: checkable facts and a free hypothesis, without evaluation scores.'
 from __future__ import annotations
 import copy
 import json
@@ -33,7 +33,7 @@ NOTE = (
 
 def response_schema(*, max_examples=1):
     if type(max_examples) is not int or max_examples != 1:
-        raise ValueError("Questo esperimento richiede k=1.")
+        raise ValueError('This experiment requires k=1.')
     schema = copy.deepcopy(SCHEMA)
     schema["properties"]["facts"]["items"]["properties"]["example_id"]["pattern"] = "^E1$"
     return schema

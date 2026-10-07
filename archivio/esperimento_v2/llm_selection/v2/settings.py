@@ -1,4 +1,4 @@
-"""Regole esplicite della seconda validation."""
+'Explicit rules for the second validation.'
 import copy
 from llm_selection.common import OUTPUT
 from llm_selection.configuration import FIXED, MAX_ATTEMPTS, TIMEOUT_SECONDS

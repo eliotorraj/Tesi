@@ -1,7 +1,5 @@
-# Strutture e operazioni del framework
+# Framework types and operations
 
-`models.py` definisce richieste, Target, esempi, raccomandazioni e artefatti di compilazione. `ports.py` descrive le interfacce delle operazioni. `adapters/` contiene le implementazioni concrete. `schema_validation.py` controlla il sottoinsieme JSON Schema impiegato dai contratti distribuiti.
+`models.py` defines requests, Targets, examples, recommendations and compilation artifacts. `ports.py` defines operation interfaces. [adapters/](adapters/README.md) implements them. `schema_validation.py` checks the supported JSON Schema subset; `errors.py` defines exceptions.
 
-L'esecuzione pubblica passa da `app.py` e usa RAG train, prompt TOON e facts v4. Le ulteriori interfacce Python non costituiscono comandi di avvio separati: partire dalla [mappa tecnica](../../docs/architettura_e_flusso.md) per capire quali vengono effettivamente chiamate.
-
-Questi moduli non avviano un addestramento MQT e non aprono il Test scientifico. Per nuove campagne usare [riproducibilita/](../../../riproducibilita/README.md).
+The public path starts in `app.py` and uses train retrieval, TOON and facts v4. Other Python interfaces are framework building blocks. See the [architecture guide](../../docs/architettura_e_flusso.md). New experimental campaigns belong in [riproducibilita/](../../../riproducibilita/README.md).

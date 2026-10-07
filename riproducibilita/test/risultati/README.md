@@ -1,5 +1,7 @@
-# Esiti e confronti Test
+# Test evaluation reference
 
-Piano congelato, risultati per metodo/circuito, eventuale oracle e report derivati. Ogni campagna crea una sottocartella con il proprio `experiment_id`.
+Test evaluates the fixed configuration selected on validation. The implementation supports method comparisons and an optional oracle.
 
-Questi contenuti sono generati dai comandi del kit, esclusi da Git e da salvare separatamente. Il clone conserva questo segnaposto. Non copiare qui risultati precedenti per presentarli come nuove misure e non riusare lo stesso identificativo dopo aver cambiato gli ingressi congelati.
+[Test commands and implementation](../README.md)
+
+[Toolkit guide](../../documentazione/guida.md)

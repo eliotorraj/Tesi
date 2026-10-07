@@ -1,4 +1,4 @@
-"""Verifica il codec reale e la conservazione dei dati attraverso Node/TOON."""
+'Verify the real codec and data preservation through Node/TOON.'
 import copy
 import json
 import unittest
@@ -80,7 +80,7 @@ class ToonTests(unittest.TestCase):
         prompt["previous_validation_errors"] = [{"code": "LLM_OUTPUT_DEVICE_NOT_ELIGIBLE", "path": "$.selected_device"}]
         text = messages(prompt, "base")[0]["content"]
         self.assertEqual(text.count(REPAIR_INSTRUCTION), 1)
-        self.assertIn("Dispositivo non ammesso", text)
+        self.assertIn('Device not allowed', text)
         empty = {"circuit": {"features": {"zero": 0.0}}, "retrieved_labeled_examples": [], "compatible_hardware": []}
         self.assertEqual(decode_view(encode_view(empty)), empty)
 

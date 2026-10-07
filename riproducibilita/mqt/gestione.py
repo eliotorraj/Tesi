@@ -1,4 +1,4 @@
-"""Prepara i modelli nel solo ambiente dedicato alla riproduzione."""
+'Prepare models only in the dedicated reproduction environment.'
 from pathlib import Path
 import sys, runpy
 import settings as s
@@ -6,7 +6,7 @@ import settings as s
 def own_environment():
     expected=(s.KIT/'.venv').resolve()
     if Path(sys.prefix).resolve()!=expected:
-        raise ValueError('Per addestrare/installare MQT usare '+str(expected/'bin/python')+'; il vecchio ambiente non viene modificato')
+        raise ValueError('To train/install MQT, use '+str(expected/'bin/python')+'; the previous environment is not modified')
 
 def hardware():
     from mqt.bench.targets import get_device
@@ -36,20 +36,20 @@ def assets():
         _,errors=validate_rl_training_metadata(p.with_suffix('.metadata.json'),device_name=device,model_sha256=s.sha(p),expected_max_steps=64,expected_num_timesteps=RL_FINAL_TIMESTEPS)
         if errors:raise ValueError(str(errors))
         runtime=get_path_trained_model()/p.name
-        if not runtime.is_file() or s.sha(runtime)!=s.sha(p):raise ValueError('Modello RL runtime non sincronizzato')
+        if not runtime.is_file() or s.sha(runtime)!=s.sha(p):raise ValueError('Runtime RL model is not synchronized')
         paths.extend([p,p.with_suffix('.metadata.json')])
     runtime=ml_path('expected_fidelity');canonical=s.MQT/'modelli'/runtime.name
     _,errors=validate_ml_classifier(canonical)
     if errors:raise ValueError(str(errors))
-    if not runtime.is_file() or s.sha(runtime)!=s.sha(canonical):raise ValueError('Selettore runtime non sincronizzato')
+    if not runtime.is_file() or s.sha(runtime)!=s.sha(canonical):raise ValueError('Runtime selector is not synchronized')
     meta=s.read(canonical.with_suffix('.metadata.json'))
-    if meta['source_manifest_sha256']!=s.sha(s.WORK/'manifest.json'):raise ValueError('Selettore di un altro corpus')
+    if meta['source_manifest_sha256']!=s.sha(s.WORK/'manifest.json'):raise ValueError('Selector belongs to another corpus')
     paths.extend([canonical,canonical.with_suffix('.metadata.json')])
     return {str(p.relative_to(s.MQT)):s.sha(p) for p in paths}
 
 
 def technical():
-    """Bell sintetico su ogni politica e sul selettore completo: nessun circuito Test."""
+    'Synthetic Bell checks for every policy and the complete selector; no Test circuits.'
     from processi import execute
     from qiskit_dataset.catalog import load_catalog
     import portalocker
@@ -63,7 +63,7 @@ def technical():
         for device in [*catalog.supported_device_ids,None]:
             name=device or 'selettore_completo'
             results[name]=execute(root/name,{'kind':'mqt','source':str(qasm),'seed':s.CONFIG['test_seed'],'device':device},catalog.execution_policy['timeout_seconds'])
-        if any(x['status']!='success' for x in results.values()):raise ValueError('Prove MQT non tutte riuscite; vedere '+str(root))
+        if any(x['status']!='success' for x in results.values()):raise ValueError('Not all MQT checks passed; see '+str(root))
         value={'assets':models,'sources':{name:s.sha(root/name/'result.json') for name in results},'directory':str(root)}
         s.same_or_save(s.MQT/'prove_tecniche/superate.json',value)
     return {'status':'passed','checks':len(results),'directory':str(root)}

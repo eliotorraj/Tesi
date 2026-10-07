@@ -1,7 +1,7 @@
-"""Configurazioni nominate: controlli, revisioni atomiche e tutela delle prove avviate.
+"""Named configurations: checks, atomic revisions and protection of prepared runs.
 
-Non importa settings: creare o leggere una configurazione non carica MQT e non
-richiede un esperimento già preparato. I percorsi interni sono relativi al kit.
+This module does not import settings: creating or reading a configuration does
+not load MQT or require a prepared experiment. Internal paths are toolkit-relative.
 """
 from contextlib import contextmanager
 from copy import deepcopy
@@ -19,15 +19,15 @@ import re
 KIT = Path(__file__).resolve().parents[1]
 NAMED = KIT / "configurazioni/esperimenti"
 METHODS = {
-    "llm_rag": "LLM con recupero dal Dataset train",
-    "llm_senza_rag": "LLM senza esempi recuperati",
-    "random": "scelta casuale di dispositivo e configurazione",
-    "llm_recupero_random": "LLM con esempi train estratti casualmente",
-    "mqt": "selettore MQT e politiche RL (richiede addestramento e prova Bell)",
-    "llm_rag_k1": "LLM con un esempio recuperato",
-    "llm_rag_k10": "LLM con dieci esempi recuperati",
-    "llm_wl": "recupero strutturale WL (richiede validation wl)",
-    "llm_wl_sintesi": "WL con sintesi del DAG nel prompt",
+    "llm_rag": 'LLM with retrieval from the train Dataset',
+    "llm_senza_rag": 'LLM without retrieved examples',
+    "random": 'random device and configuration selection',
+    "llm_recupero_random": 'LLM with randomly sampled train examples',
+    "mqt": 'MQT selector and RL policies (requires training and a Bell check)',
+    "llm_rag_k1": 'LLM with one retrieved example',
+    "llm_rag_k10": 'LLM with ten retrieved examples',
+    "llm_wl": 'WL structural retrieval (requires validation wl)',
+    "llm_wl_sintesi": 'WL with a DAG summary in the prompt',
 }
 PROFILES = {
     "cpu": dict(context=16384, batch_size=128, ubatch_size=64, gpu_layers=0, workers=1),
@@ -41,7 +41,7 @@ def read(path):
 
 def identifier(value):
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", value):
-        raise ValueError("Usare un nome che inizi con lettera o cifra, seguito da lettere, cifre, _, . o -")
+        raise ValueError('Use a name starting with a letter or digit, followed by letters, digits, _, . or -')
     return value
 
 
@@ -81,7 +81,7 @@ def load_path(path):
 def load(name):
     path = config_path(name)
     if not path.is_file():
-        raise ValueError(f"Esperimento {name!r} assente. Crearlo con: configura.py nuovo {name}")
+        raise ValueError(f'Experiment {name!r} is missing. Create it with: configura.py nuovo {name}')
     return load_path(path)
 
 
@@ -93,7 +93,7 @@ def locked(name):
         try:
             fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise ValueError("Un altro comando sta configurando o preparando questo esperimento") from exc
+            raise ValueError('Another command is configuring or preparing this experiment') from exc
         try:
             yield
         finally:
@@ -109,12 +109,12 @@ def frozen(name, config):
 
 def ensure_editable(name, config):
     if frozen(name, config):
-        raise ValueError(f"{name} è già stato preparato. Conservare i risultati e usare: configura.py duplica {name} NUOVO_NOME")
+        raise ValueError(f'{name} has already been prepared. Preserve results and use: configura.py duplica {name} NEW_NAME')
 
 
 @contextmanager
 def preparation_guard(path, config, work):
-    """Blocca le modifiche concorrenti e ricorda anche una radice --output esterna."""
+    'Prevent concurrent edits and remember external --output roots.'
     path = Path(path).resolve()
     if path.parent.parent != NAMED.resolve() or path.name != "esperimento.json":
         yield
@@ -122,14 +122,14 @@ def preparation_guard(path, config, work):
     name = path.parent.name
     with locked(name):
         if read(path) != config:
-            raise ValueError("Configurazione cambiata durante l'avvio: ripetere il comando")
+            raise ValueError('Configuration changed during startup: repeat the command')
         marker = path.parent / ".congelato.json"
         if marker.exists():
             previous = Path(read(marker)["work"])
             if previous != work and (previous / "contratto.json").exists():
-                raise ValueError("Esperimento già preparato in un'altra destinazione; duplicarlo con un nuovo nome")
-        # Ricorda l'output prima di iniziare, anche se il processo viene terminato
-        # senza eseguire finally. Il blocco scatta soltanto quando esiste il contratto.
+                raise ValueError('Experiment already prepared in another destination; duplicate it under a new name')
+        # Remember the output before starting, even if the process is terminated
+        # without running finally. Lock edits only once the contract exists.
         temporary = marker.with_name(".pending-" + uuid4().hex)
         write_json(temporary, {"work": str(work), "config_sha256": file_hash(path)})
         os.replace(temporary, marker)
@@ -146,85 +146,85 @@ def write_json(path, value):
 
 def positive(value, label, minimum=1):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < minimum:
-        raise ValueError(f"{label}: richiesto un valore finito >= {minimum}")
+        raise ValueError(f'{label}: requires a finite value >= {minimum}')
 
 
 def distinct(values, label):
     if not values or len(values) != len(set(values)):
-        raise ValueError(f"{label}: fornire almeno un valore, senza duplicati")
+        raise ValueError(f'{label}: provide at least one value, without duplicates')
 
 
 def validate(config, catalog, registry):
     identifier(config["experiment_id"])
-    distinct(config["test_methods"], "Sistemi")
+    distinct(config["test_methods"], 'Methods')
     unknown = set(config["test_methods"]) - METHODS.keys()
     if unknown:
-        raise ValueError("Sistemi sconosciuti: " + ", ".join(sorted(unknown)))
+        raise ValueError('Unknown methods: ' + ", ".join(sorted(unknown)))
     if config["retrieval_k"] not in (1, 5, 10):
-        raise ValueError("Il recupero supporta k=1, 5 o 10")
+        raise ValueError('Retrieval supports k=1, 5 or 10')
     if config["validation_criterion"] not in ("median_regret", "mean_regret"):
-        raise ValueError("Criterio validation non supportato")
+        raise ValueError('Unsupported validation criterion')
     for key in ("seed", "test_seed", "random_seed"):
         if type(config[key]) is not int or not 0 <= config[key] <= 2**32 - 1:
-            raise ValueError(key + ": richiesto un intero tra 0 e 2^32-1")
-    positive(config["rl_timesteps"], "Passi RL")
-    distinct(config["wl_iterations"], "Profondità WL")
+            raise ValueError(key + ': requires an integer between 0 and 2^32-1')
+    positive(config["rl_timesteps"], 'RL timesteps')
+    distinct(config["wl_iterations"], 'WL depth')
     for h in config["wl_iterations"]:
-        positive(h, "Profondità WL")
+        positive(h, 'WL depth')
     devices = catalog["supported_device_ids"]
-    distinct(devices, "Dispositivi")
+    distinct(devices, 'Devices')
     supported = read(KIT / "configurazioni/catalogo.json")["supported_device_ids"]
     if set(devices) - set(supported):
-        raise ValueError("Target non previsto dagli schemi: occorre estendere anche codice e schemi")
+        raise ValueError('Target not supported by the schemas: extend both code and schemas')
     if catalog["default_device_id"] not in devices or set(catalog["target_sha256"]) != set(devices):
-        raise ValueError("Dispositivo predefinito o impronte incoerenti con il catalogo")
+        raise ValueError('Default device or fingerprints are inconsistent with the catalog')
     seeds = catalog["seeds"]
     if len(seeds) != 3 or len(set(seeds)) != 3 or any(type(x) is not int or not 0 <= x <= 2**32 - 1 for x in seeds):
-        raise ValueError("Il protocollo richiede tre seed di compilazione distinti tra 0 e 2^32-1")
+        raise ValueError('The protocol requires three distinct compilation seeds between 0 and 2^32-1')
     for key, value in catalog["execution_policy"].items():
         positive(value, key)
     configs = catalog["configurations"]
-    distinct([c["config_id"] for c in configs], "Configurazioni Qiskit")
-    distinct([(c["optimization_level"], c["layout_method"], c["routing_method"]) for c in configs], "Combinazioni Qiskit")
+    distinct([c["config_id"] for c in configs], 'Qiskit configurations')
+    distinct([(c["optimization_level"], c["layout_method"], c["routing_method"]) for c in configs], 'Qiskit combinations')
     for c in configs:
         identifier(c["config_id"])
         if len(c["config_id"]) > 64:
-            raise ValueError("ID configurazione Qiskit troppo lungo: massimo 64 caratteri")
+            raise ValueError('Qiskit configuration ID is too long: maximum 64 characters')
         if c["optimization_level"] not in (2, 3) or c["layout_method"] not in (None, "sabre", "dense", "trivial") or c["routing_method"] not in (None, "sabre", "lookahead", "basic") or c["study"] not in ("baseline", "layout", "routing"):
-            raise ValueError("Opzioni Qiskit non previste dagli schemi del kit")
+            raise ValueError('Qiskit options unsupported by the toolkit schemas')
     models = registry["models"]
-    distinct([m["id"] for m in models], "Modelli")
+    distinct([m["id"] for m in models], 'Models')
     if not any(m.get("enabled", True) for m in models):
-        raise ValueError("Selezionare almeno un LLM per la validation")
+        raise ValueError('Select at least one LLM for validation')
     for m in models:
         identifier(m["id"])
         for key in ("context", "max_output_tokens", "timeout"):
             positive(m[key], m["id"] + ": " + key)
         if m["max_output_tokens"] >= m["context"]:
-            raise ValueError("Il budget di risposta deve essere minore del contesto: " + m["id"])
+            raise ValueError('The response budget must be smaller than the context: ' + m["id"])
         temperatures = m.get("temperatures", config["temperatures"])
         distinct(temperatures, "Temperature")
         for t in temperatures:
-            positive(t, "Temperatura", 0)
+            positive(t, 'Temperature', 0)
         if m.get("sha256") and not re.fullmatch(r"[0-9a-f]{64}", m["sha256"]):
-            raise ValueError("SHA-256 non valido: " + m["id"])
+            raise ValueError('Invalid SHA-256: ' + m["id"])
         url = urlparse(m["url"])
         if url.scheme != "http" or url.hostname not in ("localhost", "127.0.0.1") or not url.port or url.username or url.password or url.path not in ("", "/") or url.query or url.fragment:
-            raise ValueError("Il server deve avere un URL come http://127.0.0.1:8089")
+            raise ValueError('The server needs a URL such as http://127.0.0.1:8089')
         if m.get("transport", "native") not in ("native", "windows"):
-            raise ValueError("Trasporto ammesso: native o windows")
+            raise ValueError('Allowed transport: native or windows')
         server = m.get("server", {})
         for key in ("threads", "batch_size", "ubatch_size"):
             positive(server.get(key, 1), key)
-        positive(server.get("gpu_layers", 999), "Strati GPU", 0)
+        positive(server.get("gpu_layers", 999), 'GPU layers', 0)
         if server.get("ubatch_size", 128) > server.get("batch_size", 512):
-            raise ValueError("Microbatch maggiore del batch: " + m["id"])
+            raise ValueError('Microbatch exceeds batch size: ' + m["id"])
         if server.get("gpu_layers") == 0 and server.get("device") not in (None, "none"):
-            raise ValueError("Con zero strati GPU il dispositivo deve essere none")
+            raise ValueError('With zero GPU layers, the device must be none')
 
 
 def publish(name, bundle, action):
-    """Nuovi file immutabili, poi sostituzione atomica del solo punto d'ingresso."""
+    'Write new immutable files, then atomically replace only the entry point.'
     config, catalog, registry = deepcopy(bundle)
     config["experiment_id"] = name
     catalog.update(experiment_id=name, catalog_id=name + "-qiskit")
@@ -260,10 +260,10 @@ def apply_profile(bundle, profile):
 
 
 def select_models(registry, names):
-    distinct(names, "Modelli")
+    distinct(names, 'Models')
     missing = set(names) - {m["id"] for m in registry["models"]}
     if missing:
-        raise ValueError("Prima registrare con aggiungi-modello: " + ", ".join(sorted(missing)))
+        raise ValueError('Register first with aggiungi-modello: ' + ", ".join(sorted(missing)))
     for model in registry["models"]:
         model["enabled"] = model["id"] in names
 
@@ -271,7 +271,7 @@ def select_models(registry, names):
 def create(name, profile="cpu", models=("qwen",), systems=("llm_rag", "llm_senza_rag", "random"), source=None):
     with locked(name):
         if config_path(name).exists():
-            raise ValueError("Nome già presente; scegliere un nuovo nome o usare duplica")
+            raise ValueError('Name already exists; choose a new name or use duplica')
         bundle = load(source) if source else load_path(KIT / "configurazioni/esperimento.json")
         if not source:
             apply_profile(bundle, profile)

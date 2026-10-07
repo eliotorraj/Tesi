@@ -1,4 +1,4 @@
-"""Controlli dei confronti appaiati e delle figure; nessuna inferenza."""
+'Paired-comparison and figure checks without inference.'
 from comune import *
 import unittest
 import tempfile
@@ -23,7 +23,7 @@ class ReportTests(unittest.TestCase):
         baseline = comparison["summary"][0]
         self.assertEqual(baseline["n_common"], 46)
         self.assertEqual(baseline["complete_references"]+baseline["partial_references"], 46)
-        # Cambiare l'ordine di presentazione dei registri non cambia gli abbinamenti.
+        # Changing record presentation order does not change pairings.
         shuffled = copy.deepcopy(self.data)
         for item in shuffled["orders"].values():
             item["rows"].reverse()
@@ -63,8 +63,8 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(len((output/"confronti_appaiati.csv").read_text().splitlines()), 7)
             tex = (output/"rapporto.tex").read_text()
             self.assertNotIn("@@", tex)
-            self.assertIn("DATI SINTETICI", tex)
-            self.assertIn("50 circuiti Test QASMBench", tex)
+            self.assertIn('SYNTHETIC DATA', tex)
+            self.assertIn('50 Test circuits from QASMBench', tex)
 
     def test_oracle_summary_tampering_is_rejected(self):
         if str(REPO) not in sys.path:
@@ -79,7 +79,7 @@ class ReportTests(unittest.TestCase):
                     {"identity": {}, "identity_sha256": "fixture"}, {}, [], [], {}, 0)), \
                  patch.object(analizza, "audit_rag", return_value=({}, {}, {})), \
                  patch.object(analizza, "build_rows", return_value=[]):
-                with self.assertRaisesRegex(ValueError, "diverso dagli esiti"):
+                with self.assertRaisesRegex(ValueError, 'differs from original outcomes'):
                     self.charts.load_reference(path, [])
 
 

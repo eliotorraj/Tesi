@@ -1,4 +1,4 @@
-"""Rigenera rapporti e confronto dai risultati esistenti; non esegue metodi."""
+'Regenerate reports and comparison from existing results without running methods.'
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parent/"strumenti"))
@@ -15,7 +15,7 @@ def main():
             runs[method]={r["circuit_id"]:r for r in (read(p) for p in (base/"circuiti").glob("*/esito.json"))}
     contracts={read(AREA/"risultati"/m/"esecuzione.json")["contract_sha256"] for m in runs}
     if len(contracts)>1:
-        raise ValueError("Contratti diversi: confronto rifiutato.")
+        raise ValueError('Contracts differ: comparison rejected.')
     comparisons=[]
     for other in METHODS[1:]:
         left,right=runs.get("llm_rag",{}),runs.get(other,{})

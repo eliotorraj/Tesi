@@ -1,26 +1,7 @@
-# Verifiche sintetiche del Test
+# Evaluation software checks
 
-Queste prove controllano il software con circuiti tecnici, dati artificiali e
-risposte simulate. Non avviano Qwen, non valutano il corpus Test e non
-addestrano i modelli di confronto.
+`test_indipendenti.py` checks isolation, resume and metrics; `test_server.py` checks model/server identity; `test_trasporto.py` covers transport failures; `test_percorsi.py` covers layouts and source contracts. Retrieval variants have dedicated `test_numero_esempi.py`, `test_recupero_random.py` and `test_dag_wl.py`.
 
-- `test_indipendenti.py`: isolamento dei metodi, ripresa, errori, metriche e score.
-- `test_server.py`: requisiti del server e identità del modello.
-- `test_trasporto.py`: errori nelle chiamate e conservazione dei registri.
-- `test_percorsi.py`: separazione delle cartelle, chiavi storiche degli hash e
-  rifiuto di ripresa con codice diverso dal contratto congelato.
+Using the configured Python 3.12 environment, run the family from the repository root with `python -m unittest discover -s archivio/valutazione/test/verifiche -v`. Tests use technical circuits and simulated responses without opening a new scientific campaign. Report-generator checks are in the sibling `report/verifiche/` directory.
 
-Dalla radice del repository:
-
-```bash
-.venv/bin/python -m unittest discover -s archivio/valutazione/test/verifiche -v
-```
-
-I risultati sperimentali esistenti non devono cambiare durante queste prove.
-Le verifiche del generatore dei report sono nella cartella sorella
-`report/verifiche/`.
-
-`test_numero_esempi.py` verifica su Bell il recupero a 1 e 10 esempi,
-l'ordine Manhattan, i riferimenti E10, la codifica TOON, le correzioni,
-i token e l'isolamento delle campagne. Le risposte LLM e la compilazione
-sono simulate; nessun circuito Test reale viene eseguito.
+[Parent directory](../README.md) · [Current repository guide](../../../../README.md)

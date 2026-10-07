@@ -51,12 +51,12 @@ def parse_args() -> argparse.Namespace:
         "--component",
         choices=("all", "rl", "ml"),
         default="all",
-        help="Limita l'operazione alle policy RL o al selettore ML.",
+        help='Restrict the operation to RL policies or the ML selector.',
     )
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     if args.action == "verify" and args.overwrite:
-        parser.error("--overwrite non è valido con verify.")
+        parser.error('--overwrite is invalid with verify.')
     return args
 
 
@@ -100,17 +100,17 @@ def atomic_copy(source: Path, destination: Path, kind: ArtifactKind, overwrite: 
     """Validate and atomically copy one artifact, refusing silent replacement."""
     errors = validation_errors(source, kind)
     if errors:
-        raise ValueError(f"Artefatto sorgente non valido: {source}: {'; '.join(errors)}")
+        raise ValueError(f"Invalid source artifact: {source}: {'; '.join(errors)}")
 
     source_digest = file_sha256(source)
     if destination.exists():
         destination_digest = file_sha256(destination)
         if source_digest == destination_digest:
-            print(f"Identico, salto: {destination}")
+            print(f'Identical, skipping: {destination}')
             return False
         if not overwrite:
             raise FileExistsError(
-                f"Artefatto diverso già presente: {destination}. Usa --overwrite."
+                f'A different artifact already exists: {destination}. Use --overwrite.'
             )
 
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -119,7 +119,7 @@ def atomic_copy(source: Path, destination: Path, kind: ArtifactKind, overwrite: 
     try:
         shutil.copy2(source, temporary)
         if file_sha256(temporary) != source_digest:
-            raise OSError(f"Hash diverso dopo la copia temporanea: {temporary}")
+            raise OSError(f'Hash differs after temporary copy: {temporary}')
         temporary.replace(destination)
     finally:
         temporary.unlink(missing_ok=True)
@@ -127,10 +127,10 @@ def atomic_copy(source: Path, destination: Path, kind: ArtifactKind, overwrite: 
     destination_errors = validation_errors(destination, kind)
     if destination_errors:
         raise ValueError(
-            f"Artefatto copiato ma non valido: {destination}: "
+            f'Copied artifact is invalid: {destination}: '
             + "; ".join(destination_errors)
         )
-    print(f"Copiato: {source} -> {destination}")
+    print(f'Copied: {source} -> {destination}')
     return True
 
 
@@ -145,8 +145,7 @@ def verify_pair(pair: ArtifactPair) -> list[str]:
         runtime_digest = file_sha256(pair.runtime)
         if canonical_digest != runtime_digest:
             errors.append(
-                "hash differenti: "
-                f"canonico={canonical_digest}, runtime={runtime_digest}"
+                f'hashes differ: canonical={canonical_digest}, runtime={runtime_digest}'
             )
         elif pair.kind == "rl":
             device_name = next(
@@ -161,21 +160,21 @@ def verify_pair(pair: ArtifactPair) -> list[str]:
                 expected_max_steps=64,
                 expected_num_timesteps=RL_FINAL_TIMESTEPS,
             )
-            errors.extend(f"metadati: {message}" for message in provenance_errors)
+            errors.extend(f'metadata: {message}' for message in provenance_errors)
         else:
             _metadata, provenance_errors = validate_ml_training_metadata(
                 pair.canonical.with_suffix(".metadata.json"),
                 model_sha256=canonical_digest,
             )
-            errors.extend(f"metadati: {message}" for message in provenance_errors)
+            errors.extend(f'metadata: {message}' for message in provenance_errors)
     return errors
 
 
 def canonical_provenance_errors(pair: ArtifactPair) -> list[str]:
-    """Valida i metadati canonici anche quando la copia runtime è assente."""
+    'Validate canonical metadata even when the runtime copy is missing.'
     structural = validation_errors(pair.canonical, pair.kind)
     if structural:
-        return [f"canonico: {message}" for message in structural]
+        return [f'canonical: {message}' for message in structural]
     digest = file_sha256(pair.canonical)
     if pair.kind == "rl":
         device_name = next(
@@ -195,7 +194,7 @@ def canonical_provenance_errors(pair: ArtifactPair) -> list[str]:
             pair.canonical.with_suffix(".metadata.json"),
             model_sha256=digest,
         )
-    return [f"metadati: {message}" for message in errors]
+    return [f'metadata: {message}' for message in errors]
 
 
 def main() -> int:
@@ -204,8 +203,7 @@ def main() -> int:
     pairs = artifact_pairs(args.directory, args.component)
     if args.action == "capture":
         raise SystemExit(
-            "Il protocollo v2 non cattura modelli dal runtime: la copia canonica "
-            "con metadati deve essere prodotta dai trainer del repository."
+            'Protocol v2 does not capture models from the runtime: repository trainers must produce canonical copies with metadata.'
         )
 
     if args.action == "verify":
@@ -214,14 +212,14 @@ def main() -> int:
             errors = verify_pair(pair)
             if errors:
                 failed += 1
-                print(f"ERRORE {pair.name}: " + "; ".join(errors))
+                print(f'ERROR {pair.name}: ' + "; ".join(errors))
             else:
                 digest = file_sha256(pair.canonical)
                 print(f"OK {pair.name}: sha256={digest}")
         if failed:
-            print(f"Verifica fallita: {failed}/{len(pairs)} artefatti non conformi.")
+            print(f'Verification failed: {failed}/{len(pairs)} nonconforming artifacts.')
             return 1
-        print(f"Verifica completata: {len(pairs)}/{len(pairs)} artefatti conformi.")
+        print(f'Verification completed: {len(pairs)}/{len(pairs)} conforming artifacts.')
         return 0
 
     copied = 0
@@ -230,7 +228,7 @@ def main() -> int:
             provenance_errors = canonical_provenance_errors(pair)
             if provenance_errors:
                 raise ValueError(
-                    f"Artefatto canonico non installabile: {pair.canonical}: "
+                    f'Canonical artifact cannot be installed: {pair.canonical}: '
                     + "; ".join(provenance_errors)
                 )
             source, destination = (
@@ -243,8 +241,7 @@ def main() -> int:
         raise SystemExit(str(error)) from error
 
     print(
-        f"Sincronizzazione {args.action} completata; "
-        f"file copiati: {copied}/{len(pairs)}."
+        f'Synchronization {args.action} completed; files copied: {copied}/{len(pairs)}.'
     )
     return 0
 
