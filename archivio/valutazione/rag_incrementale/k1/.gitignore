@@ -1,0 +1,4 @@
+.campaign.lock
+__pycache__/
+*.pyc
+verifiche_sviluppo/temporanei/

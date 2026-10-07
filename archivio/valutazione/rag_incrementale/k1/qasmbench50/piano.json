@@ -1,0 +1,55 @@
+{
+  "revision": "qasmbench50-rag-k1-v1",
+  "metric": "expected_fidelity",
+  "initial_examples": 396,
+  "circuits": 50,
+  "k": 1,
+  "order_ids": [
+    "01_manifest",
+    "02_inverso",
+    "03_casuale_20261002",
+    "04_casuale_20261003"
+  ],
+  "compilation_timeout_seconds": 100,
+  "llm_timeout_seconds": 3600,
+  "qiskit_seed": 0,
+  "max_completed_llm_attempts": 3,
+  "temperature": 0,
+  "context": 60000,
+  "retrieval": {
+    "distance": "Manhattan",
+    "precision": "float64",
+    "normalization": "frozen_train_log1p_maxabs",
+    "tie_break": "rag_id",
+    "pool": "initial_train_plus_successful_committed_past_observations",
+    "exclude": "current_source_sha256",
+    "quota": null,
+    "fixed_pool": "initial_train_only"
+  },
+  "admission": {
+    "requires": "successful_validated_compilation_and_finite_score",
+    "score_threshold": null,
+    "deduplication": "source_sha256",
+    "copies_hypothesis": false
+  },
+  "resumption": "preserve_terminal_outcomes; unfinished_started_step_becomes_interrupted; no_retry",
+  "reference": "new_fixed_rag_k1",
+  "oracle": "report_only; never_for_admission_retrieval_or_decision",
+  "note": "Cinque nuove esecuzioni k=1 sugli stessi 50 circuiti: RAG fisso e quattro ordini incrementali indipendenti.",
+  "experiment_id": "qasmbench50_rag_k1_v1",
+  "source": "QASMBench 357b942396d5c2b7cbc1c229c585a6ef5ccaebac",
+  "size_groups": {
+    "small": 30,
+    "medium": 15,
+    "large": 5
+  },
+  "systems": [
+    "00_rag_fisso",
+    "01_manifest",
+    "02_inverso",
+    "03_casuale_20261002",
+    "04_casuale_20261003"
+  ],
+  "baseline_order": "manifest",
+  "benchmark": "qasmbench50"
+}

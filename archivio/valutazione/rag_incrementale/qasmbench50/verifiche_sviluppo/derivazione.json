@@ -1,0 +1,47 @@
+{
+  "kind": "source_derivation",
+  "from": "MQT Bench incremental procedure",
+  "files": {
+    "comune.py": {
+      "source": "archivio/valutazione/rag_incrementale/comune.py",
+      "sha256": "82b87cc87bd7bbfef71f005942d9a9891de4fa61cfdb9265cb21929390282bfa"
+    },
+    "memoria.py": {
+      "source": "archivio/valutazione/rag_incrementale/memoria.py",
+      "sha256": "9afdf8cea350df48a47ed476d98d3737fce3e76c2900841f7a443e48a25f7f5a"
+    },
+    "adattatore.py": {
+      "source": "archivio/valutazione/rag_incrementale/adattatore.py",
+      "sha256": "0dc36f81e3965d33ba7d31200c105322961002a32e0618c6fd9e01c0844db55d"
+    },
+    "registro.py": {
+      "source": "archivio/valutazione/rag_incrementale/registro.py",
+      "sha256": "422d13580af33b7ce4ebb9a25a89805c968e8c1c02f42362afb45647c19538d3"
+    },
+    "esperimento.py": {
+      "source": "archivio/valutazione/rag_incrementale/esperimento.py",
+      "sha256": "a7f038cfce7b3d3645697fafb15220f3becf9fbdb3a9f39f6cf6953fe42f41fc"
+    },
+    "test_incrementale.py": {
+      "source": "archivio/valutazione/rag_incrementale/test_incrementale.py",
+      "sha256": "f84245027cea9dbabc303f97dc4bef8828bd65f34af9d2175fae7a4a4a0e6982"
+    },
+    "piano.json": {
+      "source": "archivio/valutazione/rag_incrementale/piano.json",
+      "sha256": "fd50ae6c6f5ec798e534714ae1778060b5406cd949807e37bbbaf25eeaf4ae55"
+    },
+    ".gitignore": {
+      "source": "archivio/valutazione/rag_incrementale/.gitignore",
+      "sha256": "ae4a12a0786c1c74156db4f0931be1816f390d0247e2698d49a9d648a8ce1656"
+    },
+    "report/genera.py": {
+      "source": "archivio/valutazione/rag_incrementale/report/genera.py",
+      "sha256": "923e633940e0cdeb36326aa41c98dd6b1c2d3b607dec0063ca7752b4e68353a7"
+    },
+    "verifica_report.py": {
+      "source": "archivio/valutazione/rag_incrementale/verifica_report.py",
+      "sha256": "07191290593df92381f8b1313a61773de688f4e60d25d7c651fd6b7a336178ca"
+    }
+  },
+  "note": "Copie autonome per mantenere immutati codice e contratti MQT Bench."
+}

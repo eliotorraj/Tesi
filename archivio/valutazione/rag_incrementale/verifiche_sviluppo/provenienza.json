@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-10-02T16:15:40.723167+00:00",
+  "kind": "delivery_provenance_not_experimental_results",
+  "source_files": {
+    "README.md": "5b92a85a42be5f8390cd964837642f4526af1f18ad1bc44af0ffd4bf795b1582",
+    "adattatore.py": "0dc36f81e3965d33ba7d31200c105322961002a32e0618c6fd9e01c0844db55d",
+    "comune.py": "82b87cc87bd7bbfef71f005942d9a9891de4fa61cfdb9265cb21929390282bfa",
+    "esperimento.py": "a7f038cfce7b3d3645697fafb15220f3becf9fbdb3a9f39f6cf6953fe42f41fc",
+    "memoria.py": "9afdf8cea350df48a47ed476d98d3737fce3e76c2900841f7a443e48a25f7f5a",
+    "ordinamenti/01_manifest/avvia.py": "1873d5bd9541621268d4854f3086e658dc6ed842352b02e3ef09872c70ed37a0",
+    "ordinamenti/02_inverso/avvia.py": "2211d3ba887e5e3d1e6e04404f04f64190aff7b36e8460fbcadc8887c6b1c3e4",
+    "ordinamenti/03_casuale_20261002/avvia.py": "fba12915291a8825f6e068df3690ce5168b341e5463336a8f0a332a5bc2a024f",
+    "ordinamenti/04_casuale_20261003/avvia.py": "31c47edf0f4f93bcbdb747ee14f71b3ae635efbf4790e27c25b1bff9b6d0710b",
+    "piano.json": "fd50ae6c6f5ec798e534714ae1778060b5406cd949807e37bbbaf25eeaf4ae55",
+    "protocollo.md": "a09fad2151c34588aef7ac130d1afdb84e8f1f1eab02a170b3457e993273c56d",
+    "registro.py": "422d13580af33b7ce4ebb9a25a89805c968e8c1c02f42362afb45647c19538d3",
+    "report/README.md": "4a96c22e56d60599463840f560641557c7b714dc86398cc96c945b4cfc397d02",
+    "report/genera.py": "923e633940e0cdeb36326aa41c98dd6b1c2d3b607dec0063ca7752b4e68353a7",
+    "test_incrementale.py": "f84245027cea9dbabc303f97dc4bef8828bd65f34af9d2175fae7a4a4a0e6982",
+    "verifica_report.py": "07191290593df92381f8b1313a61773de688f4e60d25d7c651fd6b7a336178ca",
+    "verifiche_sviluppo/README.md": "18c485a926300f89fa221f8d14e7f25d517213ef94793a194e5c498ae6273c84",
+    "verifiche_sviluppo/verifiche.json": "64e2a49c40e5bcf1f8679c2983c52677a8a3b653dd7578e9d77df0c58ce306b4"
+  },
+  "prepared_contracts": {
+    "ordinamenti/01_manifest/campagne/mqtbench90_incrementale_v1/contratto.json": "f9db8716402fb43302ee719002e0dc4e14ac10741fa8fdccccc92c5b9eda1b6a",
+    "ordinamenti/02_inverso/campagne/mqtbench90_incrementale_v1/contratto.json": "95847afa9d3b6f607b77cc40a84a186e31fbdbcdf8367ab80f2d1e99c6988d13",
+    "ordinamenti/03_casuale_20261002/campagne/mqtbench90_incrementale_v1/contratto.json": "f7ff3586fb049d6a0657143a1dd678aa5e150703f1fa184faffc5bd144d6e7a3",
+    "ordinamenti/04_casuale_20261003/campagne/mqtbench90_incrementale_v1/contratto.json": "1cf5965e3785afc665335a033acd72065de16cbb02d0d3f1fe44608494133a2e"
+  },
+  "ast_files_checked": 12,
+  "trailing_whitespace": [],
+  "experimental_outcomes": 0
+}

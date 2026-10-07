@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+rag_fisso/campagne/
+ordinamenti/*/campagne/
+report/risultati/
+verifiche_sviluppo/temporanei/

@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-02T21:21:11.307181+00:00",
+  "kind": "delivery_provenance_not_experimental_results",
+  "files": {
+    ".gitignore": "ae4a12a0786c1c74156db4f0931be1816f390d0247e2698d49a9d648a8ce1656",
+    "README.md": "33c5171baf0ec2e56fb3f311e804e6ca1d318a87d3ab36b080068698aab72175",
+    "adattatore.py": "4068c27360122c1a369b67233833258fb61f872cc34037f38c7662b672f764d1",
+    "comune.py": "1015a60d02a1b9670548fb38d104a35a9e74a1ce4375ed5e0bff0b55e79546d7",
+    "esperimento.py": "40ba98058fcce5e53b605a051c562013d8ddfefb6db94bab776fb2502663eac9",
+    "memoria.py": "a812b595a88ce57c522134327fd563fe31884ea5467d6b9a2019991010c52231",
+    "ordinamenti/01_manifest/avvia.py": "1873d5bd9541621268d4854f3086e658dc6ed842352b02e3ef09872c70ed37a0",
+    "ordinamenti/02_inverso/avvia.py": "2211d3ba887e5e3d1e6e04404f04f64190aff7b36e8460fbcadc8887c6b1c3e4",
+    "ordinamenti/03_casuale_20261002/avvia.py": "fba12915291a8825f6e068df3690ce5168b341e5463336a8f0a332a5bc2a024f",
+    "ordinamenti/04_casuale_20261003/avvia.py": "31c47edf0f4f93bcbdb747ee14f71b3ae635efbf4790e27c25b1bff9b6d0710b",
+    "piano.json": "d663f3d446bf1b0c51898641fba4b7a64b3c7fa122eda535f7efca1136fbe147",
+    "protocollo.md": "ced8aac9fc97f1a587e4ff3a784cb4579b8ddfe2259f487952cd7ba9cb756603",
+    "registro.py": "c8ac3709b8e3ec3d0bc8ff178ff53f22800ffb2eba98fc78c981a1564597767b",
+    "report/README.md": "d2f0945bad1ea8486aa16497a087327317ee873d9a0c60661792329e1c4e81e2",
+    "report/genera.py": "046ebf29d76410f6885f4d61a4a6798ed8c0c8e83fc369818baea07b96856ba2",
+    "report/oracoli.py": "e8476df4bdef7a24060930736be2ae0b49a9ab1ef5659d3861cb43a68f8a205d",
+    "test_incrementale.py": "4cb41d04c76a79783550694265eac73ce46673b84188fd51e32b9c0de85ae715",
+    "test_report.py": "127e3adbfdfa9265cef9a1b579b4062feefd64b88c5f226b60cc83faa35f06e0",
+    "verifica_report.py": "1a4b6de4af054366600babbed9886117933e41a649bfacb0f2cb306482768be4",
+    "verifiche_sviluppo/README.md": "8ce61ac8ac1b979291016e5a837f1b9619574c8b240a42ee3b9d8dec019c62d9",
+    "verifiche_sviluppo/derivazione.json": "76f74c2aa4f427b706837c0655a6f0f6d7d576f8bcb963c4551f6b1770a0d0c4",
+    "verifiche_sviluppo/oracle_55528655.json": "eedbb1a7121f94574f33631a4f97da7858c54e54684fdd51dbdfb91d549459d8",
+    "verifiche_sviluppo/oracle_f7bcf1f2.json": "a579a872f2e24d2fc063a83b60b0dbc886d04493a47c3cadb96d3d63bb75b117",
+    "verifiche_sviluppo/verifiche.json": "54d7037600db3050755752182189f0c0762fe0ab2e4e0c3d385d369b6137b9e4"
+  },
+  "prepared_contracts": {
+    "ordinamenti/03_casuale_20261002/campagne/qasmbench50_incrementale_v1/contratto.json": "fedebd945523708deb96e47ee5457506709bdf72c34a1b42754e3aa4b5fc226d",
+    "ordinamenti/01_manifest/campagne/qasmbench50_incrementale_v1/contratto.json": "e873d527b27e52841d10696c64255bd3d514fdb32133fe953b3d046c0cca882a",
+    "ordinamenti/04_casuale_20261003/campagne/qasmbench50_incrementale_v1/contratto.json": "d8dc6b5888c037b368430577f56ac927896c30d79c64e1ac83cf4765daf3723d",
+    "ordinamenti/02_inverso/campagne/qasmbench50_incrementale_v1/contratto.json": "77977c83c070303e026fda10f8c97985108c687eb98e56b685b6fe8ffa0dc4d2"
+  }
+}

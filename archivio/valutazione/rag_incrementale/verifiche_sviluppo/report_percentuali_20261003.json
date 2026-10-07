@@ -1,0 +1,58 @@
+{
+  "kind": "notation_change_only",
+  "description": "Sostituito punti percentuali con %; calcoli e misure invariati.",
+  "reports": [
+    {
+      "benchmark": "MQTBench",
+      "k": 5,
+      "report": "archivio/valutazione/rag_incrementale/report/risultati/mqtbench90_incrementale_v1/20261003T102710Z_fc941d29/rapporto.pdf",
+      "pdf_sha256": "3c951c1d74e82c37bc291622f9f077c5e4599b0320fe652b56cbb15df7b4f569",
+      "pages": 17,
+      "measurements_unchanged": true,
+      "notation": "%",
+      "obsolete_label_absent_in_main_and_standalone_figures": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "visual_qa": "Verificate introduzione, grafico per circuito e conclusioni: simbolo % leggibile e nessun difetto rilevato."
+    },
+    {
+      "benchmark": "QASMBench",
+      "k": 5,
+      "report": "archivio/valutazione/rag_incrementale/qasmbench50/report/risultati/qasmbench50_incrementale_v1/20261003T100849Z_c322a440/rapporto.pdf",
+      "pdf_sha256": "e10e5d694ce7d2d67a0b642facce92e69a463a370db7532d44768f0f9e3084e5",
+      "pages": 10,
+      "measurements_unchanged": true,
+      "notation": "%",
+      "obsolete_label_absent_in_main_and_standalone_figures": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "visual_qa": "Verificate introduzione, grafico per circuito e conclusioni: simbolo % leggibile e nessun difetto rilevato."
+    },
+    {
+      "benchmark": "MQTBench",
+      "k": 1,
+      "report": "archivio/valutazione/rag_incrementale/k1/mqtbench90/report/risultati/mqtbench90_rag_k1_v1/20261003T154401Z_5c8f59d7/rapporto.pdf",
+      "pdf_sha256": "12fdc3ea45777651486196d25c205dce40042d846c0e14aaf30029424503b77b",
+      "pages": 17,
+      "measurements_unchanged": true,
+      "notation": "%",
+      "obsolete_label_absent_in_main_and_standalone_figures": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "visual_qa": "Verificate introduzione, grafico per circuito e conclusioni: simbolo % leggibile e nessun difetto rilevato."
+    },
+    {
+      "benchmark": "QASMBench",
+      "k": 1,
+      "report": "archivio/valutazione/rag_incrementale/k1/qasmbench50/report/risultati/qasmbench50_rag_k1_v1/20261003T154430Z_1084b3bd/rapporto.pdf",
+      "pdf_sha256": "cd61d850471789773af2946bfcf2d2450f91f3c94d7301120d11678ff023c7b6",
+      "pages": 10,
+      "measurements_unchanged": true,
+      "notation": "%",
+      "obsolete_label_absent_in_main_and_standalone_figures": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "visual_qa": "Verificate introduzione, grafico per circuito e conclusioni: simbolo % leggibile e nessun difetto rilevato."
+    }
+  ]
+}

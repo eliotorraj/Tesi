@@ -1,0 +1,61 @@
+{
+  "kind": "report_editorial_verification",
+  "report_tests_passed": 20,
+  "llm_calls": 0,
+  "quantum_compilations": 0,
+  "reports": [
+    {
+      "benchmark": "MQTBench",
+      "k": 5,
+      "report": "archivio/valutazione/rag_incrementale/report/risultati/mqtbench90_incrementale_v1/20261003T102710Z_fc941d29/rapporto.pdf",
+      "pages": 17,
+      "pdf_sha256": "d0ee348df57f3333ff94e8a6d634d6a7c4e3440d4214ac434e18f54ed2a28557",
+      "measurements_unchanged": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "conclusion_together": true,
+      "rendered_pages_visually_reviewed": 17,
+      "visual_qa": "Controllate tutte le pagine; ingrandimenti di introduzione, grafici e conclusioni. Nessun difetto rilevato."
+    },
+    {
+      "benchmark": "QASMBench",
+      "k": 5,
+      "report": "archivio/valutazione/rag_incrementale/qasmbench50/report/risultati/qasmbench50_incrementale_v1/20261003T100849Z_c322a440/rapporto.pdf",
+      "pages": 10,
+      "pdf_sha256": "8897d44df1d306b8e4192eb17893944d46cd84b0f72d7b24b5e3aeac01ef6d63",
+      "measurements_unchanged": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "conclusion_together": true,
+      "rendered_pages_visually_reviewed": 10,
+      "visual_qa": "Controllate tutte le pagine; ingrandimenti di introduzione, grafici e conclusioni. Nessun difetto rilevato."
+    },
+    {
+      "benchmark": "MQTBench",
+      "k": 1,
+      "report": "archivio/valutazione/rag_incrementale/k1/mqtbench90/report/risultati/mqtbench90_rag_k1_v1/20261003T154401Z_5c8f59d7/rapporto.pdf",
+      "pages": 17,
+      "pdf_sha256": "99d0ce38f6e7a355d8accbe65dd086a1b836ac69488dc12a40b705dc33bde964",
+      "measurements_unchanged": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "conclusion_together": true,
+      "rendered_pages_visually_reviewed": 17,
+      "visual_qa": "Controllate tutte le pagine; ingrandimenti di introduzione, grafici e conclusioni. Nessun difetto rilevato."
+    },
+    {
+      "benchmark": "QASMBench",
+      "k": 1,
+      "report": "archivio/valutazione/rag_incrementale/k1/qasmbench50/report/risultati/qasmbench50_rag_k1_v1/20261003T154430Z_1084b3bd/rapporto.pdf",
+      "pages": 10,
+      "pdf_sha256": "0260c1fa018c30dc5f012587345023d15f51bf9ba53395b58ecb165322d800ee",
+      "measurements_unchanged": true,
+      "provenance_valid": true,
+      "layout_warnings": 0,
+      "conclusion_together": true,
+      "rendered_pages_visually_reviewed": 10,
+      "visual_qa": "Controllate tutte le pagine; ingrandimenti di introduzione, grafici e conclusioni. Nessun difetto rilevato."
+    }
+  ],
+  "render_method": "Poppler pdftoppm, PNG con lato maggiore di 1600 pixel; anteprime temporanee rimosse dopo verifica."
+}

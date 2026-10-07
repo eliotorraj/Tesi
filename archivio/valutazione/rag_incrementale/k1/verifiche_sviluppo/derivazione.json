@@ -1,0 +1,25 @@
+{
+  "sources": {
+    "mqtbench90": {
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/comune.py": "82b87cc87bd7bbfef71f005942d9a9891de4fa61cfdb9265cb21929390282bfa",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/memoria.py": "9afdf8cea350df48a47ed476d98d3737fce3e76c2900841f7a443e48a25f7f5a",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/adattatore.py": "0dc36f81e3965d33ba7d31200c105322961002a32e0618c6fd9e01c0844db55d",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/registro.py": "422d13580af33b7ce4ebb9a25a89805c968e8c1c02f42362afb45647c19538d3",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/esperimento.py": "a7f038cfce7b3d3645697fafb15220f3becf9fbdb3a9f39f6cf6953fe42f41fc",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/piano.json": "fd50ae6c6f5ec798e534714ae1778060b5406cd949807e37bbbaf25eeaf4ae55"
+    },
+    "qasmbench50": {
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/qasmbench50/comune.py": "1015a60d02a1b9670548fb38d104a35a9e74a1ce4375ed5e0bff0b55e79546d7",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/qasmbench50/memoria.py": "a812b595a88ce57c522134327fd563fe31884ea5467d6b9a2019991010c52231",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/qasmbench50/adattatore.py": "4068c27360122c1a369b67233833258fb61f872cc34037f38c7662b672f764d1",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/qasmbench50/registro.py": "c8ac3709b8e3ec3d0bc8ff178ff53f22800ffb2eba98fc78c981a1564597767b",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/qasmbench50/esperimento.py": "40ba98058fcce5e53b605a051c562013d8ddfefb6db94bab776fb2502663eac9",
+      "/home/elio/Tesi-mqt-2.4-v2/archivio/valutazione/rag_incrementale/qasmbench50/piano.json": "d663f3d446bf1b0c51898641fba4b7a64b3c7fa122eda535f7efca1136fbe147"
+    }
+  },
+  "prompt_source": {
+    "path": "prototipo/prototype/prompting/facts.py",
+    "sha256": "ff1acb1ba0df6de71304e79d6277857c52c145d15ac736b23b6744842491d6b5"
+  },
+  "graph_update_requested": false
+}

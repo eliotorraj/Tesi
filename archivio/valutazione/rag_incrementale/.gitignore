@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.campaign.lock
+ordinamenti/*/campagne/
+report/risultati/
+verifiche_sviluppo/temporanei/

@@ -1,0 +1,18 @@
+{
+  "kind": "read_only_source_verification",
+  "at": "2026-10-02T21:04:03.488122+00:00",
+  "oracle_results_verified": 9000,
+  "oracle_identity": "c24448816cbba397931918336da9c5aec0200a8908bfe53f45d2325ef0f807ab",
+  "references": 50,
+  "baseline_results": 50,
+  "partial_references": 24,
+  "incremental_completed": {
+    "01_manifest": 0,
+    "02_inverso": 0,
+    "03_casuale_20261002": 0,
+    "04_casuale_20261003": 0
+  },
+  "llm_calls": 0,
+  "quantum_compilations": 0,
+  "source_set_sha256": "112583ea0d436db3f611a2600e2bdb48825b600a52f8eae7398bdc4af7e0f57f"
+}

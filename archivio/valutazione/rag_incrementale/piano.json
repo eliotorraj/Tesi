@@ -1,0 +1,38 @@
+{
+  "revision": "rag-incrementale-v1",
+  "metric": "expected_fidelity",
+  "initial_examples": 396,
+  "circuits": 90,
+  "k": 5,
+  "order_ids": [
+    "01_manifest",
+    "02_inverso",
+    "03_casuale_20261002",
+    "04_casuale_20261003"
+  ],
+  "compilation_timeout_seconds": 100,
+  "llm_timeout_seconds": 3600,
+  "qiskit_seed": 0,
+  "max_completed_llm_attempts": 3,
+  "temperature": 0,
+  "context": 60000,
+  "retrieval": {
+    "distance": "Manhattan",
+    "precision": "float64",
+    "normalization": "frozen_train_log1p_maxabs",
+    "tie_break": "rag_id",
+    "pool": "initial_train_plus_successful_committed_past_observations",
+    "exclude": "current_source_sha256",
+    "quota": null
+  },
+  "admission": {
+    "requires": "successful_validated_compilation_and_finite_score",
+    "score_threshold": null,
+    "deduplication": "source_sha256",
+    "copies_hypothesis": false
+  },
+  "resumption": "preserve_terminal_outcomes; unfinished_started_step_becomes_interrupted; no_retry",
+  "reference": "historical_llm_rag_k5_reused_only_for_reports",
+  "oracle": "report_only; never_for_admission_retrieval_or_decision",
+  "note": "Nuova valutazione sequenziale sui Test già esaminati; quattro ordinamenti dipendenti degli stessi 90 circuiti."
+}

@@ -1,0 +1,38 @@
+{
+  "at": "2026-10-03T10:30:14.547812+00:00",
+  "task": "Allineamento della forma del report MQT Bench 90 al report QASMBench 50",
+  "report": "archivio/valutazione/rag_incrementale/report/risultati/mqtbench90_incrementale_v1/20261003T102710Z_fc941d29",
+  "pdf_sha256": "dccff424edb81ee5ff77cd83e63ae6176653a21523a15419bcde8c90bf4a1ca8",
+  "circuits_per_order": 90,
+  "orders": 4,
+  "verified_report_rows": 360,
+  "reference_circuits": 90,
+  "oracle_results_verified": 16200,
+  "common_successes": 90,
+  "pairwise_comparisons": 6,
+  "report_pages": 20,
+  "standalone_figures": 20,
+  "unit_tests": {
+    "command": ".venv/bin/python -B archivio/valutazione/rag_incrementale/test_report.py",
+    "passed": 6,
+    "failed": 0
+  },
+  "data_isolation": "All 360 displayed scores match the MQT Bench campaign records; baseline and oracle match the MQT Bench references. No QASMBench source used.",
+  "protected_files_unchanged": 1105,
+  "artifact_checksums_valid": true,
+  "visual_review": "All 20 rendered pages inspected; no clipping or blank overflow pages; LaTeX reports no overfull or underfull boxes.",
+  "pdf_compilation": "pdfLaTeX, two successful passes; 20 standalone figures compiled successfully",
+  "native_editor_compiler": {
+    "status": "unavailable",
+    "diagnostic": "Unable to find standard directories for platform",
+    "source_open_requested": true
+  },
+  "llm_calls": 0,
+  "quantum_compilations": 0,
+  "code_sha256": {
+    "archivio/valutazione/rag_incrementale/report/genera.py": "58ce75ed313a5b426c1035a29040a02359cc1e9c1e7dfc2ace940fff8040fb66",
+    "archivio/valutazione/rag_incrementale/report/oracoli.py": "eda69470d80db937818d059eefc68689d265f8fa9c0300ed98935fe54a3f0489",
+    "archivio/valutazione/rag_incrementale/test_report.py": "381fcd782b3d294ff39e52b4b50a65dad8a842bc7abe8d822d8a67dfacfc0610",
+    "archivio/valutazione/rag_incrementale/verifica_report.py": "3898fd3a0fbffd3eb23389003d345a3759a40e30a94cae3034bdf80273bcfaf5"
+  }
+}

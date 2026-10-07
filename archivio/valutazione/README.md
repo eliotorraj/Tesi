@@ -3,10 +3,13 @@
 > Area storica. Per nuove esecuzioni usare [riproducibilita/](../../riproducibilita/README.md). Le istruzioni seguenti restano associate alle campagne e agli artefatti conservati qui.
 
 
+La nuova prova [RAG incrementale](rag_incrementale/README.md) viene sviluppata qui, separata dal framework, in attesa di valutarne i risultati.
+
 Questa area raccoglie gli strumenti e gli artefatti che servono a valutare o correggere il framework. L'uso ordinario del prototipo non dipende da questa cartella.
 
 | Cartella | Contenuto |
 | --- | --- |
+| [rag_incrementale/](rag_incrementale/README.md) | Memoria incrementale separata, quattro ordinamenti dei 90 Test MQT Bench e generazione dei report. |
 | [test/](test/README.md) | Quattro metodi del confronto, controlli, risultati, analisi e documenti. |
 | [test_qasmbench/](test_qasmbench/README.md) | Nuovo confronto LLM + RAG e MQT su 50 circuiti QASMBench (30 piccoli, 15 medi, 5 grandi); esecuzione separata. |
 | [test_mqt_esplorativo/](test_mqt_esplorativo/README.md) | Prova MQT separata, con la propria configurazione e i propri esiti. |

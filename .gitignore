@@ -88,4 +88,5 @@ node_modules/
 /archivio/valutazione/**/indice/
 /archivio/valutazione/**/__pycache__/
 !archivio/valutazione/oracle_test/confronto_llm_rag_k5/risultati
-/tesi.zip
+/tesi_portabile_2026-10-07_003236.zip
+/AGENTS.md

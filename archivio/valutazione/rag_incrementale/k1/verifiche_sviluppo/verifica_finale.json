@@ -1,0 +1,133 @@
+{
+  "at": "2026-10-03T10:57:15.986733+00:00",
+  "purpose": "technical_verification_only",
+  "unique_unit_tests_passed": 40,
+  "test_runs": [
+    {
+      "script": "mqtbench90/test_incrementale.py",
+      "tests": 15,
+      "seconds_reported_by_unittest": 10.233,
+      "status": "OK"
+    },
+    {
+      "script": "mqtbench90/test_report.py",
+      "tests": 5,
+      "seconds_reported_by_unittest": 0.179,
+      "status": "OK",
+      "stage": "before_template_newline_fix"
+    },
+    {
+      "script": "mqtbench90/test_report.py",
+      "tests": 5,
+      "seconds_reported_by_unittest": 0.149,
+      "status": "OK",
+      "stage": "final_template"
+    },
+    {
+      "script": "qasmbench50/test_incrementale.py",
+      "tests": 15,
+      "seconds_reported_by_unittest": 9.453,
+      "status": "OK"
+    },
+    {
+      "script": "qasmbench50/test_report.py",
+      "tests": 5,
+      "seconds_reported_by_unittest": 0.093,
+      "status": "OK",
+      "stage": "before_template_newline_fix"
+    },
+    {
+      "script": "qasmbench50/test_report.py",
+      "tests": 5,
+      "seconds_reported_by_unittest": 0.106,
+      "status": "OK",
+      "stage": "final_template"
+    }
+  ],
+  "synthetic_report_checks": [
+    {
+      "path": "verifiche_sviluppo/temporanei/mqtbench90_c158e63d",
+      "kind": "synthetic_verification",
+      "pages": 20,
+      "standalone_figures": 20,
+      "pdf_sha256": "372e534dfc46409c97256f478224586521d03640d1405e805f20433797b704ed",
+      "latex_errors_or_overfull": [],
+      "pages_rendered_and_visually_reviewed": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "no_experimental_scores_used": true
+    },
+    {
+      "path": "verifiche_sviluppo/temporanei/qasmbench50_7aa4f7b5",
+      "kind": "synthetic_verification",
+      "pages": 12,
+      "standalone_figures": 12,
+      "pdf_sha256": "5ef07b8603fe73d08a482915d4bb2ee19de3d94054c8ac058dc6db9fb1d4f436",
+      "latex_errors_or_overfull": [],
+      "pages_rendered_and_visually_reviewed": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "no_experimental_scores_used": true
+    }
+  ],
+  "python_sources_ast_parsed": 28,
+  "protected_files_verified": 6122,
+  "protected_files_changed": [],
+  "graph_updated": false,
+  "graph_hashes": {
+    "graphify-out/graph.json": "6779cec4e4c4e0100eb6b7227cf003b53dd773c003033ded0f89cec1d189da04",
+    "graphify-out/graph.html": "1efe84a2aaedfda05f4b19c7fa0371cd4d646d18e205573709c162e92e13d428",
+    "graphify-out/GRAPH_REPORT.md": "347bbb5bae3953ecc133ecf579ec4c8fba5521863e6f5df56e33638423c39c7b"
+  },
+  "user_entry_points_executed": false,
+  "real_llm_called": false,
+  "real_quantum_compilations": false,
+  "new_campaign_files": [],
+  "new_report_result_files": [],
+  "source_hashes": {
+    "avvia_mqtbench90.py": "30ab6c9d94d4dc97c895ca592f929a312d85119467e08cffbec1e077af12289f",
+    "README.md": "bf58ea6f5222e73f07890dd7cffbf6021ef80adf684ef03a64a27f867fbd03ab",
+    "report_qasmbench50.py": "a0f03597ec6e43855ddbd98d3a23747ffa40345fa3a42cf117ccd0cb4ca9a578",
+    "report_mqtbench90.py": "1d40617505c404f579fe2a381a28fa4960c67220049fb14914064175adcc5eb3",
+    "avvia_qasmbench50.py": "c18dfe423630b2e1e875ca21ed6830bc3a68ac41bb3467109dc61c1300a3f6e2",
+    "prompt_k1/support.py": "7dfbf1cc7b7d70552e6540444c015c3eeb7a1ea899082a28bce2098b28dde61f",
+    "prompt_k1/__init__.py": "dbbd39f49ffc49ba156600fc411f8ea1e79e31074497ab6009d623ac32da8e48",
+    "prompt_k1/facts.py": "9d9e901bade94ab2052717e799943a5c15178d06812d7874989f1db9302892e9",
+    "mqtbench90/piano.json": "f09439024c6f8a6901a98d84b079efbdd3fcdcf01fb6f74603d6dd46f597b581",
+    "mqtbench90/README.md": "c09bb639196b94446ad5c5dd321bed21700852b60670d1619efe235a9186b222",
+    "mqtbench90/memoria.py": "09742114fd39ecab02f8aabfd320f8908e2bf402c3472b68e656c2df4f356a68",
+    "mqtbench90/test_incrementale.py": "57ee9d6c2a23282c678b60e47970b8bf31c4e694ebe986dcdce13c8cac6d02e5",
+    "mqtbench90/adattatore.py": "572b9541eaf79a9d1abdc05b46b07ef651831e043738aed479118da501d2806c",
+    "mqtbench90/verifica_report.py": "a2b95b3e4cf676afcb065942d20655076f58b8902c3a96b7212d2b0d84667bf7",
+    "mqtbench90/test_report.py": "36bf72919ddc8621e46548b6df3b077de89c74f7bca16b275da051942848aef1",
+    "mqtbench90/esperimento.py": "621d2a5bc02db177cdefaf686cb712495f3370e828007532bef3809a010b306b",
+    "mqtbench90/registro.py": "602468ff2f98e5ba771509e1388112511b70bae0d47c1c543f9702f086ba98ff",
+    "mqtbench90/comune.py": "9a241812b668f47977e63f34cf79a04967fbb8e1656219a732c11073e0e508f3",
+    "qasmbench50/piano.json": "2e9d17308abe92157f9ac3363aa867a04047396b9eb8dfecda44daeb6d569f5b",
+    "qasmbench50/README.md": "7f5167952e2eb9d5573b7878effd1c87af9e6a1272cd3fed9343cdd5909ba9d5",
+    "qasmbench50/memoria.py": "4b60d97d494698b4c0c1086dbeb3c7031ec63a7f568acaf894ce1f246b6d2cc7",
+    "qasmbench50/test_incrementale.py": "ec0247d73bfb3ee47ff7e038d591834d12b52bb33e11767bae2445bc9e68456c",
+    "qasmbench50/adattatore.py": "d54b5c385283de2c54ff73faeb715eedd45d23c0a43064231cd4113d906ce390",
+    "qasmbench50/verifica_report.py": "a6759becc39827522c929202f1bae82343763f680d8c1ca0c0b7ad9cf3fbd78c",
+    "qasmbench50/test_report.py": "c9830c41dbc35643108f11526d25207c8f20078ba54f81cb467f8c2a7d83d544",
+    "qasmbench50/esperimento.py": "5e45b7ab9f91533ffc5eab78cd063698c3dafd528d3a5fccbd2c7d4b4971198a",
+    "qasmbench50/registro.py": "c79897cbe28c6532f1be323a034716471e2cf8bf5f426602244753e5152eb573",
+    "qasmbench50/comune.py": "e655eb8b8de328fe9c2f37a2647eeb671f38b88180629009d740643253955772",
+    "qasmbench50/report/genera.py": "0d2851f29110a987cb0deca483270adba6a3b8cf270e589f9a4402e335f318d0",
+    "qasmbench50/report/README.md": "c73dd07c0372f934f1f2c52fa6f1a3311b553c52bd08e3327320fa9fd685dfdb",
+    "qasmbench50/report/oracoli.py": "7a41237f618cc50b4d0e83f8ca64fa37192a16be85cf9a65d6c2ff32b6dd1949",
+    "mqtbench90/report/genera.py": "89825a2244568b2144aa5c9c18307b87df6e9a34bccd09a6ff192c10d774b4e7",
+    "mqtbench90/report/README.md": "108ec22c7178900ab54d81ba72e1e7cacf57421d30982e39bdac671337ae81cc",
+    "mqtbench90/report/oracoli.py": "f06863a5faf788da635e51b0929239214b8ccfa92d6935685274005b054f0823"
+  },
+  "development_corrections": [
+    "Rimosso un escape newline letterale dal template LaTeX prima della prova di compilazione.",
+    "Chiarito che il controllo citato nella verifica della fonte oracle è storico; gli score k=1 provengono solo dalle nuove campagne."
+  ]
+}

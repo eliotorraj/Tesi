@@ -1,0 +1,184 @@
+{
+  "kind": "retrieval_table_editorial_revision",
+  "reports": [
+    {
+      "report": "archivio/valutazione/rag_incrementale/report/risultati/mqtbench90_incrementale_v1/20261003T102710Z_fc941d29",
+      "pdf_sha256": "796cb8617ae32ae750be751eb76533d7d7af3979b1e1cf0164a65c2c8fab9bea",
+      "pages": 17,
+      "usage": {
+        "01_manifest": {
+          "added": 90,
+          "reused_distinct": 77,
+          "incremental_presences": 349,
+          "total_retrieved": 450,
+          "decisions_using_incremental": 82,
+          "decisions": 90
+        },
+        "02_inverso": {
+          "added": 90,
+          "reused_distinct": 75,
+          "incremental_presences": 342,
+          "total_retrieved": 450,
+          "decisions_using_incremental": 80,
+          "decisions": 90
+        },
+        "03_casuale_20261002": {
+          "added": 90,
+          "reused_distinct": 72,
+          "incremental_presences": 345,
+          "total_retrieved": 450,
+          "decisions_using_incremental": 80,
+          "decisions": 90
+        },
+        "04_casuale_20261003": {
+          "added": 90,
+          "reused_distinct": 68,
+          "incremental_presences": 341,
+          "total_retrieved": 450,
+          "decisions_using_incremental": 78,
+          "decisions": 90
+        }
+      },
+      "only_table_added_to_tex": true,
+      "measurements_unchanged": true,
+      "chart_sources_unchanged": true,
+      "provenance_verified": true,
+      "layout_warnings": []
+    },
+    {
+      "report": "archivio/valutazione/rag_incrementale/qasmbench50/report/risultati/qasmbench50_incrementale_v1/20261003T100849Z_c322a440",
+      "pdf_sha256": "00e72758745ff379a60e583e8cc60c8b3ebca3b08b636680827953fdee401634",
+      "pages": 10,
+      "usage": {
+        "01_manifest": {
+          "added": 50,
+          "reused_distinct": 34,
+          "incremental_presences": 81,
+          "total_retrieved": 250,
+          "decisions_using_incremental": 33,
+          "decisions": 50
+        },
+        "02_inverso": {
+          "added": 50,
+          "reused_distinct": 29,
+          "incremental_presences": 53,
+          "total_retrieved": 250,
+          "decisions_using_incremental": 27,
+          "decisions": 50
+        },
+        "03_casuale_20261002": {
+          "added": 50,
+          "reused_distinct": 28,
+          "incremental_presences": 66,
+          "total_retrieved": 250,
+          "decisions_using_incremental": 29,
+          "decisions": 50
+        },
+        "04_casuale_20261003": {
+          "added": 50,
+          "reused_distinct": 28,
+          "incremental_presences": 56,
+          "total_retrieved": 250,
+          "decisions_using_incremental": 28,
+          "decisions": 50
+        }
+      },
+      "only_table_added_to_tex": true,
+      "measurements_unchanged": true,
+      "chart_sources_unchanged": true,
+      "provenance_verified": true,
+      "layout_warnings": []
+    },
+    {
+      "report": "archivio/valutazione/rag_incrementale/k1/mqtbench90/report/risultati/mqtbench90_rag_k1_v1/20261003T154401Z_5c8f59d7",
+      "pdf_sha256": "fe9dafbbcde21d51df15b8c67b6bb43a079cae55b2a77aa4af69ad2a2296fc59",
+      "pages": 17,
+      "usage": {
+        "01_manifest": {
+          "added": 90,
+          "reused_distinct": 47,
+          "incremental_presences": 81,
+          "total_retrieved": 90,
+          "decisions_using_incremental": 81,
+          "decisions": 90
+        },
+        "02_inverso": {
+          "added": 90,
+          "reused_distinct": 46,
+          "incremental_presences": 79,
+          "total_retrieved": 90,
+          "decisions_using_incremental": 79,
+          "decisions": 90
+        },
+        "03_casuale_20261002": {
+          "added": 90,
+          "reused_distinct": 45,
+          "incremental_presences": 80,
+          "total_retrieved": 90,
+          "decisions_using_incremental": 80,
+          "decisions": 90
+        },
+        "04_casuale_20261003": {
+          "added": 90,
+          "reused_distinct": 48,
+          "incremental_presences": 77,
+          "total_retrieved": 90,
+          "decisions_using_incremental": 77,
+          "decisions": 90
+        }
+      },
+      "only_table_added_to_tex": true,
+      "measurements_unchanged": true,
+      "chart_sources_unchanged": true,
+      "provenance_verified": true,
+      "layout_warnings": []
+    },
+    {
+      "report": "archivio/valutazione/rag_incrementale/k1/qasmbench50/report/risultati/qasmbench50_rag_k1_v1/20261003T154430Z_1084b3bd",
+      "pdf_sha256": "ac8e1a7e095495c00717c8f469b1aa8a07694ae249c94c91844d9bea44ad0e6f",
+      "pages": 10,
+      "usage": {
+        "01_manifest": {
+          "added": 50,
+          "reused_distinct": 22,
+          "incremental_presences": 27,
+          "total_retrieved": 50,
+          "decisions_using_incremental": 27,
+          "decisions": 50
+        },
+        "02_inverso": {
+          "added": 50,
+          "reused_distinct": 17,
+          "incremental_presences": 21,
+          "total_retrieved": 50,
+          "decisions_using_incremental": 21,
+          "decisions": 50
+        },
+        "03_casuale_20261002": {
+          "added": 50,
+          "reused_distinct": 14,
+          "incremental_presences": 23,
+          "total_retrieved": 50,
+          "decisions_using_incremental": 23,
+          "decisions": 50
+        },
+        "04_casuale_20261003": {
+          "added": 50,
+          "reused_distinct": 19,
+          "incremental_presences": 23,
+          "total_retrieved": 50,
+          "decisions_using_incremental": 23,
+          "decisions": 50
+        }
+      },
+      "only_table_added_to_tex": true,
+      "measurements_unchanged": true,
+      "chart_sources_unchanged": true,
+      "provenance_verified": true,
+      "layout_warnings": []
+    }
+  ],
+  "visual_qa": "Prime pagine dei quattro PDF renderizzate e controllate: tabella e due righe leggibili prima dei grafici, nessuna sovrapposizione o pagina aggiunta.",
+  "llm_calls": 0,
+  "quantum_compilations": 0
+}
